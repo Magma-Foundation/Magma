@@ -11,43 +11,8 @@ public class ApplicationTest {
         assertRun("def main() : I16 => {return 0;}", "int main(){return 0;}");
     }
 
-    private void assertRun(String source, String target) throws ApplicationException {
-        assertEquals(target, run(source));
-    }
-
-    private String run(String content) throws ApplicationException {
-        if (content.startsWith("def ")) {
-            return compileFunction(content);
-        } else {
-            throw new ApplicationException("Unknown content: " + content);
-        }
-    }
-
-    private String compileFunction(String content) throws ApplicationException {
-        var from = "def ".length();
-        var separator = content.indexOf('(');
-        var name = slice(content, from, separator);
-        var typeSeparator = content.indexOf(':');
-        var returnSeparator = content.indexOf("=>");
-        var typeString = slice(content, typeSeparator + 1, returnSeparator);
-        var typeToUse = compileType(typeString);
-        return typeToUse + " " + name + "(){return 0;}";
-    }
-
-    private String compileType(String typeString) throws ApplicationException {
-        String typeToUse;
-        if (typeString.equals("I16")) {
-            typeToUse = "int";
-        } else if (typeString.equals("U16")) {
-            typeToUse = "unsigned int";
-        } else {
-            throw new ApplicationException("Unknown type: " + typeString);
-        }
-        return typeToUse;
-    }
-
-    private String slice(String content, int start, int end) {
-        return content.substring(start, end).trim();
+    private static void assertRun(String source, String target) throws ApplicationException {
+        assertEquals(target, new Application().run(source));
     }
 
     @Test
@@ -67,6 +32,6 @@ public class ApplicationTest {
 
     @Test
     void test_unknown_type() {
-        assertThrows(ApplicationException.class, () -> run("def main() : test => {return 0;}"));
+        assertThrows(ApplicationException.class, () -> new Application().run("def main() : test => {return 0;}"));
     }
 }
