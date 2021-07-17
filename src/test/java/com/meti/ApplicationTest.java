@@ -11,9 +11,11 @@ public class ApplicationTest {
     }
 
     private String run(String content) throws ApplicationException {
-        if(content.startsWith("def ")) {
+        if (content.startsWith("def ")) {
+            var from = "def ".length();
             var separator = content.indexOf('(');
-            return "int " + content.substring("def ".length(), separator) + "(){return 0;}";
+            var name = content.substring(from, separator);
+            return "int " + name + "(){return 0;}";
         } else {
             throw new ApplicationException();
         }
