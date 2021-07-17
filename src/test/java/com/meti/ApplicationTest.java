@@ -14,12 +14,24 @@ public class ApplicationTest {
         if (content.startsWith("def ")) {
             var from = "def ".length();
             var separator = content.indexOf('(');
-            var name = content.substring(from, separator).trim();
-            content.substring(content.indexOf(':') + 1, content.indexOf("=>"));
-            return "int " + name + "(){return 0;}";
+            var name = slice(content, from, separator);
+            var typeSeparator = content.indexOf(':');
+            var returnSeparator = content.indexOf("=>");
+            var typeString = slice(content, typeSeparator + 1, returnSeparator);
+            String typeToUse;
+            if(typeString.equals("I16")){
+                typeToUse = "int";
+            } else {
+                typeToUse = "unsigned int";
+            }
+            return typeToUse + " " + name + "(){return 0;}";
         } else {
             throw new ApplicationException();
         }
+    }
+
+    private String slice(String content, int start, int end) {
+        return content.substring(start, end).trim();
     }
 
     @Test
