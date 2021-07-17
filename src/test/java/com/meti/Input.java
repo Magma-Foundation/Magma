@@ -20,10 +20,10 @@ public class Input {
     }
 
     Input sliceToInput(int typeSeparator, int returnSeparator) {
-        return new Input(slice(typeSeparator + 1, returnSeparator));
+        return new Input(sliceToString(typeSeparator + 1, returnSeparator));
     }
 
-    String slice(int start, int end) {
+    String sliceToString(int start, int end) {
         return getContent().substring(start, end).trim();
     }
 

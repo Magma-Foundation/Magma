@@ -10,9 +10,9 @@ public class Application {
     }
 
     static String compileFunction(Input content) throws ApplicationException {
-        var from = "def ".length();
-        var separator = content.firstIndexOfChar('(');
-        var name = content.slice(from, separator);
+        var nameStart = "def ".length();
+        var nameEnd = content.firstIndexOfChar('(');
+        var name = content.sliceToString(nameStart, nameEnd);
         var typeSeparator = content.firstIndexOfChar(':');
         var returnSeparator = content.firstIndexOfSlice();
         var input = content.sliceToInput(typeSeparator, returnSeparator);
