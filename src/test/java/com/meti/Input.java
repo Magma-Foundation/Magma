@@ -7,12 +7,20 @@ public class Input {
         this.content = content;
     }
 
-    int firstIndexOfSlice() {
-        return getContent().indexOf("=>");
+    boolean contains(String i16) {
+        return getContent().equals(i16);
     }
 
     int firstIndexOfChar(char c) {
         return getContent().indexOf(c);
+    }
+
+    int firstIndexOfSlice() {
+        return getContent().indexOf("=>");
+    }
+
+    Input sliceToInput(int typeSeparator, int returnSeparator) {
+        return new Input(slice(typeSeparator + 1, returnSeparator));
     }
 
     String slice(int start, int end) {

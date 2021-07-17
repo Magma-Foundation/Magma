@@ -15,20 +15,18 @@ public class Application {
         var name = content.slice(from, separator);
         var typeSeparator = content.firstIndexOfChar(':');
         var returnSeparator = content.firstIndexOfSlice();
-        var typeString = content.slice(typeSeparator + 1, returnSeparator);
-        var typeToUse = compileType(typeString);
+        var input = content.sliceToInput(typeSeparator, returnSeparator);
+        var typeToUse = compileType(input);
         return typeToUse + " " + name + "(){return 0;}";
     }
 
-    static String compileType(String typeString) throws ApplicationException {
-        String typeToUse;
-        if (typeString.equals("I16")) {
-            typeToUse = "int";
-        } else if (typeString.equals("U16")) {
-            typeToUse = "unsigned int";
+    static String compileType(Input input) throws ApplicationException {
+        if (input.contains("I16")) {
+            return "int";
+        } else if (input.contains("U16")) {
+            return "unsigned int";
         } else {
-            throw new ApplicationException("Unknown type: " + typeString);
+            throw new ApplicationException("Unknown type: " + input.getContent());
         }
-        return typeToUse;
     }
 }
