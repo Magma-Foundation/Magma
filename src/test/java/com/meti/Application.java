@@ -3,25 +3,21 @@ package com.meti;
 public class Application {
     String run(String content) throws ApplicationException {
         if (content.startsWith("def ")) {
-            return compileFunction(content);
+            return compileFunction(new Input(content));
         } else {
             throw new ApplicationException("Unknown content: " + content);
         }
     }
 
-    static String compileFunction(String content) throws ApplicationException {
+    static String compileFunction(Input content) throws ApplicationException {
         var from = "def ".length();
-        var separator = content.indexOf('(');
-        var name = slice(content, from, separator);
-        var typeSeparator = content.indexOf(':');
-        var returnSeparator = content.indexOf("=>");
-        var typeString = slice(content, typeSeparator + 1, returnSeparator);
+        var separator = content.firstIndexOfChar('(');
+        var name = content.slice(from, separator);
+        var typeSeparator = content.firstIndexOfChar(':');
+        var returnSeparator = content.firstIndexOfSlice();
+        var typeString = content.slice(typeSeparator + 1, returnSeparator);
         var typeToUse = compileType(typeString);
         return typeToUse + " " + name + "(){return 0;}";
-    }
-
-    static String slice(String content, int start, int end) {
-        return content.substring(start, end).trim();
     }
 
     static String compileType(String typeString) throws ApplicationException {
