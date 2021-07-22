@@ -2,12 +2,8 @@ import { Test, Assertions } from org.junit.jupiter.api;
 
 import {
     { Files, Paths } from nio.file,
-    IOException from io
+    IOException from io,
 } from java;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Test
 def test() => {
