@@ -3,7 +3,7 @@ import { Test, Assertions } from org.junit.jupiter.api;
 import {
     { Files, Paths } from nio.file,
     IOException from io
-} from java
+} from java;
 
 import java.io.IOException;
 import java.nio.file.Files;
