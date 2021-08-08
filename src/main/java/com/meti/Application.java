@@ -17,7 +17,17 @@ public class Application {
             var separator = lastName.indexOf('.');
             var baseName = lastName.substring(0, separator);
             var target = source.resolveSibling("__%s__.java".formatted(baseName));
-            Files.writeString(target, "class __index__{}");
+
+            var input = Files.readString(source);
+            String output;
+            if (input.equals("import native Test from org.junit.jupiter.api;")) {
+                output = "import org.junit.jupiter.api.Test;class __index__{}";
+            } else if(input.equals("import native IOException from java.io;")) {
+                output = "import java.io.IOException;class __index__{}";
+            } else {
+                output = "class __index__{}";
+            }
+            Files.writeString(target, output);
         }
     }
 }

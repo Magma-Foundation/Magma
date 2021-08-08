@@ -15,14 +15,6 @@ public class ApplicationTest {
     public static final Path Source = Paths.get(".", "index.ms");
 
     @Test
-    void content() throws IOException {
-        Files.createFile(Source);
-        new Application(Source).run();
-
-        assertEquals("class __index__{}", Files.readString(Target));
-    }
-
-    @Test
     void different_name() throws IOException {
         var otherSource = Paths.get(".", "test.ms");
         var otherTarget = otherSource.resolveSibling("__test__.java");
@@ -33,6 +25,22 @@ public class ApplicationTest {
 
         Files.deleteIfExists(otherTarget);
         Files.deleteIfExists(otherSource);
+    }
+
+    @Test
+    void read_content() throws IOException {
+        Files.writeString(Source, "import native Test from org.junit.jupiter.api;");
+        new Application(Source).run();
+
+        assertEquals("import org.junit.jupiter.api.Test;class __index__{}", Files.readString(Target));
+    }
+
+    @Test
+    void read_other_content() throws IOException {
+        Files.writeString(Source, "import native IOException from java.io;");
+        new Application(Source).run();
+
+        assertEquals("import java.io.IOException;class __index__{}", Files.readString(Target));
     }
 
     @AfterEach
@@ -52,5 +60,13 @@ public class ApplicationTest {
     void without_source() throws IOException {
         new Application(Source).run();
         assertFalse(Files.exists(Target));
+    }
+
+    @Test
+    void write_content() throws IOException {
+        Files.createFile(Source);
+        new Application(Source).run();
+
+        assertEquals("class __index__{}", Files.readString(Target));
     }
 }
