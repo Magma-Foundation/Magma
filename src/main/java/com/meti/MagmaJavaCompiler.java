@@ -14,6 +14,7 @@ public class MagmaJavaCompiler {
     }
 
     String compile() {
+        var importOutput = "";
         if (input.startsWith("import native ")) {
             var separator = input.indexOf("from");
             var basesName = input.substring("import native ".length(), separator).trim();
@@ -25,15 +26,16 @@ public class MagmaJavaCompiler {
             } else {
                 var childrenString = basesName.substring(bracketStart + 1, bracketEnd).trim();
                 var children = childrenString.split(",");
-                var newChildren = Arrays.stream(children)
+                importOutput = Arrays.stream(children)
                         .map(String::trim)
                         .filter(value -> !value.isEmpty())
                         .map(child -> "import " + packageName + "." + child + ";")
                         .collect(Collectors.joining());
-                return "%sclass __%s__{}".formatted(newChildren, scriptName);
             }
         } else {
-            return "class __%s__{}".formatted(scriptName);
+            importOutput = "";
         }
+
+        return importOutput + "class __" + scriptName + "__";
     }
 }
