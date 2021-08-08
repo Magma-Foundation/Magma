@@ -20,4 +20,9 @@ class MagmaJavaCompilerTest {
     void import_braces() {
         assertCompile("import native { foo } from bar;", "import bar.foo;class __index__{}");
     }
+
+    @Test
+    void import_empty_braces() {
+        assertCompile("import native {} from bar;", "class __index__{}");
+    }
 }
