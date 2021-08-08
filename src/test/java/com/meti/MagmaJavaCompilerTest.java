@@ -17,7 +17,7 @@ class MagmaJavaCompilerTest {
     }
 
     @Test
-    void import_siblings() {
-        assertCompile("import native { foo } from bar;", "import foo.bar;");
+    void import_braces() {
+        assertCompile("import native { foo } from bar;", "import bar.foo;class __index__{}");
     }
 }
