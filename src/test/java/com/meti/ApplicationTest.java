@@ -22,7 +22,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void test() throws IOException {
+    void with_source() throws IOException {
         Files.createFile(Source);
         run();
         assertTrue(Files.exists(Target));
@@ -35,8 +35,13 @@ public class ApplicationTest {
     }
 
     @Test
-    void test1() throws IOException {
+    void without_source() throws IOException {
         run();
         assertFalse(Files.exists(Target));
+    }
+
+    @Test
+    void test(){
+
     }
 }
