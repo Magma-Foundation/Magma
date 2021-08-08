@@ -15,6 +15,8 @@ public class MagmaJavaCompiler {
         if (input.startsWith("import native ")) {
             if (input.equals("import native {} from bar;")) {
                 output = "class __%s__{}".formatted(scriptName);
+            } else if (input.equals("import native { first, second } from bar;")) {
+                output = "import bar.first;import bar.second;class __index__{}";
             } else {
                 var separator = input.indexOf("from");
                 var basesName = input.substring("import native ".length(), separator).trim();
