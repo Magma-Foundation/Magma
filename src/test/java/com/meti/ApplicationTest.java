@@ -11,21 +11,38 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    public static final Path Target = Paths.get(".", "index.java");
+    public static final Path Target = Paths.get(".", "__index__.java");
     public static final Path Source = Paths.get(".", "index.ms");
 
     @Test
     void content() throws IOException {
         Files.createFile(Source);
-        run();
+        run(Source);
 
         assertEquals("class __index__{}", Files.readString(Target));
     }
 
-    private void run() throws IOException {
-        if (Files.exists(Source)) {
-            Files.writeString(Target, "class __index__{}");
+    private static void run(Path source) throws IOException {
+        if (Files.exists(source)) {
+            var lastName = source.getFileName().toString();
+            var separator = lastName.indexOf('.');
+            var baseName = lastName.substring(0, separator);
+            var target = source.resolveSibling("__%s__.java".formatted(baseName));
+            Files.writeString(target, "class __index__{}");
         }
+    }
+
+    @Test
+    void different_name() throws IOException {
+        var otherSource = Paths.get(".", "test.ms");
+        var otherTarget = otherSource.resolveSibling("__test__.java");
+
+        Files.createFile(otherSource);
+        run(otherSource);
+        assertTrue(Files.exists(otherTarget));
+
+        Files.deleteIfExists(otherTarget);
+        Files.deleteIfExists(otherSource);
     }
 
     @AfterEach
@@ -37,13 +54,13 @@ public class ApplicationTest {
     @Test
     void with_source() throws IOException {
         Files.createFile(Source);
-        run();
+        run(Source);
         assertTrue(Files.exists(Target));
     }
 
     @Test
     void without_source() throws IOException {
-        run();
+        run(Source);
         assertFalse(Files.exists(Target));
     }
 }
