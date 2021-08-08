@@ -19,15 +19,20 @@ public class Application {
             var target = source.resolveSibling("__%s__.java".formatted(baseName));
 
             var input = Files.readString(source);
-            String output;
-            if (input.equals("import native Test from org.junit.jupiter.api;")) {
-                output = "import org.junit.jupiter.api.Test;class __index__{}";
-            } else if(input.equals("import native IOException from java.io;")) {
-                output = "import java.io.IOException;class __index__{}";
-            } else {
-                output = "class __index__{}";
-            }
+            var output = compile(input);
             Files.writeString(target, output);
         }
+    }
+
+    private String compile(String input) {
+        String output;
+        if (input.equals("import native Test from org.junit.jupiter.api;")) {
+            output = "import org.junit.jupiter.api.Test;class __index__{}";
+        } else if(input.equals("import native IOException from java.io;")) {
+            output = "import java.io.IOException;class __index__{}";
+        } else {
+            output = "class __index__{}";
+        }
+        return output;
     }
 }
