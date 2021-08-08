@@ -23,5 +23,4 @@ public class Application {
             Files.writeString(target, output);
         }
     }
-
 }

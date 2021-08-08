@@ -1,6 +1,7 @@
 package com.meti;
 
 public class MagmaJavaCompiler {
+    public static final int IMPORT_SEPARATOR = "from".length();
     private final String input;
 
     public MagmaJavaCompiler(String input) {
@@ -9,10 +10,11 @@ public class MagmaJavaCompiler {
 
     String compile() {
         String output;
-        if (input.equals("import native Test from org.junit.jupiter.api;")) {
-            output = "import org.junit.jupiter.api.Test;class __index__{}";
-        } else if(input.equals("import native IOException from java.io;")) {
-            output = "import java.io.IOException;class __index__{}";
+        if (input.startsWith("import native ")) {
+            var separator = input.indexOf("from");
+            var baseName = input.substring("import native ".length(), separator);
+            var packageName = input.substring(separator + IMPORT_SEPARATOR, input.length() - 1);
+            output = "import %s.%s;class __index__{}".formatted(packageName, baseName);
         } else {
             output = "class __index__{}";
         }
