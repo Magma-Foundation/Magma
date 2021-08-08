@@ -19,7 +19,7 @@ public class ApplicationTest {
         var otherSource = Paths.get(".", "test.ms");
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
-        ensureFile(otherSource);
+        new NIOPath(otherSource).ensureAsFile();
         new Application(otherSource).run();
         assertTrue(Files.exists(otherTarget));
 
@@ -27,18 +27,12 @@ public class ApplicationTest {
         Files.deleteIfExists(otherSource);
     }
 
-    private void ensureFile(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createFile(path);
-        }
-    }
-
     @Test
     void different_name_content() throws IOException {
         var otherSource = Paths.get(".", "test.ms");
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
-        ensureFile(otherSource);
+        new NIOPath(otherSource).ensureAsFile();
         new Application(otherSource).run();
         assertEquals("class __test__{}", Files.readString(otherTarget));
 
@@ -70,7 +64,7 @@ public class ApplicationTest {
 
     @Test
     void with_source() throws IOException {
-        ensureFile(Source);
+        new NIOPath(Source).ensureAsFile();
         new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
@@ -83,7 +77,7 @@ public class ApplicationTest {
 
     @Test
     void write_content() throws IOException {
-        ensureFile(Source);
+        new NIOPath(Source).ensureAsFile();
         new Application(Source).run();
 
         assertEquals("class __index__{}", Files.readString(Target));
