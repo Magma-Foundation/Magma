@@ -17,19 +17,9 @@ public class ApplicationTest {
     @Test
     void content() throws IOException {
         Files.createFile(Source);
-        run(Source);
+        new Application(Source).run();
 
         assertEquals("class __index__{}", Files.readString(Target));
-    }
-
-    private static void run(Path source) throws IOException {
-        if (Files.exists(source)) {
-            var lastName = source.getFileName().toString();
-            var separator = lastName.indexOf('.');
-            var baseName = lastName.substring(0, separator);
-            var target = source.resolveSibling("__%s__.java".formatted(baseName));
-            Files.writeString(target, "class __index__{}");
-        }
     }
 
     @Test
@@ -38,7 +28,7 @@ public class ApplicationTest {
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
         Files.createFile(otherSource);
-        run(otherSource);
+        new Application(otherSource).run();
         assertTrue(Files.exists(otherTarget));
 
         Files.deleteIfExists(otherTarget);
@@ -54,13 +44,13 @@ public class ApplicationTest {
     @Test
     void with_source() throws IOException {
         Files.createFile(Source);
-        run(Source);
+        new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
 
     @Test
     void without_source() throws IOException {
-        run(Source);
+        new Application(Source).run();
         assertFalse(Files.exists(Target));
     }
 }
