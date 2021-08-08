@@ -3,9 +3,11 @@ package com.meti;
 public class MagmaJavaCompiler {
     public static final int IMPORT_SEPARATOR = "from".length();
     private final String input;
+    private final String scriptName;
 
-    public MagmaJavaCompiler(String input) {
+    public MagmaJavaCompiler(String input, String scriptName) {
         this.input = input;
+        this.scriptName = scriptName;
     }
 
     String compile() {
@@ -14,9 +16,9 @@ public class MagmaJavaCompiler {
             var separator = input.indexOf("from");
             var baseName = input.substring("import native ".length(), separator).trim();
             var packageName = input.substring(separator + IMPORT_SEPARATOR + 1, input.length() - 1);
-            output = "import %s.%s;class __index__{}".formatted(packageName, baseName);
+            output = "import %s.%s;class __%s__{}".formatted(packageName, baseName, scriptName);
         } else {
-            output = "class __index__{}";
+            output = "class __%s__{}".formatted(scriptName);
         }
         return output;
     }

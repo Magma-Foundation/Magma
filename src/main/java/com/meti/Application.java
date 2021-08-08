@@ -19,7 +19,7 @@ public class Application {
             var target = source.resolveSibling("__%s__.java".formatted(baseName));
 
             var input = Files.readString(source);
-            var output = new MagmaJavaCompiler(input).compile();
+            var output = new MagmaJavaCompiler(input, baseName).compile();
             Files.writeString(target, output);
         }
     }

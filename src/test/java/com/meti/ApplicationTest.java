@@ -19,9 +19,28 @@ public class ApplicationTest {
         var otherSource = Paths.get(".", "test.ms");
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
-        Files.createFile(otherSource);
+        ensureFile(otherSource);
         new Application(otherSource).run();
         assertTrue(Files.exists(otherTarget));
+
+        Files.deleteIfExists(otherTarget);
+        Files.deleteIfExists(otherSource);
+    }
+
+    private void ensureFile(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+    }
+
+    @Test
+    void different_name_content() throws IOException {
+        var otherSource = Paths.get(".", "test.ms");
+        var otherTarget = otherSource.resolveSibling("__test__.java");
+
+        ensureFile(otherSource);
+        new Application(otherSource).run();
+        assertEquals("class __test__{}", Files.readString(otherTarget));
 
         Files.deleteIfExists(otherTarget);
         Files.deleteIfExists(otherSource);
@@ -51,7 +70,7 @@ public class ApplicationTest {
 
     @Test
     void with_source() throws IOException {
-        Files.createFile(Source);
+        ensureFile(Source);
         new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
@@ -64,7 +83,7 @@ public class ApplicationTest {
 
     @Test
     void write_content() throws IOException {
-        Files.createFile(Source);
+        ensureFile(Source);
         new Application(Source).run();
 
         assertEquals("class __index__{}", Files.readString(Target));
