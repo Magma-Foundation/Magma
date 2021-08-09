@@ -13,12 +13,22 @@ public class MagmaJavaCompiler {
     }
 
     String compile() throws ApplicationException {
-        if(input.startsWith(ImportPrefix + NativePrefix)) {
+        var generatedClass = "class __index__{}";
+        if (input.equals(ImportPrefix + "native Test from org.junit.jupiter.api;")) {
+            return ImportPrefix + "org.junit.jupiter.api.Test;" + generatedClass;
+        } else if (input.startsWith(ImportPrefix + NativePrefix)) {
             var start = (ImportPrefix + NativePrefix).length();
             var end = input.lastIndexOf(ImportInfix);
             var baseName = input.substring(start, end).trim();
             var packageName = input.substring(end + ImportInfix.length(), input.length() - 1).trim();
-            return ImportPrefix + packageName + "." + baseName + ";class __index__{}";
+            var separator = baseName.indexOf(",");
+            if (separator != -1) {
+                var first = baseName.substring(0, separator).trim();
+                var second = baseName.substring(separator + 1).trim();
+                return "import bar." + first + ";import bar." + second + ";" + generatedClass;
+            } else {
+                return ImportPrefix + packageName + "." + baseName + ";" + generatedClass;
+            }
         }
         var format = "Invalid input '%s'.";
         var message = format.formatted(input);
