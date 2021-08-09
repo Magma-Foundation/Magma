@@ -2,7 +2,7 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MagmaJavaCompilerTest {
     @Test
@@ -11,9 +11,22 @@ class MagmaJavaCompilerTest {
     }
 
     private void assertCompile(String source, String expectedOutput) {
+        try {
+            var actualOutput = compileImpl(source);
+            assertEquals(expectedOutput, actualOutput);
+        } catch (ApplicationException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void compile_fail() {
+        assertThrows(ApplicationException.class, () -> compileImpl(""));
+    }
+
+    private String compileImpl(String source) throws ApplicationException {
         var compiler = new MagmaJavaCompiler(source, "index");
-        var actualOutput = compiler.compile();
-        assertEquals(expectedOutput, actualOutput);
+        return compiler.compile();
     }
 
     @Test

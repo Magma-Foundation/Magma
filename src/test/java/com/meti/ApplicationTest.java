@@ -20,11 +20,19 @@ public class ApplicationTest {
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
         new NIOPath(otherSource).ensureAsFile();
-        new Application(otherSource).run();
+        runImpl(otherSource);
         assertTrue(Files.exists(otherTarget));
 
         Files.deleteIfExists(otherTarget);
         Files.deleteIfExists(otherSource);
+    }
+
+    private void runImpl(Path otherSource) {
+        try {
+            new Application(otherSource).run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
     }
 
     @Test
@@ -33,7 +41,7 @@ public class ApplicationTest {
         var otherTarget = otherSource.resolveSibling("__test__.java");
 
         new NIOPath(otherSource).ensureAsFile();
-        new Application(otherSource).run();
+        runImpl(otherSource);
         assertEquals("class __test__{}", Files.readString(otherTarget));
 
         Files.deleteIfExists(otherTarget);
@@ -43,7 +51,7 @@ public class ApplicationTest {
     @Test
     void read_content() throws IOException {
         Files.writeString(Source, "import native Test from org.junit.jupiter.api;");
-        new Application(Source).run();
+        runImpl(Source);
 
         assertEquals("import org.junit.jupiter.api.Test;class __index__{}", Files.readString(Target));
     }
@@ -51,7 +59,7 @@ public class ApplicationTest {
     @Test
     void read_other_content() throws IOException {
         Files.writeString(Source, "import native IOException from java.io;");
-        new Application(Source).run();
+        runImpl(Source);
 
         assertEquals("import java.io.IOException;class __index__{}", Files.readString(Target));
     }
@@ -65,20 +73,20 @@ public class ApplicationTest {
     @Test
     void with_source() throws IOException {
         new NIOPath(Source).ensureAsFile();
-        new Application(Source).run();
+        runImpl(Source);
         assertTrue(Files.exists(Target));
     }
 
     @Test
-    void without_source() throws IOException {
-        new Application(Source).run();
+    void without_source() {
+        runImpl(Source);
         assertFalse(Files.exists(Target));
     }
 
     @Test
     void write_content() throws IOException {
         new NIOPath(Source).ensureAsFile();
-        new Application(Source).run();
+        runImpl(Source);
 
         assertEquals("class __index__{}", Files.readString(Target));
     }

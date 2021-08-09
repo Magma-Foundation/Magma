@@ -11,16 +11,20 @@ public class Application {
         this.source = source;
     }
 
-    void run() throws IOException {
+    void run() throws ApplicationException {
         if (Files.exists(source)) {
             var lastName = source.getFileName().toString();
             var separator = lastName.indexOf('.');
             var baseName = lastName.substring(0, separator);
             var target = source.resolveSibling("__%s__.java".formatted(baseName));
 
-            var input = Files.readString(source);
-            var output = new MagmaJavaCompiler(input, baseName).compile();
-            Files.writeString(target, output);
+            try {
+                var input = Files.readString(source);
+                var output = new MagmaJavaCompiler(input, baseName).compile();
+                Files.writeString(target, output);
+            } catch (IOException e) {
+                throw new ApplicationException(e);
+            }
         }
     }
 }
