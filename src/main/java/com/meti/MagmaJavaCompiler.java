@@ -3,9 +3,9 @@ package com.meti;
 public class MagmaJavaCompiler {
     private static final String ImportPrefix = "import ";
     private static final String NativePrefix = "native ";
-    private static final String NativePrefixWithBracket = NativePrefix + "{ ";
-    private static final String ImportInfix = " from ";
-    private static final String ImportInfixWithBracket = " }" + ImportInfix;
+    private static final String NativePrefixWithBracket = NativePrefix + "{";
+    private static final String ImportInfix = "from ";
+    private static final String ImportInfixWithBracket = "} from ";
     private final String input;
     private final String scriptName;
 
@@ -21,9 +21,13 @@ public class MagmaJavaCompiler {
             var end = input.lastIndexOf(ImportInfixWithBracket);
             var baseName = slice(input, start, end);
 
-            var packageStart = end + ImportInfixWithBracket.length();
+            var packageStart = end + " } from ".length() - 1;
             var packageEnd = input.length() - 1;
             var packageName = slice(input, packageStart, packageEnd);
+
+            if(baseName.isBlank()) {
+                return generatedClass;
+            }
 
             var separator = baseName.indexOf(",");
             if (separator == -1) {
@@ -34,9 +38,9 @@ public class MagmaJavaCompiler {
                 return "import bar." + first + ";import bar." + second + ";" + generatedClass;
             }
         } else if (input.startsWith(ImportPrefix + NativePrefix)) {
-            var infix = input.indexOf(ImportInfix);
+            var infix = input.indexOf(" " + ImportInfix);
             var baseName = slice(input, (ImportPrefix + NativePrefix).length(), infix);
-            var packageName = slice(input, infix + ImportInfix.length(), input.length() - 1);
+            var packageName = slice(input, infix + " from ".length(), input.length() - 1);
             return ImportPrefix + packageName + "." + baseName + ";" + generatedClass;
         }
         var format = "Invalid input '%s'.";
