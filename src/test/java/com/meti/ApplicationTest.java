@@ -9,17 +9,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
+    private static final Path Target = Paths.get(".", "index.c");
     private static final Path Source = Paths.get(".", "index.mgs");
 
     @Test
-    void test() {
-        assertFalse(Files.exists(Source));
+    void exists() throws IOException {
+        run();
+        assertTrue(Files.exists(Target));
+    }
+
+    private void run() throws IOException {
+        if(!Files.exists(Source)) {
+            Files.createFile(Source);
+        }
+    }
+
+    @Test
+    void not_exists() throws IOException {
+        run();
+        assertFalse(Files.exists(Target));
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Target);
     }
 }
