@@ -14,7 +14,7 @@ public class Application {
             String fileName = separator == -1 ?
                     fileNameWithExtension :
                     fileNameWithExtension.substring(0, separator);
-            var target = source.resolveSibling(fileName);
+            var target = source.resolveSibling(fileName + ".c");
             Files.createFile(target);
         }
     }
