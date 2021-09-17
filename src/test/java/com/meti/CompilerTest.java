@@ -7,17 +7,36 @@ import static org.junit.jupiter.api.Assertions.*;
 class CompilerTest {
     @Test
     void empty(){
-        var output = new Compiler("index", "").compile();
-        assertEquals("struct ___index___{};struct ___index___ __index__(){struct ___index___ this={};return this;}", output);
+        assertCompile("",
+            "struct ___index___{};" +
+            "struct ___index___ __index__(){" +
+            "struct ___index___ this={};" +
+            "return this;}");
+    }
+
+    private void assertCompile(String input, String output) {
+        var compiler = new Compiler("index", input);
+        var actual = compiler.compile();
+        assertEquals(output, actual);
     }
 
     @Test
     void value(){
-        var output = new Compiler("index", "const x : I16 = 20;").compile();
-        assertEquals("struct ___index___{};" +
-                     "struct ___index___ __index__(){" +
-                     "struct ___index___ this={};" +
-                     "int x=20;" +
-                     "return this;}", output);
+        assertCompile("const x : I16 = 20;",
+            "struct ___index___{};" +
+            "struct ___index___ __index__(){" +
+            "struct ___index___ this={};" +
+            "int x=20;" +
+            "return this;}");
+    }
+
+    @Test
+    void type(){
+        assertCompile("const x : U16 = 20;",
+            "struct ___index___{};" +
+            "struct ___index___ __index__(){" +
+            "struct ___index___ this={};" +
+            "unsigned int x=20;" +
+            "return this;}");
     }
 }
