@@ -20,6 +20,6 @@ public class ApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.delete(Source);
+        Files.deleteIfExists(Source);
     }
 }
