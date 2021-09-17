@@ -15,6 +15,16 @@ public class ApplicationTest {
     private static final Path Target = Paths.get(".", "index.c");
 
     @Test
+    void declaration() throws IOException {
+        Files.writeString(Source, "const x : I16 = 10;");
+        Application.run(Source);
+        assertEquals(Files.readString(Target),
+            "struct ___index___{};" +
+            "struct ___index___ __index__(){" +
+            "struct ___index___={};return ___index___;}");
+    }
+
+    @Test
     void empty_content() throws IOException {
         Files.createFile(Source);
         Application.run(Source);
