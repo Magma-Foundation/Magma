@@ -25,7 +25,7 @@ public class ApplicationTest {
     private void assertRun(String input, String output) {
         try {
             Files.writeString(Source, input);
-            Application.run(Source);
+            new Application(Source).run();
             assertEquals(Files.readString(Target), output);
         } catch (IOException e) {
             fail(e);
@@ -47,7 +47,7 @@ public class ApplicationTest {
 
     @Test
     void not_exists() throws IOException {
-        Application.run(Source);
+        new Application(Source).run();
         assertFalse(Files.exists(Target));
     }
 

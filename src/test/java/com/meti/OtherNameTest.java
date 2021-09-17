@@ -17,7 +17,7 @@ public class OtherNameTest {
     @Test
     void declaration() throws IOException {
         Files.writeString(Source, "const x : I16 = 10;");
-        Application.run(Source);
+        new Application(Source).run();
         assertEquals(Files.readString(Target),
                 "struct ___main___{};" +
                 "struct ___main___ __main__(){" +
@@ -27,7 +27,7 @@ public class OtherNameTest {
     @Test
     void exists() throws IOException {
         Files.createFile(Source);
-        Application.run(Source);
+        new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
 

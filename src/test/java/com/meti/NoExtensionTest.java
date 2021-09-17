@@ -17,7 +17,7 @@ public class NoExtensionTest {
     @Test
     void exists() throws IOException {
         Files.createFile(Source);
-        Application.run(Source);
+        new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
 
