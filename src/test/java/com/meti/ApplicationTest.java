@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path Target = Paths.get(".", "index.c");
     private static final Path Source = Paths.get(".", "index.mgs");
+    private static final Path Target = Paths.get(".", "index.c");
 
     @Test
     void exists() throws IOException {
@@ -23,7 +23,7 @@ public class ApplicationTest {
     }
 
     private void run() throws IOException {
-        if(!Files.exists(Source)) {
+        if(Files.exists(Source)) {
             Files.createFile(Target);
         }
     }
