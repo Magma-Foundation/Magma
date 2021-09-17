@@ -15,6 +15,16 @@ public class OtherNameTest {
     private static final Path Target = Paths.get(".", "main.c");
 
     @Test
+    void declaration() throws IOException {
+        Files.writeString(Source, "const x : I16 = 10;");
+        Application.run(Source);
+        assertEquals(Files.readString(Target),
+                "struct ___main___{};" +
+                "struct ___main___ __main__(){" +
+                "struct ___main___ this={};int x=10;return this;}");
+    }
+
+    @Test
     void exists() throws IOException {
         Files.createFile(Source);
         Application.run(Source);
