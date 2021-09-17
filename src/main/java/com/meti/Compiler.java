@@ -20,11 +20,15 @@ public class Compiler {
 
     private String compileContent() {
         if (input.startsWith("const ")) {
-            var rawName = input.substring("const ".length(), input.indexOf(':'));
-            var name = rawName.trim();
-            return "int " + name + "=10;";
+            var name = slice("const ".length(), input.indexOf(':'));
+            var value = slice(input.indexOf('=') + 1, input.length() - 1);
+            return "int " + name + "=" + value + ";";
         } else {
             return "";
         }
+    }
+
+    private String slice(int start, int end) {
+        return input.substring(start, end).trim();
     }
 }
