@@ -10,28 +10,15 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ApplicationTest {
-    private static final Path Source = Paths.get(".", "index.mgs");
-    private static final Path Target = Paths.get(".", "index.c");
-
-    @Test
-    void empty_content() throws IOException {
-        Files.createFile(Source);
-        Application.run(Source);
-        assertEquals(Files.readString(Source), "");
-    }
+public class OtherNameTest {
+    private static final Path Source = Paths.get(".", "main.mgs");
+    private static final Path Target = Paths.get(".", "main.c");
 
     @Test
     void exists() throws IOException {
         Files.createFile(Source);
         Application.run(Source);
         assertTrue(Files.exists(Target));
-    }
-
-    @Test
-    void not_exists() throws IOException {
-        Application.run(Source);
-        assertFalse(Files.exists(Target));
     }
 
     @AfterEach
