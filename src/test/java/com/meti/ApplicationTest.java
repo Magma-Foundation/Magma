@@ -15,27 +15,34 @@ public class ApplicationTest {
     private static final Path Target = Paths.get(".", "index.c");
 
     @Test
-    void declaration() throws IOException {
-        Files.writeString(Source, "const x : I16 = 10;");
-        Application.run(Source);
-        assertEquals(Files.readString(Target),
+    void declaration() {
+        assertRun("const x : I16 = 10;",
             "struct ___index___{};" +
             "struct ___index___ __index__(){" +
             "struct ___index___ this={};int x=10;return this;}");
     }
 
-    @Test
-    void empty_content() throws IOException {
-        Files.createFile(Source);
-        Application.run(Source);
-        assertEquals(Files.readString(Source), "");
+    private void assertRun(String input, String output) {
+        try {
+            Files.writeString(Source, input);
+            Application.run(Source);
+            assertEquals(Files.readString(Target), output);
+        } catch (IOException e) {
+            fail(e);
+        }
     }
 
     @Test
-    void exists() throws IOException {
-        Files.createFile(Source);
-        Application.run(Source);
-        assertTrue(Files.exists(Target));
+    void declaration_name() {
+        assertRun("const test : I16 = 10;",
+                "struct ___index___{};" +
+                "struct ___index___ __index__(){" +
+                "struct ___index___ this={};int test=10;return this;}");
+    }
+
+    @Test
+    void exists() {
+        assertRun("", "");
     }
 
     @Test

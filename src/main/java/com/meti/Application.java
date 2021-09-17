@@ -16,15 +16,24 @@ public class Application {
                     fileNameWithExtension.substring(0, separator);
             var target = source.resolveSibling(packageName + ".c");
             var input = Files.readString(source);
-            if (!input.isEmpty()) {
-                var classType = "___" + packageName + "___";
-                var structType = "struct " + classType;
-                Files.writeString(target, structType + "{};" +
-                    structType + " __" + packageName + "__(){" +
-                    structType + " this={};int x=10;return this;}");
-            } else {
-                Files.createFile(target);
-            }
+            var output = compile(packageName, input);
+            Files.writeString(target, output);
         }
+    }
+
+    private static String compile(String packageName, String input) {
+        String output;
+        if (input.isEmpty()) {
+            output =  "";
+        } else {
+            var classType = "___" + packageName + "___";
+            var structType = "struct " + classType;
+            var rawName = input.substring("const ".length(), input.indexOf(':'));
+            var name = rawName.trim();
+            output = structType + "{};" +
+                     structType + " __" + packageName + "__(){" +
+                     structType + " this={};int " + name + "=10;return this;}";
+        }
+        return output;
     }
 }
