@@ -21,7 +21,7 @@ public class ApplicationTest {
         assertEquals(Files.readString(Target),
             "struct ___index___{};" +
             "struct ___index___ __index__(){" +
-            "struct ___index___={};return ___index___;}");
+            "struct ___index___={};int x=10;return ___index___;}");
     }
 
     @Test
