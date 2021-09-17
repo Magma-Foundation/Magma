@@ -24,7 +24,7 @@ public class ApplicationTest {
 
     private void run() throws IOException {
         if(!Files.exists(Source)) {
-            Files.createFile(Source);
+            Files.createFile(Target);
         }
     }
 
