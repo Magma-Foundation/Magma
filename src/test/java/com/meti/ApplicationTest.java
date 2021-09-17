@@ -17,6 +17,7 @@ public class ApplicationTest {
 
     @Test
     void exists() throws IOException {
+        Files.createFile(Source);
         run();
         assertTrue(Files.exists(Target));
     }
@@ -36,5 +37,6 @@ public class ApplicationTest {
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(Target);
+        Files.deleteIfExists(Source);
     }
 }
