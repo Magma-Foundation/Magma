@@ -12,16 +12,19 @@ public class Compiler {
     String compile() {
         var classType = "___" + packageName + "___";
         var structType = "struct " + classType;
-        String content;
+        var content = compileContent();
+        return structType + "{};" +
+               structType + " __" + packageName + "__(){" +
+               structType + " this={};" + content + "return this;}";
+    }
+
+    private String compileContent() {
         if (input.startsWith("const ")) {
             var rawName = input.substring("const ".length(), input.indexOf(':'));
             var name = rawName.trim();
-            content = "int " + name + "=10;";
+            return "int " + name + "=10;";
         } else {
-            content = "";
+            return "";
         }
-        return structType + "{};" +
-                 structType + " __" + packageName + "__(){" +
-                 structType + " this={};" + content + "return this;}";
     }
 }
