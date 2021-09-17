@@ -42,7 +42,7 @@ public class ApplicationTest {
 
     @Test
     void exists() {
-        assertRun("", "");
+        assertRun("", "struct ___index___{};struct ___index___ __index__(){struct ___index___ this={};return this;}");
     }
 
     @Test

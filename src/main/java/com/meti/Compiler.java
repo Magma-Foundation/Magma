@@ -10,18 +10,18 @@ public class Compiler {
     }
 
     String compile() {
-        String output;
-        if (input.isEmpty()) {
-            output =  "";
-        } else {
-            var classType = "___" + packageName + "___";
-            var structType = "struct " + classType;
+        var classType = "___" + packageName + "___";
+        var structType = "struct " + classType;
+        String content;
+        if (input.startsWith("const ")) {
             var rawName = input.substring("const ".length(), input.indexOf(':'));
             var name = rawName.trim();
-            output = structType + "{};" +
-                     structType + " __" + packageName + "__(){" +
-                     structType + " this={};int " + name + "=10;return this;}";
+            content = "int " + name + "=10;";
+        } else {
+            content = "";
         }
-        return output;
+        return structType + "{};" +
+                 structType + " __" + packageName + "__(){" +
+                 structType + " this={};" + content + "return this;}";
     }
 }
