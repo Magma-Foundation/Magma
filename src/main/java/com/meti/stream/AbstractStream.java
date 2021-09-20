@@ -50,6 +50,21 @@ public abstract class AbstractStream<T> implements Stream<T> {
 
     @Override
     public <E extends Exception> Stream<T> filter(F1E1<T, Boolean, E> filter) {
-        throw new UnsupportedOperationException();
+        return new AbstractStream<>() {
+            @Override
+            protected T head() throws StreamException {
+                try {
+                    T head;
+                    do {
+                        head = AbstractStream.this.head();
+                    } while (!filter.apply(head));
+                    return head;
+                } catch (EndOfStreamException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new StreamException(e);
+                }
+            }
+        };
     }
 }
