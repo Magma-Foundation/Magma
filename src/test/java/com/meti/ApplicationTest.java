@@ -46,7 +46,7 @@ public class ApplicationTest {
 
     private void runImpl() throws IOException {
         Files.createFile(Source);
-        new Application(new Script(Source)).run();
+        new Application(new Source(new Script(Source))).run();
     }
 
     @Test
@@ -57,13 +57,13 @@ public class ApplicationTest {
 
     @Test
     void target_header_missing() throws IOException {
-        new Application(new Script(Source)).run();
+        new Application(new Source(new Script(Source))).run();
         assertFalse(Files.exists(TargetHeader));
     }
 
     @Test
     void target_source_missing() throws IOException {
-        new Application(new Script(Source)).run();
+        new Application(new Source(new Script(Source))).run();
         assertFalse(Files.exists(TargetSource));
     }
 
