@@ -7,7 +7,7 @@ public class Source {
         this.script = script;
     }
 
-    public Script getScript() {
-        return script;
+    public Stream stream() {
+        return new Stream(script);
     }
 }
