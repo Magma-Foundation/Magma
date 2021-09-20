@@ -14,7 +14,7 @@ public class Script {
         return source.resolveSibling(name + extension);
     }
 
-    boolean exists() {
+    public boolean exists() {
         return Files.exists(source);
     }
 

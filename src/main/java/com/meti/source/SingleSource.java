@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.source;
+
+import com.meti.EmptyStream;
+import com.meti.Script;
+import com.meti.SingleStream;
+import com.meti.Stream;
 
 public class SingleSource implements Source {
     private final Script script;
