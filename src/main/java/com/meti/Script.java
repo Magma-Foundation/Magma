@@ -3,10 +3,10 @@ package com.meti;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Source {
+public class Script {
     private final Path source;
 
-    public Source(Path source) {
+    public Script(Path source) {
         this.source = source;
     }
 

@@ -4,18 +4,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class Application {
-    private final Source source;
+    private final Script script;
 
-    public Application(Source source) {
-        this.source = source;
+    public Application(Script script) {
+        this.script = script;
     }
 
     void run() throws IOException {
-        if (source.exists()) {
-            var name = source.extractName();
+        if (script.exists()) {
+            var name = script.extractName();
 
-            var targetHeader = source.extend(name, ".h");
-            var targetSource = source.extend(name, ".c");
+            var targetHeader = script.extend(name, ".h");
+            var targetSource = script.extend(name, ".c");
 
             var headerContent = "#ifndef " + name + "_h\n" +
                     "#define " + name + "_h\n" +
