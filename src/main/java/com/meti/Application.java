@@ -18,16 +18,19 @@ public class Application {
             var targetHeader = source.resolveSibling(name + ".h");
             var targetSource = source.resolveSibling(name + ".c");
 
-            Files.writeString(targetHeader, "#ifndef " + name + "_h\n" +
+            String headerContent = "#ifndef " + name + "_h\n" +
                     "#define " + name + "_h\n" +
                     "struct _" + name + "_ {}" +
                     "struct _" + name + "_ __" + name + "__();" +
-                    "#endif\n");
+                    "#endif\n";
 
-            Files.writeString(targetSource, "struct _" + name + "_ __" + name + "__(){" +
+            String sourceContent = "struct _" + name + "_ __" + name + "__(){" +
                     "struct _" + name + "_ this={};" +
                     "return this;" +
-                    "}");
+                    "}";
+
+            Files.writeString(targetHeader, headerContent);
+            Files.writeString(targetSource, sourceContent);
         }
     }
 
