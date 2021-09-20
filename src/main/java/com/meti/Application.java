@@ -18,14 +18,14 @@ public class Application {
             var targetHeader = source.resolveSibling(name + ".h");
             var targetSource = source.resolveSibling(name + ".c");
 
-            Files.writeString(targetHeader, "#ifndef index_h\n" +
-                    "#define index_h\n" +
-                    "struct _index_ {}" +
-                    "struct _index_ __index__();" +
+            Files.writeString(targetHeader, "#ifndef " + name + "_h\n" +
+                    "#define " + name + "_h\n" +
+                    "struct _" + name + "_ {}" +
+                    "struct _" + name + "_ __" + name + "__();" +
                     "#endif\n");
 
-            Files.writeString(targetSource, "struct _index_ __index__(){" +
-                    "struct _index_ this={};" +
+            Files.writeString(targetSource, "struct _" + name + "_ __" + name + "__(){" +
+                    "struct _" + name + "_ this={};" +
                     "return this;" +
                     "}");
         }
