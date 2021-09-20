@@ -53,7 +53,7 @@ public class OtherApplicationTest {
 
     private void runImpl() throws IOException {
         Files.createFile(Source);
-        new Application(Source).run();
+        new Application(new Source(Source)).run();
     }
 
     @AfterEach
