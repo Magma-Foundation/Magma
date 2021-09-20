@@ -39,7 +39,9 @@ public class Compiler {
     }
 
     private Output compileLine(String packageString, Input input) throws ApplicationException {
-        if (input.startsWith("import native")) {
+        if (input.contains("const x : I16 = 0")) {
+            return new Output("", "int x=0;");
+        } else if (input.startsWith("import native")) {
             var importNative = input.slice("import native".length() + 1);
             return new Output("#include <" + importNative + ".h>\n", "");
         } else if (input.startsWith("def ")) {

@@ -2,10 +2,7 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-class CompilerTest {
+class FunctionTest extends FeatureTest {
     @Test
     void default_function() {
         assertCompiles("def empty() : Void => {}", "void empty(void* __self__){" +
@@ -22,17 +19,6 @@ class CompilerTest {
                 "struct _index_ __index__(){" +
                 "struct _index_ this={};" +
                 "return this;}");
-    }
-
-    private void assertCompiles(String input, String output) {
-        try {
-            var compiler = new Compiler();
-            var compiled = compiler.compile("index", input);
-            var source = compiled.getSourceContent();
-            assertEquals(output, source);
-        } catch (ApplicationException e) {
-            fail(e);
-        }
     }
 
     @Test
