@@ -43,7 +43,7 @@ public class Compiler {
             return new Output("", "int x=0;");
         } else if (input.startsWith("import native")) {
             var importNative = input.slice("import native".length() + 1);
-            return new Output("#include <" + importNative + ".h>\n", "");
+            return render(new MapNode(importNative, NodeType.Import));
         } else if (input.startsWith("def ")) {
             var paramStart = input.firstIndexOfChar('(');
             var typeSeparator = input.firstIndexOfChar(':');
@@ -56,6 +56,18 @@ public class Compiler {
             return new Output("", typeOutput + " " + funcName + "(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
         } else {
             throw new ApplicationException("Invalid input: " + input.compute());
+        }
+    }
+
+    private Output render(MapNode node) throws ApplicationException {
+        if (node.type() == NodeType.Import) {
+            var format = "#include <%s.h>\n";
+            var importName = node.apply(Attribute.Type.Value).computeString();
+            return new Output(String.format(format, importName), "");
+        } else if (node.type() == NodeType.Declaration) {
+            return new Output("", "int x=0;");
+        } else {
+            throw new ApplicationException("Unknown type: " + node.type());
         }
     }
 
