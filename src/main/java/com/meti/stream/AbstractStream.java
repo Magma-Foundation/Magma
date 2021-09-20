@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.stream;
+
+import com.meti.C1E1;
+import com.meti.EndOfStreamException;
+import com.meti.F1E1;
+import com.meti.F2E1;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     protected abstract T head() throws StreamException;

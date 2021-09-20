@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.source.Source;
+import com.meti.stream.StreamException;
 
 import java.io.IOException;
 import java.nio.file.Files;

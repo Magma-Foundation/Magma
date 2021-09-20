@@ -1,7 +1,7 @@
 package com.meti.source;
 
 import com.meti.Script;
-import com.meti.Stream;
+import com.meti.stream.Stream;
 
 import java.io.IOException;
 

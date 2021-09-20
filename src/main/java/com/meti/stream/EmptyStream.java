@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.stream;
+
+import com.meti.EndOfStreamException;
 
 public class EmptyStream<T> extends AbstractStream<T> {
     @Override

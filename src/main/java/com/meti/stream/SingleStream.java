@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.stream;
+
+import com.meti.EndOfStreamException;
+import com.meti.Script;
 
 public class SingleStream extends AbstractStream<Script> {
     private final Script value;

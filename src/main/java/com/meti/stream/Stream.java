@@ -1,4 +1,8 @@
-package com.meti;
+package com.meti.stream;
+
+import com.meti.C1E1;
+import com.meti.F1E1;
+import com.meti.F2E1;
 
 public interface Stream<T> {
     <R, E extends Exception> Stream<R> map(F1E1<T, R, E> mapper);

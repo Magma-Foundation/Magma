@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.stream.JavaListStream;
+import com.meti.stream.StreamException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.meti.source;
 
-import com.meti.JavaListStream;
 import com.meti.Script;
-import com.meti.Stream;
+import com.meti.stream.JavaListStream;
+import com.meti.stream.Stream;
 
 import java.io.IOException;
 import java.nio.file.Files;
