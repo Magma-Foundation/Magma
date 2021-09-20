@@ -9,6 +9,6 @@ public class SingleSource implements Source {
 
     @Override
     public Stream stream() {
-        return new Stream(script);
+        return new SingleStream(script);
     }
 }
