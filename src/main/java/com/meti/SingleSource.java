@@ -9,6 +9,10 @@ public class SingleSource implements Source {
 
     @Override
     public Stream<Script> stream() {
-        return new SingleStream(script);
+        if (script.exists()) {
+            return new SingleStream(script);
+        } else {
+            return new EmptyStream<>();
+        }
     }
 }
