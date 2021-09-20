@@ -12,7 +12,7 @@ public class Compiler {
                 "#define " + packageString + "_h\n" +
                 output.getHeaderContent() +
                 "struct " + structureName + " {}" +
-                "struct " + structureName + "_ __" + packageString + "__();" +
+                "struct " + structureName + " __" + packageString + "__();" +
                 "#endif\n";
 
         var sourceContent = output.getSourceContent() + "struct " + structureName + " __" + packageString + "__(){" +
