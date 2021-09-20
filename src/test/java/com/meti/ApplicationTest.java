@@ -19,26 +19,26 @@ public class ApplicationTest {
     @Test
     void target_header_present() throws IOException {
         Files.createFile(Source);
-        new Application().run();
+        new Application(Source).run();
         assertTrue(Files.exists(TargetHeader));
     }
 
     @Test
     void target_source_present() throws IOException {
         Files.createFile(Source);
-        new Application().run();
+        new Application(Source).run();
         assertTrue(Files.exists(TargetSource));
     }
 
     @Test
     void target_header_missing() throws IOException {
-        new Application().run();
+        new Application(Source).run();
         assertFalse(Files.exists(TargetHeader));
     }
 
     @Test
     void target_source_missing() throws IOException {
-        new Application().run();
+        new Application(Source).run();
         assertFalse(Files.exists(TargetSource));
     }
 
