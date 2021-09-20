@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
@@ -16,17 +17,43 @@ public class OtherApplicationTest {
     public static final Path TargetSource = Paths.get(".", "main.c");
 
     @Test
+    void target_header_content() throws IOException {
+        runImpl();
+
+        var content = Files.readString(TargetHeader);
+        assertEquals("#ifndef main_h\n" +
+                "#define main_h\n" +
+                "struct _main_ {}" +
+                "struct _main_ __main__();" +
+                "#endif\n", content);
+    }
+
+    @Test
+    void target_source_content() throws IOException {
+        runImpl();
+
+        var content = Files.readString(TargetSource);
+        assertEquals("struct _main_ __main__(){" +
+                "struct _main_ this={};" +
+                "return this;" +
+                "}", content);
+    }
+
+    @Test
     void target_header() throws IOException {
-        Files.createFile(TargetHeader);
-        new Application(Source).run();
+        runImpl();
         assertTrue(Files.exists(TargetHeader));
     }
 
     @Test
     void target_source() throws IOException {
-        Files.createFile(TargetSource);
-        new Application(Source).run();
+        runImpl();
         assertTrue(Files.exists(TargetSource));
+    }
+
+    private void runImpl() throws IOException {
+        Files.createFile(Source);
+        new Application(Source).run();
     }
 
     @AfterEach
