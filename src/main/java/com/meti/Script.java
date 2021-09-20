@@ -1,21 +1,22 @@
 package com.meti;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Script {
-    private final Path source;
+    private final Path path;
 
-    public Script(Path source) {
-        this.source = source;
+    public Script(Path path) {
+        this.path = path;
     }
 
     Path extend(String name, String extension) {
-        return source.resolveSibling(name + extension);
+        return path.resolveSibling(name + extension);
     }
 
     public boolean exists() {
-        return Files.exists(source);
+        return Files.exists(path);
     }
 
     String extractName() {
@@ -26,17 +27,21 @@ public class Script {
     }
 
     private String nativeName() {
-        var lastIndex = source.getNameCount() - 1;
-        return source.getName(lastIndex).toString();
+        var lastIndex = path.getNameCount() - 1;
+        return path.getName(lastIndex).toString();
     }
 
     public String asString() {
-        return source.toAbsolutePath().toString();
+        return path.toAbsolutePath().toString();
     }
 
     public boolean hasExtensionOf(String extension) {
         var nativeName = nativeName();
         var separator = nativeName.indexOf('.');
         return separator != -1 && nativeName.substring(separator + 1).equals(extension);
+    }
+
+    public String read() throws IOException {
+        return Files.readString(path);
     }
 }

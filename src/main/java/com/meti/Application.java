@@ -21,14 +21,31 @@ public class Application {
         }
     }
 
-    private void compileScript(Script script) throws IOException {
+    private void compileScript(Script script) throws ApplicationException {
         var name = script.extractName();
 
         var targetHeader = script.extend(name, ".h");
         var targetSource = script.extend(name, ".c");
 
+        String input;
+        try {
+            input = script.read();
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+
+        String importString;
+        if (input.isBlank()) {
+            importString = "";
+        } else if (input.equals("import native stdio;")) {
+            importString = "#include <stdio.h>\n";
+        } else {
+            throw new ApplicationException("Invalid input: " + input);
+        }
+
         var headerContent = "#ifndef " + name + "_h\n" +
                 "#define " + name + "_h\n" +
+                importString +
                 "struct _" + name + "_ {}" +
                 "struct _" + name + "_ __" + name + "__();" +
                 "#endif\n";
@@ -38,7 +55,11 @@ public class Application {
                 "return this;" +
                 "}";
 
-        Files.writeString(targetHeader, headerContent);
-        Files.writeString(targetSource, sourceContent);
+        try {
+            Files.writeString(targetHeader, headerContent);
+            Files.writeString(targetSource, sourceContent);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
     }
 }
