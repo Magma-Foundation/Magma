@@ -19,7 +19,7 @@ public class Script {
         return Files.exists(path);
     }
 
-    String extractName() {
+    String stringifyPackage() {
         var nativeName = nativeName();
         var separator = nativeName.indexOf('.');
         return separator == -1 ? nativeName :
@@ -47,8 +47,8 @@ public class Script {
 
     void write(Output output) throws ApplicationException {
         try {
-            Files.writeString(extend(extractName(), ".h"), output.getHeaderContent());
-            Files.writeString(extend(extractName(), ".c"), output.getSourceContent());
+            Files.writeString(extend(stringifyPackage(), ".h"), output.getHeaderContent());
+            Files.writeString(extend(stringifyPackage(), ".c"), output.getSourceContent());
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
