@@ -17,6 +17,19 @@ public class ApplicationTest {
     public static final Path TargetSource = Paths.get(".", "index.c");
 
     @Test
+    void native_import() throws IOException, ApplicationException {
+        Files.writeString(Source, "import native stdio;");
+        new Application(new SingleSource(new Script(Source))).run();
+        var content = Files.readString(TargetHeader);
+        assertEquals("#ifndef index_h\n" +
+                "#define index_h\n" +
+                "#include <stdio.h>\n" +
+                "struct _index_ {}" +
+                "struct _index_ __index__();" +
+                "#endif\n", content);
+    }
+
+    @Test
     void target_header_content() throws IOException {
         runImpl();
 
