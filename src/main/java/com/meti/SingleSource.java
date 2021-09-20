@@ -1,9 +1,9 @@
 package com.meti;
 
-public class SingleStream implements Source {
+public class SingleSource implements Source {
     private final Script script;
 
-    public SingleStream(Script script) {
+    public SingleSource(Script script) {
         this.script = script;
     }
 
