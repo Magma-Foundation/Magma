@@ -10,7 +10,7 @@ public class DirectorySource implements Source {
     }
 
     @Override
-    public Stream stream() {
+    public Stream<Script> stream() {
 
         return null;
     }

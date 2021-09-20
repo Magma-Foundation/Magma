@@ -1,5 +1,5 @@
 package com.meti;
 
 public interface Source {
-    Stream stream();
+    Stream<Script> stream();
 }

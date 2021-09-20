@@ -1,8 +1,6 @@
 package com.meti;
 
-import java.io.IOException;
-
-public class SingleStream implements Stream {
+public class SingleStream implements Stream<Script> {
     private final Script value;
 
     public SingleStream(Script value) {
@@ -10,7 +8,7 @@ public class SingleStream implements Stream {
     }
 
     @Override
-    public void forEach(C1E1<Script, IOException> consumer) throws IOException {
+    public <E extends Exception> void forEach(C1E1<Script, E> consumer) throws E {
         consumer.apply(value);
     }
 }

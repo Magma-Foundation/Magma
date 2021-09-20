@@ -8,7 +8,7 @@ public class SingleSource implements Source {
     }
 
     @Override
-    public Stream stream() {
+    public Stream<Script> stream() {
         return new SingleStream(script);
     }
 }
