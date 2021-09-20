@@ -31,23 +31,40 @@ public class Compiler {
         var output = new Output();
         for (String line : input.split(";")) {
             if (!line.isBlank()) {
-                var output1 = compileLine(packageString, line);
+                var output1 = compileLine(packageString, new Input(line));
                 output = output.concat(output1);
             }
         }
         return output;
     }
 
-    private Output compileLine(String packageString, String line) throws ApplicationException {
-        if (line.startsWith("import native")) {
-            var importNative = line.substring("import native".length() + 1);
+    private Output compileLine(String packageString, Input input) throws ApplicationException {
+        if (input.startsWith("import native")) {
+            var importNative = input.slice("import native".length() + 1);
             return new Output("#include <" + importNative + ".h>\n", "");
-        } else if (line.startsWith("def ")) {
-            var funcName = line.substring("def ".length(), line.indexOf("("));
+        } else if (input.startsWith("def ")) {
+            var paramStart = input.firstIndexOfChar('(');
+            var typeSeparator = input.firstIndexOfChar(':');
+            var valueSeparator = input.firstIndexOfString("=>");
+
+            var funcName = input.slice("def ".length(), paramStart);
+            var typeString = input.slice(typeSeparator + 1, valueSeparator);
+            var typeOutput = resolveTypeName(typeString);
             var structName = formatStructName(packageString);
-            return new Output("", "void " + funcName + "(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
+            return new Output("", typeOutput + " " + funcName + "(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
         } else {
-            throw new ApplicationException("Invalid input: " + line);
+            throw new ApplicationException("Invalid input: " + input.compute());
+        }
+    }
+
+    private String resolveTypeName(String typeString) throws ApplicationException {
+        switch (typeString) {
+            case "Void":
+                return "void";
+            case "I16":
+                return "int";
+            default:
+                throw new ApplicationException("Unknown type:" + typeString);
         }
     }
 }
