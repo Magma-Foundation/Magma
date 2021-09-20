@@ -44,14 +44,4 @@ public class Script {
     public String read() throws IOException {
         return Files.readString(path);
     }
-
-    void write(Output output) throws ApplicationException {
-        try {
-            var name = nativeName();
-            Files.writeString(extend(name, ".h"), output.getHeaderContent());
-            Files.writeString(extend(name, ".c"), output.getSourceContent());
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
-    }
 }
