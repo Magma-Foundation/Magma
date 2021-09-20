@@ -13,15 +13,7 @@ public class Application {
 
     void run() throws IOException {
         if (Files.exists(source)) {
-            var nativeName = source.getName(source.getNameCount() - 1)
-                    .toString();
-            var separator = nativeName.indexOf('.');
-            String name;
-            if (separator == -1) {
-                name = nativeName;
-            } else {
-                name = nativeName.substring(0, separator);
-            }
+            var name = extractNameWithoutExtension();
 
             var targetHeader = source.resolveSibling(name + ".h");
             var targetSource = source.resolveSibling(name + ".c");
@@ -29,5 +21,18 @@ public class Application {
             Files.createFile(targetHeader);
             Files.createFile(targetSource);
         }
+    }
+
+    private String extractNameWithoutExtension() {
+        var nativeName = source.getName(source.getNameCount() - 1)
+                .toString();
+        var separator = nativeName.indexOf('.');
+        String name;
+        if (separator == -1) {
+            name = nativeName;
+        } else {
+            name = nativeName.substring(0, separator);
+        }
+        return name;
     }
 }
