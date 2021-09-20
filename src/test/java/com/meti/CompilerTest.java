@@ -11,6 +11,10 @@ class CompilerTest {
         var compiler = new Compiler();
         var output = compiler.compile("index", "def empty() : Void => {}");
         var source = output.getSourceContent();
-        assertEquals("", source);
+        assertEquals("void empty(void* __self__){" +
+                "struct _index_* this=(struct _index_*) self;}" +
+                "struct _index_ __index__(){" +
+                "struct _index_ this={};" +
+                "return this;}", source);
     }
 }

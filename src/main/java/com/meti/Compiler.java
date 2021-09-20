@@ -5,39 +5,46 @@ public class Compiler {
     }
 
     Output compile(String packageString, String input) throws ApplicationException {
-        var output = compileAllLines(input);
+        var output = compileAllLines(packageString, input);
+        var structureName = formatStructName(packageString);
 
         var headerContent = "#ifndef " + packageString + "_h\n" +
                 "#define " + packageString + "_h\n" +
-                output +
-                "struct _" + packageString + "_ {}" +
-                "struct _" + packageString + "_ __" + packageString + "__();" +
+                output.getHeaderContent() +
+                "struct " + structureName + " {}" +
+                "struct " + structureName + "_ __" + packageString + "__();" +
                 "#endif\n";
 
-        var sourceContent = "struct _" + packageString + "_ __" + packageString + "__(){" +
-                "struct _" + packageString + "_ this={};" +
+        var sourceContent = output.getSourceContent() + "struct " + structureName + " __" + packageString + "__(){" +
+                "struct " + structureName + " this={};" +
                 "return this;" +
                 "}";
 
         return new Output(headerContent, sourceContent);
     }
 
-    private String compileAllLines(String input) throws ApplicationException {
-        var output = new StringBuilder();
-        for (String line : input.split(";")) {
-            if (!line.isBlank()) {
-                output.append(compileLine(line));
-            }
-        }
-        return output.toString();
+    private String formatStructName(String packageString) {
+        return "_" + packageString + "_";
     }
 
-    private String compileLine(String line) throws ApplicationException {
+    private Output compileAllLines(String packageString, String input) throws ApplicationException {
+        var output = new Output();
+        for (String line : input.split(";")) {
+            if (!line.isBlank()) {
+                var output1 = compileLine(packageString, line);
+                output = output.concat(output1);
+            }
+        }
+        return output;
+    }
+
+    private Output compileLine(String packageString, String line) throws ApplicationException {
         if (line.startsWith("import native")) {
             var importNative = line.substring("import native".length() + 1);
-            return "#include <" + importNative + ".h>\n";
+            return new Output("#include <" + importNative + ".h>\n", "");
         } else if (line.equals("def empty() : Void => {}")) {
-            return "void empty(){}";
+            var structName = formatStructName(packageString);
+            return new Output("", "void empty(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
         } else {
             throw new ApplicationException("Invalid input: " + line);
         }
