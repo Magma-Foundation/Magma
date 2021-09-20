@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DirectorySourceTest {
     public static final Path Root = Paths.get(".", "gen_test");
     public static final Path Child = Root.resolve("child");
-    public static final Path First = Root.resolve("first");
-    public static final Path Second = Child.resolve("second");
+    public static final Path First = Root.resolve("first.mgs");
+    public static final Path Second = Child.resolve("second.mgs");
 
     @BeforeEach
     void setUp() throws IOException {

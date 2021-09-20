@@ -37,8 +37,9 @@ public class Application {
         String importString;
         if (input.isBlank()) {
             importString = "";
-        } else if (input.equals("import native stdio;")) {
-            importString = "#include <stdio.h>\n";
+        } else if (input.startsWith("import native")) {
+            var importNative = input.substring("import native".length() + 1, input.length() - 1);
+            importString = "#include <" + importNative + ".h>\n";
         } else {
             throw new ApplicationException("Invalid input: " + input);
         }
