@@ -47,4 +47,9 @@ public abstract class AbstractStream<T> implements Stream<T> {
         }
         return current;
     }
+
+    @Override
+    public <E extends Exception> Stream<T> filter(F1E1<T, Boolean, E> filter) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -21,6 +21,8 @@ public class DirectorySource implements Source {
         var list = Files.walk(root)
                 .filter(Files::isRegularFile)
                 .collect(Collectors.toList());
-        return new JavaListStream<>(list).map(Script::new);
+        return new JavaListStream<>(list)
+                .map(Script::new)
+                .filter(script -> script.hasExtensionOf("mgs"));
     }
 }

@@ -19,16 +19,24 @@ public class Script {
     }
 
     String extractName() {
-        var lastIndex = source.getNameCount() - 1;
-        var nativeName = source.getName(lastIndex)
-                .toString();
+        var nativeName = nativeName();
         var separator = nativeName.indexOf('.');
-        return separator == -1 ?
-                nativeName :
+        return separator == -1 ? nativeName :
                 nativeName.substring(0, separator);
+    }
+
+    private String nativeName() {
+        var lastIndex = source.getNameCount() - 1;
+        return source.getName(lastIndex).toString();
     }
 
     public String asString() {
         return source.toAbsolutePath().toString();
+    }
+
+    public boolean hasExtensionOf(String extension) {
+        var nativeName = nativeName();
+        var separator = nativeName.indexOf('.');
+        return separator != -1 && nativeName.substring(separator + 1).equals(extension);
     }
 }
