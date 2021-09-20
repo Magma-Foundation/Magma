@@ -18,8 +18,16 @@ public class Application {
             var targetHeader = source.resolveSibling(name + ".h");
             var targetSource = source.resolveSibling(name + ".c");
 
-            Files.createFile(targetHeader);
-            Files.createFile(targetSource);
+            Files.writeString(targetHeader, "#ifndef index_h\n" +
+                    "#define index_h\n" +
+                    "struct _index_ {}" +
+                    "struct _index_ __index__();" +
+                    "#endif\n");
+
+            Files.writeString(targetSource, "struct _index_ __index__(){" +
+                    "struct _index_ this={};" +
+                    "return this;" +
+                    "}");
         }
     }
 

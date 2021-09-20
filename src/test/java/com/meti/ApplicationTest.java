@@ -31,7 +31,7 @@ public class ApplicationTest {
     void target_source_content() throws IOException {
         runImpl();
 
-        var content = Files.readString(TargetHeader);
+        var content = Files.readString(TargetSource);
         assertEquals("struct _index_ __index__(){" +
                 "struct _index_ this={};" +
                 "return this;" +
