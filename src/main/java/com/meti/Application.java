@@ -11,10 +11,7 @@ public class Application {
     }
 
     void run() throws IOException {
-        Script script = source.stream().getValue();
-        if (script.exists()) {
-            compileScript(script);
-        }
+        source.stream().forEach(this::compileScript);
     }
 
     private void compileScript(Script script) throws IOException {

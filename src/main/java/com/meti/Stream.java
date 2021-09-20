@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.io.IOException;
+
 public class Stream {
     private final Script value;
 
@@ -9,5 +11,9 @@ public class Stream {
 
     public Script getValue() {
         return value;
+    }
+
+    void forEach(C1E1<Script, IOException> consumer) throws IOException {
+        consumer.apply(getValue());
     }
 }
