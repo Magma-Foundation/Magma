@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
-    public static final Path Source = Paths.get(".", "main.mgs");
+    public static final Path Source = Paths.get(".", "main");
     public static final Path TargetHeader = Paths.get(".", "main.h");
     public static final Path TargetSource = Paths.get(".", "main.c");
 
