@@ -19,6 +19,7 @@ public class DirectorySource implements Source {
     @Override
     public Stream<Script> stream() throws IOException {
         var list = Files.walk(root)
+                .filter(Files::isRegularFile)
                 .collect(Collectors.toList());
         return new JavaListStream<>(list).map(Script::new);
     }

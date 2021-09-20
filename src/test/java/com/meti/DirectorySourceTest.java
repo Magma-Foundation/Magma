@@ -11,6 +11,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DirectorySourceTest {
@@ -31,15 +32,16 @@ class DirectorySourceTest {
     @Test
     void stream() throws IOException, StreamException {
         var source = new DirectorySource(Root);
-        var collection = source.stream().map(Script::asString)
+        var scripts = source.stream().map(Script::asString)
                 .foldRight(new HashSet<String>(), (current, next) -> {
                     var copy = new HashSet<>(current);
                     copy.add(next);
                     return copy;
                 });
 
-        assertTrue(collection.contains(First.toAbsolutePath().toString()));
-        assertTrue(collection.contains(Second.toAbsolutePath().toString()));
+        assertTrue(scripts.contains(First.toAbsolutePath().toString()));
+        assertTrue(scripts.contains(Second.toAbsolutePath().toString()));
+        assertFalse(scripts.contains(Child.toAbsolutePath().toString()));
     }
 
     @AfterEach
