@@ -8,8 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OtherApplicationTest {
     public static final Path Source = Paths.get(".", "main");
@@ -52,8 +51,12 @@ public class OtherApplicationTest {
     }
 
     private void runImpl() throws IOException {
-        Files.createFile(Source);
-        new Application(new SingleSource(new Script(Source))).run();
+        try {
+            Files.createFile(Source);
+            new Application(new SingleSource(new Script(Source))).run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
     }
 
     @AfterEach

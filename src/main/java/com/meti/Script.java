@@ -27,4 +27,8 @@ public class Script {
                 nativeName :
                 nativeName.substring(0, separator);
     }
+
+    public String asString() {
+        return source.toAbsolutePath().toString();
+    }
 }

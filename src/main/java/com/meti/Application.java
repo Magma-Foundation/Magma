@@ -10,8 +10,12 @@ public class Application {
         this.source = source;
     }
 
-    void run() throws IOException {
-        source.stream().forEach(this::compileScript);
+    void run() throws ApplicationException {
+        try {
+            source.stream().forEach(this::compileScript);
+        } catch (StreamException | IOException e) {
+            throw new ApplicationException(e);
+        }
     }
 
     private void compileScript(Script script) throws IOException {
