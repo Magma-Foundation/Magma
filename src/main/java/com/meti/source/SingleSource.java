@@ -13,7 +13,7 @@ public class SingleSource implements Source {
     }
 
     @Override
-    public Stream<Script> stream() {
+    public Stream<? extends Script> stream() {
         if (script.exists()) {
             return new SingleStream(script);
         } else {

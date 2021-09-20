@@ -6,5 +6,5 @@ import com.meti.stream.Stream;
 import java.io.IOException;
 
 public interface Source {
-    Stream<Script> stream() throws IOException;
+    Stream<? extends Script> stream() throws IOException;
 }

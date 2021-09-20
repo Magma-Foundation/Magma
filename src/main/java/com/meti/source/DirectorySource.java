@@ -1,5 +1,6 @@
 package com.meti.source;
 
+import com.meti.PathScript;
 import com.meti.Script;
 import com.meti.stream.JavaListStream;
 import com.meti.stream.Stream;
@@ -17,12 +18,12 @@ public class DirectorySource implements Source {
     }
 
     @Override
-    public Stream<Script> stream() throws IOException {
+    public Stream<? extends Script> stream() throws IOException {
         var list = Files.walk(root)
                 .filter(Files::isRegularFile)
                 .collect(Collectors.toList());
         return new JavaListStream<>(list)
-                .map(Script::new)
+                .map(PathScript::new)
                 .filter(script -> script.hasExtensionOf("mgs"));
     }
 }

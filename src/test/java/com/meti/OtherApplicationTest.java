@@ -54,7 +54,7 @@ public class OtherApplicationTest {
     private void runImpl() throws IOException {
         try {
             Files.createFile(Source);
-            new Application(new SingleSource(new Script(Source))).run();
+            new Application(new SingleSource(new PathScript(Source))).run();
         } catch (ApplicationException e) {
             fail(e);
         }

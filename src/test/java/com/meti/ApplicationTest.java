@@ -19,7 +19,7 @@ public class ApplicationTest {
     @Test
     void native_import() throws IOException, ApplicationException {
         Files.writeString(Source, "import native stdio;");
-        new Application(new SingleSource(new Script(Source))).run();
+        new Application(new SingleSource(new PathScript(Source))).run();
         var content = Files.readString(TargetHeader);
         assertEquals("#ifndef index_h\n" +
                 "#define index_h\n" +
@@ -32,7 +32,7 @@ public class ApplicationTest {
     @Test
     void another_native_import() throws IOException, ApplicationException {
         Files.writeString(Source, "import native test;");
-        new Application(new SingleSource(new Script(Source))).run();
+        new Application(new SingleSource(new PathScript(Source))).run();
         var content = Files.readString(TargetHeader);
         assertEquals("#ifndef index_h\n" +
                 "#define index_h\n" +
@@ -45,7 +45,7 @@ public class ApplicationTest {
     @Test
     void multiple_native_imports() throws ApplicationException, IOException {
         Files.writeString(Source, "import native first;import native second;");
-        new Application(new SingleSource(new Script(Source))).run();
+        new Application(new SingleSource(new PathScript(Source))).run();
         var content = Files.readString(TargetHeader);
         assertEquals("#ifndef index_h\n" +
                 "#define index_h\n" +
@@ -88,7 +88,7 @@ public class ApplicationTest {
     private void runImpl() throws IOException {
         try {
             Files.createFile(Source);
-            new Application(new SingleSource(new Script(Source))).run();
+            new Application(new SingleSource(new PathScript(Source))).run();
         } catch (ApplicationException e) {
             fail(e);
         }
@@ -102,13 +102,13 @@ public class ApplicationTest {
 
     @Test
     void target_header_missing() throws ApplicationException {
-        new Application(new SingleSource(new Script(Source))).run();
+        new Application(new SingleSource(new PathScript(Source))).run();
         assertFalse(Files.exists(TargetHeader));
     }
 
     @Test
     void target_source_missing() throws ApplicationException {
-        new Application(new SingleSource(new Script(Source))).run();
+        new Application(new SingleSource(new PathScript(Source))).run();
         assertFalse(Files.exists(TargetSource));
     }
 

@@ -11,13 +11,13 @@ class ScriptTest {
 
     @Test
     void validate_has_extension_of() {
-        var script = new Script(Paths.get(".", ".a"));
+        var script = new PathScript(Paths.get(".", ".a"));
         assertTrue(script.hasExtensionOf("a"));
     }
 
     @Test
     void invalidate_has_extension_of() {
-        var script = new Script(Paths.get(".", ".b"));
+        var script = new PathScript(Paths.get(".", ".b"));
         assertFalse(script.hasExtensionOf("a"));
     }
 }
