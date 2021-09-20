@@ -7,11 +7,15 @@ public class StringScript implements Script {
     private final String extension;
     private final String content;
 
-    public StringScript(List<String> packageList, String content) {
-        this(packageList, "", content);
+    public StringScript(String content, String... packageList) {
+        this(content, List.of(packageList));
     }
 
-    public StringScript(List<String> packageList, String extension, String content) {
+    public StringScript(String content, List<String> packageList) {
+        this(content, "", packageList);
+    }
+
+    public StringScript(String content, String extension, List<String> packageList) {
         this.packageList = packageList;
         this.extension = extension;
         this.content = content;

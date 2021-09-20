@@ -4,9 +4,8 @@ public class Compiler {
     public Compiler() {
     }
 
-    Output compile(Script script, String input) throws ApplicationException {
+    Output compile(String packageString, String input) throws ApplicationException {
         var output = compileAllLines(input);
-        var packageString = script.stringifyPackage();
 
         var headerContent = "#ifndef " + packageString + "_h\n" +
                 "#define " + packageString + "_h\n" +
@@ -37,6 +36,8 @@ public class Compiler {
         if (line.startsWith("import native")) {
             var importNative = line.substring("import native".length() + 1);
             return "#include <" + importNative + ".h>\n";
+        } else if (line.equals("def empty() : Void => {}")) {
+            return "void empty(){}";
         } else {
             throw new ApplicationException("Invalid input: " + line);
         }

@@ -23,7 +23,8 @@ public class Application {
 
     private void compileScript(Script script) throws ApplicationException {
         var input = read(script);
-        var output = compiler.compile(script, input);
+        var packageString = script.stringifyPackage();
+        var output = compiler.compile(packageString, input);
         script.write(output);
     }
 
