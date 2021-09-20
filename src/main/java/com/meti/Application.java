@@ -34,19 +34,21 @@ public class Application {
             throw new ApplicationException(e);
         }
 
-        String importString;
-        if (input.isBlank()) {
-            importString = "";
-        } else if (input.startsWith("import native")) {
-            var importNative = input.substring("import native".length() + 1, input.length() - 1);
-            importString = "#include <" + importNative + ".h>\n";
-        } else {
-            throw new ApplicationException("Invalid input: " + input);
+        String output = "";
+        for (String line : input.split(";")) {
+            if (!line.isBlank()) {
+                if (line.startsWith("import native")) {
+                    var importNative = line.substring("import native".length() + 1);
+                    output += "#include <" + importNative + ".h>\n";
+                } else {
+                    throw new ApplicationException("Invalid input: " + line);
+                }
+            }
         }
 
         var headerContent = "#ifndef " + name + "_h\n" +
                 "#define " + name + "_h\n" +
-                importString +
+                output +
                 "struct _" + name + "_ {}" +
                 "struct _" + name + "_ __" + name + "__();" +
                 "#endif\n";
