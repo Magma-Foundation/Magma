@@ -42,9 +42,10 @@ public class Compiler {
         if (line.startsWith("import native")) {
             var importNative = line.substring("import native".length() + 1);
             return new Output("#include <" + importNative + ".h>\n", "");
-        } else if (line.equals("def empty() : Void => {}")) {
+        } else if (line.startsWith("def ")) {
+            var funcName = line.substring("def ".length(), line.indexOf("("));
             var structName = formatStructName(packageString);
-            return new Output("", "void empty(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
+            return new Output("", "void " + funcName + "(void* __self__){struct " + structName + "* this=(struct " + structName + "*) self;}");
         } else {
             throw new ApplicationException("Invalid input: " + line);
         }
