@@ -1,3 +1,5 @@
+package com.meti;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,19 +18,13 @@ public class ApplicationTest {
     @Test
     void target() throws IOException {
         Files.createFile(Source);
-        run();
+        new Application(Source).run();
         assertTrue(Files.exists(Target));
-    }
-
-    private void run() throws IOException {
-        if (Files.exists(Source)) {
-            Files.createFile(Target);
-        }
     }
 
     @Test
     void no_target() throws IOException {
-        run();
+        new Application(Source).run();
         assertFalse(Files.exists(Target));
     }
 
