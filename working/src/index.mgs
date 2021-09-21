@@ -1,5 +1,46 @@
 import native stdio;
+import native stdlib;
 
-native def printf(format : Ref[I8], ...args : Any);
+class def ArrayList<T>() => {
+    let internalSize = 0;
+    let externalSize = 10;
 
-printf("Hello World!");
+    let array = malloc(externalSize * T.size);
+
+    def apply(index : I16) => {
+        if(index < 0) throw BoundsException("Index cannot be negative.");
+        if(index >= internalSize) throw BoundsException("Index cannot be equal to or exceed length.");
+
+        return array[index];
+    }
+
+    def expand() => {
+        const newExternalSize = externalSize * 2;
+        const newArray = malloc(newExternalSize * T.size);
+        for(let i = 0; i < externalSize; i++) newArray[i] = array[i];
+        free(array);
+
+        externalSize = newExternalSize;
+        array = newArray;
+    }
+
+    def set(index : I16, value : T) => {
+        if(index < 0) throw BoundsException("Index cannot be negative.");
+        while(index >= externalSize) resize();
+
+        array[index] = value;
+        if(index > internalLength) {
+            internalLength = index;
+        }
+    }
+
+    def add(element : T) => {
+        set(internalLength, element);
+    }
+
+    def delete() => {
+        free(array);
+    }
+
+    implements Deletable;
+}
