@@ -15,6 +15,7 @@ public class ApplicationTest {
     private static final Path Root = Paths.get(".");
     private static final String Package = "index";
     private static final Path Source = Root.resolve(Package + ".mgs");
+    private static final Path Header = Source.resolveSibling(Package + ".h");
     private static final Path Target = Source.resolveSibling(Package + ".c");
 
     @Test
@@ -32,7 +33,13 @@ public class ApplicationTest {
     }
 
     @Test
-    void generated_content() throws IOException {
+    void generated_target_header() throws IOException {
+        runWithSource();
+        assertTrue(Files.exists(Header));
+    }
+
+    @Test
+    void generated_target_source() throws IOException {
         runWithSource();
         assertTrue(Files.exists(Target));
     }
@@ -45,6 +52,7 @@ public class ApplicationTest {
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(Target);
+        Files.deleteIfExists(Header);
         Files.deleteIfExists(Source);
     }
 }

@@ -13,6 +13,7 @@ public class Application {
 
     boolean run() throws IOException {
         if (Files.exists(source)) {
+            Files.createFile(source.resolveSibling("index.h"));
             Files.createFile(source.resolveSibling("index.c"));
             return true;
         } else {
