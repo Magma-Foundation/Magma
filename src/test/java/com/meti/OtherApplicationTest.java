@@ -27,7 +27,9 @@ public class OtherApplicationTest {
     @Test
     void test() throws IOException {
         Files.createFile(Source);
-        var target = new Application(Source).run().orElse(null).getTarget();
+        var target = new Application(Source).run()
+                .map(TargetSet::getTarget)
+                .orElse(Header);
         assertEquals(Target, target);
     }
 }
