@@ -17,14 +17,14 @@ public class OtherApplicationTest {
     public static final Path Source = Paths.get(".", "main.mgs");
 
     @Test
-    void target() throws IOException {
+    void target() throws IOException, ApplicationException {
         Files.createFile(Source);
         new Application(Source).run();
         assertTrue(Files.exists(Target));
     }
 
     @Test
-    void no_target() throws IOException {
+    void no_target() throws IOException, ApplicationException {
         new Application(Source).run();
         assertFalse(Files.exists(Target));
     }

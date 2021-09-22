@@ -24,7 +24,7 @@ public class Application {
         Files.writeString(source.resolveSibling(packageName + ".c"), output.getTargetContent());
     }
 
-    void run() throws IOException {
+    void run() throws IOException, ApplicationException {
         if (Files.exists(source)) {
             var fileName = source.getFileName();
             var fileNameString = fileName.toString();
@@ -36,12 +36,18 @@ public class Application {
         }
     }
 
-    private Output compile(String packageName, String input) {
+    private Output compile(String packageName, String input) throws ApplicationException {
         var scriptMacro = "__" + packageName + "_header__";
         var scriptType = "struct __" + packageName + "_type__";
         var scriptMain = "__" + packageName + "_main__";
 
-        var members = input.isBlank() ? "" : "\tint x;\n";
+        var typeSeparator = input.indexOf(':');
+        var valueSeparator = input.indexOf('=');
+        var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
+
+        var type = resolveTypeName(typeString);
+
+        var members = input.isBlank() ? "" : "\t" + type + " x;\n";
 
         var headerContent = renderHeaderWithContent("ifndef", scriptMacro) +
                 renderHeaderWithContent("define", scriptMacro) +
@@ -55,5 +61,17 @@ public class Application {
                 "}\n";
 
         return new Output(headerContent, targetContent);
+    }
+
+    private String resolveTypeName(String typeString) throws ApplicationException {
+        String type;
+        if (typeString.equals("U16")) {
+            type = "unsigned int";
+        } else if (typeString.equals("I16")) {
+            type = "int";
+        } else {
+            throw new ApplicationException("Unknown type: " + typeString);
+        }
+        return type;
     }
 }

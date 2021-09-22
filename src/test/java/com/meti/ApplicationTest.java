@@ -16,6 +16,20 @@ public class ApplicationTest {
     public static final Path Header = Paths.get(".", "index.h");
 
     @Test
+    void declaration_header_type() throws IOException {
+        run("const x : U16 = 10;");
+        assertEquals("""
+                #ifndef __index_header__
+                #define __index_header__
+                struct __index_type__ {
+                \tunsigned int x;
+                }
+                struct __index_type__ __index_main__();
+                #endif
+                """, Files.readString(Header));
+    }
+
+    @Test
     void declaration_header() throws IOException {
         run("const x : I16 = 10;");
         assertEquals("""
@@ -71,12 +85,20 @@ public class ApplicationTest {
 
     private void run(String input) throws IOException {
         Files.writeString(Source, input);
-        new Application(Source).run();
+        try {
+            new Application(Source).run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
     }
 
     @Test
     void no_target() throws IOException {
-        new Application(Source).run();
+        try {
+            new Application(Source).run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
         assertFalse(Files.exists(Target));
     }
 
