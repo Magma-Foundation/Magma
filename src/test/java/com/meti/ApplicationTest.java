@@ -30,7 +30,7 @@ public class ApplicationTest {
         Files.createFile(Source);
         runApplication();
         var content = Files.readString(Target);
-        assertEquals("int main(){return 0;}", content);
+        assertEquals("int main(){\n\treturn 0;\n}\n", content);
     }
 
     @Test

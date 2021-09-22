@@ -17,7 +17,7 @@ public class Application {
             var separator = fileName.indexOf('.');
             var packageName = fileName.substring(0, separator);
             var header = create(packageName + ".h", "");
-            var target = create(packageName + ".c", "int main(){return 0;}");
+            var target = create(packageName + ".c", "int main(){\n\treturn 0;\n}\n");
             return new Some<>(new TargetSet(header, target));
         } else {
             return new None<>();
