@@ -13,11 +13,15 @@ public class Application {
 
     boolean run() throws IOException {
         if (Files.exists(source)) {
-            Files.createFile(source.resolveSibling("index.h"));
-            Files.createFile(source.resolveSibling("index.c"));
+            create("index.h");
+            create("index.c");
             return true;
         } else {
             return false;
         }
+    }
+
+    private void create(String name) throws IOException {
+        Files.createFile(source.resolveSibling(name));
     }
 }
