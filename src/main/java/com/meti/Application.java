@@ -11,6 +11,14 @@ public class Application {
         this.source = source;
     }
 
+    private static String renderHeader(String name) {
+        return "#" + name;
+    }
+
+    private static String renderHeader(String name, String content) {
+        return renderHeader(name) + " " + content;
+    }
+
     void run() throws IOException {
         if (Files.exists(source)) {
             var fileName = source.getFileName();
@@ -20,10 +28,12 @@ public class Application {
 
             Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".c"));
 
-            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"), "#ifndef __index_header__\n" +
-                    "#define __index_header__\n" +
-                    "struct __index_type__ {}\n" +
-                    "#endif\n");
+            var headerMacro = "__" + fileNameWithoutSeparator + "_header__";
+            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"),
+                    renderHeader("ifndef", headerMacro) +
+                            renderHeader("define", headerMacro) +
+                            "struct __" + fileNameWithoutSeparator + "_type__ {}\n" +
+                            renderHeader("endif"));
         }
     }
 }
