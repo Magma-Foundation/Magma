@@ -1,5 +1,6 @@
 package com.meti;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
     private static final Path ROOT = Paths.get(".");
-    private static final Path SOURCE = ROOT.resolve("index" + ".mgs");
+    private static final Path Source = ROOT.resolve("index" + ".mgs");
+    private static final Path Target = Source.resolveSibling("index.c");
 
     @Test
     void generated() throws IOException {
@@ -20,23 +22,29 @@ public class ApplicationTest {
         assertTrue(condition);
     }
 
+    @Test
+    void generated_content() throws IOException {
+        runWithSource();
+        assertTrue(Files.exists(Target));
+    }
+
     private boolean runWithSource() throws IOException {
-        Files.createFile(SOURCE);
+        Files.createFile(Source);
         return runApplication();
     }
 
     private boolean runApplication() throws IOException {
-        return new Application(ApplicationTest.SOURCE).run();
-    }
-
-    @Test
-    void generated_content() throws IOException {
-        runWithSource();
-        assertTrue(Files.exists(SOURCE.resolveSibling("index.c")));
+        return new Application(ApplicationTest.Source).run();
     }
 
     @Test
     void not_generated() throws IOException {
         assertFalse(runApplication());
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Target);
+        Files.deleteIfExists(Source);
     }
 }
