@@ -16,15 +16,15 @@ public class Application {
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var packageName = fileName.substring(0, separator);
-            var header = create(packageName + ".h");
-            var target = create(packageName + ".c");
+            var header = create(packageName + ".h", "");
+            var target = create(packageName + ".c", "int main(){return 0;}");
             return new Some<>(new TargetSet(header, target));
         } else {
             return new None<>();
         }
     }
 
-    private Path create(String name) throws IOException {
-        return Files.createFile(source.resolveSibling(name));
+    private Path create(String name, String output) throws IOException {
+        return Files.writeString(source.resolveSibling(name), output);
     }
 }

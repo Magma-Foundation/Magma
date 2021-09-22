@@ -8,8 +8,8 @@ public class Some<T> implements Option<T> {
     }
 
     @Override
-    public <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) {
-        throw new UnsupportedOperationException();
+    public <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) throws E {
+        return new Some<>(mapper.apply(value));
     }
 
     @Override

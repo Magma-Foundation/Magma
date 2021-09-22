@@ -18,6 +18,22 @@ public class ApplicationTest {
     private static final Path Target = Source.resolveSibling(Package + ".c");
 
     @Test
+    void target_header_content() throws IOException {
+        Files.createFile(Source);
+        runApplication();
+        var content = Files.readString(Header);
+        assertEquals("", content);
+    }
+
+    @Test
+    void target_source_content() throws IOException {
+        Files.createFile(Source);
+        runApplication();
+        var content = Files.readString(Target);
+        assertEquals("int main(){return 0;}", content);
+    }
+
+    @Test
     void generated() throws IOException {
         assertTrue(runPresent());
     }
