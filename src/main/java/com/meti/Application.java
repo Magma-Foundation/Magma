@@ -17,7 +17,9 @@ public class Application {
             var fileNameString = fileName.toString();
             var separator = fileNameString.indexOf('.');
             var fileNameWithoutSeparator = fileNameString.substring(0, separator);
+
             Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".c"));
+            Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".h"));
         }
     }
 }

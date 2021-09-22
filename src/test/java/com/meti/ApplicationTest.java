@@ -14,12 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ApplicationTest {
     public static final Path Target = Paths.get(".", "index.c");
     public static final Path Source = Paths.get(".", "index.mgs");
+    public static final Path Header = Paths.get(".", "index.h");
 
     @Test
-    void target() throws IOException {
+    void target_header() throws IOException {
+        runImpl();
+        assertTrue(Files.exists(Header));
+    }
+
+    @Test
+    void target_source() throws IOException {
+        runImpl();
+        assertTrue(Files.exists(Target));
+    }
+
+    private void runImpl() throws IOException {
         Files.createFile(Source);
         new Application(Source).run();
-        assertTrue(Files.exists(Target));
     }
 
     @Test
@@ -30,6 +41,7 @@ public class ApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
+        Files.deleteIfExists(Header);
         Files.deleteIfExists(Target);
         Files.deleteIfExists(Source);
     }
