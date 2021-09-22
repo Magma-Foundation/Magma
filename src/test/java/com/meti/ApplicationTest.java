@@ -18,8 +18,7 @@ public class ApplicationTest {
 
     @Test
     void generated() throws IOException {
-        boolean condition = runWithSource();
-        assertTrue(condition);
+        assertTrue(runWithSource());
     }
 
     @Test
