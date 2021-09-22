@@ -15,8 +15,8 @@ public class Application {
         return "#" + name;
     }
 
-    private static String renderHeader(String name, String content) {
-        return renderHeader(name) + " " + content;
+    private static String renderHeaderWithContent(String name, String content) {
+        return renderHeader(name) + " " + content + "\n";
     }
 
     void run() throws IOException {
@@ -30,10 +30,10 @@ public class Application {
 
             var headerMacro = "__" + fileNameWithoutSeparator + "_header__";
             Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"),
-                    renderHeader("ifndef", headerMacro) +
-                            renderHeader("define", headerMacro) +
+                    renderHeaderWithContent("ifndef", headerMacro) +
+                            renderHeaderWithContent("define", headerMacro) +
                             "struct __" + fileNameWithoutSeparator + "_type__ {}\n" +
-                            renderHeader("endif"));
+                            renderHeader("endif") + "\n");
         }
     }
 }
