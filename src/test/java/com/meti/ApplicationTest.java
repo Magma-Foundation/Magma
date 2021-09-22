@@ -19,18 +19,17 @@ public class ApplicationTest {
 
     @Test
     void target_header_content() throws IOException {
-        runWithSource();
         assertContains(Header, "");
     }
 
     private void assertContains(Path path, String expected) throws IOException {
+        runWithSource();
         var actual = Files.readString(path);
         assertEquals(expected, actual);
     }
 
     @Test
     void target_source_content() throws IOException {
-        runWithSource();
         assertContains(Target, "int main(){\n\treturn 0;\n}\n");
     }
 
