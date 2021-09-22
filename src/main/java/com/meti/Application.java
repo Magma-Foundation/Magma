@@ -19,28 +19,38 @@ public class Application {
         return renderHeader(name) + " " + content + "\n";
     }
 
+    private static void write(Path source, String packageName, Output output) throws IOException {
+        Files.writeString(source.resolveSibling(packageName + ".h"), output.getHeaderContent());
+        Files.writeString(source.resolveSibling(packageName + ".c"), output.getTargetContent());
+    }
+
     void run() throws IOException {
         if (Files.exists(source)) {
             var fileName = source.getFileName();
             var fileNameString = fileName.toString();
             var separator = fileNameString.indexOf('.');
-            var fileNameWithoutSeparator = fileNameString.substring(0, separator);
-
-
-            var scriptMacro = "__" + fileNameWithoutSeparator + "_header__";
-            var scriptType = "struct __" + fileNameWithoutSeparator + "_type__";
-            var scriptMain = "__" + fileNameWithoutSeparator + "_main__";
-
-            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"), renderHeaderWithContent("ifndef", scriptMacro) +
-                    renderHeaderWithContent("define", scriptMacro) +
-                    scriptType + " {}\n" +
-                    scriptType + " " + scriptMain + "();\n" +
-                    renderHeader("endif") + "\n");
-
-            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".c"), scriptType + " " + scriptMain + "(){\n" +
-                    "\t" + scriptType + " this={};\n" +
-                    "\treturn this;\n" +
-                    "}\n");
+            var packageName = fileNameString.substring(0, separator);
+            var output = compile(packageName);
+            write(source, packageName, output);
         }
+    }
+
+    private Output compile(String packageName) {
+        var scriptMacro = "__" + packageName + "_header__";
+        var scriptType = "struct __" + packageName + "_type__";
+        var scriptMain = "__" + packageName + "_main__";
+
+        var headerContent = renderHeaderWithContent("ifndef", scriptMacro) +
+                renderHeaderWithContent("define", scriptMacro) +
+                scriptType + " {}\n" +
+                scriptType + " " + scriptMain + "();\n" +
+                renderHeader("endif") + "\n";
+
+        var targetContent = scriptType + " " + scriptMain + "(){\n" +
+                "\t" + scriptType + " this={};\n" +
+                "\treturn this;\n" +
+                "}\n";
+
+        return new Output(headerContent, targetContent);
     }
 }
