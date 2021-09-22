@@ -13,8 +13,9 @@ public class Application {
 
     Option<TargetSet> run() throws IOException {
         if (Files.exists(source)) {
-            var header = create("index.h");
-            var target = create("index.c");
+            var fileName = "index";
+            var header = create(fileName + ".h");
+            var target = create(fileName + ".c");
             return new Some<>(new TargetSet(header, target));
         } else {
             return new None<>();
