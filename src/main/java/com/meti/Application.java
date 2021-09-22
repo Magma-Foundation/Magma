@@ -30,19 +30,22 @@ public class Application {
             var fileNameString = fileName.toString();
             var separator = fileNameString.indexOf('.');
             var packageName = fileNameString.substring(0, separator);
-            var output = compile(packageName);
+            var input = Files.readString(source);
+            var output = compile(packageName, input);
             write(source, packageName, output);
         }
     }
 
-    private Output compile(String packageName) {
+    private Output compile(String packageName, String input) {
         var scriptMacro = "__" + packageName + "_header__";
         var scriptType = "struct __" + packageName + "_type__";
         var scriptMain = "__" + packageName + "_main__";
 
+        var members = input.isBlank() ? "" : "\tint x;\n";
+
         var headerContent = renderHeaderWithContent("ifndef", scriptMacro) +
                 renderHeaderWithContent("define", scriptMacro) +
-                scriptType + " {}\n" +
+                scriptType + " {\n" + members + "}\n" +
                 scriptType + " " + scriptMain + "();\n" +
                 renderHeader("endif") + "\n";
 
