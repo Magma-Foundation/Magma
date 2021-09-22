@@ -8,8 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     private static final Path Root = Paths.get(".");
@@ -20,33 +19,48 @@ public class ApplicationTest {
 
     @Test
     void generated() throws IOException {
-        assertTrue(runWithSource());
+        assertTrue(runWithSource2());
     }
 
-    private boolean runWithSource() throws IOException {
+    private boolean runWithSource2() throws IOException {
+        var option = runWithSource();
+        return option.isPresent();
+    }
+
+    private Option<TargetSet> runWithSource() throws IOException {
         Files.createFile(Source);
         return runApplication();
     }
 
-    private boolean runApplication() throws IOException {
+    private Option<TargetSet> runApplication() throws IOException {
         return new Application(ApplicationTest.Source).run();
     }
 
     @Test
+    void generated_header() throws IOException {
+        assertEquals(runWithSource().get().getHeader(), Header);
+    }
+
+    @Test
+    void generated_target() throws IOException {
+        assertEquals(runWithSource().get().getTarget(), Target);
+    }
+
+    @Test
     void generated_target_header() throws IOException {
-        runWithSource();
+        runWithSource2();
         assertTrue(Files.exists(Header));
     }
 
     @Test
     void generated_target_source() throws IOException {
-        runWithSource();
+        runWithSource2();
         assertTrue(Files.exists(Target));
     }
 
     @Test
     void not_generated() throws IOException {
-        assertFalse(runApplication());
+        assertFalse(runApplication().isPresent());
     }
 
     @AfterEach
