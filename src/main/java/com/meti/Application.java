@@ -13,9 +13,11 @@ public class Application {
 
     Option<TargetSet> run() throws IOException {
         if (Files.exists(source)) {
-            var fileName = "index";
-            var header = create(fileName + ".h");
-            var target = create(fileName + ".c");
+            var fileName = source.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var packageName = fileName.substring(0, separator);
+            var header = create(packageName + ".h");
+            var target = create(packageName + ".c");
             return new Some<>(new TargetSet(header, target));
         } else {
             return new None<>();
