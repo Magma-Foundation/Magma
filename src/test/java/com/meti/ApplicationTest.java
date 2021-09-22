@@ -37,12 +37,16 @@ public class ApplicationTest {
 
     @Test
     void generated_header() throws IOException {
-        assertEquals(runWithSource().get().getHeader(), Header);
+        assertEquals(runWithSource()
+                .map(TargetSet::getHeader)
+                .orElse(Target), Header);
     }
 
     @Test
     void generated_target() throws IOException {
-        assertEquals(runWithSource().get().getTarget(), Target);
+        assertEquals(runWithSource()
+                .map(TargetSet::getTarget)
+                .orElse(Header), Target);
     }
 
     @Test

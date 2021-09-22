@@ -27,7 +27,7 @@ public class OtherApplicationTest {
     @Test
     void test() throws IOException {
         Files.createFile(Source);
-        var target = new Application(Source).run().get().getTarget();
+        var target = new Application(Source).run().orElse(null).getTarget();
         assertEquals(Target, target);
     }
 }
