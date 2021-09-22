@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
+    public static final Path Header = Paths.get(".", "main.h");
     public static final Path Target = Paths.get(".", "main.c");
     public static final Path Source = Paths.get(".", "main.mgs");
 
@@ -32,5 +33,6 @@ public class OtherApplicationTest {
     void tearDown() throws IOException {
         Files.deleteIfExists(Target);
         Files.deleteIfExists(Source);
+        Files.deleteIfExists(Header);
     }
 }

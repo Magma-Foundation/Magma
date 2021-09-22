@@ -16,11 +16,21 @@ public class ApplicationTest {
     public static final Path Header = Paths.get(".", "index.h");
 
     @Test
+    void target_source_content() throws IOException {
+        runImpl();
+        assertEquals("struct __index_type__ __index_main__(){\n" +
+                "\tstruct __index_type__ this={};\n" +
+                "\treturn this;\n" +
+                "}\n", Files.readString(Target));
+    }
+
+    @Test
     void target_header_content() throws IOException {
         runImpl();
         assertEquals("#ifndef __index_header__\n" +
                 "#define __index_header__\n" +
                 "struct __index_type__ {}\n" +
+                "struct __index_type__ __index_main__();\n" +
                 "#endif\n", Files.readString(Header));
     }
 

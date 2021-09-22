@@ -26,14 +26,21 @@ public class Application {
             var separator = fileNameString.indexOf('.');
             var fileNameWithoutSeparator = fileNameString.substring(0, separator);
 
-            Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".c"));
 
-            var headerMacro = "__" + fileNameWithoutSeparator + "_header__";
-            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"),
-                    renderHeaderWithContent("ifndef", headerMacro) +
-                            renderHeaderWithContent("define", headerMacro) +
-                            "struct __" + fileNameWithoutSeparator + "_type__ {}\n" +
-                            renderHeader("endif") + "\n");
+            var scriptMacro = "__" + fileNameWithoutSeparator + "_header__";
+            var scriptType = "struct __" + fileNameWithoutSeparator + "_type__";
+            var scriptMain = "__" + fileNameWithoutSeparator + "_main__";
+
+            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"), renderHeaderWithContent("ifndef", scriptMacro) +
+                    renderHeaderWithContent("define", scriptMacro) +
+                    scriptType + " {}\n" +
+                    scriptType + " " + scriptMain + "();\n" +
+                    renderHeader("endif") + "\n");
+
+            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".c"), scriptType + " " + scriptMain + "(){\n" +
+                    "\t" + scriptType + " this={};\n" +
+                    "\treturn this;\n" +
+                    "}\n");
         }
     }
 }
