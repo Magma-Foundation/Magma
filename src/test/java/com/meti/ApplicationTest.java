@@ -12,19 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path ROOT = Paths.get(".");
-    private static final Path Source = ROOT.resolve("index" + ".mgs");
-    private static final Path Target = Source.resolveSibling("index.c");
+    private static final Path Root = Paths.get(".");
+    private static final String Package = "index";
+    private static final Path Source = Root.resolve(Package + ".mgs");
+    private static final Path Target = Source.resolveSibling(Package + ".c");
 
     @Test
     void generated() throws IOException {
         assertTrue(runWithSource());
-    }
-
-    @Test
-    void generated_content() throws IOException {
-        runWithSource();
-        assertTrue(Files.exists(Target));
     }
 
     private boolean runWithSource() throws IOException {
@@ -34,6 +29,12 @@ public class ApplicationTest {
 
     private boolean runApplication() throws IOException {
         return new Application(ApplicationTest.Source).run();
+    }
+
+    @Test
+    void generated_content() throws IOException {
+        runWithSource();
+        assertTrue(Files.exists(Target));
     }
 
     @Test
