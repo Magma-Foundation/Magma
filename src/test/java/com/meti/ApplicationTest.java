@@ -19,12 +19,11 @@ public class ApplicationTest {
 
     @Test
     void generated() throws IOException {
-        assertTrue(runWithSource2());
+        assertTrue(runPresent());
     }
 
-    private boolean runWithSource2() throws IOException {
-        var option = runWithSource();
-        return option.isPresent();
+    private boolean runPresent() throws IOException {
+        return runWithSource().isPresent();
     }
 
     private Option<TargetSet> runWithSource() throws IOException {
@@ -48,13 +47,13 @@ public class ApplicationTest {
 
     @Test
     void generated_target_header() throws IOException {
-        runWithSource2();
+        runPresent();
         assertTrue(Files.exists(Header));
     }
 
     @Test
     void generated_target_source() throws IOException {
-        runWithSource2();
+        runPresent();
         assertTrue(Files.exists(Target));
     }
 
