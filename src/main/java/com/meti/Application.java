@@ -19,7 +19,11 @@ public class Application {
             var fileNameWithoutSeparator = fileNameString.substring(0, separator);
 
             Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".c"));
-            Files.createFile(source.resolveSibling(fileNameWithoutSeparator + ".h"));
+
+            Files.writeString(source.resolveSibling(fileNameWithoutSeparator + ".h"), "#ifndef __index_header__\n" +
+                    "#define __index_header__\n" +
+                    "struct __index_type__ {}\n" +
+                    "#endif\n");
         }
     }
 }
