@@ -9,9 +9,10 @@ public class AssignmentFeatureTest extends FeatureTest {
     }
 
     private void assertAssignment(String name, String value) {
+        var declaration = new Declaration(name, Declaration.Flag.LET, PrimitiveType.I16, value);
         var assignment = new Assignment(name, value);
-        assertCompile("let " + name + " : I16 = 420;" + assignment.renderMagma(),
-                "int " + name + "=420;" + assignment.renderNative());
+        assertCompile(declaration.renderMagma() + assignment.renderMagma(),
+                declaration.renderNative() + assignment.renderNative());
     }
 
     @Test
