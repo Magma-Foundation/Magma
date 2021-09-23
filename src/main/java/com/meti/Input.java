@@ -1,33 +1,37 @@
 package com.meti;
 
 public class Input {
-    private final String input;
+    private final String value;
 
-    public Input(String input) {
-        this.input = input.trim();
+    public Input(String value) {
+        this.value = value.trim();
     }
 
     public boolean contains(String target) {
-        return input.equals(target);
+        return value.equals(target);
     }
 
     int firstIndexOfChar(char c) {
-        return input.indexOf(c);
+        return value.indexOf(c);
     }
 
     boolean isEmpty() {
-        return input.isBlank();
+        return value.isBlank();
     }
 
     int length() {
-        return input.length();
+        return value.length();
+    }
+
+    String slice(int start) {
+        return slice(start, value.length());
     }
 
     String slice(int start, int end) {
-        return input.substring(start, end).trim();
+        return value.substring(start, end).trim();
     }
 
     boolean startsWithString(String slice) {
-        return input.startsWith(slice);
+        return value.startsWith(slice);
     }
 }

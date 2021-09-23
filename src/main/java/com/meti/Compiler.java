@@ -31,7 +31,7 @@ public class Compiler {
             var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
             var name = input.slice(prefix.length(), typeSeparator);
             var valueSeparator = input.firstIndexOfChar('=');
-            var value = input.slice(valueSeparator + 1, input.length());
+            var value = input.slice(valueSeparator + 1);
 
             var typeString = input.slice(typeSeparator + 1, valueSeparator);
             var type = new Resolver(typeString).resolve();
@@ -41,7 +41,8 @@ public class Compiler {
         var separator = input.firstIndexOfChar('=');
         if (separator != -1) {
             var name = input.slice(0, separator);
-            return new Assignment(name);
+            var value = input.slice(separator + 1);
+            return new Assignment(name, value);
         } else {
             throw new ApplicationException("Invalid line:" + line);
         }

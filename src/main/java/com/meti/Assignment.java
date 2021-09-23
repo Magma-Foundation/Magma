@@ -2,9 +2,11 @@ package com.meti;
 
 public class Assignment implements Node {
     private final String name;
+    private final String value;
 
-    public Assignment(String name) {
+    public Assignment(String name, String value) {
         this.name = name;
+        this.value = value;
     }
 
     @Override
@@ -14,6 +16,6 @@ public class Assignment implements Node {
 
     @Override
     public String renderNative() {
-        return name + "=69;";
+        return name + "=" + value + ";";
     }
 }
