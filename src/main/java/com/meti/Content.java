@@ -10,6 +10,11 @@ public class Content implements Node {
     }
 
     @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Node getType() {
         throw new UnsupportedOperationException();
     }
@@ -22,6 +27,11 @@ public class Content implements Node {
     @Override
     public Group group() {
         return Group.Content;
+    }
+
+    @Override
+    public boolean isFlagged(Declaration.Flag flag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

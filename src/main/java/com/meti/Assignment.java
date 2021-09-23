@@ -12,6 +12,11 @@ public class Assignment implements Node {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Node getType() {
         throw new UnsupportedOperationException();
     }
@@ -24,6 +29,11 @@ public class Assignment implements Node {
     @Override
     public Group group() {
         return Group.Assignment;
+    }
+
+    @Override
+    public boolean isFlagged(Declaration.Flag flag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

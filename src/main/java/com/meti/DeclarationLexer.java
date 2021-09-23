@@ -17,7 +17,7 @@ public class DeclarationLexer implements Lexer {
 
     @Override
     public Option<Node> lex() {
-        if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
+        if (isConstant() || input.startsWithString(LET_PREFIX)) {
             var typeSeparator = input.firstIndexOfChar(':');
             var valueSeparator = input.firstIndexOfChar('=');
 
@@ -25,15 +25,23 @@ public class DeclarationLexer implements Lexer {
             var type = lexType(typeSeparator, valueSeparator);
             var value = input.slice(valueSeparator + 1);
 
-            var node = new Declaration(Declaration.Flag.CONST, name, type, value);
+            var flag = isConstant() ?
+                    Declaration.Flag.CONST :
+                    Declaration.Flag.LET;
+
+            var node = new Declaration(flag, name, type, value);
             return new Some<>(node);
         } else {
             return new None<>();
         }
     }
 
+    private boolean isConstant() {
+        return input.startsWithString(CONST_PREFIX);
+    }
+
     private String lexName(int typeSeparator, int valueSeparator) {
-        var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
+        var prefix = isConstant() ? CONST_PREFIX : LET_PREFIX;
         var nameEnd = (typeSeparator == -1) ? valueSeparator : typeSeparator;
         return input.slice(prefix.length(), nameEnd);
     }

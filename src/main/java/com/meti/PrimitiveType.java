@@ -15,6 +15,11 @@ public enum PrimitiveType implements Node {
     }
 
     @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Node getType() {
         throw new UnsupportedOperationException();
     }
@@ -27,6 +32,11 @@ public enum PrimitiveType implements Node {
     @Override
     public Group group() {
         return Group.Primitive;
+    }
+
+    @Override
+    public boolean isFlagged(Declaration.Flag flag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

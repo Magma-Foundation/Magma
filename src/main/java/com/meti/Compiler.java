@@ -21,9 +21,11 @@ public class Compiler {
             }
         }
 
+        var scope = new ArrayList<Node>();
         var outputAST = new ArrayList<Node>();
         for (Node node : inputAST) {
             if (node.group() == Node.Group.Declaration) {
+                scope.add(node);
                 if (node.getType().group() == Node.Group.Implicit) {
                     var value = node.getValue();
                     Node type;
@@ -37,6 +39,15 @@ public class Compiler {
                 } else {
                     outputAST.add(node);
                 }
+            } else if (node.group() == Node.Group.Assignment) {
+                for (Node node1 : scope) {
+                    if (node1.getName().equals(node.getName())) {
+                        if (node1.isFlagged(Declaration.Flag.CONST)) {
+                            throw new ApplicationException(node1.getName() + " is constant and cannot be reassigned.");
+                        }
+                    }
+                }
+                outputAST.add(node);
             } else {
                 outputAST.add(node);
             }

@@ -17,6 +17,11 @@ public class Declaration implements Node {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Node getType() {
         return type;
     }
@@ -32,13 +37,8 @@ public class Declaration implements Node {
     }
 
     @Override
-    public String renderMagma() {
-        return flag.name().toLowerCase() + " " + name + " : " + type.renderMagma() + " = " + value + ";";
-    }
-
-    @Override
-    public String renderNative() {
-        return type.renderNative() + " " + name + "=" + value + ";";
+    public boolean isFlagged(Flag flag) {
+        return this.flag == flag;
     }
 
     @Override
@@ -49,6 +49,16 @@ public class Declaration implements Node {
     @Override
     public Node withType(Node type) {
         return new Declaration(flag, name, type, value);
+    }
+
+    @Override
+    public String renderMagma() {
+        return flag.name().toLowerCase() + " " + name + " : " + type.renderMagma() + " = " + value + ";";
+    }
+
+    @Override
+    public String renderNative() {
+        return type.renderNative() + " " + name + "=" + value + ";";
     }
 
     enum Flag {

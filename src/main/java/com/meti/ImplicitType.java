@@ -9,6 +9,11 @@ public class ImplicitType implements Node {
     }
 
     @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Node getType() {
         throw new UnsupportedOperationException();
     }
@@ -21,6 +26,11 @@ public class ImplicitType implements Node {
     @Override
     public Group group() {
         return Group.Implicit;
+    }
+
+    @Override
+    public boolean isFlagged(Declaration.Flag flag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
