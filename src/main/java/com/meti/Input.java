@@ -7,6 +7,10 @@ public class Input {
         this.input = input.trim();
     }
 
+    public boolean contains(String target) {
+        return input.equals(target);
+    }
+
     int firstIndexOfChar(char c) {
         return input.indexOf(c);
     }

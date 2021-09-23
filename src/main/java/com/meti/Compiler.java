@@ -25,7 +25,7 @@ public class Compiler {
         return builder.toString();
     }
 
-    private Declaration compileNode(String line, Input input) throws ApplicationException {
+    private Node compileNode(String line, Input input) throws ApplicationException {
         if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
             var typeSeparator = input.firstIndexOfChar(':');
             var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
@@ -37,6 +37,8 @@ public class Compiler {
             var type = new Resolver(typeString).resolve();
 
             return new Declaration(name, Declaration.Flag.CONST, type, value);
+        } else if (input.contains("x = 69")) {
+            return new Assignment();
         } else {
             throw new ApplicationException("Invalid line:" + line);
         }

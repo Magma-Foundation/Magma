@@ -8,7 +8,7 @@ public class DeclarationFeatureTest extends FeatureTest {
         assertDeclaration(new Declaration("x", Declaration.Flag.CONST, PrimitiveType.I16, "420"));
     }
 
-    private void assertDeclaration(Declaration node) {
+    private void assertDeclaration(Node node) {
         var input = node.renderMagma();
         var expected = node.renderNative();
         assertCompile(input, expected);

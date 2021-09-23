@@ -1,6 +1,6 @@
 package com.meti;
 
-public class Declaration {
+public class Declaration implements Node {
     private final Flag flag;
 
     private final String name;
@@ -14,11 +14,13 @@ public class Declaration {
         this.flag = flag;
     }
 
-    String renderMagma() {
+    @Override
+    public String renderMagma() {
         return flag.name().toLowerCase() + " " + name + " : " + type.renderMagma() + " = " + value + ";";
     }
 
-    String renderNative() {
+    @Override
+    public String renderNative() {
         return type.renderNative() + " " + name + "=" + value + ";";
     }
 
