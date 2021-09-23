@@ -10,25 +10,35 @@ public class Compiler {
     }
 
     String compile() throws ApplicationException {
-        if (input.isBlank()) {
-            return "";
-        } else if (input.startsWith(CONST_PREFIX) || input.startsWith(LET_PREFIX)) {
-            var typeSeparator = input.indexOf(':');
-            var prefix = input.startsWith(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
-            var name = slice(typeSeparator, prefix.length());
-            var valueSeparator = input.indexOf("=");
-            var value = slice(input.length() - 1, valueSeparator + 1);
+        var lines = input.split(";");
+        var builder = new StringBuilder();
+        for (String line : lines) {
+            var input = new Input(line);
 
-            var typeString = slice(valueSeparator, typeSeparator + 1);
-            var type = new Resolver(typeString).resolve();
+            if (input.isEmpty()) {
+                return "";
+            }
 
-            return new Declaration(name, Declaration.Flag.valueOf("const".toUpperCase()), type, value).renderNative();
-        } else {
-            throw new ApplicationException("Invalid input:" + input);
+            var node = compileNode(line, input);
+            builder.append(node.renderNative());
         }
+        return builder.toString();
     }
 
-    private String slice(int typeSeparator, int length) {
-        return input.substring(length, typeSeparator).trim();
+    private Declaration compileNode(String line, Input input) throws ApplicationException {
+        if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
+            var typeSeparator = input.firstIndexOfChar(':');
+            var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
+            var name = input.slice(prefix.length(), typeSeparator);
+            var valueSeparator = input.firstIndexOfChar('=');
+            var value = input.slice(valueSeparator + 1, input.length());
+
+            var typeString = input.slice(typeSeparator + 1, valueSeparator);
+            var type = new Resolver(typeString).resolve();
+
+            return new Declaration(name, Declaration.Flag.CONST, type, value);
+        } else {
+            throw new ApplicationException("Invalid line:" + line);
+        }
     }
 }
