@@ -7,6 +7,10 @@ public class Compiler {
         this.input = input;
     }
 
+    static String renderDeclaration(String name, PrimitiveType type) {
+        return Compiler.renderDeclaration(name, type.renderNative());
+    }
+
     String compile() throws ApplicationException {
         if (input.isBlank()) {
             return "";
