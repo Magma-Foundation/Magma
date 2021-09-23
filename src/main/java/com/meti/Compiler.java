@@ -86,7 +86,8 @@ public class Compiler {
                 new DeclarationLexer(input),
                 new AssignmentLexer(input),
                 new BooleanLexer(input),
-                new IfLexer(input))
+                new IfLexer(input),
+                new BlockLexer(input))
                 .stream()
                 .map(Lexer::lex)
                 .flatMap(value -> value.map(Stream::of).orElse(Stream.empty()))
