@@ -19,7 +19,16 @@ public class ApplicationTest {
 
     @Test
     void declaration() throws IOException {
-        assertContains(Target, "const x : I16 = 420;", new Function("\tint x=420;\n").render());
+        declare("x");
+    }
+
+    private void declare(final String test) throws IOException {
+        assertContains(Target, "const " + test + " : I16 = 420;", new Function("\tint " + test + "=420;\n").render());
+    }
+
+    @Test
+    void declaration_name() throws IOException {
+        declare("test");
     }
 
     private void assertContains(Path path, String input, String output) throws IOException {
