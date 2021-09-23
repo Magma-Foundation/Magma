@@ -8,14 +8,10 @@ public class Compiler {
     }
 
     String compile() throws ApplicationException {
-        if (getInput().equals("const x : I16 = 420;")) {
+        if (input.equals("const x : I16 = 420;")) {
             return "\tint x=420;\n";
         } else {
-            throw new ApplicationException("Invalid input:" + getInput());
+            throw new ApplicationException("Invalid input:" + input);
         }
-    }
-
-    public String getInput() {
-        return input;
     }
 }
