@@ -22,24 +22,24 @@ public class ApplicationTest {
         declare("x", "I16", "int");
     }
 
-    private void declare(final String name, final String magmaType, final String nativeType) throws IOException {
-        assertContains(Target, "const " + name + " : " + magmaType + " = 420;", new Function("\t" + nativeType + " " + name + "=420;\n").render());
-    }
-
     @Test
     void declaration_name() throws IOException {
         declare("test", "I16", "int");
-    }
-
-    @Test
-    void declaration_type() throws IOException {
-        declare("x", "U16", "unsigned int");
     }
 
     private void assertContains(Path path, String input, String output) throws IOException {
         runWithSource(input);
         var actual = Files.readString(path);
         assertEquals(output, actual);
+    }
+
+    private void declare(final String name, final String magmaType, final String nativeType) throws IOException {
+        assertContains(Target, "const " + name + " : " + magmaType + " = 420;", new Function(Compiler.renderDeclaration(name, nativeType)).render());
+    }
+
+    @Test
+    void declaration_type() throws IOException {
+        declare("x", "U16", "unsigned int");
     }
 
     @Test

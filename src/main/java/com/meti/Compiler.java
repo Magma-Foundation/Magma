@@ -15,10 +15,14 @@ public class Compiler {
             var name = input.substring("const ".length(), typeSeparator).trim();
             var typeString = input.substring(typeSeparator + 1, input.indexOf("=")).trim();
             var type = resolveTypeName(typeString);
-            return "\t" + type + " " + name + "=420;\n";
+            return renderDeclaration(name, type);
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }
+    }
+
+    static String renderDeclaration(String name, String type) {
+        return "\t" + type + " " + name + "=420;\n";
     }
 
     private String resolveTypeName(String typeString) throws ApplicationException {
