@@ -79,7 +79,8 @@ public class Compiler {
         return List.of(
                 new DeclarationLexer(input),
                 new AssignmentLexer(input),
-                new BooleanLexer(input))
+                new BooleanLexer(input),
+                new IfLexer(input))
                 .stream()
                 .map(Lexer::lex)
                 .flatMap(value -> value.map(Stream::of).orElse(Stream.empty()))
