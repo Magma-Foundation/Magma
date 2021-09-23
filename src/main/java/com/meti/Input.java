@@ -7,6 +7,10 @@ public class Input {
         this.value = value.trim();
     }
 
+    public String compute() {
+        return value;
+    }
+
     public boolean contains(String target) {
         return value.equals(target);
     }

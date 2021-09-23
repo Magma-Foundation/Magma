@@ -17,6 +17,10 @@ public interface Node {
 
     Stream<Node> streamTypes();
 
+    Stream<Node> streamNodes();
+
+    Node withNode(Node node);
+
     Node withType(Node type);
 
     enum Group {

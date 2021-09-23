@@ -28,8 +28,18 @@ public class Content implements Node {
     }
 
     @Override
+    public Stream<Node> streamNodes() {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<Node> streamTypes() {
         return Stream.empty();
+    }
+
+    @Override
+    public Node withNode(Node node) {
+        return this;
     }
 
     @Override

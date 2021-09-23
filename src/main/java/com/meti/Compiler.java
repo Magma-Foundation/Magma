@@ -65,17 +65,23 @@ public class Compiler {
     }
 
     private Node compileLine(String line, Input input) throws ApplicationException {
-        var node = compileNode(line, input);
-        for (Node type : node.streamTypes().collect(Collectors.toList())) {
+        var parent = compileNode(input);
+        for (Node type : parent.streamTypes().collect(Collectors.toList())) {
             if (type.group() == Node.Group.Content) {
                 var resolver = new Resolver(type.apply(Attribute.Type.Value).asString());
-                node = node.withType(resolver.resolve());
+                parent = parent.withType(resolver.resolve());
             }
         }
-        return node;
+        for (Node oldChild : parent.streamNodes().collect(Collectors.toList())) {
+            if (oldChild.group() == Node.Group.Content) {
+                var newChild = compileNode(new Input(oldChild.apply(Attribute.Type.Value).asString()));
+                parent = parent.withNode(newChild);
+            }
+        }
+        return parent;
     }
 
-    private Node compileNode(String line, Input input) throws ApplicationException {
+    private Node compileNode(Input input) throws ApplicationException {
         return List.of(
                 new DeclarationLexer(input),
                 new AssignmentLexer(input),
@@ -87,7 +93,7 @@ public class Compiler {
                 .findFirst()
                 .orElseThrow(() -> {
                     var format = "Invalid input: '%s'";
-                    var message = format.formatted(line);
+                    var message = format.formatted(input.compute());
                     return new ApplicationException(message);
                 });
     }

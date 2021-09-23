@@ -14,8 +14,11 @@ public class IfLexer implements Lexer {
 
     @Override
     public Option<Node> lex() {
-        if (input.contains("if(true){}")) {
-            return new Some<>(new IfNode());
+        if (input.startsWithString("if(")) {
+            var paramStart = input.firstIndexOfChar('(');
+            var paramEnd = input.firstIndexOfChar(')');
+            var condition = new Content(input.slice(paramStart + 1, paramEnd));
+            return new Some<>(new IfNode(condition));
         } else {
             return new None<>();
         }
