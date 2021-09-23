@@ -76,6 +76,11 @@ public class Compiler {
     private Node compileNode(String line, Input input) throws ApplicationException {
         return new DeclarationLexer(input).lex()
                 .or(new AssignmentLexer(input).lex())
-                .orElseThrow(() -> new ApplicationException("Invalid line:" + line));
+                .or(new BooleanLexer(input).lex())
+                .orElseThrow(() -> {
+                    var format = "Invalid input: '%s'";
+                    var message = format.formatted(line);
+                    return new ApplicationException(message);
+                });
     }
 }
