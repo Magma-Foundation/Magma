@@ -18,32 +18,18 @@ public class ApplicationTest {
     private static final Path Target = Source.resolveSibling(Package + ".c");
 
     @Test
-    void target_header_content() throws IOException {
-        assertContains(Header, "");
+    void declaration() throws IOException {
+        assertContains(Target, "const x : I16 = 420;", Application.renderMain("\tint x=420;\n"));
     }
 
-    private void assertContains(Path path, String expected) throws IOException {
-        runWithSource();
+    private void assertContains(Path path, String input, String output) throws IOException {
+        runWithSource(input);
         var actual = Files.readString(path);
-        assertEquals(expected, actual);
+        assertEquals(output, actual);
     }
 
-    @Test
-    void target_source_content() throws IOException {
-        assertContains(Target, "int main(){\n\treturn 0;\n}\n");
-    }
-
-    @Test
-    void generated() throws IOException {
-        assertTrue(runPresent());
-    }
-
-    private boolean runPresent() throws IOException {
-        return runWithSource().isPresent();
-    }
-
-    private Option<TargetSet> runWithSource() throws IOException {
-        Files.createFile(Source);
+    private Option<TargetSet> runWithSource(String input) throws IOException {
+        Files.writeString(Source, input);
         return runApplication();
     }
 
@@ -52,17 +38,30 @@ public class ApplicationTest {
     }
 
     @Test
+    void generated() throws IOException {
+        assertTrue(runPresent());
+    }
+
+    @Test
     void generated_header() throws IOException {
-        assertEquals(runWithSource()
+        assertEquals(runWithEmptySource()
                 .map(TargetSet::getHeader)
                 .orElse(Target), Header);
     }
 
     @Test
     void generated_target() throws IOException {
-        assertEquals(runWithSource()
+        assertEquals(runWithEmptySource()
                 .map(TargetSet::getTarget)
                 .orElse(Header), Target);
+    }
+
+    private boolean runPresent() throws IOException {
+        return runWithEmptySource().isPresent();
+    }
+
+    private Option<TargetSet> runWithEmptySource() throws IOException {
+        return runWithSource("");
     }
 
     @Test
@@ -80,6 +79,16 @@ public class ApplicationTest {
     @Test
     void not_generated() throws IOException {
         assertFalse(runApplication().isPresent());
+    }
+
+    @Test
+    void target_header_content() throws IOException {
+        assertContains(Header, "", "");
+    }
+
+    @Test
+    void target_source_content() throws IOException {
+        assertContains(Target, "", Application.renderMain(""));
     }
 
     @AfterEach
