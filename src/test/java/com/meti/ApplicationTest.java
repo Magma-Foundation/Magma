@@ -19,7 +19,7 @@ public class ApplicationTest {
 
     @Test
     void declaration() throws IOException {
-        assertContains(Target, "const x : I16 = 420;", Application.renderMain("\tint x=420;\n"));
+        assertContains(Target, "const x : I16 = 420;", new Function("\tint x=420;\n").render());
     }
 
     private void assertContains(Path path, String input, String output) throws IOException {
@@ -101,7 +101,7 @@ public class ApplicationTest {
 
     @Test
     void target_source_content() throws IOException {
-        assertContains(Target, "", Application.renderMain(""));
+        assertContains(Target, "", new Function("").render());
     }
 
     @AfterEach
