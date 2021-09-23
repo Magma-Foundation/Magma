@@ -17,13 +17,18 @@ public class Declaration implements Node {
     }
 
     @Override
+    public Node getType() {
+        return type;
+    }
+
+    @Override
     public String getValue() {
-        throw new UnsupportedOperationException();
+        return value;
     }
 
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Declaration;
     }
 
     @Override

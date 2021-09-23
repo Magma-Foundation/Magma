@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -11,13 +12,39 @@ public class Compiler {
 
     String compile() throws ApplicationException {
         var lines = input.split(";");
-        var builder = new StringBuilder();
+        var inputAST = new ArrayList<Node>();
         for (String line : lines) {
             if (!line.isBlank()) {
                 var input = new Input(line);
                 var node = compileLine(line, input);
-                builder.append(node.renderNative());
+                inputAST.add(node);
             }
+        }
+
+        var outputAST = new ArrayList<Node>();
+        for (Node node : inputAST) {
+            if (node.group() == Node.Group.Declaration) {
+                if (node.getType().group() == Node.Group.Implicit) {
+                    var value = node.getValue();
+                    Node type;
+                    try {
+                        Integer.parseInt(value);
+                        type = PrimitiveType.I16;
+                    } catch (NumberFormatException e) {
+                        throw new ApplicationException("Unknown type of node: " + value);
+                    }
+                    outputAST.add(node.withType(type));
+                } else {
+                    outputAST.add(node);
+                }
+            } else {
+                outputAST.add(node);
+            }
+        }
+
+        var builder = new StringBuilder();
+        for (Node node : outputAST) {
+            builder.append(node.renderNative());
         }
         return builder.toString();
     }

@@ -9,6 +9,11 @@ public class ImplicitType implements Node {
     }
 
     @Override
+    public Node getType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getValue() {
         throw new UnsupportedOperationException();
     }

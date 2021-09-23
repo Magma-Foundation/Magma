@@ -10,6 +10,11 @@ public class Content implements Node {
     }
 
     @Override
+    public Node getType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getValue() {
         return value;
     }

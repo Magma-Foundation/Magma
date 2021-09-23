@@ -3,6 +3,8 @@ package com.meti;
 import java.util.stream.Stream;
 
 public interface Node {
+    Node getType();
+
     String getValue();
 
     Group group();
@@ -13,7 +15,7 @@ public interface Node {
 
     enum Group {
         Content,
-        Implicit, Primitive
+        Implicit, Declaration, Assignment, Primitive
     }
 
     String renderMagma();

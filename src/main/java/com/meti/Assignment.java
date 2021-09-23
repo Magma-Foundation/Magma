@@ -12,13 +12,18 @@ public class Assignment implements Node {
     }
 
     @Override
+    public Node getType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getValue() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Assignment;
     }
 
     @Override

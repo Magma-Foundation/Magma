@@ -15,13 +15,18 @@ public enum PrimitiveType implements Node {
     }
 
     @Override
+    public Node getType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getValue() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Primitive;
     }
 
     @Override
