@@ -13,7 +13,7 @@ public class Application {
 
     Option<TargetSet> run() throws IOException, ApplicationException {
         if (Files.exists(source)) {
-            var output = compileOutput();
+            var output = compileOutput().replace(";", ";\n\t");
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var packageName = fileName.substring(0, separator);

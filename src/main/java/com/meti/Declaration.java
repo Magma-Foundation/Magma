@@ -18,12 +18,12 @@ public class Declaration {
         return flag.name().toLowerCase() + " " + name + " : " + type.renderMagma() + " = " + value + ";";
     }
 
+    String renderNative() {
+        return type.renderNative() + " " + name + "=" + value + ";";
+    }
+
     enum Flag {
         CONST,
         LET
-    }
-
-    String renderNative() {
-        return "\t" + type.renderNative() + " " + name + "=" + value + ";\n";
     }
 }
