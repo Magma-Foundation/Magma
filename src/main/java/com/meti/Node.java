@@ -18,7 +18,10 @@ public interface Node {
     Node withType(Node type);
 
     enum Group {
+        Assignment,
+        Declaration,
         Content,
-        Implicit, Declaration, Assignment, Primitive
+        Implicit,
+        Primitive
     }
 }
