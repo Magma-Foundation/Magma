@@ -1,6 +1,8 @@
 package com.meti;
 
 public class Compiler {
+    private static final String CONST_PREFIX = "const ";
+    private static final String LET_PREFIX = "let ";
     private final String input;
 
     public Compiler(String input) {
@@ -10,18 +12,23 @@ public class Compiler {
     String compile() throws ApplicationException {
         if (input.isBlank()) {
             return "";
-        } else if (input.startsWith("const ")) {
+        } else if (input.startsWith(CONST_PREFIX) || input.startsWith(LET_PREFIX)) {
             var typeSeparator = input.indexOf(':');
-            var name = input.substring("const ".length(), typeSeparator).trim();
+            var prefix = input.startsWith(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
+            var name = slice(typeSeparator, prefix.length());
             var valueSeparator = input.indexOf("=");
-            var value = input.substring(valueSeparator + 1, input.length() - 1).trim();
+            var value = slice(input.length() - 1, valueSeparator + 1);
 
-            var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
+            var typeString = slice(valueSeparator, typeSeparator + 1);
             var type = new Resolver(typeString).resolve();
 
             return new Declaration(name, Declaration.Flag.valueOf("const".toUpperCase()), type, value).renderNative();
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }
+    }
+
+    private String slice(int typeSeparator, int length) {
+        return input.substring(length, typeSeparator).trim();
     }
 }

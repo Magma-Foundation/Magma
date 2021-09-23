@@ -37,6 +37,6 @@ public class DeclarationFeatureTest {
 
     @Test
     void flag() {
-        declare(new Declaration("x", Declaration.Flag.CONST, PrimitiveType.I16, "420"));
+        declare(new Declaration("x", Declaration.Flag.LET, PrimitiveType.I16, "420"));
     }
 }
