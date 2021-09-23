@@ -15,29 +15,33 @@ public class Application {
         if (Files.exists(source)) {
             var input = Files.readString(source);
 
-            String more;
-            if (input.equals("const x : I16 = 420;")) {
-                more = "\tint x=420;\n";
-            } else {
-                throw new ApplicationException("Invalid input:" + input);
-            }
-
+            var output = compile(input);
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var packageName = fileName.substring(0, separator);
             var header = create(packageName + ".h", "");
-            var target = create(packageName + ".c", renderMain(more));
+            var target = create(packageName + ".c", renderMain(output));
             return new Some<>(new TargetSet(header, target));
         } else {
             return new None<>();
         }
     }
 
-    static String renderMain(final String more) {
-        return "int main(){\n" + more + "\treturn 0;\n}\n";
+    private String compile(String input) throws ApplicationException {
+        String more;
+        if (input.equals("const x : I16 = 420;")) {
+            more = "\tint x=420;\n";
+        } else {
+            throw new ApplicationException("Invalid input:" + input);
+        }
+        return more;
     }
 
     private Path create(String name, String output) throws IOException {
         return Files.writeString(source.resolveSibling(name), output);
+    }
+
+    static String renderMain(final String more) {
+        return "int main(){\n" + more + "\treturn 0;\n}\n";
     }
 }
