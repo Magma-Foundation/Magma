@@ -14,7 +14,7 @@ public class DeclarationFeatureTest {
     private void declare(Declaration node) {
         try {
             var output = new Compiler(node.renderMagma()).compile();
-            assertEquals(new Function(node.renderNative()).render(), output);
+            assertEquals(node.renderNative(), output);
         } catch (ApplicationException e) {
             fail(e);
         }
