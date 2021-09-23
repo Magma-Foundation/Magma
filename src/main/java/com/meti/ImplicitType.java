@@ -10,31 +10,31 @@ public class ImplicitType implements Node {
 
     @Override
     public String getValue() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Group group() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Stream<Node> streamTypes() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Node withType(Node type) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String renderMagma() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String renderNative() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
