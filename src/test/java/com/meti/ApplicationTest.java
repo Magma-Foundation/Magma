@@ -19,7 +19,7 @@ public class ApplicationTest {
 
     @Test
     void declaration() throws IOException {
-        declare(new Declaration("x", PrimitiveType.I16));
+        declare(new Declaration("x", PrimitiveType.I16, "420"));
     }
 
     private void declare(Declaration node) throws IOException {
@@ -34,17 +34,17 @@ public class ApplicationTest {
 
     @Test
     void declaration_name() throws IOException {
-        declare(new Declaration("test", PrimitiveType.I16));
+        declare(new Declaration("test", PrimitiveType.I16, "420"));
     }
 
     @Test
     void declaration_type() throws IOException {
-        declare(new Declaration("x", PrimitiveType.U16));
+        declare(new Declaration("x", PrimitiveType.U16, "420"));
     }
 
     @Test
     void declaration_value() throws IOException {
-        declare(new Declaration("x", PrimitiveType.U16));
+        declare(new Declaration("x", PrimitiveType.U16, "69"));
     }
 
     @Test
