@@ -11,7 +11,7 @@ public class Application {
         this.source = source;
     }
 
-    Option<TargetSet> run() throws IOException {
+    Option<TargetSet> run() throws IOException, ApplicationException {
         if (Files.exists(source)) {
             var input = Files.readString(source);
 
@@ -19,7 +19,7 @@ public class Application {
             if (input.equals("const x : I16 = 420;")) {
                 more = "\tint x=420;\n";
             } else {
-                more = "";
+                throw new ApplicationException("Invalid input:" + input);
             }
 
             var fileName = source.getFileName().toString();

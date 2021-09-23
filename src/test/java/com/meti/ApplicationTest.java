@@ -28,18 +28,30 @@ public class ApplicationTest {
         assertEquals(output, actual);
     }
 
-    private Option<TargetSet> runWithSource(String input) throws IOException {
-        Files.writeString(Source, input);
-        return runApplication();
+    @Test
+    void invalid() {
+        assertThrows(ApplicationException.class, () -> {
+            Files.writeString(Source, "test");
+            runApplication();
+        });
     }
 
-    private Option<TargetSet> runApplication() throws IOException {
-        return new Application(ApplicationTest.Source).run();
+    @Test
+    void not_generated() throws IOException, ApplicationException {
+        assertFalse(runApplication().isPresent());
     }
 
     @Test
     void generated() throws IOException {
         assertTrue(runPresent());
+    }
+
+    private boolean runPresent() throws IOException {
+        return runWithEmptySource().isPresent();
+    }
+
+    private Option<TargetSet> runWithEmptySource() throws IOException {
+        return runWithSource("");
     }
 
     @Test
@@ -56,14 +68,6 @@ public class ApplicationTest {
                 .orElse(Header), Target);
     }
 
-    private boolean runPresent() throws IOException {
-        return runWithEmptySource().isPresent();
-    }
-
-    private Option<TargetSet> runWithEmptySource() throws IOException {
-        return runWithSource("");
-    }
-
     @Test
     void generated_target_header() throws IOException {
         runPresent();
@@ -76,9 +80,18 @@ public class ApplicationTest {
         assertTrue(Files.exists(Target));
     }
 
-    @Test
-    void not_generated() throws IOException {
-        assertFalse(runApplication().isPresent());
+    private Option<TargetSet> runWithSource(String input) throws IOException {
+        Files.writeString(Source, input);
+        try {
+            return runApplication();
+        } catch (ApplicationException e) {
+            fail(e);
+            return new None<>();
+        }
+    }
+
+    private Option<TargetSet> runApplication() throws IOException, ApplicationException {
+        return new Application(ApplicationTest.Source).run();
     }
 
     @Test

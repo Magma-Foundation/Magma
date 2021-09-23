@@ -25,7 +25,7 @@ public class OtherApplicationTest {
     }
 
     @Test
-    void test() throws IOException {
+    void test() throws IOException, ApplicationException {
         Files.createFile(Source);
         var target = new Application(Source).run()
                 .map(TargetSet::getTarget)
