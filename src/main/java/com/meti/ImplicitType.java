@@ -9,17 +9,7 @@ public class ImplicitType implements Node {
     }
 
     @Override
-    public String getName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getValue() {
+    public Attribute apply(Attribute.Type type) {
         throw new UnsupportedOperationException();
     }
 
@@ -34,16 +24,6 @@ public class ImplicitType implements Node {
     }
 
     @Override
-    public Stream<Node> streamTypes() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node withType(Node type) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String renderMagma() {
         throw new UnsupportedOperationException();
     }
@@ -51,5 +31,15 @@ public class ImplicitType implements Node {
     @Override
     public String renderNative() {
         throw new UnsupportedOperationException("Implicit types can't be rendered. Did the compiler remove this type?");
+    }
+
+    @Override
+    public Stream<Node> streamTypes() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Node withType(Node type) {
+        throw new UnsupportedOperationException();
     }
 }

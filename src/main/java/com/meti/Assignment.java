@@ -12,18 +12,12 @@ public class Assignment implements Node {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Node getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getValue() {
-        throw new UnsupportedOperationException();
+    public Attribute apply(Attribute.Type type) throws ApplicationException {
+        return switch (type) {
+            case Name -> new StringAttribute(name);
+            case Value -> new StringAttribute(value);
+            default -> throw new ApplicationException();
+        };
     }
 
     @Override

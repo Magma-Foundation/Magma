@@ -3,15 +3,15 @@ package com.meti;
 import java.util.stream.Stream;
 
 public interface Node {
-    String getName();
-
-    Node getType();
-
-    String getValue();
+    Attribute apply(Attribute.Type type) throws ApplicationException;
 
     Group group();
 
     boolean isFlagged(Declaration.Flag flag);
+
+    String renderMagma();
+
+    String renderNative();
 
     Stream<Node> streamTypes();
 
@@ -21,8 +21,4 @@ public interface Node {
         Content,
         Implicit, Declaration, Assignment, Primitive
     }
-
-    String renderMagma();
-
-    String renderNative();
 }

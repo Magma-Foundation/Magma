@@ -17,18 +17,12 @@ public class Declaration implements Node {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Node getType() {
-        return type;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
+    public Attribute apply(Attribute.Type type) {
+        return switch (type) {
+            case Name -> new StringAttribute(name);
+            case Type -> new NodeAttribute(this.type);
+            case Value -> new StringAttribute(value);
+        };
     }
 
     @Override

@@ -15,17 +15,7 @@ public enum PrimitiveType implements Node {
     }
 
     @Override
-    public String getName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getValue() {
+    public Attribute apply(Attribute.Type type) {
         throw new UnsupportedOperationException();
     }
 

@@ -10,18 +10,9 @@ public class Content implements Node {
     }
 
     @Override
-    public String getName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Node getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getValue() {
-        return value;
+    public Attribute apply(Attribute.Type type) throws ApplicationException {
+        if (type == Attribute.Type.Value) return new StringAttribute(value);
+        else throw new ApplicationException();
     }
 
     @Override

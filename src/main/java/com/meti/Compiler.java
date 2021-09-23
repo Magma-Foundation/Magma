@@ -26,8 +26,8 @@ public class Compiler {
         for (Node node : inputAST) {
             if (node.group() == Node.Group.Declaration) {
                 scope.add(node);
-                if (node.getType().group() == Node.Group.Implicit) {
-                    var value = node.getValue();
+                if (node.apply(Attribute.Type.Type).asNode().group() == Node.Group.Implicit) {
+                    var value = node.apply(Attribute.Type.Value).asString();
                     Node type;
                     try {
                         Integer.parseInt(value);
@@ -41,9 +41,9 @@ public class Compiler {
                 }
             } else if (node.group() == Node.Group.Assignment) {
                 for (Node node1 : scope) {
-                    if (node1.getName().equals(node.getName())) {
+                    if (node1.apply(Attribute.Type.Name).asString().equals(node.apply(Attribute.Type.Name).asString())) {
                         if (node1.isFlagged(Declaration.Flag.CONST)) {
-                            throw new ApplicationException(node1.getName() + " is constant and cannot be reassigned.");
+                            throw new ApplicationException(node1.apply(Attribute.Type.Name).asString() + " is constant and cannot be reassigned.");
                         }
                     }
                 }
@@ -64,7 +64,7 @@ public class Compiler {
         var node = compileNode(line, input);
         for (Node type : node.streamTypes().collect(Collectors.toList())) {
             if (type.group() == Node.Group.Content) {
-                var resolver = new Resolver(type.getValue());
+                var resolver = new Resolver(type.apply(Attribute.Type.Value).asString());
                 node = node.withType(resolver.resolve());
             }
         }
