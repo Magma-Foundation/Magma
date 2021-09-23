@@ -8,8 +8,10 @@ public class AssignmentFeatureTest extends FeatureTest {
         assertAssignment("x", "69");
     }
 
-    private void assertAssignment(final String name, final String value) {
-        assertCompile("let " + name + " : I16 = 420;" + name + " = " + value + ";", "int " + name + "=420;" + name + "=" + value + ";");
+    private void assertAssignment(String name, String value) {
+        var assignment = new Assignment(name, value);
+        assertCompile("let " + name + " : I16 = 420;" + assignment.renderMagma(),
+                "int " + name + "=420;" + assignment.renderNative());
     }
 
     @Test

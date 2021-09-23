@@ -11,7 +11,7 @@ public class Assignment implements Node {
 
     @Override
     public String renderMagma() {
-        throw new UnsupportedOperationException();
+        return name + " = " + value + ";";
     }
 
     @Override
