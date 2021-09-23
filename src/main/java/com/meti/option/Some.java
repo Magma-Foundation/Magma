@@ -17,7 +17,7 @@ public class Some<T> implements Option<T> {
 
     @Override
     public Option<T> or(Option<T> other) {
-        throw new UnsupportedOperationException();
+        return this;
     }
 
     @Override
@@ -32,6 +32,6 @@ public class Some<T> implements Option<T> {
 
     @Override
     public <E extends Exception> T orElseThrow(Supplier<E> supplier) {
-        throw new UnsupportedOperationException();
+        return value;
     }
 }

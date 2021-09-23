@@ -11,7 +11,7 @@ public class None<T> implements Option<T> {
 
     @Override
     public Option<T> or(Option<T> other) {
-        throw new UnsupportedOperationException();
+        return other;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class None<T> implements Option<T> {
     }
 
     @Override
-    public <E extends Exception> T orElseThrow(Supplier<E> supplier) {
-        throw new UnsupportedOperationException();
+    public <E extends Exception> T orElseThrow(Supplier<E> supplier) throws E {
+        throw supplier.get();
     }
 }
