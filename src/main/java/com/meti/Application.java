@@ -13,9 +13,7 @@ public class Application {
 
     Option<TargetSet> run() throws IOException, ApplicationException {
         if (Files.exists(source)) {
-            var input = Files.readString(source);
-            var output = new Compiler(input).compile();
-
+            var output = compileOutput();
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var packageName = fileName.substring(0, separator);
@@ -25,6 +23,11 @@ public class Application {
         } else {
             return new None<>();
         }
+    }
+
+    private String compileOutput() throws IOException, ApplicationException {
+        var input = Files.readString(source);
+        return new Compiler(input).compile();
     }
 
     private Path create(String name, String output) throws IOException {
