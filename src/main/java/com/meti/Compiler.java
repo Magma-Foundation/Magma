@@ -19,22 +19,24 @@ public class Compiler {
         var lines = input.split(";");
         var builder = new StringBuilder();
         for (String line : lines) {
-            var input = new Input(line);
-
-            if (input.isEmpty()) {
-                return "";
+            if (!line.isBlank()) {
+                var input = new Input(line);
+                var node = compileLine(line, input);
+                builder.append(node.renderNative());
             }
-
-            var node = compileNode(line, input);
-            for (Node type : node.streamTypes().collect(Collectors.toList())) {
-                if (type.group() == Node.Group.Content) {
-                    var resolver = new Resolver(type.getValue());
-                    node = node.withType(resolver.resolve());
-                }
-            }
-            builder.append(node.renderNative());
         }
         return builder.toString();
+    }
+
+    private Node compileLine(String line, Input input) throws ApplicationException {
+        var node = compileNode(line, input);
+        for (Node type : node.streamTypes().collect(Collectors.toList())) {
+            if (type.group() == Node.Group.Content) {
+                var resolver = new Resolver(type.getValue());
+                node = node.withType(resolver.resolve());
+            }
+        }
+        return node;
     }
 
     private Node compileNode(String line, Input input) throws ApplicationException {
