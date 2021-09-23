@@ -3,7 +3,9 @@ package com.meti;
 import com.meti.node.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Compiler {
     private final String input;
@@ -74,9 +76,14 @@ public class Compiler {
     }
 
     private Node compileNode(String line, Input input) throws ApplicationException {
-        return new DeclarationLexer(input).lex()
-                .or(new AssignmentLexer(input).lex())
-                .or(new BooleanLexer(input).lex())
+        return List.of(
+                new DeclarationLexer(input),
+                new AssignmentLexer(input),
+                new BooleanLexer(input))
+                .stream()
+                .map(Lexer::lex)
+                .flatMap(value -> value.map(Stream::of).orElse(Stream.empty()))
+                .findFirst()
                 .orElseThrow(() -> {
                     var format = "Invalid input: '%s'";
                     var message = format.formatted(line);
