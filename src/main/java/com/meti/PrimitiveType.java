@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.util.stream.Stream;
+
 public enum PrimitiveType implements Node {
     I16("I16", "int"),
     U16("U16", "unsigned int");
@@ -10,6 +12,11 @@ public enum PrimitiveType implements Node {
     PrimitiveType(String magmaType, String nativeType) {
         this.magmaType = magmaType;
         this.nativeType = nativeType;
+    }
+
+    @Override
+    public String getValue() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -25,5 +32,15 @@ public enum PrimitiveType implements Node {
     @Override
     public String renderNative() {
         return nativeType;
+    }
+
+    @Override
+    public Stream<Node> streamTypes() {
+        return Stream.empty();
+    }
+
+    @Override
+    public Node withType(Node type) {
+        return this;
     }
 }

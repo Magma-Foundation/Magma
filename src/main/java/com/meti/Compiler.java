@@ -4,6 +4,8 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import java.util.stream.Collectors;
+
 public class Compiler {
     private static final String CONST_PREFIX = "const ";
     private static final String LET_PREFIX = "let ";
@@ -24,6 +26,12 @@ public class Compiler {
             }
 
             var node = compileNode(line, input);
+            for (Node type : node.streamTypes().collect(Collectors.toList())) {
+                if (type.group() == Node.Group.Content) {
+                    var resolver = new Resolver(type.getValue());
+                    node = node.withType(resolver.resolve());
+                }
+            }
             builder.append(node.renderNative());
         }
         return builder.toString();
@@ -35,7 +43,7 @@ public class Compiler {
                 .orElseThrow(() -> new ApplicationException("Invalid line:" + line));
     }
 
-    private Option<Node> lexDeclaration(Input input) throws ApplicationException {
+    private Option<Node> lexDeclaration(Input input) {
         if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
             var typeSeparator = input.firstIndexOfChar(':');
             var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
@@ -44,9 +52,9 @@ public class Compiler {
             var value = input.slice(valueSeparator + 1);
 
             var typeString = input.slice(typeSeparator + 1, valueSeparator);
-            var type = new Resolver(typeString).resolve();
+            var type = new Content(typeString);
 
-            return new Some<>(new Declaration(name, Declaration.Flag.CONST, type, value));
+            return new Some<>(new Declaration(Declaration.Flag.CONST, name, type, value));
         } else {
             return new None<>();
         }

@@ -9,7 +9,7 @@ public class AssignmentFeatureTest extends FeatureTest {
     }
 
     private void assertAssignment(String name, String value) {
-        var declaration = new Declaration(name, Declaration.Flag.LET, PrimitiveType.I16, value);
+        var declaration = new Declaration(Declaration.Flag.LET, name, PrimitiveType.I16, value);
         var assignment = new Assignment(name, value);
         assertCompile(declaration.renderMagma() + assignment.renderMagma(),
                 declaration.renderNative() + assignment.renderNative());
