@@ -1,6 +1,6 @@
 package com.meti;
 
-public enum PrimitiveType {
+public enum PrimitiveType implements Node {
     I16("I16", "int"),
     U16("U16", "unsigned int");
 
@@ -12,10 +12,12 @@ public enum PrimitiveType {
         this.nativeType = nativeType;
     }
 
+    @Override
     public String renderMagma() {
         return magmaType;
     }
 
+    @Override
     public String renderNative() {
         return nativeType;
     }
