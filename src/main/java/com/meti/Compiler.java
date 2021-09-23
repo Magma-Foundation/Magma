@@ -7,10 +7,6 @@ public class Compiler {
         this.input = input;
     }
 
-    static String renderDeclaration(String name, PrimitiveType type) {
-        return "\t" + type.renderNative() + " " + name + "=420;\n";
-    }
-
     String compile() throws ApplicationException {
         if (input.isBlank()) {
             return "";
@@ -19,7 +15,7 @@ public class Compiler {
             var name = input.substring("const ".length(), typeSeparator).trim();
             var typeString = input.substring(typeSeparator + 1, input.indexOf("=")).trim();
             var type = resolveTypeName(typeString);
-            return renderDeclaration(name, type);
+            return new Declaration(name, type).render();
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }

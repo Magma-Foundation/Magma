@@ -23,7 +23,7 @@ public class ApplicationTest {
     }
 
     private void declare(final String name, PrimitiveType type) throws IOException {
-        assertContains(Target, "const " + name + " : " + type.renderMagma() + " = 420;", new Function(Compiler.renderDeclaration(name, type)).render());
+        assertContains(Target, "const " + name + " : " + type.renderMagma() + " = 420;", new Function(new Declaration(name, type).render()).render());
     }
 
     private void assertContains(Path path, String input, String output) throws IOException {
