@@ -14,18 +14,10 @@ public class Compiler {
             var typeSeparator = input.indexOf(':');
             var name = input.substring("const ".length(), typeSeparator).trim();
             var typeString = input.substring(typeSeparator + 1, input.indexOf("=")).trim();
-            var type = resolveTypeName(typeString);
+            var type = new Resolver(typeString).resolve();
             return new Declaration(name, type).render();
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }
-    }
-
-    private PrimitiveType resolveTypeName(String typeString) throws ApplicationException {
-        return switch (typeString) {
-            case "I16" -> PrimitiveType.I16;
-            case "U16" -> PrimitiveType.U16;
-            default -> throw new ApplicationException("Invalid type: " + typeString);
-        };
     }
 }
