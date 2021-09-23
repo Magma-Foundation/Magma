@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public class Compiler {
     private static final String CONST_PREFIX = "const ";
     private static final String LET_PREFIX = "let ";
@@ -26,6 +30,12 @@ public class Compiler {
     }
 
     private Node compileNode(String line, Input input) throws ApplicationException {
+        return lexDeclaration(input)
+                .or(lexAssignment(input))
+                .orElseThrow(() -> new ApplicationException("Invalid line:" + line));
+    }
+
+    private Option<Node> lexDeclaration(Input input) throws ApplicationException {
         if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
             var typeSeparator = input.firstIndexOfChar(':');
             var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
@@ -36,15 +46,20 @@ public class Compiler {
             var typeString = input.slice(typeSeparator + 1, valueSeparator);
             var type = new Resolver(typeString).resolve();
 
-            return new Declaration(name, Declaration.Flag.CONST, type, value);
+            return new Some<>(new Declaration(name, Declaration.Flag.CONST, type, value));
+        } else {
+            return new None<>();
         }
+    }
+
+    private Option<Node> lexAssignment(Input input) {
         var separator = input.firstIndexOfChar('=');
-        if (separator != -1) {
+        if (separator == -1) {
+            return new None<>();
+        } else {
             var name = input.slice(0, separator);
             var value = input.slice(separator + 1);
-            return new Assignment(name, value);
-        } else {
-            throw new ApplicationException("Invalid line:" + line);
+            return new Some<>(new Assignment(name, value));
         }
     }
 }

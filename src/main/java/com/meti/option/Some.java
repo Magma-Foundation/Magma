@@ -1,6 +1,7 @@
 package com.meti.option;
 
 import com.meti.core.F1;
+import com.meti.core.Supplier;
 
 public class Some<T> implements Option<T> {
     private final T value;
@@ -15,6 +16,11 @@ public class Some<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> other) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public T orElse(T other) {
         return value;
     }
@@ -22,5 +28,10 @@ public class Some<T> implements Option<T> {
     @Override
     public boolean isPresent() {
         return true;
+    }
+
+    @Override
+    public <E extends Exception> T orElseThrow(Supplier<E> supplier) {
+        throw new UnsupportedOperationException();
     }
 }
