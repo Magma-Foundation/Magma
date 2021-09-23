@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 
 public class DeclarationFeatureTest extends FeatureTest {
     @Test
+    void no_type() {
+        assertCompile("const x = 420;", "int x=420;");
+    }
+
+    @Test
     void declaration() {
         assertDeclaration(new Declaration(Declaration.Flag.CONST, "x", PrimitiveType.I16, "420"));
     }

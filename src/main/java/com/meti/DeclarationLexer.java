@@ -4,6 +4,8 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import static com.meti.ImplicitType.ImplicitType_;
+
 public class DeclarationLexer implements Lexer {
     static final String CONST_PREFIX = "const ";
     static final String LET_PREFIX = "let ";
@@ -17,17 +19,31 @@ public class DeclarationLexer implements Lexer {
     public Option<Node> lex() {
         if (input.startsWithString(CONST_PREFIX) || input.startsWithString(LET_PREFIX)) {
             var typeSeparator = input.firstIndexOfChar(':');
-            var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
-            var name = input.slice(prefix.length(), typeSeparator);
             var valueSeparator = input.firstIndexOfChar('=');
+
+            var name = lexName(typeSeparator, valueSeparator);
+            var type = lexType(typeSeparator, valueSeparator);
             var value = input.slice(valueSeparator + 1);
 
-            var typeString = input.slice(typeSeparator + 1, valueSeparator);
-            var type = new Content(typeString);
-
-            return new Some<>(new Declaration(Declaration.Flag.CONST, name, type, value));
+            var node = new Declaration(Declaration.Flag.CONST, name, type, value);
+            return new Some<>(node);
         } else {
             return new None<>();
+        }
+    }
+
+    private String lexName(int typeSeparator, int valueSeparator) {
+        var prefix = input.startsWithString(CONST_PREFIX) ? CONST_PREFIX : LET_PREFIX;
+        var nameEnd = (typeSeparator == -1) ? valueSeparator : typeSeparator;
+        return input.slice(prefix.length(), nameEnd);
+    }
+
+    private Node lexType(int typeSeparator, int valueSeparator) {
+        if (typeSeparator == -1) {
+            return ImplicitType_;
+        } else {
+            var typeString = input.slice(typeSeparator + 1, valueSeparator);
+            return new Content(typeString);
         }
     }
 }
