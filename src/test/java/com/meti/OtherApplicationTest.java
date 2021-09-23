@@ -8,28 +8,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
-    private static final Path Root = Paths.get(".");
-    private static final String FileName = "main";
-    private static final Path Target = Root.resolve(FileName + ".c");
-    private static final Path Source = Root.resolve(FileName + ".mgs");
-    private static final Path Header = Root.resolve(FileName + ".h");
+    public static final Path Header = Paths.get(".", "main.h");
+    public static final Path Target = Paths.get(".", "main.c");
+    public static final Path Source = Paths.get(".", "main.mgs");
+
+    @Test
+    void target() throws IOException, ApplicationException {
+        Files.createFile(Source);
+        new Application(Source).run();
+        assertTrue(Files.exists(Target));
+    }
+
+    @Test
+    void no_target() throws IOException, ApplicationException {
+        new Application(Source).run();
+        assertFalse(Files.exists(Target));
+    }
 
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(Target);
-        Files.deleteIfExists(Header);
         Files.deleteIfExists(Source);
-    }
-
-    @Test
-    void test() throws IOException, ApplicationException {
-        Files.createFile(Source);
-        var target = new Application(Source).run()
-                .map(TargetSet::getTarget)
-                .orElse(Header);
-        assertEquals(Target, target);
+        Files.deleteIfExists(Header);
     }
 }
