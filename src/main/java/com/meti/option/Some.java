@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.option;
+
+import com.meti.core.F1;
 
 public class Some<T> implements Option<T> {
     private final T value;

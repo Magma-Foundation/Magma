@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

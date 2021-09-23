@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.option.Some;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
