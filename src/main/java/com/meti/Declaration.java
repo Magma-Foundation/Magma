@@ -15,6 +15,11 @@ public class Declaration implements Node {
     }
 
     @Override
+    public Group group() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String renderMagma() {
         return flag.name().toLowerCase() + " " + name + " : " + type.renderMagma() + " = " + value + ";";
     }

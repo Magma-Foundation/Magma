@@ -13,6 +13,11 @@ public enum PrimitiveType implements Node {
     }
 
     @Override
+    public Group group() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String renderMagma() {
         return magmaType;
     }

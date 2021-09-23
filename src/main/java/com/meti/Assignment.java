@@ -10,6 +10,11 @@ public class Assignment implements Node {
     }
 
     @Override
+    public Group group() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String renderMagma() {
         return name + " = " + value + ";";
     }
