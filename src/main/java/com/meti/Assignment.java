@@ -1,6 +1,12 @@
 package com.meti;
 
 public class Assignment implements Node {
+    private final String name;
+
+    public Assignment(String name) {
+        this.name = name;
+    }
+
     @Override
     public String renderMagma() {
         throw new UnsupportedOperationException();
@@ -8,6 +14,6 @@ public class Assignment implements Node {
 
     @Override
     public String renderNative() {
-        return "x=69;";
+        return name + "=69;";
     }
 }

@@ -37,8 +37,11 @@ public class Compiler {
             var type = new Resolver(typeString).resolve();
 
             return new Declaration(name, Declaration.Flag.CONST, type, value);
-        } else if (input.contains("x = 69")) {
-            return new Assignment();
+        }
+        var separator = input.firstIndexOfChar('=');
+        if (separator != -1) {
+            var name = input.slice(0, separator);
+            return new Assignment(name);
         } else {
             throw new ApplicationException("Invalid line:" + line);
         }
