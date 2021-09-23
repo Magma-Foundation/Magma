@@ -19,7 +19,7 @@ public class Compiler {
             var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
             var type = new Resolver(typeString).resolve();
 
-            return new Declaration(name, type, value).renderNative();
+            return new Declaration(name, Declaration.Flag.valueOf("const".toUpperCase()), type, value).renderNative();
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }
