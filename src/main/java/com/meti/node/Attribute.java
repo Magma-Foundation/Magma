@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.node;
+
+import com.meti.ApplicationException;
 
 public interface Attribute {
     default Node asNode() throws ApplicationException {

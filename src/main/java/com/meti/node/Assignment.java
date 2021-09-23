@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.node;
+
+import com.meti.ApplicationException;
 
 import java.util.stream.Stream;
 

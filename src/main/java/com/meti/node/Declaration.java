@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 import java.util.stream.Stream;
 
@@ -55,7 +55,7 @@ public class Declaration implements Node {
         return type.renderNative() + " " + name + "=" + value + ";";
     }
 
-    enum Flag {
+    public enum Flag {
         CONST,
         LET
     }

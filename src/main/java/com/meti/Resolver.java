@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.PrimitiveType;
+
 public class Resolver {
     private final String type;
 

@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 public class StringAttribute implements Attribute {
     private final String value;

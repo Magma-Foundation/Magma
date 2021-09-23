@@ -1,10 +1,11 @@
-package com.meti;
+package com.meti.node;
 
+import com.meti.Input;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-import static com.meti.ImplicitType.ImplicitType_;
+import static com.meti.node.ImplicitType.ImplicitType_;
 
 public class DeclarationLexer implements Lexer {
     static final String CONST_PREFIX = "const ";

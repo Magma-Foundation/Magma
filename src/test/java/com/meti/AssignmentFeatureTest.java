@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.node.Assignment;
+import com.meti.node.Declaration;
+import com.meti.node.PrimitiveType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

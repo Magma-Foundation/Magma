@@ -11,7 +11,7 @@ public class Input {
         return value.equals(target);
     }
 
-    int firstIndexOfChar(char c) {
+    public int firstIndexOfChar(char c) {
         return value.indexOf(c);
     }
 
@@ -23,15 +23,15 @@ public class Input {
         return value.length();
     }
 
-    String slice(int start) {
+    public String slice(int start) {
         return slice(start, value.length());
     }
 
-    String slice(int start, int end) {
+    public String slice(int start, int end) {
         return value.substring(start, end).trim();
     }
 
-    boolean startsWithString(String slice) {
+    public boolean startsWithString(String slice) {
         return value.startsWith(slice);
     }
 }

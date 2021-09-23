@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 public class Function {
     private final String body;
@@ -7,7 +7,7 @@ public class Function {
         this.body = body;
     }
 
-    String render() {
+    public String render() {
         return "int main(){\n" + body + "\treturn 0;\n}\n";
     }
 }

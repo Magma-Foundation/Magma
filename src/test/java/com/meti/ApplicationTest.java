@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.node.Function;
 import com.meti.option.None;
 import com.meti.option.Option;
 import org.junit.jupiter.api.AfterEach;
