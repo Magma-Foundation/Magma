@@ -2,6 +2,7 @@ package com.meti.node;
 
 import com.meti.ApplicationException;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public interface Node {
@@ -18,6 +19,10 @@ public interface Node {
     Stream<Node> streamTypes();
 
     Stream<Node> streamNodes();
+
+    Stream<Node> streamNodeGroups();
+
+    Node withNodeGroup(List<Node> children);
 
     Node withNode(Node node);
 

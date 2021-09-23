@@ -15,12 +15,13 @@ public class Compiler {
     }
 
     String compile() throws ApplicationException {
-        var lines = input.split(";");
+        var lines = new Splitter(input).split();
         var inputAST = new ArrayList<Node>();
+
         for (String line : lines) {
             if (!line.isBlank()) {
                 var input = new Input(line);
-                var node = compileLine(line, input);
+                var node = compileNodeTreeFromInput(input);
                 inputAST.add(node);
             }
         }
@@ -57,37 +58,20 @@ public class Compiler {
             }
         }
 
-        var builder = new StringBuilder();
+        var builder2 = new StringBuilder();
         for (Node node : outputAST) {
-            builder.append(node.renderNative());
+            builder2.append(node.renderNative());
         }
-        return builder.toString();
-    }
-
-    private Node compileLine(String line, Input input) throws ApplicationException {
-        var parent = compileNode(input);
-        for (Node type : parent.streamTypes().collect(Collectors.toList())) {
-            if (type.group() == Node.Group.Content) {
-                var resolver = new Resolver(type.apply(Attribute.Type.Value).asString());
-                parent = parent.withType(resolver.resolve());
-            }
-        }
-        for (Node oldChild : parent.streamNodes().collect(Collectors.toList())) {
-            if (oldChild.group() == Node.Group.Content) {
-                var newChild = compileNode(new Input(oldChild.apply(Attribute.Type.Value).asString()));
-                parent = parent.withNode(newChild);
-            }
-        }
-        return parent;
+        return builder2.toString();
     }
 
     private Node compileNode(Input input) throws ApplicationException {
         return List.of(
+                new BlockLexer(input),
                 new DeclarationLexer(input),
                 new AssignmentLexer(input),
                 new BooleanLexer(input),
-                new IfLexer(input),
-                new BlockLexer(input))
+                new IfLexer(input))
                 .stream()
                 .map(Lexer::lex)
                 .flatMap(value -> value.map(Stream::of).orElse(Stream.empty()))
@@ -97,5 +81,42 @@ public class Compiler {
                     var message = format.formatted(input.compute());
                     return new ApplicationException(message);
                 });
+    }
+
+    private Node compileNodeTreeFromInput(Input input) throws ApplicationException {
+        var parent = compileNode(input);
+        return compileNodeTreeFromRoot(parent);
+    }
+
+    private Node compileNodeTreeFromRoot(Node parent) throws ApplicationException {
+        var current = parent;
+
+        for (Node type : current.streamTypes().collect(Collectors.toList())) {
+            if (type.group() == Node.Group.Content) {
+                var resolver = new Resolver(type.apply(Attribute.Type.Value).asString());
+                current = current.withType(resolver.resolve());
+            }
+        }
+
+        for (Node oldChild : current.streamNodes().collect(Collectors.toList())) {
+            if (oldChild.group() == Node.Group.Content) {
+                var newChild = compileNodeTreeFromInput(new Input(oldChild.apply(Attribute.Type.Value).asString()));
+                current = current.withNode(newChild);
+            } else {
+                current = current.withNode(oldChild);
+            }
+        }
+
+        var newGroup = new ArrayList<Node>();
+        for (Node oldChild : current.streamNodeGroups().collect(Collectors.toList())) {
+            if (oldChild.group() == Node.Group.Content) {
+                var newChild = compileNodeTreeFromInput(new Input(oldChild.apply(Attribute.Type.Value).asString()));
+                newGroup.add(newChild);
+            } else {
+                newGroup.add(compileNodeTreeFromRoot(oldChild));
+            }
+        }
+
+        return current.withNodeGroup(newGroup);
     }
 }

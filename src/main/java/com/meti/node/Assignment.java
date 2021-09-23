@@ -2,6 +2,7 @@ package com.meti.node;
 
 import com.meti.ApplicationException;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public class Assignment implements Node {
@@ -43,6 +44,11 @@ public class Assignment implements Node {
     }
 
     @Override
+    public Stream<Node> streamNodeGroups() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Stream<Node> streamNodes() {
         return Stream.empty();
     }
@@ -54,6 +60,11 @@ public class Assignment implements Node {
 
     @Override
     public Node withNode(Node node) {
+        return this;
+    }
+
+    @Override
+    public Node withNodeGroup(List<Node> children) {
         return this;
     }
 

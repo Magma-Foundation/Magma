@@ -1,5 +1,6 @@
 package com.meti.node;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public enum PrimitiveType implements Node {
@@ -40,6 +41,11 @@ public enum PrimitiveType implements Node {
     }
 
     @Override
+    public Stream<Node> streamNodeGroups() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Stream<Node> streamNodes() {
         return Stream.empty();
     }
@@ -51,6 +57,11 @@ public enum PrimitiveType implements Node {
 
     @Override
     public Node withNode(Node node) {
+        return this;
+    }
+
+    @Override
+    public Node withNodeGroup(List<Node> children) {
         return this;
     }
 

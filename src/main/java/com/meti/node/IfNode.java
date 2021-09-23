@@ -2,6 +2,7 @@ package com.meti.node;
 
 import com.meti.ApplicationException;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public class IfNode implements Node {
@@ -37,6 +38,11 @@ public class IfNode implements Node {
     }
 
     @Override
+    public Stream<Node> streamNodeGroups() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Stream<Node> streamNodes() {
         return Stream.of(condition);
     }
@@ -49,6 +55,11 @@ public class IfNode implements Node {
     @Override
     public Node withNode(Node node) {
         return new IfNode(node);
+    }
+
+    @Override
+    public Node withNodeGroup(List<Node> children) {
+        return this;
     }
 
     @Override

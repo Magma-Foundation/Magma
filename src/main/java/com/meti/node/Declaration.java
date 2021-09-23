@@ -1,5 +1,6 @@
 package com.meti.node;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public class Declaration implements Node {
@@ -36,6 +37,11 @@ public class Declaration implements Node {
     }
 
     @Override
+    public Stream<Node> streamNodeGroups() {
+        return Stream.empty();
+    }
+
+    @Override
     public Stream<Node> streamNodes() {
         return Stream.empty();
     }
@@ -47,6 +53,11 @@ public class Declaration implements Node {
 
     @Override
     public Node withNode(Node node) {
+        return this;
+    }
+
+    @Override
+    public Node withNodeGroup(List<Node> children) {
         return this;
     }
 

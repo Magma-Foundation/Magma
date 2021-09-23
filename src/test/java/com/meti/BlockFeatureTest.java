@@ -7,4 +7,9 @@ public class BlockFeatureTest extends FeatureTest {
     void empty() {
         assertCompile("{}", "{}");
     }
+
+    @Test
+    void one() {
+        assertCompile("{const x = 420;}", "{int x=420;}");
+    }
 }
