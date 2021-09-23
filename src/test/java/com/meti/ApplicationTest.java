@@ -18,49 +18,6 @@ public class ApplicationTest {
     private static final Path Target = Source.resolveSibling(Package + ".c");
 
     @Test
-    void declaration() throws IOException {
-        declare(new Declaration("x", PrimitiveType.I16, "420"));
-    }
-
-    private void declare(Declaration node) throws IOException {
-        assertContains(Target, node.renderMagma(), new Function(node.renderNative()).render());
-    }
-
-    private void assertContains(Path path, String input, String output) throws IOException {
-        runWithSource(input);
-        var actual = Files.readString(path);
-        assertEquals(output, actual);
-    }
-
-    @Test
-    void declaration_name() throws IOException {
-        declare(new Declaration("test", PrimitiveType.I16, "420"));
-    }
-
-    @Test
-    void declaration_type() throws IOException {
-        declare(new Declaration("x", PrimitiveType.U16, "420"));
-    }
-
-    @Test
-    void declaration_value() throws IOException {
-        declare(new Declaration("x", PrimitiveType.U16, "69"));
-    }
-
-    @Test
-    void invalid() {
-        assertThrows(ApplicationException.class, () -> {
-            Files.writeString(Source, "test");
-            runApplication();
-        });
-    }
-
-    @Test
-    void not_generated() throws IOException, ApplicationException {
-        assertFalse(runApplication().isPresent());
-    }
-
-    @Test
     void generated() throws IOException {
         assertTrue(runPresent());
     }
@@ -71,6 +28,22 @@ public class ApplicationTest {
 
     private Option<TargetSet> runWithEmptySource() throws IOException {
         return runWithSource("");
+    }
+
+    private void assertContains(Path path, String input, String output) throws IOException {
+        runWithSource(input);
+        var actual = Files.readString(path);
+        assertEquals(output, actual);
+    }
+
+    private Option<TargetSet> runWithSource(String input) throws IOException {
+        Files.writeString(Source, input);
+        try {
+            return runApplication();
+        } catch (ApplicationException e) {
+            fail(e);
+            return new None<>();
+        }
     }
 
     @Test
@@ -99,14 +72,12 @@ public class ApplicationTest {
         assertTrue(Files.exists(Target));
     }
 
-    private Option<TargetSet> runWithSource(String input) throws IOException {
-        Files.writeString(Source, input);
-        try {
-            return runApplication();
-        } catch (ApplicationException e) {
-            fail(e);
-            return new None<>();
-        }
+    @Test
+    void invalid() {
+        assertThrows(ApplicationException.class, () -> {
+            Files.writeString(Source, "test");
+            runApplication();
+        });
     }
 
     private Option<TargetSet> runApplication() throws IOException, ApplicationException {
@@ -116,6 +87,11 @@ public class ApplicationTest {
     @Test
     void target_header_content() throws IOException {
         assertContains(Header, "", "");
+    }
+
+    @Test
+    void not_generated() throws IOException, ApplicationException {
+        assertFalse(runApplication().isPresent());
     }
 
     @Test
