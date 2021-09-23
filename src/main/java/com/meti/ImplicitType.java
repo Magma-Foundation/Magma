@@ -15,7 +15,7 @@ public class ImplicitType implements Node {
 
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Implicit;
     }
 
     @Override
@@ -35,6 +35,6 @@ public class ImplicitType implements Node {
 
     @Override
     public String renderNative() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Implicit types can't be rendered. Did the compiler remove this type?");
     }
 }

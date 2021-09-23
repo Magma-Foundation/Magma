@@ -13,7 +13,7 @@ public interface Node {
 
     enum Group {
         Content,
-        Primitive
+        Implicit, Primitive
     }
 
     String renderMagma();
