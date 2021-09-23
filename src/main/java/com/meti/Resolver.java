@@ -1,21 +1,17 @@
 package com.meti;
 
 public class Resolver {
-    private final String typeString;
+    private final String type;
 
-    public Resolver(String typeString) {
-        this.typeString = typeString;
+    public Resolver(String type) {
+        this.type = type;
     }
 
     PrimitiveType resolve() throws ApplicationException {
-        return switch (getTypeString()) {
+        return switch (type) {
             case "I16" -> PrimitiveType.I16;
             case "U16" -> PrimitiveType.U16;
-            default -> throw new ApplicationException("Invalid type: " + getTypeString());
+            default -> throw new ApplicationException("Invalid type: " + type);
         };
-    }
-
-    public String getTypeString() {
-        return typeString;
     }
 }
