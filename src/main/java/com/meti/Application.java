@@ -37,30 +37,7 @@ public class Application {
     }
 
     private Output compile(String packageName, String input) throws ApplicationException {
-        var scriptMacro = "__" + packageName + "_header__";
-        var scriptType = "struct __" + packageName + "_type__";
-        var scriptMain = "__" + packageName + "_main__";
-
-        var typeSeparator = input.indexOf(':');
-        var valueSeparator = input.indexOf('=');
-        var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
-
-        var type = resolveTypeName(typeString);
-
-        var members = input.isBlank() ? "" : "\t" + type + " x;\n";
-
-        var headerContent = renderHeaderWithContent("ifndef", scriptMacro) +
-                renderHeaderWithContent("define", scriptMacro) +
-                scriptType + " {\n" + members + "}\n" +
-                scriptType + " " + scriptMain + "();\n" +
-                renderHeader("endif") + "\n";
-
-        var targetContent = scriptType + " " + scriptMain + "(){\n" +
-                "\t" + scriptType + " this={};\n" +
-                "\treturn this;\n" +
-                "}\n";
-
-        return new Output(headerContent, targetContent);
+        return new Output("", new Compiler(input).compile());
     }
 
     private String resolveTypeName(String typeString) throws ApplicationException {
