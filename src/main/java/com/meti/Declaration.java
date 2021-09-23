@@ -9,7 +9,11 @@ public class Declaration {
         this.type = type;
     }
 
-    String render() {
+    String renderMagma() {
+        return "const " + name + " : " + type.renderMagma() + " = 420;";
+    }
+
+    String renderNative() {
         return "\t" + type.renderNative() + " " + name + "=420;\n";
     }
 }

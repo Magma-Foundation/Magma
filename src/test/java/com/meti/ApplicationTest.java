@@ -19,11 +19,11 @@ public class ApplicationTest {
 
     @Test
     void declaration() throws IOException {
-        declare("x", PrimitiveType.I16);
+        declare(new Declaration("x", PrimitiveType.I16));
     }
 
-    private void declare(final String name, PrimitiveType type) throws IOException {
-        assertContains(Target, "const " + name + " : " + type.renderMagma() + " = 420;", new Function(new Declaration(name, type).render()).render());
+    private void declare(Declaration node) throws IOException {
+        assertContains(Target, node.renderMagma(), new Function(node.renderNative()).render());
     }
 
     private void assertContains(Path path, String input, String output) throws IOException {
@@ -34,17 +34,17 @@ public class ApplicationTest {
 
     @Test
     void declaration_name() throws IOException {
-        declare("test", PrimitiveType.I16);
+        declare(new Declaration("test", PrimitiveType.I16));
     }
 
     @Test
     void declaration_type() throws IOException {
-        declare("x", PrimitiveType.U16);
+        declare(new Declaration("x", PrimitiveType.U16));
     }
 
     @Test
-    void declaration_value() {
-
+    void declaration_value() throws IOException {
+        declare(new Declaration("x", PrimitiveType.U16));
     }
 
     @Test

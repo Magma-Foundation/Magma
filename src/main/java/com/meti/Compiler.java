@@ -15,7 +15,7 @@ public class Compiler {
             var name = input.substring("const ".length(), typeSeparator).trim();
             var typeString = input.substring(typeSeparator + 1, input.indexOf("=")).trim();
             var type = new Resolver(typeString).resolve();
-            return new Declaration(name, type).render();
+            return new Declaration(name, type).renderNative();
         } else {
             throw new ApplicationException("Invalid input:" + input);
         }
