@@ -8,7 +8,7 @@ public class Compiler {
     }
 
     static String renderDeclaration(String name, PrimitiveType type) {
-        return Compiler.renderDeclaration(name, type.renderNative());
+        return "\t" + type.renderNative() + " " + name + "=420;\n";
     }
 
     String compile() throws ApplicationException {
@@ -25,17 +25,11 @@ public class Compiler {
         }
     }
 
-    static String renderDeclaration(String name, String type) {
-        return "\t" + type + " " + name + "=420;\n";
-    }
-
-    private String resolveTypeName(String typeString) throws ApplicationException {
-        if (typeString.equals("I16")) {
-            return "int";
-        } else if (typeString.equals("U16")) {
-            return "unsigned int";
-        } else {
-            throw new ApplicationException("Invalid type: " + typeString);
-        }
+    private PrimitiveType resolveTypeName(String typeString) throws ApplicationException {
+        return switch (typeString) {
+            case "I16" -> PrimitiveType.I16;
+            case "U16" -> PrimitiveType.U16;
+            default -> throw new ApplicationException("Invalid type: " + typeString);
+        };
     }
 }
