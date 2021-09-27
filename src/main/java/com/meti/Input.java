@@ -5,6 +5,14 @@ public record Input(String value) {
         return value.indexOf(c);
     }
 
+    int firstIndexOfSlice() {
+        return value().indexOf("=>");
+    }
+
+    int lastIndexOfChar() {
+        return value().lastIndexOf(':');
+    }
+
     public int length() {
         return value.length();
     }

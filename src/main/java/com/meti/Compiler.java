@@ -1,46 +1,34 @@
 package com.meti;
 
-public record Compiler(String input) {
+public record Compiler(Input input) {
     String compile() {
-        return compileLine(this.input);
+        return compileLine(input.value());
     }
 
     private String compileLine(String lineString) {
-        var lineInput = new Input(lineString);
+        var input = new Input(lineString);
 
         String output;
         if (lineString.isBlank()) {
             output = "";
         } else if (lineString.startsWith("{") && lineString.endsWith("}")) {
-            output = parseBody(lineInput);
+            output = parseBody(input);
         } else if (lineString.startsWith("const ")) {
-            output = parseField(lineInput) + ";";
+            output = parseField(input) + ";";
         } else {
-            var paramStart = lineString.indexOf('(');
-            var paramEnd = lineString.indexOf(')');
-            var paramSlice = lineInput.slice(paramStart + 1, paramEnd);
-            var parameters = parseParameters(paramSlice);
-
-            var name = lineInput.slice("def ".length(), paramStart);
-            var returnTypeString = lineInput.slice(lineString.lastIndexOf(':') + 1, lineString.indexOf("=>"));
-            var returnType = resolveTypeName(returnTypeString);
-            var bodyStart = lineString.indexOf('{');
-            var body = lineInput.slice(bodyStart, lineString.length());
-            output = returnType + " " + name + "(" + parameters + ")" + body;
+            output = parseFunction(input);
         }
         return output;
     }
 
-    private String parseBody(Input lineInput) {
-        String output;
-        var body = lineInput.slice(lineInput.firstIndexOfChar('{') + 1, lineInput.length() - 1);
+    private String parseBody(Input input) {
+        var body = input.slice(input.firstIndexOfChar('{') + 1, input.length() - 1);
         var lines = body.split(";");
         var builder = new StringBuilder();
         for (String line : lines) {
             builder.append(compileLine(line));
         }
-        output = "{" + builder + "}";
-        return output;
+        return "{" + builder + "}";
     }
 
     private String parseField(Input input) {
@@ -61,6 +49,23 @@ public record Compiler(String input) {
             parameters = type + " " + name + valueOutput;
         }
         return parameters;
+    }
+
+    private String parseFunction(Input input) {
+        var paramStart = input.firstIndexOfChar('(');
+        var paramEnd = input.firstIndexOfChar(')');
+        var paramSlice = input.slice(paramStart + 1, paramEnd);
+        var parameters = parseParameters(paramSlice);
+
+        var name = input.slice("def ".length(), paramStart);
+
+        var returnTypeString = input.slice(input.lastIndexOfChar() + 1, input.firstIndexOfSlice());
+        var returnType = resolveTypeName(returnTypeString);
+
+        var bodyStart = input.firstIndexOfChar('{');
+        var body = input.slice(bodyStart, input.length());
+
+        return returnType + " " + name + "(" + parameters + ")" + body;
     }
 
     private StringBuilder parseParameters(String paramSlice) {

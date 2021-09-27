@@ -23,7 +23,7 @@ public class Application {
             var targetName = formatTargetName(packageName);
 
             var input = Files.readString(source);
-            var output = new Compiler(input).compile();
+            var output = new Compiler(new Input(input)).compile();
 
             Files.writeString(source.resolveSibling(targetName), output);
         }
