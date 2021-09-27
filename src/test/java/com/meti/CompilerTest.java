@@ -10,6 +10,11 @@ class CompilerTest {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }
 
+    @Test
+    void one_param() {
+        assertCompile("def empty(value : I16) : Void => {}", "void empty(int value){}");
+    }
+
     private void assertCompile(String input, String output) {
         var compiler = new Compiler(input);
         var actual = compiler.compile();
