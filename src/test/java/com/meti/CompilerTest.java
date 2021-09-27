@@ -40,4 +40,9 @@ class CompilerTest {
     void type() {
         assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
+
+    @Test
+    void body() {
+        assertCompile("def test() : I16 => {return 420;}", "int test(){return 420;}");
+    }
 }
