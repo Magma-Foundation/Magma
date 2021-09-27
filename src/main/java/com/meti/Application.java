@@ -23,14 +23,19 @@ public class Application {
             var targetName = formatTargetName(packageName);
 
             var input = Files.readString(source);
-            String output;
-            if (input.isBlank()) {
-                output = "";
-            } else {
-                output = "void main(){}";
-            }
+            var output = compile(input);
 
             Files.writeString(source.resolveSibling(targetName), output);
         }
+    }
+
+    private String compile(String input) {
+        String output;
+        if (input.isBlank()) {
+            output = "";
+        } else {
+            output = "void main(){}";
+        }
+        return output;
     }
 }
