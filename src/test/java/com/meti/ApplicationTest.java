@@ -18,14 +18,19 @@ public class ApplicationTest {
     @Test
     void target() throws IOException {
         Files.createFile(Source);
-        if (Files.exists(Source)) {
-            Files.createFile(Target);
-        }
+        run();
         assertTrue(Files.exists(Target));
     }
 
+    private void run() throws IOException {
+        if (Files.exists(Source)) {
+            Files.createFile(Target);
+        }
+    }
+
     @Test
-    void no_target() {
+    void no_target() throws IOException {
+        run();
         assertFalse(Files.exists(Target));
     }
 
