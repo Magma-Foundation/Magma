@@ -23,12 +23,14 @@ public record Compiler(String input) {
 
     private String parseParameters(String paramString) {
         String parameters;
-        if (paramString.endsWith(" : I16")) {
-            var separator = paramString.indexOf(':');
-            var name = slice(paramString, 0, separator);
-            parameters = "int " + name;
-        } else {
+        var separator = paramString.indexOf(':');
+        if (separator == -1) {
             parameters = "";
+        } else {
+            var name = slice(paramString, 0, separator);
+            var typeName = slice(paramString, separator + 1, paramString.length());
+            var type = resolveTypeName(typeName);
+            parameters = type + " " + name;
         }
         return parameters;
     }
@@ -37,8 +39,10 @@ public record Compiler(String input) {
         String returnType;
         if (returnTypeString.equals("Void")) {
             returnType = "void";
-        } else {
+        } else if (returnTypeString.equals("I16")) {
             returnType = "int";
+        } else {
+            returnType = "unsigned int";
         }
         return returnType;
     }
