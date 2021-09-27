@@ -12,4 +12,14 @@ public class DeclarationFeatureTest extends CompilerTest {
     void name() {
         assertCompile("const test : I16 = 420;", "int test=420;");
     }
+
+    @Test
+    void type() {
+        assertCompile("const test : U16 = 420;", "unsigned int test=420;");
+    }
+
+    @Test
+    void value() {
+        assertCompile("const value : I16 = 69;", "int value=69;");
+    }
 }
