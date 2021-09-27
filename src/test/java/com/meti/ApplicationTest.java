@@ -16,20 +16,29 @@ public class ApplicationTest {
     private static final Path Target = Root.resolve(Application.formatTargetName("index"));
 
     @Test
-    void main() throws IOException {
-        runWithSource();
-        var output = Files.readString(Target);
-        assertEquals("void main(){}", output);
+    void empty() throws IOException {
+        assertCompile("", "");
     }
 
-    private void runWithSource() throws IOException {
-        Files.createFile(Source);
+    @Test
+    void main() throws IOException {
+        assertCompile("def main() : Void => {}", "void main(){}");
+    }
+
+    private void assertCompile(String input, String output) throws IOException {
+        runWithSource(input);
+        var actual = Files.readString(Target);
+        assertEquals(output, actual);
+    }
+
+    private void runWithSource(String input) throws IOException {
+        Files.writeString(Source, input);
         run();
     }
 
     @Test
     void target() throws IOException {
-        runWithSource();
+        runWithSource("");
         assertTrue(Files.exists(Target));
     }
 
