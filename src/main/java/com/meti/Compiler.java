@@ -8,14 +8,14 @@ public record Compiler(String input) {
         } else {
             var paramStart = input.indexOf('(');
             var paramEnd = input.indexOf(')');
-            var paramSlice = slice(input, paramStart + 1, paramEnd);
+            var paramSlice = new Input(input).slice(paramStart + 1, paramEnd);
             var parameters = parseParameters(paramSlice);
 
-            var name = slice(input, "def ".length(), paramStart);
-            var returnTypeString = slice(input, input.lastIndexOf(':') + 1, input.indexOf("=>"));
+            var name = new Input(input).slice("def ".length(), paramStart);
+            var returnTypeString = new Input(input).slice(input.lastIndexOf(':') + 1, input.indexOf("=>"));
             var returnType = resolveTypeName(returnTypeString);
             var bodyStart = input.indexOf('{');
-            var body = slice(input, bodyStart, input.length());
+            var body = new Input(input).slice(bodyStart, input.length());
             output = returnType + " " + name + "(" + parameters + ")" + body;
         }
         return output;
@@ -25,25 +25,25 @@ public record Compiler(String input) {
         var paramStrings = paramSlice.split(",");
         var parameters = new StringBuilder();
         if (paramStrings.length != 0) {
-            parameters.append(parseParameter(paramStrings[0]));
+            parameters.append(parseParameter(new Input(paramStrings[0])));
 
             for (int i = 1; i < paramStrings.length; i++) {
                 var paramString = paramStrings[i];
-                var parsedParameter = parseParameter(paramString);
+                var parsedParameter = parseParameter(new Input(paramString));
                 parameters.append(",").append(parsedParameter);
             }
         }
         return parameters;
     }
 
-    private String parseParameter(String paramString) {
+    private String parseParameter(Input input) {
         String parameters;
-        var separator = paramString.indexOf(':');
+        var separator = input.firstIndexOfChar();
         if (separator == -1) {
             parameters = "";
         } else {
-            var name = slice(paramString, 0, separator);
-            var typeName = slice(paramString, separator + 1, paramString.length());
+            var name = input.slice(0, separator);
+            var typeName = input.slice(separator + 1);
             var type = resolveTypeName(typeName);
             parameters = type + " " + name;
         }
@@ -60,9 +60,5 @@ public record Compiler(String input) {
             returnType = "unsigned int";
         }
         return returnType;
-    }
-
-    private String slice(String value, int start, int end) {
-        return value.substring(start, end).trim();
     }
 }
