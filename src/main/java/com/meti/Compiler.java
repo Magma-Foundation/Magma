@@ -2,24 +2,36 @@ package com.meti;
 
 public record Compiler(String input) {
     String compile() {
-        var input1 = new Input(this.input);
+        return compileLine(this.input);
+    }
+
+    private String compileLine(String lineString) {
+        var lineInput = new Input(lineString);
 
         String output;
-        if (input.isBlank()) {
+        if (lineString.isBlank()) {
             output = "";
-        } else if (input.startsWith("const ")) {
-            return parseField(input1) + ";";
+        } else if (lineString.startsWith("{") && lineString.endsWith("}")) {
+            var body = lineInput.slice(lineInput.firstIndexOfChar('{') + 1, lineInput.length() - 1);
+            var lines = body.split(";");
+            var builder = new StringBuilder();
+            for (String line : lines) {
+                builder.append(compileLine(line));
+            }
+            output = "{" + builder + "}";
+        } else if (lineString.startsWith("const ")) {
+            output = parseField(lineInput) + ";";
         } else {
-            var paramStart = input.indexOf('(');
-            var paramEnd = input.indexOf(')');
-            var paramSlice = input1.slice(paramStart + 1, paramEnd);
+            var paramStart = lineString.indexOf('(');
+            var paramEnd = lineString.indexOf(')');
+            var paramSlice = lineInput.slice(paramStart + 1, paramEnd);
             var parameters = parseParameters(paramSlice);
 
-            var name = input1.slice("def ".length(), paramStart);
-            var returnTypeString = input1.slice(this.input.lastIndexOf(':') + 1, this.input.indexOf("=>"));
+            var name = lineInput.slice("def ".length(), paramStart);
+            var returnTypeString = lineInput.slice(lineString.lastIndexOf(':') + 1, lineString.indexOf("=>"));
             var returnType = resolveTypeName(returnTypeString);
-            var bodyStart = this.input.indexOf('{');
-            var body = input1.slice(bodyStart, this.input.length());
+            var bodyStart = lineString.indexOf('{');
+            var body = lineInput.slice(bodyStart, lineString.length());
             output = returnType + " " + name + "(" + parameters + ")" + body;
         }
         return output;
@@ -39,7 +51,7 @@ public record Compiler(String input) {
                     ? input.length()
                     : valueSeparator);
             var type = resolveTypeName(typeName);
-            var valueOutput = valueSeparator != -1 ? '=' + input.slice(valueSeparator + 1, input.length() - 1) : "";
+            var valueOutput = valueSeparator != -1 ? '=' + input.slice(valueSeparator + 1) : "";
             parameters = type + " " + name + valueOutput;
         }
         return parameters;
