@@ -6,8 +6,18 @@ public record Compiler(String input) {
         if (input.isBlank()) {
             output = "";
         } else {
-            var name = slice("def ".length(), input.indexOf('('));
-            var returnTypeString = slice(input.indexOf(':') + 1, input.indexOf("=>"));
+            var paramStart = input.indexOf('(');
+            var paramEnd = input.indexOf(')');
+            var paramString = slice(paramStart + 1, paramEnd);
+            String parameters;
+            if (paramString.equals("value : I16")) {
+                parameters = "int value";
+            } else {
+                parameters = "";
+            }
+
+            var name = slice("def ".length(), paramStart);
+            var returnTypeString = slice(input.lastIndexOf(':') + 1, input.indexOf("=>"));
             String returnType;
             if (returnTypeString.equals("Void")) {
                 returnType = "void";
@@ -16,7 +26,7 @@ public record Compiler(String input) {
             }
             var bodyStart = input.indexOf('{');
             var body = slice(bodyStart, input.length());
-            output = returnType + " " + name + "()" + body;
+            output = returnType + " " + name + "(" + parameters + ")" + body;
         }
         return output;
     }
