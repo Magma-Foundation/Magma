@@ -11,10 +11,10 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ApplicationTest {
+public class OtherApplicationTest {
     private static final Path Root = Paths.get(".");
-    private static final Path Source = Root.resolve("index.mgs");
-    private static final Path Target = Root.resolve(Application.formatTargetName("index"));
+    private static final Path Source = Root.resolve("main.mgs");
+    private static final Path Target = Root.resolve(Application.formatTargetName("main"));
 
     @Test
     void target() throws IOException {
