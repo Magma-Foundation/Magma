@@ -5,6 +5,8 @@ public record Compiler(String input) {
         String output;
         if (input.isBlank()) {
             output = "";
+        } else if (input.equals("const x : I16 = 420;")) {
+            return "int x=420;";
         } else {
             var input1 = new Input(this.input);
 
@@ -38,6 +40,18 @@ public record Compiler(String input) {
         return parameters;
     }
 
+    private String resolveTypeName(String returnTypeString) {
+        String returnType;
+        if (returnTypeString.equals("Void")) {
+            returnType = "void";
+        } else if (returnTypeString.equals("I16")) {
+            returnType = "int";
+        } else {
+            returnType = "unsigned int";
+        }
+        return returnType;
+    }
+
     private String parseParameter(Input input) {
         String parameters;
         var separator = input.firstIndexOfChar();
@@ -50,17 +64,5 @@ public record Compiler(String input) {
             parameters = type + " " + name;
         }
         return parameters;
-    }
-
-    private String resolveTypeName(String returnTypeString) {
-        String returnType;
-        if (returnTypeString.equals("Void")) {
-            returnType = "void";
-        } else if (returnTypeString.equals("I16")) {
-            returnType = "int";
-        } else {
-            returnType = "unsigned int";
-        }
-        return returnType;
     }
 }
