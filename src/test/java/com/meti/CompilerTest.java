@@ -7,8 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CompilerTest {
     @Test
     void name() {
-        var compiler = new Compiler("def empty() : Void => {}");
-        var output = compiler.compile();
-        assertEquals("void empty(){}", output);
+        assertCompile("def empty() : Void => {}", "void empty(){}");
+    }
+
+    private void assertCompile(String input, String output) {
+        var compiler = new Compiler(input);
+        var actual = compiler.compile();
+        assertEquals(output, actual);
+    }
+
+    @Test
+    void type() {
+        assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
 }
