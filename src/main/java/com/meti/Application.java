@@ -21,7 +21,16 @@ public class Application {
             var separator = fileName.indexOf(".");
             var packageName = fileName.substring(0, separator);
             var targetName = formatTargetName(packageName);
-            Files.createFile(source.resolveSibling(targetName));
+
+            var input = Files.readString(source);
+            String output;
+            if (input.isBlank()) {
+                output = "";
+            } else {
+                output = "void main(){}";
+            }
+
+            Files.writeString(source.resolveSibling(targetName), output);
         }
     }
 }
