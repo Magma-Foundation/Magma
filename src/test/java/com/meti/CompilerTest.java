@@ -11,8 +11,13 @@ class CompilerTest {
     }
 
     @Test
-    void one_param() {
+    void param() {
         assertCompile("def empty(value : I16) : Void => {}", "void empty(int value){}");
+    }
+
+    @Test
+    void param_name() {
+        assertCompile("def empty(test : I16) : Void => {}", "void empty(int test){}");
     }
 
     private void assertCompile(String input, String output) {
