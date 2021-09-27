@@ -12,13 +12,7 @@ public record Compiler(String input) {
         if (lineString.isBlank()) {
             output = "";
         } else if (lineString.startsWith("{") && lineString.endsWith("}")) {
-            var body = lineInput.slice(lineInput.firstIndexOfChar('{') + 1, lineInput.length() - 1);
-            var lines = body.split(";");
-            var builder = new StringBuilder();
-            for (String line : lines) {
-                builder.append(compileLine(line));
-            }
-            output = "{" + builder + "}";
+            output = parseBody(lineInput);
         } else if (lineString.startsWith("const ")) {
             output = parseField(lineInput) + ";";
         } else {
@@ -34,6 +28,18 @@ public record Compiler(String input) {
             var body = lineInput.slice(bodyStart, lineString.length());
             output = returnType + " " + name + "(" + parameters + ")" + body;
         }
+        return output;
+    }
+
+    private String parseBody(Input lineInput) {
+        String output;
+        var body = lineInput.slice(lineInput.firstIndexOfChar('{') + 1, lineInput.length() - 1);
+        var lines = body.split(";");
+        var builder = new StringBuilder();
+        for (String line : lines) {
+            builder.append(compileLine(line));
+        }
+        output = "{" + builder + "}";
         return output;
     }
 
