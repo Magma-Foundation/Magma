@@ -6,16 +6,18 @@ public record Compiler(String input) {
         if (input.isBlank()) {
             output = "";
         } else {
+            var input1 = new Input(this.input);
+
             var paramStart = input.indexOf('(');
             var paramEnd = input.indexOf(')');
-            var paramSlice = new Input(input).slice(paramStart + 1, paramEnd);
+            var paramSlice = input1.slice(paramStart + 1, paramEnd);
             var parameters = parseParameters(paramSlice);
 
-            var name = new Input(input).slice("def ".length(), paramStart);
-            var returnTypeString = new Input(input).slice(input.lastIndexOf(':') + 1, input.indexOf("=>"));
+            var name = input1.slice("def ".length(), paramStart);
+            var returnTypeString = input1.slice(this.input.lastIndexOf(':') + 1, this.input.indexOf("=>"));
             var returnType = resolveTypeName(returnTypeString);
-            var bodyStart = input.indexOf('{');
-            var body = new Input(input).slice(bodyStart, input.length());
+            var bodyStart = this.input.indexOf('{');
+            var body = input1.slice(bodyStart, this.input.length());
             output = returnType + " " + name + "(" + parameters + ")" + body;
         }
         return output;
