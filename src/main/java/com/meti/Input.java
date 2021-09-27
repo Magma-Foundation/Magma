@@ -1,8 +1,12 @@
 package com.meti;
 
 public record Input(String value) {
-    int firstIndexOfChar() {
-        return value.indexOf(':');
+    int firstIndexOfChar(char c) {
+        return value.indexOf(c);
+    }
+
+    public int length() {
+        return value.length();
     }
 
     String slice(int start) {
