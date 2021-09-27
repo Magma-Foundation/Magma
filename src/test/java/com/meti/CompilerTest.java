@@ -25,6 +25,11 @@ class CompilerTest {
         assertCompile("def empty(value : U16) : Void => {}", "void empty(unsigned int value){}");
     }
 
+    @Test
+    void parameters() {
+        assertCompile("def empty(first : I16, second : I16) : Void => {}", "void empty(int first,int second){}");
+    }
+
     private void assertCompile(String input, String output) {
         var compiler = new Compiler(input);
         var actual = compiler.compile();

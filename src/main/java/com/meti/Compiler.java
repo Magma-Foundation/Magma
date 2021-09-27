@@ -8,8 +8,18 @@ public record Compiler(String input) {
         } else {
             var paramStart = input.indexOf('(');
             var paramEnd = input.indexOf(')');
-            var paramString = slice(input, paramStart + 1, paramEnd);
-            var parameters = parseParameters(paramString);
+            var paramSlice = slice(input, paramStart + 1, paramEnd);
+            var paramStrings = paramSlice.split(",");
+            var parameters = new StringBuilder();
+            if (paramStrings.length != 0) {
+                parameters.append(parseParameter(paramStrings[0]));
+
+                for (int i = 1; i < paramStrings.length; i++) {
+                    var paramString = paramStrings[i];
+                    var parsedParameter = parseParameter(paramString);
+                    parameters.append(",").append(parsedParameter);
+                }
+            }
 
             var name = slice(input, "def ".length(), paramStart);
             var returnTypeString = slice(input, input.lastIndexOf(':') + 1, input.indexOf("=>"));
@@ -21,7 +31,7 @@ public record Compiler(String input) {
         return output;
     }
 
-    private String parseParameters(String paramString) {
+    private String parseParameter(String paramString) {
         String parameters;
         var separator = paramString.indexOf(':');
         if (separator == -1) {
