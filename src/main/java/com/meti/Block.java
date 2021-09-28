@@ -1,6 +1,9 @@
 package com.meti;
 
-public record Block(Iterable<Node> children) implements Node {
+import java.util.Collection;
+import java.util.stream.Stream;
+
+public record Block(Collection<Node> children) implements Node {
     @Override
     public String render() {
         var builder = new StringBuilder();
@@ -9,5 +12,15 @@ public record Block(Iterable<Node> children) implements Node {
         }
 
         return "{" + builder + "}";
+    }
+
+    @Override
+    public Stream<Node> streamNodes() {
+        return children.stream();
+    }
+
+    @Override
+    public Node withNodes(Collection<Node> nodes) {
+        return new Block(nodes);
     }
 }

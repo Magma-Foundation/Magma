@@ -1,15 +1,23 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import static com.meti.EmptyNode.EmptyNode_;
 
 public record Compiler(Input input) {
     String compile() {
-        return compileLine(input).render();
+        var root = parseLine(input);
+        var oldChildren = root.streamNodes().collect(Collectors.toList());
+        var newChildren = new ArrayList<Node>();
+        for (Node oldChild : oldChildren) {
+            newChildren.add(parseLine(new Input(oldChild.getValue())));
+        }
+        var parsedRoot = root.withNodes(newChildren);
+        return parsedRoot.render();
     }
 
-    private Node compileLine(Input input) {
+    private Node parseLine(Input input) {
         if (input.isBlank()) {
             return EmptyNode_;
         } else if (input.startsWith("{") && input.endsWith("}")) {
@@ -30,7 +38,7 @@ public record Compiler(Input input) {
 
         var children = new ArrayList<Node>();
         for (String line : lines) {
-            children.add(compileLine(new Input(line)));
+            children.add(new Content(line));
         }
 
         return new Block(children);
@@ -67,17 +75,6 @@ public record Compiler(Input input) {
         return new Function(name, parameters, returnType, body);
     }
 
-    private ArrayList<String> parseParameters(String paramSlice) {
-        var paramStrings = paramSlice.split(",");
-        var parameters = new ArrayList<String>();
-        for (String paramString : paramStrings) {
-            if (!paramString.isBlank()) {
-                parameters.add(parseField(new Input(paramString)));
-            }
-        }
-        return parameters;
-    }
-
     private String resolveTypeName(String returnTypeString) {
         String returnType;
         if (returnTypeString.equals("Void")) {
@@ -88,5 +85,16 @@ public record Compiler(Input input) {
             returnType = "unsigned int";
         }
         return returnType;
+    }
+
+    private ArrayList<String> parseParameters(String paramSlice) {
+        var paramStrings = paramSlice.split(",");
+        var parameters = new ArrayList<String>();
+        for (String paramString : paramStrings) {
+            if (!paramString.isBlank()) {
+                parameters.add(parseField(new Input(paramString)));
+            }
+        }
+        return parameters;
     }
 }
