@@ -30,23 +30,17 @@ public record Compiler(Input input) {
     }
 
     private String parseField(Input input) {
-        String parameters;
         var typeSeparator = input.firstIndexOfChar(':');
-        if (typeSeparator == -1) {
-            parameters = "";
-        } else {
-            var valueSeparator = input.firstIndexOfChar('=');
+        var valueSeparator = input.firstIndexOfChar('=');
 
-            var keys = input.slice(0, typeSeparator);
-            var name = keys.substring(keys.lastIndexOf(' ') + 1);
-            var typeName = input.slice(typeSeparator + 1, valueSeparator == -1
-                    ? input.length()
-                    : valueSeparator);
-            var type = resolveTypeName(typeName);
-            var valueOutput = valueSeparator != -1 ? '=' + input.slice(valueSeparator + 1) : "";
-            parameters = type + " " + name + valueOutput;
-        }
-        return parameters;
+        var keys = input.slice(0, typeSeparator);
+        var name = keys.substring(keys.lastIndexOf(' ') + 1);
+        var typeName = input.slice(typeSeparator + 1, valueSeparator == -1
+                ? input.length()
+                : valueSeparator);
+        var type = resolveTypeName(typeName);
+        var valueOutput = valueSeparator != -1 ? '=' + input.slice(valueSeparator + 1) : "";
+        return type + " " + name + valueOutput;
     }
 
     private String parseFunction(Input input) {
