@@ -1,14 +1,22 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.meti.EmptyNode.EmptyNode_;
 
 public record Compiler(Input input) {
     String compile() {
-        var withNodes = parseAST(parseLine(input));
-        return withNodes.render();
+        var linesArray = splitLines(input.value());
+        var linesList = new ArrayList<Node>();
+        for (String content : linesArray) {
+            linesList.add(new Content(content));
+        }
+        var root = new Block(linesList);
+        var withNodes = parseAST(root);
+        var output = withNodes.render();
+        return output.substring(1, output.length() - 1);
     }
 
     private Node parseAST(Node root) {
@@ -22,19 +30,28 @@ public record Compiler(Input input) {
         return parseChildren(withChild);
     }
 
-    private Node parseBody(Input input) {
-        var start = input.firstIndexOfChar('{') + 1;
-        var end = input.length() - 1;
+    private List<String> splitLines(String parent) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
 
-        var body = input.slice(start, end);
-        var lines = body.split(";");
-
-        var children = new ArrayList<Node>();
-        for (String line : lines) {
-            children.add(new Content(line));
+        var parentLength = parent.length();
+        for (int i = 0; i < parentLength; i++) {
+            var c = parent.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
         }
 
-        return new Block(children);
+        lines.add(builder.toString());
+        lines.removeIf(String::isBlank);
+
+        return lines;
     }
 
     private Node parseChild(Node root) {
@@ -131,5 +148,20 @@ public record Compiler(Input input) {
             returnType = "unsigned int";
         }
         return returnType;
+    }
+
+    private Node parseBody(Input input) {
+        var start = input.firstIndexOfChar('{') + 1;
+        var end = input.length() - 1;
+
+        var body = input.slice(start, end);
+        var lines = splitLines(body);
+
+        var children = new ArrayList<Node>();
+        for (String line : lines) {
+            children.add(new Content(line));
+        }
+
+        return new Block(children);
     }
 }
