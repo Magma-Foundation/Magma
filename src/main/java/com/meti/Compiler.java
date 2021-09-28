@@ -14,7 +14,8 @@ public record Compiler(Input input) {
         } else if (input.startsWith("{") && input.endsWith("}")) {
             return parseBody(input);
         } else if (input.startsWith("const ")) {
-            output = parseField(input) + ";";
+            var identity = parseField(input);
+            return new Declaration(identity);
         } else {
             output = parseFunction(input);
         }
@@ -69,20 +70,25 @@ public record Compiler(Input input) {
 
     private StringBuilder parseParameters(String paramSlice) {
         var paramStrings = paramSlice.split(",");
-        var parameters = new StringBuilder();
-        if (paramStrings.length != 0) {
-            var first = paramStrings[0];
-            if (!first.isBlank()) {
-                parameters.append(parseField(new Input(first)));
-            }
-
-            for (int i = 1; i < paramStrings.length; i++) {
-                var paramString = paramStrings[i];
-                var parsedParameter = parseField(new Input(paramString));
-                parameters.append(",").append(parsedParameter);
+        var parameters = new ArrayList<String>();
+        for (String paramString : paramStrings) {
+            if (!paramString.isBlank()) {
+                parameters.add(parseField(new Input(paramString)));
             }
         }
-        return parameters;
+
+        var renderedParameters = new StringBuilder();
+        if (!parameters.isEmpty()) {
+            var first = parameters.get(0);
+            if (!first.isBlank()) {
+                renderedParameters.append(first);
+            }
+
+            for (int i = 1; i < parameters.size(); i++) {
+                renderedParameters.append(",").append(parameters.get(i));
+            }
+        }
+        return renderedParameters;
     }
 
     private String resolveTypeName(String returnTypeString) {
