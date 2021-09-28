@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public record Compiler(Input input) {
     String compile() {
-        return compileLine(input).renderMagma();
+        return compileLine(input).render();
     }
 
     private Node compileLine(Input input) {
@@ -12,17 +12,20 @@ public record Compiler(Input input) {
         if (input.isBlank()) {
             output = "";
         } else if (input.startsWith("{") && input.endsWith("}")) {
-            output = parseBody(input);
+            return parseBody(input);
         } else if (input.startsWith("const ")) {
             output = parseField(input) + ";";
         } else {
             output = parseFunction(input);
         }
-        return new Node(output);
+        return new InlineNode(output);
     }
 
-    private String parseBody(Input input) {
-        var body = input.slice(input.firstIndexOfChar('{') + 1, input.length() - 1);
+    private Node parseBody(Input input) {
+        var start = input.firstIndexOfChar('{') + 1;
+        var end = input.length() - 1;
+
+        var body = input.slice(start, end);
         var lines = body.split(";");
 
         var children = new ArrayList<Node>();
@@ -30,12 +33,7 @@ public record Compiler(Input input) {
             children.add(compileLine(new Input(line)));
         }
 
-        var builder = new StringBuilder();
-        for (Node child : children) {
-            builder.append(child.renderMagma());
-        }
-
-        return "{" + builder + "}";
+        return new Block(children);
     }
 
     private String parseField(Input input) {
