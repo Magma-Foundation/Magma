@@ -1,8 +1,10 @@
 package com.meti;
 
+import java.util.ArrayList;
+
 public record Compiler(Input input) {
     String compile() {
-        return compileLine(input).getValue();
+        return compileLine(input).renderMagma();
     }
 
     private Node compileLine(Input input) {
@@ -23,10 +25,16 @@ public record Compiler(Input input) {
         var body = input.slice(input.firstIndexOfChar('{') + 1, input.length() - 1);
         var lines = body.split(";");
 
-        var builder = new StringBuilder();
+        var children = new ArrayList<Node>();
         for (String line : lines) {
-            builder.append(compileLine(new Input(line)).getValue());
+            children.add(compileLine(new Input(line)));
         }
+
+        var builder = new StringBuilder();
+        for (Node child : children) {
+            builder.append(child.renderMagma());
+        }
+
         return "{" + builder + "}";
     }
 

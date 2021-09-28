@@ -7,7 +7,7 @@ public class Node {
         this.value = value;
     }
 
-    public String getValue() {
+    public String renderMagma() {
         return value;
     }
 }
