@@ -29,7 +29,7 @@ public interface Node {
     }
 
     enum Group {
-        Function, Return, Integer, Content
+        Function, Return, Integer, Empty, Block, Declaration, Content
     }
 
     enum Type {

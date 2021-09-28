@@ -8,7 +8,7 @@ public class EmptyNode implements Node {
 
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Empty;
     }
 
     @Override

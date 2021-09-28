@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 public record Block(Collection<Node> children) implements Node {
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Block;
     }
 
     @Override
