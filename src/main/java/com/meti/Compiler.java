@@ -22,7 +22,7 @@ public record Compiler(Input input) {
     private Node parseAST(Node root) {
         Node newRoot;
         if (root.group() == Node.Group.Content) {
-            newRoot = parseLine(new Input(root.getValue()));
+            newRoot = parseLine(new Input(root.getValue().trim()));
         } else {
             newRoot = root;
         }
