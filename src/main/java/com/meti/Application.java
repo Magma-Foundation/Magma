@@ -4,13 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Application {
-    private final Path source;
-
-    public Application(Path source) {
-        this.source = source;
-    }
-
+public record Application(Path source) {
     static String formatTargetName(String packageName) {
         return packageName + ".c";
     }
@@ -28,5 +22,4 @@ public class Application {
             Files.writeString(source.resolveSibling(targetName), output);
         }
     }
-
 }
