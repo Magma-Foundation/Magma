@@ -8,18 +8,15 @@ public record Compiler(Input input) {
     }
 
     private Node compileLine(Input input) {
-        String output;
         if (input.isBlank()) {
-            output = "";
+            return new EmptyNode();
         } else if (input.startsWith("{") && input.endsWith("}")) {
             return parseBody(input);
         } else if (input.startsWith("const ")) {
-            var identity = parseField(input);
-            return new Declaration(identity);
+            return new Declaration(parseField(input));
         } else {
-            output = parseFunction(input);
+            return parseFunction(input);
         }
-        return new InlineNode(output);
     }
 
     private Node parseBody(Input input) {
@@ -51,7 +48,7 @@ public record Compiler(Input input) {
         return type + " " + name + valueOutput;
     }
 
-    private String parseFunction(Input input) {
+    private Node parseFunction(Input input) {
         var paramStart = input.firstIndexOfChar('(');
         var paramEnd = input.firstIndexOfChar(')');
         var paramSlice = input.slice(paramStart + 1, paramEnd);
@@ -65,10 +62,10 @@ public record Compiler(Input input) {
         var bodyStart = input.firstIndexOfChar('{');
         var body = input.slice(bodyStart, input.length());
 
-        return returnType + " " + name + "(" + parameters + ")" + body;
+        return new Function(name, parameters, returnType, body);
     }
 
-    private StringBuilder parseParameters(String paramSlice) {
+    private ArrayList<String> parseParameters(String paramSlice) {
         var paramStrings = paramSlice.split(",");
         var parameters = new ArrayList<String>();
         for (String paramString : paramStrings) {
@@ -76,19 +73,7 @@ public record Compiler(Input input) {
                 parameters.add(parseField(new Input(paramString)));
             }
         }
-
-        var renderedParameters = new StringBuilder();
-        if (!parameters.isEmpty()) {
-            var first = parameters.get(0);
-            if (!first.isBlank()) {
-                renderedParameters.append(first);
-            }
-
-            for (int i = 1; i < parameters.size(); i++) {
-                renderedParameters.append(",").append(parameters.get(i));
-            }
-        }
-        return renderedParameters;
+        return parameters;
     }
 
     private String resolveTypeName(String returnTypeString) {
