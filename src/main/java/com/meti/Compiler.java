@@ -109,7 +109,7 @@ public record Compiler(Input input) {
 
         var name = input.slice("def ".length(), paramStart);
 
-        var typeStart = input.firstIndexOfChar(':', paramEnd + 1);
+        var typeStart = input.firstIndexOfChar(':', paramEnd + 1) + 1;
         var typeEnd = input.firstIndexOfSlice();
 
         var returnTypeString = input.slice(typeStart, typeEnd);
@@ -132,16 +132,19 @@ public record Compiler(Input input) {
         return parameters;
     }
 
-    private String resolveTypeName(String returnTypeString) {
-        String returnType;
-        if (returnTypeString.equals("Void")) {
-            returnType = "void";
-        } else if (returnTypeString.equals("I16")) {
-            returnType = "int";
-        } else {
-            returnType = "unsigned int";
+    private String resolveTypeName(String input) {
+        String output;
+        switch (input) {
+            case "Void" -> output = "void";
+            case "I16" -> output = "int";
+            case "U16" -> output = "unsigned int";
+            default -> {
+                var format = "Invalid input: '%s'";
+                var message = format.formatted(input);
+                throw new UnsupportedOperationException(message);
+            }
         }
-        return returnType;
+        return output;
     }
 
     private List<String> splitLines(String parent) {
