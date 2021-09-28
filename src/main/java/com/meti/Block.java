@@ -5,6 +5,11 @@ import java.util.stream.Stream;
 
 public record Block(Collection<Node> children) implements Node {
     @Override
+    public Group group() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String render() {
         var builder = new StringBuilder();
         for (Node child : children) {
@@ -15,7 +20,7 @@ public record Block(Collection<Node> children) implements Node {
     }
 
     @Override
-    public Stream<Node> streamNodes() {
+    public Stream<Node> streamChildren() {
         return children.stream();
     }
 

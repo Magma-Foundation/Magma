@@ -7,6 +7,11 @@ public class EmptyNode implements Node {
     }
 
     @Override
+    public Group group() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String render() {
         return "";
     }

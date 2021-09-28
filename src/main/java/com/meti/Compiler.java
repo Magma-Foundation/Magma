@@ -7,26 +7,19 @@ import static com.meti.EmptyNode.EmptyNode_;
 
 public record Compiler(Input input) {
     String compile() {
-        var root = parseLine(input);
-        var oldChildren = root.streamNodes().collect(Collectors.toList());
-        var newChildren = new ArrayList<Node>();
-        for (Node oldChild : oldChildren) {
-            newChildren.add(parseLine(new Input(oldChild.getValue())));
-        }
-        var parsedRoot = root.withNodes(newChildren);
-        return parsedRoot.render();
+        var withNodes = parseAST(parseLine(input));
+        return withNodes.render();
     }
 
-    private Node parseLine(Input input) {
-        if (input.isBlank()) {
-            return EmptyNode_;
-        } else if (input.startsWith("{") && input.endsWith("}")) {
-            return parseBody(input);
-        } else if (input.startsWith("const ")) {
-            return new Declaration(parseField(input));
+    private Node parseAST(Node root) {
+        Node newRoot;
+        if (root.group() == Node.Group.Content) {
+            newRoot = parseLine(new Input(root.getValue()));
         } else {
-            return parseFunction(input);
+            newRoot = root;
         }
+        var withChild = parseChild(newRoot);
+        return parseChildren(withChild);
     }
 
     private Node parseBody(Input input) {
@@ -42,6 +35,26 @@ public record Compiler(Input input) {
         }
 
         return new Block(children);
+    }
+
+    private Node parseChild(Node root) {
+        var types = root.streamNodes().collect(Collectors.toList());
+        var current = root;
+        for (Node.Type type : types) {
+            var child = current.apply(type);
+            var newChild = parseAST(child);
+            current = current.withNode(newChild);
+        }
+        return current;
+    }
+
+    private Node parseChildren(Node withChild) {
+        var oldChildren = withChild.streamChildren().collect(Collectors.toList());
+        var newChildren = new ArrayList<Node>();
+        for (Node oldChild : oldChildren) {
+            newChildren.add(parseAST(oldChild));
+        }
+        return withChild.withNodes(newChildren);
     }
 
     private String parseField(Input input) {
@@ -72,7 +85,40 @@ public record Compiler(Input input) {
         var bodyStart = input.firstIndexOfChar('{');
         var body = input.slice(bodyStart, input.length());
 
-        return new Function(name, parameters, returnType, body);
+        return new Function(name, parameters, returnType, new Content(body));
+    }
+
+    private Node parseLine(Input input) {
+        if (input.isBlank()) {
+            return EmptyNode_;
+        } else if (input.startsWith("{") && input.endsWith("}")) {
+            return parseBody(input);
+        } else if (input.startsWith("const ")) {
+            return new Declaration(parseField(input));
+        } else if (input.startsWith("def")) {
+            return parseFunction(input);
+        } else if (input.startsWith("return ")) {
+            var value = input.slice("return ".length());
+            return new Return(new Content(value));
+        } else {
+            try {
+                var value = Integer.parseInt(input.value());
+                return new IntegerNode(value);
+            } catch (NumberFormatException e) {
+                throw new UnsupportedOperationException("Unknown input: " + input);
+            }
+        }
+    }
+
+    private ArrayList<String> parseParameters(String paramSlice) {
+        var paramStrings = paramSlice.split(",");
+        var parameters = new ArrayList<String>();
+        for (String paramString : paramStrings) {
+            if (!paramString.isBlank()) {
+                parameters.add(parseField(new Input(paramString)));
+            }
+        }
+        return parameters;
     }
 
     private String resolveTypeName(String returnTypeString) {
@@ -85,16 +131,5 @@ public record Compiler(Input input) {
             returnType = "unsigned int";
         }
         return returnType;
-    }
-
-    private ArrayList<String> parseParameters(String paramSlice) {
-        var paramStrings = paramSlice.split(",");
-        var parameters = new ArrayList<String>();
-        for (String paramString : paramStrings) {
-            if (!paramString.isBlank()) {
-                parameters.add(parseField(new Input(paramString)));
-            }
-        }
-        return parameters;
     }
 }

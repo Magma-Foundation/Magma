@@ -1,16 +1,37 @@
 package com.meti;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public record Function(String name,
                        List<String> parameters,
                        String returnType,
-                       String body) implements Node {
+                       Node body) implements Node {
+
+    @Override
+    public Group group() {
+        return Group.Function;
+    }
 
     @Override
     public String render() {
         var renderedParameters = renderParameters();
-        return returnType + " " + name + "(" + renderedParameters + ")" + body;
+        return returnType + " " + name + "(" + renderedParameters + ")" + body.render();
+    }
+
+    @Override
+    public Stream<Type> streamNodes() {
+        return Stream.of(Type.Body);
+    }
+
+    @Override
+    public Node apply(Type type) {
+        return body;
+    }
+
+    @Override
+    public Node withNode(Node node) {
+        return new Function(name, parameters, returnType, node);
     }
 
     private StringBuilder renderParameters() {
