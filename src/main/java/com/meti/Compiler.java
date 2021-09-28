@@ -2,6 +2,8 @@ package com.meti;
 
 import java.util.ArrayList;
 
+import static com.meti.EmptyNode.EmptyNode_;
+
 public record Compiler(Input input) {
     String compile() {
         return compileLine(input).render();
@@ -9,7 +11,7 @@ public record Compiler(Input input) {
 
     private Node compileLine(Input input) {
         if (input.isBlank()) {
-            return new EmptyNode();
+            return EmptyNode_;
         } else if (input.startsWith("{") && input.endsWith("}")) {
             return parseBody(input);
         } else if (input.startsWith("const ")) {
