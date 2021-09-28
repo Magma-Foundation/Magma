@@ -2,10 +2,10 @@ package com.meti;
 
 public record Compiler(Input input) {
     String compile() {
-        return compileLine(input);
+        return compileLine(input).getValue();
     }
 
-    private String compileLine(Input input) {
+    private Node compileLine(Input input) {
         String output;
         if (input.isBlank()) {
             output = "";
@@ -16,15 +16,16 @@ public record Compiler(Input input) {
         } else {
             output = parseFunction(input);
         }
-        return output;
+        return new Node(output);
     }
 
     private String parseBody(Input input) {
         var body = input.slice(input.firstIndexOfChar('{') + 1, input.length() - 1);
         var lines = body.split(";");
+
         var builder = new StringBuilder();
         for (String line : lines) {
-            builder.append(compileLine(new Input(line)));
+            builder.append(compileLine(new Input(line)).getValue());
         }
         return "{" + builder + "}";
     }
