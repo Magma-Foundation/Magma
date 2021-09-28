@@ -2,18 +2,16 @@ package com.meti;
 
 public record Compiler(Input input) {
     String compile() {
-        return compileLine(input.value());
+        return compileLine(input);
     }
 
-    private String compileLine(String lineString) {
-        var input = new Input(lineString);
-
+    private String compileLine(Input input) {
         String output;
-        if (lineString.isBlank()) {
+        if (input.isBlank()) {
             output = "";
-        } else if (lineString.startsWith("{") && lineString.endsWith("}")) {
+        } else if (input.startsWith("{") && input.endsWith("}")) {
             output = parseBody(input);
-        } else if (lineString.startsWith("const ")) {
+        } else if (input.startsWith("const ")) {
             output = parseField(input) + ";";
         } else {
             output = parseFunction(input);
@@ -26,7 +24,7 @@ public record Compiler(Input input) {
         var lines = body.split(";");
         var builder = new StringBuilder();
         for (String line : lines) {
-            builder.append(compileLine(line));
+            builder.append(compileLine(new Input(line)));
         }
         return "{" + builder + "}";
     }
