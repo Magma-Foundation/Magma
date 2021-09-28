@@ -73,7 +73,10 @@ public record Compiler(Input input) {
         var paramStrings = paramSlice.split(",");
         var parameters = new StringBuilder();
         if (paramStrings.length != 0) {
-            parameters.append(parseField(new Input(paramStrings[0])));
+            var first = paramStrings[0];
+            if (!first.isBlank()) {
+                parameters.append(parseField(new Input(first)));
+            }
 
             for (int i = 1; i < paramStrings.length; i++) {
                 var paramString = paramStrings[i];
