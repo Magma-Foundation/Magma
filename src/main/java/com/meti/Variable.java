@@ -1,9 +1,9 @@
 package com.meti;
 
-public record InlineNode(String value) implements Node {
+public record Variable(String value) implements Node {
     @Override
     public Group group() {
-        throw new UnsupportedOperationException();
+        return Group.Variable;
     }
 
     @Override

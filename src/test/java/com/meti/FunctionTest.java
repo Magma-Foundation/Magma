@@ -9,6 +9,11 @@ class FunctionTest extends CompilerTest {
     }
 
     @Test
+    void declaration_in_function() {
+        assertCompile("def empty() : Void => {const x : I16 = 69;}", "void empty(){int x=69;}");
+    }
+
+    @Test
     void name() {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }

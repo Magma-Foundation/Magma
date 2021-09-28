@@ -9,6 +9,10 @@ public record Input(String value) {
         return value.indexOf(c);
     }
 
+    int firstIndexOfChar(char c, int extent) {
+        return value.indexOf(c, extent);
+    }
+
     int firstIndexOfSlice() {
         return value.indexOf("=>");
     }

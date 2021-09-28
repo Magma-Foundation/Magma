@@ -30,28 +30,26 @@ public record Compiler(Input input) {
         return parseChildren(withChild);
     }
 
-    private List<String> splitLines(String parent) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-
-        var parentLength = parent.length();
-        for (int i = 0; i < parentLength; i++) {
-            var c = parent.charAt(i);
-            if (c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                builder.append(c);
+    private Node parseLine(Input input) {
+        if (input.isBlank()) {
+            return EmptyNode_;
+        } else if (input.startsWith("{") && input.endsWith("}")) {
+            return parseBody(input);
+        } else if (input.startsWith("const ")) {
+            return new Declaration(parseField(input));
+        } else if (input.startsWith("def")) {
+            return parseFunction(input);
+        } else if (input.startsWith("return ")) {
+            var value = input.slice("return ".length());
+            return new Return(new Content(value));
+        } else {
+            try {
+                var value = Integer.parseInt(input.value());
+                return new IntegerNode(value);
+            } catch (NumberFormatException e) {
+                return new Variable(input.value());
             }
         }
-
-        lines.add(builder.toString());
-        lines.removeIf(String::isBlank);
-
-        return lines;
     }
 
     private Node parseChild(Node root) {
@@ -88,6 +86,21 @@ public record Compiler(Input input) {
         return type + " " + name + valueOutput;
     }
 
+    private Node parseBody(Input input) {
+        var start = input.firstIndexOfChar('{') + 1;
+        var end = input.length() - 1;
+
+        var body = input.slice(start, end);
+        var lines = splitLines(body);
+
+        var children = new ArrayList<Node>();
+        for (String line : lines) {
+            children.add(new Content(line));
+        }
+
+        return new Block(children);
+    }
+
     private Node parseFunction(Input input) {
         var paramStart = input.firstIndexOfChar('(');
         var paramEnd = input.firstIndexOfChar(')');
@@ -96,35 +109,16 @@ public record Compiler(Input input) {
 
         var name = input.slice("def ".length(), paramStart);
 
-        var returnTypeString = input.slice(input.lastIndexOfChar() + 1, input.firstIndexOfSlice());
+        var typeStart = input.firstIndexOfChar(':', paramEnd + 1);
+        var typeEnd = input.firstIndexOfSlice();
+
+        var returnTypeString = input.slice(typeStart, typeEnd);
         var returnType = resolveTypeName(returnTypeString);
 
         var bodyStart = input.firstIndexOfChar('{');
         var body = input.slice(bodyStart, input.length());
 
         return new Function(name, parameters, returnType, new Content(body));
-    }
-
-    private Node parseLine(Input input) {
-        if (input.isBlank()) {
-            return EmptyNode_;
-        } else if (input.startsWith("{") && input.endsWith("}")) {
-            return parseBody(input);
-        } else if (input.startsWith("const ")) {
-            return new Declaration(parseField(input));
-        } else if (input.startsWith("def")) {
-            return parseFunction(input);
-        } else if (input.startsWith("return ")) {
-            var value = input.slice("return ".length());
-            return new Return(new Content(value));
-        } else {
-            try {
-                var value = Integer.parseInt(input.value());
-                return new IntegerNode(value);
-            } catch (NumberFormatException e) {
-                throw new UnsupportedOperationException("Unknown input: " + input);
-            }
-        }
     }
 
     private ArrayList<String> parseParameters(String paramSlice) {
@@ -150,18 +144,27 @@ public record Compiler(Input input) {
         return returnType;
     }
 
-    private Node parseBody(Input input) {
-        var start = input.firstIndexOfChar('{') + 1;
-        var end = input.length() - 1;
+    private List<String> splitLines(String parent) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
 
-        var body = input.slice(start, end);
-        var lines = splitLines(body);
-
-        var children = new ArrayList<Node>();
-        for (String line : lines) {
-            children.add(new Content(line));
+        var parentLength = parent.length();
+        for (int i = 0; i < parentLength; i++) {
+            var c = parent.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
         }
 
-        return new Block(children);
+        lines.add(builder.toString());
+        lines.removeIf(String::isBlank);
+
+        return lines;
     }
 }
