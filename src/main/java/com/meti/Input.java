@@ -10,15 +10,15 @@ public record Input(String value) {
     }
 
     int firstIndexOfSlice() {
-        return value().indexOf("=>");
+        return value.indexOf("=>");
     }
 
     public boolean isBlank() {
-        return value().isBlank();
+        return value.isBlank();
     }
 
     int lastIndexOfChar() {
-        return value().lastIndexOf(':');
+        return value.lastIndexOf(':');
     }
 
     public int length() {
