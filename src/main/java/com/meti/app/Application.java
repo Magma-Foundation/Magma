@@ -1,9 +1,11 @@
-package com.meti;
+package com.meti.app;
+
+import com.meti.api.Path;
 
 import java.io.IOException;
 
 public record Application(Path path) {
-    void run() throws IOException {
+    public void run() throws IOException {
         path.ensureAsFile();
     }
 }
