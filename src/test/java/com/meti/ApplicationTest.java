@@ -8,53 +8,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path Root = Paths.get(".");
-    private static final Path Source = Root.resolve("index.mgs");
-    private static final Path Target = Root.resolve(Application.formatTargetName("index"));
+    private static final Path Project = Paths.get(".", "project.json");
 
     @Test
-    void empty() throws IOException {
-        assertCompile("", "");
+    void exists() throws IOException {
+        Files.createFile(Project);
+        runAndAssertProjectFileExists();
     }
 
-    @Test
-    void main() throws IOException {
-        assertCompile("def main() : Void => {}", "void main(){}");
-    }
-
-    private void assertCompile(String input, String output) throws IOException {
-        runWithSource(input);
-        var actual = Files.readString(Target);
-        assertEquals(output, actual);
-    }
-
-    private void runWithSource(String input) throws IOException {
-        Files.writeString(Source, input);
-        run();
+    private static void runAndAssertProjectFileExists() throws IOException {
+        new Application(new JavaPath(Project)).run();
+        assertTrue(Files.exists(Project));
     }
 
     @Test
-    void target() throws IOException {
-        runWithSource("");
-        assertTrue(Files.exists(Target));
-    }
-
-    private void run() throws IOException {
-        new Application(Source).run();
-    }
-
-    @Test
-    void no_target() throws IOException {
-        run();
-        assertFalse(Files.exists(Target));
+    void no_exists() throws IOException {
+        runAndAssertProjectFileExists();
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.deleteIfExists(Target);
-        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Project);
     }
 }
