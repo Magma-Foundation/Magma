@@ -6,23 +6,19 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path Project = Paths.get(".", "project.json");
-
     @Test
     void exists() throws IOException {
-        Files.createFile(Project);
+        Files.createFile(Main.Project);
         runAndAssertProjectFileExists();
     }
 
     private static void runAndAssertProjectFileExists() throws IOException {
-        new Application(new JavaPath(Project)).run();
-        assertTrue(Files.exists(Project));
+        new Application(new JavaPath(Main.Project)).run();
+        assertTrue(Files.exists(Main.Project));
     }
 
     @Test
@@ -32,6 +28,6 @@ public class ApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.deleteIfExists(Project);
+        Files.deleteIfExists(Main.Project);
     }
 }
