@@ -1,5 +1,10 @@
 {
   "name": "magma",
-  "version": "1.0.0.",
-  "description": "The Magma toolchain."
+  "version": "1.0.0",
+  "description": "The Magma toolchain.",
+  "path": "./src",
+  "envs": [
+    "c",
+    "js"
+  ]
 }
