@@ -1,3 +1,5 @@
 {
-  "name": "magma"
+  "name": "magma",
+  "version": "1.0.0.",
+  "description": "The Magma toolchain."
 }
