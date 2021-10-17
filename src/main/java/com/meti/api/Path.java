@@ -1,7 +1,9 @@
 package com.meti.api;
 
-import java.io.IOException;
-
 public interface Path {
-    void ensureAsFile() throws IOException;
+    Path absolute();
+
+    void ensureAsFile(String defaultContent) throws IOException;
+
+    String readContentAsString() throws IOException;
 }

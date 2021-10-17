@@ -1,8 +1,7 @@
 package com.meti.app;
 
-import com.meti.java.JavaPath;
+import com.meti.java.NIOPath;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -11,10 +10,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            var path = new JavaPath(Project);
+            var path = new NIOPath(Project);
             var application = new Application(path);
             application.run();
-        } catch (IOException e) {
+        } catch (ApplicationException e) {
             e.printStackTrace();
         }
     }
