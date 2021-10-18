@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompilerTest {
+
     @Test
     void name() {
-        assertCompile(new MagmaFunctionRenderer().render("empty", "Void", "{}"), new CFunctionRenderer().render("empty", "void", "{}"));
+        var body = new BlockRenderer().render("");
+        var input = new MagmaFunctionRenderer().render("empty", "Void", body);
+        var output = new CFunctionRenderer().render("empty", "void", body);
+        assertCompile(input, output);
     }
 
     private void assertCompile(String input, String expected) {
@@ -18,11 +22,17 @@ class CompilerTest {
 
     @Test
     void type() {
-        assertCompile(new MagmaFunctionRenderer().render("supplier", "U16", "{return 420;}"), new CFunctionRenderer().render("supplier", "unsigned int", "{return 420;}"));
+        var body = new BlockRenderer().render("return 420;");
+        var input = new MagmaFunctionRenderer().render("supplier", "U16", body);
+        var output = new CFunctionRenderer().render("supplier", "unsigned int", body);
+        assertCompile(input, output);
     }
 
     @Test
     void body() {
-        assertCompile(new MagmaFunctionRenderer().render("supplier", "I16", "{return 420;}"), new CFunctionRenderer().render("supplier", "int", "{return 420;}"));
+        var body = new BlockRenderer().render("return 420;");
+        var input = new MagmaFunctionRenderer().render("supplier", "I16", body);
+        var output = new CFunctionRenderer().render("supplier", "int", body);
+        assertCompile(input, output);
     }
 }
