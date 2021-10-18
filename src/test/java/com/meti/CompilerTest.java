@@ -22,7 +22,8 @@ class CompilerTest {
 
     @Test
     void type() {
-        var body = new BlockRenderer().render("return 420;");
+        var value = new ReturnRenderer().render();
+        var body = new BlockRenderer().render(value);
         var input = new MagmaFunctionRenderer().render("supplier", "U16", body);
         var output = new CFunctionRenderer().render("supplier", "unsigned int", body);
         assertCompile(input, output);
@@ -30,7 +31,8 @@ class CompilerTest {
 
     @Test
     void body() {
-        var body = new BlockRenderer().render("return 420;");
+        var value = new ReturnRenderer().render();
+        var body = new BlockRenderer().render(value);
         var input = new MagmaFunctionRenderer().render("supplier", "I16", body);
         var output = new CFunctionRenderer().render("supplier", "int", body);
         assertCompile(input, output);
