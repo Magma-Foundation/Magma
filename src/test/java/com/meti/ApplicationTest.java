@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    public static final Path Source = Paths.get(".", "index.mgs");
+    public static final Path Source = Paths.get(".", "index.mgf");
 
     @Test
     void exists() throws IOException {
