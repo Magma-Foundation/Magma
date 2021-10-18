@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CompilerTest {
     @Test
     void name() {
-        assertCompile("def empty() : Void => {}", "void empty(){}");
+        assertCompile("def empty() : Void => {}", new FunctionRenderer().render("empty", "void", "{}"));
     }
 
     private void assertCompile(String input, String expected) {
@@ -18,11 +18,11 @@ class CompilerTest {
 
     @Test
     void type() {
-        assertCompile("def supplier() : U16 => {return 420;}", "unsigned int supplier(){return 420;}");
+        assertCompile("def supplier() : U16 => {return 420;}", new FunctionRenderer().render("supplier", "unsigned int", "{return 420;}"));
     }
 
     @Test
     void body() {
-        assertCompile("def supplier() : I16 => {return 420;}", "int supplier(){return 420;}");
+        assertCompile("def supplier() : I16 => {return 420;}", new FunctionRenderer().render("supplier", "int", "{return 420;}"));
     }
 }
