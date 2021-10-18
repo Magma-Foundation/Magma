@@ -1,4 +1,0 @@
-def main() : I16 => {
-    const x : I16 = 420;
-    return x;
-}
