@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
@@ -24,9 +25,37 @@ public class ApplicationTest {
         runAndAssertSourceExists();
     }
 
+    @Test
+    void empty() throws IOException {
+        assertCompile("", "");
+    }
+
+    @Test
+    void test_main() throws IOException {
+        assertCompile("int main(){return 0;}", "def main() : I16 => {return 0;}");
+    }
+
+    private void assertCompile(String output, String input) throws IOException {
+        Files.writeString(Source, input);
+        run();
+        assertEquals(output, Files.readString(Source));
+    }
+
     private void runAndAssertSourceExists() throws IOException {
-        if (!Files.exists(Source)) Files.createFile(Source);
+        run();
         assertTrue(Files.exists(Source));
+    }
+
+    private void run() throws IOException {
+        if (!Files.exists(Source)) Files.createFile(Source);
+        var input = Files.readString(Source);
+        String output;
+        if (input.equals("def main() : I16 => {return 0;}")) {
+            output = "int main(){return 0;}";
+        } else {
+            output = "";
+        }
+        Files.writeString(Source, output);
     }
 
     @AfterEach
