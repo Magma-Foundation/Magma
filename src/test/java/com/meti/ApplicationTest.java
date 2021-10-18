@@ -5,18 +5,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    public static final Path Source = Paths.get(".", "index.mgf");
 
     @Test
     void exists() throws IOException {
-        Files.createFile(Source);
+        Files.createFile(Application.Source);
         runAndAssertSourceExists();
     }
 
@@ -32,38 +29,22 @@ public class ApplicationTest {
 
     @Test
     void test_main() throws IOException {
-        assertCompile(renderFunction(), "def main() : I16 => {return 0;}");
-    }
-
-    private String renderFunction() {
-        return "int main(){return 0;}";
+        assertCompile(new FunctionRenderer().render(), "def main() : I16 => {return 0;}");
     }
 
     private void assertCompile(String output, String input) throws IOException {
-        Files.writeString(Source, input);
-        run();
-        assertEquals(output, Files.readString(Source));
+        Files.writeString(Application.Source, input);
+        new Application().run();
+        assertEquals(output, Files.readString(Application.Source));
     }
 
     private void runAndAssertSourceExists() throws IOException {
-        run();
-        assertTrue(Files.exists(Source));
-    }
-
-    private void run() throws IOException {
-        if (!Files.exists(Source)) Files.createFile(Source);
-        var input = Files.readString(Source);
-        String output;
-        if (input.equals("def main() : I16 => {return 0;}")) {
-            output = renderFunction();
-        } else {
-            output = "";
-        }
-        Files.writeString(Source, output);
+        new Application().run();
+        assertTrue(Files.exists(Application.Source));
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Application.Source);
     }
 }
