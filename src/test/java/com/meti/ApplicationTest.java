@@ -29,7 +29,7 @@ public class ApplicationTest {
 
     @Test
     void test_main() throws IOException {
-        assertCompile(new FunctionRenderer().render("main", "int", "{return 0;}"), "def main() : I16 => {return 0;}");
+        assertCompile(new CFunctionRenderer().render("main", "int", "{return 0;}"), "def main() : I16 => {return 0;}");
     }
 
     private void assertCompile(String output, String input) throws IOException {

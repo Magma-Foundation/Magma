@@ -21,7 +21,7 @@ public record Compiler(String input) {
                 case "Void" -> "void";
                 default -> "";
             };
-            output = new FunctionRenderer().render(name, type, body);
+            output = new CFunctionRenderer().render(name, type, body);
         } else {
             output = "";
         }

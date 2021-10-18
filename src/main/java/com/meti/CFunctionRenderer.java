@@ -1,6 +1,6 @@
 package com.meti;
 
-public class FunctionRenderer {
+public class CFunctionRenderer {
     String render(final String name, final String type, final String body) {
         return type + " " + name + "()" + body;
     }
