@@ -32,7 +32,11 @@ public class ApplicationTest {
 
     @Test
     void test_main() throws IOException {
-        assertCompile("int main(){return 0;}", "def main() : I16 => {return 0;}");
+        assertCompile(renderFunction(), "def main() : I16 => {return 0;}");
+    }
+
+    private String renderFunction() {
+        return "int main(){return 0;}";
     }
 
     private void assertCompile(String output, String input) throws IOException {
@@ -51,7 +55,7 @@ public class ApplicationTest {
         var input = Files.readString(Source);
         String output;
         if (input.equals("def main() : I16 => {return 0;}")) {
-            output = "int main(){return 0;}";
+            output = renderFunction();
         } else {
             output = "";
         }
