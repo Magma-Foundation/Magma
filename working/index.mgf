@@ -1,3 +1,44 @@
+import native { strlen } from "string";
+import native { printf } from "stdio";
+
+native def strlen(array : Ref[I8]) : AnySize;
+native def printf(format : Ref[I8], args : ...Any) : Void;
+
+throwable struct IndexException {
+    index : AnySize;
+    length : AnySize;
+}
+
+interface String {
+    callable apply : AnySize => I8 ? IndexException;
+    length : AnySize;
+}
+
+out def StringConstructor(array : Ref[I8]) : String => {
+    const length = strlen(array);
+    return {
+        length, apply(index : AnySize) =>
+            if(index < length) array[index];
+            else throw <IndexException>{index, length};
+    }
+}
+
+out def StringDeconstructor(value : String) => {
+}
+
+throwable struct IOException {
+    message : String;
+    print => printf("%s", message);
+}
+
+
+
+const Application = {
+    run => throw <IOException>{"Method not implemented yet."};
+}
+
 def main() : I16 => {
+    try Application.run();
+    catch(e : IOException) e.print();
     return 0;
 }
