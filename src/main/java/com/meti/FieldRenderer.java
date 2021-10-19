@@ -1,7 +1,7 @@
 package com.meti;
 
 public class FieldRenderer {
-    static String renderField(String name, String type) {
+    static String render(String name, String type) {
         return type + " " + name;
     }
 }
