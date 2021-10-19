@@ -2,37 +2,13 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class CompilerTest {
-    @Test
-    void native_import() {
-        assertNativeImport("string");
-    }
-
-    private void assertNativeImport(String string) {
-        var input = new MagmaNativeImportRenderer(string).render();
-        var output = new IncludeDirectiveRenderer(string).render();
-        assertCompile(input, output);
-    }
-
-    @Test
-    void another_native_import() {
-        assertNativeImport("stdio");
-    }
-
+class FunctionTest extends FeatureTest {
     @Test
     void name() {
         var body = new BlockRenderer().render("");
         var input = new MagmaFunctionRenderer().render("empty", "Void", body);
         var output = new CFunctionRenderer().render("empty", "void", body);
         assertCompile(input, output);
-    }
-
-    private void assertCompile(String input, String expected) {
-        var compiler = new Compiler(input);
-        var output = compiler.compile();
-        assertEquals(expected, output);
     }
 
     @Test
