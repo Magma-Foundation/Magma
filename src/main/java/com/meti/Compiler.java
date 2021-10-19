@@ -10,12 +10,19 @@ public record Compiler(String input) {
     }
 
     String compile() {
+        return Arrays.stream(input.split(";"))
+                .filter(line -> !line.isBlank())
+                .map(this::compileLine)
+                .collect(Collectors.joining());
+    }
+
+    private String compileLine(String line) {
         String output;
-        if (input.startsWith("struct ")) {
+        if (line.startsWith("struct ")) {
             output = lexStructure();
-        } else if (input.startsWith("import native ")) {
-            output = lexNativeImport();
-        } else if (input.startsWith("def ")) {
+        } else if (line.startsWith("import native ")) {
+            output = lexNativeImport(line);
+        } else if (line.startsWith("def ")) {
             output = lexFunction();
         } else {
             output = "";
@@ -23,8 +30,8 @@ public record Compiler(String input) {
         return output;
     }
 
-    private String lexNativeImport() {
-        var name = input.substring("import native ".length());
+    private String lexNativeImport(String line) {
+        var name = line.substring("import native ".length());
         return new IncludeDirectiveRenderer().render(name);
     }
 

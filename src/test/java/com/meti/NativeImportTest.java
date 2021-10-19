@@ -10,7 +10,17 @@ public class NativeImportTest extends FeatureTest {
 
     @Test
     void native_imports() {
+        var inputRenderer = new MagmaNativeImportRenderer();
+        var inputFirst = inputRenderer.render("first") + ";";
+        var inputSecond = inputRenderer.render("second") + ";";
+        var input = inputFirst + inputSecond;
 
+        var outputRenderer = new IncludeDirectiveRenderer();
+        var outputFirst = outputRenderer.render("first");
+        var outputSecond = outputRenderer.render("second");
+        var output = outputFirst + outputSecond;
+
+        assertCompile(input, output);
     }
 
     private void assertNativeImport(String value) {
