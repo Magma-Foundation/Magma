@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StructureTest extends FeatureTest {
     @Test
@@ -13,18 +12,12 @@ public class StructureTest extends FeatureTest {
     }
 
     private void assertStructure(String name) {
-        assertStructure(name, "", "");
-    }
-
-    private void assertStructure(String name, String inputMember, String outputMember) {
-        var inputMembers = Collections.singletonList(inputMember);
-        var outputMembers = Collections.singletonList(outputMember);
-        assertStructure(name, inputMembers, outputMembers);
+        assertStructure(name, Collections.emptyList(), Collections.emptyList());
     }
 
     private void assertStructure(String name, List<String> inputMembers, List<String> outputMembers) {
-        var input = render(name, inputMembers);
-        var expected = render(name, outputMembers);
+        var input = new StructureRenderer(",").render(name, inputMembers);
+        var expected = new StructureRenderer(";").render(name, outputMembers);
         assertCompile(input, expected + ";");
     }
 
@@ -35,7 +28,9 @@ public class StructureTest extends FeatureTest {
 
     @Test
     void one_member() {
-        assertStructure("Wrapper", "x : I16", "int x;");
+        var inputMembers = Collections.singletonList("x : I16");
+        var outputMembers = Collections.singletonList("int x;");
+        assertStructure("Wrapper", inputMembers, outputMembers);
     }
 
     @Test
@@ -43,17 +38,5 @@ public class StructureTest extends FeatureTest {
         var inputMembers = List.of("x : I16", "y : I16");
         var outputMembers = List.of("int x;", "int y;");
         assertStructure("Point", inputMembers, outputMembers);
-    }
-
-    private String render(final String name, List<String> members) {
-        var format = "struct %s{%s}";
-        var renderedMembers = renderedMembers(members);
-        return format.formatted(name, renderedMembers);
-    }
-
-    private String renderedMembers(List<String> members) {
-        return members.stream()
-                .map(value -> value + ";")
-                .collect(Collectors.joining());
     }
 }
