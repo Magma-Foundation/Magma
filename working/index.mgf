@@ -1,5 +1,5 @@
-import native { strlen } from "string";
-import native { printf } from "stdio";
+import native "string";
+import native "stdio";
 
 native def strlen(array : Ref[I8]) : AnySize;
 native def printf(format : Ref[I8], args : ...Any) : Void;

@@ -3,7 +3,10 @@ package com.meti;
 public record Compiler(String input) {
     String compile() {
         String output;
-        if (input.startsWith("def ")) {
+        if (input.startsWith("import native ")) {
+            var name = input.substring("import native ".length());
+            output = new IncludeDirectiveRenderer(name).render();
+        } else if (input.startsWith("def ")) {
             var nameStart = "def ".length();
             var nameEnd = input.indexOf('(');
             var name = slice(nameStart, nameEnd);
