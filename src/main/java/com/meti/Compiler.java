@@ -63,15 +63,18 @@ public record Compiler(String input) {
     private List<String> lexMembers(String membersString) {
         return Arrays.stream(membersString.split(","))
                 .filter(value -> !value.isBlank())
-                .map(this::lexMember)
+                .map(this::lexDeclaration)
                 .collect(Collectors.toList());
     }
 
-    private String lexMember(String value) {
+    private String lexDeclaration(String value) {
         var separator = value.indexOf(':');
         var name = slice(value, 0, separator);
-        var type = slice(value, separator + 1, value.length());
-        return new FieldRenderer().render(name, this.resolveTypeName(type)) + ";";
+        var typeString = slice(value, separator + 1, value.length());
+        var type = this.resolveTypeName(typeString);
+        var member = new Field(name, type);
+
+        return new FieldRenderer().render(member) + ";";
     }
 
     private String resolveTypeName(String name) {
