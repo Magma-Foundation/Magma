@@ -17,21 +17,24 @@ interface String {
 out def StringConstructor(array : Ref[I8]) : String => {
     const length = strlen(array);
     return {
-        length, apply(index : AnySize) =>
+        length,
+        apply(index : AnySize) =>
             if(index < length) array[index];
             else throw <IndexException>{index, length};
+        delete() => free(array);
     }
 }
 
 out def StringDeconstructor(value : String) => {
+    const array = malloc(I8.size * value.length);
+    for(let i = 0; i < value.length; i++) array[i]] = value(i);
+    return array;
 }
 
 throwable struct IOException {
     message : String;
     print => printf("%s", message);
 }
-
-
 
 const Application = {
     run => throw <IOException>{"Method not implemented yet."};
