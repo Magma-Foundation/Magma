@@ -9,19 +9,20 @@ throwable struct IndexException {
     length : AnySize;
 }
 
-interface String {
-    callable apply : AnySize => I8 ? IndexException;
+struct String {
     length : AnySize;
+
+    callable apply : AnySize => I8 ? IndexException;
+    drop : () => Void;
 }
 
 out def StringConstructor(array : Ref[I8]) : String => {
-    const length = strlen(array);
     return {
-        length,
-        apply(index : AnySize) =>
+        length : strlen(array),
+        drop   : () => free(array),
+        apply  : (index : AnySize) =>
             if(index < length) array[index];
             else throw <IndexException>{index, length};
-        delete() => free(array);
     }
 }
 
@@ -33,11 +34,11 @@ out def StringDeconstructor(value : String) => {
 
 throwable struct IOException {
     message : String;
-    print => printf("%s", message);
+    print : () => printf("%s", message);
 }
 
 const Application = {
-    run => throw <IOException>{"Method not implemented yet."};
+    run : () => throw <IOException>{"Method not implemented yet."};
 }
 
 def main() : I16 => {
