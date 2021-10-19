@@ -8,9 +8,14 @@ public class NativeImportTest extends FeatureTest {
         assertNativeImport("string");
     }
 
-    private void assertNativeImport(String string) {
-        var input = new MagmaNativeImportRenderer(string).render();
-        var output = new IncludeDirectiveRenderer(string).render();
+    @Test
+    void native_imports() {
+
+    }
+
+    private void assertNativeImport(String value) {
+        var input = new MagmaNativeImportRenderer().render(value);
+        var output = new IncludeDirectiveRenderer().render(value);
         assertCompile(input, output);
     }
 

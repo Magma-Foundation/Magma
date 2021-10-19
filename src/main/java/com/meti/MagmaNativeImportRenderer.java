@@ -1,7 +1,7 @@
 package com.meti;
 
-public record MagmaNativeImportRenderer(String name) {
-    String render() {
-        return "import native " + name();
+public final class MagmaNativeImportRenderer {
+    String render(String name) {
+        return "import native " + name;
     }
 }

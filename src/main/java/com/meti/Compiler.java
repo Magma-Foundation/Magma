@@ -25,7 +25,7 @@ public record Compiler(String input) {
 
     private String lexNativeImport() {
         var name = input.substring("import native ".length());
-        return new IncludeDirectiveRenderer(name).render();
+        return new IncludeDirectiveRenderer().render(name);
     }
 
     private String lexFunction() {

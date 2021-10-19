@@ -1,7 +1,7 @@
 package com.meti;
 
-public record IncludeDirectiveRenderer(String name) {
-    String render() {
-        return "#include <" + name() + ".h>\n";
+public final class IncludeDirectiveRenderer {
+    String render(String name) {
+        return "#include <" + name + ".h>\n";
     }
 }
