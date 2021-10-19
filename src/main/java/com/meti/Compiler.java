@@ -71,7 +71,7 @@ public record Compiler(String input) {
         var separator = value.indexOf(':');
         var name = slice(value, 0, separator);
         var type = slice(value, separator + 1, value.length());
-        return resolveTypeName(type) + " " + name + ";";
+        return FieldRenderer.renderField(name, this.resolveTypeName(type)) + ";";
     }
 
     private String resolveTypeName(String name) {
