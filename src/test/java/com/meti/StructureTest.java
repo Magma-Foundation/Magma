@@ -15,9 +15,9 @@ public class StructureTest extends FeatureTest {
         assertStructure(name, Collections.emptyList(), Collections.emptyList());
     }
 
-    private void assertStructure(String name, List<String> inputMembers, List<String> outputMembers) {
-        var input = new StructureRenderer(",").render(new Structure(name, inputMembers));
-        var expected = new StructureRenderer(";").render(new Structure(name, outputMembers));
+    private void assertStructure(String name, List<? extends Node> inputMembers, List<? extends Node> outputMembers) {
+        var input = new StructureRenderer(",").render(new Structure(name, inputMembers)).compute();
+        var expected = new StructureRenderer(";").render(new Structure(name, outputMembers)).compute();
         assertCompile(input, expected + ";");
     }
 
@@ -28,15 +28,15 @@ public class StructureTest extends FeatureTest {
 
     @Test
     void one_member() {
-        var inputMembers = Collections.singletonList("x : I16");
-        var outputMembers = Collections.singletonList("int x;");
+        var inputMembers = Collections.singletonList(new Content("x : I16"));
+        var outputMembers = Collections.singletonList(new Content("int x;"));
         assertStructure("Wrapper", inputMembers, outputMembers);
     }
 
     @Test
     void two_members() {
-        var inputMembers = List.of("x : I16", "y : I16");
-        var outputMembers = List.of("int x;", "int y;");
+        var inputMembers = List.of(new Content("x : I16"), new Content("y : I16"));
+        var outputMembers = List.of(new Content("int x;"), new Content("int y;"));
         assertStructure("Point", inputMembers, outputMembers);
     }
 }

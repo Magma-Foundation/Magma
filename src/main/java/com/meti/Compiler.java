@@ -59,24 +59,22 @@ public record Compiler(String input) {
         var members = lexMembers(membersString);
         var node = new Structure(name, members);
 
-        return new StructureRenderer(";").render(node) + ";";
+        return new StructureRenderer(";").render(node).compute() + ";";
     }
 
-    private List<String> lexMembers(String membersString) {
+    private List<Field> lexMembers(String membersString) {
         return Arrays.stream(membersString.split(","))
                 .filter(value -> !value.isBlank())
                 .map(this::lexDeclaration)
                 .collect(Collectors.toList());
     }
 
-    private String lexDeclaration(String value) {
+    private Field lexDeclaration(String value) {
         var separator = value.indexOf(':');
         var name = slice(value, 0, separator);
         var typeString = slice(value, separator + 1, value.length());
         var type = this.resolveTypeName(typeString);
-        var member = new Field(name, type);
-
-        return new FieldRenderer().render(member) + ";";
+        return new Field(name, type);
     }
 
     private String resolveTypeName(String name) {
