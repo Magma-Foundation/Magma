@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -29,18 +28,32 @@ public class ApplicationTest {
 
     @Test
     void test_main() throws IOException {
-        assertCompile(new CFunctionRenderer().render("main", "int", "{return 0;}"), "def main() : I16 => {return 0;}");
+        var body = new Content("{return 0;}");
+        var identity = new Content("int main");
+        var root = new Function(identity, body);
+        var renderer = new CFunctionRenderer();
+        var output = renderer.render(root);
+        var actual = output.compute();
+        assertCompile(actual, "def main() : I16 => {return 0;}");
     }
 
     private void assertCompile(String output, String input) throws IOException {
-        Files.writeString(Application.Source, input);
-        new Application().run();
-        assertEquals(output, Files.readString(Application.Source));
+        try {
+            Files.writeString(Application.Source, input);
+            new Application().run();
+            assertEquals(output, Files.readString(Application.Source));
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     private void runAndAssertSourceExists() throws IOException {
-        new Application().run();
-        assertTrue(Files.exists(Application.Source));
+        try {
+            new Application().run();
+            assertTrue(Files.exists(Application.Source));
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @AfterEach

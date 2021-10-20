@@ -5,4 +5,9 @@ public record Content(String value) implements Node {
     public String value() {
         return value;
     }
+
+    @Override
+    public boolean is(Type type) {
+        throw new UnsupportedOperationException();
+    }
 }

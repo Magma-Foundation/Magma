@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             new Application().run();
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             e.printStackTrace();
         }
     }

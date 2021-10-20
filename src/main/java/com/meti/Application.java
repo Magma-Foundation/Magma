@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class Application {
     public static final Path Source = Paths.get(".", "index.mgf");
 
-    void run() throws IOException {
+    void run() throws IOException, CompileException {
         if (!Files.exists(Source)) Files.createFile(Source);
         var input = Files.readString(Source);
         var output = new Compiler(input).compile();

@@ -15,9 +15,9 @@ public class NativeImportTest extends FeatureTest {
         var inputSecond = inputRenderer.render("second") + ";";
         var input = inputFirst + inputSecond;
 
-        var outputRenderer = new IncludeDirectiveRenderer();
-        var outputFirst = outputRenderer.render("first");
-        var outputSecond = outputRenderer.render("second");
+        var outputRenderer = new CImportRenderer();
+        var outputFirst = outputRenderer.render(new Import("first")).compute();
+        var outputSecond = outputRenderer.render(new Import("second")).compute();
         var output = outputFirst + outputSecond;
 
         assertCompile(input, output);
@@ -25,7 +25,8 @@ public class NativeImportTest extends FeatureTest {
 
     private void assertNativeImport(String value) {
         var input = new MagmaNativeImportRenderer().render(value);
-        var output = new IncludeDirectiveRenderer().render(value);
+        var output = new CImportRenderer().render(new Import(value))
+                .compute();
         assertCompile(input, output);
     }
 

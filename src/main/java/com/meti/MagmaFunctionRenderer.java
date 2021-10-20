@@ -4,7 +4,7 @@ public class MagmaFunctionRenderer {
     public MagmaFunctionRenderer() {
     }
 
-    String render(final String name, final String type, final String body) {
-        return "def " + name + "() : " + type + " => " + body;
+    String render(Function function) {
+        return "def " + function.name() + "() : " + function.type() + " => " + function.body();
     }
 }

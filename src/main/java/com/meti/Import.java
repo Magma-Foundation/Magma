@@ -1,6 +1,6 @@
 package com.meti;
 
-public record Field(String name, String type) implements Node {
+public record Import(String name) implements Node {
     @Override
     public boolean is(Type type) {
         throw new UnsupportedOperationException();
