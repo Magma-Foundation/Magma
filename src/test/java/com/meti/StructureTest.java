@@ -16,8 +16,8 @@ public class StructureTest extends FeatureTest {
     }
 
     private void assertStructure(String name, List<String> inputMembers, List<String> outputMembers) {
-        var input = new StructureRenderer(",").render(name, inputMembers);
-        var expected = new StructureRenderer(";").render(name, outputMembers);
+        var input = new StructureRenderer(",").render(new Structure(name, inputMembers));
+        var expected = new StructureRenderer(";").render(new Structure(name, outputMembers));
         assertCompile(input, expected + ";");
     }
 

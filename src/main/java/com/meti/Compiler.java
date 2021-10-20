@@ -57,7 +57,9 @@ public record Compiler(String input) {
         var name = slice(input, "struct ".length(), membersStart);
         var membersString = slice(input, membersStart + 1, membersEnd);
         var members = lexMembers(membersString);
-        return new StructureRenderer(";").render(name, members) + ";";
+        var node = new Structure(name, members);
+
+        return new StructureRenderer(";").render(node) + ";";
     }
 
     private List<String> lexMembers(String membersString) {
