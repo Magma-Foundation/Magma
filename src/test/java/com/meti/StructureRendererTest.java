@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StructureRendererTest {
 
     @Test
-    void render() {
+    void render() throws CompileException {
         var members = List.of(
                 new Content("int x"),
                 new Content("int y")

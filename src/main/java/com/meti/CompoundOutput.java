@@ -2,14 +2,16 @@ package com.meti;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record CompoundOutput(List<Output> children) implements Output {
     @Override
-    public String compute() {
-        return children.stream()
-                .map(Output::compute)
-                .collect(Collectors.joining());
+    public String compute() throws AttributeException {
+        StringBuilder sb = new StringBuilder();
+        for (Output child : children) {
+            String compute = child.compute();
+            sb.append(compute);
+        }
+        return sb.toString();
     }
 
     @Override

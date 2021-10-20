@@ -27,7 +27,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void test_main() throws IOException {
+    void test_main() throws IOException, CompileException {
         var body = new Content("{return 0;}");
         var identity = new Content("int main");
         var root = new Function(identity, body);

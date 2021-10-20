@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class StructureTest extends FeatureTest {
     @Test
     void empty() {
@@ -16,9 +18,13 @@ public class StructureTest extends FeatureTest {
     }
 
     private void assertStructure(String name, List<? extends Node> inputMembers, List<? extends Node> outputMembers) {
-        var input = new StructureRenderer(",").render(new Structure(name, inputMembers)).compute();
-        var expected = new StructureRenderer(";").render(new Structure(name, outputMembers)).compute();
-        assertCompile(input, expected + ";");
+        try {
+            var input = new StructureRenderer(",").render(new Structure(name, inputMembers)).compute();
+            var expected = new StructureRenderer(";").render(new Structure(name, outputMembers)).compute();
+            assertCompile(input, expected + ";");
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test

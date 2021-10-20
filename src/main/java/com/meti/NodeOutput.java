@@ -4,8 +4,8 @@ import java.util.List;
 
 public record NodeOutput(Node node) implements Output {
     @Override
-    public String compute() {
-        return node.value();
+    public String compute() throws AttributeException {
+        return node.apply(Attribute.Group.Value).asString();
     }
 
     @Override

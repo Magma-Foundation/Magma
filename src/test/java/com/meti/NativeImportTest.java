@@ -1,5 +1,6 @@
 package com.meti;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class NativeImportTest extends FeatureTest {
@@ -9,7 +10,7 @@ public class NativeImportTest extends FeatureTest {
     }
 
     @Test
-    void native_imports() {
+    void native_imports() throws CompileException {
         var inputRenderer = new MagmaNativeImportRenderer();
         var inputFirst = inputRenderer.render("first") + ";";
         var inputSecond = inputRenderer.render("second") + ";";
@@ -24,10 +25,14 @@ public class NativeImportTest extends FeatureTest {
     }
 
     private void assertNativeImport(String value) {
-        var input = new MagmaNativeImportRenderer().render(value);
-        var output = new CImportRenderer().render(new Import(value))
-                .compute();
-        assertCompile(input, output);
+        try {
+            var input = new MagmaNativeImportRenderer().render(value);
+            var output = new CImportRenderer().render(new Import(value))
+                    .compute();
+            assertCompile(input, output);
+        } catch (CompileException e) {
+            Assertions.fail(e);
+        }
     }
 
     @Test

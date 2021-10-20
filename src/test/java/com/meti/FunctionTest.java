@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 class FunctionTest extends FeatureTest {
     @Test
-    void name() {
+    void name() throws CompileException {
         var body = new Content("");
         var input = new MagmaFunctionRenderer().render(new Function(new Field("empty", "Void"), body));
         var output = new CFunctionRenderer().render(new Function(new Field("empty", "void"), body))
@@ -13,7 +13,7 @@ class FunctionTest extends FeatureTest {
     }
 
     @Test
-    void type() {
+    void type() throws CompileException {
         var body = new Content("{return 420;}");
         var input = new MagmaFunctionRenderer().render(new Function(new Field("supplier", "U16"), body));
         var output = new CFunctionRenderer().render(new Function(new Field("supplier", "unsigned int"), body))
@@ -22,7 +22,7 @@ class FunctionTest extends FeatureTest {
     }
 
     @Test
-    void body() {
+    void body() throws CompileException {
         var body = new Content("{return 420;}");
         var input = new MagmaFunctionRenderer().render(new Function(new Field("supplier", "I16"), body));
         var output = new CFunctionRenderer().render(new Function(new Field("supplier", "int"), body))

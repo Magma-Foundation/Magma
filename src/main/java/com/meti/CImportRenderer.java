@@ -1,7 +1,8 @@
 package com.meti;
 
-public final class CImportRenderer {
-    Output render(Node anImport) {
-        return new StringOutput("#include <" + anImport.value() + ".h>\n");
+public final class CImportRenderer implements Renderer {
+    @Override
+    public Output render(Node anImport) throws CompileException {
+        return new StringOutput("#include <" + anImport.apply(Attribute.Group.Value).asString() + ".h>\n");
     }
 }
