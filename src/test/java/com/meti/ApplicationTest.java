@@ -8,8 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     public static final Path Source = Paths.get(".", "index.mgf");
@@ -26,9 +25,15 @@ public class ApplicationTest {
     }
 
     @Test
+    void target() throws IOException {
+        assertEquals(Target, runImpl());
+    }
+
+    @Test
     void with_source() throws IOException {
-        var target = runImpl();
-        assertTrue(Files.exists(target));
+        Files.createFile(Source);
+        runImpl();
+        assertTrue(Files.exists(Target));
     }
 
     @AfterEach

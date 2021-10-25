@@ -6,7 +6,15 @@ import java.nio.file.Path;
 
 public record Application(Path source) {
     Path run() throws IOException {
-        if (Files.exists(source())) Files.createFile(ApplicationTest.Target);
-        return ApplicationTest.Target;
+        var fileName = source.getFileName().toString();
+        var separator = fileName.indexOf('.');
+        var name = fileName.substring(0, separator);
+        var targetName = name + ".c";
+        var target = source.resolveSibling(targetName);
+        if (Files.exists(source)) {
+            Files.createFile(target);
+        }
+
+        return target;
     }
 }
