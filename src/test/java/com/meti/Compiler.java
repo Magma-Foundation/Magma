@@ -1,12 +1,14 @@
 package com.meti;
 
 public record Compiler(String input) {
-    static String renderIncludeDirective() {
-        return "#include <stdio.h>\n";
+    public static final String ImportNativePrefix = "import native ";
+
+    static String renderIncludeDirective(final String value) {
+        return "#include <" + value + ".h>\n";
     }
 
-    static String renderNativeImport() {
-        return "import native stdio;";
+    static String renderNativeImport(final String value) {
+        return ImportNativePrefix + value;
     }
 
     static String renderInteger(int value) {
@@ -23,14 +25,21 @@ public record Compiler(String input) {
 
     private String compileLine(String line) {
         String output;
-        if (line.equals(renderNativeImport())) {
-            output = renderIncludeDirective();
+        if (line.startsWith(ImportNativePrefix)) {
+            var value = slice(line, ImportNativePrefix, line.length());
+            output = renderIncludeDirective(value);
         } else if (line.startsWith("return ")) {
-            var value = line.substring("return ".length()).trim();
+            var value = slice(line, "return ", line.length());
             output = renderReturns(value);
         } else {
             output = renderInteger(Integer.parseInt(line));
         }
         return output;
+    }
+
+    private String slice(String line, String prefix, int end) {
+        var prefixLength = prefix.length();
+        var slice = line.substring(prefixLength, end);
+        return slice.trim();
     }
 }
