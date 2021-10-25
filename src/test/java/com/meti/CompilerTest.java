@@ -2,9 +2,12 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+class CompilerTest extends CompiledTests {
+    private static void assertInteger(int value) {
+        var rendered = Compiler.renderInteger(value);
+        assertCompile(rendered, rendered);
+    }
 
-class CompilerTest {
     @Test
     void integer() {
         assertInteger(420);
@@ -13,11 +16,5 @@ class CompilerTest {
     @Test
     void another() {
         assertInteger(69);
-    }
-
-    private void assertInteger(int value) {
-        var compile = new Compiler(Compiler.renderInteger(value));
-        var output = compile.compile();
-        assertEquals(Compiler.renderInteger(value), output);
     }
 }
