@@ -9,7 +9,7 @@ class ImportTest {
     @Test
     void another() {
         var input = Compiler.renderNativeImport("stdlib");
-        var output = Compiler.renderIncludeDirective("stdlib");
+        var output = Compiler.renderC(new Import("stdlib"));
         assertCompile(input, output);
     }
 }

@@ -6,7 +6,7 @@ import static com.meti.CompiledTests.assertCompile;
 
 class IntegerTest {
     private static void assertInteger(int value) {
-        var rendered = Compiler.renderInteger(value);
+        var rendered = Compiler.renderC(new IntegerNode(value));
         assertCompile(rendered, rendered);
     }
 

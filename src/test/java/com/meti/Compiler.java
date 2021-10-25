@@ -6,16 +6,17 @@ import java.util.stream.Collectors;
 public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
 
-    static String renderIncludeDirective(final String value) {
-        return "#include <" + value + ".h>\n";
+    static String renderC(Node node) {
+        var value = node.apply(Attribute.Type.Value);
+        if (node.is(Import.Type.Import)) {
+            return "#include <" + value.asString() + ".h>\n";
+        } else {
+            return String.valueOf(value.asInteger());
+        }
     }
 
     static String renderNativeImport(final String value) {
         return ImportNativePrefix + value;
-    }
-
-    static String renderInteger(int value) {
-        return String.valueOf(value);
     }
 
     static String renderReturns(String value) {
@@ -34,12 +35,12 @@ public record Compiler(String input) {
         String output;
         if (line.startsWith(ImportNativePrefix)) {
             var value = slice(line, ImportNativePrefix, line.length());
-            output = renderIncludeDirective(value);
+            output = renderC(new Import(value));
         } else if (line.startsWith("return ")) {
             var value = slice(line, "return ", line.length());
             output = renderReturns(value);
         } else {
-            output = renderInteger(Integer.parseInt(line));
+            output = renderC(new IntegerNode(Integer.parseInt(line)));
         }
         return output;
     }

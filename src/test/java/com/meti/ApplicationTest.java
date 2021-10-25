@@ -47,7 +47,7 @@ public class ApplicationTest {
     @Test
     void content() {
         var input = Compiler.renderNativeImport("stdio");
-        var output = Compiler.renderIncludeDirective("stdio");
+        var output = Compiler.renderC(new Import("stdio"));
         assertCompile(input, output);
     }
 
