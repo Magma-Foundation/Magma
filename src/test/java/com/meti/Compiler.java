@@ -1,5 +1,8 @@
 package com.meti;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
 
@@ -20,7 +23,11 @@ public record Compiler(String input) {
     }
 
     String compile() {
-        return input.isBlank() ? "" : compileLine(input);
+        if (input.isBlank()) return "";
+        var lines = input.split(";");
+        return Arrays.stream(lines)
+                .map(this::compileLine)
+                .collect(Collectors.joining());
     }
 
     private String compileLine(String line) {
