@@ -9,9 +9,9 @@ public record Compiler(String input) {
         return "import native stdio;";
     }
 
-    String getString() {
+    String compile() {
         String output;
-        if (input().equals(renderNativeImport())) {
+        if (input.equals(renderNativeImport())) {
             output = renderIncludeDirective();
         } else {
             output = "";

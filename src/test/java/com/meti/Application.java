@@ -14,7 +14,7 @@ public record Application(Path source) {
         var target = source.resolveSibling(targetName);
         if (Files.exists(source)) {
             var input = Files.readString(source);
-            var output = new Compiler(input).getString();
+            var output = new Compiler(input).compile();
             Files.writeString(target, output);
         }
 
