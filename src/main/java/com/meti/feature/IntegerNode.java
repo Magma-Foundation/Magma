@@ -2,13 +2,7 @@ package com.meti.feature;
 
 import com.meti.Attribute;
 
-public class IntegerNode implements Node {
-    private final int value;
-
-    public IntegerNode(int value) {
-        this.value = value;
-    }
-
+public record IntegerNode(int value) implements Node {
     @Override
     public boolean is(Import.Type type) {
         return type == Import.Type.Integer;
