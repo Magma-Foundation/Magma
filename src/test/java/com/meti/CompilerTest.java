@@ -7,9 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CompilerTest {
     @Test
     void integer() {
-        var compile = new Compiler(Compiler.renderInteger());
-        var output = compile.compile();
-        assertEquals(Compiler.renderInteger(), output);
+        assertInteger(420);
     }
 
+    @Test
+    void another() {
+        assertInteger(69);
+    }
+
+    private void assertInteger(int value) {
+        var compile = new Compiler(Compiler.renderInteger(value));
+        var output = compile.compile();
+        assertEquals(Compiler.renderInteger(value), output);
+    }
 }

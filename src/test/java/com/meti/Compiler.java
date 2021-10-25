@@ -9,8 +9,8 @@ public record Compiler(String input) {
         return "import native stdio;";
     }
 
-    static String renderInteger() {
-        return "420";
+    static String renderInteger(int value) {
+        return String.valueOf(value);
     }
 
     String compile() {
@@ -19,7 +19,7 @@ public record Compiler(String input) {
         else if (input.equals(renderNativeImport())) {
             output = renderIncludeDirective();
         } else {
-            output = renderInteger();
+            output = renderInteger(Integer.parseInt(input));
         }
         return output;
     }
