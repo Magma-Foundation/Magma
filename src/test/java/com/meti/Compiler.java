@@ -13,13 +13,23 @@ public record Compiler(String input) {
         return String.valueOf(value);
     }
 
+    static String renderReturns(String value) {
+        return "return " + value;
+    }
+
     String compile() {
+        return input.isBlank() ? "" : compileLine(input);
+    }
+
+    private String compileLine(String line) {
         String output;
-        if (input.isBlank()) return "";
-        else if (input.equals(renderNativeImport())) {
+        if (line.equals(renderNativeImport())) {
             output = renderIncludeDirective();
+        } else if (line.startsWith("return ")) {
+            var value = line.substring("return ".length()).trim();
+            output = renderReturns(value);
         } else {
-            output = renderInteger(Integer.parseInt(input));
+            output = renderInteger(Integer.parseInt(line));
         }
         return output;
     }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.meti.CompiledTests.assertCompile;
 
-class CompilerTest {
+class IntegerTest {
     private static void assertInteger(int value) {
         var rendered = Compiler.renderInteger(value);
         assertCompile(rendered, rendered);
