@@ -1,8 +1,9 @@
-package com.meti;
+package com.meti.feature;
 
+import com.meti.Compiler;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.CompiledTests.assertCompile;
+import static com.meti.feature.FeatureTest.assertCompile;
 
 class IntegerTest {
     private static void assertInteger(int value) {

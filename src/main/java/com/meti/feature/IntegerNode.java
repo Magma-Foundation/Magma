@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.feature;
+
+import com.meti.Attribute;
 
 public class IntegerNode implements Node {
     private final int value;

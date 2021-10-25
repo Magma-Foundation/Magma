@@ -1,9 +1,10 @@
 package com.meti;
 
+import com.meti.feature.Import;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.CompiledTests.assertCompile;
 import static com.meti.Compiler.renderNativeImport;
+import static com.meti.feature.FeatureTest.assertCompile;
 
 class CompilerTest {
     @Test

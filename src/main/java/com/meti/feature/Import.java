@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.feature;
+
+import com.meti.Attribute;
 
 public record Import(String value) implements Node {
     @Override
@@ -12,7 +14,7 @@ public record Import(String value) implements Node {
         else throw new UnsupportedOperationException();
     }
 
-    enum Type {
+    public enum Type {
         Integer, Import
     }
 }

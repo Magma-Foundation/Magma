@@ -1,12 +1,16 @@
 package com.meti;
 
+import com.meti.feature.Import;
+import com.meti.feature.IntegerNode;
+import com.meti.feature.Node;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
 
-    static String renderC(Node node) {
+    public static String renderC(Node node) {
         var value = node.apply(Attribute.Type.Value);
         if (node.is(Import.Type.Import)) {
             return "#include <" + value.asString() + ".h>\n";
@@ -15,15 +19,15 @@ public record Compiler(String input) {
         }
     }
 
-    static String renderNativeImport(final String value) {
+    public static String renderNativeImport(final String value) {
         return ImportNativePrefix + value;
     }
 
-    static String renderReturns(String value) {
+    public static String renderReturns(String value) {
         return "return " + value;
     }
 
-    String compile() {
+    public String compile() {
         if (input.isBlank()) return "";
         var lines = input.split(";");
         return Arrays.stream(lines)
