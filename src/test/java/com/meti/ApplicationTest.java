@@ -30,6 +30,28 @@ public class ApplicationTest {
     }
 
     @Test
+    void empty() {
+        assertCompile("", "");
+    }
+
+    private void assertCompile(String input, String output) {
+        try {
+            Files.writeString(Source, input);
+            runImpl();
+            assertEquals(output, Files.readString(Target));
+        } catch (IOException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void content() {
+        var input = Application.renderNativeImport();
+        var output = Application.renderIncludeDirective();
+        assertCompile(input, output);
+    }
+
+    @Test
     void with_source() throws IOException {
         Files.createFile(Source);
         runImpl();
