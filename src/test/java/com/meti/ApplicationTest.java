@@ -17,19 +17,18 @@ public class ApplicationTest {
 
     @Test
     void no_source() throws IOException {
-        var target = run(Source);
+        var target = runImpl();
         assertFalse(Files.exists(target));
+    }
+
+    private Path runImpl() throws IOException {
+        return new Application(Source).run();
     }
 
     @Test
     void with_source() throws IOException {
-        var target = run(Source);
+        var target = runImpl();
         assertTrue(Files.exists(target));
-    }
-
-    private Path run(Path source) throws IOException {
-        if (Files.exists(source)) Files.createFile(Target);
-        return Target;
     }
 
     @AfterEach
