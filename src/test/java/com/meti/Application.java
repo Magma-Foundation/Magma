@@ -5,13 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public record Application(Path source) {
-    static String renderIncludeDirective() {
-        return "#include <stdio.h>\n";
-    }
-
-    static String renderNativeImport() {
-        return "import native stdio;";
-    }
 
     Path run() throws IOException {
         var fileName = source.getFileName().toString();
@@ -21,13 +14,7 @@ public record Application(Path source) {
         var target = source.resolveSibling(targetName);
         if (Files.exists(source)) {
             var input = Files.readString(source);
-            String output;
-            if (input.equals(renderNativeImport())) {
-                output = renderIncludeDirective();
-            } else {
-                output = "";
-            }
-
+            var output = new Compiler(input).getString();
             Files.writeString(target, output);
         }
 

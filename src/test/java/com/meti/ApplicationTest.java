@@ -46,8 +46,8 @@ public class ApplicationTest {
 
     @Test
     void content() {
-        var input = Application.renderNativeImport();
-        var output = Application.renderIncludeDirective();
+        var input = Compiler.renderNativeImport();
+        var output = Compiler.renderIncludeDirective();
         assertCompile(input, output);
     }
 
