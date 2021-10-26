@@ -2,11 +2,9 @@ package com.meti.attribute;
 
 import com.meti.feature.Node;
 
-public interface Attribute {
-    default String asString() {
-        throw new UnsupportedOperationException();
-    }
+import java.util.stream.Stream;
 
+public interface Attribute {
     default int asInteger() {
         throw new UnsupportedOperationException();
     }
@@ -15,11 +13,19 @@ public interface Attribute {
         throw new UnsupportedOperationException();
     }
 
+    default Stream<Node> asNodeStream() {
+        throw new UnsupportedOperationException();
+    }
+
+    default String asString() {
+        throw new UnsupportedOperationException();
+    }
+
     enum Group {
         Node
     }
 
     enum Type {
-        Value
+        Children, Value
     }
 }
