@@ -10,7 +10,7 @@ class CompilerTest {
     @Test
     void multiple() {
         var input = renderNativeImport("stdio") + ";" + renderNativeImport("stdlib") + ";";
-        var output = Compiler.renderC(new Import("stdio")).getValue() + Compiler.renderC(new Import("stdlib")).getValue();
+        var output = Compiler.renderC(new Import("stdio")).compute() + Compiler.renderC(new Import("stdlib")).compute();
         assertCompile(input, output);
     }
 }

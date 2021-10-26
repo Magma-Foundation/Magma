@@ -17,7 +17,7 @@ class IntegerTest {
     }
 
     private static void assertInteger(int value) {
-        var rendered = Compiler.renderC(new IntegerNode(value)).getValue();
+        var rendered = Compiler.renderC(new IntegerNode(value)).compute();
         assertCompile(rendered, rendered);
     }
 }
