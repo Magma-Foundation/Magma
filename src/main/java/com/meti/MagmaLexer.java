@@ -4,22 +4,16 @@ import com.meti.feature.Import;
 import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
 
-public record MagmaLexer(String line) {
+public record MagmaLexer(Input root) {
     Node lexLine() {
-        if (line.startsWith("import native ")) {
-            var value = slice(line, "import native ", line.length());
+        if (root.startsWithString("import native ")) {
+            var value = root.slice("import native ", root.length());
             return new Import(value);
-        } else if (line.startsWith("return ")) {
-            var value = slice(line, "return ", line.length());
+        } else if (root.startsWithString("return ")) {
+            var value = root.slice("return ", root.length());
             return new Return(new IntegerNode(Integer.parseInt(value)));
         } else {
-            return new IntegerNode(Integer.parseInt(line));
+            return new IntegerNode(Integer.parseInt(root.compute()));
         }
-    }
-
-    public static String slice(String line, String prefix, int end) {
-        var prefixLength = prefix.length();
-        var slice = line.substring(prefixLength, end);
-        return slice.trim();
     }
 }
