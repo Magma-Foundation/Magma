@@ -5,7 +5,7 @@ import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
 
 public record MagmaLexer(Input root) {
-    Node lexLine() {
+    Node lex() {
         if (root.startsWithString("import native ")) {
             var value = root.slice("import native ", root.length());
             return new Import(value);

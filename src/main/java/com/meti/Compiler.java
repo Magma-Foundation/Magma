@@ -25,7 +25,7 @@ public record Compiler(String input) {
     }
 
     private String compileLine(String line) {
-        var tree = lexTree(new MagmaLexer(new Input(line)).lexLine());
+        var tree = lexTree(new MagmaLexer(new Input(line)).lex());
         return renderTree(tree)
                 .asString()
                 .orElse("");
