@@ -1,7 +1,5 @@
 package com.meti;
 
-import com.meti.feature.Import;
-import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
 
 import java.util.Arrays;
@@ -27,22 +25,10 @@ public record Compiler(String input) {
     }
 
     private String compileLine(String line) {
-        var tree = lexTree(lexLine(line));
+        var tree = lexTree(new MagmaLexer(line).lexLine());
         return renderTree(tree)
                 .asString()
                 .orElse("");
-    }
-
-    private Node lexLine(String line) {
-        if (line.startsWith(ImportNativePrefix)) {
-            var value = slice(line, ImportNativePrefix, line.length());
-            return new Import(value);
-        } else if (line.startsWith("return ")) {
-            var value = slice(line, "return ", line.length());
-            return new Return(new IntegerNode(Integer.parseInt(value)));
-        } else {
-            return new IntegerNode(Integer.parseInt(line));
-        }
     }
 
     private Node lexTree(Node node) {
@@ -54,11 +40,5 @@ public record Compiler(String input) {
                     .orElse(node);
         }
         return node;
-    }
-
-    private String slice(String line, String prefix, int end) {
-        var prefixLength = prefix.length();
-        var slice = line.substring(prefixLength, end);
-        return slice.trim();
     }
 }
