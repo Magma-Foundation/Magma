@@ -1,11 +1,11 @@
 package com.meti.magma;
 
-import com.meti.AbstractRenderingStage;
 import com.meti.clang.Processor;
-import com.meti.feature.IntegerRenderer;
-import com.meti.feature.Node;
-import com.meti.feature.ReturnRenderer;
-import com.meti.output.Output;
+import com.meti.compile.AbstractRenderingStage;
+import com.meti.compile.feature.IntegerRenderer;
+import com.meti.compile.feature.ReturnRenderer;
+import com.meti.compile.node.Node;
+import com.meti.compile.node.output.Output;
 
 import java.util.stream.Stream;
 

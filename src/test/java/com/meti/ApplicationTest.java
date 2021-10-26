@@ -1,7 +1,7 @@
 package com.meti;
 
 import com.meti.clang.CRenderingStage;
-import com.meti.feature.Import;
+import com.meti.compile.feature.Import;
 import com.meti.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
