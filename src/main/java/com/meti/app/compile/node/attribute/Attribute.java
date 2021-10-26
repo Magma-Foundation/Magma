@@ -6,24 +6,24 @@ import com.meti.app.compile.node.Node;
 import java.util.stream.Stream;
 
 public interface Attribute {
-    default Input asInput() {
-        throw new UnsupportedOperationException();
+    default Input asInput() throws AttributeException {
+        throw new AttributeException("Not input.");
     }
 
-    default int asInteger() {
-        throw new UnsupportedOperationException();
+    default int asInteger() throws AttributeException {
+        throw new AttributeException("Not an integer.");
     }
 
-    default Node asNode() {
-        throw new UnsupportedOperationException();
+    default Node asNode() throws AttributeException {
+        throw new AttributeException("Not a node.");
     }
 
-    default Stream<? extends Node> asNodeStream() {
-        throw new UnsupportedOperationException();
+    default Stream<? extends Node> asNodeStream() throws AttributeException {
+        throw new AttributeException("Not a sequence of nodes.");
     }
 
-    default String asString() {
-        throw new UnsupportedOperationException();
+    default String asString() throws AttributeException {
+        throw new AttributeException("Not a string.");
     }
 
     enum Group {

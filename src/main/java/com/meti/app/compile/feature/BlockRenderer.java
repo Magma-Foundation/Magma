@@ -1,8 +1,5 @@
 package com.meti.app.compile.feature;
 
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 import com.meti.app.clang.AbstractRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -15,7 +12,6 @@ import com.meti.app.compile.node.output.StringOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BlockRenderer extends AbstractRenderer {
     public BlockRenderer(Node node) {
@@ -23,16 +19,9 @@ public class BlockRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output processDefined() {
-        Option<Attribute> result;
-        try {
-            result = new Some<>(node.apply(Attribute.Type.Children));
-        } catch (AttributeException e) {
-            result = new None<>();
-        }
-        var lines = result
-                .map(Attribute::asNodeStream)
-                .orElse(Stream.empty())
+    protected Output processDefined() throws AttributeException {
+        var lines = node.apply(Attribute.Type.Children)
+                .asNodeStream()
                 .map(NodeOutput::new)
                 .collect(Collectors.toList());
         var copy = new ArrayList<Output>(List.of(new StringOutput("{")));

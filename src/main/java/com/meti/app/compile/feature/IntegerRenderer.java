@@ -1,8 +1,5 @@
 package com.meti.app.compile.feature;
 
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 import com.meti.app.clang.AbstractRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -16,17 +13,8 @@ public class IntegerRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output processDefined() {
-        Option<Attribute> result;
-        try {
-            result = new Some<>(node.apply(Attribute.Type.Value));
-        } catch (AttributeException e) {
-            result = new None<>();
-        }
-        var value = result
-                .map(Attribute::asInteger)
-                .orElse(-1);
-
+    protected Output processDefined() throws AttributeException {
+        var value = node.apply(Attribute.Type.Value).asInteger();
         return new StringOutput(String.valueOf(value));
     }
 }
