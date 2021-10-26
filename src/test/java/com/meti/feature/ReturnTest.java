@@ -13,7 +13,7 @@ class ReturnTest {
     }
 
     private static void assertInteger(final String value) {
-        var rendered = Compiler.renderC(new Return(new IntegerNode(Integer.parseInt(value))));
+        var rendered = Compiler.renderC(new Return(new IntegerNode(Integer.parseInt(value)))).getValue();
         assertCompile(rendered, rendered);
     }
 

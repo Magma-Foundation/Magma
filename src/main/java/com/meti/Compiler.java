@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
 
-    public static String renderC(Node node) {
+    public static StringOutput renderC(Node node) {
         var value = node.apply(Attribute.Type.Value);
         if (node.is(Import.Type.Import)) {
-            return "#include <" + value.asString() + ".h>\n";
+            return new StringOutput("#include <" + value.asString() + ".h>\n");
         } else if (node.is(Node.Type.Return)) {
-            return "return " + renderC(value.asNode()) + ";";
+            return new StringOutput("return " + renderC(value.asNode()).getValue() + ";");
         } else {
-            return String.valueOf(value.asInteger());
+            return new StringOutput(String.valueOf(value.asInteger()));
         }
     }
 
@@ -34,7 +34,7 @@ public record Compiler(String input) {
     }
 
     private String compileLine(String line) {
-        return renderC(lexLine(line));
+        return renderC(lexLine(line)).getValue();
     }
 
     private Node lexLine(String line) {

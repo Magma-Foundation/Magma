@@ -48,7 +48,7 @@ public class ApplicationTest {
     @Test
     void content() {
         var input = Compiler.renderNativeImport("stdio");
-        var output = Compiler.renderC(new Import("stdio"));
+        var output = Compiler.renderC(new Import("stdio")).getValue();
         assertCompile(input, output);
     }
 
