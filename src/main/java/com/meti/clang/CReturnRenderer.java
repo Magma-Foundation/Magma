@@ -1,7 +1,8 @@
 package com.meti.clang;
 
-import com.meti.*;
+import com.meti.attribute.Attribute;
 import com.meti.feature.Node;
+import com.meti.output.*;
 
 import java.util.List;
 

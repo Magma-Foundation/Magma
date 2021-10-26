@@ -1,9 +1,8 @@
-package com.meti;
+package com.meti.clang;
 
-import com.meti.clang.CImportRenderer;
-import com.meti.clang.CReturnRenderer;
-import com.meti.clang.Renderer;
+import com.meti.feature.IntegerRenderer;
 import com.meti.feature.Node;
+import com.meti.output.Output;
 
 import java.util.stream.Stream;
 

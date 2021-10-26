@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.output;
+
+import com.meti.option.Option;
+import com.meti.option.Some;
 
 public record StringOutput(String value) implements Output {
     @Override

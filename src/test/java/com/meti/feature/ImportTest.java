@@ -1,7 +1,7 @@
 package com.meti.feature;
 
-import com.meti.CRenderer;
 import com.meti.Compiler;
+import com.meti.clang.CRenderer;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.feature.FeatureTest.assertCompile;

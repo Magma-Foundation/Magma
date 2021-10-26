@@ -1,8 +1,8 @@
 package com.meti.feature;
 
-import com.meti.Attribute;
-import com.meti.None;
-import com.meti.Option;
+import com.meti.attribute.Attribute;
+import com.meti.option.None;
+import com.meti.option.Option;
 
 import java.util.stream.Stream;
 

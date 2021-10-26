@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.output;
+
+import com.meti.option.Option;
+import com.meti.option.Some;
 
 public class EmptyOutput implements Output {
     @Override

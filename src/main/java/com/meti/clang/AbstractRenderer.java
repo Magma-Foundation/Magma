@@ -1,10 +1,10 @@
 package com.meti.clang;
 
-import com.meti.None;
-import com.meti.Option;
-import com.meti.Output;
-import com.meti.Some;
 import com.meti.feature.Node;
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+import com.meti.output.Output;
 
 public abstract class AbstractRenderer implements Renderer {
     protected final Node node;

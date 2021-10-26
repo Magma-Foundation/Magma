@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.option;
+
+import com.meti.F1;
 
 public record Some<T>(T value) implements Option<T> {
     @Override

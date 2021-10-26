@@ -1,6 +1,4 @@
-package com.meti.feature;
-
-import com.meti.Attribute;
+package com.meti.attribute;
 
 public record IntegerAttribute(int value) implements Attribute {
     @Override

@@ -1,6 +1,9 @@
-package com.meti;
+package com.meti.output;
 
+import com.meti.F1;
 import com.meti.feature.Node;
+import com.meti.option.None;
+import com.meti.option.Option;
 
 public interface Output {
     default Option<Node> asNode() {

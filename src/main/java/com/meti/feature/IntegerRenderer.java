@@ -1,7 +1,9 @@
-package com.meti;
+package com.meti.feature;
 
+import com.meti.attribute.Attribute;
 import com.meti.clang.AbstractRenderer;
-import com.meti.feature.Node;
+import com.meti.output.Output;
+import com.meti.output.StringOutput;
 
 public class IntegerRenderer extends AbstractRenderer {
     public IntegerRenderer(Node node) {

@@ -1,6 +1,9 @@
 package com.meti;
 
+import com.meti.attribute.Attribute;
+import com.meti.clang.CRenderer;
 import com.meti.feature.Node;
+import com.meti.output.Output;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

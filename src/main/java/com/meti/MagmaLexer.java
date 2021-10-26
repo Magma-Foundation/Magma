@@ -3,6 +3,7 @@ package com.meti;
 import com.meti.feature.Import;
 import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
+import com.meti.feature.Return;
 
 public record MagmaLexer(Input root) {
     Node lex() {

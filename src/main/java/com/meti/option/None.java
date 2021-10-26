@@ -1,8 +1,10 @@
-package com.meti;
+package com.meti.option;
+
+import com.meti.F1;
 
 public class None<T> implements Option<T> {
     @Override
-    public <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) throws E {
+    public <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) {
         return new None<>();
     }
 
