@@ -5,7 +5,7 @@ import com.meti.Attribute;
 public record IntegerNode(int value) implements Node {
     @Override
     public boolean is(Import.Type type) {
-        return type == Import.Type.Integer;
+        return type == Node.Type.Integer;
     }
 
     @Override
