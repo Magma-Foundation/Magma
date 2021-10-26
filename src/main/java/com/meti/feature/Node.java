@@ -6,7 +6,7 @@ public interface Node {
     boolean is(Node.Type type);
 
     enum Type {
-        Integer, Import
+        Integer, Return, Import
     }
 
     Attribute apply(Attribute.Type type);
