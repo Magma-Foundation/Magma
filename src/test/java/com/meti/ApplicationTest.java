@@ -16,18 +16,12 @@ public class ApplicationTest {
     public static final Path Target = Paths.get(".", "index.c");
 
     @Test
-    void no_source() throws IOException {
-        var target = runImpl();
-        assertFalse(Files.exists(target));
-    }
-
-    private Path runImpl() throws IOException {
-        return new Application(Source).run();
-    }
-
-    @Test
-    void target() throws IOException {
-        assertEquals(Target, runImpl());
+    void content() {
+        var input = Compiler.renderNativeImport("stdio");
+        var output = Compiler.render(new Import("stdio"))
+                .asString()
+                .orElse("");
+        assertCompile(input, output);
     }
 
     @Test
@@ -46,10 +40,24 @@ public class ApplicationTest {
     }
 
     @Test
-    void content() {
-        var input = Compiler.renderNativeImport("stdio");
-        var output = Compiler.renderC(new Import("stdio")).compute();
-        assertCompile(input, output);
+    void no_source() throws IOException {
+        var target = runImpl();
+        assertFalse(Files.exists(target));
+    }
+
+    private Path runImpl() throws IOException {
+        return new Application(Source).run();
+    }
+
+    @Test
+    void target() throws IOException {
+        assertEquals(Target, runImpl());
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Target);
+        Files.deleteIfExists(Source);
     }
 
     @Test
@@ -57,11 +65,5 @@ public class ApplicationTest {
         Files.createFile(Source);
         runImpl();
         assertTrue(Files.exists(Target));
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.deleteIfExists(Target);
-        Files.deleteIfExists(Source);
     }
 }

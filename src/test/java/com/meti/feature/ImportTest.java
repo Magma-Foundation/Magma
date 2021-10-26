@@ -10,7 +10,9 @@ class ImportTest {
     @Test
     void another() {
         var input = Compiler.renderNativeImport("stdlib");
-        var output = Compiler.renderC(new Import("stdlib")).compute();
+        var output = Compiler.render(new Import("stdlib"))
+                .asString()
+                .orElse("");
         assertCompile(input, output);
     }
 }
