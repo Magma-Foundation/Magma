@@ -1,15 +1,11 @@
 package com.meti;
 
-import com.meti.clang.CImportRenderer;
-import com.meti.clang.CReturnRenderer;
-import com.meti.clang.Renderer;
 import com.meti.feature.Import;
 import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
@@ -26,20 +22,8 @@ public record Compiler(String input) {
                 .collect(Collectors.joining());
     }
 
-    public static Output render(Node node) {
-        return Stream.of(
-                new CImportRenderer(node),
-                new CReturnRenderer(node),
-                new IntegerRenderer(node))
-                .map(Renderer::render)
-                .map(option -> option.map(Stream::of))
-                .flatMap(option -> option.orElse(Stream.empty()))
-                .findFirst()
-                .orElseThrow();
-    }
-
     private static Output renderTree(Node tree) {
-        return render(tree).mapNodes(Compiler::renderTree);
+        return new CRenderer(tree).render().mapNodes(Compiler::renderTree);
     }
 
     private String compileLine(String line) {

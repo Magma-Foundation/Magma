@@ -1,5 +1,6 @@
 package com.meti.feature;
 
+import com.meti.CRenderer;
 import com.meti.Compiler;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ class ImportTest {
     @Test
     void another() {
         var input = Compiler.renderNativeImport("stdlib");
-        var output = Compiler.render(new Import("stdlib"))
+        var output = new CRenderer(new Import("stdlib")).render()
                 .asString()
                 .orElse("");
         assertCompile(input, output);

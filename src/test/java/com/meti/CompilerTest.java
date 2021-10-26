@@ -10,8 +10,8 @@ class CompilerTest {
     @Test
     void multiple() {
         var input = renderNativeImport("stdio") + ";" + renderNativeImport("stdlib") + ";";
-        var first = Compiler.render(new Import("stdio")).asString().orElse("");
-        var second = Compiler.render(new Import("stdlib")).asString().orElse("");
+        var first = new CRenderer(new Import("stdio")).render().asString().orElse("");
+        var second = new CRenderer(new Import("stdlib")).render().asString().orElse("");
         var output = first + second;
         assertCompile(input, output);
     }

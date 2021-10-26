@@ -18,7 +18,7 @@ public class ApplicationTest {
     @Test
     void content() {
         var input = Compiler.renderNativeImport("stdio");
-        var output = Compiler.render(new Import("stdio"))
+        var output = new CRenderer(new Import("stdio")).render()
                 .asString()
                 .orElse("");
         assertCompile(input, output);
