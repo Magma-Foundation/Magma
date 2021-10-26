@@ -12,7 +12,7 @@ class ReturnTest {
     }
 
     private static void assertInteger(int value) {
-        var rendered = new CRenderingStage(new Return(new IntegerNode(value))).render()
+        var rendered = new CRenderingStage(new Return(new IntegerNode(value))).process()
                 .asString()
                 .orElse("");
         assertCompile(rendered, rendered);

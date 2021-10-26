@@ -6,7 +6,7 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 import com.meti.output.Output;
 
-public abstract class AbstractRenderer implements Renderer {
+public abstract class AbstractRenderer implements Processor<Output> {
     protected final Node node;
     protected final Node.Type type;
 
@@ -16,7 +16,7 @@ public abstract class AbstractRenderer implements Renderer {
     }
 
     @Override
-    public Option<Output> render() {
+    public Option<Output> process() {
         if (node.is(type)) {
             Output output = renderDefined();
             return new Some<>(output);

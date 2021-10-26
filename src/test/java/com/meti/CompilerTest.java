@@ -11,14 +11,14 @@ class CompilerTest {
     @Test
     void multiple() {
         var input = new MagmaRenderingStage(new Import("stdio"))
-                            .render()
+                            .process()
                             .asString()
                             .orElse("") + ";" + new MagmaRenderingStage(new Import("stdlib"))
-                            .render()
+                            .process()
                             .asString()
                             .orElse("") + ";";
-        var first = new CRenderingStage(new Import("stdio")).render().asString().orElse("");
-        var second = new CRenderingStage(new Import("stdlib")).render().asString().orElse("");
+        var first = new CRenderingStage(new Import("stdio")).process().asString().orElse("");
+        var second = new CRenderingStage(new Import("stdlib")).process().asString().orElse("");
         var output = first + second;
         assertCompile(input, output);
     }

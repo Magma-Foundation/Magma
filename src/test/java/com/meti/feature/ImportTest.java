@@ -11,10 +11,10 @@ class ImportTest {
     @Test
     void another() {
         var input = new MagmaRenderingStage(new Import("stdlib"))
-                .render()
+                .process()
                 .asString()
                 .orElse("");
-        var output = new CRenderingStage(new Import("stdlib")).render()
+        var output = new CRenderingStage(new Import("stdlib")).process()
                 .asString()
                 .orElse("");
         assertCompile(input, output);

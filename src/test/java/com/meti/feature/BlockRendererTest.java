@@ -19,7 +19,7 @@ class BlockRendererTest {
                 new StringOutput("{"),
                 new NodeOutput(line),
                 new StringOutput("}")));
-        var actual = new BlockRenderer(new Block(List.of(line))).render()
+        var actual = new BlockRenderer(new Block(List.of(line))).process()
                 .orElse(new EmptyOutput());
         assertEquals(expected, actual);
     }

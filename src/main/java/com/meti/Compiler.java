@@ -3,7 +3,7 @@ package com.meti;
 import com.meti.attribute.Attribute;
 import com.meti.clang.CRenderingStage;
 import com.meti.feature.Node;
-import com.meti.magma.MagmaLexer;
+import com.meti.magma.MagmaLexingStage;
 import com.meti.output.Output;
 
 import java.util.Arrays;
@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 
 public record Compiler(String input) {
     private static Output renderTree(Node tree) {
-        return new CRenderingStage(tree).render().mapNodes(Compiler::renderTree);
+        return new CRenderingStage(tree)
+                .process()
+                .mapNodes(Compiler::renderTree);
     }
 
     public String compile() {
@@ -23,7 +25,7 @@ public record Compiler(String input) {
     }
 
     private String compileLine(String line) {
-        var tree = lexTree(new MagmaLexer(new Input(line)).lex());
+        var tree = lexTree(new MagmaLexingStage(new Input(line)).process());
         return renderTree(tree)
                 .asString()
                 .orElse("");

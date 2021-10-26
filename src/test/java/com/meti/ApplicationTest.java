@@ -20,10 +20,10 @@ public class ApplicationTest {
     @Test
     void content() {
         var input = new MagmaRenderingStage(new Import("stdio"))
-                .render()
+                .process()
                 .asString()
                 .orElse("");
-        var output = new CRenderingStage(new Import("stdio")).render()
+        var output = new CRenderingStage(new Import("stdio")).process()
                 .asString()
                 .orElse("");
         assertCompile(input, output);
