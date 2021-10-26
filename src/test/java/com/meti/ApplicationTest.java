@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.clang.CRenderingStage;
 import com.meti.feature.Import;
+import com.meti.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,10 @@ public class ApplicationTest {
 
     @Test
     void content() {
-        var input = Compiler.renderNativeImport("stdio");
+        var input = new MagmaRenderingStage(new Import("stdio"))
+                .render()
+                .asString()
+                .orElse("");
         var output = new CRenderingStage(new Import("stdio")).render()
                 .asString()
                 .orElse("");
