@@ -11,7 +11,7 @@ public class IntegerRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output renderDefined() {
+    protected Output processValid() {
         var value = node.apply(Attribute.Type.Value)
                 .map(Attribute::asInteger)
                 .orElse(-1);

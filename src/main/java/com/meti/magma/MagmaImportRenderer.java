@@ -14,7 +14,7 @@ class MagmaImportRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output renderDefined() {
+    protected Output processValid() {
         return new StringOutput(ImportNativePrefix + compute());
     }
 

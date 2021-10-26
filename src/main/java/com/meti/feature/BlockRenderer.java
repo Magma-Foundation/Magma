@@ -18,7 +18,7 @@ public class BlockRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output renderDefined() {
+    protected Output processValid() {
         var lines = node.apply(Attribute.Type.Children)
                 .map(Attribute::asNodeStream)
                 .orElse(Stream.empty())

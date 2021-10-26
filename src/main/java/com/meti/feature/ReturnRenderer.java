@@ -12,7 +12,7 @@ public class ReturnRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output renderDefined() {
+    protected Output processValid() {
         var prefix = new StringOutput("return ");
         var value = node.apply(Attribute.Type.Value);
         return value.<Output, RuntimeException>map(v -> {

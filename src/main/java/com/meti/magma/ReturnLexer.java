@@ -13,7 +13,7 @@ public record ReturnLexer(Input root) implements Processor<Node> {
     @Override
     public Option<Node> process() {
         if (root.startsWithString("return ")) {
-            var value = root.slice("return ", root.length());
+            var value = root.sliceWithPrefix("return ");
             return new Some<>(new Return(new IntegerNode(Integer.parseInt(value))));
         }
         return new None<>();

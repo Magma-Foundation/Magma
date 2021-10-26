@@ -12,7 +12,7 @@ public final class CImportRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output renderDefined() {
+    protected Output processValid() {
         var format = "#include <%s.h>\n";
         var value = node.apply(Attribute.Type.Value)
                 .map(Attribute::asString)

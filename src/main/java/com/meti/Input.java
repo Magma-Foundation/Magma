@@ -5,14 +5,24 @@ public record Input(String value) {
         return value;
     }
 
+    public boolean endsWithChar(char suffix) {
+        return value.length() > 0 && value.charAt(value.length() - 1) == suffix;
+    }
+
     public int length() {
         return value.length();
     }
 
-    public String slice(String prefix, int end) {
-        var prefixLength = prefix.length();
-        var slice = value.substring(prefixLength, end);
-        return slice.trim();
+    public String sliceWithPrefix(String offset) {
+        return slice(offset.length(), value.length());
+    }
+
+    public String slice(int start, int end) {
+        return value.substring(start, end).trim();
+    }
+
+    public boolean startsWithChar(char prefix) {
+        return value.length() > 0 && value.charAt(0) == prefix;
     }
 
     public boolean startsWithString(String prefix) {

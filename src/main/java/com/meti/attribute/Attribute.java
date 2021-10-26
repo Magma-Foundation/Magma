@@ -1,10 +1,15 @@
 package com.meti.attribute;
 
+import com.meti.Input;
 import com.meti.feature.Node;
 
 import java.util.stream.Stream;
 
 public interface Attribute {
+    default Input asInput() {
+        throw new UnsupportedOperationException();
+    }
+
     default int asInteger() {
         throw new UnsupportedOperationException();
     }
