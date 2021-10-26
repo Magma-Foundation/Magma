@@ -18,6 +18,6 @@ public interface Node {
     }
 
     enum Type {
-        Integer, Return, Block, Import
+        Integer, Return, Block, Content, Import
     }
 }

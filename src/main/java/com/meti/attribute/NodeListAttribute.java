@@ -5,9 +5,9 @@ import com.meti.feature.Node;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record NodeListAttribute(List<Node> children) implements Attribute {
+public record NodeListAttribute(List<? extends Node> children) implements Attribute {
     @Override
-    public Stream<Node> asNodeStream() {
+    public Stream<? extends Node> asNodeStream() {
         return children.stream();
     }
 }

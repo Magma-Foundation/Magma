@@ -12,7 +12,7 @@ public record ImportLexer(Input root) implements Processor<Node> {
     @Override
     public Option<Node> process() {
         if (root.startsWithString("import native ")) {
-            var value = root.slice("import native ", root.length());
+            var value = root.truncate("import native ");
             return new Some<>(new Import(value));
         }
         return new None<>();

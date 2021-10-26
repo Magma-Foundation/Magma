@@ -8,7 +8,7 @@ import com.meti.option.Some;
 
 import java.util.List;
 
-public record Block(List<Node> children) implements Node {
+public record Block(List<? extends Node> children) implements Node {
     @Override
     public Option<Attribute> apply(Attribute.Type type) {
         return type == Attribute.Type.Children

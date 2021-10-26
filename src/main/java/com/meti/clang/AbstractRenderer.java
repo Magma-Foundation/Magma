@@ -1,12 +1,9 @@
 package com.meti.clang;
 
 import com.meti.feature.Node;
-import com.meti.option.None;
-import com.meti.option.Option;
-import com.meti.option.Some;
 import com.meti.output.Output;
 
-public abstract class AbstractRenderer implements Processor<Output> {
+public abstract class AbstractRenderer extends AbstractProcessor<Output> {
     protected final Node node;
     protected final Node.Type type;
 
@@ -16,13 +13,7 @@ public abstract class AbstractRenderer implements Processor<Output> {
     }
 
     @Override
-    public Option<Output> process() {
-        if (node.is(type)) {
-            Output output = renderDefined();
-            return new Some<>(output);
-        }
-        return new None<>();
+    protected boolean validate() {
+        return node.is(type);
     }
-
-    protected abstract Output renderDefined();
 }
