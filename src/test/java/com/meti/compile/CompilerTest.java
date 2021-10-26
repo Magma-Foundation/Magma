@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 import com.meti.clang.CRenderingStage;
 import com.meti.compile.feature.Import;
