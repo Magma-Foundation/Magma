@@ -1,6 +1,6 @@
 package com.meti;
 
-import com.meti.clang.CRenderer;
+import com.meti.clang.CRenderingStage;
 import com.meti.feature.Import;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ public class ApplicationTest {
     @Test
     void content() {
         var input = Compiler.renderNativeImport("stdio");
-        var output = new CRenderer(new Import("stdio")).render()
+        var output = new CRenderingStage(new Import("stdio")).render()
                 .asString()
                 .orElse("");
         assertCompile(input, output);

@@ -1,8 +1,11 @@
 package com.meti;
 
 import com.meti.attribute.Attribute;
-import com.meti.clang.CRenderer;
+import com.meti.clang.CRenderingStage;
+import com.meti.feature.Import;
 import com.meti.feature.Node;
+import com.meti.magma.MagmaLexer;
+import com.meti.magma.MagmaRenderingStage;
 import com.meti.output.Output;
 
 import java.util.Arrays;
@@ -12,11 +15,18 @@ public record Compiler(String input) {
     public static final String ImportNativePrefix = "import native ";
 
     public static String renderNativeImport(final String value) {
-        return ImportNativePrefix + value;
+        return render(new Import(value));
+    }
+
+    private static String render(Node root) {
+        return new MagmaRenderingStage(root)
+                .render()
+                .asString()
+                .orElse("");
     }
 
     private static Output renderTree(Node tree) {
-        return new CRenderer(tree).render().mapNodes(Compiler::renderTree);
+        return new CRenderingStage(tree).render().mapNodes(Compiler::renderTree);
     }
 
     public String compile() {
@@ -44,4 +54,5 @@ public record Compiler(String input) {
         }
         return node;
     }
+
 }

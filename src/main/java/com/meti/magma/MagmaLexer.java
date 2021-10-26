@@ -1,12 +1,13 @@
-package com.meti;
+package com.meti.magma;
 
+import com.meti.Input;
 import com.meti.feature.Import;
 import com.meti.feature.IntegerNode;
 import com.meti.feature.Node;
 import com.meti.feature.Return;
 
 public record MagmaLexer(Input root) {
-    Node lex() {
+    public Node lex() {
         if (root.startsWithString("import native ")) {
             var value = root.slice("import native ", root.length());
             return new Import(value);

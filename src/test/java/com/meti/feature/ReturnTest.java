@@ -1,6 +1,6 @@
 package com.meti.feature;
 
-import com.meti.clang.CRenderer;
+import com.meti.clang.CRenderingStage;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.feature.FeatureTest.assertCompile;
@@ -12,7 +12,7 @@ class ReturnTest {
     }
 
     private static void assertInteger(int value) {
-        var rendered = new CRenderer(new Return(new IntegerNode(value))).render()
+        var rendered = new CRenderingStage(new Return(new IntegerNode(value))).render()
                 .asString()
                 .orElse("");
         assertCompile(rendered, rendered);
