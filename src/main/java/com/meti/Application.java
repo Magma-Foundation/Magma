@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.compile.Compiler;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

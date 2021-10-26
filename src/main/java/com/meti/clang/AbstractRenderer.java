@@ -1,7 +1,7 @@
 package com.meti.clang;
 
-import com.meti.feature.Node;
-import com.meti.output.Output;
+import com.meti.compile.Node;
+import com.meti.compile.output.Output;
 
 public abstract class AbstractRenderer extends AbstractProcessor<Output> {
     protected final Node node;

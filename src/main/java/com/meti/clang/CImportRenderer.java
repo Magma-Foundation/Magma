@@ -1,10 +1,10 @@
 package com.meti.clang;
 
-import com.meti.attribute.Attribute;
-import com.meti.feature.Import;
-import com.meti.feature.Node;
-import com.meti.output.Output;
-import com.meti.output.StringOutput;
+import com.meti.compile.Node;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.feature.Import;
+import com.meti.compile.output.Output;
+import com.meti.compile.output.StringOutput;
 
 public final class CImportRenderer extends AbstractRenderer {
     public CImportRenderer(Node node) {

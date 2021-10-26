@@ -1,10 +1,10 @@
 package com.meti.magma;
 
-import com.meti.attribute.Attribute;
 import com.meti.clang.AbstractRenderer;
-import com.meti.feature.Node;
-import com.meti.output.Output;
-import com.meti.output.StringOutput;
+import com.meti.compile.Node;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.output.Output;
+import com.meti.compile.output.StringOutput;
 
 class MagmaImportRenderer extends AbstractRenderer {
     public static final String ImportNativePrefix = "import native ";

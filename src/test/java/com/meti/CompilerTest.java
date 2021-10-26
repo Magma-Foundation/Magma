@@ -1,11 +1,11 @@
 package com.meti;
 
 import com.meti.clang.CRenderingStage;
-import com.meti.feature.Import;
+import com.meti.compile.feature.Import;
 import com.meti.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.feature.FeatureTest.assertCompile;
+import static com.meti.compile.feature.FeatureTest.assertCompile;
 
 class CompilerTest {
     @Test

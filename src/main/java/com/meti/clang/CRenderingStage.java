@@ -1,10 +1,10 @@
 package com.meti.clang;
 
-import com.meti.AbstractRenderingStage;
-import com.meti.feature.IntegerRenderer;
-import com.meti.feature.Node;
-import com.meti.feature.ReturnRenderer;
-import com.meti.output.Output;
+import com.meti.compile.AbstractRenderingStage;
+import com.meti.compile.Node;
+import com.meti.compile.feature.IntegerRenderer;
+import com.meti.compile.feature.ReturnRenderer;
+import com.meti.compile.output.Output;
 
 import java.util.stream.Stream;
 

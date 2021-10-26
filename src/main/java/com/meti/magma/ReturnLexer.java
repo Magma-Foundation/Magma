@@ -1,10 +1,10 @@
 package com.meti.magma;
 
-import com.meti.Input;
 import com.meti.clang.Processor;
-import com.meti.feature.IntegerNode;
-import com.meti.feature.Node;
-import com.meti.feature.Return;
+import com.meti.compile.Input;
+import com.meti.compile.Node;
+import com.meti.compile.feature.IntegerNode;
+import com.meti.compile.feature.Return;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
