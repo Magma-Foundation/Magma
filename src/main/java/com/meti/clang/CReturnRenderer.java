@@ -14,8 +14,10 @@ public class CReturnRenderer extends AbstractRenderer {
     protected Output renderDefined() {
         var prefix = new StringOutput("return ");
         var value = node.apply(Attribute.Type.Value);
-        var content = new NodeOutput(value.asNode());
-        var suffix = new StringOutput(";");
-        return new CompoundOutput(List.of(prefix, content, suffix));
+        return value.<Output, RuntimeException>map(v -> {
+            var content = new NodeOutput(v.asNode());
+            var suffix = new StringOutput(";");
+            return new CompoundOutput(List.of(prefix, content, suffix));
+        }).orElse(new EmptyOutput());
     }
 }

@@ -1,6 +1,9 @@
 package com.meti.feature;
 
 import com.meti.Attribute;
+import com.meti.None;
+import com.meti.Option;
+import com.meti.Some;
 
 public record Import(String value) implements Node {
     @Override
@@ -9,8 +12,9 @@ public record Import(String value) implements Node {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) {
-        if (type == Attribute.Type.Value) return new StringAttribute(value);
-        else throw new UnsupportedOperationException();
+    public Option<Attribute> apply(Attribute.Type type) {
+        return type == Attribute.Type.Value ?
+                new Some<>(new StringAttribute(value)) :
+                new None<>();
     }
 }

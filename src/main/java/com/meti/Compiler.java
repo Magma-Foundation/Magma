@@ -14,6 +14,10 @@ public record Compiler(String input) {
         return ImportNativePrefix + value;
     }
 
+    private static Output renderTree(Node tree) {
+        return new CRenderer(tree).render().mapNodes(Compiler::renderTree);
+    }
+
     public String compile() {
         if (input.isBlank()) return "";
         var lines = input.split(";");
@@ -22,12 +26,9 @@ public record Compiler(String input) {
                 .collect(Collectors.joining());
     }
 
-    private static Output renderTree(Node tree) {
-        return new CRenderer(tree).render().mapNodes(Compiler::renderTree);
-    }
-
     private String compileLine(String line) {
-        return renderTree(lexLine(line))
+        var tree = lexTree(lexLine(line));
+        return renderTree(tree)
                 .asString()
                 .orElse("");
     }
@@ -42,6 +43,17 @@ public record Compiler(String input) {
         } else {
             return new IntegerNode(Integer.parseInt(line));
         }
+    }
+
+    private Node lexTree(Node node) {
+        var children = node.stream(Attribute.Group.Node).collect(Collectors.toList());
+        for (Attribute.Type child : children) {
+            node = node.apply(child)
+                    .map(Attribute::asNode)
+                    .map(this::lexTree)
+                    .orElse(node);
+        }
+        return node;
     }
 
     private String slice(String line, String prefix, int end) {

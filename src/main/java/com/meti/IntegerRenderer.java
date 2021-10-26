@@ -10,7 +10,10 @@ public class IntegerRenderer extends AbstractRenderer {
 
     @Override
     protected Output renderDefined() {
-        var value = node.apply(Attribute.Type.Value).asInteger();
+        var value = node.apply(Attribute.Type.Value)
+                .map(Attribute::asInteger)
+                .orElse(-1);
+
         return new StringOutput(String.valueOf(value));
     }
 }

@@ -15,6 +15,10 @@ public interface Attribute {
         throw new UnsupportedOperationException();
     }
 
+    enum Group {
+        Node
+    }
+
     enum Type {
         Value
     }

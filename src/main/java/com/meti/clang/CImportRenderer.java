@@ -14,7 +14,10 @@ public final class CImportRenderer extends AbstractRenderer {
     @Override
     protected Output renderDefined() {
         var format = "#include <%s.h>\n";
-        var value = node.apply(Attribute.Type.Value).asString();
+        var value = node.apply(Attribute.Type.Value)
+                .map(Attribute::asString)
+                .orElse("");
+
         var formatted = format.formatted(value);
         return new StringOutput(formatted);
     }

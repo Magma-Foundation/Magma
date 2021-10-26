@@ -10,8 +10,9 @@ public record Return(Node value) implements Node {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) {
-        if (type == Attribute.Type.Value) return new NodeAttribute(value);
-        throw new UnsupportedOperationException();
+    public Option<Attribute> apply(Attribute.Type type) {
+        return type == Attribute.Type.Value ?
+                new Some<>(new NodeAttribute(value)) :
+                new None<>();
     }
 }
