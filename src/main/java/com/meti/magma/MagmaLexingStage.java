@@ -2,6 +2,7 @@ package com.meti.magma;
 
 import com.meti.clang.Processor;
 import com.meti.compile.AbstractStage;
+import com.meti.compile.feature.BlockLexer;
 import com.meti.compile.node.Input;
 import com.meti.compile.node.Node;
 
@@ -16,7 +17,9 @@ public final class MagmaLexingStage extends AbstractStage<Node, Processor<Node>>
 
     @Override
     protected Stream<Processor<Node>> createProcessors() {
-        return Stream.of(new ImportLexer(root),
+        return Stream.of(
+                new BlockLexer(root),
+                new ImportLexer(root),
                 new ReturnLexer(root),
                 new IntegerLexer(root));
     }

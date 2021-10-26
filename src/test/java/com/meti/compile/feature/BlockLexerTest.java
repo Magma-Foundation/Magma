@@ -1,14 +1,10 @@
 package com.meti.compile.feature;
 
-import com.meti.clang.AbstractProcessor;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Input;
-import com.meti.compile.node.Node;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,32 +22,4 @@ public class BlockLexerTest {
         assertEquals(expected, actual);
     }
 
-    static class BlockLexer extends AbstractProcessor<Node> {
-        private final Input input;
-
-        BlockLexer(Input input) {
-            this.input = input;
-        }
-
-        @Override
-        protected boolean validate() {
-            return input.startsWithChar('{') && input.endsWithChar('}');
-        }
-
-        @Override
-        protected Node processDefined() {
-            var split = input.slice(1, input.length() - 1).split(";");
-            var lines = createChildren(split);
-            return new Block(lines);
-        }
-
-        private List<Content> createChildren(String[] split) {
-            return Arrays.stream(split)
-                    .map(String::trim)
-                    .filter(value -> !value.isEmpty())
-                    .map(Input::new)
-                    .map(Content::new)
-                    .collect(Collectors.toList());
-        }
-    }
 }
