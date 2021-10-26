@@ -1,13 +1,13 @@
-package com.meti.clang;
+package com.meti.feature;
 
 import com.meti.attribute.Attribute;
-import com.meti.feature.Node;
+import com.meti.clang.AbstractRenderer;
 import com.meti.output.*;
 
 import java.util.List;
 
-public class CReturnRenderer extends AbstractRenderer {
-    public CReturnRenderer(Node node) {
+public class ReturnRenderer extends AbstractRenderer {
+    public ReturnRenderer(Node node) {
         super(node, Node.Type.Return);
     }
 

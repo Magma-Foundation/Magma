@@ -2,9 +2,9 @@ package com.meti.magma;
 
 import com.meti.AbstractRenderingStage;
 import com.meti.clang.AbstractRenderer;
-import com.meti.clang.CReturnRenderer;
 import com.meti.feature.IntegerRenderer;
 import com.meti.feature.Node;
+import com.meti.feature.ReturnRenderer;
 
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ public class MagmaRenderingStage extends AbstractRenderingStage {
     protected Stream<AbstractRenderer> createRenderers() {
         return Stream.of(
                 new MagmaImportRenderer(node),
-                new CReturnRenderer(node),
+                new ReturnRenderer(node),
                 new IntegerRenderer(node));
     }
 }
