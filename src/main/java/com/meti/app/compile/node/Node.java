@@ -1,15 +1,12 @@
 package com.meti.app.compile.node;
 
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 
 import java.util.stream.Stream;
 
 public interface Node {
-    default Option<Attribute> apply(Attribute.Type type) {
-        return new None<>();
-    }
+    Attribute apply(Attribute.Type type) throws AttributeException;
 
     boolean is(Node.Type type);
 

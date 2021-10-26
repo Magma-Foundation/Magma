@@ -1,8 +1,12 @@
 package com.meti.app.compile.feature;
 
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.app.clang.AbstractRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.output.CompoundOutput;
 import com.meti.app.compile.node.output.NodeOutput;
 import com.meti.app.compile.node.output.Output;
@@ -20,7 +24,13 @@ public class BlockRenderer extends AbstractRenderer {
 
     @Override
     protected Output processDefined() {
-        var lines = node.apply(Attribute.Type.Children)
+        Option<Attribute> result;
+        try {
+            result = new Some<>(node.apply(Attribute.Type.Children));
+        } catch (AttributeException e) {
+            result = new None<>();
+        }
+        var lines = result
                 .map(Attribute::asNodeStream)
                 .orElse(Stream.empty())
                 .map(NodeOutput::new)
