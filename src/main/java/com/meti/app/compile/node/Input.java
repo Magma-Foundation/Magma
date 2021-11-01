@@ -1,5 +1,9 @@
 package com.meti.app.compile.node;
 
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
+
 public record Input(String value) {
     public String compute() {
         return value;
@@ -29,5 +33,12 @@ public record Input(String value) {
 
     public String slice(int start, int end) {
         return value.substring(start, end).trim();
+    }
+
+    public Option<Integer> firstIndexOfChar(char c) {
+        var index = value.indexOf(c);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
     }
 }

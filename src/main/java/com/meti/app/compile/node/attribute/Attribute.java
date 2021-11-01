@@ -30,6 +30,6 @@ public interface Attribute {
     }
 
     enum Type {
-        Children, Value
+        Children, Name, Value
     }
 }
