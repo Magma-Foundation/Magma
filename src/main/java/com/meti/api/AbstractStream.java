@@ -49,37 +49,31 @@ public interface AbstractStream<T> extends Stream<T> {
     @Override
     default <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) {
         return new AbstractStream<>() {
-            private Stream<R> current = new EmptyStream<>();
-            private boolean hasCurrent = false;
+            private Stream<R> current = null;
 
             @Override
             public R head() throws StreamException {
-                if (!hasCurrent) {
-                    try {
-                        current = mapper.apply(AbstractStream.this.head());
-                    } catch (EndOfStreamException e) {
-                        throw e;
-                    } catch (Exception e) {
-                        throw new StreamException(e);
-                    }
-                    hasCurrent = true;
+                if (current == null) {
+                    advance();
                 }
 
-                while (hasCurrent) {
+                while (true) {
                     try {
                         return current.head();
                     } catch (EndOfStreamException e) {
-                        try {
-                            current = mapper.apply(AbstractStream.this.head());
-                        } catch (EndOfStreamException e2) {
-                            hasCurrent = false;
-                        } catch (Exception ex) {
-                            throw new StreamException(e);
-                        }
+                        advance();
                     }
                 }
+            }
 
-                throw new EndOfStreamException("No more streams left.");
+            private void advance() throws StreamException {
+                try {
+                    current = mapper.apply(AbstractStream.this.head());
+                } catch (StreamException ex) {
+                    throw ex;
+                } catch (Exception ex) {
+                    throw new StreamException(ex);
+                }
             }
         };
     }
