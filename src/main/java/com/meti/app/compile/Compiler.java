@@ -1,5 +1,7 @@
 package com.meti.app.compile;
 
+import com.meti.api.ListStream;
+import com.meti.api.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -15,13 +17,13 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
-    private static Output renderTree(Node tree) {
+    private static Output renderTree(Node tree) throws CompileException {
         return new CRenderingStage(tree)
                 .process()
                 .mapNodes(Compiler::renderTree);
     }
 
-    public String compile() {
+    public String compile() throws CompileException {
         if (input.isBlank()) return "";
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
@@ -39,19 +41,27 @@ public record Compiler(String input) {
         }
         lines.add(builder.toString());
         lines.removeIf(String::isBlank);
-        return lines.stream()
-                .map(this::compileLine)
-                .collect(Collectors.joining());
+
+        try {
+            return new ListStream<>(lines)
+                    .map(this::compileLine)
+                    .foldRight((current, next) -> current + next)
+                    .orElse("");
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
-    private String compileLine(String line) {
-        var tree = lexTree(new MagmaLexingStage(new Input(line)).process());
+    private String compileLine(String line) throws CompileException {
+        var input = new Input(line);
+        var root = new MagmaLexingStage(input).process();
+        var tree = lexTree(root);
         return renderTree(tree)
                 .asString()
                 .orElse("");
     }
 
-    private Node lexTree(Node node) {
+    private Node lexTree(Node node) throws AttributeException {
         var children = node.stream(Attribute.Group.Node).collect(Collectors.toList());
         for (Attribute.Type child : children) {
             Option<Attribute> result;

@@ -1,5 +1,6 @@
 package com.meti.app.compile.feature;
 
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Input;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ public class BlockLexerTest {
     }
 
     @Test
-    void processDefined() {
+    void processDefined() throws CompileException {
         var expected = new Block(List.of(new Content(new Input("return 420"))));
         var actual = new BlockLexer(new Input("{return 420;}")).processDefined();
         assertEquals(expected, actual);

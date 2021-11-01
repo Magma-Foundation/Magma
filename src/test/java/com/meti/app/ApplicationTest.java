@@ -1,6 +1,7 @@
 package com.meti.app;
 
 import com.meti.app.clang.CRenderingStage;
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.feature.Import;
 import com.meti.app.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +19,7 @@ public class ApplicationTest {
     public static final Path Target = Paths.get(".", "index.c");
 
     @Test
-    void content() {
+    void content() throws CompileException {
         var input = new MagmaRenderingStage(new Import("stdio"))
                 .process()
                 .asString()
@@ -45,17 +46,22 @@ public class ApplicationTest {
     }
 
     @Test
-    void no_source() throws IOException {
+    void no_source() {
         var target = runImpl();
         assertFalse(Files.exists(target));
     }
 
-    private Path runImpl() throws IOException {
-        return new Application(Source).run();
+    private Path runImpl() {
+        try {
+            return new Application(Source).run();
+        } catch (ApplicationException e) {
+            fail(e);
+            return Paths.get(".");
+        }
     }
 
     @Test
-    void target() throws IOException {
+    void target() {
         assertEquals(Target, runImpl());
     }
 

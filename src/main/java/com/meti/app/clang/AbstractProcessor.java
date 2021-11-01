@@ -3,7 +3,7 @@ package com.meti.app.clang;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.node.attribute.CompileException;
+import com.meti.app.compile.CompileException;
 
 public abstract class AbstractProcessor<T> implements Processor<T> {
     @Override

@@ -9,17 +9,22 @@ import static com.meti.app.compile.feature.FeatureTest.assertCompile;
 
 class CompilerTest {
     @Test
-    void multiple() {
-        var input = new MagmaRenderingStage(new Import("stdio"))
-                            .process()
-                            .asString()
-                            .orElse("") + ";" + new MagmaRenderingStage(new Import("stdlib"))
-                            .process()
-                            .asString()
-                            .orElse("") + ";";
-        var first = new CRenderingStage(new Import("stdio")).process().asString().orElse("");
-        var second = new CRenderingStage(new Import("stdlib")).process().asString().orElse("");
+    void multiple() throws CompileException {
+        var input = render("stdio") + ";" + render("stdlib") + ";";
+        var first = renderNative("stdio");
+        var second = renderNative("stdlib");
         var output = first + second;
         assertCompile(input, output);
+    }
+
+    private String renderNative(String stdio) throws CompileException {
+        return new CRenderingStage(new Import(stdio)).process().asString().orElse("");
+    }
+
+    private String render(String name) throws CompileException {
+        return new MagmaRenderingStage(new Import(name))
+                .process()
+                .asString()
+                .orElse("");
     }
 }

@@ -18,11 +18,11 @@ class MagmaImportRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected Output processDefined() {
+    protected Output processDefined() throws AttributeException {
         return new StringOutput(ImportNativePrefix + compute());
     }
 
-    private String compute() {
+    private String compute() throws AttributeException {
         Option<Attribute> result;
         try {
             result = new Some<>(node.apply(Attribute.Type.Value));

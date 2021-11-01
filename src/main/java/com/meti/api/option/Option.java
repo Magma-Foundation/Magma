@@ -8,5 +8,9 @@ public interface Option<T> {
 
     T orElse(T other);
 
-    <E extends Exception> T orElseThrow(Supplier<E> supplier);
+    <E extends Exception> T orElseThrow(Supplier<E> supplier) throws E;
+
+    boolean isPresent();
+
+    boolean isEmpty();
 }

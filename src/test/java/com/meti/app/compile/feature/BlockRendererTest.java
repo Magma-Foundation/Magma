@@ -1,5 +1,6 @@
 package com.meti.app.compile.feature;
 
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.node.output.CompoundOutput;
 import com.meti.app.compile.node.output.EmptyOutput;
 import com.meti.app.compile.node.output.NodeOutput;
@@ -13,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class BlockRendererTest {
 
     @Test
-    void renderDefined() {
+    void renderDefined() throws CompileException {
         var line = new Return(new IntegerNode(420));
         var expected = new CompoundOutput(List.of(
                 new StringOutput("{"),

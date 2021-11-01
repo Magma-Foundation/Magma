@@ -1,17 +1,21 @@
 package com.meti.app.compile;
 
+import com.meti.api.OptionStream;
+import com.meti.api.Stream;
+import com.meti.api.StreamException;
 import com.meti.app.clang.Processor;
 
-import java.util.stream.Stream;
-
 public abstract class AbstractStage<A, B extends Processor<A>> {
-    public A process() {
-        return createProcessors()
-                .map(Processor::process)
-                .map(option -> option.map(Stream::of))
-                .flatMap(option -> option.orElse(Stream.empty()))
-                .findFirst()
-                .orElseThrow();
+    public A process() throws CompileException {
+        try {
+            return createProcessors()
+                    .map(Processor::process)
+                    .flatMap(OptionStream::new)
+                    .first()
+                    .orElseThrow(() -> new CompileException("Failed to process."));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     protected abstract Stream<B> createProcessors();
