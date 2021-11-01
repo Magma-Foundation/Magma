@@ -7,6 +7,10 @@ public class CompileException extends ApplicationException {
         super(message);
     }
 
+    public CompileException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public CompileException(Throwable cause) {
         super(cause);
     }
