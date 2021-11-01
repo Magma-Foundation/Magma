@@ -14,6 +14,10 @@ public interface Node {
         return Stream.empty();
     }
 
+    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return this;
+    }
+
     enum Type {
         Integer, Return, Block, Content, Import
     }

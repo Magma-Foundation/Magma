@@ -1,9 +1,8 @@
 package com.meti.app.compile.node.attribute;
 
+import com.meti.api.Stream;
 import com.meti.app.compile.node.Input;
 import com.meti.app.compile.node.Node;
-
-import java.util.stream.Stream;
 
 public interface Attribute {
     default Input asInput() throws AttributeException {
@@ -27,7 +26,7 @@ public interface Attribute {
     }
 
     enum Group {
-        Node
+        NodeList, Node
     }
 
     enum Type {

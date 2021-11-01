@@ -6,4 +6,8 @@ public class NodeException extends CompileException {
     public NodeException(String message) {
         super(message);
     }
+
+    public NodeException(Throwable cause) {
+        super(cause);
+    }
 }
