@@ -1,14 +1,12 @@
 package com.meti.app.compile.split;
 
 import com.meti.api.ListStream;
-import com.meti.api.StreamException;
-import com.meti.app.compile.CompileException;
+import com.meti.api.Stream;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public record Splitter(String input) {
-    public List<String> split() throws CompileException {
+    public Stream<String> split() {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -25,16 +23,8 @@ public record Splitter(String input) {
         }
         lines.add(builder.toString());
         lines.removeIf(String::isBlank);
-        try {
-            return new ListStream<>(lines)
-                    .map(String::trim)
-                    .filter(value -> !value.isBlank())
-                    .foldRight(new ArrayList<>(), (sum, next) -> {
-                        sum.add(next);
-                        return sum;
-                    });
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
+        return new ListStream<>(lines)
+                .map(String::trim)
+                .filter(value -> !value.isBlank());
     }
 }

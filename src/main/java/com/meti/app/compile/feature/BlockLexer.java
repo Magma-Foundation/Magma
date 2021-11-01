@@ -1,6 +1,5 @@
 package com.meti.app.compile.feature;
 
-import com.meti.api.ListStream;
 import com.meti.api.StreamException;
 import com.meti.app.clang.AbstractProcessor;
 import com.meti.app.compile.CompileException;
@@ -10,7 +9,6 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.split.Splitter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BlockLexer extends AbstractProcessor<Node> {
     private final Input input;
@@ -27,24 +25,19 @@ public class BlockLexer extends AbstractProcessor<Node> {
     @Override
     protected Node processDefined() throws CompileException {
         try {
-            var split = new Splitter(input.slice(1, input.length() - 1))
-                    .split();
-            var lines = createChildren(split);
+            var lines = new Splitter(input.slice(1, input.length() - 1)).split()
+                    .map(String::trim)
+                    .filter(value -> !value.isEmpty())
+                    .map(Input::new)
+                    .map(Content::new)
+                    .foldRight(new ArrayList<Node>(), (contents, content) -> {
+                        contents.add(content);
+                        return contents;
+                    });
             return new Block(lines);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
     }
 
-    private List<Content> createChildren(List<String> split) throws StreamException {
-        return new ListStream<>(split)
-                .map(String::trim)
-                .filter(value -> !value.isEmpty())
-                .map(Input::new)
-                .map(Content::new)
-                .foldRight(new ArrayList<>(), (contents, content) -> {
-                    contents.add(content);
-                    return contents;
-                });
-    }
 }

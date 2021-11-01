@@ -1,16 +1,15 @@
 package com.meti.app.compile;
 
-import com.meti.api.ListStream;
 import com.meti.api.StreamException;
 import com.meti.app.compile.split.Splitter;
 
 public record Compiler(String input) {
     public String compile() throws CompileException {
         if (input.isBlank()) return "";
-        var lines = new Splitter(input).split();
 
         try {
-            return new ListStream<>(lines)
+            return new Splitter(input)
+                    .split()
                     .map(this::compileLine)
                     .foldRight((current, next) -> current + next)
                     .orElse("");
