@@ -8,10 +8,10 @@ import com.meti.app.compile.feature.BlockLexer;
 import com.meti.app.compile.node.Input;
 import com.meti.app.compile.node.Node;
 
-public final class MagmaLexingStage extends AbstractStage<Node, Processor<Node>> {
+public final class MagmaLexer extends AbstractStage<Node, Processor<Node>> {
     private final Input root;
 
-    public MagmaLexingStage(Input root) {
+    public MagmaLexer(Input root) {
         this.root = root;
     }
 

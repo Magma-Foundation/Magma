@@ -2,17 +2,8 @@ package com.meti.app.compile;
 
 import com.meti.api.ListStream;
 import com.meti.api.StreamException;
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
-import com.meti.api.option.Some;
-import com.meti.app.compile.node.Input;
-import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.AttributeException;
-import com.meti.app.magma.MagmaLexingStage;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public record Compiler(String input) {
     public String compile() throws CompileException {
@@ -45,28 +36,9 @@ public record Compiler(String input) {
     }
 
     private String compileLine(String line) throws CompileException {
-        var input = new Input(line);
-        var root = new MagmaLexingStage(input).process();
-        var tree = lexTree(root);
+        var tree = new MagmaLexingStage(line).lex();
         return new CRenderingStage(tree).render()
                 .asString()
                 .orElse("");
-    }
-
-    private Node lexTree(Node node) throws AttributeException {
-        var children = node.stream(Attribute.Group.Node).collect(Collectors.toList());
-        for (Attribute.Type child : children) {
-            Option<Attribute> result;
-            try {
-                result = new Some<>(node.apply(child));
-            } catch (AttributeException e) {
-                result = new None<>();
-            }
-            node = result
-                    .map(Attribute::asNode)
-                    .map(this::lexTree)
-                    .orElse(node);
-        }
-        return node;
     }
 }
