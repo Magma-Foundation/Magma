@@ -12,10 +12,14 @@ public abstract class AbstractStage<A, B extends Processor<A>> {
                     .map(Processor::process)
                     .flatMap(OptionStream::new)
                     .first()
-                    .orElseThrow(() -> new CompileException("Failed to process."));
+                    .orElseThrow(this::invalidate);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    protected CompileException invalidate() {
+        return new CompileException("Failed to process.");
     }
 
     protected abstract Stream<B> createProcessors();
