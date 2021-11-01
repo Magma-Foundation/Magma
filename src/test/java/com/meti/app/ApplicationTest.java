@@ -1,6 +1,6 @@
 package com.meti.app;
 
-import com.meti.app.clang.CRenderingStage;
+import com.meti.app.clang.CRenderer;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.feature.Import;
 import com.meti.app.magma.MagmaRenderingStage;
@@ -24,7 +24,7 @@ public class ApplicationTest {
                 .process()
                 .asString()
                 .orElse("");
-        var output = new CRenderingStage(new Import("stdio")).process()
+        var output = new CRenderer(new Import("stdio")).process()
                 .asString()
                 .orElse("");
         assertCompile(input, output);

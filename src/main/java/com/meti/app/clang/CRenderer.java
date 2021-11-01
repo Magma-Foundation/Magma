@@ -9,8 +9,8 @@ import com.meti.app.compile.feature.ReturnRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.output.Output;
 
-public final class CRenderingStage extends AbstractRenderingStage {
-    public CRenderingStage(Node node) {
+public final class CRenderer extends AbstractRenderingStage {
+    public CRenderer(Node node) {
         super(node);
     }
 

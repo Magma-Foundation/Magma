@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.app.clang.CRenderingStage;
+import com.meti.app.clang.CRenderer;
 import com.meti.app.compile.feature.Import;
 import com.meti.app.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class CompilerTest {
     }
 
     private String renderNative(String stdio) throws CompileException {
-        return new CRenderingStage(new Import(stdio)).process().asString().orElse("");
+        return new CRenderer(new Import(stdio)).process().asString().orElse("");
     }
 
     private String render(String name) throws CompileException {

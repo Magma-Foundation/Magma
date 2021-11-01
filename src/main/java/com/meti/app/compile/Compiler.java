@@ -5,24 +5,16 @@ import com.meti.api.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.clang.CRenderingStage;
 import com.meti.app.compile.node.Input;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
-import com.meti.app.compile.node.output.Output;
 import com.meti.app.magma.MagmaLexingStage;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
-    private static Output renderTree(Node tree) throws CompileException {
-        return new CRenderingStage(tree)
-                .process()
-                .mapNodes(Compiler::renderTree);
-    }
-
     public String compile() throws CompileException {
         if (input.isBlank()) return "";
         var lines = new ArrayList<String>();
@@ -56,7 +48,7 @@ public record Compiler(String input) {
         var input = new Input(line);
         var root = new MagmaLexingStage(input).process();
         var tree = lexTree(root);
-        return renderTree(tree)
+        return new CRenderingStage(tree).render()
                 .asString()
                 .orElse("");
     }

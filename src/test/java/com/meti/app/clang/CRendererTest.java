@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CRenderingStageTest {
+class CRendererTest {
     @Test
     void returns() throws CompileException {
         var child = new IntegerNode(420);
@@ -21,7 +21,7 @@ class CRenderingStageTest {
                 new StringOutput("return "),
                 new NodeOutput(child),
                 new StringOutput(";")));
-        var actual = new CRenderingStage(root).process();
+        var actual = new CRenderer(root).process();
         assertEquals(expected, actual);
     }
 }

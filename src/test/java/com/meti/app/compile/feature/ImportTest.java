@@ -1,6 +1,6 @@
 package com.meti.app.compile.feature;
 
-import com.meti.app.clang.CRenderingStage;
+import com.meti.app.clang.CRenderer;
 import com.meti.app.compile.CompileException;
 import com.meti.app.magma.MagmaRenderingStage;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ class ImportTest {
                 .process()
                 .asString()
                 .orElse("");
-        var output = new CRenderingStage(new Import("stdlib")).process()
+        var output = new CRenderer(new Import("stdlib")).process()
                 .asString()
                 .orElse("");
         assertCompile(input, output);
