@@ -1,6 +1,7 @@
 package com.meti.app.clang;
 
 import com.meti.api.ArrayStream;
+import com.meti.api.Stream;
 import com.meti.app.compile.AbstractRenderingStage;
 import com.meti.app.compile.feature.BlockRenderer;
 import com.meti.app.compile.feature.IntegerRenderer;
@@ -14,7 +15,7 @@ public final class CRenderingStage extends AbstractRenderingStage {
     }
 
     @Override
-    protected com.meti.api.Stream<Processor<Output>> createProcessors() {
+    protected Stream<Processor<Output>> createProcessors() {
         return new ArrayStream<>(
                 new BlockRenderer(node),
                 new CImportRenderer(node),
