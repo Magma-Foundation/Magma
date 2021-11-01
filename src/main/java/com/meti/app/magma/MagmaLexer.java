@@ -9,18 +9,19 @@ import com.meti.app.compile.node.Input;
 import com.meti.app.compile.node.Node;
 
 public final class MagmaLexer extends AbstractStage<Node, Processor<Node>> {
-    private final Input root;
+    private final Input input;
 
-    public MagmaLexer(Input root) {
-        this.root = root;
+    public MagmaLexer(Input input) {
+        this.input = input;
     }
 
     @Override
     protected Stream<Processor<Node>> createProcessors() {
         return new ArrayStream<>(
-                new BlockLexer(root),
-                new ImportLexer(root),
-                new ReturnLexer(root),
-                new IntegerLexer(root));
+                new FunctionLexer(input),
+                new BlockLexer(input),
+                new ImportLexer(input),
+                new ReturnLexer(input),
+                new IntegerLexer(input));
     }
 }

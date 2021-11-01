@@ -19,6 +19,7 @@ public final class CRenderer extends AbstractRenderingStage {
         return new ArrayStream<>(
                 new BlockRenderer(node),
                 new IntegerRenderer(node),
+                new CFunctionRenderer(node),
                 new CImportRenderer(node),
                 new ContentRenderer(node),
                 new ReturnRenderer(node));

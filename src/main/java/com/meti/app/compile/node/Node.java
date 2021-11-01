@@ -6,7 +6,9 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import java.util.stream.Stream;
 
 public interface Node {
-    Attribute apply(Attribute.Type type) throws AttributeException;
+    default Attribute apply(Attribute.Type type) throws AttributeException {
+        throw new AttributeException("Unknown type:" + type);
+    }
 
     boolean is(Node.Type type);
 
@@ -19,6 +21,6 @@ public interface Node {
     }
 
     enum Type {
-        Integer, Return, Block, Content, Import
+        Integer, Return, Block, Content, Function, Import
     }
 }
