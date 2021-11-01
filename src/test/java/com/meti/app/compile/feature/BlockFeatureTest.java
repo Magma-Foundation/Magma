@@ -17,6 +17,6 @@ public class BlockFeatureTest {
 
     @Test
     void two() {
-        assertCompile("{return first;return second;}", "{return first;return second;}");
+        assertCompile("{return 420;return 69;}", "{return 420;return 69;}");
     }
 }
