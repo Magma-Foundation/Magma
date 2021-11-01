@@ -18,8 +18,9 @@ public final class CRenderingStage extends AbstractRenderingStage {
     protected Stream<Processor<Output>> createProcessors() {
         return new ArrayStream<>(
                 new BlockRenderer(node),
+                new IntegerRenderer(node),
                 new CImportRenderer(node),
-                new ReturnRenderer(node),
-                new IntegerRenderer(node));
+                new ContentRenderer(node),
+                new ReturnRenderer(node));
     }
 }
