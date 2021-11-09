@@ -26,7 +26,7 @@ public interface Attribute {
     }
 
     enum Group {
-        NodeList, Node
+        NodeList, Type, Node
     }
 
     enum Type {
