@@ -29,6 +29,12 @@ public class FunctionLexer extends AbstractProcessor<Node> {
     protected Node processDefined() throws CompileException {
         var paramStart = paramStart().orElseThrow(() -> new CompileException("No param start."));
         var name = new Input(input.slice("def ".length(), paramStart));
+
+        var typeSeparator = input.firstIndexOfChar(':').orElse(-1);
+        var returnSeparator = input.firstIndexOfChar('=').orElse(-1);
+
+        var type = new Input(input.slice(typeSeparator + 1, returnSeparator));
+
         return new Node() {
             @Override
             public boolean is(Type type) {
@@ -37,7 +43,7 @@ public class FunctionLexer extends AbstractProcessor<Node> {
 
             @Override
             public Attribute apply(Attribute.Type type) throws AttributeException {
-                if (type == Attribute.Type.Name) return new InputAttribute(name);
+                if (type == Attribute.Type.Identity) return new InputAttribute(name);
                 throw new AttributeException("Unknown type: " + type);
             }
         };

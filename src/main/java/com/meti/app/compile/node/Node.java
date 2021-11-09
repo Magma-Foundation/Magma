@@ -22,6 +22,6 @@ public interface Node {
 
     enum Type {
         Integer, Return, Block, Content,
-        Function, Import
+        Function, Field, Import
     }
 }
