@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.option.Option;
+
 public class OptionStream<T> implements Stream<T> {
     private final Option<T> value;
     private boolean retrieved = false;

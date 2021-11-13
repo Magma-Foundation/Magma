@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 import java.util.Collections;
 
 public record DeclarationLexer(Input input) implements Lexer {

@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public interface Stream<T> {
     default Option<T> first() throws StreamException {
         try {

@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public abstract class FilteredProcessor<T> implements Processor<T> {
     @Override
     public Option<T> process() throws CompileException {

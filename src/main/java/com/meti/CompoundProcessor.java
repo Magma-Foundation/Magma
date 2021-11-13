@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.option.Option;
+
 public abstract class CompoundProcessor<T> implements Processor<T> {
     @Override
     public Option<T> process() throws CompileException {

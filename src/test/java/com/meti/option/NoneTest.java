@@ -1,13 +1,13 @@
-package com.meti;
+package com.meti.option;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SomeTest {
+class NoneTest {
 
     @Test
     void orElse() {
-        assertEquals(4, new Some<>(4).orElse(0));
+        assertEquals(4, new None<>().orElse(4));
     }
 }

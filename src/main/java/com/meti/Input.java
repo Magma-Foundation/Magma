@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public record Input(String value) {
     public boolean endsWithChar(char c) {
         return !value.isEmpty() && value.charAt(value.length() - 1) == c;
