@@ -20,7 +20,10 @@ public interface Node {
     enum Type {
         Block,
         Content,
+        Function,
         Int,
-        Primitive, Sequence, Return
+        Primitive,
+        Return,
+        Sequence,
     }
 }

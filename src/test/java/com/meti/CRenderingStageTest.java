@@ -2,6 +2,9 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -13,7 +16,12 @@ class CRenderingStageTest {
 
     private void renderImpl(String type, int value, String expected) {
         try {
-            var actual = new CRenderingStage("test", type, value).render();
+            var parameters = new Sequence(Collections.emptyList());
+            var identity = type.equals("I16")
+                    ? Primitive.I16.asField("test", parameters)
+                    : Primitive.U16.asField("test", parameters);
+            var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(value)))));
+            var actual = new CRenderingStage(root).render();
             assertEquals(expected, actual);
         } catch (CompileException e) {
             fail(e);

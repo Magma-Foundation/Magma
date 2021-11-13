@@ -11,6 +11,7 @@ public class CNodeRenderer extends CompoundRenderer {
     protected Stream<Renderer> stream() {
         return new ArrayStream<>(
                 new BlockRenderer(value),
+                new FunctionRenderer(value),
                 new IntegerRenderer(value),
                 new ReturnRenderer(value),
                 new SequenceRenderer(value));

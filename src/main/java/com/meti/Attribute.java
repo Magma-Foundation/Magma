@@ -24,6 +24,7 @@ public interface Attribute {
     enum Type {
         Bits,
         Children,
+        Identity,
         Name,
         PreEquality,
         Signed,
@@ -31,6 +32,8 @@ public interface Attribute {
     }
 
     enum Group {
-        Nodes, Node
+        Field,
+        Node,
+        Nodes,
     }
 }

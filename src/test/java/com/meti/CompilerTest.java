@@ -2,6 +2,9 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -14,7 +17,12 @@ public class CompilerTest {
     private void assertFunction(String name, String type) {
         try {
             var input = new MagmaRenderer(name, type).render();
-            var output = new CRenderingStage(name, type, 0).render();
+            var parameters = new Sequence(Collections.emptyList());
+            var identity = type.equals("I16")
+                    ? Primitive.I16.asField(name, parameters)
+                    : Primitive.U16.asField(name, parameters);
+            var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(0)))));
+            var output = new CRenderingStage(root).render();
             assertCompile(input, output);
         } catch (CompileException e) {
             fail(e);
