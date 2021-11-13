@@ -12,12 +12,7 @@ public record Application(Path source) {
         var target = source.resolveSibling(name + ".c");
         if (Files.exists(source)) {
             var input = Files.readString(source);
-            String output;
-            if (input.isBlank()) {
-                output = "";
-            } else {
-                output = "int main(){return 0;}";
-            }
+            var output = new Compiler(input).compile();
             Files.writeString(target, output);
             return new Some(target);
         } else {
