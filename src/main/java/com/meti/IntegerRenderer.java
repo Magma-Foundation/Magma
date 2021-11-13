@@ -1,9 +1,9 @@
 package com.meti;
 
 public class IntegerRenderer {
-    private final IntegerNode node;
+    private final Node node;
 
-    public IntegerRenderer(IntegerNode node) {
+    public IntegerRenderer(Node node) {
         this.node = node;
     }
 

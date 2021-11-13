@@ -26,10 +26,10 @@ public final class CRenderer {
     }
 
     private String renderBlock() throws CompileException {
-        return "{" + renderReturn(new IntegerNode(value)) + "}";
+        return "{" + renderReturn(new Return(new IntegerNode(value)).apply().asNode()) + "}";
     }
 
-    private String renderReturn(IntegerNode value) throws CompileException {
+    private String renderReturn(Node value) throws CompileException {
         return "return " + new IntegerRenderer(value).render() + ";";
     }
 }
