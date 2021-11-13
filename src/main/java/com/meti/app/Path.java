@@ -7,9 +7,7 @@ public interface Path {
 
     boolean exists();
 
-    java.nio.file.Path extendWith(String extension);
-
-    java.nio.file.Path getSource();
+    Path extendWith(String extension);
 
     String readAsString() throws IOException;
 

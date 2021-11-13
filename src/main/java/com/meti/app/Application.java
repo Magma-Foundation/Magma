@@ -12,7 +12,7 @@ public record Application(Path Path) {
             var input = readSource();
             var output = new Compiler(input).compile();
             var target = Path.extendWith("c");
-            return writeTarget(output, new NIOPath(target));
+            return writeTarget(output, target);
         } else {
             return new None<>();
         }
