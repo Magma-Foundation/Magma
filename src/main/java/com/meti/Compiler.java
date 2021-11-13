@@ -6,8 +6,10 @@ public record Compiler(String input) {
     String compile() {
         if (input.isBlank()) return "";
         var paramStart = input.indexOf('(');
-        var name = input.substring(Offset, paramStart);
-        return new CRenderer(name).render();
+        var name = input.substring(Offset, paramStart).trim();
+        var typeSeparator = input.indexOf(':');
+        var returnSeparator = input.indexOf("=>");
+        var returnType = input.substring(typeSeparator + 1, returnSeparator).trim();
+        return new CRenderer(name, returnType).render();
     }
-
 }

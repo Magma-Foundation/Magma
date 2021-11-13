@@ -1,17 +1,15 @@
 package com.meti;
 
-public class MagmaRenderer {
+class MagmaRenderer {
     private final String name;
+    private final String type;
 
-    public MagmaRenderer(String name) {
+    public MagmaRenderer(String name, String type) {
         this.name = name;
+        this.type = type;
     }
 
     String render() {
-        return "def " + getName() + "() : I16 => {return 0;}";
-    }
-
-    public String getName() {
-        return name;
+        return "def " + name + "() : " + type + " => {return 0;}";
     }
 }

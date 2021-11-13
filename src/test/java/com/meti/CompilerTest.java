@@ -17,17 +17,22 @@ public class CompilerTest {
 
     @Test
     void name() {
-        assertFunction("empty");
+        assertFunction("empty", "I16");
     }
 
-    private void assertFunction(String empty) {
-        var input = new MagmaRenderer(empty).render();
-        var output = new CRenderer(empty).render();
+    private void assertFunction(String empty, String type) {
+        var input = new MagmaRenderer(empty, type).render();
+        var output = new CRenderer(empty, type).render();
         assertCompile(input, output);
     }
 
     @Test
     void testMain() {
-        assertFunction("main");
+        assertFunction("main", "I16");
+    }
+
+    @Test
+    void type() {
+        assertFunction("test", "U16");
     }
 }
