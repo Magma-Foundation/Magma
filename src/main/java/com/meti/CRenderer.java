@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public final class CRenderer {
@@ -17,6 +18,10 @@ public final class CRenderer {
         return renderFunctionHeader(type) + renderBlock();
     }
 
+    private String renderBlock() throws CompileException {
+        return "{" + renderTree(new Return(new IntegerNode(value))) + "}";
+    }
+
     private String renderFunctionHeader(String input) {
         String typeString;
         if (input.equals("I16")) {
@@ -25,24 +30,6 @@ public final class CRenderer {
             typeString = "unsigned int";
         }
         return typeString + " " + name + "()";
-    }
-
-    private String renderBlock() throws CompileException {
-        return "{" + renderReturn(new Return(new IntegerNode(value))) + "}";
-    }
-
-    private String renderReturn(Node value) throws CompileException {
-        var types = value.stream(Attribute.Group.Node).collect(Collectors.toList());
-        var current = value;
-        for (Attribute.Type type : types) {
-            var child = current.apply(type).asNode();
-            var childOutput = renderNode(child);
-            current = current.with(new Content(childOutput));
-        }
-
-        return new ReturnRenderer(current)
-                .render()
-                .orElse("");
     }
 
     private String renderNode(Node value) throws CompileException {
@@ -59,4 +46,45 @@ public final class CRenderer {
         }
     }
 
+    private Node renderNodeChildren(Node value) throws CompileException {
+        var types = value.stream(Attribute.Group.Node).collect(Collectors.toList());
+        var current = value;
+        for (Attribute.Type type : types) {
+            var child = current.apply(type).asNode();
+            var childOutput = renderTree(child);
+            var childAttribute = new NodeAttribute(new Content(childOutput));
+            current = current.with(Attribute.Type.Value, childAttribute);
+        }
+        return current;
+    }
+
+    private Node renderNodesChildren(Node value) throws CompileException {
+        var types = value.stream(Attribute.Group.Nodes).collect(Collectors.toList());
+        var current = value;
+        for (Attribute.Type type : types) {
+            var child = current.apply(type).asNodeStream();
+            var childAttribute = renderStream(child);
+            current = current.with(Attribute.Type.Value, childAttribute);
+        }
+        return current;
+    }
+
+    private Attribute renderStream(Stream<Node> child) throws AttributeException {
+        try {
+            return new NodesAttribute(child.map(this::renderTree)
+                    .map(Content::new)
+                    .foldRight(new ArrayList<>(), (collection, node) -> {
+                        collection.add(node);
+                        return collection;
+                    }));
+        } catch (StreamException e) {
+            throw new AttributeException("Cannot attribute with list of nodes.", e);
+        }
+    }
+
+    private String renderTree(Node value) throws CompileException {
+        var withNode = renderNodeChildren(value);
+        var withNodes = renderNodesChildren(withNode);
+        return renderNode(withNodes);
+    }
 }

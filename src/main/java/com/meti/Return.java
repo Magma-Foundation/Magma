@@ -15,11 +15,13 @@ public record Return(Node value) implements Node {
 
     @Override
     public Stream<Attribute.Type> stream(Attribute.Group group) {
-        return Stream.of(Attribute.Type.Value);
+        return group == Attribute.Group.Node
+                ? Stream.of(Attribute.Type.Value)
+                : Stream.empty();
     }
 
     @Override
-    public Node with(Node value) {
-        return new Return(value);
+    public Node with(Attribute.Type type, Attribute value) throws AttributeException {
+        return type == Attribute.Type.Value ? new Return(value.asNode()) : this;
     }
 }

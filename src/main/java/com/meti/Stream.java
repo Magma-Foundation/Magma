@@ -40,6 +40,18 @@ public interface Stream<T> {
         };
     }
 
+    default <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E {
+        var current = identity;
+        while (true) {
+            try {
+                current = folder.apply(current, head());
+            } catch (EndOfStreamException e) {
+                break;
+            }
+        }
+        return current;
+    }
+
     default <R> Stream<R> map(F1<T, R, ?> mapper) {
         return () -> {
             try {

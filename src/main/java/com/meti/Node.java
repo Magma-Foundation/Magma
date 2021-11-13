@@ -3,7 +3,9 @@ package com.meti;
 import java.util.stream.Stream;
 
 public interface Node {
-    Attribute apply(Attribute.Type type);
+    default Attribute apply(Attribute.Type type) throws AttributeException {
+        throw new AttributeException("No attribute exists for type: " + type);
+    }
 
     boolean is(Type type);
 
@@ -11,12 +13,14 @@ public interface Node {
         return Stream.empty();
     }
 
-    default Node with(Node value) {
+    default Node with(Attribute.Type type, Attribute value) throws AttributeException {
         return this;
     }
 
     enum Type {
+        Block,
+        Content,
         Int,
-        Content, Return
+        Return
     }
 }
