@@ -5,18 +5,14 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-public record Application(Path source) {
+public record Application(Path Path) {
     Option<Path> run() throws ApplicationException {
-        var fileName = source.getFileName().toString();
-        var separator = fileName.indexOf('.');
-        var name = fileName.substring(0, separator);
-        if (Files.exists(source)) {
-            String input = readSource();
+        if (Path.exists()) {
+            var input = readSource();
             var output = new Compiler(input).compile();
-            return writeTarget(name, output);
+            var target = Path.extendWith("c");
+            return writeTarget(output, new NIOPath(target));
         } else {
             return new None<>();
         }
@@ -24,19 +20,19 @@ public record Application(Path source) {
 
     private String readSource() throws ApplicationException {
         try {
-            return Files.readString(source);
+            return Path.readAsString();
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
     }
 
-    private Option<Path> writeTarget(String name, String output) throws ApplicationException {
+    private Option<Path> writeTarget(String output, Path Path) throws ApplicationException {
         try {
-            var target = source.resolveSibling(name + ".c");
-            Files.writeString(target, output);
-            return new Some<>(target);
+            Path.writeAsString(output);
+            return new Some<>(Path);
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
     }
+
 }

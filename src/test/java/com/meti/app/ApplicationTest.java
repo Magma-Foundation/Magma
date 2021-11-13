@@ -7,14 +7,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    private static final Path Source = Paths.get(".", "index.mgs");
-    private static final Path Target = Paths.get(".", "index.c");
+    private static final java.nio.file.Path Source = Paths.get(".", "index.mgs");
+    private static final java.nio.file.Path Target = Paths.get(".", "index.c");
 
     @Test
     void no_target() {
@@ -25,9 +24,9 @@ public class ApplicationTest {
         return runImpl().isPresent();
     }
 
-    private Option<Path> runImpl() {
+    private Option<? extends Path> runImpl() {
         try {
-            return new Application(Source).run();
+            return new Application(new NIOPath(Source)).run();
         } catch (ApplicationException e) {
             fail(e);
             return new None<>();
