@@ -20,9 +20,9 @@ public class CompilerTest {
         assertFunction("empty", "I16");
     }
 
-    private void assertFunction(String empty, String type) {
-        var input = new MagmaRenderer(empty, type).render();
-        var output = new CRenderer(empty, type).render();
+    private void assertFunction(String name, String type) {
+        var input = new MagmaRenderer(name, type).render();
+        var output = new CRenderer(name, type).render();
         assertCompile(input, output);
     }
 
