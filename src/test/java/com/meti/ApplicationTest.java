@@ -8,20 +8,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     private static final Path Source = Paths.get(".", "index.mgs");
     private static final Path Target = Paths.get(".", "index.c");
+
+    private boolean isTargetCreated() throws IOException {
+        return runImpl().isPresent();
+    }
 
     @Test
     void no_target() throws IOException {
         assertFalse(isTargetCreated());
     }
 
-    private boolean isTargetCreated() throws IOException {
-        return new Application(Source).run().isPresent();
+    @Test
+    void testMain() throws IOException {
+        Files.writeString(Source, "def main() : I16 => {return 0;}");
+        runImpl();
+        var output = Files.readString(Target);
+        assertEquals("int main(){return 0;}", output);
+    }
+
+    private Option runImpl() throws IOException {
+        return new Application(Source).run();
     }
 
     @AfterEach

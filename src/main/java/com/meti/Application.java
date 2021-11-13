@@ -11,7 +11,7 @@ public record Application(Path source) {
         var name = fileName.substring(0, separator);
         var target = source.resolveSibling(name + ".c");
         if (Files.exists(source)) {
-            Files.createFile(target);
+            Files.writeString(target, "int main(){return 0;}");
             return new Some(target);
         } else {
             return new None();
