@@ -1,6 +1,6 @@
 package com.meti.option;
 
-import com.meti.Supplier;
+import com.meti.core.Supplier;
 
 public class None<T> implements Option<T> {
     @Override

@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.core.F1;
+import com.meti.core.F2;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;

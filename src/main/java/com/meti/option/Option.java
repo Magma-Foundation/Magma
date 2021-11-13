@@ -1,6 +1,6 @@
 package com.meti.option;
 
-import com.meti.Supplier;
+import com.meti.core.Supplier;
 
 public interface Option<T> {
     boolean isPresent();
