@@ -21,7 +21,7 @@ public class ApplicationTest {
     }
 
     private boolean isTargetCreated() throws IOException {
-        return Files.exists(new Application(Source).run());
+        return new Application(Source).run().isPresent();
     }
 
     @AfterEach
