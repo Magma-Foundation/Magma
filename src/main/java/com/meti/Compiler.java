@@ -7,6 +7,7 @@ public record Compiler(String input) {
         if (input.isBlank()) return "";
         var paramStart = input.indexOf('(');
         var name = input.substring(Offset, paramStart);
-        return "int " + name + "(){return 0;}";
+        return new CRenderer(name).render();
     }
+
 }

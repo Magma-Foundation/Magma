@@ -10,18 +10,24 @@ public class CompilerTest {
         assertCompile("", "");
     }
 
-    @Test
-    void name() {
-        assertCompile("def empty() : I16 => {return 0;}", "int empty(){return 0;}");
-    }
-
     private static void assertCompile(String input, String output) {
         var actual = new Compiler(input).compile();
         assertEquals(output, actual);
     }
 
     @Test
+    void name() {
+        assertFunction("empty");
+    }
+
+    private void assertFunction(String empty) {
+        var input = new MagmaRenderer(empty).render();
+        var output = new CRenderer(empty).render();
+        assertCompile(input, output);
+    }
+
+    @Test
     void testMain() {
-        assertCompile("def main() : I16 => {return 0;}", "int main(){return 0;}");
+        assertFunction("main");
     }
 }
