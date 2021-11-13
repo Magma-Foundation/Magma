@@ -7,8 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CRendererTest {
 
     @Test
-    void render() {
-        var output = new CRenderer("test", "U16").render();
+    void testFunction() {
+        var output = new CRenderer("test", "U16", 0).render();
         assertEquals("unsigned int test(){return 0;}", output);
+    }
+
+    @Test
+    void testFunctionBody() {
+        var output = new CRenderer("test", "I16", 420).render();
+        assertEquals("int test(){return 420;}", output);
     }
 }
