@@ -1,5 +1,7 @@
 package com.meti;
 
-public interface Option {
+public interface Option<T> {
+    T orElse(T other);
+
     boolean isPresent();
 }

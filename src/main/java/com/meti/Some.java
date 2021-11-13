@@ -1,8 +1,11 @@
 package com.meti;
 
-import java.nio.file.Path;
+public record Some<T>(T value) implements Option<T> {
+    @Override
+    public T orElse(T other) {
+        return value;
+    }
 
-public record Some(Path value) implements Option {
     @Override
     public boolean isPresent() {
         return true;

@@ -26,14 +26,10 @@ public final class CRenderer {
     }
 
     private String renderBlock() {
-        return "{" + renderReturn() + "}";
+        return "{" + renderReturn(new IntegerNode(value)) + "}";
     }
 
-    private String renderReturn() {
-        return "return " + renderIntegerValue() + ";";
-    }
-
-    private String renderIntegerValue() {
-        return String.valueOf(value);
+    private String renderReturn(IntegerNode value) {
+        return "return " + new IntegerRenderer(value).render() + ";";
     }
 }

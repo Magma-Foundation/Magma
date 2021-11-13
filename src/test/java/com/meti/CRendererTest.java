@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CRendererTest {
-
     @Test
     void testFunction() {
         var output = new CRenderer("test", "U16", 0).render();

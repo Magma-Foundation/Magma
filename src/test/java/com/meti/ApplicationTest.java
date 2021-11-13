@@ -24,7 +24,7 @@ public class ApplicationTest {
         return runImpl().isPresent();
     }
 
-    private Option runImpl() throws IOException {
+    private Option<Path> runImpl() throws IOException {
         return new Application(Source).run();
     }
 
