@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.attribute.Attribute;
 import com.meti.node.*;
+import com.meti.stage.CRenderingProcessingStage;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

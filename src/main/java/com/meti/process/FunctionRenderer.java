@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.process;
 
+import com.meti.CompileException;
 import com.meti.attribute.Attribute;
 import com.meti.node.Node;
 

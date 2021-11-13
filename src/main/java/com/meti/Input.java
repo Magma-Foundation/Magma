@@ -15,7 +15,7 @@ public record Input(String value) {
         else return new Some<>(index);
     }
 
-    Option<Integer> firstSlice() {
+    public Option<Integer> firstSlice() {
         return new Some<>(value.indexOf("=>"));
     }
 
@@ -23,7 +23,7 @@ public record Input(String value) {
         return value.length();
     }
 
-    String slice(int start, int end) {
+    public String slice(int start, int end) {
         return value.substring(start, end).trim();
     }
 
@@ -31,7 +31,7 @@ public record Input(String value) {
         return !value.isEmpty() && value.charAt(0) == c;
     }
 
-    boolean startsWithSlice(String slice) {
+    public boolean startsWithSlice(String slice) {
         return value.startsWith(slice);
     }
 }

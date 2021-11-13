@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.stage;
 
+import com.meti.CompileException;
 import com.meti.attribute.Attribute;
 import com.meti.attribute.AttributeException;
 import com.meti.attribute.NodeAttribute;

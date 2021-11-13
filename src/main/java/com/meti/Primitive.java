@@ -17,7 +17,7 @@ public enum Primitive {
         this.bits = bits;
     }
 
-    Node asField(String name, Node preEquality) {
+    public Node asField(String name, Node preEquality) {
         return new PrimitiveField(name, preEquality);
     }
 

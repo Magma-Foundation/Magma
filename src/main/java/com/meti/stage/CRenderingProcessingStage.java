@@ -1,7 +1,10 @@
-package com.meti;
+package com.meti.stage;
 
+import com.meti.CompileException;
 import com.meti.node.Content;
 import com.meti.node.Node;
+import com.meti.process.CFieldRenderer;
+import com.meti.process.CNodeRenderer;
 
 public final class CRenderingProcessingStage extends AbstractProcessingStage {
     public CRenderingProcessingStage(Node root) {
