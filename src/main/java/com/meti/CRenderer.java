@@ -46,9 +46,17 @@ public final class CRenderer {
     }
 
     private String renderNode(Node value) throws CompileException {
-        return new IntegerRenderer(value)
-                .render()
-                .orElseThrow(() -> new CompileException("Cannot render: " + value));
+        try {
+            return new ArrayStream<>(
+                    new ReturnRenderer(value),
+                    new IntegerRenderer(value))
+                    .map(AbstractRenderer::render)
+                    .flatMap(OptionStream::new)
+                    .first()
+                    .orElseThrow(() -> new CompileException("Cannot render: " + value));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
 }
