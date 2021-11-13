@@ -1,8 +1,8 @@
 package com.meti.node;
 
-import com.meti.Attribute;
-import com.meti.AttributeException;
-import com.meti.NodeAttribute;
+import com.meti.attribute.Attribute;
+import com.meti.attribute.AttributeException;
+import com.meti.attribute.NodeAttribute;
 
 import java.util.stream.Stream;
 

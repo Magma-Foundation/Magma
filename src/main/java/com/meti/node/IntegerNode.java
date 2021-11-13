@@ -1,7 +1,7 @@
 package com.meti.node;
 
-import com.meti.Attribute;
-import com.meti.IntAttribute;
+import com.meti.attribute.Attribute;
+import com.meti.attribute.IntAttribute;
 
 public record IntegerNode(int value) implements Node {
     @Override

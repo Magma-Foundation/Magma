@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.attribute;
 
 import com.meti.node.Node;
 import com.meti.stream.JavaListStream;

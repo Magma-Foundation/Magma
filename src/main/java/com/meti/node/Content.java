@@ -1,7 +1,7 @@
 package com.meti.node;
 
-import com.meti.Attribute;
-import com.meti.StringAttribute;
+import com.meti.attribute.Attribute;
+import com.meti.attribute.StringAttribute;
 
 public record Content(String value) implements Node {
     @Override

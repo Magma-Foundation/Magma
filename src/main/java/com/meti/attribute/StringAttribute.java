@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.attribute;
 
 public record StringAttribute(String value) implements Attribute {
     @Override

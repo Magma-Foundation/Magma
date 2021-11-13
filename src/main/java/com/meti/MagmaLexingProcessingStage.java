@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.attribute.Attribute;
 import com.meti.node.Node;
 
 public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
