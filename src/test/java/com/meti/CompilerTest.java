@@ -10,6 +10,11 @@ public class CompilerTest {
         assertCompile("", "");
     }
 
+    @Test
+    void name() {
+        assertCompile("def empty() : I16 => {return 0;}", "int empty(){return 0;}");
+    }
+
     private static void assertCompile(String input, String output) {
         var actual = new Compiler(input).compile();
         assertEquals(output, actual);
