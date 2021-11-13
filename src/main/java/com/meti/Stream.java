@@ -40,6 +40,16 @@ public interface Stream<T> {
         };
     }
 
+    default <E extends Exception> Option<T> foldRight(F2<T, T, T, E> folder) throws StreamException, E {
+        try {
+            var head = head();
+            var folded = foldRight(head, folder);
+            return new Some<>(folded);
+        } catch (EndOfStreamException e) {
+            return new None<>();
+        }
+    }
+
     default <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E {
         var current = identity;
         while (true) {

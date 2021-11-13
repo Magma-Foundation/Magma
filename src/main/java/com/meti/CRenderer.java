@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class CRenderer {
@@ -15,11 +16,7 @@ public final class CRenderer {
     }
 
     public String render() throws CompileException {
-        return renderFunctionHeader(type) + renderBlock();
-    }
-
-    private String renderBlock() throws CompileException {
-        return "{" + renderTree(new Return(new IntegerNode(value))) + "}";
+        return renderFunctionHeader(type) + renderTree(new Block(List.of(new Return(new IntegerNode(value)))));
     }
 
     private String renderFunctionHeader(String input) {
@@ -35,8 +32,9 @@ public final class CRenderer {
     private String renderNode(Node value) throws CompileException {
         try {
             return new ArrayStream<>(
-                    new ReturnRenderer(value),
-                    new IntegerRenderer(value))
+                    new BlockRenderer(value),
+                    new IntegerRenderer(value),
+                    new ReturnRenderer(value))
                     .map(AbstractRenderer::render)
                     .flatMap(OptionStream::new)
                     .first()
