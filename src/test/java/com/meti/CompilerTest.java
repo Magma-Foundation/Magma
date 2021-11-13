@@ -14,7 +14,7 @@ public class CompilerTest {
     private void assertFunction(String name, String type) {
         try {
             var input = new MagmaRenderer(name, type).render();
-            var output = new CRenderer(name, type, 0).render();
+            var output = new CRenderingStage(name, type, 0).render();
             assertCompile(input, output);
         } catch (CompileException e) {
             fail(e);
