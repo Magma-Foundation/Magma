@@ -1,6 +1,8 @@
 package com.meti;
 
 import com.meti.node.Node;
+import com.meti.stream.ArrayStream;
+import com.meti.stream.Stream;
 
 public class MagmaNodeLexer extends CompoundProcessor<Node> {
     private final Input root;

@@ -1,6 +1,8 @@
 package com.meti;
 
 import com.meti.node.Node;
+import com.meti.stream.Stream;
+import com.meti.stream.StreamException;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.stream;
 
 public class StreamException extends Exception {
     public StreamException(Throwable cause) {

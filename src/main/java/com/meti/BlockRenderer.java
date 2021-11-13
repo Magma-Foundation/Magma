@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.node.Node;
+import com.meti.stream.StreamException;
 
 class BlockRenderer extends FilteredRenderer {
     public BlockRenderer(Node value) {

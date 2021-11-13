@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.stream;
 
 import java.util.List;
 

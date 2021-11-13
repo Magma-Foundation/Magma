@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.node.Node;
+import com.meti.stream.Stream;
 
 public interface Attribute {
     default boolean asBoolean() throws AttributeException {

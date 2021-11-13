@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.stream;
 
 import com.meti.core.F1;
 import com.meti.core.F2;

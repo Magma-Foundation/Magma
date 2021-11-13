@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.stream;
 
 public class ArrayStream<T> implements Stream<T> {
     private final T[] items;
