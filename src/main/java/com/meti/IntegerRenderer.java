@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public class IntegerRenderer extends FilteredRenderer {
     public IntegerRenderer(Node node) {
         super(node, Node.Type.Int);

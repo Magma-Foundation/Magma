@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.node.Content;
+import com.meti.node.Function;
+import com.meti.node.Node;
+
 class FunctionLexer extends FilteredLexer {
     public FunctionLexer(Input input) {
         super(input);

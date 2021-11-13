@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 class ReturnRenderer extends FilteredRenderer {
     public ReturnRenderer(Node node) {
         super(node, Node.Type.Return);

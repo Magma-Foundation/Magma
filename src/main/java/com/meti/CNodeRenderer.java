@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public class CNodeRenderer extends CompoundProcessor<String> {
     private final Node value;
 

@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.node;
+
+import com.meti.Attribute;
+import com.meti.AttributeException;
+import com.meti.NodesAttribute;
+import com.meti.StreamException;
 
 import java.util.ArrayList;
 import java.util.List;

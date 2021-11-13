@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public abstract class FilteredRenderer extends FilteredProcessor<String> {
     protected final Node value;
     private final Node.Type type;

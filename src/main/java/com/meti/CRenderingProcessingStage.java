@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.node.Content;
+import com.meti.node.Node;
+
 public final class CRenderingProcessingStage extends AbstractProcessingStage {
     public CRenderingProcessingStage(Node root) {
         super(root);

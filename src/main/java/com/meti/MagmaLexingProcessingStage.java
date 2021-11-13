@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
     public MagmaLexingProcessingStage(Node root) {
         super(root);

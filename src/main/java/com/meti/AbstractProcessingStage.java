@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 

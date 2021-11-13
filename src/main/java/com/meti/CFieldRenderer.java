@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public class CFieldRenderer extends CompoundProcessor<String> {
     private final Node field;
 

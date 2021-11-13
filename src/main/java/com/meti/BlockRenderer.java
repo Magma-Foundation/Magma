@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 class BlockRenderer extends FilteredRenderer {
     public BlockRenderer(Node value) {
         super(value, Node.Type.Block);

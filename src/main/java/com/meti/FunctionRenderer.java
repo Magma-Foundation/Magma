@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public class FunctionRenderer extends FilteredRenderer {
     public FunctionRenderer(Node value) {
         super(value, Node.Type.Function);

@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.node;
+
+import com.meti.Attribute;
+import com.meti.AttributeException;
 
 import java.util.stream.Stream;
 

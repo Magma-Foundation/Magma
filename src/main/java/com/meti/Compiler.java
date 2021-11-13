@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Content;
+
 public record Compiler(String input) {
     String compile() throws CompileException {
         if (input.isBlank()) return "";

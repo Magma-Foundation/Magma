@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 class SequenceRenderer extends FilteredRenderer {
     public SequenceRenderer(Node value) {
         super(value, Node.Type.Sequence);

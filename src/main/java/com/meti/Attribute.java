@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 public interface Attribute {
     default boolean asBoolean() throws AttributeException {
         throw new AttributeException("Not a boolean.");
