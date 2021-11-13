@@ -9,6 +9,6 @@ public class MagmaNodeLexer extends CompoundProcessor<Node> {
 
     @Override
     protected Stream<Processor<Node>> stream() {
-        return new ArrayStream<>(new FunctionLexer(value));
+        return new ArrayStream<>(new FunctionLexer(new Input(value)));
     }
 }
