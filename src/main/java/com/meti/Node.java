@@ -21,6 +21,6 @@ public interface Node {
         Block,
         Content,
         Int,
-        Return
+        Primitive, Sequence, Return
     }
 }

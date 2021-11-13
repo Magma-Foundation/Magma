@@ -6,7 +6,7 @@ public class AttributeException extends CompileException {
     }
 
     public AttributeException(Attribute.Type type) {
-        super("Unknown type:" + type);
+        super("Unknown type: " + type);
     }
 
     public AttributeException(String message, Throwable cause) {

@@ -2,18 +2,18 @@ package com.meti;
 
 import java.util.List;
 
-public final class Block extends Container {
-    public Block(List<Node> children) {
+public class Sequence extends Container {
+    public Sequence(List<Node> children) {
         super(children);
     }
 
     @Override
     protected Node complete(List<Node> nodes) {
-        return new Block(nodes);
+        return new Sequence(nodes);
     }
 
     @Override
     public boolean is(Type type) {
-        return type == Type.Block;
+        return type == Type.Sequence;
     }
 }

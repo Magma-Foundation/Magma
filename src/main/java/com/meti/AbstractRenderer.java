@@ -10,7 +10,7 @@ public abstract class AbstractRenderer implements Renderer {
     }
 
     @Override
-    public Option<String> render() throws AttributeException {
+    public Option<String> render() throws CompileException {
         if (value.is(type)) {
             var valueAsString = renderValid();
             return new Some<>(valueAsString);
@@ -19,5 +19,5 @@ public abstract class AbstractRenderer implements Renderer {
         }
     }
 
-    protected abstract String renderValid() throws AttributeException;
+    protected abstract String renderValid() throws CompileException;
 }

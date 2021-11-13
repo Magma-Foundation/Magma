@@ -1,6 +1,10 @@
 package com.meti;
 
 public interface Attribute {
+    default boolean asBoolean() throws AttributeException {
+        throw new AttributeException("Not a boolean.");
+    }
+
     default int asInt() throws AttributeException {
         throw new AttributeException("Not an int.");
     }
@@ -18,7 +22,12 @@ public interface Attribute {
     }
 
     enum Type {
-        Children, Value
+        Bits,
+        Children,
+        Name,
+        PreEquality,
+        Signed,
+        Value
     }
 
     enum Group {
