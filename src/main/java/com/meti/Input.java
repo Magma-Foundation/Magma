@@ -1,7 +1,17 @@
 package com.meti;
 
 public record Input(String value) {
-    Option<Integer> firstIndexOfSlice() {
+    public boolean endsWithChar(char c) {
+        return !value.isEmpty() && value.charAt(value.length() - 1) == c;
+    }
+
+    public Option<Integer> firstChar(char c) {
+        var index = value.indexOf(c);
+        if (index == -1) return new None<>();
+        else return new Some<>(index);
+    }
+
+    Option<Integer> firstSlice() {
         return new Some<>(value.indexOf("=>"));
     }
 
@@ -11,10 +21,6 @@ public record Input(String value) {
 
     String slice(int start, int end) {
         return value.substring(start, end).trim();
-    }
-
-    public boolean endsWithChar(char c) {
-        return !value.isEmpty() && value.charAt(value.length() - 1) == c;
     }
 
     public boolean startsWithChar(char c) {

@@ -12,7 +12,7 @@ class FunctionLexer extends FilteredLexer {
 
     @Override
     protected Node processValid() {
-        var returnSeparator = input.firstIndexOfSlice().orElse(-1);
+        var returnSeparator = input.firstSlice().orElse(-1);
         var identity = new Content(input.slice(0, returnSeparator));
         var body = new Content(input.slice(returnSeparator + "=>".length(), input.length()));
         return new Function(identity, body);

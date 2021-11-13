@@ -1,0 +1,16 @@
+package com.meti;
+
+import java.util.Collections;
+
+public record DeclarationLexer(Input input) implements Lexer {
+    @Override
+    public Option<Node> process() throws CompileException {
+        if (input.value().startsWith("def ")) {
+            var name = input.slice("def ".length(), input.firstChar('(').orElse(-1));
+            var type = input.slice(input.firstChar(':').orElse(-1) + 1, input.length());
+            return new Some<>(Primitive.valueOf(type).asField(name, new Sequence(Collections.emptyList())));
+        } else {
+            return new None<>();
+        }
+    }
+}
