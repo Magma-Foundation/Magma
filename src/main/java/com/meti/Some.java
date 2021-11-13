@@ -7,6 +7,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public <E extends Exception> T orElseThrow(Supplier<E> supplier) {
+        return value;
+    }
+
+    @Override
     public boolean isPresent() {
         return true;
     }
