@@ -3,17 +3,25 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class CRendererTest {
     @Test
     void testFunction() {
-        var output = new CRenderer("test", "U16", 0).render();
-        assertEquals("unsigned int test(){return 0;}", output);
+        renderImpl("U16", 0, "unsigned int test(){return 0;}");
+    }
+
+    private void renderImpl(String type, int value, String expected) {
+        try {
+            var actual = new CRenderer("test", type, value).render();
+            assertEquals(expected, actual);
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test
     void testFunctionBody() {
-        var output = new CRenderer("test", "I16", 420).render();
-        assertEquals("int test(){return 420;}", output);
+        renderImpl("I16", 420, "int test(){return 420;}");
     }
 }

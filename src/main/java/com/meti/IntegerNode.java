@@ -1,13 +1,7 @@
 package com.meti;
 
-public class IntegerNode {
-    private final int value;
-
-    public IntegerNode(int value) {
-        this.value = value;
-    }
-
-    public int getValue() {
-        return value;
+public record IntegerNode(int value) {
+    public Attribute apply() {
+        return new IntAttribute(value);
     }
 }

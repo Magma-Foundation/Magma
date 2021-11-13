@@ -3,6 +3,7 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class CompilerTest {
     @Test
@@ -10,9 +11,14 @@ public class CompilerTest {
         assertCompile("", "");
     }
 
-    private static void assertCompile(String input, String output) {
-        var actual = new Compiler(input).compile();
-        assertEquals(output, actual);
+    private void assertFunction(String name, String type) {
+        try {
+            var input = new MagmaRenderer(name, type).render();
+            var output = new CRenderer(name, type, 0).render();
+            assertCompile(input, output);
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test
@@ -20,10 +26,13 @@ public class CompilerTest {
         assertFunction("empty", "I16");
     }
 
-    private void assertFunction(String name, String type) {
-        var input = new MagmaRenderer(name, type).render();
-        var output = new CRenderer(name, type, 0).render();
-        assertCompile(input, output);
+    private static void assertCompile(String input, String output) {
+        try {
+            var actual = new Compiler(input).compile();
+            assertEquals(output, actual);
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test

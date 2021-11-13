@@ -7,7 +7,7 @@ public class IntegerRenderer {
         this.node = node;
     }
 
-    String render() {
-        return new Some<>(String.valueOf(node.getValue())).orElse("");
+    String render() throws CompileException {
+        return new Some<>(String.valueOf(node.apply().asInt())).orElse("");
     }
 }

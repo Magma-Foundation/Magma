@@ -3,7 +3,7 @@ package com.meti;
 public record Compiler(String input) {
     private static final int Offset = "def ".length();
 
-    String compile() {
+    String compile() throws CompileException {
         if (input.isBlank()) return "";
         var paramStart = input.indexOf('(');
         var name = input.substring(Offset, paramStart).trim();

@@ -11,7 +11,7 @@ public final class CRenderer {
         this.value = value;
     }
 
-    public String render() {
+    public String render() throws CompileException {
         return renderFunctionHeader(type) + renderBlock();
     }
 
@@ -25,11 +25,11 @@ public final class CRenderer {
         return typeString + " " + name + "()";
     }
 
-    private String renderBlock() {
+    private String renderBlock() throws CompileException {
         return "{" + renderReturn(new IntegerNode(value)) + "}";
     }
 
-    private String renderReturn(IntegerNode value) {
+    private String renderReturn(IntegerNode value) throws CompileException {
         return "return " + new IntegerRenderer(value).render() + ";";
     }
 }
