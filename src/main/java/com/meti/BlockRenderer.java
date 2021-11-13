@@ -6,7 +6,7 @@ class BlockRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected String renderValid() throws AttributeException {
+    protected String processValid() throws AttributeException {
         return "{" + renderChildren() + "}";
     }
 

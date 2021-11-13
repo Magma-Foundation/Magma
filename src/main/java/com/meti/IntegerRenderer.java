@@ -6,7 +6,7 @@ public class IntegerRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected String renderValid() throws AttributeException {
+    protected String processValid() throws AttributeException {
         var valueAsInt = value.apply(Attribute.Type.Value).asInt();
         return String.valueOf(valueAsInt);
     }

@@ -1,6 +1,6 @@
 package com.meti;
 
-public abstract class AbstractRenderer implements Renderer {
+public abstract class AbstractRenderer extends AbstractProcessor<String> {
     protected final Node value;
     private final Node.Type type;
 
@@ -10,14 +10,7 @@ public abstract class AbstractRenderer implements Renderer {
     }
 
     @Override
-    public Option<String> render() throws CompileException {
-        if (value.is(type)) {
-            var valueAsString = renderValid();
-            return new Some<>(valueAsString);
-        } else {
-            return new None<>();
-        }
+    protected boolean isValid() {
+        return value.is(type);
     }
-
-    protected abstract String renderValid() throws CompileException;
 }

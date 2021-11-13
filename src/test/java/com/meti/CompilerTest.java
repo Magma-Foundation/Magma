@@ -22,7 +22,10 @@ public class CompilerTest {
                     ? Primitive.I16.asField(name, parameters)
                     : Primitive.U16.asField(name, parameters);
             var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(0)))));
-            var output = new CRenderingStage(root).render();
+            var output = new CRenderingProcessingStage(root)
+                    .process()
+                    .apply(Attribute.Type.Value)
+                    .asString();
             assertCompile(input, output);
         } catch (CompileException e) {
             fail(e);

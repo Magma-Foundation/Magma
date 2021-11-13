@@ -15,7 +15,7 @@ class IntegerTypeRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected String renderValid() throws CompileException {
+    protected String processValid() throws CompileException {
         var isSigned = value.apply(Attribute.Type.Signed).asBoolean();
         var bits = value.apply(Attribute.Type.Bits).asInt();
         var name = value.apply(Attribute.Type.Name).asString();

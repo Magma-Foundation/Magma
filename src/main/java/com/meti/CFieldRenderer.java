@@ -1,6 +1,6 @@
 package com.meti;
 
-public class CFieldRenderer extends CompoundRenderer {
+public class CFieldRenderer extends CompoundProcessor<String> {
     private final Node field;
 
     public CFieldRenderer(Node field) {
@@ -8,7 +8,7 @@ public class CFieldRenderer extends CompoundRenderer {
     }
 
     @Override
-    protected Stream<Renderer> stream() {
+    protected Stream<Processor<String>> stream() {
         return new ArrayStream<>(new IntegerTypeRenderer(field));
     }
 }

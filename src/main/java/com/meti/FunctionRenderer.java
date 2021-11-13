@@ -6,7 +6,7 @@ public class FunctionRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected String renderValid() throws CompileException {
+    protected String processValid() throws CompileException {
         var identity = value.apply(Attribute.Type.Identity).asNode().apply(Attribute.Type.Value).asString();
         var valueString = value.apply(Attribute.Type.Value).asNode().apply(Attribute.Type.Value).asString();
         return identity + valueString;

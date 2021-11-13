@@ -8,7 +8,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class CRenderingStageTest {
+class CRenderingProcessorTest {
     @Test
     void testFunction() {
         renderImpl("U16", 0, "unsigned int test(){return 0;}");
@@ -21,7 +21,7 @@ class CRenderingStageTest {
                     ? Primitive.I16.asField("test", parameters)
                     : Primitive.U16.asField("test", parameters);
             var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(value)))));
-            var actual = new CRenderingStage(root).render();
+            var actual = new CRenderingProcessingStage(root).process().apply(Attribute.Type.Value).asString();
             assertEquals(expected, actual);
         } catch (CompileException e) {
             fail(e);

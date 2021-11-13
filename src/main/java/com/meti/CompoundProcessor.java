@@ -1,11 +1,11 @@
 package com.meti;
 
-public abstract class CompoundRenderer implements Renderer {
+public abstract class CompoundProcessor<T> implements Processor<T> {
     @Override
-    public Option<String> render() throws CompileException {
+    public Option<T> process() throws CompileException {
         try {
             return stream()
-                    .map(Renderer::render)
+                    .map(Processor::process)
                     .flatMap(OptionStream::new)
                     .first();
         } catch (StreamException e) {
@@ -13,5 +13,5 @@ public abstract class CompoundRenderer implements Renderer {
         }
     }
 
-    protected abstract Stream<Renderer> stream();
+    protected abstract Stream<Processor<T>> stream();
 }

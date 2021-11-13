@@ -1,6 +1,6 @@
 package com.meti;
 
-public class CNodeRenderer extends CompoundRenderer {
+public class CNodeRenderer extends CompoundProcessor<String> {
     private final Node value;
 
     public CNodeRenderer(Node value) {
@@ -8,7 +8,7 @@ public class CNodeRenderer extends CompoundRenderer {
     }
 
     @Override
-    protected Stream<Renderer> stream() {
+    protected Stream<Processor<String>> stream() {
         return new ArrayStream<>(
                 new BlockRenderer(value),
                 new FunctionRenderer(value),
