@@ -2,7 +2,7 @@ package com.meti;
 
 public record Content(String value) implements Node {
     @Override
-    public Attribute apply() {
+    public Attribute apply(Attribute.Type type) {
         return new StringAttribute(value);
     }
 

@@ -7,6 +7,13 @@ class ReturnRenderer extends AbstractRenderer {
 
     @Override
     protected String renderValid() throws AttributeException {
-        return "return " + value.apply().asNode().apply().asString() + ";";
+        return "return " + renderChild() + ";";
+    }
+
+    private String renderChild() throws AttributeException {
+        return value.apply(Attribute.Type.Value)
+                .asNode()
+                .apply(Attribute.Type.Value)
+                .asString();
     }
 }

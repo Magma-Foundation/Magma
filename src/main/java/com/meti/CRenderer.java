@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.util.stream.Collectors;
+
 public final class CRenderer {
     private final String name;
     private final String type;
@@ -30,13 +32,20 @@ public final class CRenderer {
     }
 
     private String renderReturn(Node value) throws CompileException {
-        var inner = value.apply().asNode();
-        var outer = renderImpl(inner);
-        var with = value.with(new Content(outer));
-        return new ReturnRenderer(with).render().orElse("");
+        var types = value.stream(Attribute.Group.Node).collect(Collectors.toList());
+        var current = value;
+        for (Attribute.Type type : types) {
+            var child = current.apply(type).asNode();
+            var childOutput = renderNode(child);
+            current = current.with(new Content(childOutput));
+        }
+
+        return new ReturnRenderer(current)
+                .render()
+                .orElse("");
     }
 
-    private String renderImpl(Node value) throws CompileException {
+    private String renderNode(Node value) throws CompileException {
         return new IntegerRenderer(value)
                 .render()
                 .orElseThrow(() -> new CompileException("Cannot render: " + value));

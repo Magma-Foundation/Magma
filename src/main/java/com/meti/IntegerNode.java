@@ -2,7 +2,7 @@ package com.meti;
 
 public record IntegerNode(int value) implements Node {
     @Override
-    public Attribute apply() {
+    public Attribute apply(Attribute.Type type) {
         return new IntAttribute(value);
     }
 
