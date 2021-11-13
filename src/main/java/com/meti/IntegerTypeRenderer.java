@@ -2,7 +2,7 @@ package com.meti;
 
 import java.util.Map;
 
-class IntegerTypeRenderer extends AbstractRenderer {
+class IntegerTypeRenderer extends FilteredRenderer {
     private final Map<Integer, String> bitsToName = Map.of(
             8, "byte",
             16, "int",

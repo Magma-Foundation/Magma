@@ -1,15 +1,13 @@
 package com.meti;
 
-class FunctionLexer extends AbstractProcessor<Node> {
-    private final Input input;
-
+class FunctionLexer extends FilteredLexer {
     public FunctionLexer(Input input) {
-        this.input = input;
+        super(input);
     }
 
     @Override
     protected boolean isValid() {
-        return input.startsWithSlice();
+        return input.startsWithSlice("def ");
     }
 
     @Override

@@ -1,14 +1,18 @@
 package com.meti;
 
 public class MagmaNodeLexer extends CompoundProcessor<Node> {
-    private final String value;
+    private final Input root;
 
-    public MagmaNodeLexer(String value) {
-        this.value = value;
+    public MagmaNodeLexer(Input root) {
+        this.root = root;
     }
 
     @Override
     protected Stream<Processor<Node>> stream() {
-        return new ArrayStream<>(new FunctionLexer(new Input(value)));
+        return new ArrayStream<>(
+                new BlockLexer(root),
+                new FunctionLexer(root),
+                new IntLexer(root),
+                new ReturnLexer(root));
     }
 }

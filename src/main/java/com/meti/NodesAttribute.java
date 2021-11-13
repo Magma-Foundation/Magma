@@ -2,9 +2,9 @@ package com.meti;
 
 import java.util.List;
 
-public record NodesAttribute(List<Node> children) implements Attribute {
+public record NodesAttribute(List<? extends Node> children) implements Attribute {
     @Override
-    public Stream<Node> asNodeStream() {
+    public Stream<? extends Node> asNodeStream() {
         return new JavaListStream<>(children);
     }
 }

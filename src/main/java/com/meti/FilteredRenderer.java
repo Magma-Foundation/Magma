@@ -1,10 +1,10 @@
 package com.meti;
 
-public abstract class AbstractRenderer extends AbstractProcessor<String> {
+public abstract class FilteredRenderer extends FilteredProcessor<String> {
     protected final Node value;
     private final Node.Type type;
 
-    public AbstractRenderer(Node value, Node.Type type) {
+    public FilteredRenderer(Node value, Node.Type type) {
         this.value = value;
         this.type = type;
     }

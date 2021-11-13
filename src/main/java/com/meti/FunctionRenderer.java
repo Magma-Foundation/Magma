@@ -1,6 +1,6 @@
 package com.meti;
 
-public class FunctionRenderer extends AbstractRenderer {
+public class FunctionRenderer extends FilteredRenderer {
     public FunctionRenderer(Node value) {
         super(value, Node.Type.Function);
     }

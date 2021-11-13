@@ -39,7 +39,7 @@ public abstract class AbstractProcessingStage {
         var current = value;
         for (Attribute.Type type : types) {
             var child = current.apply(type).asNodeStream();
-            var childAttribute = renderStream(child);
+            var childAttribute = processNodeStream(child);
             current = current.with(type, childAttribute);
         }
         return current;
@@ -57,7 +57,7 @@ public abstract class AbstractProcessingStage {
         return current;
     }
 
-    private Attribute renderStream(Stream<Node> child) throws AttributeException {
+    private Attribute processNodeStream(Stream<? extends Node> child) throws AttributeException {
         try {
             return new NodesAttribute(child.map(this::processNodeTree)
                     .foldRight(new ArrayList<>(), (collection, node) -> {
@@ -65,7 +65,7 @@ public abstract class AbstractProcessingStage {
                         return collection;
                     }));
         } catch (StreamException e) {
-            throw new AttributeException("Cannot attribute with list of nodes.", e);
+            throw new AttributeException("Cannot process stream of nodes nodes.", e);
         }
     }
 

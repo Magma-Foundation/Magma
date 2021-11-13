@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class Container implements Node {
-    protected final List<Node> children;
+    protected final List<? extends Node> children;
 
-    public Container(List<Node> children) {
+    public Container(List<? extends Node> children) {
         this.children = children;
     }
 

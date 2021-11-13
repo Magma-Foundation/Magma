@@ -13,7 +13,15 @@ public record Input(String value) {
         return value.substring(start, end).trim();
     }
 
-    boolean startsWithSlice() {
-        return value.startsWith("def ");
+    public boolean endsWithChar(char c) {
+        return !value.isEmpty() && value.charAt(value.length() - 1) == c;
+    }
+
+    public boolean startsWithChar(char c) {
+        return !value.isEmpty() && value.charAt(0) == c;
+    }
+
+    boolean startsWithSlice(String slice) {
+        return value.startsWith(slice);
     }
 }

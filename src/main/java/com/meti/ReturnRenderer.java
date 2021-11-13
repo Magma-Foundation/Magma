@@ -1,6 +1,6 @@
 package com.meti;
 
-class ReturnRenderer extends AbstractRenderer {
+class ReturnRenderer extends FilteredRenderer {
     public ReturnRenderer(Node node) {
         super(node, Node.Type.Return);
     }

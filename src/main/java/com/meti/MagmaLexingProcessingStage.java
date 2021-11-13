@@ -10,7 +10,7 @@ public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
         Node toUse;
         if (value.is(Node.Type.Content)) {
             var input = value.apply(Attribute.Type.Value).asString();
-            toUse = new MagmaNodeLexer(input).process().orElseThrow(() -> new CompileException("Cannot lex: " + value));
+            toUse = new MagmaNodeLexer(new Input(input)).process().orElseThrow(() -> new CompileException("Cannot lex: " + value));
         } else {
             toUse = value;
         }

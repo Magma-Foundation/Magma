@@ -1,6 +1,6 @@
 package com.meti;
 
-class BlockRenderer extends AbstractRenderer {
+class BlockRenderer extends FilteredRenderer {
     public BlockRenderer(Node value) {
         super(value, Node.Type.Block);
     }

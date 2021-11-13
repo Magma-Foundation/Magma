@@ -1,6 +1,6 @@
 package com.meti;
 
-class SequenceRenderer extends AbstractRenderer {
+class SequenceRenderer extends FilteredRenderer {
     public SequenceRenderer(Node value) {
         super(value, Node.Type.Sequence);
     }

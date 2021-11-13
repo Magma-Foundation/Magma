@@ -1,6 +1,6 @@
 package com.meti;
 
-public abstract class AbstractProcessor<T> implements Processor<T> {
+public abstract class FilteredProcessor<T> implements Processor<T> {
     @Override
     public Option<T> process() throws CompileException {
         return isValid() ?

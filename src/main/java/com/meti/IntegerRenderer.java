@@ -1,6 +1,6 @@
 package com.meti;
 
-public class IntegerRenderer extends AbstractRenderer {
+public class IntegerRenderer extends FilteredRenderer {
     public IntegerRenderer(Node node) {
         super(node, Node.Type.Int);
     }

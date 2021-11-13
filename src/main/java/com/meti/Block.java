@@ -3,7 +3,7 @@ package com.meti;
 import java.util.List;
 
 public final class Block extends Container {
-    public Block(List<Node> children) {
+    public Block(List<? extends Node> children) {
         super(children);
     }
 
