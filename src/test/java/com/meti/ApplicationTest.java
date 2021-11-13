@@ -24,11 +24,20 @@ public class ApplicationTest {
     }
 
     @Test
-    void testMain() throws IOException {
-        Files.writeString(Source, "def main() : I16 => {return 0;}");
+    void empty() throws IOException {
+        assertCompile("", "");
+    }
+
+    private void assertCompile(String input, String output) throws IOException {
+        Files.writeString(Source, input);
         runImpl();
-        var output = Files.readString(Target);
-        assertEquals("int main(){return 0;}", output);
+        var actual = Files.readString(Target);
+        assertEquals(output, actual);
+    }
+
+    @Test
+    void testMain() throws IOException {
+        assertCompile("def main() : I16 => {return 0;}", "int main(){return 0;}");
     }
 
     private Option runImpl() throws IOException {

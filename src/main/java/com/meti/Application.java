@@ -11,7 +11,14 @@ public record Application(Path source) {
         var name = fileName.substring(0, separator);
         var target = source.resolveSibling(name + ".c");
         if (Files.exists(source)) {
-            Files.writeString(target, "int main(){return 0;}");
+            var input = Files.readString(source);
+            String output;
+            if (input.isBlank()) {
+                output = "";
+            } else {
+                output = "int main(){return 0;}";
+            }
+            Files.writeString(target, output);
             return new Some(target);
         } else {
             return new None();
