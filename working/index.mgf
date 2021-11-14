@@ -12,17 +12,72 @@ struct Option[T]{
     ?? (other : T) => T;
 }
 
+partial struct Number {
+  native operator < =(other : ThisType) : Bool;
+  native operator == =(other : ThisType) : Bool;
+
+  native operator + =(other : ThisType) : ThisType;
+}
+
+struct StreamException = {
+    cause : Option[Ref[Any]] = None;
+}
+
+struct EndOfStreamException < StreamException;
+
+interface Stream[T] {
+    head :=> T ? StreamException;
+    filter : [E](predicate : T => Bool ? E) => implements Stream[T] {
+        head = () => try {
+            let current : T;
+            do current = head();
+            while(!predicate(current));
+            return current;
+        } catch(e : StreamException) throw e;
+        } catch(e : E) throw StreamException(~e);
+    }
+    first ==>
+        try Some(head());
+        catch(e : EndOfStreamException) None();
+}
+
+class def RangeStream[T < Number](start : T, end : T) => {
+    let counter = start;
+
+    implements Stream[T] {
+        head = () =>
+            if(counter < end) counter = counter + 1;
+            else throw EndOfStreamException("End of range has been reached.");
+    }
+}
+
 struct String {
     length : AnySize;
-    lastChar : I16 => Option[U16];
+    lastChar : U8 => Option[AnySize];
+    slice : (AnySize, AnySize) => String;
+}
+
+partial native struct OutOfMemoryException {
+    bits : AnySize;
 }
 
 // null-terminated
 out def StringConstructor(array : Ref[U8]) : String => {
     return {
         length = array[length];
-        lastChar = index => {
-
+        lastChar = value =>
+            try RangeStream(0, length)
+                .filter(array[it] == value)
+                .first();
+            catch(e : StreamException) None();
+        slice = (start : AnySize, end : AnySize) => {
+            try {
+                const array = new U8(end - start);
+                RangeStream(start, end)
+                    .map(array[it]))
+                    .forEachSequentially(value, index) => array[index = value]);
+                return StringConstructor(array);
+            } catch(e : StreamException) new "";
         }
     }
 }
