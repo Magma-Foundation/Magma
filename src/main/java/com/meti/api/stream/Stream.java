@@ -7,6 +7,22 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 public interface Stream<T> {
+    default Stream<T> filter(F1<T, Boolean, ?> predicate) {
+        return () -> {
+            try {
+                T head;
+                do {
+                    head = Stream.this.head();
+                } while (!predicate.apply(head));
+                return head;
+            } catch (StreamException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new StreamException(e);
+            }
+        };
+    }
+
     default Option<T> first() throws StreamException {
         try {
             return new Some<>(head());

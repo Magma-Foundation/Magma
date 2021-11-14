@@ -5,6 +5,10 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 public record Input(String value) {
+    public char apply(int index) {
+        return value.charAt(index);
+    }
+
     public boolean endsWithChar(char c) {
         return !value.isEmpty() && value.charAt(value.length() - 1) == c;
     }
