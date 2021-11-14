@@ -20,6 +20,7 @@ public class MagmaNodeLexer extends CompoundProcessor<Node> {
     @Override
     protected Stream<Processor<Node>> stream() {
         return new ArrayStream<>(
+                new MagmaImportLexer(root),
                 new BlockLexer(root),
                 new IntLexer(root),
                 new ReturnLexer(root),

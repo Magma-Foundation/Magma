@@ -27,6 +27,6 @@ public interface Node {
         Int,
         Primitive,
         Return,
-        Sequence,
+        Sequence, Import,
     }
 }
