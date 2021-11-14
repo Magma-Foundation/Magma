@@ -1,4 +1,4 @@
-package com.meti.app.process;
+package com.meti.app.process.clang;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
@@ -7,6 +7,7 @@ import com.meti.app.CompileException;
 import com.meti.app.Input;
 import com.meti.app.node.IntegerNode;
 import com.meti.app.node.Node;
+import com.meti.app.process.Lexer;
 
 public record IntLexer(Input input) implements Lexer {
     @Override

@@ -4,8 +4,8 @@ import com.meti.app.CompileException;
 import com.meti.app.Input;
 import com.meti.app.attribute.Attribute;
 import com.meti.app.node.Node;
-import com.meti.app.process.DeclarationLexer;
-import com.meti.app.process.MagmaNodeLexer;
+import com.meti.app.process.clang.DeclarationLexer;
+import com.meti.app.process.magma.MagmaNodeLexer;
 
 public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
     public MagmaLexingProcessingStage(Node root) {

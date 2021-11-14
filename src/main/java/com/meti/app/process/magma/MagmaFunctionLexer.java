@@ -1,12 +1,13 @@
-package com.meti.app.process;
+package com.meti.app.process.magma;
 
 import com.meti.app.Input;
 import com.meti.app.node.Content;
 import com.meti.app.node.Function;
 import com.meti.app.node.Node;
+import com.meti.app.process.FilteredLexer;
 
-class FunctionLexer extends FilteredLexer {
-    public FunctionLexer(Input input) {
+class MagmaFunctionLexer extends FilteredLexer {
+    public MagmaFunctionLexer(Input input) {
         super(input);
     }
 

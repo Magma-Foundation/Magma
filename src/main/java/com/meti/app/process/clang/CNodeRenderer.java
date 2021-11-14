@@ -1,8 +1,10 @@
-package com.meti.app.process;
+package com.meti.app.process.clang;
 
 import com.meti.api.stream.ArrayStream;
 import com.meti.api.stream.Stream;
 import com.meti.app.node.Node;
+import com.meti.app.process.CompoundProcessor;
+import com.meti.app.process.Processor;
 
 public class CNodeRenderer extends CompoundProcessor<String> {
     private final Node value;
