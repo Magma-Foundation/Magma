@@ -13,17 +13,12 @@ class BlockRenderer extends FilteredRenderer {
 
     @Override
     protected String processValid() throws AttributeException {
-        return "{" + renderChildren() + "}";
-    }
-
-    private String renderChildren() throws AttributeException {
         try {
             return value.apply(Attribute.Type.Children)
-                    .asNodeStream()
-                    .map(child -> child.apply(Attribute.Type.Value))
-                    .map(Attribute::asString)
-                    .foldRight((sum, next) -> sum + next)
-                    .orElse("");
+                           .asNodeStream()
+                           .map(child -> child.apply(Attribute.Type.Value))
+                           .map(Attribute::asString)
+                           .foldRight("{", (sum, next) -> sum + next) + "}";
         } catch (StreamException e) {
             throw new AttributeException("Failed to render children.", e);
         }
