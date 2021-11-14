@@ -5,14 +5,31 @@ type DWORD = U32;
 
 // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa
 native const INVALID_FILE_ATTRIBUTES : DWORD;
-native def GetFileAttributes(fileName : LPCSTR) : DWORD;
+native def GetFileAttributesW(fileName : LPCSTR) : DWORD;
+
+struct Option[T]{
+    -> [R](mapper : T => R) => Option[R];
+    ?? (other : T) => T;
+}
 
 struct String {
+    length : AnySize;
+    lastChar : I16 => Option[U16];
+}
 
+// null-terminated
+out def StringConstructor(array : Ref[U8]) : String => {
+    return {
+        length = array[length];
+        lastChar = index => {
+
+        }
+    }
 }
 
 class def WindowsPath(source : String) => {
     def exists() => GetFileAttributes(source) != INVALID_FILE_ATTRIBUTES;
+
     def extendWith(extension : String) => {
         const fileName = source.lastChar('\\')
             -> source.slice(it)
