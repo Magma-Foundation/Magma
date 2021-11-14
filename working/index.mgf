@@ -1,3 +1,31 @@
+import native "windows";
+
+type LPCSTR = Ref[U16];
+type DWORD = U32;
+
+// https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfileattributesa
+native const INVALID_FILE_ATTRIBUTES : DWORD;
+native def GetFileAttributes(fileName : LPCSTR) : DWORD;
+
+struct String {
+
+}
+
+class def WindowsPath(source : String) => {
+    def exists() => GetFileAttributes(source) != INVALID_FILE_ATTRIBUTES;
+    def extendWith(extension : String) => {
+        const fileName = source.lastChar('\\')
+            -> source.slice(it)
+            ?? source;
+
+        const fileNameWithoutExtension = fileName.firstChar('.')
+            -> fileName.slice(0, it)
+            ?? fileName;
+
+        return WindowsPath(fileNameWithoutExtension + ".c");
+    }
+}
+
 def main() : I16 => {
     return 0;
 }

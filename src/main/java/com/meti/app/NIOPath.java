@@ -11,15 +11,10 @@ public record NIOPath(java.nio.file.Path source) implements Path {
 
     @Override
     public Path extendWith(final String extension) {
-        var name = computeFileName();
-        return new NIOPath(source.resolveSibling("%s.%s".formatted(name, extension)));
-    }
-
-    @Override
-    public String computeFileName() {
         var fileName = source.getFileName().toString();
         var separator = fileName.indexOf('.');
-        return fileName.substring(0, separator);
+        var name = fileName.substring(0, separator);
+        return new NIOPath(source.resolveSibling("%s.%s".formatted(name, extension)));
     }
 
     @Override

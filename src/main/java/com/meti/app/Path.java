@@ -3,8 +3,6 @@ package com.meti.app;
 import java.io.IOException;
 
 public interface Path {
-    String computeFileName();
-
     boolean exists();
 
     Path extendWith(String extension);
