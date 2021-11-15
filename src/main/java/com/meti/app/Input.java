@@ -9,6 +9,10 @@ public record Input(String value) {
         return value.charAt(index);
     }
 
+    public boolean containsChar(char c) {
+        return value.indexOf(c) != -1;
+    }
+
     public boolean endsWithChar(char c) {
         return !value.isEmpty() && value.charAt(value.length() - 1) == c;
     }

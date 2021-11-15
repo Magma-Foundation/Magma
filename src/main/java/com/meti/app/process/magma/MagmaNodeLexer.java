@@ -11,19 +11,20 @@ import com.meti.app.process.clang.IntLexer;
 import com.meti.app.process.clang.ReturnLexer;
 
 public class MagmaNodeLexer extends CompoundProcessor<Node> {
-    private final Input root;
+    private final Input input;
 
-    public MagmaNodeLexer(Input root) {
-        this.root = root;
+    public MagmaNodeLexer(Input input) {
+        this.input = input;
     }
 
     @Override
     protected Stream<Processor<Node>> stream() {
         return new ArrayStream<>(
-                new MagmaImportLexer(root),
-                new BlockLexer(root),
-                new IntLexer(root),
-                new ReturnLexer(root),
-                new MagmaFunctionLexer(root));
+                new MagmaDeclarationLexer(input),
+                new MagmaImportLexer(input),
+                new BlockLexer(input),
+                new IntLexer(input),
+                new ReturnLexer(input),
+                new MagmaFunctionLexer(input));
     }
 }
