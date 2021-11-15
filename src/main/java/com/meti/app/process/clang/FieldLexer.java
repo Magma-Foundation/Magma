@@ -12,7 +12,7 @@ import com.meti.app.process.Lexer;
 
 import java.util.Collections;
 
-public record DeclarationLexer(Input input) implements Lexer {
+public record FieldLexer(Input input) implements Lexer {
     @Override
     public Option<Node> process() throws CompileException {
         if (input.value().startsWith("def ")) {

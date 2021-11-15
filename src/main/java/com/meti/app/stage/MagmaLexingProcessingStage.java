@@ -4,7 +4,7 @@ import com.meti.app.CompileException;
 import com.meti.app.Input;
 import com.meti.app.attribute.Attribute;
 import com.meti.app.node.Node;
-import com.meti.app.process.clang.DeclarationLexer;
+import com.meti.app.process.clang.FieldLexer;
 import com.meti.app.process.magma.MagmaNodeLexer;
 
 public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
@@ -33,7 +33,7 @@ public final class MagmaLexingProcessingStage extends AbstractProcessingStage {
         Node toUse;
         if (field.is(Node.Type.Content)) {
             var input = new Input(field.apply(Attribute.Type.Value).asString());
-            toUse = new DeclarationLexer(input)
+            toUse = new FieldLexer(input)
                     .process()
                     .orElseThrow(() -> createCannotLex(field));
         } else {
