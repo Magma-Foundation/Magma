@@ -29,7 +29,7 @@ public interface Attribute {
         Children,
         Identity,
         Name,
-        PreEquality,
+        Onset,
         Signed,
         Value
     }

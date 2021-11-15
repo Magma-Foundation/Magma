@@ -23,8 +23,8 @@ class CRenderingProcessorTest {
         try {
             var parameters = new Sequence(Collections.emptyList());
             var identity = type.equals("I16")
-                    ? Primitive.I16.asField("test", parameters)
-                    : Primitive.U16.asField("test", parameters);
+                    ? Primitive.I16.asFieldWithOnset("test", parameters)
+                    : Primitive.U16.asFieldWithOnset("test", parameters);
             var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(value)))));
             var actual = new CRenderingProcessingStage(root).process().apply(Attribute.Type.Value).asString();
             assertEquals(expected, actual);

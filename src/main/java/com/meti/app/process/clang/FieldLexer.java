@@ -18,7 +18,7 @@ public record FieldLexer(Input input) implements Lexer {
         if (input.value().startsWith("def ")) {
             var name = input.slice("def ".length(), input.firstChar('(').orElse(-1));
             var type = input.slice(input.firstChar(':').orElse(-1) + 1, input.length());
-            return new Some<>(Primitive.valueOf(type).asField(name, new Sequence(Collections.emptyList())));
+            return new Some<>(Primitive.valueOf(type).asFieldWithOnset(name, new Sequence(Collections.emptyList())));
         } else {
             return new None<>();
         }

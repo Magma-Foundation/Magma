@@ -17,8 +17,8 @@ public class CompilerTest {
             var input = new MagmaRenderer(name, type).render();
             var parameters = new Sequence(Collections.emptyList());
             var identity = type.equals("I16")
-                    ? Primitive.I16.asField(name, parameters)
-                    : Primitive.U16.asField(name, parameters);
+                    ? Primitive.I16.asFieldWithOnset(name, parameters)
+                    : Primitive.U16.asFieldWithOnset(name, parameters);
             var root = new Function(identity, new Block(List.of(new Return(new IntegerNode(0)))));
             var output = new CRenderingProcessingStage(root)
                     .process()

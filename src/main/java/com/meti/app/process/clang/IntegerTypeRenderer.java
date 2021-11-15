@@ -24,7 +24,7 @@ class IntegerTypeRenderer extends FilteredRenderer {
         var isSigned = value.apply(Attribute.Type.Signed).asBoolean();
         var bits = value.apply(Attribute.Type.Bits).asInt();
         var name = value.apply(Attribute.Type.Name).asString();
-        var preEquality = value.apply(Attribute.Type.PreEquality)
+        var preEquality = value.apply(Attribute.Type.Onset)
                 .asNode()
                 .apply(Attribute.Type.Value)
                 .asString();
