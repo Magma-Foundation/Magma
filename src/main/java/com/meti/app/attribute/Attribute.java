@@ -31,7 +31,7 @@ public interface Attribute {
         Name,
         Onset,
         Signed,
-        Value
+        Coda, Value
     }
 
     enum Group {

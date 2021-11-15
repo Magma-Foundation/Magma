@@ -20,11 +20,11 @@ public class MagmaNodeLexer extends CompoundProcessor<Node> {
     @Override
     protected Stream<Processor<Node>> stream() {
         return new ArrayStream<>(
+                new MagmaFunctionLexer(input),
                 new MagmaDeclarationLexer(input),
                 new MagmaImportLexer(input),
                 new BlockLexer(input),
                 new IntLexer(input),
-                new ReturnLexer(input),
-                new MagmaFunctionLexer(input));
+                new ReturnLexer(input));
     }
 }

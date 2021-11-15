@@ -14,8 +14,12 @@ public enum Primitive {
         this.bits = bits;
     }
 
+    public Node asField(String name, Node value) {
+        return new CodaPrimitiveField(signed, bits, name, value);
+    }
+
     public Node asField(String name) {
-        return new PrimitiveField(name, bits, signed);
+        return new PrimitiveField(signed, bits, name);
     }
 
     public Node asFieldWithOnset(String name, Node onset) {

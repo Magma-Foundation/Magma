@@ -1,5 +1,8 @@
 package com.meti.app.node;
 
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.app.attribute.Attribute;
 import com.meti.app.attribute.AttributeException;
 
@@ -8,6 +11,14 @@ import java.util.stream.Stream;
 public interface Node {
     default Attribute apply(Attribute.Type type) throws AttributeException {
         throw new AttributeException("No attribute exists for type: " + type);
+    }
+
+    default Option<Attribute> applyOptionally(Attribute.Type type) {
+        try {
+            return new Some<>(apply(type));
+        } catch (AttributeException e) {
+            return new None<>();
+        }
     }
 
     boolean is(Type type);

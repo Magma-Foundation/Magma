@@ -18,6 +18,7 @@ public class CNodeRenderer extends CompoundProcessor<String> {
         return new ArrayStream<>(
                 new BlockRenderer(value),
                 new CImportRenderer(value),
+                new DeclarationRenderer(value),
                 new FunctionRenderer(value),
                 new IntegerRenderer(value),
                 new ReturnRenderer(value),

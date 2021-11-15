@@ -1,5 +1,5 @@
 package com.meti.api.core;
 
-public interface Supplier<T> {
-    T get();
+public interface Supplier<T, E extends Exception> {
+    T get() throws E;
 }

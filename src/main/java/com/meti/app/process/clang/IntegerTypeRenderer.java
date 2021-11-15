@@ -24,15 +24,23 @@ class IntegerTypeRenderer extends FilteredRenderer {
         var isSigned = value.apply(Attribute.Type.Signed).asBoolean();
         var bits = value.apply(Attribute.Type.Bits).asInt();
         var name = value.apply(Attribute.Type.Name).asString();
-        var preEquality = value.apply(Attribute.Type.Onset)
-                .asNode()
-                .apply(Attribute.Type.Value)
-                .asString();
+        var onset = value.applyOptionally(Attribute.Type.Onset)
+                .map(Attribute::asNode)
+                .map(value -> value.apply(Attribute.Type.Value))
+                .map(Attribute::asString)
+                .orElse("");
+
+        var coda = value.applyOptionally(Attribute.Type.Coda)
+                .map(Attribute::asNode)
+                .map(value -> value.apply(Attribute.Type.Value))
+                .map(Attribute::asString)
+                .map(value -> "=" + value)
+                .orElse("");
 
         var prefix = isSigned ? "" : "unsigned ";
         var bitString = lookupBits(bits);
 
-        return prefix + bitString + " " + name + preEquality;
+        return prefix + bitString + " " + name + onset + coda;
     }
 
     private String lookupBits(int bits) throws CompileException {

@@ -8,7 +8,7 @@ public class PrimitiveField implements Node {
     protected final int bits;
     protected final boolean signed;
 
-    public PrimitiveField(String name, int bits, boolean signed) {
+    public PrimitiveField(boolean signed, int bits, String name) {
         this.name = name;
         this.bits = bits;
         this.signed = signed;
