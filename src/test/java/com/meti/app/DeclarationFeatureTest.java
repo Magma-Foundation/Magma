@@ -1,8 +1,9 @@
-package com.meti.app.process;
+package com.meti.app;
 
 import org.junit.jupiter.api.Test;
 
 import static com.meti.app.CompiledTest.assertCompile;
+import static com.meti.app.CompiledTest.assertInvalid;
 
 public class DeclarationFeatureTest {
     @Test
@@ -23,5 +24,10 @@ public class DeclarationFeatureTest {
     @Test
     void value() {
         assertCompile("const x : I16 = 69", "int x=69;");
+    }
+
+    @Test
+    void invalidate_type() {
+        assertInvalid("const x : test = 420");
     }
 }
