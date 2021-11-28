@@ -15,7 +15,8 @@ public class ApplicationTest {
     private static final Path MainDirectoryPath = SourceDirectoryPath.resolve("main").resolve("magma");
 
     @Test
-    void creates_main() {
+    void creates_main() throws IOException {
+        run();
         assertTrue(Files.exists(MainDirectoryPath));
     }
 
@@ -38,7 +39,8 @@ public class ApplicationTest {
     }
 
     @Test
-    void creates_test() {
+    void creates_test() throws IOException {
+        run();
         assertTrue(Files.exists(TestDirectoryPath));
     }
 
