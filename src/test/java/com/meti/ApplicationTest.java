@@ -45,7 +45,6 @@ public class ApplicationTest {
     @AfterEach
     void tearDown() throws IOException {
         Files.walkFileTree(SourceDirectoryPath, new DeletingVisitor());
-        Files.delete(SourceDirectoryPath);
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
