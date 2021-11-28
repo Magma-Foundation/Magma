@@ -29,7 +29,14 @@ public class ApplicationTest {
         assertWritesTarget("First");
     }
 
-    private void ensure(Path path) throws IOException {
+    private void assertWritesTarget(final String name) throws IOException {
+        ensureDirectory(MainDirectory);
+        Files.createFile(MainDirectory.resolve(name + ".mgf"));
+        run();
+        assertTrue(Files.exists(OutDirectory.resolve("c").resolve(name + ".c")));
+    }
+
+    private void ensureDirectory(Path path) throws IOException {
         if (!Files.exists(path)) {
             Files.createDirectories(path);
         }
@@ -59,35 +66,42 @@ public class ApplicationTest {
         Files.walkFileTree(OutDirectory, new DeletingVisitor());
     }
 
-    private void assertWritesTarget(final String name) throws IOException {
-        ensure(MainDirectory);
-        Files.createFile(MainDirectory.resolve(name + ".mgf"));
-        run();
-        assertTrue(Files.exists(OutDirectory.resolve("c").resolve(name + ".c")));
-    }
-
     private void run() throws IOException {
-        ensure(SourceDirectory);
-        ensure(MainDirectory);
-        ensure(TestDirectory);
+        ensureDirectory(SourceDirectory);
+        ensureDirectory(MainDirectory);
+        ensureDirectory(TestDirectory);
 
-        var found = Files.list(MainDirectory).collect(Collectors.toSet());
-        for (Path path : found) {
-            var fileName = path.getFileName().toString();
+        var sourceFiles = Files.walk(MainDirectory).collect(Collectors.toSet());
+        for (var relativeToMain : sourceFiles) {
+            var relativeSource = MainDirectory.relativize(relativeToMain);
+
+            var fileName = relativeToMain.getFileName().toString();
             var separator = fileName.indexOf('.');
             if (separator != -1) {
                 var name = fileName.substring(0, separator);
                 var extension = fileName.substring(separator + 1);
                 if (extension.equals("mgf")) {
                     var parent = OutDirectory.resolve("c");
-                    ensure(parent);
-                    var resolve = parent.resolve(name + ".c");
-                    if (!Files.exists(resolve)) {
-                        Files.createFile(resolve);
-                    }
+                    ensureDirectory(parent);
+                    var relativeTarget = relativeSource.resolveSibling(name + ".c");
+                    var relativeToTarget = parent.resolve(relativeTarget);
+                    ensureFile(relativeToTarget);
                 }
             }
         }
+    }
+
+    private void ensureFile(Path path) throws IOException {
+        var parent = path.getParent();
+        if (parent != null) ensureDirectory(parent);
+        if (!Files.exists(path)) Files.createFile(path);
+    }
+
+    @Test
+    void writes_sub_directory() throws IOException {
+        ensureFile(MainDirectory.resolve("com").resolve("Test.mgf"));
+        run();
+        assertTrue(Files.exists(OutDirectory.resolve("c").resolve("com").resolve("Test.c")));
     }
 
     @Test
