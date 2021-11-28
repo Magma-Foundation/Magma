@@ -26,15 +26,22 @@ public class ApplicationTest {
         assertTrue(Files.exists(SourceDirectoryPath));
     }
 
+    private void ensure(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createDirectories(path);
+        }
+    }
+
     private void run() throws IOException {
         ensure(SourceDirectoryPath);
         ensure(MainDirectoryPath);
         ensure(TestDirectoryPath);
-    }
 
-    private void ensure(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
+        var parent = Paths.get(".", "build", "c");
+        ensure(parent);
+        var resolve = parent.resolve("Test.c");
+        if (!Files.exists(resolve)) {
+            Files.createFile(resolve);
         }
     }
 
@@ -47,6 +54,14 @@ public class ApplicationTest {
     @AfterEach
     void tearDown() throws IOException {
         Files.walkFileTree(SourceDirectoryPath, new DeletingVisitor());
+    }
+
+    @Test
+    void writes_target() throws IOException {
+        ensure(MainDirectoryPath);
+        Files.createFile(MainDirectoryPath.resolve("Test.mgf"));
+        run();
+        assertTrue(Files.exists(Paths.get(".", "build", "c", "Test.c")));
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
