@@ -11,29 +11,24 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path SourceDirectoryPath = Paths.get(".", "source");
-    private static final Path TestDirectoryPath = SourceDirectoryPath.resolve("test").resolve("magma");
-    private static final Path MainDirectoryPath = SourceDirectoryPath.resolve("main").resolve("magma");
-    private static final Path OutDirectory = Paths.get(".", "out");
+    private static final Path Root = Paths.get(".");
+    private static final Path SourceDirectory = Root.resolve("source");
+    private static final Path TestDirectory = SourceDirectory.resolve("test").resolve("magma");
+    private static final Path MainDirectory = SourceDirectory.resolve("main").resolve("magma");
+    private static final Path OutDirectory = Root.resolve("out");
 
     @Test
     void creates_main() throws IOException {
         run();
-        assertTrue(Files.exists(MainDirectoryPath));
-    }
-
-    @Test
-    void creates_source() throws IOException {
-        run();
-        assertTrue(Files.exists(SourceDirectoryPath));
+        assertTrue(Files.exists(MainDirectory));
     }
 
     private void run() throws IOException {
-        ensure(SourceDirectoryPath);
-        ensure(MainDirectoryPath);
-        ensure(TestDirectoryPath);
+        ensure(SourceDirectory);
+        ensure(MainDirectory);
+        ensure(TestDirectory);
 
-        if (Files.exists(MainDirectoryPath.resolve("Test.mgf"))) {
+        if (Files.exists(MainDirectory.resolve("Test.mgf"))) {
             var parent = OutDirectory.resolve("c");
             ensure(parent);
             var resolve = parent.resolve("Test.c");
@@ -50,9 +45,15 @@ public class ApplicationTest {
     }
 
     @Test
+    void creates_source() throws IOException {
+        run();
+        assertTrue(Files.exists(SourceDirectory));
+    }
+
+    @Test
     void creates_test() throws IOException {
         run();
-        assertTrue(Files.exists(TestDirectoryPath));
+        assertTrue(Files.exists(TestDirectory));
     }
 
     @Test
@@ -63,14 +64,14 @@ public class ApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.walkFileTree(SourceDirectoryPath, new DeletingVisitor());
+        Files.walkFileTree(SourceDirectory, new DeletingVisitor());
         Files.walkFileTree(OutDirectory, new DeletingVisitor());
     }
 
     @Test
     void writes_target() throws IOException {
-        ensure(MainDirectoryPath);
-        Files.createFile(MainDirectoryPath.resolve("Test.mgf"));
+        ensure(MainDirectory);
+        Files.createFile(MainDirectory.resolve("Test.mgf"));
         run();
         assertTrue(Files.exists(OutDirectory.resolve("c").resolve("Test.c")));
     }
