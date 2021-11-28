@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,19 +24,9 @@ public class ApplicationTest {
         assertTrue(Files.exists(MainDirectory));
     }
 
-    private void run() throws IOException {
-        ensure(SourceDirectory);
-        ensure(MainDirectory);
-        ensure(TestDirectory);
-
-        if (Files.exists(MainDirectory.resolve("Test.mgf"))) {
-            var parent = OutDirectory.resolve("c");
-            ensure(parent);
-            var resolve = parent.resolve("Test.c");
-            if (!Files.exists(resolve)) {
-                Files.createFile(resolve);
-            }
-        }
+    @Test
+    void writes_another_target() throws IOException {
+        assertWritesTarget("First");
     }
 
     private void ensure(Path path) throws IOException {
@@ -68,12 +59,40 @@ public class ApplicationTest {
         Files.walkFileTree(OutDirectory, new DeletingVisitor());
     }
 
+    private void assertWritesTarget(final String name) throws IOException {
+        ensure(MainDirectory);
+        Files.createFile(MainDirectory.resolve(name + ".mgf"));
+        run();
+        assertTrue(Files.exists(OutDirectory.resolve("c").resolve(name + ".c")));
+    }
+
+    private void run() throws IOException {
+        ensure(SourceDirectory);
+        ensure(MainDirectory);
+        ensure(TestDirectory);
+
+        var found = Files.list(MainDirectory).collect(Collectors.toSet());
+        for (Path path : found) {
+            var fileName = path.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            if (separator != -1) {
+                var name = fileName.substring(0, separator);
+                var extension = fileName.substring(separator + 1);
+                if (extension.equals("mgf")) {
+                    var parent = OutDirectory.resolve("c");
+                    ensure(parent);
+                    var resolve = parent.resolve(name + ".c");
+                    if (!Files.exists(resolve)) {
+                        Files.createFile(resolve);
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     void writes_target() throws IOException {
-        ensure(MainDirectory);
-        Files.createFile(MainDirectory.resolve("Test.mgf"));
-        run();
-        assertTrue(Files.exists(OutDirectory.resolve("c").resolve("Test.c")));
+        assertWritesTarget("Test");
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
