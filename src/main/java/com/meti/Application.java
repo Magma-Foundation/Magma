@@ -30,7 +30,9 @@ public class Application {
     }
 
     private void compileSources() throws ApplicationException {
+        var classPath = new DirectoryClassPath(SourceDirectory);
         var sourceFiles = collectSourceFiles();
+
         for (var relativeToSource : sourceFiles) {
             var relativeSource = MainDirectory.relativize(relativeToSource);
 
@@ -44,7 +46,7 @@ public class Application {
                     var relativeToTarget = OutDirectory.resolve(relativeTarget);
 
                     var input = readInput(relativeToSource);
-                    var output = new Compiler(input).compile();
+                    var output = new Compiler(classPath, input).compile();
 
                     writeOutput(relativeToTarget, output);
                 }
