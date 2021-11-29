@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Application {
@@ -13,12 +14,23 @@ public class Application {
     static final Path MainDirectory = SourceDirectory.resolve("main").resolve("magma");
     static final Path OutDirectory = Root.resolve("out").resolve("c");
 
-    void run() throws IOException {
-        new com.meti.Path(SourceDirectory).ensureDirectory();
-        new com.meti.Path(MainDirectory).ensureDirectory();
-        new com.meti.Path(TestDirectory).ensureDirectory();
+    void run() throws ApplicationException {
+        createDirectories();
+        compileSources();
+    }
 
-        var sourceFiles = Files.walk(MainDirectory).collect(Collectors.toSet());
+    private void createDirectories() throws ApplicationException {
+        try {
+            new com.meti.Path(SourceDirectory).ensureDirectory();
+            new com.meti.Path(MainDirectory).ensureDirectory();
+            new com.meti.Path(TestDirectory).ensureDirectory();
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    private void compileSources() throws ApplicationException {
+        var sourceFiles = collectSourceFiles();
         for (var relativeToSource : sourceFiles) {
             var relativeSource = MainDirectory.relativize(relativeToSource);
 
@@ -31,13 +43,37 @@ public class Application {
                     var relativeTarget = relativeSource.resolveSibling(name + ".h");
                     var relativeToTarget = OutDirectory.resolve(relativeTarget);
 
-                    new com.meti.Path(relativeToTarget.getParent()).ensureDirectory();
-
-                    var input = Files.readString(relativeToSource);
+                    var input = readInput(relativeToSource);
                     var output = new Compiler(input).compile();
-                    Files.writeString(relativeToTarget, output);
+
+                    writeOutput(relativeToTarget, output);
                 }
             }
+        }
+    }
+
+    private Set<Path> collectSourceFiles() throws ApplicationException {
+        try {
+            return Files.walk(MainDirectory).collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    private String readInput(Path relativeToSource) throws ApplicationException {
+        try {
+            return Files.readString(relativeToSource);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    private void writeOutput(Path relativeToTarget, String output) throws ApplicationException {
+        try {
+            new com.meti.Path(relativeToTarget.getParent()).ensureDirectory();
+            Files.writeString(relativeToTarget, output);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
         }
     }
 }

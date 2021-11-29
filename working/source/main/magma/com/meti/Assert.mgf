@@ -1,4 +1,4 @@
-import { String } from String;
+import { String } from com.meti.String;
 
 def it(value : String, action : () => Void) : Void => {
 }
