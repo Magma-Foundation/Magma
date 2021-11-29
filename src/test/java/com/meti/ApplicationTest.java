@@ -4,53 +4,45 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.stream.Collectors;
 
+import static com.meti.Application.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    private static final Path Root = Paths.get(".");
-    private static final Path SourceDirectory = Root.resolve("source");
-    private static final Path TestDirectory = SourceDirectory.resolve("test").resolve("magma");
-    private static final Path MainDirectory = SourceDirectory.resolve("main").resolve("magma");
-    private static final Path OutDirectory = Root.resolve("out");
-
     @Test
     void creates_main() throws IOException {
-        run();
+        new Application().run();
         assertTrue(Files.exists(MainDirectory));
     }
 
     @Test
     void creates_source() throws IOException {
-        run();
+        new Application().run();
         assertTrue(Files.exists(SourceDirectory));
     }
 
     @Test
     void creates_test() throws IOException {
-        run();
+        new Application().run();
         assertTrue(Files.exists(TestDirectory));
     }
 
     @Test
     void does_not_write_target() throws IOException {
-        run();
-        assertFalse(Files.exists(OutDirectory.resolve("c").resolve("Test.c")));
+        new Application().run();
+        assertFalse(Files.exists(OutDirectory.resolve("Test.c")));
     }
 
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.walkFileTree(SourceDirectory, new DeletingVisitor());
-        Files.walkFileTree(OutDirectory, new DeletingVisitor());
-    }
-
-    private void ensureFile(Path path) throws IOException {
-        var parent = path.getParent();
-        if (parent != null) ensureDirectory(parent);
-        if (!Files.exists(path)) Files.createFile(path);
+    private void runImpl(final String name, String input, String output) throws IOException {
+        Application.ensureDirectory(MainDirectory);
+        Files.writeString(MainDirectory.resolve(name + ".mgf"), input);
+        new Application().run();
+        assertEquals(output, Files.readString(OutDirectory.resolve(name + ".c")));
     }
 
     @Test
@@ -62,50 +54,10 @@ public class ApplicationTest {
         runImpl(name, "", "");
     }
 
-    private void runImpl(final String name, String input, String output) throws IOException {
-        ensureDirectory(MainDirectory);
-        Files.writeString(MainDirectory.resolve(name + ".mgf"), input);
-        run();
-        assertEquals(output, Files.readString(OutDirectory.resolve("c").resolve(name + ".c")));
-    }
-
-    private void ensureDirectory(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
-    }
-
-    private void run() throws IOException {
-        ensureDirectory(SourceDirectory);
-        ensureDirectory(MainDirectory);
-        ensureDirectory(TestDirectory);
-
-        var sourceFiles = Files.walk(MainDirectory).collect(Collectors.toSet());
-        for (var relativeToSource : sourceFiles) {
-            var relativeSource = MainDirectory.relativize(relativeToSource);
-
-            var fileName = relativeToSource.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            if (separator != -1) {
-                var name = fileName.substring(0, separator);
-                var extension = fileName.substring(separator + 1);
-                if (extension.equals("mgf")) {
-                    var relativeTarget = relativeSource.resolveSibling(name + ".c");
-                    var relativeToTarget = OutDirectory.resolve("c").resolve(relativeTarget);
-
-                    ensureDirectory(relativeToTarget.getParent());
-
-                    var input = Files.readString(relativeToSource);
-                    if (input.isBlank()) {
-                        Files.createFile(relativeToTarget);
-                    } else {
-                        var start = input.indexOf('{');
-                        var structureName = input.substring("struct ".length(), start).trim();
-                        Files.writeString(relativeToTarget, "struct " + structureName + " {};");
-                    }
-                }
-            }
-        }
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.walkFileTree(SourceDirectory, new DeletingVisitor());
+        Files.walkFileTree(Root.resolve("out"), new DeletingVisitor());
     }
 
     @Test
@@ -118,15 +70,21 @@ public class ApplicationTest {
     }
 
     @Test
-    void writes_sub_directory() throws IOException {
-        ensureFile(MainDirectory.resolve("com").resolve("Test.mgf"));
-        run();
-        assertTrue(Files.exists(OutDirectory.resolve("c").resolve("com").resolve("Test.c")));
+    void writes_other_content() throws IOException {
+        assertSource("struct Test {}", "struct Test {};");
     }
 
     @Test
-    void writes_other_content() throws IOException {
-        assertSource("struct Test {}", "struct Test {};");
+    void writes_sub_directory() throws IOException {
+        ensureFile(MainDirectory.resolve("com").resolve("Test.mgf"));
+        new Application().run();
+        assertTrue(Files.exists(OutDirectory.resolve("com").resolve("Test.c")));
+    }
+
+    private static void ensureFile(Path path) throws IOException {
+        var parent = path.getParent();
+        if (parent != null) Application.ensureDirectory(parent);
+        if (!Files.exists(path)) Files.createFile(path);
     }
 
     @Test
