@@ -38,11 +38,10 @@ public class ApplicationTest {
         assertFalse(Files.exists(OutDirectory.resolve("Test.c")));
     }
 
-    private void runImpl(final String name, String input, String output) throws IOException {
-        Application.ensureDirectory(MainDirectory);
-        Files.writeString(MainDirectory.resolve(name + ".mgf"), input);
-        new Application().run();
-        assertEquals(output, Files.readString(OutDirectory.resolve(name + ".c")));
+    private static void ensureFile(Path path) throws IOException {
+        var parent = path.getParent();
+        if (parent != null) new com.meti.Path(parent).ensureDirectory();
+        if (!Files.exists(path)) Files.createFile(path);
     }
 
     @Test
@@ -81,10 +80,11 @@ public class ApplicationTest {
         assertTrue(Files.exists(OutDirectory.resolve("com").resolve("Test.c")));
     }
 
-    private static void ensureFile(Path path) throws IOException {
-        var parent = path.getParent();
-        if (parent != null) Application.ensureDirectory(parent);
-        if (!Files.exists(path)) Files.createFile(path);
+    private void runImpl(final String name, String input, String output) throws IOException {
+        new com.meti.Path(MainDirectory).ensureDirectory();
+        Files.writeString(MainDirectory.resolve(name + ".mgf"), input);
+        new Application().run();
+        assertEquals(output, Files.readString(OutDirectory.resolve(name + ".c")));
     }
 
     @Test

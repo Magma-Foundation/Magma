@@ -14,9 +14,9 @@ public class Application {
     static final Path OutDirectory = Root.resolve("out").resolve("c");
 
     void run() throws IOException {
-        ensureDirectory(SourceDirectory);
-        ensureDirectory(MainDirectory);
-        ensureDirectory(TestDirectory);
+        new com.meti.Path(SourceDirectory).ensureDirectory();
+        new com.meti.Path(MainDirectory).ensureDirectory();
+        new com.meti.Path(TestDirectory).ensureDirectory();
 
         var sourceFiles = Files.walk(MainDirectory).collect(Collectors.toSet());
         for (var relativeToSource : sourceFiles) {
@@ -31,24 +31,13 @@ public class Application {
                     var relativeTarget = relativeSource.resolveSibling(name + ".c");
                     var relativeToTarget = OutDirectory.resolve(relativeTarget);
 
-                    ensureDirectory(relativeToTarget.getParent());
+                    new com.meti.Path(relativeToTarget.getParent()).ensureDirectory();
 
                     var input = Files.readString(relativeToSource);
-                    if (input.isBlank()) {
-                        Files.createFile(relativeToTarget);
-                    } else {
-                        var start = input.indexOf('{');
-                        var structureName = input.substring("struct ".length(), start).trim();
-                        Files.writeString(relativeToTarget, "struct " + structureName + " {};");
-                    }
+                    var output = new Compiler(input).compile();
+                    Files.writeString(relativeToTarget, output);
                 }
             }
-        }
-    }
-
-    static void ensureDirectory(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
         }
     }
 }
