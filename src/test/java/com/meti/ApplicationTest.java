@@ -35,7 +35,7 @@ public class ApplicationTest {
     @Test
     void does_not_write_target() throws IOException {
         new Application().run();
-        assertFalse(Files.exists(OutDirectory.resolve("Test.c")));
+        assertFalse(Files.exists(OutDirectory.resolve("Test.h")));
     }
 
     private static void ensureFile(Path path) throws IOException {
@@ -73,18 +73,18 @@ public class ApplicationTest {
         assertSource("struct Test {}", "struct Test {};");
     }
 
-    @Test
-    void writes_sub_directory() throws IOException {
-        ensureFile(MainDirectory.resolve("com").resolve("Test.mgf"));
-        new Application().run();
-        assertTrue(Files.exists(OutDirectory.resolve("com").resolve("Test.c")));
-    }
-
     private void runImpl(final String name, String input, String output) throws IOException {
         new com.meti.Path(MainDirectory).ensureDirectory();
         Files.writeString(MainDirectory.resolve(name + ".mgf"), input);
         new Application().run();
-        assertEquals(output, Files.readString(OutDirectory.resolve(name + ".c")));
+        assertEquals(output, Files.readString(OutDirectory.resolve(name + ".h")));
+    }
+
+    @Test
+    void writes_sub_directory() throws IOException {
+        ensureFile(MainDirectory.resolve("com").resolve("Test.mgf"));
+        new Application().run();
+        assertTrue(Files.exists(OutDirectory.resolve("com").resolve("Test.h")));
     }
 
     @Test

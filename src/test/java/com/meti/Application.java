@@ -28,7 +28,7 @@ public class Application {
                 var name = fileName.substring(0, separator);
                 var extension = fileName.substring(separator + 1);
                 if (extension.equals("mgf")) {
-                    var relativeTarget = relativeSource.resolveSibling(name + ".c");
+                    var relativeTarget = relativeSource.resolveSibling(name + ".h");
                     var relativeToTarget = OutDirectory.resolve(relativeTarget);
 
                     new com.meti.Path(relativeToTarget.getParent()).ensureDirectory();
