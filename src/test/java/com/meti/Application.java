@@ -11,7 +11,7 @@ public class Application {
     static final Path SourceDirectory = Root.resolve("source");
     static final Path TestDirectory = SourceDirectory.resolve("test").resolve("magma");
     static final Path MainDirectory = SourceDirectory.resolve("main").resolve("magma");
-    static final Path OutDirectory = Paths.get(".").resolve("out").resolve("c");
+    static final Path OutDirectory = Root.resolve("out").resolve("c");
 
     void run() throws IOException {
         ensureDirectory(SourceDirectory);
