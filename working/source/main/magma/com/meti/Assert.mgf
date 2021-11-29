@@ -1,7 +1,7 @@
 import { String } from String;
 
-def it(value : String, action : () => Void) => {
+def it(value : String, action : () => Void) : Void => {
 }
 
-def describe(value : String, action : () => Void) => {
+def describe(value : String, action : () => Void) : Void => {
 }
