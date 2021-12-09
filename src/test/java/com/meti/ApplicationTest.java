@@ -12,40 +12,45 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.meti.Application.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-
-    private void assertCreatesFile(String name) throws IOException {
-        createSourceDirectory();
-        createSourceTestFile(name);
-        Application.run();
-        assertTrue(Files.exists(Application.OutputCDirectory.resolve(name + ".c")));
-    }
-
-    private void createSourceDirectory() throws IOException {
-        Files.createDirectory(Application.SourceDirectory);
-    }
-
-    private void createSourceTestFile(String name) throws IOException {
-        Files.createFile(resolveSourceTestFile(name));
-    }
 
     @Test
     void creates_another_file() throws IOException {
         assertCreatesFile("test1");
     }
 
+    private void assertCreatesFile(String name) throws IOException {
+        createSourceDirectory();
+        createSourceTestFile(name, "");
+        Application.run();
+        assertTrue(Files.exists(Application.OutCDirectory.resolve(name + ".c")));
+    }
+
+    private void createSourceDirectory() throws IOException {
+        Files.createDirectory(Application.SourceDirectory);
+    }
+
+    private void createSourceTestFile(String name, String input) throws IOException {
+        Files.writeString(resolveSourceTestFile(name), input);
+    }
+
+    private Path resolveSourceTestFile(final String name) {
+        return Application.SourceDirectory.resolve(name + ".mgf");
+    }
+
     @Test
     void creates_files() throws IOException {
         createSourceDirectory();
-        createSourceTestFile("first");
-        createSourceTestFile("second");
+        createSourceTestFile("first", "");
+        createSourceTestFile("second", "");
 
         Application.run();
 
         var expected = Set.of("first.c", "second.c");
-        var actual = Files.list(Application.OutputCDirectory)
+        var actual = Files.list(Application.OutCDirectory)
                 .map(Path::getFileName)
                 .map(Path::toString)
                 .collect(Collectors.toSet());
@@ -60,7 +65,7 @@ public class ApplicationTest {
 
         Application.run();
 
-        assertTrue(Files.exists(Application.OutputCDirectory.resolve("inner").resolve("test.c")));
+        assertTrue(Files.exists(Application.OutCDirectory.resolve("inner").resolve("test.c")));
     }
 
     @Test
@@ -70,16 +75,23 @@ public class ApplicationTest {
 
     @Test
     void does_not_create_out_directory() {
-        assertFalse(Files.exists(Application.OutDirectory));
+        assertFalse(Files.exists(OutDirectory));
     }
 
-    private Path resolveSourceTestFile(final String name) {
-        return Application.SourceDirectory.resolve(name + ".mgf");
+    @Test
+    void empty_source() throws IOException {
+        createSourceDirectory();
+        createSourceTestFile("test", "");
+
+        run();
+
+        var actual = Files.readString(OutCDirectory.resolve("test.c"));
+        assertEquals("", actual);
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.walkFileTree(Application.OutDirectory, new DeletingVisitor());
+        Files.walkFileTree(OutDirectory, new DeletingVisitor());
         Files.walkFileTree(Application.SourceDirectory, new DeletingVisitor());
     }
 

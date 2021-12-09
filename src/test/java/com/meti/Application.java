@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class Application {
     static final Path Root = Paths.get(".");
     static final Path OutDirectory = Root.resolve("out");
-    static final Path OutputCDirectory = OutDirectory.resolve("c");
+    static final Path OutCDirectory = OutDirectory.resolve("c");
     static final Path SourceDirectory = Root.resolve("source");
 
     private static void compileDirectory(Path directory) throws IOException {
@@ -31,7 +31,7 @@ public class Application {
         var relativeChild = SourceDirectory.relativize(child);
         var newName = name + ".c";
 
-        var path = OutputCDirectory
+        var path = OutCDirectory
                 .resolve(relativeChild)
                 .resolveSibling(newName);
 
