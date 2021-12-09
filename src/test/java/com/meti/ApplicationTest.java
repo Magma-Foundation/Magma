@@ -16,17 +16,19 @@ import static com.meti.Application.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-
     @Test
-    void creates_another_file() throws IOException {
-        assertCreatesFile("test1");
+    void content_source() throws IOException {
+        assertIntegrativeCompile("def main() : I16 => {return 0;}", "int main(){return 0;}");
     }
 
-    private void assertCreatesFile(String name) throws IOException {
+    private void assertIntegrativeCompile(String input, String output) throws IOException {
         createSourceDirectory();
-        createSourceTestFile(name, "");
-        Application.run();
-        assertTrue(Files.exists(Application.OutCDirectory.resolve(name + ".c")));
+        createSourceTestFile("test", input);
+
+        run();
+
+        var actual = Files.readString(OutCDirectory.resolve("test.c"));
+        assertEquals(output, actual);
     }
 
     private void createSourceDirectory() throws IOException {
@@ -39,6 +41,18 @@ public class ApplicationTest {
 
     private Path resolveSourceTestFile(final String name) {
         return Application.SourceDirectory.resolve(name + ".mgf");
+    }
+
+    @Test
+    void creates_another_file() throws IOException {
+        assertCreatesFile("test1");
+    }
+
+    private void assertCreatesFile(String name) throws IOException {
+        createSourceDirectory();
+        createSourceTestFile(name, "");
+        Application.run();
+        assertTrue(Files.exists(Application.OutCDirectory.resolve(name + ".c")));
     }
 
     @Test
@@ -80,13 +94,7 @@ public class ApplicationTest {
 
     @Test
     void empty_source() throws IOException {
-        createSourceDirectory();
-        createSourceTestFile("test", "");
-
-        run();
-
-        var actual = Files.readString(OutCDirectory.resolve("test.c"));
-        assertEquals("", actual);
+        assertIntegrativeCompile("", "");
     }
 
     @AfterEach
