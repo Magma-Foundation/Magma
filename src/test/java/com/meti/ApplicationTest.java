@@ -6,15 +6,16 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     private static final Path Root = Paths.get(".");
     private static final Path SourceDirectory = Root.resolve("source");
     private static final Path OutDirectory = Root.resolve("out");
+    private static final Path OutputCDirectory = OutDirectory.resolve("c");
 
     @Test
     void creates_another_file() throws IOException {
@@ -23,9 +24,13 @@ public class ApplicationTest {
 
     private void assertCreatesFile(String name) throws IOException {
         createSourceDirectory();
-        Files.createFile(resolveSourceTestFile(name));
+        createSourceTestFile(name);
         run();
         assertTrue(Files.exists(resolveOutputTestFile(name)));
+    }
+
+    private void createSourceTestFile(String name) throws IOException {
+        Files.createFile(resolveSourceTestFile(name));
     }
 
     private void createSourceDirectory() throws IOException {
@@ -44,14 +49,29 @@ public class ApplicationTest {
             var name = filePath.substring(0, separator);
 
             var path = resolveOutputTestFile(name);
-            Files.createDirectory(path.getParent().getParent());
-            Files.createDirectory(path.getParent());
+            Files.createDirectories(path.getParent());
             Files.createFile(path);
         }
     }
 
     private Path resolveOutputTestFile(final String name) {
-        return OutDirectory.resolve("c").resolve(name + ".c");
+        return OutputCDirectory.resolve(name + ".c");
+    }
+
+    @Test
+    void creates_files() throws IOException {
+        createSourceDirectory();
+        createSourceTestFile("first");
+        createSourceTestFile("second");
+
+        run();
+
+        var expected = Set.of("first.c", "second.c");
+        var actual = Files.list(OutputCDirectory)
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .collect(Collectors.toSet());
+        assertEquals(expected, actual);
     }
 
     @Test
