@@ -15,26 +15,14 @@ public class ApplicationTest {
     private static final Path SourceDirectory = Root.resolve("source");
     private static final Path OutDirectory = Root.resolve("out");
 
-    @Test
-    void creates_output_directory() throws IOException {
-        createSourceDirectory();
-
-        run();
-
-        assertTrue(Files.exists(OutDirectory));
-    }
-
     private void createSourceDirectory() throws IOException {
         Files.createDirectory(SourceDirectory);
     }
 
     private void run() throws IOException {
-        if (Files.exists(SourceDirectory)) {
-            Files.createDirectory(OutDirectory);
-        }
-
         if (Files.exists(resolveSourceTestFile())) {
             var path = resolveOutputTestFile();
+            Files.createDirectory(path.getParent().getParent());
             Files.createDirectory(path.getParent());
             Files.createFile(path);
         }
