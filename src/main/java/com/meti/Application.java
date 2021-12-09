@@ -25,12 +25,7 @@ public class Application {
 
     private static void compileFile(Path child) throws IOException {
         var input = Files.readString(child);
-        String output;
-        if (input.equals("def main() : I16 => {return 0;}")) {
-            output = "int main(){return 0;}";
-        } else {
-            output = "";
-        }
+        var output = new MagmaCCompiler(input).compile();
 
         var filePath = child.getFileName().toString();
         var separator = filePath.indexOf('.');
