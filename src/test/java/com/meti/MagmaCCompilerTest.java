@@ -2,27 +2,39 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MagmaCCompilerTest {
+    @Test
+    void body() {
+        assertCompile("def main() : Void => {}", "void main(){}");
+    }
+
+    private void assertCompile(String input, String output) {
+        try {
+            var actual = compileImpl(input);
+            assertEquals(output, actual);
+        } catch (CompileException e) {
+            fail(e);
+        }
+    }
+
+    private String compileImpl(String input) throws CompileException {
+        return new MagmaCCompiler(input).compile();
+    }
+
+    @Test
+    void invalid_type() {
+        assertThrows(CompileException.class, () -> compileImpl("def test() : test => {}"));
+    }
+
     @Test
     void name() {
         assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
 
-    private void assertCompile(String input, String output) {
-        var actual = new MagmaCCompiler(input)
-                .compile();
-        assertEquals(output, actual);
-    }
-
     @Test
     void type() {
         assertCompile("def main() : U16 => {return 0;}", "unsigned int main(){return 0;}");
-    }
-
-    @Test
-    void body() {
-        assertCompile("def main() : Void => {}", "void main(){}");
     }
 }

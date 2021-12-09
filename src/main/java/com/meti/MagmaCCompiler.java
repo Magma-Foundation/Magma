@@ -7,23 +7,16 @@ public class MagmaCCompiler {
         this.input = input;
     }
 
-    String compile() {
+    String compile() throws CompileException {
         String output;
         if (input.startsWith("def ")) {
             var parameterStart = input.indexOf('(');
-            var name = slice(parameterStart, "def ".length());
+            var name = slice("def ".length(), parameterStart);
             var typeSeparator = input.indexOf(':');
             var returnSeparator = input.indexOf("=>");
-            var typeString = slice(returnSeparator, typeSeparator + 1);
+            var typeString = slice(typeSeparator + 1, returnSeparator);
 
-            String type;
-            if (typeString.equals("I16")) {
-                type = "int";
-            } else if (typeString.equals("U16")) {
-                type = "unsigned int";
-            } else {
-                type = "void";
-            }
+            var type = resolveTypeName(typeString);
 
             var bodyStart = input.indexOf('{');
             var bodyEnd = input.indexOf('}');
@@ -41,7 +34,16 @@ public class MagmaCCompiler {
         return output;
     }
 
-    private String slice(int parameterStart, int length) {
-        return input.substring(length, parameterStart).trim();
+    private String slice(int start, int end) {
+        return input.substring(start, end).trim();
+    }
+
+    private String resolveTypeName(String typeString) throws CompileException {
+        return switch (typeString) {
+            case "I16" -> "int";
+            case "U16" -> "unsigned int";
+            case "Void" -> "void";
+            default -> throw new CompileException("Unknown type: " + typeString);
+        };
     }
 }

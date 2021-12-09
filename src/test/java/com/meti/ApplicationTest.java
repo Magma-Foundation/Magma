@@ -21,14 +21,19 @@ public class ApplicationTest {
         assertIntegrativeCompile("def main() : I16 => {return 0;}", "int main(){return 0;}");
     }
 
-    private void assertIntegrativeCompile(String input, String output) throws IOException {
+    private void assertCreatesFile(String name) throws IOException {
         createSourceDirectory();
-        createSourceTestFile("test", input);
+        createSourceTestFile(name, "");
+        runImpl();
+        assertTrue(Files.exists(Application.OutCDirectory.resolve(name + ".c")));
+    }
 
-        run();
-
-        var actual = Files.readString(OutCDirectory.resolve("test.c"));
-        assertEquals(output, actual);
+    private void runImpl() {
+        try {
+            run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
     }
 
     private void createSourceDirectory() throws IOException {
@@ -48,11 +53,14 @@ public class ApplicationTest {
         assertCreatesFile("test1");
     }
 
-    private void assertCreatesFile(String name) throws IOException {
+    private void assertIntegrativeCompile(String input, String output) throws IOException {
         createSourceDirectory();
-        createSourceTestFile(name, "");
-        Application.run();
-        assertTrue(Files.exists(Application.OutCDirectory.resolve(name + ".c")));
+        createSourceTestFile("test", input);
+
+        runImpl();
+
+        var actual = Files.readString(OutCDirectory.resolve("test.c"));
+        assertEquals(output, actual);
     }
 
     @Test
@@ -61,7 +69,7 @@ public class ApplicationTest {
         createSourceTestFile("first", "");
         createSourceTestFile("second", "");
 
-        Application.run();
+        runImpl();
 
         var expected = Set.of("first.c", "second.c");
         var actual = Files.list(Application.OutCDirectory)
@@ -77,7 +85,7 @@ public class ApplicationTest {
         Files.createDirectories(parent);
         Files.createFile(parent.resolve("test.mgf"));
 
-        Application.run();
+        runImpl();
 
         assertTrue(Files.exists(Application.OutCDirectory.resolve("inner").resolve("test.c")));
     }
