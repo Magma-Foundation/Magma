@@ -20,4 +20,9 @@ class MagmaCCompilerTest {
     void type() {
         assertCompile("def main() : U16 => {return 0;}", "unsigned int main(){return 0;}");
     }
+
+    @Test
+    void body() {
+        assertCompile("def main() : Void => {}", "void main(){}");
+    }
 }

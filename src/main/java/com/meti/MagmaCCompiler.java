@@ -19,11 +19,22 @@ public class MagmaCCompiler {
             String type;
             if (typeString.equals("I16")) {
                 type = "int";
-            } else {
+            } else if (typeString.equals("U16")) {
                 type = "unsigned int";
+            } else {
+                type = "void";
             }
 
-            output = type + " " + name + "()" + "{return 0;}";
+            var bodyStart = input.indexOf('{');
+            var bodyEnd = input.indexOf('}');
+            var bodySlice = slice(bodyStart + 1, bodyEnd);
+            String lines;
+            if (bodySlice.equals("return 0;")) {
+                lines = "return 0;";
+            } else {
+                lines = "";
+            }
+            output = type + " " + name + "()" + "{" + lines + "}";
         } else {
             output = "";
         }
