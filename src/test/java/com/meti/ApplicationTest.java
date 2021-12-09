@@ -17,45 +17,51 @@ public class ApplicationTest {
     private static final Path OutDirectory = Root.resolve("out");
     private static final Path OutputCDirectory = OutDirectory.resolve("c");
 
-    @Test
-    void creates_another_file() throws IOException {
-        assertCreatesFile("test1");
-    }
-
     private void assertCreatesFile(String name) throws IOException {
         createSourceDirectory();
         createSourceTestFile(name);
         run();
-        assertTrue(Files.exists(resolveOutputTestFile(name)));
+        assertTrue(Files.exists(OutputCDirectory.resolve(name + ".c")));
     }
 
-    private void createSourceTestFile(String name) throws IOException {
-        Files.createFile(resolveSourceTestFile(name));
+    private void compileDirectory(Path directory) throws IOException {
+        var children = Files.list(directory).collect(Collectors.toList());
+        for (Path child : children) {
+            if (Files.isDirectory(child)) {
+                compileDirectory(child);
+            } else {
+                compileFile(child);
+            }
+        }
+    }
+
+    private void compileFile(Path child) throws IOException {
+        var filePath = child.getFileName().toString();
+        var separator = filePath.indexOf('.');
+        var name = filePath.substring(0, separator);
+
+        var relativeChild = SourceDirectory.relativize(child);
+        var newName = name + ".c";
+
+        var path = OutputCDirectory
+                .resolve(relativeChild)
+                .resolveSibling(newName);
+
+        Files.createDirectories(path.getParent());
+        Files.createFile(path);
     }
 
     private void createSourceDirectory() throws IOException {
         Files.createDirectory(SourceDirectory);
     }
 
-    private Path resolveSourceTestFile(final String name) {
-        return SourceDirectory.resolve(name + ".mgf");
+    private void createSourceTestFile(String name) throws IOException {
+        Files.createFile(resolveSourceTestFile(name));
     }
 
-    private void run() throws IOException {
-        var children = Files.list(SourceDirectory).collect(Collectors.toList());
-        for (Path child : children) {
-            var filePath = child.getFileName().toString();
-            var separator = filePath.indexOf('.');
-            var name = filePath.substring(0, separator);
-
-            var path = resolveOutputTestFile(name);
-            Files.createDirectories(path.getParent());
-            Files.createFile(path);
-        }
-    }
-
-    private Path resolveOutputTestFile(final String name) {
-        return OutputCDirectory.resolve(name + ".c");
+    @Test
+    void creates_another_file() throws IOException {
+        assertCreatesFile("test1");
     }
 
     @Test
@@ -75,6 +81,17 @@ public class ApplicationTest {
     }
 
     @Test
+    void creates_package() throws IOException {
+        var parent = SourceDirectory.resolve("inner");
+        Files.createDirectories(parent);
+        Files.createFile(parent.resolve("test.mgf"));
+
+        run();
+
+        assertTrue(Files.exists(OutputCDirectory.resolve("inner").resolve("test.c")));
+    }
+
+    @Test
     void creates_single_file() throws IOException {
         assertCreatesFile("test");
     }
@@ -82,6 +99,14 @@ public class ApplicationTest {
     @Test
     void does_not_create_out_directory() {
         assertFalse(Files.exists(OutDirectory));
+    }
+
+    private Path resolveSourceTestFile(final String name) {
+        return SourceDirectory.resolve(name + ".mgf");
+    }
+
+    private void run() throws IOException {
+        compileDirectory(SourceDirectory);
     }
 
     @AfterEach
