@@ -4,27 +4,58 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-
     private static final Path Root = Paths.get(".");
     private static final Path SourceDirectory = Root.resolve("source");
     private static final Path OutDirectory = Root.resolve("out");
 
     @Test
-    void creates_out_directory() throws IOException {
+    void creates_output_directory() throws IOException {
+        createSourceDirectory();
+
+        run();
+
+        assertTrue(Files.exists(OutDirectory));
+    }
+
+    private void createSourceDirectory() throws IOException {
         Files.createDirectory(SourceDirectory);
+    }
+
+    private void run() throws IOException {
         if (Files.exists(SourceDirectory)) {
             Files.createDirectory(OutDirectory);
         }
 
-        assertTrue(Files.exists(OutDirectory));
+        if (Files.exists(resolveSourceTestFile())) {
+            var path = resolveOutputTestFile();
+            Files.createDirectory(path.getParent());
+            Files.createFile(path);
+        }
+    }
+
+    private Path resolveSourceTestFile() {
+        return SourceDirectory.resolve("test.mgf");
+    }
+
+    private Path resolveOutputTestFile() {
+        return OutDirectory.resolve("c").resolve("test.c");
+    }
+
+    @Test
+    void creates_single_file() throws IOException {
+        createSourceDirectory();
+        Files.createFile(resolveSourceTestFile());
+
+        run();
+
+        assertTrue(Files.exists(resolveOutputTestFile()));
     }
 
     @Test
@@ -34,7 +65,31 @@ public class ApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.deleteIfExists(OutDirectory);
-        Files.deleteIfExists(SourceDirectory);
+        Files.walkFileTree(OutDirectory, new DeletingVisitor());
+        Files.walkFileTree(SourceDirectory, new DeletingVisitor());
+    }
+
+    private static class DeletingVisitor implements FileVisitor<Path> {
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Files.delete(file);
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            Files.delete(dir);
+            return FileVisitResult.CONTINUE;
+        }
     }
 }
