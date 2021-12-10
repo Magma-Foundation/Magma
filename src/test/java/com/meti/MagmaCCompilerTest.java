@@ -15,6 +15,21 @@ class MagmaCCompilerTest {
         assertCompile("def main() : Void => {}", "void main(){}");
     }
 
+    @Test
+    void invalid_type() {
+        assertThrows(CompileException.class, () -> compileImpl("def test() : test => {}"));
+    }
+
+    @Test
+    void name() {
+        assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
+    }
+
+    @Test
+    void separator() {
+        assertCompile("{};{}", "{}{}");
+    }
+
     private void assertCompile(String input, String output) {
         try {
             var actual = compileImpl(input);
@@ -26,16 +41,6 @@ class MagmaCCompilerTest {
 
     private String compileImpl(String input) throws CompileException {
         return new MagmaCCompiler(input).compile();
-    }
-
-    @Test
-    void invalid_type() {
-        assertThrows(CompileException.class, () -> compileImpl("def test() : test => {}"));
-    }
-
-    @Test
-    void name() {
-        assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
 
     @Test
