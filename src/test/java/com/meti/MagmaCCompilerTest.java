@@ -30,6 +30,11 @@ class MagmaCCompilerTest {
         assertCompile("{};{}", "{}{}");
     }
 
+    @Test
+    void no_separator() {
+        assertCompile("{}{}", "{}{}");
+    }
+
     private void assertCompile(String input, String output) {
         try {
             var actual = compileImpl(input);

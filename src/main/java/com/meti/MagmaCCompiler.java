@@ -18,6 +18,11 @@ public class MagmaCCompiler {
             if (c == ';' && depth == 0) {
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                depth--;
+                buffer.append(c);
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
