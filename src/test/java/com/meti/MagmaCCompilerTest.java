@@ -35,6 +35,11 @@ class MagmaCCompilerTest {
         assertCompile("{}{}", "{}{}");
     }
 
+    @Test
+    void inner() {
+        assertCompile("{{}}", "{{}}");
+    }
+
     private void assertCompile(String input, String output) {
         try {
             var actual = compileImpl(input);
