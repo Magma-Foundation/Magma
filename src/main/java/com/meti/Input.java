@@ -9,12 +9,18 @@ public record Input(String value) {
         return value.length() != 0 && value.charAt(value.length() - 1) == c;
     }
 
-    int firstChar(char c) {
-        return value.indexOf(c);
+    Option<Integer> firstChar(char c) {
+        var index = value.indexOf(c);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
     }
 
-    int firstSlice() {
-        return value.indexOf("=>");
+    Option<Integer> firstSlice() {
+        var index = value.indexOf("=>");
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
     }
 
     public int size() {
@@ -32,7 +38,6 @@ public record Input(String value) {
     public boolean startsWithChar(char c) {
         return value.length() != 0 && value.charAt(0) == c;
     }
-
 
     boolean startsWithSlice(String s) {
         return value.startsWith(s);

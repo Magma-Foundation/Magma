@@ -19,10 +19,10 @@ public class MagmaCCompiler {
     }
 
     private static String compileFunction(Input input) throws CompileException {
-        var parameterStart = input.firstChar('(');
+        var parameterStart = input.firstChar('(').orElse(-1);
         var name = input.slice("def ".length(), parameterStart);
-        var typeSeparator = input.firstChar(':');
-        var returnSeparator = input.firstSlice();
+        var typeSeparator = input.firstChar(':').orElse(-1);
+        var returnSeparator = input.firstSlice().orElse(-1);
         var typeString = input.slice(typeSeparator + 1, returnSeparator);
 
         var type = resolveTypeName(typeString);
