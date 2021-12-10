@@ -10,28 +10,26 @@ public class MagmaCCompiler {
     String compile() throws CompileException {
         String output;
         if (input.startsWith("def ")) {
-            var parameterStart = input.indexOf('(');
-            var name = slice("def ".length(), parameterStart);
-            var typeSeparator = input.indexOf(':');
-            var returnSeparator = input.indexOf("=>");
-            var typeString = slice(typeSeparator + 1, returnSeparator);
-
-            var type = resolveTypeName(typeString);
-
-            var bodyStart = input.indexOf('{');
-            var bodyEnd = input.indexOf('}');
-            var bodySlice = slice(bodyStart + 1, bodyEnd);
-            String lines;
-            if (bodySlice.equals("return 0;")) {
-                lines = "return 0;";
-            } else {
-                lines = "";
-            }
-            output = type + " " + name + "()" + "{" + lines + "}";
+            output = compileFunction();
+        } else if (input.startsWith("{")) {
+            output = compileBlock();
         } else {
             output = "";
         }
         return output;
+    }
+
+    private String compileBlock() {
+        var bodyStart = input.indexOf('{');
+        var bodyEnd = input.indexOf('}');
+        var bodySlice = slice(bodyStart + 1, bodyEnd);
+        String lines;
+        if (bodySlice.equals("return 0;")) {
+            lines = "return 0;";
+        } else {
+            lines = "";
+        }
+        return "{" + lines + "}";
     }
 
     private String slice(int start, int end) {
@@ -45,5 +43,19 @@ public class MagmaCCompiler {
             case "Void" -> "void";
             default -> throw new CompileException("Unknown type: " + typeString);
         };
+    }
+
+    private String compileFunction() throws CompileException {
+        String output;
+        var parameterStart = input.indexOf('(');
+        var name = slice("def ".length(), parameterStart);
+        var typeSeparator = input.indexOf(':');
+        var returnSeparator = input.indexOf("=>");
+        var typeString = slice(typeSeparator + 1, returnSeparator);
+
+        var type = resolveTypeName(typeString);
+        var body = compileBlock();
+        output = type + " " + name + "()" + body;
+        return output;
     }
 }

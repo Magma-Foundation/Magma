@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MagmaCCompilerTest {
     @Test
+    void block() {
+        assertCompile("{}", "{}");
+    }
+
+    @Test
     void body() {
         assertCompile("def main() : Void => {}", "void main(){}");
     }
