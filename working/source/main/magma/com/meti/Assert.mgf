@@ -1,7 +1,0 @@
-import com.meti.String;
-
-def it(value : String, action : () => Void) : Void => {
-}
-
-def describe(value : String, action : () => Void) : Void => {
-}

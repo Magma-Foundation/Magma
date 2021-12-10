@@ -1,8 +1,0 @@
-import { describe, it } from Assert;
-
-def main() => {
-    describe("The application", () => {
-        it("should work", () => {
-        });
-    });
-}
