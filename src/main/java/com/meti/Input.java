@@ -1,25 +1,40 @@
 package com.meti;
 
-public class Input {
-    private final String input;
+public record Input(String value) {
+    public String compute() {
+        return value;
+    }
 
-    public Input(String input) {
-        this.input = input;
+    public boolean endsWithChar(char c) {
+        return value.length() != 0 && value.charAt(value.length() - 1) == c;
     }
 
     int firstChar(char c) {
-        return getInput().indexOf(c);
+        return value.indexOf(c);
     }
 
-    public String getInput() {
-        return input;
+    int firstSlice() {
+        return value.indexOf("=>");
+    }
+
+    public int size() {
+        return value.length();
+    }
+
+    public Input sliceToEnd(int offset) {
+        return new Input(slice(offset, value.length()));
     }
 
     String slice(int start, int end) {
-        return getInput().substring(start, end).trim();
+        return value.substring(start, end).trim();
     }
 
+    public boolean startsWithChar(char c) {
+        return value.length() != 0 && value.charAt(0) == c;
+    }
+
+
     boolean startsWithSlice(String s) {
-        return getInput().startsWith(s);
+        return value.startsWith(s);
     }
 }
