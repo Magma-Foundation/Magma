@@ -1,3 +1,23 @@
+struct AppError {
+    message : String;
+}
+
+def run() : Void ? AppError => {
+}
+
+import native "stdio";
+
+native def printf(format : String, args : Any...) : Void;
+
+def print(error : AppError) => {
+    printf("%s", error);
+}
+
 def main() : I16 => {
+    try {
+        run();
+    } catch(e : AppError) {
+        print(e);
+    }
     return 0;
 }
