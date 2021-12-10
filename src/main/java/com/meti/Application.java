@@ -23,18 +23,18 @@ public class Application {
         return output;
     }
 
-    private static void compileDirectory(Path directory) throws ApplicationException {
+    private void compileDirectory(Path directory) throws ApplicationException {
         var children = listChildren(directory);
         for (Path child : children) {
             if (Files.isDirectory(child)) {
-                compileDirectory(child);
+                this.compileDirectory(child);
             } else {
                 compileFile(child);
             }
         }
     }
 
-    private static void compileFile(Path child) throws ApplicationException {
+    private void compileFile(Path child) throws ApplicationException {
         var input = readInput(child);
         var output = compile(input);
 
@@ -50,6 +50,10 @@ public class Application {
                 .resolveSibling(newName);
 
         writeOutput(output, path);
+    }
+
+    void run() throws ApplicationException {
+        compileDirectory(SourceDirectory);
     }
 
     private static List<Path> listChildren(Path directory) throws ApplicationException {
@@ -72,11 +76,7 @@ public class Application {
         return input;
     }
 
-    static void run() throws ApplicationException {
-        compileDirectory(SourceDirectory);
-    }
-
-    private static void writeOutput(String output, Path path) throws ApplicationException {
+    private void writeOutput(String output, Path path) throws ApplicationException {
         try {
             Files.createDirectories(path.getParent());
             Files.writeString(path, output);

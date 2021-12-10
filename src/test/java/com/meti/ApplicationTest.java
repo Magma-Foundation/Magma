@@ -12,7 +12,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.meti.Application.*;
+import static com.meti.Application.OutCDirectory;
+import static com.meti.Application.OutDirectory;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
@@ -30,7 +31,7 @@ public class ApplicationTest {
 
     private void runImpl() {
         try {
-            run();
+            new Application().run();
         } catch (ApplicationException e) {
             fail(e);
         }
