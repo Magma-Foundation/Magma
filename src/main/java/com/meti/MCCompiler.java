@@ -5,7 +5,10 @@ public record MCCompiler(String input) {
         if (input.startsWith("const ")) {
             var separator = input.indexOf(':');
             var name = input.substring("const ".length(), separator).trim();
-            return "int " + name + "=420;";
+            var valueSeparator = input.indexOf('=');
+            var typeString = input.substring(separator + 1, valueSeparator).trim();
+            var type = compileType(typeString);
+            return type + " " + name + "=420;";
         } else if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
             var name = input.substring("def ".length(), paramStart).trim();
@@ -13,11 +16,7 @@ public record MCCompiler(String input) {
             var typeSeparator = input.indexOf(':');
             var returnSeparator = input.indexOf("=>");
             var typeString = input.substring(typeSeparator + 1, returnSeparator).trim();
-            var type = switch (typeString) {
-                case "I16" -> "int";
-                case "Void" -> "void";
-                default -> "unsigned int";
-            };
+            var type = compileType(typeString);
 
             var bodyString = input.substring(returnSeparator + "=>".length()).trim();
             var bodyRendered = bodyString.equals("{return 0;}")
@@ -27,5 +26,13 @@ public record MCCompiler(String input) {
             return type + " " + name + "()" + bodyRendered;
         }
         return "";
+    }
+
+    private String compileType(String typeString) {
+        return switch (typeString) {
+            case "I16" -> "int";
+            case "Void" -> "void";
+            default -> "unsigned int";
+        };
     }
 }
