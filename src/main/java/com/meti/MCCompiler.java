@@ -29,7 +29,11 @@ public record MCCompiler(String input) {
     }
 
     private static String compileNode(String input) {
-        if (input.startsWith("{") && input.endsWith("}")) {
+        if (input.startsWith("return ")) {
+            var value = input.substring("return ".length()).trim();
+            var compiled = compileNode(value);
+            return "return " + compiled + ";";
+        } else if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
         } else if (input.startsWith("const ")) {
@@ -55,8 +59,14 @@ public record MCCompiler(String input) {
                     : "{}";
 
             return type + " " + name + "()" + bodyRendered;
+        } else {
+            try {
+                Integer.parseInt(input);
+                return input;
+            } catch (NumberFormatException e) {
+                return "";
+            }
         }
-        return "";
     }
 
     private static String compileType(String typeString) {
