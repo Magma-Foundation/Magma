@@ -63,34 +63,52 @@ public final class MCCompiler {
         return output.toString();
     }
 
+    private String compileNativeImport(String input) {
+        var nameString = input.substring("native import ".length());
+        String name;
+        if (nameString.startsWith("\"") && nameString.endsWith("\"")) {
+            name = nameString.substring(1, nameString.length() - 1);
+        } else {
+            name = nameString;
+        }
+        return "#include <" + name + ".h>\n";
+    }
+
     private String compileNode(String input) throws CompileException {
         if (input.startsWith("native import ")) {
-            var nameString = input.substring("native import ".length());
-            String name;
-            if (nameString.startsWith("\"") && nameString.endsWith("\"")) {
-                name = nameString.substring(1, nameString.length() - 1);
-            } else {
-                name = nameString;
-            }
-            return "#include <" + name + ".h>\n";
+            return compileNativeImport(input);
         } else if (input.startsWith("'") && input.endsWith("'")) {
             return input;
         } else if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
-        } else if (input.startsWith("def ")) {
+        } else if (input.startsWith("def ") || input.startsWith("native def ")) {
             var paramStart = input.indexOf('(');
-            var name = input.substring("def ".length(), paramStart).trim();
+            var nameStart = input.startsWith("def")
+                    ? "def ".length()
+                    : "native def ".length();
+
+            var name = input.substring(nameStart, paramStart).trim();
 
             var typeSeparator = input.indexOf(':');
             var returnSeparator = input.indexOf("=>");
-            var typeString = input.substring(typeSeparator + 1, returnSeparator).trim();
+            int typeEnd = 0;
+            if (returnSeparator != -1) {
+                typeEnd = returnSeparator;
+            } else {
+                typeEnd = input.length();
+            }
+            var typeString = input.substring(typeSeparator + 1, typeEnd).trim();
             var type = MCCompiler.compileType(typeString);
 
-            var bodyString = input.substring(returnSeparator + "=>".length()).trim();
-            var bodyRendered = compileNode(bodyString);
+            if (returnSeparator != -1) {
+                var bodyString = input.substring(returnSeparator + "=>".length()).trim();
+                var bodyRendered = compileNode(bodyString);
 
-            return type + " " + name + "()" + bodyRendered;
+                return type + " " + name + "()" + bodyRendered;
+            } else {
+                return "";
+            }
         } else if (input.startsWith("const ") || input.startsWith("let ")) {
             var typeSeparator = input.indexOf(':');
             var valueSeparator = input.indexOf('=');
