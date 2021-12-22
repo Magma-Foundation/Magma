@@ -65,7 +65,9 @@ public final class MCCompiler {
     }
 
     private String compileNode(String input) throws CompileException {
-        if (input.startsWith("{") && input.endsWith("}")) {
+        if (input.startsWith("'") && input.endsWith("'")) {
+            return input;
+        } else if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
         } else if (input.startsWith("def ")) {
@@ -101,16 +103,17 @@ public final class MCCompiler {
                 throw new CompileException(name + " is already defined.");
             }
 
-            var value = input.substring(valueSeparator + 1).trim();
+            var valueString = input.substring(valueSeparator + 1).trim();
 
             String type;
             if (typeSeparator != -1) {
                 var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
                 type = compileType(typeString);
             } else {
-                type = resolve(value);
+                type = resolve(valueString);
             }
 
+            var value = compileNode(valueString);
             return type + " " + name + "=" + value + ";";
         } else if (input.contains("=")) {
             var separator = input.indexOf('=');

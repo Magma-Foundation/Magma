@@ -15,4 +15,9 @@ public class AssignmentTest {
     void valid() {
         assertCompile("let x = 420;x = 69;", "int x=420;x=69;");
     }
+
+    @Test
+    void type() {
+        assertDoesNotCompile("let x = 420;x ='a';");
+    }
 }
