@@ -8,7 +8,8 @@ public record MCCompiler(String input) {
             var valueSeparator = input.indexOf('=');
             var typeString = input.substring(separator + 1, valueSeparator).trim();
             var type = compileType(typeString);
-            return type + " " + name + "=420;";
+            var value = input.substring(valueSeparator + 1, input.length() - 1).trim();
+            return type + " " + name + "=" + value + ";";
         } else if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
             var name = input.substring("def ".length(), paramStart).trim();

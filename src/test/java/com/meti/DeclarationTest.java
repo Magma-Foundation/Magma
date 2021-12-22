@@ -19,4 +19,9 @@ public class DeclarationTest {
     void type() {
         assertCompile("const x : U16 = 420;", "unsigned int x=420;");
     }
+
+    @Test
+    void value() {
+        assertCompile("const x : I16 = 69;", "int x=69;");
+    }
 }
