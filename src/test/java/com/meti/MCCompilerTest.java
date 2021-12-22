@@ -2,27 +2,21 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.meti.CompiledTest.assertCompile;
 
 class MCCompilerTest {
     @Test
     void empty() {
-        assertCompile("void test(){}", "def test() : Void => {}");
-    }
-
-    private void assertCompile(String source, String target) {
-        var compiler = new MCCompiler(target);
-        var output = compiler.compile();
-        assertEquals(source, output);
+        assertCompile("def test() : Void => {}", "void test(){}");
     }
 
     @Test
     void name() {
-        assertCompile("int test(){return 0;}", "def test() : I16 => {return 0;}");
+        assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
 
     @Test
     void type() {
-        assertCompile("unsigned int test(){return 0;}", "def test() : U16 => {return 0;}");
+        assertCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
     }
 }
