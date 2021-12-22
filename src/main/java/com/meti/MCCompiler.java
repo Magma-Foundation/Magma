@@ -64,7 +64,16 @@ public final class MCCompiler {
     }
 
     private String compileNode(String input) throws CompileException {
-        if (input.startsWith("'") && input.endsWith("'")) {
+        if (input.startsWith("native import ")) {
+            var nameString = input.substring("native import ".length());
+            String name;
+            if (nameString.startsWith("\"") && nameString.endsWith("\"")) {
+                name = nameString.substring(1, nameString.length() - 1);
+            } else {
+                name = nameString;
+            }
+            return "#include <" + name + ".h>\n";
+        } else if (input.startsWith("'") && input.endsWith("'")) {
             return input;
         } else if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
