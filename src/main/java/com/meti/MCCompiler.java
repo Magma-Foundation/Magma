@@ -1,8 +1,26 @@
 package com.meti;
 
+import java.util.ArrayList;
+
 public record MCCompiler(String input) {
-    String compile() {
-        var lines = input.split(";");
+    private static String compileMultiple(String input) {
+        var lines = new ArrayList<String>();
+        var buffer = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                buffer.append(c);
+            }
+        }
+        lines.add(buffer.toString());
+        lines.removeIf(String::isBlank);
+
         var output = new StringBuilder();
         for (String line : lines) {
             output.append(compileNode(line));
@@ -11,8 +29,9 @@ public record MCCompiler(String input) {
     }
 
     private static String compileNode(String input) {
-        if (input.equals("{}")) {
-            return "{}";
+        if (input.startsWith("{") && input.endsWith("}")) {
+            var value = input.substring(1, input.length() - 1);
+            return "{" + compileMultiple(value) + "}";
         } else if (input.startsWith("const ")) {
             var separator = input.indexOf(':');
             var name = input.substring("const ".length(), separator).trim();
@@ -46,5 +65,9 @@ public record MCCompiler(String input) {
             case "Void" -> "void";
             default -> "unsigned int";
         };
+    }
+
+    String compile() {
+        return compileMultiple(input);
     }
 }
