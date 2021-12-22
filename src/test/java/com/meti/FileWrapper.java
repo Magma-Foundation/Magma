@@ -8,8 +8,9 @@ import java.nio.file.Paths;
 public record FileWrapper(Path value) {
     static final FileWrapper Root = new FileWrapper(Paths.get("."));
 
-    public void create() throws IOException {
+    public FileWrapper create() throws IOException {
         Files.createFile(value);
+        return this;
     }
 
     public void deleteIfExists() throws IOException {

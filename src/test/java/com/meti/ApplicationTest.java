@@ -14,22 +14,27 @@ public class ApplicationTest {
     private static final FileWrapper Source = Root.resolve("index.mgf");
 
     @Test
-    void creates_target() throws IOException {
+    void creates_proper_target() throws IOException {
         Source.create();
-        run();
-        assertTrue(Target.exists());
+        assertTrue(run()
+                .filter(value -> value.equals(Target))
+                .isPresent());
     }
 
-    private void run() throws IOException {
-        if (Source.exists()) {
-            Target.create();
-        }
+    private Option<FileWrapper> run() throws IOException {
+        if (Source.exists()) return new Some<>(Target.create());
+        return new None<>();
+    }
+
+    @Test
+    void creates_target() throws IOException {
+        Source.create();
+        assertTrue(run().isPresent());
     }
 
     @Test
     void does_not_create_target() throws IOException {
-        run();
-        assertFalse(Target.exists());
+        assertFalse(run().isPresent());
     }
 
     @AfterEach
