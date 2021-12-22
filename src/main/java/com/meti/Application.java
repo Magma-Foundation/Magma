@@ -2,13 +2,7 @@ package com.meti;
 
 import java.io.IOException;
 
-public class Application {
-    private final FileWrapper source;
-
-    public Application(FileWrapper source) {
-        this.source = source;
-    }
-
+public record Application(FileWrapper source) {
     Option<FileWrapper> run() throws IOException {
         if (source.exists()) {
             var name = source.computeRetractedFileName();
