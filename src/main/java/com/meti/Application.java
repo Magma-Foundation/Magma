@@ -5,19 +5,33 @@ import com.meti.option.Option;
 import java.io.IOException;
 
 public record Application(PathWrapper source) {
-    Option<File> run() throws IOException {
-        return source.existsAsFile()
-                .map(Application::compile);
+    Option<File> run() throws ApplicationException {
+        return source.existsAsFile().map(Application::compile);
     }
 
-    private static File compile(File source) throws IOException {
-        var input = source.readString();
+    private static File compile(File source) throws ApplicationException {
+        var input = readSource(source);
         var output = new MCCompiler(input).compile();
 
         var path = source.asPath();
         var name = path.computeRetractedFileName();
         var target = path.resolveSibling(name + ".c");
-        return target.createAsFile().writeString(output);
+        return writeTarget(output, target);
     }
 
+    private static String readSource(File source) throws ApplicationException {
+        try {
+            return source.readString();
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    private static File writeTarget(String output, PathWrapper target) throws ApplicationException {
+        try {
+            return target.createAsFile().writeString(output);
+        } catch (IOException e) {
+            throw new ApplicationException(e);
+        }
+    }
 }

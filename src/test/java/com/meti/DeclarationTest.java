@@ -3,8 +3,14 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.CompiledTest.assertCompile;
+import static com.meti.CompiledTest.assertDoesNotCompile;
 
 public class DeclarationTest {
+    @Test
+    void redeclare() {
+        assertDoesNotCompile("const x = 420;const x=69;");
+    }
+
     @Test
     void implicit() {
         assertCompile("const x = 420;", "int x=420;");

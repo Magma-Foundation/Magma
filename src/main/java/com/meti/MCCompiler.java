@@ -1,9 +1,39 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public record MCCompiler(String input) {
-    private static String compileMultiple(String input) {
+public final class MCCompiler {
+    private final String input;
+    private final Set<String> names = new HashSet<>();
+
+    public MCCompiler(String input) {
+        this.input = input;
+    }
+
+    private static String compileType(String typeString) {
+        return switch (typeString) {
+            case "I16" -> "int";
+            case "Void" -> "void";
+            default -> "unsigned int";
+        };
+    }
+
+    private static String resolve(String value) {
+        try {
+            Integer.parseInt(value);
+            return "int";
+        } catch (NumberFormatException e) {
+            return "";
+        }
+    }
+
+    String compile() throws CompileException {
+        return compileMultiple(input);
+    }
+
+    private String compileMultiple(String input) throws CompileException {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -28,7 +58,7 @@ public record MCCompiler(String input) {
         return output.toString();
     }
 
-    private static String compileNode(String input) {
+    private String compileNode(String input) throws CompileException {
         if (input.startsWith("return ")) {
             var value = input.substring("return ".length()).trim();
             var compiled = compileNode(value);
@@ -42,6 +72,12 @@ public record MCCompiler(String input) {
 
             var nameEnd = typeSeparator != -1 ? typeSeparator : valueSeparator;
             var name = input.substring("const ".length(), nameEnd).trim();
+
+            if (!names.contains(name)) {
+                names.add(name);
+            } else {
+                throw new CompileException(name + " is already defined.");
+            }
 
             var value = input.substring(valueSeparator + 1).trim();
 
@@ -75,26 +111,5 @@ public record MCCompiler(String input) {
                 return "";
             }
         }
-    }
-
-    private static String compileType(String typeString) {
-        return switch (typeString) {
-            case "I16" -> "int";
-            case "Void" -> "void";
-            default -> "unsigned int";
-        };
-    }
-
-    private static String resolve(String value) {
-        try {
-            Integer.parseInt(value);
-            return "int";
-        } catch (NumberFormatException e) {
-            return "";
-        }
-    }
-
-    String compile() {
-        return compileMultiple(input);
     }
 }

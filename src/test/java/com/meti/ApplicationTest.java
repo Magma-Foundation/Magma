@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.option.None;
 import com.meti.option.Option;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,9 @@ public class ApplicationTest {
                 .orElse(""));
     }
 
-    private Option<File> run() throws IOException {
-        return new Application(Source).run();
+    @Test
+    void does_not_create_target() {
+        assertFalse(doesCreateTarget());
     }
 
     @Test
@@ -39,13 +41,17 @@ public class ApplicationTest {
         assertTrue(doesCreateTarget());
     }
 
-    private boolean doesCreateTarget() throws IOException {
+    private boolean doesCreateTarget() {
         return run().isPresent();
     }
 
-    @Test
-    void does_not_create_target() throws IOException {
-        assertFalse(doesCreateTarget());
+    private Option<File> run() {
+        try {
+            return new Application(Source).run();
+        } catch (ApplicationException e) {
+            fail(e);
+            return new None<>();
+        }
     }
 
     @AfterEach

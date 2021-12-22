@@ -13,7 +13,7 @@ public class OtherApplicationTest {
     private static final PathWrapper Target = Root.resolve("test.c");
 
     @Test
-    void creates_proper_target() throws IOException {
+    void creates_proper_target() throws IOException, ApplicationException {
         Source.createAsFile();
         assertTrue(new Application(Source)
                 .run()
