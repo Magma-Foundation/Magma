@@ -58,7 +58,7 @@ public final class MCCompiler {
 
         var output = new StringBuilder();
         for (String line : lines) {
-            output.append(compileNode(line));
+            output.append(compileNode(line.trim()));
         }
         return output.toString();
     }
