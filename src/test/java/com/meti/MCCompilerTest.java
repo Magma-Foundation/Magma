@@ -6,14 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MCCompilerTest {
     @Test
-    void name() {
-        assertCompile("int test(){return 0;}", "def test() : I16 => {return 0;}");
+    void empty() {
+        assertCompile("void test(){}", "def test() : Void => {}");
     }
 
     private void assertCompile(String source, String target) {
         var compiler = new MCCompiler(target);
         var output = compiler.compile();
         assertEquals(source, output);
+    }
+
+    @Test
+    void name() {
+        assertCompile("int test(){return 0;}", "def test() : I16 => {return 0;}");
     }
 
     @Test

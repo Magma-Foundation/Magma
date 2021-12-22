@@ -9,9 +9,18 @@ public record MCCompiler(String input) {
             var typeSeparator = input.indexOf(':');
             var returnSeparator = input.indexOf("=>");
             var typeString = input.substring(typeSeparator + 1, returnSeparator).trim();
-            var type = typeString.equals("I16") ? "int" : "unsigned int";
+            var type = switch (typeString) {
+                case "I16" -> "int";
+                case "Void" -> "void";
+                default -> "unsigned int";
+            };
 
-            return type + " " + name + "(){return 0;}";
+            var bodyString = input.substring(returnSeparator + "=>".length()).trim();
+            var bodyRendered = bodyString.equals("{return 0;}")
+                    ? "{return 0;}"
+                    : "{}";
+
+            return type + " " + name + "()" + bodyRendered;
         }
         return "";
     }
