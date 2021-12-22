@@ -37,12 +37,22 @@ public record MCCompiler(String input) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
         } else if (input.startsWith("const ")) {
-            var separator = input.indexOf(':');
-            var name = input.substring("const ".length(), separator).trim();
+            var typeSeparator = input.indexOf(':');
             var valueSeparator = input.indexOf('=');
-            var typeString = input.substring(separator + 1, valueSeparator).trim();
-            var type = compileType(typeString);
+
+            var nameEnd = typeSeparator != -1 ? typeSeparator : valueSeparator;
+            var name = input.substring("const ".length(), nameEnd).trim();
+
             var value = input.substring(valueSeparator + 1).trim();
+
+            String type;
+            if (typeSeparator != -1) {
+                var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
+                type = compileType(typeString);
+            } else {
+                type = resolve(value);
+            }
+
             return type + " " + name + "=" + value + ";";
         } else if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
@@ -73,6 +83,15 @@ public record MCCompiler(String input) {
             case "Void" -> "void";
             default -> "unsigned int";
         };
+    }
+
+    private static String resolve(String value) {
+        try {
+            Integer.parseInt(value);
+            return "int";
+        } catch (NumberFormatException e) {
+            return "";
+        }
     }
 
     String compile() {

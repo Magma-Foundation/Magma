@@ -6,6 +6,11 @@ import static com.meti.CompiledTest.assertCompile;
 
 public class DeclarationTest {
     @Test
+    void implicit() {
+        assertCompile("const x = 420;", "int x=420;");
+    }
+
+    @Test
     void name() {
         assertCompile("const test : I16 = 420;", "int test=420;");
     }
