@@ -1,6 +1,6 @@
 package com.meti.option;
 
-import com.meti.F1;
+import com.meti.core.F1;
 
 public interface Option<T> {
     <E extends Exception> Option<T> filter(F1<T, Boolean, E> filter) throws E;
