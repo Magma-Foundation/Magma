@@ -59,13 +59,22 @@ public final class MCCompiler {
     }
 
     private String compileNode(String input) throws CompileException {
-        if (input.startsWith("return ")) {
-            var value = input.substring("return ".length()).trim();
-            var compiled = compileNode(value);
-            return "return " + compiled + ";";
-        } else if (input.startsWith("{") && input.endsWith("}")) {
+        if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
+        } else if (input.startsWith("def ")) {
+            var paramStart = input.indexOf('(');
+            var name = input.substring("def ".length(), paramStart).trim();
+
+            var typeSeparator = input.indexOf(':');
+            var returnSeparator = input.indexOf("=>");
+            var typeString = input.substring(typeSeparator + 1, returnSeparator).trim();
+            var type = MCCompiler.compileType(typeString);
+
+            var bodyString = input.substring(returnSeparator + "=>".length()).trim();
+            var bodyRendered = compileNode(bodyString);
+
+            return type + " " + name + "()" + bodyRendered;
         } else if (input.startsWith("const ") || input.startsWith("let ")) {
             var typeSeparator = input.indexOf(':');
             var valueSeparator = input.indexOf('=');
@@ -97,25 +106,27 @@ public final class MCCompiler {
             }
 
             return type + " " + name + "=" + value + ";";
-        } else if (input.startsWith("def ")) {
-            var paramStart = input.indexOf('(');
-            var name = input.substring("def ".length(), paramStart).trim();
+        } else if (input.contains("=")) {
+            var separator = input.indexOf('=');
+            var name = input.substring(0, separator).trim();
+            var valueString = input.substring(separator + 1).trim();
+            var value = compileNode(valueString);
 
-            var typeSeparator = input.indexOf(':');
-            var returnSeparator = input.indexOf("=>");
-            var typeString = input.substring(typeSeparator + 1, returnSeparator).trim();
-            var type = MCCompiler.compileType(typeString);
+            if (!names.contains(name)) {
+                throw new CompileException(name + " is undefined.");
+            }
 
-            var bodyString = input.substring(returnSeparator + "=>".length()).trim();
-            var bodyRendered = compileNode(bodyString);
-
-            return type + " " + name + "()" + bodyRendered;
+            return name + "=" + value + ";";
+        } else if (input.startsWith("return ")) {
+            var value = input.substring("return ".length()).trim();
+            var compiled = compileNode(value);
+            return "return " + compiled + ";";
         } else {
             try {
                 Integer.parseInt(input);
                 return input;
             } catch (NumberFormatException e) {
-                return "";
+                throw new CompileException("Unknown token: " + input);
             }
         }
     }
