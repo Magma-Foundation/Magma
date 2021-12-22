@@ -4,21 +4,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
+import static com.meti.FileWrapper.Root;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final Path Root = Paths.get(".");
-    private static final NIOFile Target = resolve("index.c");
-    private static final NIOFile Source = resolve("index.mgf");
-
-    private static NIOFile resolve(String name) {
-        return new NIOFile(Root.resolve(name));
-    }
+    private static final FileWrapper Target = Root.resolve("index.c");
+    private static final FileWrapper Source = Root.resolve("index.mgf");
 
     @Test
     void creates_target() throws IOException {
@@ -27,35 +20,21 @@ public class ApplicationTest {
         assertTrue(Target.exists());
     }
 
-    @Test
-    void does_not_create_target() throws IOException {
-        run();
-        assertFalse(Target.exists());
-    }
-
     private void run() throws IOException {
         if (Source.exists()) {
             Target.create();
         }
     }
 
+    @Test
+    void does_not_create_target() throws IOException {
+        run();
+        assertFalse(Target.exists());
+    }
+
     @AfterEach
     void tearDown() throws IOException {
         Source.deleteIfExists();
         Target.deleteIfExists();
-    }
-
-    public record NIOFile(Path value) {
-        private void create() throws IOException {
-            Files.createFile(value);
-        }
-
-        public void deleteIfExists() throws IOException {
-            Files.deleteIfExists(value);
-        }
-
-        private boolean exists() {
-            return Files.exists(value);
-        }
     }
 }
