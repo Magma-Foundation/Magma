@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-    private static final FileWrapper Target = Root.resolve("index.c");
     private static final FileWrapper Source = Root.resolve("index.mgf");
+    private static final FileWrapper Target = Root.resolve("index.c");
 
     @Test
     void creates_proper_target() throws IOException {
@@ -21,20 +21,23 @@ public class ApplicationTest {
                 .isPresent());
     }
 
-    private Option<FileWrapper> run() throws IOException {
-        if (Source.exists()) return new Some<>(Target.create());
-        return new None<>();
-    }
-
     @Test
     void creates_target() throws IOException {
         Source.create();
-        assertTrue(run().isPresent());
+        assertTrue(doesCreateTarget());
+    }
+
+    private boolean doesCreateTarget() throws IOException {
+        return run().isPresent();
+    }
+
+    private Option<FileWrapper> run() throws IOException {
+        return new Application(Source).run();
     }
 
     @Test
     void does_not_create_target() throws IOException {
-        assertFalse(run().isPresent());
+        assertFalse(doesCreateTarget());
     }
 
     @AfterEach
