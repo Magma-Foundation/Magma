@@ -12,15 +12,21 @@ public final class MCCompiler {
         this.input = input;
     }
 
-    private static String compileType(String typeString) {
-        return switch (typeString) {
+    private static String compileType(String type) throws CompileException {
+        return switch (type) {
+            case "I8" -> "char";
             case "I16" -> "int";
+            case "U16" -> "unsigned int";
             case "Void" -> "void";
-            default -> "unsigned int";
+            default -> throw new CompileException("Unknown type: " + type);
         };
     }
 
     private static String resolve(String value) {
+        if (value.startsWith("'") && value.endsWith("'")) {
+            return "char";
+        }
+
         try {
             Integer.parseInt(value);
             return "int";
