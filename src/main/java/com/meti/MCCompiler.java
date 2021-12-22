@@ -1,15 +1,14 @@
 package com.meti;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public final class MCCompiler {
     private final String input;
-    private final Set<String> names = new HashSet<>();
+    private final Scope scope;
 
     public MCCompiler(String input) {
         this.input = input;
+        this.scope = new Scope();
     }
 
     private static String compileType(String type) throws CompileException {
@@ -95,14 +94,7 @@ public final class MCCompiler {
                 nameStart = "let ".length();
             }
 
-            var name = input.substring(nameStart, nameEnd).trim();
-
-            if (!names.contains(name)) {
-                names.add(name);
-            } else {
-                throw new CompileException(name + " is already defined.");
-            }
-
+            var nameString = input.substring(nameStart, nameEnd).trim();
             var valueString = input.substring(valueSeparator + 1).trim();
 
             String type;
@@ -113,16 +105,24 @@ public final class MCCompiler {
                 type = resolve(valueString);
             }
 
+            if (scope.isUndefined(nameString)) {
+                scope.define(new Field(nameString, type));
+            } else {
+                throw new CompileException(nameString + " is already defined.");
+            }
+
             var value = compileNode(valueString);
-            return type + " " + name + "=" + value + ";";
+            return type + " " + nameString + "=" + value + ";";
         } else if (input.contains("=")) {
             var separator = input.indexOf('=');
             var name = input.substring(0, separator).trim();
             var valueString = input.substring(separator + 1).trim();
             var value = compileNode(valueString);
+            var valueType = resolve(valueString);
 
-            if (!names.contains(name)) {
-                throw new CompileException(name + " is undefined.");
+            var definition = scope.apply(name).orElseThrow(() -> new CompileException(name + " is undefined."));
+            if (!definition.isTyped(valueType)) {
+                throw new CompileException("Assignment of type " + valueType + " is not the same as defined type as " + definition.type());
             }
 
             return name + "=" + value + ";";
@@ -139,4 +139,5 @@ public final class MCCompiler {
             }
         }
     }
+
 }

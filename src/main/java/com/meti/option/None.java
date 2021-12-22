@@ -1,6 +1,7 @@
 package com.meti.option;
 
 import com.meti.core.F1;
+import com.meti.core.Supplier;
 
 public class None<T> implements Option<T> {
     @Override
@@ -21,5 +22,10 @@ public class None<T> implements Option<T> {
     @Override
     public T orElse(T other) {
         return other;
+    }
+
+    @Override
+    public <E extends Exception> T orElseThrow(Supplier<E, E> supplier) throws E {
+        throw supplier.apply();
     }
 }
