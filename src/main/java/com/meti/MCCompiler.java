@@ -2,8 +2,10 @@ package com.meti;
 
 public record MCCompiler(String input) {
     String compile() {
-        if (input.equals("const x : I16 = 420;")) {
-            return "int x=420;";
+        if (input.startsWith("const ")) {
+            var separator = input.indexOf(':');
+            var name = input.substring("const ".length(), separator).trim();
+            return "int " + name + "=420;";
         } else if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
             var name = input.substring("def ".length(), paramStart).trim();
