@@ -5,34 +5,41 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.meti.FileWrapper.Root;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.meti.PathWrapper.Root;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    private static final FileWrapper Source = Root.resolve("index.mgf");
-    private static final FileWrapper Target = Root.resolve("index.c");
+    private static final PathWrapper Source = Root.resolve("index.mgf");
+    private static final PathWrapper Target = Root.resolve("index.c");
+
+    @Test
+    void content() throws IOException {
+        Source.createAsFile().writeString("def main() : I16 => {return 0;}");
+        assertEquals("int main(){return 0;}", run()
+                .map(File::readString)
+                .orElse(""));
+    }
+
+    private Option<File> run() throws IOException {
+        return new Application(Source).run();
+    }
 
     @Test
     void creates_proper_target() throws IOException {
-        Source.create();
+        Source.createAsFile();
         assertTrue(run()
-                .filter(value -> value.equals(Target))
+                .filter(value -> value.asPath().equals(Target))
                 .isPresent());
     }
 
     @Test
     void creates_target() throws IOException {
-        Source.create();
+        Source.createAsFile();
         assertTrue(doesCreateTarget());
     }
 
     private boolean doesCreateTarget() throws IOException {
         return run().isPresent();
-    }
-
-    private Option<FileWrapper> run() throws IOException {
-        return new Application(Source).run();
     }
 
     @Test

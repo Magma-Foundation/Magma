@@ -1,15 +1,34 @@
 package com.meti;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.io.IOException;
 
-class FileWrapperTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class FileWrapperTest {
+    private static final PathWrapper TestFile = PathWrapper.Root.resolve("test.c");
 
     @Test
-    void computeRetractedFileName() {
-        var wrapper = FileWrapper.Root.resolve("test.c");
-        var name = wrapper.computeRetractedFileName();
-        assertEquals("test", name);
+    void readString() throws IOException {
+        assertTrue(TestFile.createAsFile()
+                .readString()
+                .isEmpty());
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        TestFile.deleteIfExists();
+    }
+
+    @Test
+    void writeString() throws IOException {
+        var expected = "test";
+        var actual = TestFile.createAsFile()
+                .writeString(expected)
+                .readString();
+        assertEquals(expected, actual);
     }
 }

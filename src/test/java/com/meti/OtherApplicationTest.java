@@ -5,16 +5,19 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.meti.FileWrapper.Root;
+import static com.meti.PathWrapper.Root;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
-    private static final FileWrapper Source = Root.resolve("test.mgf");
-    private static final FileWrapper Target = Root.resolve("test.c");
+    private static final PathWrapper Source = Root.resolve("test.mgf");
+    private static final PathWrapper Target = Root.resolve("test.c");
 
     @Test
     void creates_proper_target() throws IOException {
-        assertTrue(new Application(Source.create()).run()
+        Source.createAsFile();
+        assertTrue(new Application(Source)
+                .run()
+                .map(File::asPath)
                 .filter(value -> value.equals(Target))
                 .isPresent());
     }
