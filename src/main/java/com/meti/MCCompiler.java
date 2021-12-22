@@ -54,9 +54,7 @@ public record MCCompiler(String input) {
             var type = MCCompiler.compileType(typeString);
 
             var bodyString = input.substring(returnSeparator + "=>".length()).trim();
-            var bodyRendered = bodyString.equals("{return 0;}")
-                    ? "{return 0;}"
-                    : "{}";
+            var bodyRendered = compileNode(bodyString);
 
             return type + " " + name + "()" + bodyRendered;
         } else {
