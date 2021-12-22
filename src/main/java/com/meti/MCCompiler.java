@@ -11,7 +11,9 @@ public record MCCompiler(String input) {
     }
 
     private static String compileNode(String input) {
-        if (input.startsWith("const ")) {
+        if (input.equals("{}")) {
+            return "{}";
+        } else if (input.startsWith("const ")) {
             var separator = input.indexOf(':');
             var name = input.substring("const ".length(), separator).trim();
             var valueSeparator = input.indexOf('=');
