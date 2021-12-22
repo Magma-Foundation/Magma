@@ -66,12 +66,19 @@ public final class MCCompiler {
         } else if (input.startsWith("{") && input.endsWith("}")) {
             var value = input.substring(1, input.length() - 1);
             return "{" + compileMultiple(value) + "}";
-        } else if (input.startsWith("const ")) {
+        } else if (input.startsWith("const ") || input.startsWith("let ")) {
             var typeSeparator = input.indexOf(':');
             var valueSeparator = input.indexOf('=');
 
             var nameEnd = typeSeparator != -1 ? typeSeparator : valueSeparator;
-            var name = input.substring("const ".length(), nameEnd).trim();
+            int nameStart;
+            if (input.startsWith("const ")) {
+                nameStart = "const ".length();
+            } else {
+                nameStart = "let ".length();
+            }
+
+            var name = input.substring(nameStart, nameEnd).trim();
 
             if (!names.contains(name)) {
                 names.add(name);

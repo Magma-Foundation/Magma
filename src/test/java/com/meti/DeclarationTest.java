@@ -7,6 +7,11 @@ import static com.meti.CompiledTest.assertDoesNotCompile;
 
 public class DeclarationTest {
     @Test
+    void mutable() {
+        assertCompile("let x = 420;", "int x=420;");
+    }
+
+    @Test
     void redeclare() {
         assertDoesNotCompile("const x = 420;const x=69;");
     }
