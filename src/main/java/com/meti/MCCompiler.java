@@ -1,13 +1,22 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public record MCCompiler(Input input) {
     String compile() throws CompileException {
+        return lexInteger()
+                .orElseThrow(() -> new CompileException("Invalid input."));
+    }
+
+    private Option<String> lexInteger() {
         try {
             var value = input.compute();
             Integer.parseInt(value);
-            return value;
+            return new Some<>(value);
         } catch (NumberFormatException e) {
-            throw new CompileException("Invalid input.");
+            return new None<String>();
         }
     }
 }
