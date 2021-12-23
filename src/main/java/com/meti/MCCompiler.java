@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +45,7 @@ public final class MCCompiler {
 
     private String compileAssignment(String input) throws CompileException {
         var separator = input.indexOf('=');
-        var name = input.substring(0, separator).trim();
+        var name = slice(input, 0, separator);
         var valueString = input.substring(separator + 1).trim();
         var value = compileNode(valueString);
         var valueType = resolve(valueString);
@@ -71,14 +75,14 @@ public final class MCCompiler {
             nameStart = "let ".length();
         }
 
-        var nameString = input.substring(nameStart, nameEnd).trim();
+        var nameString = slice(input, nameStart, nameEnd);
         var valueString = input.substring(valueSeparator + 1).trim();
 
         String type;
         if (typeSeparator == -1) {
             type = resolve(valueString);
         } else {
-            var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
+            var typeString = slice(input, typeSeparator + 1, valueSeparator);
             type = compileType(typeString);
         }
 
@@ -98,12 +102,12 @@ public final class MCCompiler {
                 ? "def ".length()
                 : "native def ".length();
 
-        var name = input.substring(nameStart, paramStart).trim();
+        var name = slice(input, nameStart, paramStart);
 
         var typeSeparator = input.indexOf(':');
         var returnSeparator = input.indexOf("=>");
         var typeEnd = returnSeparator == -1 ? input.length() : returnSeparator;
-        var typeString = input.substring(typeSeparator + 1, typeEnd).trim();
+        var typeString = slice(input, typeSeparator + 1, typeEnd);
         var type = MCCompiler.compileType(typeString);
 
         if (returnSeparator == -1) {
@@ -151,17 +155,22 @@ public final class MCCompiler {
         if (input.contains("=")) {
             return compileAssignment(input);
         }
-        if (input.startsWith("return ")) {
-            return compileReturn(input);
-        }
+        lex(new ReturnLexer(input));
         return new IntegerLexer(input)
                 .lex().orElseThrow(() -> new CompileException("Unknown token: " + input));
     }
 
-    private String compileReturn(String input) throws CompileException {
-        var value = input.substring("return ".length()).trim();
-        var compiled = compileNode(value);
-        return "return " + compiled + ";";
+    private Option<String> lex(ReturnLexer returnLexer) throws CompileException {
+        if (returnLexer.getInput().startsWith("return ")) {
+            var value = slice(returnLexer.getInput(), "return ".length(), returnLexer.getInput().length());
+            var compiled = compileNode(value);
+            return new Some<>("return " + compiled + ";");
+        }
+        return new None<>();
+    }
+
+    private String slice(String input, int length, int length2) {
+        return input.substring(length, length2).trim();
     }
 
     private List<String> split(String input) {
