@@ -18,6 +18,10 @@ public interface Node {
 
     boolean is(Type type);
 
+    default Node with(Node child) {
+        return this;
+    }
+
     enum Type {
         Integer,
         Content, Return

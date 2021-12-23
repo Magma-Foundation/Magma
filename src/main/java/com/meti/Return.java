@@ -13,4 +13,9 @@ public record Return(Node node) implements Node {
     public boolean is(Type type) {
         return type == Type.Return;
     }
+
+    @Override
+    public Node with(Node child) {
+        return new Return(child);
+    }
 }
