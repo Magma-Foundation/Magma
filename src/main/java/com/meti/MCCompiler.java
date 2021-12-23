@@ -1,13 +1,16 @@
 package com.meti;
 
-public final class MCCompiler {
-    private final Input input;
-
-    public MCCompiler(String input) {
-        this.input = new Input(input);
+public record MCCompiler(Input input) {
+    String compile() throws CompileException {
+        var lines = input.split(";");
+        var output = new StringBuilder();
+        for (Input line : lines) {
+            output.append(lexNode(line));
+        }
+        return output.toString();
     }
 
-    String compile() throws CompileException {
+    private String lexNode(Input input) throws CompileException {
         var typeSeparator = input.firstChar(':').orElse(-1);
         var valueSeparator = input.firstChar('=').orElse(-1);
 
@@ -18,14 +21,16 @@ public final class MCCompiler {
         var typeString = input.slice(typeSeparator + 1, valueSeparator);
         var type = lexType(typeString);
 
-        return type + " " + name + "=420;";
+        var value = input.sliceToEnd(valueSeparator + 1);
+
+        return type + " " + name + "=" + value.compute() + ";";
     }
 
     private String lexType(Input typeString) throws CompileException {
         String type;
-        if (typeString.contains("I16")) {
+        if (typeString.wraps("I16")) {
             type = "int";
-        } else if (typeString.contains("U16")) {
+        } else if (typeString.wraps("U16")) {
             type = "unsigned int";
         } else {
             throw new CompileException("Unknown type:" + typeString);

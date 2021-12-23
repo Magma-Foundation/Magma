@@ -11,7 +11,7 @@ public record Application(PathWrapper source) {
 
     private static File compile(File source) throws ApplicationException {
         var input = readSource(source);
-        var output = new MCCompiler(input).compile();
+        var output = new MCCompiler(new RootInput(input)).compile();
 
         var path = source.asPath();
         var name = path.computeRetractedFileName();
