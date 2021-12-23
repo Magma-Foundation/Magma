@@ -25,8 +25,16 @@ public class RootInput implements Input {
     }
 
     @Override
-    public int lastChar() {
-        return input.lastIndexOf(' ');
+    public Option<Integer> lastChar() {
+        var value = input.lastIndexOf(' ');
+        return value == -1
+                ? new None<>()
+                : new Some<>(value);
+    }
+
+    @Override
+    public int length() {
+        return input.length();
     }
 
     @Override

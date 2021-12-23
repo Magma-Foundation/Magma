@@ -20,8 +20,18 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> other) {
+        return other;
+    }
+
+    @Override
     public T orElse(T other) {
         return other;
+    }
+
+    @Override
+    public <E extends Exception> T orElseGet(Supplier<T, E> teSupplier) throws E {
+        return teSupplier.apply();
     }
 
     @Override

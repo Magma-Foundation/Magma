@@ -1,5 +1,7 @@
 package com.meti;
 
+import static com.meti.EmptyInput.EmptyInput_;
+
 public record MCCompiler(Input input) {
     String compile() throws CompileException {
         var lines = input.split(";");
@@ -11,19 +13,39 @@ public record MCCompiler(Input input) {
     }
 
     private String lexNode(Input input) throws CompileException {
-        var typeSeparator = input.firstChar(':').orElse(-1);
-        var valueSeparator = input.firstChar('=').orElse(-1);
+        try {
+            var typeSeparator = input.firstChar(':');
+            var valueSeparator = input.firstChar('=');
 
-        var slice = input.slice(0, typeSeparator);
-        var nameSeparator = slice.lastChar();
-        var name = slice.sliceToEnd(nameSeparator + 1).compute();
+            var slice = typeSeparator
+                    .or(valueSeparator)
+                    .map(value -> input.slice(0, value))
+                    .orElse(EmptyInput_);
+            var nameSeparator = slice.lastChar().orElse(0);
+            var name = slice.sliceToEnd(nameSeparator + 1).compute();
 
-        var typeString = input.slice(typeSeparator + 1, valueSeparator);
-        var type = lexType(typeString);
+            var value = valueSeparator.map(item -> input.sliceToEnd(item + 1));
 
-        var value = input.sliceToEnd(valueSeparator + 1);
+            var type = typeSeparator.map(item -> {
+                try {
+                    var start = item + 1;
+                    var end = valueSeparator.orElse(input.length());
+                    var typeString = input.slice(start, end);
+                    return lexType(typeString);
+                } catch (IndexException e) {
+                    throw new CompileException(e);
+                }
+            }).orElse("int");
 
-        return type + " " + name + "=" + value.compute() + ";";
+            var header = type + " " + name;
+
+            return value
+                           .map(Input::compute)
+                           .map(item -> header + "=" + item)
+                           .orElse(header) + ";";
+        } catch (IndexException e) {
+            throw new CompileException(e);
+        }
     }
 
     private String lexType(Input typeString) throws CompileException {
