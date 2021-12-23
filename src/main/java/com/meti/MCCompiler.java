@@ -75,11 +75,11 @@ public final class MCCompiler {
         var valueString = input.substring(valueSeparator + 1).trim();
 
         String type;
-        if (typeSeparator != -1) {
+        if (typeSeparator == -1) {
+            type = resolve(valueString);
+        } else {
             var typeString = input.substring(typeSeparator + 1, valueSeparator).trim();
             type = compileType(typeString);
-        } else {
-            type = resolve(valueString);
         }
 
         if (scope.isUndefined(nameString)) {
@@ -148,12 +148,8 @@ public final class MCCompiler {
         } else if (input.startsWith("return ")) {
             return compileReturn(input);
         } else {
-            try {
-                Integer.parseInt(input);
-                return input;
-            } catch (NumberFormatException e) {
-                throw new CompileException("Unknown token: " + input);
-            }
+            return new IntegerLexer(input)
+                    .lex().orElseThrow(() -> new CompileException("Unknown token: " + input));
         }
     }
 
