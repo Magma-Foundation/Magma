@@ -1,6 +1,6 @@
 package com.meti;
 
-public abstract class AbstractLexer implements Lexer {
+public abstract class AbstractLexer implements Processor<Node, LexException> {
     protected final Input input;
 
     public AbstractLexer(Input input) {

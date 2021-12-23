@@ -10,7 +10,7 @@ public class ReturnLexer extends AbstractLexer {
     }
 
     @Override
-    public Option<Node> lex() throws LexException {
+    public Option<Node> process() throws LexException {
         if (input.startsWithSlice("return ")) {
             try {
                 var valueString = this.input.sliceToEnd("return ".length());

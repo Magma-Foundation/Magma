@@ -10,7 +10,7 @@ public class IntegerLexer extends AbstractLexer {
     }
 
     @Override
-    public Option<Node> lex() {
+    public Option<Node> process() {
         try {
             var valueAsString = input.compute();
             var valueAsInteger = Integer.parseInt(valueAsString);

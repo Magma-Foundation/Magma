@@ -9,7 +9,7 @@ public class ReturnRenderer extends AbstractRenderer {
     }
 
     @Override
-    public Option<String> render() {
+    public Option<String> process() {
         if (node.is(Node.Type.Return)) {
             return node.getValueAsNode()
                     .flatMap(Node::getValueAsInput)

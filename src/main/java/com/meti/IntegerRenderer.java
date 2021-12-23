@@ -8,7 +8,7 @@ class IntegerRenderer extends AbstractRenderer {
     }
 
     @Override
-    public Option<String> render() {
+    public Option<String> process() {
         return node.getValueAsInteger()
                 .filter(value -> node.is(Node.Type.Integer))
                 .map(String::valueOf);
