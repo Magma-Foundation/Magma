@@ -135,22 +135,27 @@ public final class MCCompiler {
     private String compileNode(String input) throws CompileException {
         if (input.startsWith("native import ")) {
             return compileNativeImport(input);
-        } else if (input.startsWith("'") && input.endsWith("'")) {
-            return input;
-        } else if (input.startsWith("{") && input.endsWith("}")) {
-            return compileBlock(input);
-        } else if (input.startsWith("def ") || input.startsWith("native def ")) {
-            return compileFunction(input);
-        } else if (input.startsWith("const ") || input.startsWith("let ")) {
-            return compileDeclaration(input);
-        } else if (input.contains("=")) {
-            return compileAssignment(input);
-        } else if (input.startsWith("return ")) {
-            return compileReturn(input);
-        } else {
-            return new IntegerLexer(input)
-                    .lex().orElseThrow(() -> new CompileException("Unknown token: " + input));
         }
+        if (input.startsWith("'") && input.endsWith("'")) {
+            return input;
+        }
+        if (input.startsWith("{") && input.endsWith("}")) {
+            return compileBlock(input);
+        }
+        if (input.startsWith("def ") || input.startsWith("native def ")) {
+            return compileFunction(input);
+        }
+        if (input.startsWith("const ") || input.startsWith("let ")) {
+            return compileDeclaration(input);
+        }
+        if (input.contains("=")) {
+            return compileAssignment(input);
+        }
+        if (input.startsWith("return ")) {
+            return compileReturn(input);
+        }
+        return new IntegerLexer(input)
+                .lex().orElseThrow(() -> new CompileException("Unknown token: " + input));
     }
 
     private String compileReturn(String input) throws CompileException {
