@@ -1,13 +1,16 @@
 package com.meti;
 
-public class IntegerNode {
-    private final String value;
+import com.meti.option.Option;
+import com.meti.option.Some;
 
-    public IntegerNode(String value) {
-        this.value = value;
+public record IntegerNode(int value) implements Node {
+    @Override
+    public Option<Integer> getValueAsInteger() {
+        return new Some<Integer>(value);
     }
 
-    public String getValue() {
-        return value;
+    @Override
+    public boolean is(Type type) {
+        return type == Type.Integer;
     }
 }

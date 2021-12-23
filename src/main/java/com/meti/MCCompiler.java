@@ -1,27 +1,38 @@
 package com.meti;
 
-import com.meti.option.None;
-import com.meti.option.Option;
-import com.meti.option.Some;
+import java.util.List;
 
 public record MCCompiler(Input input) {
     String compile() throws CompileException {
-        return lexInteger()
-                .map(this::render)
-                .orElseThrow(() -> new CompileException("Invalid input."));
+        var ast = lexInput();
+        return render(ast);
     }
 
-    private Option<IntegerNode> lexInteger() {
-        try {
-            var value = input.compute();
-            Integer.parseInt(value);
-            return new Some<>(new IntegerNode(value));
-        } catch (NumberFormatException e) {
-            return new None<>();
+    private Node lexInput() throws CompileException {
+        var list = List.of(
+                new ReturnLexer(input),
+                new IntegerLexer(input));
+        for (AbstractLexer lexer : list) {
+            var option = lexer.lex();
+            if (option.isPresent()) {
+                return option.orElse(null);
+            }
         }
+        throw new CompileException("Invalid node: " + input);
     }
 
-    private String render(IntegerNode integerNode) {
-        return integerNode.getValue();
+    private static String render(Node node) throws RenderException {
+        var renderers = List.of(
+                new ReturnRenderer(node),
+                new IntegerRenderer(node));
+
+        for (Renderer renderer : renderers) {
+            var rendered = renderer.render();
+            if (rendered.isPresent()) {
+                return rendered.orElse(null);
+            }
+        }
+        throw new RenderException("Unable to render:" + node);
     }
+
 }

@@ -57,6 +57,11 @@ public class RootInput implements Input {
     }
 
     @Override
+    public boolean startsWithSlice(String slice) {
+        return input.trim().startsWith(slice);
+    }
+
+    @Override
     public boolean wraps(String value) {
         return this.input.equals(value);
     }

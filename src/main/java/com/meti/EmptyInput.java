@@ -50,6 +50,11 @@ public class EmptyInput implements Input {
     }
 
     @Override
+    public boolean startsWithSlice(String slice) {
+        return slice.isEmpty();
+    }
+
+    @Override
     public boolean wraps(String value) {
         return value.isEmpty();
     }

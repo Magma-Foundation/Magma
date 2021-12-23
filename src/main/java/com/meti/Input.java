@@ -19,5 +19,7 @@ public interface Input {
 
     List<Input> split(String delimiter);
 
+    boolean startsWithSlice(String slice);
+
     boolean wraps(String value);
 }

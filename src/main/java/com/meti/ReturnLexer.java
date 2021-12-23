@@ -1,13 +1,25 @@
 package com.meti;
 
-public class ReturnLexer {
-    private final String input;
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
 
-    public ReturnLexer(String input) {
-        this.input = input;
+public class ReturnLexer extends AbstractLexer {
+    public ReturnLexer(Input input) {
+        super(input);
     }
 
-    public String getInput() {
-        return input;
+    @Override
+    public Option<Node> lex() throws LexException {
+        if (input.startsWithSlice("return ")) {
+            try {
+                var valueString = this.input.sliceToEnd("return ".length());
+                var value = new Content(valueString);
+                return new Some<>(new Return(value));
+            } catch (IndexException e) {
+                throw new LexException(e);
+            }
+        }
+        return new None<>();
     }
 }

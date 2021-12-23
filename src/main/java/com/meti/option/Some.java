@@ -10,6 +10,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E {
+        return mapper.apply(value);
+    }
+
+    @Override
     public boolean isPresent() {
         return true;
     }

@@ -4,11 +4,17 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-public record IntegerLexer(String input) {
-    Option<String> lex() {
+public class IntegerLexer extends AbstractLexer {
+    public IntegerLexer(Input input) {
+        super(input);
+    }
+
+    @Override
+    public Option<Node> lex() {
         try {
-            Integer.parseInt(input);
-            return new Some<>(input);
+            var valueAsString = input.compute();
+            var valueAsInteger = Integer.parseInt(valueAsString);
+            return new Some<>(new IntegerNode(valueAsInteger));
         } catch (NumberFormatException e) {
             return new None<>();
         }
