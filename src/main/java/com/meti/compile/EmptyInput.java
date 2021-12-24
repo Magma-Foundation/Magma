@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.compile;
 
+import com.meti.IndexException;
 import com.meti.option.None;
 import com.meti.option.Option;
 

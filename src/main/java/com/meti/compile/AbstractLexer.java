@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 public abstract class AbstractLexer implements Processor<Node, LexException> {
     protected final Input input;

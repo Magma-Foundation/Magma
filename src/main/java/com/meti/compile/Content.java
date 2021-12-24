@@ -1,7 +1,7 @@
-package com.meti;
+package com.meti.compile;
 
-import com.meti.attribute.Attribute;
-import com.meti.attribute.InputAttribute;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.InputAttribute;
 import com.meti.option.Option;
 import com.meti.option.Some;
 

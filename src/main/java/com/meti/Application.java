@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.compile.MCCompiler;
+import com.meti.compile.RootInput;
 import com.meti.io.File;
 import com.meti.io.PathWrapper;
 import com.meti.option.Option;

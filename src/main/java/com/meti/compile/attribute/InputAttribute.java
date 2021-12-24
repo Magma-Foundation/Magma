@@ -1,6 +1,6 @@
-package com.meti.attribute;
+package com.meti.compile.attribute;
 
-import com.meti.Input;
+import com.meti.compile.Input;
 
 public record InputAttribute(Input input) implements Attribute {
     @Override

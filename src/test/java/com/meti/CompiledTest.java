@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.compile.CompileException;
+import com.meti.compile.MCCompiler;
+import com.meti.compile.RootInput;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CompiledTest {

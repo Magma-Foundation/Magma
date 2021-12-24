@@ -1,9 +1,9 @@
-package com.meti.returns;
+package com.meti.compile.returns;
 
-import com.meti.Input;
-import com.meti.Node;
-import com.meti.attribute.Attribute;
-import com.meti.attribute.NodeAttribute;
+import com.meti.compile.Input;
+import com.meti.compile.Node;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.NodeAttribute;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;

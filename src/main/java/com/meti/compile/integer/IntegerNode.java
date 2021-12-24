@@ -1,8 +1,8 @@
-package com.meti.integer;
+package com.meti.compile.integer;
 
-import com.meti.Node;
-import com.meti.attribute.Attribute;
-import com.meti.attribute.IntegerAttribute;
+import com.meti.compile.Node;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.IntegerAttribute;
 import com.meti.option.Option;
 import com.meti.option.Some;
 

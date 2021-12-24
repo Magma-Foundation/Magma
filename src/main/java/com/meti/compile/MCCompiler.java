@@ -1,17 +1,17 @@
-package com.meti;
+package com.meti.compile;
 
-import com.meti.attribute.Attribute;
-import com.meti.integer.IntegerLexer;
-import com.meti.integer.IntegerRenderer;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.integer.IntegerLexer;
+import com.meti.compile.integer.IntegerRenderer;
+import com.meti.compile.returns.ReturnLexer;
+import com.meti.compile.returns.ReturnRenderer;
 import com.meti.option.None;
 import com.meti.option.Option;
-import com.meti.returns.ReturnLexer;
-import com.meti.returns.ReturnRenderer;
 
 import java.util.List;
 
 public record MCCompiler(Input input) {
-    String compile() throws CompileException {
+    public String compile() throws CompileException {
         if (input.length() == 0) return "";
         var ast = lexInput();
         return renderOutput(ast);
