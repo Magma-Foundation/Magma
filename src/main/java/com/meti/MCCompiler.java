@@ -14,15 +14,15 @@ public record MCCompiler(Input input) {
 
     private Node lexInput() throws CompileException {
         var node = lexInput(input);
-        return node.getValueAsNode()
-                .flatMap(Node::getValueAsInput)
+        return node.getValue().map(Attribute::asNode)
+                .flatMap(node1 -> node1.getValue().map(Attribute::asInput))
                 .map(this::lexInput)
                 .map(node::with)
                 .orElse(node);
     }
 
     private String renderOutput(Node node) throws CompileException {
-        var parent = node.getValueAsNode()
+        var parent = node.getValue().map(Attribute::asNode)
                 .map(this::renderNode)
                 .map(RootInput::new)
                 .map(Content::new)

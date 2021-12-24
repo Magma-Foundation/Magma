@@ -5,8 +5,8 @@ import com.meti.option.Some;
 
 public record IntegerNode(int value) implements Node {
     @Override
-    public Option<Integer> getValueAsInteger() {
-        return new Some<Integer>(value);
+    public Option<Attribute> getValue() {
+        return new Some<>(new IntegerAttribute(value));
     }
 
     @Override

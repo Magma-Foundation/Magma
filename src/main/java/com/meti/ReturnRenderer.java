@@ -9,12 +9,16 @@ public class ReturnRenderer extends AbstractRenderer {
     }
 
     @Override
-    public Option<String> process() {
+    public Option<String> process() throws RenderException {
         if (node.is(Node.Type.Return)) {
-            return node.getValueAsNode()
-                    .flatMap(Node::getValueAsInput)
-                    .map(Input::compute)
-                    .map(value -> "return " + value + ";");
+            try {
+                return node.getValue().map(Attribute::asNode)
+                        .flatMap(node1 -> node1.getValue().map(Attribute::asInput))
+                        .map(Input::compute)
+                        .map(value -> "return " + value + ";");
+            } catch (AttributeException e) {
+                throw new RenderException(e);
+            }
         } else {
             return new None<>();
         }

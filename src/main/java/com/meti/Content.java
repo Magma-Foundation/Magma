@@ -5,8 +5,8 @@ import com.meti.option.Some;
 
 public record Content(Input input) implements Node {
     @Override
-    public Option<Input> getValueAsInput() {
-        return new Some<>(input);
+    public Option<Attribute> getValue() {
+        return new Some<>(new InputAttribute(input));
     }
 
     @Override

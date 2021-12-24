@@ -8,9 +8,13 @@ class IntegerRenderer extends AbstractRenderer {
     }
 
     @Override
-    public Option<String> process() {
-        return node.getValueAsInteger()
-                .filter(value -> node.is(Node.Type.Integer))
-                .map(String::valueOf);
+    public Option<String> process() throws RenderException {
+        try {
+            return node.getValue().map(Attribute::asInteger)
+                    .filter(value -> node.is(Node.Type.Integer))
+                    .map(String::valueOf);
+        } catch (AttributeException e) {
+            throw new RenderException(e);
+        }
     }
 }
