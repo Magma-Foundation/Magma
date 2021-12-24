@@ -14,6 +14,12 @@ public record MCCompiler(Input input) {
     public String compile() throws CompileException {
         if (input.length() == 0) return "";
         var ast = lexInput();
+        if (ast.getValue()
+                .map(Attribute::asNode)
+                .map(value -> value.is(Node.Type.Return))
+                .orElse(false)) {
+            throw new CompileException("Not an expression.");
+        }
         return renderOutput(ast);
     }
 
