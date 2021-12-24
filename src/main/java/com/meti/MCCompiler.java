@@ -7,6 +7,7 @@ import java.util.List;
 
 public record MCCompiler(Input input) {
     String compile() throws CompileException {
+        if (input.length() == 0) return "";
         var ast = lexInput();
         return renderOutput(ast);
     }
