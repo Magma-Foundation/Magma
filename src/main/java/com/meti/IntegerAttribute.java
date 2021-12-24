@@ -1,12 +1,6 @@
 package com.meti;
 
-public class IntegerAttribute implements Attribute {
-    private final int value;
-
-    public IntegerAttribute(int value) {
-        this.value = value;
-    }
-
+public record IntegerAttribute(int value) implements Attribute {
     @Override
     public int asInteger() {
         return value;

@@ -1,12 +1,6 @@
 package com.meti;
 
-public class NodeAttribute implements Attribute {
-    private final Node node;
-
-    public NodeAttribute(Node node) {
-        this.node = node;
-    }
-
+public record NodeAttribute(Node node) implements Attribute {
     @Override
     public Node asNode() {
         return node;

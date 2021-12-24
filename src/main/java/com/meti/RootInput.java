@@ -8,9 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RootInput implements Input {
-    private final String input;
-
+public record RootInput(String input) implements Input {
     @Override
     public String compute() {
         return input;
@@ -66,7 +64,4 @@ public class RootInput implements Input {
         return this.input.equals(value);
     }
 
-    public RootInput(String input) {
-        this.input = input;
-    }
 }

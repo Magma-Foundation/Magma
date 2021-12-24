@@ -3,7 +3,7 @@ package com.meti;
 import com.meti.option.Option;
 
 public interface Node {
-    Option<Attribute> getValue() throws AttributeException;
+    Option<Attribute> getValue();
 
     boolean is(Type type);
 

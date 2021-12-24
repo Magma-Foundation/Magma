@@ -1,12 +1,6 @@
 package com.meti;
 
-public class InputAttribute implements Attribute {
-    private final Input input;
-
-    public InputAttribute(Input input) {
-        this.input = input;
-    }
-
+public record InputAttribute(Input input) implements Attribute {
     @Override
     public Input asInput() {
         return input;
