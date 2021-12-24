@@ -1,8 +1,4 @@
-package com.meti;
-
-import com.meti.compile.CompileException;
-import com.meti.compile.MCCompiler;
-import com.meti.compile.RootInput;
+package com.meti.compile;
 
 import static org.junit.jupiter.api.Assertions.*;
 

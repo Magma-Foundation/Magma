@@ -1,9 +1,9 @@
-package com.meti;
+package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
-import static com.meti.CompiledTest.assertCompile;
-import static com.meti.CompiledTest.assertDoesNotCompile;
+import static com.meti.compile.CompiledTest.assertCompile;
+import static com.meti.compile.CompiledTest.assertDoesNotCompile;
 
 public class DeclarationTest {
     @Test

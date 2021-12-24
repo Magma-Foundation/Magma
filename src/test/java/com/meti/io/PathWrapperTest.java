@@ -1,6 +1,5 @@
-package com.meti;
+package com.meti.io;
 
-import com.meti.io.PathWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
