@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.io.File;
+import com.meti.io.PathWrapper;
 import com.meti.option.Option;
 
 import java.io.IOException;

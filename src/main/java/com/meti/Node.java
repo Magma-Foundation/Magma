@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.attribute.Attribute;
 import com.meti.option.Option;
 
 public interface Node {

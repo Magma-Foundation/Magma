@@ -1,8 +1,13 @@
-package com.meti;
+package com.meti.integer;
 
+import com.meti.AbstractRenderer;
+import com.meti.Node;
+import com.meti.RenderException;
+import com.meti.attribute.Attribute;
+import com.meti.attribute.AttributeException;
 import com.meti.option.Option;
 
-class IntegerRenderer extends AbstractRenderer {
+public class IntegerRenderer extends AbstractRenderer {
     public IntegerRenderer(Node node) {
         super(node);
     }

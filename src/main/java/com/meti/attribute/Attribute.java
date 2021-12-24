@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.attribute;
+
+import com.meti.Input;
+import com.meti.Node;
 
 public interface Attribute {
     default Input asInput() throws AttributeException {

@@ -1,5 +1,8 @@
-package com.meti;
+package com.meti.integer;
 
+import com.meti.AbstractLexer;
+import com.meti.Input;
+import com.meti.Node;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;

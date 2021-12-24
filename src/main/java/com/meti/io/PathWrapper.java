@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.io;
 
 import com.meti.option.None;
 import com.meti.option.Option;
@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public record PathWrapper(Path value) {
-    static final PathWrapper Root = new PathWrapper(Paths.get("."));
+    public static final PathWrapper Root = new PathWrapper(Paths.get("."));
 
     public String computeRetractedFileName() {
         var name = value.getFileName().toString();
@@ -37,7 +37,7 @@ public record PathWrapper(Path value) {
                 : new None<>();
     }
 
-    PathWrapper resolve(String name) {
+    public PathWrapper resolve(String name) {
         return new PathWrapper(value.resolve(name));
     }
 

@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.io.File;
+import com.meti.io.PathWrapper;
 import com.meti.option.None;
 import com.meti.option.Option;
 import org.junit.jupiter.api.AfterEach;
@@ -7,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.meti.PathWrapper.Root;
+import static com.meti.io.PathWrapper.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {

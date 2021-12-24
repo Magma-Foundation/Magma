@@ -1,11 +1,13 @@
 package com.meti;
 
+import com.meti.io.File;
+import com.meti.io.PathWrapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.meti.PathWrapper.Root;
+import static com.meti.io.PathWrapper.Root;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OtherApplicationTest {
