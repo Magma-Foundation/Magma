@@ -35,7 +35,7 @@ public record MCCompiler(Input input) {
                 new ReturnLexer(input),
                 new IntegerLexer(input));
         return this.processAll(list)
-                .orElseThrow(() -> new LexException("Invalid input: " + input));
+                .orElseThrow(() -> new LexException("Invalid input: " + input.compute()));
     }
 
     private String renderNode(Node node) throws CompileException {
