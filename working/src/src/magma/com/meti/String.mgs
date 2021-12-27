@@ -1,3 +1,4 @@
 export default struct String {
-
+    + : I8 => String;
+    + : String => String;
 }
