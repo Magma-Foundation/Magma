@@ -1,4 +1,21 @@
 export default struct String {
     + : I8 => String;
     + : String => String;
+
+    isBlank : () => Bool;
+
+    out unwrap : () => Ref[I8];
 }
+
+export def CharsString(values : Ref[I8]) >> String {
+
+}
+
+export def CharString(value : I8) >> String {
+    def +(other : I8) => {
+
+    }
+}
+
+export const Empty = [String]{
+};
