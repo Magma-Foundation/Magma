@@ -1,5 +1,5 @@
-describe("The application", () => {
-    it("should", () => {
+import { describe } from com.meti.Executor;
 
-    });
-});
+describe("The application", it =>
+    it("should work", () => assertTrue(true))
+);

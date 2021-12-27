@@ -1,7 +1,0 @@
-import { String, Error } from com.meti;
-
-def describe(value : String, () => Void ? Error) => {
-}
-
-def it(value : String, () => Void ? Error) => {
-}
