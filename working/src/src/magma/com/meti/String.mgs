@@ -2,9 +2,9 @@ export default struct String {
     + : I8 => String ? IndexError;
     + : String => String ? IndexError;
 
-    length : AnySize;
+    length : Size;
 
-    apply : AnySize => I8 ? IndexError;
+    apply : Size => I8 ? IndexError;
 
     isBlank : () => Bool;
 
@@ -20,7 +20,7 @@ export class def CharsString(values : Array[I8]) >> String => {
         const length = values.length;
         const copy = new[I8](length + 2);
 
-        Streams.AnySize(0, length)
+        Streams.Size(0, length)
             .forEach(index => copy(index) = values(index));
 
         copy(length, other)(length, '\0');
@@ -32,8 +32,8 @@ export class def CharsString(values : Array[I8]) >> String => {
         const length = values.length;
         const copy = new I8[length + other.length + 1];
 
-        Streams.AnySize(0, length).forEach(index => copy(index) = values(index));
-        Streams.AnySize(0, other.length).forEach(index => copy(length + index) = other(index));
+        Streams.Size(0, length).forEach(index => copy(index) = values(index));
+        Streams.Size(0, other.length).forEach(index => copy(length + index) = other(index));
 
         copy(length + other.length, '\0');
 
@@ -46,7 +46,7 @@ export class def CharsString(values : Array[I8]) >> String => {
 export def CharString(value : I8) >> String {
     const length = 1;
 
-    def apply(index : AnySize) => index == 0
+    def apply(index : Size) => index == 0
          ? value
          : throw IndexError(index);
 
