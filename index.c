@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// testing comments
+
 int main() {
     FILE* file = fopen("index.mgf", "r");
     if(file) {
@@ -15,11 +17,15 @@ int main() {
         }
 
         fclose(file);
-    
+
         printf("%s", buffer);
+    
+        FILE* target = fopen("index.c", "w");
+        fputs(buffer, target);
+        fclose(target);
 
         free(buffer);
     }
 
     return 0;
-}
+}lateyInstall=C:\ProgramData\ch
