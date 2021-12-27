@@ -1,3 +1,5 @@
+import { IndexError, Array} from com.meti;
+
 export default struct String {
     + : I8 => String ? IndexError;
     + : String => String ? IndexError;
