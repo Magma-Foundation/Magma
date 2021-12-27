@@ -1,0 +1,5 @@
+import com.meti.Stream;
+
+export default trait Map[A, B] {
+    streamValues : () => Stream[B];
+}

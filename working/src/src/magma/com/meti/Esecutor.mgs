@@ -11,14 +11,13 @@ struct Result {
     message : String;
 }
 
-def it(action : () => Result ? Error) =>
-    try action()
-    catch(e : Error) [Result]{validity: Failure, message : e.message};
-
 export type ItType = typeof it;
 export def describe(name : String, action : ItType => Map[String, Result]) => {
-    const results = action();
+    def it(action : () => Result ? Error) =>
+        try action()
+        catch(e : Error) [Result]{validity: Failure, message : e.message};
 
+    const results = action(it);
     const resultsSummary = results
         .values()
         .map([_.validity == Success, 1])
