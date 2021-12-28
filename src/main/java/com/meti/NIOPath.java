@@ -5,18 +5,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class NIOPath implements com.meti.Path {
-    static final com.meti.Path Root = new NIOPath(Paths.get("."));
-    private final Path target;
+public record NIOPath(Path value) implements com.meti.Path {
+    public static final com.meti.Path Root = new NIOPath(Paths.get("."));
 
-    public NIOPath(Path target) {
-        this.target = target;
+    @Override
+    public String computeFileNameWithoutExtension() {
+        var fileName = value.getFileName().toString();
+        var separator = fileName.indexOf('.');
+        return fileName.substring(0, separator);
     }
 
     @Override
     public void create() throws com.meti.IOException {
         try {
-            Files.createFile(target);
+            Files.createFile(value);
         } catch (IOException e) {
             throw new com.meti.IOException(e);
         }
@@ -25,7 +27,7 @@ public class NIOPath implements com.meti.Path {
     @Override
     public void deleteIfExists() throws com.meti.IOException {
         try {
-            Files.deleteIfExists(target);
+            Files.deleteIfExists(value);
         } catch (IOException e) {
             throw new com.meti.IOException(e);
         }
@@ -33,11 +35,16 @@ public class NIOPath implements com.meti.Path {
 
     @Override
     public boolean exists() {
-        return Files.exists(target);
+        return Files.exists(value);
     }
 
     @Override
-    public com.meti.Path resolve(String child) {
-        return new NIOPath(target.resolve(child));
+    public com.meti.Path resolveChild(String child) {
+        return new NIOPath(value.resolve(child));
+    }
+
+    @Override
+    public com.meti.Path resolveSibling(String sibling) {
+        return new NIOPath(value.resolveSibling(sibling));
     }
 }

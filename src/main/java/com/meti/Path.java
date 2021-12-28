@@ -1,11 +1,15 @@
 package com.meti;
 
 public interface Path {
+    String computeFileNameWithoutExtension();
+
     void create() throws IOException;
 
     void deleteIfExists() throws IOException;
 
     boolean exists();
 
-    Path resolve(String child);
+    Path resolveChild(String child);
+
+    Path resolveSibling(String sibling);
 }
