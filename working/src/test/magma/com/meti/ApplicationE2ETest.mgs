@@ -1,5 +1,14 @@
-import { describe } from com.meti.Executor;
+def it(name : String, action : () => Void) => {
+}
 
-describe("The application", it =>
-    it("should work", () => assertTrue(true))
-);
+def describe(name : String, action : () => Void) => {
+
+}
+
+def main() => {
+    describe("The application", () =>
+        it("should work", () => {
+            assertTrue(true);
+        });
+    );
+}
