@@ -3,6 +3,17 @@ import native "stdlib";
 native def malloc(size : Size) : Ref[Any];
 native def free(block : Ref[Any]) : Void;
 
+trait Array[T] {
+    size : Size;
+    drop : () => Void;
+}
+
+class def DynamicArray[T](size : Size) >> Array[T] => {
+    const memory = malloc(size);
+
+    def drop() => free(memory);
+}
+
 struct String {
     +: I8 => String;
 }
