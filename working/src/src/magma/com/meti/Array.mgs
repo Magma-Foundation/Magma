@@ -1,6 +1,6 @@
 import com.meti.IndexError;
 
-export default struct Array[T] {
+export default trait Array[T] {
     length : Size;
     apply : Size => T ? IndexError;
     apply : (Size, T) => Array[T] ? IndexError;

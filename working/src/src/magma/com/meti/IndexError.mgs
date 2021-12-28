@@ -1,3 +1,1 @@
-export default struct IndexError {
-    index : Size;
-}
+export default class def IndexError(index : Size, length : Size);

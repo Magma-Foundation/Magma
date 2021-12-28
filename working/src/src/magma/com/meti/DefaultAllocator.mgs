@@ -1,0 +1,20 @@
+import from com.meti {
+    { Allocator, Default } from Allocator,
+    Array,
+}
+
+import native stdlib;
+
+class def ArrayImpl[T](length : Size, reference : Ref[T]) >> Array[T] => {
+    def apply(index : Size) => index < length
+        ? *(reference + index)
+        : throw IndexError(index, length);
+
+    def apply(index : Size, value : T) => index < length;
+        ? *(reference + index) = value
+        : throw IndexError(index, length);
+}
+
+Default = [Allocator]{
+    apply : [T](size : Size) => ArrayImpl(malloc(size * T.size)) ?? throw AllocationError(size);
+}

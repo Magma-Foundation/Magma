@@ -1,4 +1,5 @@
 import { IndexError, Array} from com.meti;
+import com.meti.Allocator as new;
 
 export default struct String {
     + : I8 => String ? IndexError;
