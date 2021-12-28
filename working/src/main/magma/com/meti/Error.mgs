@@ -1,5 +1,0 @@
-import com.meti.String;
-
-export default struct Error {
-    message : String;
-}

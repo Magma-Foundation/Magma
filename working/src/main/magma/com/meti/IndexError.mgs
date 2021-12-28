@@ -1,1 +1,0 @@
-export default class def IndexError(index : Size, length : Size);

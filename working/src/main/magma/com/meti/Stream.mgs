@@ -1,9 +1,0 @@
-import com.meti.Error;
-
-export default StreamError >> Error {
-}
-
-export default trait Stream[T] {
-    map : [R, E > Error](T => R) : Stream[R];
-    foldRight : [R, E > Error](R, (R, T, R) => R ? E) : Stream[R];
-}

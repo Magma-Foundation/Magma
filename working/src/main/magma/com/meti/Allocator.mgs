@@ -1,9 +1,0 @@
-export struct AllocationError {
-    size : Size;
-}
-
-export trait Allocator {
-    apply : [T](size : Size) : Array[T] ? AllocationError;
-}
-
-export partial default const Default : Allocator;
