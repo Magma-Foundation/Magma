@@ -1,8 +1,19 @@
+struct String {
+
+}
+
+// Should be null terminated!
+out def StringConstructor(value : Ref[I8]) => [String]{
+}
+
 def it(name : String, action : () => Void) => {
 }
 
 def describe(name : String, action : () => Void) => {
 
+}
+
+def assertTrue(value : Bool) => {
 }
 
 def main() => {
