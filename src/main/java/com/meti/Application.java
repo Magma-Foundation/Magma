@@ -5,7 +5,7 @@ public record Application(Path source) {
         try {
             if (source.exists()) {
                 var name = source.computeFileNameWithoutExtension();
-                var target = source.resolveSibling(name + ".mg");
+                var target = source.resolveSibling(name + ".c");
                 target.create();
             }
         } catch (IOException e) {
