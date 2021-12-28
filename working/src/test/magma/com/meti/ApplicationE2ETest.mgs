@@ -1,11 +1,27 @@
+import native "stdlib";
+
+native def malloc(size : Size) : Ref[Any];
+native def free(block : Ref[Any]) : Void;
+
 struct String {
-    // Should be null terminated!
-    out def apply(value : Ref[I8]) => [String]{
-    }
+    +: I8 => String;
+}
 
-    out def unapply(value : String) => {
+class def ArrayString(value : Array[I8]) >> String => {
+    def +(suffix : I8) => {
 
     }
+}
+
+// Should be null terminated!
+out def apply(value : Ref[I8]) => [String]{
+    + : suffix => {
+
+    }
+}
+
+out def unapply(value : String) => {
+
 }
 
 import native "stdio";
@@ -20,7 +36,7 @@ def it(name : String, action : () => Void) => {
 }
 
 def describe(name : String, action : () => Void) => {
-
+    print(name + '\n');
 }
 
 def assertTrue(value : Bool) => {
