@@ -13,20 +13,8 @@ public class ApplicationE2ETest {
 
     @Test
     void no_writes_target() throws ApplicationException {
-        run();
+        new Application(Source).run();
         assertFalse(Target.exists());
-    }
-
-    private static void run() throws ApplicationException {
-        try {
-            if (Source.exists()) {
-                var name = Source.computeFileNameWithoutExtension();
-                var target = Source.resolveSibling(name + ".mg");
-                target.create();
-            }
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
     }
 
     @AfterEach
@@ -38,7 +26,7 @@ public class ApplicationE2ETest {
     @Test
     void writes_target() throws ApplicationException, com.meti.IOException {
         Source.create();
-        run();
+        new Application(Source).run();
         assertTrue(Target.exists());
     }
 }
