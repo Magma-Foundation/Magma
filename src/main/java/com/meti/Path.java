@@ -3,9 +3,11 @@ package com.meti;
 public interface Path {
     String computeFileNameWithoutExtension();
 
-    void create() throws IOException;
+    File create() throws IOException;
 
     void deleteIfExists() throws IOException;
+
+    Option<File> existing();
 
     boolean exists();
 

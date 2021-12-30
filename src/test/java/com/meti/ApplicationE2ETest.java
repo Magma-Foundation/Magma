@@ -4,8 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.NIOPath.Root;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationE2ETest {
     private static final Path Target = Root.resolveChild("index.c");
@@ -21,6 +20,15 @@ public class ApplicationE2ETest {
     void tearDown() throws com.meti.IOException {
         Source.deleteIfExists();
         Target.deleteIfExists();
+    }
+
+    @Test
+    void writes_content() throws IOException, ApplicationException {
+        Source.create().writeAsString("def main() : I16 => {return 0;}");
+        new Application(Source).run();
+        assertEquals("int main(){return 0;}", Target.existing()
+                .map(File::readAsString)
+                .orElse(""));
     }
 
     @Test
