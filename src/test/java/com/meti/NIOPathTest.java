@@ -1,8 +1,9 @@
 package com.meti;
 
+import com.meti.io.IOException;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.NIOPath.Root;
+import static com.meti.io.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NIOPathTest {

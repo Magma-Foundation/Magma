@@ -1,9 +1,14 @@
 package com.meti;
 
+import com.meti.app.Application;
+import com.meti.app.ApplicationException;
+import com.meti.io.File;
+import com.meti.io.IOException;
+import com.meti.io.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.NIOPath.Root;
+import static com.meti.io.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationE2ETest {
@@ -17,7 +22,7 @@ public class ApplicationE2ETest {
     }
 
     @AfterEach
-    void tearDown() throws com.meti.IOException {
+    void tearDown() throws IOException {
         Source.deleteIfExists();
         Target.deleteIfExists();
     }
@@ -41,7 +46,7 @@ public class ApplicationE2ETest {
     }
 
     @Test
-    void writes_target() throws ApplicationException, com.meti.IOException {
+    void writes_target() throws ApplicationException, IOException {
         Source.create();
         new Application(Source).run();
         assertTrue(Target.exists());

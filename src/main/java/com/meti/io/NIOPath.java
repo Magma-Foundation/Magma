@@ -1,12 +1,16 @@
-package com.meti;
+package com.meti.io;
+
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public record NIOPath(Path value) implements com.meti.Path {
-    public static final com.meti.Path Root = new NIOPath(Paths.get("."));
+public record NIOPath(Path value) implements com.meti.io.Path {
+    public static final com.meti.io.Path Root = new NIOPath(Paths.get("."));
 
     @Override
     public String computeFileNameWithoutExtension() {
@@ -16,21 +20,21 @@ public record NIOPath(Path value) implements com.meti.Path {
     }
 
     @Override
-    public File create() throws com.meti.IOException {
+    public File create() throws com.meti.io.IOException {
         try {
             Files.createFile(value);
             return new FileImpl();
         } catch (IOException e) {
-            throw new com.meti.IOException(e);
+            throw new com.meti.io.IOException(e);
         }
     }
 
     @Override
-    public void deleteIfExists() throws com.meti.IOException {
+    public void deleteIfExists() throws com.meti.io.IOException {
         try {
             Files.deleteIfExists(value);
         } catch (IOException e) {
-            throw new com.meti.IOException(e);
+            throw new com.meti.io.IOException(e);
         }
     }
 
@@ -47,31 +51,31 @@ public record NIOPath(Path value) implements com.meti.Path {
     }
 
     @Override
-    public com.meti.Path resolveChild(String child) {
+    public com.meti.io.Path resolveChild(String child) {
         return new NIOPath(value.resolve(child));
     }
 
     @Override
-    public com.meti.Path resolveSibling(String sibling) {
+    public com.meti.io.Path resolveSibling(String sibling) {
         return new NIOPath(value.resolveSibling(sibling));
     }
 
     private class FileImpl implements File {
         @Override
-        public String readAsString() throws com.meti.IOException {
+        public String readAsString() throws com.meti.io.IOException {
             try {
                 return Files.readString(value);
             } catch (IOException e) {
-                throw new com.meti.IOException(e);
+                throw new com.meti.io.IOException(e);
             }
         }
 
         @Override
-        public void writeAsString(String output) throws com.meti.IOException {
+        public void writeAsString(String output) throws com.meti.io.IOException {
             try {
                 Files.writeString(value, output);
             } catch (IOException e) {
-                throw new com.meti.IOException(e);
+                throw new com.meti.io.IOException(e);
             }
         }
     }

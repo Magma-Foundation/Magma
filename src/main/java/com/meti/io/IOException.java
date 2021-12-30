@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.io;
 
 public class IOException extends Exception {
     public IOException(Throwable cause) {

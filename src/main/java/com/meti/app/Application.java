@@ -1,7 +1,10 @@
-package com.meti;
+package com.meti.app;
+
+import com.meti.io.IOException;
+import com.meti.io.Path;
 
 public record Application(Path source) {
-    void run() throws ApplicationException {
+    public void run() throws ApplicationException {
         try {
             source.existing().ifPresent(file -> {
                 var input = file.readAsString();
