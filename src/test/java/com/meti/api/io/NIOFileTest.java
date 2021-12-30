@@ -2,10 +2,10 @@ package com.meti.api.io;
 
 import org.junit.jupiter.api.Test;
 
-import static com.meti.api.io.NIOPath.Root;
+import static com.meti.api.io.NIOFile.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
-class NIOPathTest {
+class NIOFileTest {
 
     @Test
     void computeFileNameWithoutExtension() {

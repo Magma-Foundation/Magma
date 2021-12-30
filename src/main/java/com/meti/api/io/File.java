@@ -1,7 +1,7 @@
 package com.meti.api.io;
 
-public interface File {
+public interface File extends Path {
     String readAsString() throws IOException;
 
-    void writeAsString(String output) throws IOException;
+    File writeAsString(String output) throws IOException;
 }

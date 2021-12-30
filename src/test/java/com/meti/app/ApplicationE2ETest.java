@@ -6,7 +6,7 @@ import com.meti.api.io.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.api.io.NIOPath.Root;
+import static com.meti.api.io.NIOFile.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationE2ETest {
