@@ -1,6 +1,6 @@
 package com.meti.app;
 
-import com.meti.io.NIOPath;
+import com.meti.api.io.NIOPath;
 
 public class Main {
     public static void main(String[] args) {

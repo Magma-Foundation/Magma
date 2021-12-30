@@ -1,7 +1,7 @@
-package com.meti.option;
+package com.meti.api.option;
 
-import com.meti.func.C1;
-import com.meti.func.F1;
+import com.meti.api.func.C1;
+import com.meti.api.func.F1;
 
 public class None<T> implements Option<T> {
     @Override

@@ -1,7 +1,7 @@
 package com.meti.app;
 
-import com.meti.io.IOException;
-import com.meti.io.Path;
+import com.meti.api.io.IOException;
+import com.meti.api.io.Path;
 
 public record Application(Path source) {
     public void run() throws ApplicationException {

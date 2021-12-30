@@ -1,14 +1,12 @@
-package com.meti;
+package com.meti.app;
 
-import com.meti.app.Application;
-import com.meti.app.ApplicationException;
-import com.meti.io.File;
-import com.meti.io.IOException;
-import com.meti.io.Path;
+import com.meti.api.io.File;
+import com.meti.api.io.IOException;
+import com.meti.api.io.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.io.NIOPath.Root;
+import static com.meti.api.io.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationE2ETest {

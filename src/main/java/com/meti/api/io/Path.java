@@ -1,6 +1,6 @@
-package com.meti.io;
+package com.meti.api.io;
 
-import com.meti.option.Option;
+import com.meti.api.option.Option;
 
 public interface Path {
     String computeFileNameWithoutExtension();

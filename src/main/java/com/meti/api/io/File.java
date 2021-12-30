@@ -1,6 +1,4 @@
-package com.meti.io;
-
-import com.meti.io.IOException;
+package com.meti.api.io;
 
 public interface File {
     String readAsString() throws IOException;
