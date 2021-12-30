@@ -2,18 +2,17 @@ package com.meti.app;
 
 import com.meti.api.io.File;
 import com.meti.api.io.IOException;
-import com.meti.api.io.Path;
 
 public final class Application {
-    private final Path source;
+    private final Source source;
 
-    public Application(Path source) {
+    public Application(Source source) {
         this.source = source;
     }
 
-    public void run() throws ApplicationException {
+    public Stream<File> run() throws ApplicationException {
         try {
-            source.existing().map(Application::compile);
+            return source.stream().map(Application::compile);
         } catch (IOException e) {
             throw new ApplicationException(e);
         }

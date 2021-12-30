@@ -15,7 +15,7 @@ public class ApplicationE2ETest {
 
     @Test
     void no_writes_target() throws ApplicationException {
-        new Application(Source).run();
+        new Application(new SingleSource(Source)).run();
         assertFalse(Target.exists());
     }
 
@@ -28,7 +28,7 @@ public class ApplicationE2ETest {
     @Test
     void writes_content() throws IOException, ApplicationException {
         Source.create().writeAsString("def main() : I16 => {return 0;}");
-        new Application(Source).run();
+        new Application(new SingleSource(Source)).run();
         assertEquals("int main(){return 0;}", Target.existing()
                 .map(File::readAsString)
                 .orElse(""));
@@ -37,7 +37,7 @@ public class ApplicationE2ETest {
     @Test
     void writes_empty() throws IOException, ApplicationException {
         Source.create().writeAsString("");
-        new Application(Source).run();
+        new Application(new SingleSource(Source)).run();
         assertEquals("", Target.existing()
                 .map(File::readAsString)
                 .orElse(""));
@@ -46,7 +46,7 @@ public class ApplicationE2ETest {
     @Test
     void writes_target() throws ApplicationException, IOException {
         Source.create();
-        new Application(Source).run();
+        new Application(new SingleSource(Source)).run();
         assertTrue(Target.exists());
     }
 }
