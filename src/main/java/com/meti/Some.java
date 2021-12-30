@@ -12,6 +12,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public <E extends Exception> void ifPresent(C1<T, E> consumer) throws E {
+        consumer.accept(value);
+    }
+
+    @Override
     public T orElse(T other) {
         return value;
     }

@@ -32,6 +32,15 @@ public class ApplicationE2ETest {
     }
 
     @Test
+    void writes_empty() throws IOException, ApplicationException {
+        Source.create().writeAsString("");
+        new Application(Source).run();
+        assertEquals("", Target.existing()
+                .map(File::readAsString)
+                .orElse(""));
+    }
+
+    @Test
     void writes_target() throws ApplicationException, com.meti.IOException {
         Source.create();
         new Application(Source).run();
