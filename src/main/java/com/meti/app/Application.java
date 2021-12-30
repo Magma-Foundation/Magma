@@ -4,32 +4,39 @@ import com.meti.api.io.File;
 import com.meti.api.io.IOException;
 
 public final class Application {
-    private final Source source;
+    private final SourceDirectory sourceDirectory;
+    private final TargetDirectory targetDirectory;
 
-    public Application(Source source) {
-        this.source = source;
+    public Application(SourceDirectory sourceDirectory, PathTargetDirectory targetDirectory) {
+        this.sourceDirectory = sourceDirectory;
+        this.targetDirectory = targetDirectory;
     }
 
     public Stream<File> run() throws ApplicationException {
         try {
-            return source.stream().map(Application::compile);
+            return sourceDirectory.stream()
+                    .map(this::compileSource);
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
     }
 
-    private static File compile(File file) throws IOException {
-        var input = file.readAsString();
+    private File compileSource(Source source) throws IOException {
+        var package_ = source.computePackage();
+
+        var input = source.read();
+        var output = compile(input);
+
+        return targetDirectory.write(output, package_);
+    }
+
+    private String compile(String input) {
         String output;
         if (input.equals("def main() : I16 => {return 0;}")) {
             output = "int main(){return 0;}";
         } else {
             output = "";
         }
-
-        var name = file.computeFileNameWithoutExtension();
-        var target = file.resolveSibling(name + ".c");
-        return target.create().writeAsString(output);
-
+        return output;
     }
 }

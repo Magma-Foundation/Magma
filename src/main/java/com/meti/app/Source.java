@@ -1,7 +1,9 @@
 package com.meti.app;
 
-import com.meti.api.io.File;
+import com.meti.api.io.IOException;
 
 public interface Source {
-    Stream<File> stream();
+    Reference computePackage();
+
+    String read() throws IOException;
 }
