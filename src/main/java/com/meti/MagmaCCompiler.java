@@ -31,7 +31,7 @@ public record MagmaCCompiler(String input) {
     private String compileNode(String input) {
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
-            var paramEnd = input.indexOf(')');
+            var paramEnd = input.lastIndexOf(')');
 
             var name = slice(input, "def ".length(), paramStart);
             var typeSeparator = input.indexOf(':', paramEnd);
