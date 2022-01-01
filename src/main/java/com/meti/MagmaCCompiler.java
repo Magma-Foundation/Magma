@@ -82,19 +82,19 @@ public record MagmaCCompiler(String input) {
     }
 
     private String lexField(Input input, String suffix) throws LexException {
-        var separator = input.getInput().indexOf("=>");
+        var separator = input.firstIndexOfSlice();
         if (separator != -1) {
-            var paramStart = input.getInput().indexOf('(');
-            var paramEnd = input.getInput().indexOf(')');
+            var paramStart = input.firstIndexOfChar('(');
+            var paramEnd = input.firstIndexOfChar(')');
             var paramType = input.slice(paramStart + 1, paramEnd);
             String parameter;
-            if (!paramType.getInput().isBlank()) {
-                parameter = lexField(paramType, "");
-            } else {
+            if (paramType.isEmpty()) {
                 parameter = "";
+            } else {
+                parameter = lexField(paramType, "");
             }
 
-            var slice = input.slice(separator + "=>".length(), input.getInput().length());
+            var slice = input.sliceToEnd(separator + "=>".length());
             return lexField(slice, "(*" + suffix + "(" + parameter.trim() + "))");
         }
         return switch (input.getInput()) {
