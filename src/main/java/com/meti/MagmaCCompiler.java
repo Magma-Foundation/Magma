@@ -10,7 +10,7 @@ public record MagmaCCompiler(String input) {
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (depth == 0 && c == ';') {
-                lines.add(buffer.toString());
+                lines.add(buffer.toString().trim());
                 buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
@@ -18,8 +18,8 @@ public record MagmaCCompiler(String input) {
                 buffer.append(c);
             }
         }
-        lines.add(buffer.toString());
-        lines.removeIf(String::isBlank);
+        lines.add(buffer.toString().trim());
+        lines.removeIf(String::isEmpty);
 
         var output = new StringBuilder();
         for (String line : lines) {
