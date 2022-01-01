@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MagmaCCompilerTest {
     @Test
+    void integer(){
+        assertCompile("420", "420");
+    }
+
+    @Test
     void empty() {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }

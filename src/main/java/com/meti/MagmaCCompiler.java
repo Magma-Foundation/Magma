@@ -31,7 +31,19 @@ public record MagmaCCompiler(String input) {
     private String compileNode(String input) {
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
-            var paramEnd = input.lastIndexOf(')');
+
+            var depth = 0;
+            var paramEnd = -1;
+            for (int i = paramStart + 1; i < input.length(); i++) {
+                var c = input.charAt(i);
+                if (c == ')' && depth == 0) {
+                    paramEnd = i;
+                    break;
+                } else {
+                    if (c == '(') depth++;
+                    if (c == ')') depth--;
+                }
+            }
 
             var name = slice(input, "def ".length(), paramStart);
             var typeSeparator = input.indexOf(':', paramEnd);
@@ -55,7 +67,13 @@ public record MagmaCCompiler(String input) {
             var value = slice(input, valueSeparator + "=>".length(), input.length());
             return outputType + "(" + paramsOutput + ")" + value;
         }
-        return "";
+
+        try {
+            Integer.parseInt(input);
+            return input;
+        } catch (NumberFormatException e) {
+            return "";
+        }
     }
 
     private String lexTypeString(String input, String suffix) {
