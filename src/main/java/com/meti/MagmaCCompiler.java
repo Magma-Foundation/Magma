@@ -68,7 +68,8 @@ public record MagmaCCompiler(String input) {
 
         var paramsOutput = String.join(",", output);
         var value = slice(input, valueSeparator + "=>".length(), input.length());
-        return outputType + "(" + paramsOutput + ")" + value;
+        var compiledValue = compileNode(value);
+        return outputType + "(" + paramsOutput + ")" + compiledValue;
     }
 
     private String compileNode(String input) {
@@ -96,7 +97,7 @@ public record MagmaCCompiler(String input) {
             Integer.parseInt(input);
             return input;
         } catch (NumberFormatException e) {
-            return "";
+            return input;
         }
     }
 
