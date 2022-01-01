@@ -28,44 +28,52 @@ public record MagmaCCompiler(String input) {
         return output.toString();
     }
 
+    private String compileFunction(String input) {
+        var paramStart = input.indexOf('(');
+
+        var depth = 0;
+        var paramEnd = -1;
+        for (int i = paramStart + 1; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ')' && depth == 0) {
+                paramEnd = i;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+
+        var name = slice(input, "def ".length(), paramStart);
+        var typeSeparator = input.indexOf(':', paramEnd);
+        var valueSeparator = input.lastIndexOf("=>");
+        var inputType = slice(input, typeSeparator + 1, valueSeparator);
+        var outputType = lexTypeString(inputType, name);
+
+        var parameterString = slice(input, paramStart + 1, paramEnd);
+        var parameters = parameterString.split(",");
+        var output = new ArrayList<String>();
+        for (String parameter : parameters) {
+            if (!parameter.isBlank()) {
+                var separator = parameter.indexOf(':');
+                var paramName = slice(parameter, 0, separator);
+                var paramType = slice(parameter, separator + 1, parameter.length());
+                output.add(lexTypeString(paramType, paramName));
+            }
+        }
+
+        var paramsOutput = String.join(",", output);
+        var value = slice(input, valueSeparator + "=>".length(), input.length());
+        return outputType + "(" + paramsOutput + ")" + value;
+    }
+
     private String compileNode(String input) {
-        if (input.startsWith("def ")) {
-            var paramStart = input.indexOf('(');
-
-            var depth = 0;
-            var paramEnd = -1;
-            for (int i = paramStart + 1; i < input.length(); i++) {
-                var c = input.charAt(i);
-                if (c == ')' && depth == 0) {
-                    paramEnd = i;
-                    break;
-                } else {
-                    if (c == '(') depth++;
-                    if (c == ')') depth--;
-                }
-            }
-
-            var name = slice(input, "def ".length(), paramStart);
-            var typeSeparator = input.indexOf(':', paramEnd);
-            var valueSeparator = input.lastIndexOf("=>");
-            var inputType = slice(input, typeSeparator + 1, valueSeparator);
-            var outputType = lexTypeString(inputType, name);
-
-            var parameterString = slice(input, paramStart + 1, paramEnd);
-            var parameters = parameterString.split(",");
-            var output = new ArrayList<String>();
-            for (String parameter : parameters) {
-                if (!parameter.isBlank()) {
-                    var separator = parameter.indexOf(':');
-                    var paramName = slice(parameter, 0, separator);
-                    var paramType = slice(parameter, separator + 1, parameter.length());
-                    output.add(lexTypeString(paramType, paramName));
-                }
-            }
-
-            var paramsOutput = String.join(",", output);
-            var value = slice(input, valueSeparator + "=>".length(), input.length());
-            return outputType + "(" + paramsOutput + ")" + value;
+        if (input.startsWith("return ")) {
+            var value = slice(input, "return ".length(), input.length());
+            var compiled = compileNode(value);
+            return "return " + compiled + ";";
+        } else if (input.startsWith("def ")) {
+            return compileFunction(input);
         }
 
         try {

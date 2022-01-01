@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MagmaCCompilerTest {
     @Test
-    void integer(){
-        assertCompile("420", "420");
+    void empty() {
+        assertCompile("def empty() : Void => {}", "void empty(){}");
     }
 
     @Test
-    void empty() {
-        assertCompile("def empty() : Void => {}", "void empty(){}");
+    void empty_block() {
+        assertCompile("{}", "{}");
     }
 
     @Test
@@ -24,6 +24,17 @@ class MagmaCCompilerTest {
     @Test
     void functional_parameter() {
         assertCompile("def consumer(value : () => Void) : Void => {}", "void consumer(void (*value())){}");
+    }
+
+    @Test
+    void integer() {
+        assertCompile("420", "420");
+    }
+
+    private void assertCompile(String input, String output) {
+        var actual = new MagmaCCompiler(input)
+                .compile();
+        assertEquals(output, actual);
     }
 
     @Test
@@ -42,10 +53,9 @@ class MagmaCCompilerTest {
         assertCompile("def wrapper(value : I16) : I16 => {return value;}", "int wrapper(int value){return value;}");
     }
 
-    private void assertCompile(String input, String output) {
-        var actual = new MagmaCCompiler(input)
-                .compile();
-        assertEquals(output, actual);
+    @Test
+    void returns() {
+        assertCompile("return 420", "return 420;");
     }
 
     @Test
