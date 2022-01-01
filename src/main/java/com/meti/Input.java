@@ -1,6 +1,10 @@
 package com.meti;
 
 public record Input(String input) {
+    public Input(String input) {
+        this.input = input.trim();
+    }
+
     char apply(int i) {
         return input.charAt(i);
     }
@@ -42,7 +46,7 @@ public record Input(String input) {
     }
 
     Input slice(int start, int end) {
-        return new Input(input.substring(start, end).trim());
+        return new Input(input.substring(start, end));
     }
 
     boolean startsWith(String s) {
