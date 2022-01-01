@@ -6,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MagmaCCompilerTest {
     @Test
+    void one_parameter(){
+        assertCompile("def wrapper(value : I16) : I16 => {return value;}", "int wrapper(int value){return value;}");
+    }
+
+    @Test
     void empty() {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }

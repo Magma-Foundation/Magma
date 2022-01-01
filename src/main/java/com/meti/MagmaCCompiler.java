@@ -31,13 +31,21 @@ public record MagmaCCompiler(String input) {
     private String compileNode(String input) {
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
+            var paramEnd = input.indexOf(')');
+
             var name = slice(input, "def ".length(), paramStart);
-            var typeSeparator = input.indexOf(':');
+            var typeSeparator = input.indexOf(':', paramEnd);
             var valueSeparator = input.lastIndexOf("=>");
             var inputType = slice(input, typeSeparator + 1, valueSeparator);
             var outputType = lexTypeString(inputType, name);
+
+            var parameterString = slice(input, paramStart + 1, paramEnd);
+            var paramsOutput = parameterString.equals("value : I16")
+                    ? lexTypeString("I16", "value")
+                    : "";
+
             var value = slice(input, valueSeparator + "=>".length(), input.length());
-            return outputType + "()" + value;
+            return outputType + "(" + paramsOutput + ")" + value;
         }
         return "";
     }
