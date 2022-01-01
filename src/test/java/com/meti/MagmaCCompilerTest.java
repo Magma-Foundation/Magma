@@ -31,6 +31,13 @@ class MagmaCCompilerTest {
     }
 
     @Test
+    void function_type_with_parameters() {
+        assertCompile("def empty(value : I16) : Void => {};" +
+                      "def main() : (I16) => Void => {return empty;}",
+                "void empty(int value){}void (*main(int))(){return empty;}");
+    }
+
+    @Test
     void functional_parameter() {
         assertCompile("def consumer(value : () => Void) : Void => {}", "void consumer(void (*value())){}");
     }

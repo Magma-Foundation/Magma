@@ -12,6 +12,6 @@ public class Input {
     }
 
     Input slice(int start, int end) {
-        return new Input(getInput().substring(start, end).trim());
+        return new Input(input.substring(start, end).trim());
     }
 }
