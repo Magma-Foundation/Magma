@@ -22,12 +22,10 @@ public class ApplicationTest {
         assertEquals("int main(){return 0;}", Files.readString(Target));
     }
 
-    private void run() throws IOException {
+    private static void run() throws IOException {
         if (Files.exists(Source)) {
             var input = Files.readString(Source);
-            var output = input.equals("def main() : I16 => {return 0;}")
-                    ? "int main(){return 0;}"
-                    : "";
+            var output = new Compiler(input).compile();
             Files.writeString(Target, output);
         }
     }
