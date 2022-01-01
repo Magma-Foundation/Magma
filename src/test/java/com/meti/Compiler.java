@@ -34,10 +34,19 @@ public record Compiler(String input) {
             var name = input.substring("def ".length(), paramStart).trim();
             var typeSeparator = input.indexOf(':');
             var valueSeparator = input.indexOf("=>");
-            var inputType = input.substring(typeSeparator + 1, valueSeparator).trim();
-            var outputType = inputType.equals("I16") ? "int" : "unsigned int";
-            return outputType + " " + name + "(){return 0;}";
+            var inputType = slice(input, typeSeparator, 1, valueSeparator);
+            var outputType = switch (inputType) {
+                case "I16" -> "int";
+                case "U16" -> "unsigned int";
+                default -> "void";
+            };
+            var value = slice(input, valueSeparator, "=>".length(), input.length());
+            return outputType + " " + name + "()" + value;
         }
         return "";
+    }
+
+    private String slice(String input, int valueSeparator, int length, int length2) {
+        return input.substring(valueSeparator + length, length2).trim();
     }
 }
