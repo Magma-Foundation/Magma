@@ -1,5 +1,6 @@
 package com.meti;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,9 +17,10 @@ public class ApplicationTest {
     private static final Path Source = Root.resolve("index.mg");
 
     @Test
-    void test() throws IOException {
+    void creates_target() throws IOException {
+        Files.createFile(Source);
         run();
-        assertFalse(Files.exists(Target));
+        assertTrue(Files.exists(Target));
     }
 
     private void run() throws IOException {
@@ -28,9 +30,14 @@ public class ApplicationTest {
     }
 
     @Test
-    void test1() throws IOException {
-        Files.createFile(Source);
+    void does_not_create_target() throws IOException {
         run();
-        assertTrue(Files.exists(Target));
+        assertFalse(Files.exists(Target));
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Target);
     }
 }
