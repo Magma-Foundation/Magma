@@ -4,6 +4,15 @@ import java.util.ArrayList;
 
 public record MagmaCCompiler(String input) {
     String compile() {
+        var lines = split(input);
+        var output = new StringBuilder();
+        for (String line : lines) {
+            output.append(compileNode(line));
+        }
+        return output.toString();
+    }
+
+    private ArrayList<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -20,12 +29,7 @@ public record MagmaCCompiler(String input) {
         }
         lines.add(buffer.toString().trim());
         lines.removeIf(String::isEmpty);
-
-        var output = new StringBuilder();
-        for (String line : lines) {
-            output.append(compileNode(line));
-        }
-        return output.toString();
+        return lines;
     }
 
     private String compileFunction(String input) {
@@ -68,11 +72,23 @@ public record MagmaCCompiler(String input) {
     }
 
     private String compileNode(String input) {
+        if (input.startsWith("{") && input.endsWith("}")) {
+            var linesString = input.substring(1, input.length() - 1);
+            var lines = split(linesString);
+            var output = new StringBuilder();
+            for (String line : lines) {
+                output.append(compileNode(line));
+            }
+            return "{" + output + "}";
+        }
+
         if (input.startsWith("return ")) {
             var value = slice(input, "return ".length(), input.length());
             var compiled = compileNode(value);
             return "return " + compiled + ";";
-        } else if (input.startsWith("def ")) {
+        }
+
+        if (input.startsWith("def ")) {
             return compileFunction(input);
         }
 

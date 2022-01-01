@@ -10,6 +10,12 @@ class MagmaCCompilerTest {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }
 
+    private void assertCompile(String input, String output) {
+        var actual = new MagmaCCompiler(input)
+                .compile();
+        assertEquals(output, actual);
+    }
+
     @Test
     void empty_block() {
         assertCompile("{}", "{}");
@@ -27,14 +33,13 @@ class MagmaCCompilerTest {
     }
 
     @Test
-    void integer() {
-        assertCompile("420", "420");
+    void grandparent() {
+        assertCompile("{{}}", "{{}}");
     }
 
-    private void assertCompile(String input, String output) {
-        var actual = new MagmaCCompiler(input)
-                .compile();
-        assertEquals(output, actual);
+    @Test
+    void integer() {
+        assertCompile("420", "420");
     }
 
     @Test
@@ -49,6 +54,11 @@ class MagmaCCompilerTest {
     }
 
     @Test
+    void one_line() {
+        assertCompile("{420}", "{420}");
+    }
+
+    @Test
     void one_parameter() {
         assertCompile("def wrapper(value : I16) : I16 => {return value;}", "int wrapper(int value){return value;}");
     }
@@ -56,6 +66,11 @@ class MagmaCCompilerTest {
     @Test
     void returns() {
         assertCompile("return 420", "return 420;");
+    }
+
+    @Test
+    void two_lines() {
+        assertCompile("{420;69}", "{42069}");
     }
 
     @Test
