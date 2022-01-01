@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CompilerTest {
+class MagmaCCompilerTest {
     @Test
     void empty() {
         assertCompile("def empty() : Void => {}", "void empty(){}");
@@ -17,7 +17,7 @@ class CompilerTest {
     }
 
     private void assertCompile(String input, String output) {
-        var actual = new Compiler(input)
+        var actual = new MagmaCCompiler(input)
                 .compile();
         assertEquals(output, actual);
     }

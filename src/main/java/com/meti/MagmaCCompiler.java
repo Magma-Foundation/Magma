@@ -2,7 +2,7 @@ package com.meti;
 
 import java.util.ArrayList;
 
-public record Compiler(String input) {
+public record MagmaCCompiler(String input) {
     String compile() {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
