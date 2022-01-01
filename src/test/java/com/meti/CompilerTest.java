@@ -1,15 +1,23 @@
 package com.meti;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompilerTest {
     @Test
     void name() {
-        var output = new Compiler("def supplier() : I16 => {return 0;}")
+        assertCompile("def supplier() : I16 => {return 0;}", "int supplier(){return 0;}");
+    }
+
+    private void assertCompile(String input, String output) {
+        var actual = new Compiler(input)
                 .compile();
-        assertEquals("int supplier(){return 0;}", output);
+        assertEquals(output, actual);
+    }
+
+    @Test
+    void type() {
+        assertCompile("def main() : U16 => {return 0;}", "unsigned int main(){return 0;}");
     }
 }
