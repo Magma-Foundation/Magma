@@ -1,8 +1,44 @@
-struct String {
+import native "string";
+
+native def strlen(value : Ref[I8]) : Size;
+
+struct IndexError {
+    index : Size;
+    length : Size;
 }
 
-out def StringConstructor(value : Ref[I8]) : String => {
-    return [String]{};
+trait String {
+    length : Size;
+
+    callable apply : Size => I8 ? IndexError;
+}
+
+out def StringConstructor(value : Ref[I8]) => [String](value){
+    length : strlen(value),
+    apply : index => index < length
+        ? *(value + index)
+        : throw [IndexError]{ index, length }
+};
+
+import native "stdlib";
+
+native def malloc(size : Size) : Ref[Any];
+
+native def free(block : Ref[Any]) : Void;
+
+out def StringDeconstructor(value : String) : Ref[I8] => {
+    const { length } = value;
+    const block = malloc(length * I8.size);
+
+    for(let i = 0; i < length; i++) {
+        let element =
+            try value(i)
+            catch(error : IndexError) '?';
+
+        *(block + i) = element;
+    }
+
+    return block;
 }
 
 import native "stdio";
