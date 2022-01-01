@@ -3,11 +3,11 @@ package com.meti;
 import java.util.ArrayList;
 
 public record MagmaCCompiler(String input) {
-    String compile() {
+    String compile() throws CompileException {
         var lines = split(input);
         var output = new StringBuilder();
         for (String line : lines) {
-            output.append(compileNode(line));
+            output.append(lexNode(line));
         }
         return output.toString();
     }
@@ -32,7 +32,7 @@ public record MagmaCCompiler(String input) {
         return lines;
     }
 
-    private String compileFunction(String input) {
+    private String compileFunction(String input) throws LexException {
         var paramStart = input.indexOf('(');
 
         var depth = 0;
@@ -68,24 +68,24 @@ public record MagmaCCompiler(String input) {
 
         var paramsOutput = String.join(",", output);
         var value = slice(input, valueSeparator + "=>".length(), input.length());
-        var compiledValue = compileNode(value);
+        var compiledValue = lexNode(value);
         return outputType + "(" + paramsOutput + ")" + compiledValue;
     }
 
-    private String compileNode(String input) {
+    private String lexNode(String input) throws LexException {
         if (input.startsWith("{") && input.endsWith("}")) {
             var linesString = input.substring(1, input.length() - 1);
             var lines = split(linesString);
             var output = new StringBuilder();
             for (String line : lines) {
-                output.append(compileNode(line));
+                output.append(lexNode(line));
             }
             return "{" + output + "}";
         }
 
         if (input.startsWith("return ")) {
             var value = slice(input, "return ".length(), input.length());
-            var compiled = compileNode(value);
+            var compiled = lexNode(value);
             return "return " + compiled + ";";
         }
 
@@ -101,7 +101,7 @@ public record MagmaCCompiler(String input) {
         }
     }
 
-    private String lexTypeString(String input, String suffix) {
+    private String lexTypeString(String input, String suffix) throws LexException {
         var separator = input.indexOf("=>");
         if (separator != -1) {
             var returnType = slice(input, separator + "=>".length(), input.length());
@@ -110,7 +110,8 @@ public record MagmaCCompiler(String input) {
         return switch (input) {
             case "I16" -> "int";
             case "U16" -> "unsigned int";
-            default -> "void";
+            case "Void" -> "void";
+            default -> throw new LexException("Unknown type: " + input);
         } + " " + suffix;
     }
 

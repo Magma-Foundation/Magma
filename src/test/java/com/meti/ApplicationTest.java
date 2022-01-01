@@ -18,27 +18,35 @@ public class ApplicationTest {
     @Test
     void content() throws IOException {
         Files.writeString(Source, "def main() : I16 => {return 0;}");
-        new Application(Source).run();
+        runImpl();
         assertEquals("int main(){return 0;}", Files.readString(Target));
+    }
+
+    private void runImpl() {
+        try {
+            new Application(Source).run();
+        } catch (ApplicationException e) {
+            fail(e);
+        }
     }
 
     @Test
     void creates_target() throws IOException {
         Files.createFile(Source);
-        new Application(Source).run();
+        runImpl();
         assertTrue(Files.exists(Target));
     }
 
     @Test
-    void does_not_create_target() throws IOException {
-        new Application(Source).run();
+    void does_not_create_target() {
+        runImpl();
         assertFalse(Files.exists(Target));
     }
 
     @Test
     void empty() throws IOException {
         Files.writeString(Source, "");
-        new Application(Source).run();
+        runImpl();
         assertEquals("", Files.readString(Target));
     }
 
