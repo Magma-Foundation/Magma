@@ -10,6 +10,12 @@ class CompilerTest {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }
 
+    @Test
+    void function_type() {
+        assertCompile("def empty() : Void => {};def main() : () => Void => {return empty;}",
+                "void empty(){}void (*main())(){return empty;}");
+    }
+
     private void assertCompile(String input, String output) {
         var actual = new Compiler(input)
                 .compile();

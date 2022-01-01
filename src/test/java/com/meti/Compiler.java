@@ -31,22 +31,31 @@ public record Compiler(String input) {
     private String compileNode(String input) {
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
-            var name = input.substring("def ".length(), paramStart).trim();
+            var name = slice(input, "def ".length(), paramStart);
             var typeSeparator = input.indexOf(':');
-            var valueSeparator = input.indexOf("=>");
-            var inputType = slice(input, typeSeparator, 1, valueSeparator);
-            var outputType = switch (inputType) {
-                case "I16" -> "int";
-                case "U16" -> "unsigned int";
-                default -> "void";
-            };
-            var value = slice(input, valueSeparator, "=>".length(), input.length());
-            return outputType + " " + name + "()" + value;
+            var valueSeparator = input.lastIndexOf("=>");
+            var inputType = slice(input, typeSeparator + 1, valueSeparator);
+            var outputType = lexTypeString(inputType, name);
+            var value = slice(input, valueSeparator + "=>".length(), input.length());
+            return outputType + "()" + value;
         }
         return "";
     }
 
-    private String slice(String input, int valueSeparator, int length, int length2) {
-        return input.substring(valueSeparator + length, length2).trim();
+    private String lexTypeString(String input, String suffix) {
+        var separator = input.indexOf("=>");
+        if (separator != -1) {
+            var returnType = slice(input, separator + "=>".length(), input.length());
+            return lexTypeString(returnType, "(*" + suffix + "())");
+        }
+        return switch (input) {
+            case "I16" -> "int";
+            case "U16" -> "unsigned int";
+            default -> "void";
+        } + " " + suffix;
+    }
+
+    private String slice(String input, int start, int end) {
+        return input.substring(start, end).trim();
     }
 }
