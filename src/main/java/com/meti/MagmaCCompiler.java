@@ -7,18 +7,18 @@ public record MagmaCCompiler(String input) {
         var lines = split(input);
         var output = new StringBuilder();
         for (String line : lines) {
-            output.append(lexNode(line));
+            output.append(lexNode(new Input(line)));
         }
         return output.toString();
     }
 
-    private String compileFunction(String input) throws LexException {
-        var paramStart = input.indexOf('(');
+    private String compileFunction(Input input) throws LexException {
+        var paramStart = input.firstIndexOfChar('(');
 
         var depth = 0;
         var paramEnd = -1;
         for (int i = paramStart + 1; i < input.length(); i++) {
-            var c = input.charAt(i);
+            var c = input.apply(i);
             if (c == ')' && depth == 0) {
                 paramEnd = i;
                 break;
@@ -28,60 +28,45 @@ public record MagmaCCompiler(String input) {
             }
         }
 
-        var name = new Input(input).slice("def ".length(), paramStart).getInput();
-        var typeSeparator = input.indexOf(':', paramEnd);
-        var valueSeparator = input.lastIndexOf("=>");
-        var inputType = new Input(input).slice(typeSeparator + 1, valueSeparator).getInput();
-        var outputType = lexField(new Input(inputType), name);
+        var name = input.slice("def ".length(), paramStart);
+        var typeSeparator = input.firstIndexOfCharFrom(':', paramEnd);
+        var valueSeparator = input.lastIndexOfString();
+        var inputType = input.slice(typeSeparator + 1, valueSeparator);
+        var outputType = lexField(inputType, name);
 
-        var parameterString = new Input(input).slice(paramStart + 1, paramEnd).getInput();
+        var parameterString = input
+                .slice(paramStart + 1, paramEnd)
+                .compute();
+
         var parameters = parameterString.split(",");
         var output = new ArrayList<String>();
         for (String parameter : parameters) {
             if (!parameter.isBlank()) {
                 var separator = parameter.indexOf(':');
-                var paramName = new Input(parameter).slice(0, separator).getInput();
-                var paramType = new Input(parameter).slice(separator + 1, parameter.length()).getInput();
-                output.add(lexField(new Input(paramType), paramName));
+                var input1 = new Input(parameter);
+                var paramName = input1.slice(0, separator);
+                var paramType = input1.slice(separator + 1, parameter.length());
+                output.add(lexField(paramType, paramName));
             }
         }
 
         var paramsOutput = String.join(",", output);
-        var value = new Input(input).slice(valueSeparator + "=>".length(), input.length()).getInput();
+        var value = input.sliceToEnd(valueSeparator + "=>".length());
         var compiledValue = lexNode(value);
         return outputType + "(" + paramsOutput + ")" + compiledValue;
     }
 
-    private String lexNode(String input) throws LexException {
-        if (input.startsWith("{") && input.endsWith("}")) {
-            var linesString = input.substring(1, input.length() - 1);
-            var lines = split(linesString);
-            var output = new StringBuilder();
-            for (String line : lines) {
-                output.append(lexNode(line));
-            }
-            return "{" + output + "}";
+    private String lexBlock(Input input) throws LexException {
+        var linesString = input.slice(1, input.length() - 1);
+        var lines = split(linesString.compute());
+        var output = new StringBuilder();
+        for (String line : lines) {
+            output.append(lexNode(new Input(line)));
         }
-
-        if (input.startsWith("return ")) {
-            var value = new Input(input).slice("return ".length(), input.length()).getInput();
-            var compiled = lexNode(value);
-            return "return " + compiled + ";";
-        }
-
-        if (input.startsWith("def ")) {
-            return compileFunction(input);
-        }
-
-        try {
-            Integer.parseInt(input);
-            return input;
-        } catch (NumberFormatException e) {
-            return input;
-        }
+        return "{" + output + "}";
     }
 
-    private String lexField(Input input, String suffix) throws LexException {
+    private String lexField(Input input, Input suffix) throws LexException {
         var separator = input.firstIndexOfSlice();
         if (separator != -1) {
             var paramStart = input.firstIndexOfChar('(');
@@ -91,18 +76,45 @@ public record MagmaCCompiler(String input) {
             if (paramType.isEmpty()) {
                 parameter = "";
             } else {
-                parameter = lexField(paramType, "");
+                parameter = lexField(paramType, new Input(""));
             }
 
             var slice = input.sliceToEnd(separator + "=>".length());
-            return lexField(slice, "(*" + suffix + "(" + parameter.trim() + "))");
+            return lexField(slice, new Input("(*" + suffix.compute() + "(" + parameter.trim() + "))"));
         }
-        return switch (input.getInput()) {
+        return switch (input.compute()) {
             case "I16" -> "int";
             case "U16" -> "unsigned int";
             case "Void" -> "void";
-            default -> throw new LexException("Unknown type: " + input.getInput());
-        } + " " + suffix;
+            default -> throw new LexException("Unknown type: " + input.compute());
+        } + " " + suffix.compute();
+    }
+
+    private String lexNode(Input input) throws LexException {
+        if (input.startsWith("{") && input.endsWith()) {
+            return lexBlock(input);
+        }
+
+        if (input.startsWith("return ")) {
+            return lexReturn(input);
+        }
+
+        if (input.startsWith("def ")) {
+            return compileFunction(input);
+        }
+
+        try {
+            Integer.parseInt(input.compute());
+            return input.compute();
+        } catch (NumberFormatException e) {
+            return input.compute();
+        }
+    }
+
+    private String lexReturn(Input input) throws LexException {
+        var value = input.sliceToEnd("return ".length());
+        var compiled = lexNode(value);
+        return "return " + compiled + ";";
     }
 
     private ArrayList<String> split(String input) {
