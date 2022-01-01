@@ -28,26 +28,26 @@ public record MagmaCCompiler(String input) {
             }
         }
 
-        var name = new Input(input).slice("def ".length(), paramStart);
+        var name = new Input(input).slice("def ".length(), paramStart).getInput();
         var typeSeparator = input.indexOf(':', paramEnd);
         var valueSeparator = input.lastIndexOf("=>");
-        var inputType = new Input(input).slice(typeSeparator + 1, valueSeparator);
+        var inputType = new Input(input).slice(typeSeparator + 1, valueSeparator).getInput();
         var outputType = lexField(new Input(inputType), name);
 
-        var parameterString = new Input(input).slice(paramStart + 1, paramEnd);
+        var parameterString = new Input(input).slice(paramStart + 1, paramEnd).getInput();
         var parameters = parameterString.split(",");
         var output = new ArrayList<String>();
         for (String parameter : parameters) {
             if (!parameter.isBlank()) {
                 var separator = parameter.indexOf(':');
-                var paramName = new Input(parameter).slice(0, separator);
-                var paramType = new Input(parameter).slice(separator + 1, parameter.length());
+                var paramName = new Input(parameter).slice(0, separator).getInput();
+                var paramType = new Input(parameter).slice(separator + 1, parameter.length()).getInput();
                 output.add(lexField(new Input(paramType), paramName));
             }
         }
 
         var paramsOutput = String.join(",", output);
-        var value = new Input(input).slice(valueSeparator + "=>".length(), input.length());
+        var value = new Input(input).slice(valueSeparator + "=>".length(), input.length()).getInput();
         var compiledValue = lexNode(value);
         return outputType + "(" + paramsOutput + ")" + compiledValue;
     }
@@ -64,7 +64,7 @@ public record MagmaCCompiler(String input) {
         }
 
         if (input.startsWith("return ")) {
-            var value = new Input(input).slice("return ".length(), input.length());
+            var value = new Input(input).slice("return ".length(), input.length()).getInput();
             var compiled = lexNode(value);
             return "return " + compiled + ";";
         }
@@ -84,8 +84,8 @@ public record MagmaCCompiler(String input) {
     private String lexField(Input input, String suffix) throws LexException {
         var separator = input.getInput().indexOf("=>");
         if (separator != -1) {
-            var returnType = input.slice(separator + "=>".length(), input.getInput().length());
-            return lexField(input, "(*" + suffix + "())");
+            var slice = input.slice(separator + "=>".length(), input.getInput().length());
+            return lexField(slice, "(*" + suffix + "())");
         }
         return switch (input.getInput()) {
             case "I16" -> "int";
