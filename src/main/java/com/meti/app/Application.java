@@ -12,10 +12,11 @@ public final class Application {
         this.targetDirectory = targetDirectory;
     }
 
-    public Stream<File> run() throws ApplicationException {
+    public ApplicationDetails run() throws ApplicationException {
         try {
-            return sourceDirectory.stream()
-                    .map(this::compileSource);
+            return new ApplicationDetails(sourceDirectory.stream()
+                    .map(this::compileSource)
+                    .foldRight(new ArrayList<>(), ArrayList::add));
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
