@@ -11,6 +11,11 @@ class MagmaCCompilerTest {
     }
 
     @Test
+    void two_parameters(){
+        assertCompile("def Point(x : I16, y : I16) : Void => {}", "void Point(int x,int y){}");
+    }
+
+    @Test
     void empty() {
         assertCompile("def empty() : Void => {}", "void empty(){}");
     }

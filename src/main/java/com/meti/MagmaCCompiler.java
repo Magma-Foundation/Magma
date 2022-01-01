@@ -40,10 +40,18 @@ public record MagmaCCompiler(String input) {
             var outputType = lexTypeString(inputType, name);
 
             var parameterString = slice(input, paramStart + 1, paramEnd);
-            var paramsOutput = parameterString.equals("value : I16")
-                    ? lexTypeString("I16", "value")
-                    : "";
+            var parameters = parameterString.split(",");
+            var output = new ArrayList<String>();
+            for (String parameter : parameters) {
+                if (!parameter.isBlank()) {
+                    var separator = parameter.indexOf(':');
+                    var paramName = slice(parameter, 0, separator);
+                    var paramType = slice(parameter, separator + 1, parameter.length());
+                    output.add(lexTypeString(paramType, paramName));
+                }
+            }
 
+            var paramsOutput = String.join(",", output);
             var value = slice(input, valueSeparator + "=>".length(), input.length());
             return outputType + "(" + paramsOutput + ")" + value;
         }
