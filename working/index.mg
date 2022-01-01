@@ -46,7 +46,9 @@ import native "stdio";
 native def printf(format : String, args : Any...) : Void;
 
 def print(value : String) => {
-    printf("%s", value);
+    const copy = StringDeconstructor(value);
+    printf("%s", copy);
+    free(copy);
 }
 
 def describe(name : String, action : () => Void) => {
