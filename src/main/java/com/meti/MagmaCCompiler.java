@@ -32,7 +32,7 @@ public record MagmaCCompiler(String input) {
         var typeSeparator = input.firstIndexOfCharFrom(':', paramEnd);
         var valueSeparator = input.lastIndexOfString();
         var inputType = input.slice(typeSeparator + 1, valueSeparator);
-        var outputType = lexField(inputType, name);
+        var outputType = compileField(inputType, name);
 
         var parameterString = input
                 .slice(paramStart + 1, paramEnd)
@@ -46,7 +46,7 @@ public record MagmaCCompiler(String input) {
                 var input1 = new Input(parameter);
                 var paramName = input1.slice(0, separator);
                 var paramType = input1.slice(separator + 1, parameter.length());
-                output.add(lexField(paramType, paramName));
+                output.add(compileField(paramType, paramName));
             }
         }
 
@@ -66,28 +66,36 @@ public record MagmaCCompiler(String input) {
         return "{" + output + "}";
     }
 
-    private String lexField(Input input, Input suffix) throws LexException {
+    private String compileField(Input input, Input suffix) throws LexException {
         var separator = input.firstIndexOfSlice();
         if (separator != -1) {
-            var paramStart = input.firstIndexOfChar('(');
-            var paramEnd = input.firstIndexOfChar(')');
-            var paramType = input.slice(paramStart + 1, paramEnd);
-            String parameter;
-            if (paramType.isEmpty()) {
-                parameter = "";
-            } else {
-                parameter = lexField(paramType, new Input(""));
-            }
-
-            var slice = input.sliceToEnd(separator + "=>".length());
-            return lexField(slice, new Input("(*" + suffix.compute() + "(" + parameter.trim() + "))"));
+            return compileFunctionType(input, suffix, separator);
         }
+        return compilePrimitiveType(input, suffix);
+    }
+
+    private String compilePrimitiveType(Input input, Input suffix) throws LexException {
         return switch (input.compute()) {
             case "I16" -> "int";
             case "U16" -> "unsigned int";
             case "Void" -> "void";
             default -> throw new LexException("Unknown type: " + input.compute());
         } + " " + suffix.compute();
+    }
+
+    private String compileFunctionType(Input input, Input suffix, int separator) throws LexException {
+        var paramStart = input.firstIndexOfChar('(');
+        var paramEnd = input.firstIndexOfChar(')');
+        var paramType = input.slice(paramStart + 1, paramEnd);
+        String parameter;
+        if (paramType.isEmpty()) {
+            parameter = "";
+        } else {
+            parameter = compileField(paramType, new Input(""));
+        }
+
+        var slice = input.sliceToEnd(separator + "=>".length());
+        return compileField(slice, new Input("(*" + suffix.compute() + "(" + parameter.trim() + "))"));
     }
 
     private String lexNode(Input input) throws LexException {
