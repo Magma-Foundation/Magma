@@ -3,14 +3,7 @@ package com.meti;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class PathSource implements Source {
-    private final NIOPath path;
-    private final List<String> packageList;
-
-    public PathSource(NIOPath path, List<String> packageList) {
-        this.path = path;
-        this.packageList = packageList;
-    }
+public record PathSource(NIOPath path, List<String> packageList) implements Source {
 
     @Override
     public String computeName() {

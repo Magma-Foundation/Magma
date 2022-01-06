@@ -50,10 +50,6 @@ public record NIOPath(Path value) {
         return new NIOPath(value.resolve(name));
     }
 
-    NIOPath resolveSibling(String name) {
-        return new NIOPath(value.resolveSibling(name));
-    }
-
     public Stream<String> streamNames() {
         var list = new ArrayList<String>();
         for (int i = 0; i < value.getNameCount(); i++) {

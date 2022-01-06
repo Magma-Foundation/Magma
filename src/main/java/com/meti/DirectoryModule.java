@@ -1,20 +1,11 @@
 package com.meti;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class DirectoryModule implements Module {
-    private final NIOPath root;
+public record DirectoryModule(NIOPath root) implements Module {
 
-    public DirectoryModule(NIOPath root) {
-        this.root = root;
-    }
-
-    @Override
     public boolean hasSource(String name, List<String> packageList) {
         return packageList.stream()
                 .reduce(root, NIOPath::resolveChild, (previous, next) -> next)

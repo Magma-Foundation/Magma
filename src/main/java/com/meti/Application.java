@@ -4,13 +4,8 @@ import java.io.IOException;
 
 import static com.meti.NIOPath.Root;
 
-public class Application {
+public record Application(Module module) {
     public static final NIOPath Out = Root.resolveChild("out");
-    private final Module module;
-
-    public Application(Module module) {
-        this.module = module;
-    }
 
     void run() throws IOException {
         var sources = module.listSources();

@@ -14,54 +14,14 @@ class NIOPathTest {
     private static final NIOPath Parent = NIOPath.Root.resolveChild("parent");
 
     @Test
-    void computeFileNameWithoutExtension() {
-    }
-
-    @Test
-    void createAsDirectory() {
-    }
-
-    @Test
-    void createAsFile() {
-    }
-
-    @Test
-    void delete() {
-    }
-
-    @Test
-    void deleteAsDirectory() {
-    }
-
-    @Test
-    void exists() {
-    }
-
-    @Test
     void hasExtensionOf() {
         var path = NIOPath.Root.resolveChild("test.ing");
         assertTrue(path.hasExtensionOf("ing"));
     }
 
-    @Test
-    void list() {
-    }
-
-    @Test
-    void resolveChild() {
-    }
-
-    @Test
-    void resolveSibling() {
-    }
-
     @AfterEach
     void tearDown() throws IOException {
         Parent.deleteAsDirectory();
-    }
-
-    @Test
-    void value() {
     }
 
     @Test
