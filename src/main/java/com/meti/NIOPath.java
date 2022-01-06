@@ -3,6 +3,7 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public record NIOPath(Path value) {
@@ -41,8 +42,8 @@ public record NIOPath(Path value) {
         return expected.equals(actual);
     }
 
-    Stream<Path> list() throws IOException {
-        return Files.list(value);
+    public NIOPath relativize(NIOPath path) {
+        return new NIOPath(value.relativize(path.value));
     }
 
     NIOPath resolveChild(String name) {
@@ -51,6 +52,15 @@ public record NIOPath(Path value) {
 
     NIOPath resolveSibling(String name) {
         return new NIOPath(value.resolveSibling(name));
+    }
+
+    public Stream<String> streamNames() {
+        var list = new ArrayList<String>();
+        for (int i = 0; i < value.getNameCount(); i++) {
+            var name = value.getName(i);
+            list.add(name.toString());
+        }
+        return list.stream();
     }
 
     public Stream<NIOPath> walk() throws IOException {

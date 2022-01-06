@@ -1,9 +1,7 @@
 package com.meti;
 
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SingleModule implements Module {
     private final NIOPath path;
@@ -13,9 +11,14 @@ public class SingleModule implements Module {
     }
 
     @Override
-    public List<NIOPath> listSources() {
+    public boolean hasSource(String name, List<String> packageList) {
+        return packageList.isEmpty() && path.computeFileNameWithoutExtension().equals(name + ".mg");
+    }
+
+    @Override
+    public List<Source> listSources() {
         return path.exists()
-                ? List.of(path)
+                ? List.of(new PathSource(path, Collections.emptyList()))
                 : Collections.emptyList();
     }
 }

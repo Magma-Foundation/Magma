@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static com.meti.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,15 +16,15 @@ public class DirectoryApplicationTest {
 
     @Test
     void test() throws IOException {
-        Parent.createAsDirectory();
-        Parent.resolveChild("child.mg").createAsFile();
+        if(!Parent.exists()) Parent.createAsDirectory();
+
+        var child = Parent.resolveChild("child.mg");
+        if(!child.exists()) child.createAsFile();
 
         var module = new DirectoryModule(Parent);
         new Application(module).run();
 
-        assertTrue(Out.resolveChild("parent")
-                .resolveChild("child.c")
-                .exists());
+        assertTrue(Out.resolveChild("child.c").exists());
     }
 
     @AfterEach

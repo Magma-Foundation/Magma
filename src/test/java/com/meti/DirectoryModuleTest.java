@@ -5,11 +5,25 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DirectoryModuleTest {
     private static final NIOPath Parent = NIOPath.Root.resolveChild("parent");
+
+    @Test
+    void hasSource() throws IOException {
+        Parent.createAsDirectory();
+
+        var child = Parent.resolveChild("child.mg");
+        child.createAsFile();
+
+        var module = new DirectoryModule(Parent);
+
+        assertTrue(module.hasSource("child", Collections.emptyList()));
+    }
 
     @Test
     void listSources() throws IOException {
@@ -19,9 +33,10 @@ class DirectoryModuleTest {
         child.createAsFile();
 
         var module = new DirectoryModule(Parent);
-        var sources = module.listSources();
-
-        assertIterableEquals(Collections.singletonList(child), sources);
+        assertTrue(module.listSources()
+                .stream()
+                .map(Source::computeName)
+                .allMatch(name -> module.hasSource(name, Collections.emptyList())));
     }
 
     @Test
@@ -35,9 +50,7 @@ class DirectoryModuleTest {
         grandChild.createAsFile();
 
         var module = new DirectoryModule(Parent);
-        var sources = module.listSources();
-
-        assertIterableEquals(Collections.singletonList(grandChild), sources);
+        assertTrue(module.hasSource("grandChild", List.of("child")));
     }
 
     @AfterEach

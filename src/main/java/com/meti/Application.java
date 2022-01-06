@@ -2,7 +2,10 @@ package com.meti;
 
 import java.io.IOException;
 
+import static com.meti.NIOPath.Root;
+
 public class Application {
+    private static final NIOPath Out = Root.resolveChild("out");
     private final Module module;
 
     public Application(Module module) {
@@ -10,14 +13,20 @@ public class Application {
     }
 
     void run() throws IOException {
-        for (var source : module.listSources()) {
+        var sources = module.listSources();
+        for (var source : sources) {
             compile(source);
         }
     }
 
-    private void compile(NIOPath source) throws IOException {
-        var name = source.computeFileNameWithoutExtension();
-        var target = source.resolveSibling(name + ".c");
+    private void compile(Source source) throws IOException {
+        var name = source.computeName();
+
+        if (!Out.exists()) Out.createAsDirectory();
+        var reduce = source.computePackage().reduce(Out, NIOPath::resolveChild, (previous, next) -> next);
+
+        var target = reduce.resolveChild(name + ".c");
         target.createAsFile();
     }
+
 }
