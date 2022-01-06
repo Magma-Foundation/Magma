@@ -1,23 +1,21 @@
 package com.meti;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SingleModule implements Module {
-    private final Path source;
+    private final NIOPath path;
 
-    public SingleModule(Path source) {
-        this.source = source;
+    public SingleModule(NIOPath path) {
+        this.path = path;
     }
 
     @Override
-    public List<Path> listSources() {
-        return Files.exists(getSource()) ? List.of(getSource()) : Collections.emptyList();
-    }
-
-    public Path getSource() {
-        return source;
+    public List<NIOPath> listSources() {
+        return path.exists()
+                ? List.of(path)
+                : Collections.emptyList();
     }
 }
