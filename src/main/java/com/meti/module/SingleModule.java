@@ -1,8 +1,8 @@
 package com.meti.module;
 
 import com.meti.io.NIOPath;
-import com.meti.PathSource;
-import com.meti.Source;
+import com.meti.source.PathSource;
+import com.meti.source.Source;
 
 import java.util.Collections;
 import java.util.List;

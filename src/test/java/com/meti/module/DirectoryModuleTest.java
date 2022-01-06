@@ -1,7 +1,7 @@
 package com.meti.module;
 
 import com.meti.io.NIOPath;
-import com.meti.Source;
+import com.meti.source.Source;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

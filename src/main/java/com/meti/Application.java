@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.io.NIOPath;
 import com.meti.module.Module;
+import com.meti.source.Source;
 
 import java.io.IOException;
 
