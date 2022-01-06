@@ -9,45 +9,41 @@ public record NIOPath(Path value) {
     static final NIOPath Root = new NIOPath(Paths.get("."));
 
     String computeFileNameWithoutExtension() {
-        var fileName = getValue().getFileName().toString();
+        var fileName = value.getFileName().toString();
         var separator = fileName.indexOf('.');
         return fileName.substring(0, separator);
     }
 
     void createAsDirectory() throws IOException {
-        Files.createDirectory(getValue());
-    }
-
-    void delete() throws IOException {
-        Files.deleteIfExists(getValue());
-    }
-
-    boolean exists() {
-        return Files.exists(getValue());
-    }
-
-    public Path getValue() {
-        return value;
+        Files.createDirectory(value);
     }
 
     void createAsFile() throws IOException {
-        Files.createFile(getValue());
+        Files.createFile(value);
+    }
+
+    void delete() throws IOException {
+        Files.deleteIfExists(value);
     }
 
     void deleteAsDirectory() throws IOException {
-        Files.walkFileTree(getValue(), new DeletingVisitor());
+        Files.walkFileTree(value, new DeletingVisitor());
+    }
+
+    boolean exists() {
+        return Files.exists(value);
     }
 
     Stream<Path> list() throws IOException {
-        return Files.list(getValue());
+        return Files.list(value);
     }
 
     NIOPath resolveChild(String name) {
-        return new NIOPath(getValue().resolve(name));
+        return new NIOPath(value.resolve(name));
     }
 
     NIOPath resolveSibling(String name) {
-        return new NIOPath(getValue().resolveSibling(name));
+        return new NIOPath(value.resolveSibling(name));
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
