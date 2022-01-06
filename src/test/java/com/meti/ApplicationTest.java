@@ -14,22 +14,22 @@ public class ApplicationTest {
     private static final Path Source = NIOPath.Root.resolveChild("index.mg");
     private static final Path Target = NIOPath.Root.resolveChild("index.c");
 
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.deleteIfExists(Source);
-        Files.deleteIfExists(Target);
+    @Test
+    void creates_target() throws IOException {
+        Files.createFile(Source);
+        new Application(Source).run();
+        assertTrue(Files.exists(Target));
     }
 
     @Test
-    void test() throws IOException {
+    void does_not_create_target() throws IOException {
         new Application(Source).run();
         assertFalse(Files.exists(Target));
     }
 
-    @Test
-    void test1() throws IOException {
-        Files.createFile(Source);
-        new Application(Source).run();
-        assertTrue(Files.exists(Target));
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Target);
     }
 }
