@@ -1,0 +1,13 @@
+package com.meti;
+
+import java.io.IOException;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            new Application(new DirectoryModule(NIOPath.Root.resolveChild("src"))).run();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
