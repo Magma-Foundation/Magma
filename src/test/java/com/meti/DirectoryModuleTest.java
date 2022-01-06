@@ -15,13 +15,29 @@ class DirectoryModuleTest {
     void listSources() throws IOException {
         Parent.createAsDirectory();
 
-        var child = Parent.resolveChild("child.mgs");
+        var child = Parent.resolveChild("child.mg");
         child.createAsFile();
 
         var module = new DirectoryModule(Parent);
         var sources = module.listSources();
 
         assertIterableEquals(Collections.singletonList(child), sources);
+    }
+
+    @Test
+    void listSubSources() throws IOException {
+        Parent.createAsDirectory();
+
+        var child = Parent.resolveChild("child");
+        child.createAsDirectory();
+
+        var grandChild = child.resolveChild("grandChild.mg");
+        grandChild.createAsFile();
+
+        var module = new DirectoryModule(Parent);
+        var sources = module.listSources();
+
+        assertIterableEquals(Collections.singletonList(grandChild), sources);
     }
 
     @AfterEach

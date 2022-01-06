@@ -34,6 +34,13 @@ public record NIOPath(Path value) {
         return Files.exists(value);
     }
 
+    public boolean hasExtensionOf(String expected) {
+        var name = value.getFileName().toString();
+        var separator = name.indexOf('.');
+        var actual = name.substring(separator + 1);
+        return expected.equals(actual);
+    }
+
     Stream<Path> list() throws IOException {
         return Files.list(value);
     }
@@ -44,6 +51,10 @@ public record NIOPath(Path value) {
 
     NIOPath resolveSibling(String name) {
         return new NIOPath(value.resolveSibling(name));
+    }
+
+    public Stream<NIOPath> walk() throws IOException {
+        return Files.walk(value).map(NIOPath::new);
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
