@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.io;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

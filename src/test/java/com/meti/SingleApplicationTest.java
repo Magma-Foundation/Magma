@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.io.NIOPath;
+import com.meti.module.SingleModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

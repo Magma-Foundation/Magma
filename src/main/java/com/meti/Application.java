@@ -1,8 +1,11 @@
 package com.meti;
 
+import com.meti.io.NIOPath;
+import com.meti.module.Module;
+
 import java.io.IOException;
 
-import static com.meti.NIOPath.Root;
+import static com.meti.io.NIOPath.Root;
 
 public record Application(Module module) {
     public static final NIOPath Out = Root.resolveChild("out");

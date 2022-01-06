@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.io;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -7,31 +7,31 @@ import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public record NIOPath(Path value) {
-    static final NIOPath Root = new NIOPath(Paths.get("."));
+    public static final NIOPath Root = new NIOPath(Paths.get("."));
 
-    String computeFileNameWithoutExtension() {
+    public String computeFileNameWithoutExtension() {
         var fileName = value.getFileName().toString();
         var separator = fileName.indexOf('.');
         return fileName.substring(0, separator);
     }
 
-    void createAsDirectory() throws IOException {
+    public void createAsDirectory() throws IOException {
         Files.createDirectory(value);
     }
 
-    void createAsFile() throws IOException {
+    public void createAsFile() throws IOException {
         Files.createFile(value);
     }
 
-    void delete() throws IOException {
+    public void delete() throws IOException {
         Files.deleteIfExists(value);
     }
 
-    void deleteAsDirectory() throws IOException {
+    public void deleteAsDirectory() throws IOException {
         Files.walkFileTree(value, new DeletingVisitor());
     }
 
-    boolean exists() {
+    public boolean exists() {
         return Files.exists(value);
     }
 
@@ -46,7 +46,7 @@ public record NIOPath(Path value) {
         return new NIOPath(value.relativize(path.value));
     }
 
-    NIOPath resolveChild(String name) {
+    public NIOPath resolveChild(String name) {
         return new NIOPath(value.resolve(name));
     }
 
