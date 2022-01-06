@@ -14,17 +14,21 @@ public class ApplicationTest {
     private static final Path Target = NIOPath.Root.resolveChild("index.c");
 
     @Test
-    void test() {
+    void test() throws IOException {
+        run();
         assertFalse(Files.exists(Target));
     }
 
     @Test
     void test1() throws IOException {
         Files.createFile(Source);
+        run();
+        assertTrue(Files.exists(Target));
+    }
+
+    private void run() throws IOException {
         if (Files.exists(Source)) {
             Files.createFile(Target);
         }
-
-        assertTrue(Files.exists(Target));
     }
 }
