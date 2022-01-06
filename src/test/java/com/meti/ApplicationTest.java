@@ -17,13 +17,13 @@ public class ApplicationTest {
     @Test
     void creates_target() throws IOException {
         Files.createFile(Source);
-        new Application(Source).run();
+        new Application(new SingleModule(Source)).run();
         assertTrue(Files.exists(Target));
     }
 
     @Test
     void does_not_create_target() throws IOException {
-        new Application(Source).run();
+        new Application(new SingleModule(Source)).run();
         assertFalse(Files.exists(Target));
     }
 

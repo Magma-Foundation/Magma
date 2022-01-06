@@ -5,22 +5,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Application {
-    private final Path source;
+    private final Module module;
 
-    public Application(Path source) {
-        this.source = source;
-    }
-
-    public Path getSource() {
-        return source;
+    public Application(Module module) {
+        this.module = module;
     }
 
     void run() throws IOException {
-        if (Files.exists(getSource())) {
-            var fileName = getSource().getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var name = fileName.substring(0, separator);
-            Files.createFile(getSource().resolveSibling(name + ".c"));
+        var sources = module.listSources();
+
+        for (Path source : sources) {
+            compile(source);
         }
+    }
+
+    private void compile(Path source) throws IOException {
+        var fileName = source.getFileName().toString();
+        var separator = fileName.indexOf('.');
+        var name = fileName.substring(0, separator);
+        Files.createFile(source.resolveSibling(name + ".c"));
     }
 }
