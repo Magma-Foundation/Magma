@@ -4,12 +4,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ApplicationTest {
+public class SingleApplicationTest {
     private static final NIOPath Source = NIOPath.Root.resolveChild("index.mg");
     private static final NIOPath Target = NIOPath.Root.resolveChild("index.c");
 
