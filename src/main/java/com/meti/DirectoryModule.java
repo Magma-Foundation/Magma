@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,9 @@ public class DirectoryModule implements Module {
 
     @Override
     public boolean hasSource(String name, List<String> packageList) {
-        return root.resolveChild(name + ".mg").exists();
+        return packageList.stream()
+                .reduce(root, NIOPath::resolveChild, (previous, next) -> next)
+                .resolveChild(name + ".mg").exists();
     }
 
     @Override

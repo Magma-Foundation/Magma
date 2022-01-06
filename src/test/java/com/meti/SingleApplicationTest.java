@@ -5,12 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static com.meti.Application.Out;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleApplicationTest {
     private static final NIOPath Source = NIOPath.Root.resolveChild("index.mg");
-    private static final NIOPath Target = NIOPath.Root.resolveChild("index.c");
+    private static final NIOPath Target = Out.resolveChild("index.c");
 
     @Test
     void creates_target() throws IOException {
@@ -28,6 +29,6 @@ public class SingleApplicationTest {
     @AfterEach
     void tearDown() throws IOException {
         Source.delete();
-        Target.delete();
+        Out.deleteAsDirectory();
     }
 }

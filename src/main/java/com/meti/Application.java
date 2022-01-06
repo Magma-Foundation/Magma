@@ -5,7 +5,7 @@ import java.io.IOException;
 import static com.meti.NIOPath.Root;
 
 public class Application {
-    private static final NIOPath Out = Root.resolveChild("out");
+    public static final NIOPath Out = Root.resolveChild("out");
     private final Module module;
 
     public Application(Module module) {
@@ -26,7 +26,6 @@ public class Application {
         var reduce = source.computePackage().reduce(Out, NIOPath::resolveChild, (previous, next) -> next);
 
         var target = reduce.resolveChild(name + ".c");
-        target.createAsFile();
+        if (!target.exists()) target.createAsFile();
     }
-
 }
