@@ -1,3 +1,1 @@
-def main() : I16 => {
-    return 0;
-}
+def main() : I16 => {return 0;}
