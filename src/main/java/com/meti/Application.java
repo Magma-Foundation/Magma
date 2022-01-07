@@ -18,13 +18,11 @@ public record Application(Module module) {
         }
     }
 
-    private void compile(Source source) throws IOException {
+    private static void compile(Source source) throws IOException {
         var name = source.computeName();
 
         var input = source.read();
-        var output = input.equals("def main() : I16 => {return 0;}")
-                ? "int main(){return 0;}"
-                : "";
+        var output = new Compiler(input).compile();
 
         Out.ensureAsDirectory();
         source.computePackage()
@@ -33,4 +31,5 @@ public record Application(Module module) {
                 .ensureAsFile()
                 .writeAsString(output);
     }
+
 }
