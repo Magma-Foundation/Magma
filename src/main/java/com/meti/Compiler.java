@@ -2,8 +2,11 @@ package com.meti;
 
 public record Compiler(String input) {
     String compile() {
-        return input.equals("def main() : I16 => {return 0;}")
-                ? "int main(){return 0;}"
-                : "";
+        if(input.startsWith("def ")) {
+            var paramStart = input.indexOf('(');
+            var name = input.substring("def ".length(), paramStart);
+            return "int " + name + "(){return 0;}";
+        }
+        return "";
     }
 }
