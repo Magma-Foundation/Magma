@@ -1,5 +1,9 @@
 package com.meti.io;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -19,8 +23,9 @@ public record NIOPath(Path value) {
         Files.createDirectory(value);
     }
 
-    public void createAsFile() throws IOException {
+    public NIOPath createAsFile() throws IOException {
         Files.createFile(value);
+        return this;
     }
 
     public void delete() throws IOException {
@@ -29,6 +34,21 @@ public record NIOPath(Path value) {
 
     public void deleteAsDirectory() throws IOException {
         Files.walkFileTree(value, new DeletingVisitor());
+    }
+
+    public void ensureAsDirectory() throws IOException {
+        if (!exists()) createAsDirectory();
+    }
+
+    public NIOPath ensureAsFile() throws IOException {
+        if (!exists()) createAsFile();
+        return this;
+    }
+
+    public Option<NIOPath> existing() {
+        return exists()
+                ? new Some<>(this)
+                : new None<>();
     }
 
     public boolean exists() {
@@ -40,6 +60,10 @@ public record NIOPath(Path value) {
         var separator = name.indexOf('.');
         var actual = name.substring(separator + 1);
         return expected.equals(actual);
+    }
+
+    public String readAsString() throws IOException {
+        return Files.readString(value);
     }
 
     public NIOPath relativize(NIOPath path) {
@@ -61,6 +85,10 @@ public record NIOPath(Path value) {
 
     public Stream<NIOPath> walk() throws IOException {
         return Files.walk(value).map(NIOPath::new);
+    }
+
+    public void writeAsString(String value) throws IOException {
+        Files.writeString(this.value, value);
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {

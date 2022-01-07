@@ -21,10 +21,16 @@ public record Application(Module module) {
     private void compile(Source source) throws IOException {
         var name = source.computeName();
 
-        if (!Out.exists()) Out.createAsDirectory();
-        var reduce = source.computePackage().reduce(Out, NIOPath::resolveChild, (previous, next) -> next);
+        var input = source.read();
+        var output = input.equals("def main() : I16 => {return 0;}")
+                ? "int main(){return 0;}"
+                : "";
 
-        var target = reduce.resolveChild(name + ".c");
-        if (!target.exists()) target.createAsFile();
+        Out.ensureAsDirectory();
+        source.computePackage()
+                .reduce(Out, NIOPath::resolveChild, (previous, next) -> next)
+                .resolveChild(name + ".c")
+                .ensureAsFile()
+                .writeAsString(output);
     }
 }

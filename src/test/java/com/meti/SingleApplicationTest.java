@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static com.meti.Application.Out;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleApplicationTest {
     private static final NIOPath Source = NIOPath.Root.resolveChild("index.mg");
@@ -18,19 +17,42 @@ public class SingleApplicationTest {
     @Test
     void creates_target() throws IOException {
         Source.createAsFile();
-        new Application(new SingleModule(Source)).run();
+        runImpl();
         assertTrue(Target.exists());
+    }
+
+    private void runImpl() throws IOException {
+        new Application(new SingleModule(Source)).run();
     }
 
     @Test
     void does_not_create_target() throws IOException {
-        new Application(new SingleModule(Source)).run();
+        runImpl();
         assertFalse(Target.exists());
+    }
+
+    @Test
+    void empty() throws IOException {
+        Source.createAsFile();
+        runImpl();
+        assertTrue(Target.existing()
+                .map(NIOPath::readAsString)
+                .map(String::isBlank)
+                .orElse(false));
     }
 
     @AfterEach
     void tearDown() throws IOException {
         Source.delete();
         Out.deleteAsDirectory();
+    }
+
+    @Test
+    void test_main() throws IOException {
+        Source.createAsFile().writeAsString("def main() : I16 => {return 0;}");
+        runImpl();
+        assertEquals("int main(){return 0;}", Target.existing()
+                .map(NIOPath::readAsString)
+                .orElse(""));
     }
 }
