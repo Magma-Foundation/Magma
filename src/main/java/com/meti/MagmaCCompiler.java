@@ -2,6 +2,9 @@ package com.meti;
 
 public record MagmaCCompiler(String input) {
     private static Node lexNode(String input) {
+        if (input.startsWith("{") && input.endsWith("}")) {
+            return new Content("{}");
+        }
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
             var name = slice(input, "def ".length(), paramStart);

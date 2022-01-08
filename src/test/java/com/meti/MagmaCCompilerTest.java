@@ -22,6 +22,11 @@ class MagmaCCompilerTest {
     }
 
     @Test
+    void empty_block() {
+        assertCompile("{}", "{}");
+    }
+
+    @Test
     void integer() {
         assertCompile("420", "420");
     }
