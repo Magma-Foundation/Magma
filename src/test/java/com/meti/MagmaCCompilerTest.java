@@ -32,6 +32,11 @@ class MagmaCCompilerTest {
     }
 
     @Test
+    void one_line() {
+        assertCompile("{return 420}", "{return 420;}");
+    }
+
+    @Test
     void return_type() {
         assertCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
     }
@@ -39,5 +44,10 @@ class MagmaCCompilerTest {
     @Test
     void returns() {
         assertCompile("return 69", "return 69;");
+    }
+
+    @Test
+    void two_lines() {
+        assertCompile("{return 69;return 420;}", "{return 69;return 420;}");
     }
 }

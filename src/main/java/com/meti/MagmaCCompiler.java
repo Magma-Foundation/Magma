@@ -1,9 +1,17 @@
 package com.meti;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public record MagmaCCompiler(String input) {
     private static Node lexNode(String input) {
         if (input.startsWith("{") && input.endsWith("}")) {
-            return new Content("{}");
+            var lines = slice(input, 1, input.length() - 1).split(";");
+            var values = new ArrayList<Node>();
+            for (String line : lines) {
+                values.add(new Content(line));
+            }
+            return new Block(values);
         }
         if (input.startsWith("def ")) {
             var paramStart = input.indexOf('(');
@@ -33,14 +41,22 @@ public record MagmaCCompiler(String input) {
     }
 
     private static Node lexNodeTree(String input) throws AttributeException {
-        var ast = lexNode(input);
-        if (ast.is(Node.Type.Return)) {
-            var value = ast.getValueAsNode();
+        var node = lexNode(input);
+        if (node.is(Node.Type.Return)) {
+            var value = node.getValueAsNode();
             var valueString = value.getValueAsString();
             var child = lexNode(valueString);
-            return ast.withValue(child);
+            return node.withValue(child);
         }
-        return ast;
+        if (node.is(Node.Type.Block)) {
+            var lines = node.getLinesAsStream().collect(Collectors.toList());
+            var newLines = new ArrayList<Node>();
+            for (Node line : lines) {
+                newLines.add(lexNode(line.getValueAsString()));
+            }
+            return node.withLines(newLines);
+        }
+        return node;
     }
 
     private static String slice(String input, int start, int end) {
@@ -59,6 +75,13 @@ public record MagmaCCompiler(String input) {
             var value = node.getValueAsNode();
             var valueString = renderNode(value);
             withValue = node.withValue(new Content(valueString));
+        } else if (node.is(Node.Type.Block)) {
+            var lines = node.getLinesAsStream().collect(Collectors.toList());
+            var newLines = new ArrayList<Node>();
+            for (Node line : lines) {
+                newLines.add(new Content(renderAST(line)));
+            }
+            withValue = node.withLines(newLines);
         } else {
             withValue = node;
         }
@@ -66,9 +89,17 @@ public record MagmaCCompiler(String input) {
     }
 
     private String renderNode(Node node) throws CompileException {
+        if (node.is(Node.Type.Block)) {
+            var builder = new StringBuilder().append("{");
+            var children = node.getLinesAsStream().collect(Collectors.toList());
+            for (Node node1 : children) {
+                builder.append(node1.getValueAsString());
+            }
+            return builder.append("}").toString();
+        }
         if (node.is(Node.Type.Return)) {
             var child = node.getValueAsNode();
-            var renderedChild = renderAST(child);
+            var renderedChild = child.getValueAsString();
             return "return " + renderedChild + ";";
         } else if (node.is(Node.Type.Content)) {
             return node.getValueAsString();
