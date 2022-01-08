@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 record Return(Node value) implements Node {
     @Override

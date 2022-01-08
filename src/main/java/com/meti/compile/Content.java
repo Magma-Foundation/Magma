@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 public record Content(String value) implements Node {
     @Override

@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.compile.MagmaCCompiler;
 import com.meti.io.NIOPath;
 import com.meti.module.Module;
 import com.meti.source.Source;
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import static com.meti.io.NIOPath.Root;
 

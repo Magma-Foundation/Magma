@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -32,7 +32,7 @@ public record MagmaCCompiler(String input) {
         return node;
     }
 
-    String compile() throws CompileException {
+    public String compile() throws CompileException {
         if (input.isBlank()) return input;
         var root = new Input(this.input);
         var node = lexNodeTree(root);

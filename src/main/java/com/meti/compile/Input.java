@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 public class Input {
     private final String input;
