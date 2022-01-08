@@ -63,14 +63,14 @@ public record MagmaCCompiler(String input) {
         if (node.is(Node.Type.Return)) {
             var value = node.getValueAsNode();
             var valueString = value.getValueAsString();
-            var child = lexNode(valueString);
+            var child = lexNodeTree(valueString);
             return node.withValue(child);
         }
         if (node.is(Node.Type.Block)) {
             var lines = node.getLinesAsStream().collect(Collectors.toList());
             var newLines = new ArrayList<Node>();
             for (Node line : lines) {
-                newLines.add(lexNode(line.getValueAsString()));
+                newLines.add(lexNodeTree(line.getValueAsString()));
             }
             return node.withLines(newLines);
         }
@@ -93,20 +93,20 @@ public record MagmaCCompiler(String input) {
     String compile() throws CompileException {
         if (input.isBlank()) return input;
         var node = lexNodeTree(input);
-        return renderAST(node);
+        return renderNodeTree(node);
     }
 
-    private String renderAST(Node node) throws CompileException {
+    private String renderNodeTree(Node node) throws CompileException {
         Node withValue;
         if (node.is(Node.Type.Return)) {
             var value = node.getValueAsNode();
-            var valueString = renderNode(value);
+            var valueString = renderNodeTree(value);
             withValue = node.withValue(new Content(valueString));
         } else if (node.is(Node.Type.Block)) {
             var lines = node.getLinesAsStream().collect(Collectors.toList());
             var newLines = new ArrayList<Node>();
             for (Node line : lines) {
-                newLines.add(new Content(renderAST(line)));
+                newLines.add(new Content(renderNodeTree(line)));
             }
             withValue = node.withLines(newLines);
         } else {
