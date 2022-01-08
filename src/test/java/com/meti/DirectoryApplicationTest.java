@@ -16,14 +16,14 @@ public class DirectoryApplicationTest {
     private static final NIOPath Out = Root.resolveChild("out");
 
     @Test
-    void test() throws IOException, InterruptedException {
+    void test() throws IOException, ApplicationException {
         if(!Parent.exists()) Parent.createAsDirectory();
 
         var child = Parent.resolveChild("child.mg");
         if(!child.exists()) child.createAsFile();
 
         var module = new DirectoryModule(Parent);
-        new Application(module).run();
+        new BuildingApplication(module).run();
 
         assertTrue(Out.resolveChild("child.c").exists());
     }

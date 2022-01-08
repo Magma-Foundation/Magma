@@ -3,17 +3,22 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-class CompilerTest {
+class MagmaCCompilerTest {
     @Test
     void compile() {
         assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
     }
 
     private void assertCompile(String input, String output) {
-        var compiler = new Compiler(input);
-        var actual = compiler.compile();
-        assertEquals(output, actual);
+        try {
+            var compiler = new MagmaCCompiler(input);
+            var actual = compiler.compile();
+            assertEquals(output, actual);
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test

@@ -21,16 +21,16 @@ public class SingleApplicationTest {
         assertTrue(Target.exists());
     }
 
-    private void runImpl() throws IOException {
+    private void runImpl() {
         try {
-            new Application(new SingleModule(Source)).run();
-        } catch (InterruptedException e) {
+            new BuildingApplication(new SingleModule(Source)).run();
+        } catch (ApplicationException e) {
             fail(e);
         }
     }
 
     @Test
-    void does_not_create_target() throws IOException {
+    void does_not_create_target() {
         runImpl();
         assertFalse(Target.exists());
     }
