@@ -1,43 +1,55 @@
 package com.meti;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+import com.meti.option.Supplier;
+
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
-    private static Node lexNode(String input) {
+    private static Option<Node> lexBlock(String input) {
         if (input.startsWith("{") && input.endsWith("}")) {
             var lines = slice(input, 1, input.length() - 1).split(";");
             var values = new ArrayList<Node>();
             for (String line : lines) {
                 values.add(new Content(line));
             }
-            return new Block(values);
+            return new Some<>(new Block(values));
         }
-        if (input.startsWith("def ")) {
-            var paramStart = input.indexOf('(');
-            var name = slice(input, "def ".length(), paramStart);
-            var typeSeparator = input.indexOf(':');
-            var valueSeparator = input.indexOf("=>");
-            var typeString = slice(input, typeSeparator + 1, valueSeparator);
-            String type;
-            if (typeString.equals("I16")) {
-                type = "int";
-            } else {
-                type = "unsigned int";
+        return new None<>();
+    }
+
+    private static Node lexNode(String input) {
+        Option<Node> values = lexBlock(input);
+        return values.orElseGet(() -> {
+            if (input.startsWith("def ")) {
+                var paramStart = input.indexOf('(');
+                var name = slice(input, "def ".length(), paramStart);
+                var typeSeparator = input.indexOf(':');
+                var valueSeparator = input.indexOf("=>");
+                var typeString = slice(input, typeSeparator + 1, valueSeparator);
+                String type;
+                if (typeString.equals("I16")) {
+                    type = "int";
+                } else {
+                    type = "unsigned int";
+                }
+                return new Content(type + " " + name + "(){return 0;}");
             }
-            return new Content(type + " " + name + "(){return 0;}");
-        }
-        if (input.startsWith("return ")) {
-            var valueString = slice(input, "return ".length(), input.length());
-            var value = new Content(valueString);
-            return new Return(value);
-        }
-        try {
-            Integer.parseInt(input);
-            return new Content(input);
-        } catch (NumberFormatException e) {
-            return new Content("");
-        }
+            if (input.startsWith("return ")) {
+                var valueString = slice(input, "return ".length(), input.length());
+                var value = new Content(valueString);
+                return new Return(value);
+            }
+            try {
+                Integer.parseInt(input);
+                return new Content(input);
+            } catch (NumberFormatException e) {
+                return new Content("");
+            }
+        });
     }
 
     private static Node lexNodeTree(String input) throws AttributeException {
