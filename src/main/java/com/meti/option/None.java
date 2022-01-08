@@ -14,12 +14,22 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> other) {
+        return other;
+    }
+
+    @Override
     public T orElse(T other) {
         return other;
     }
 
     @Override
-    public <E extends Exception> T orElseGet(Supplier<T, E> getter) throws E {
-        return getter.get();
+    public <E extends Exception> T orElseGet(Supplier<T, E> supplier) throws E {
+        return supplier.get();
+    }
+
+    @Override
+    public <E extends Exception> T orElseThrow(Supplier<E, E> supplier) throws E {
+        throw supplier.get();
     }
 }

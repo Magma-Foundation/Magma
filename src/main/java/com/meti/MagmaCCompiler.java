@@ -3,7 +3,6 @@ package com.meti;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
-import com.meti.option.Supplier;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -14,45 +13,52 @@ public record MagmaCCompiler(String input) {
             var lines = slice(input, 1, input.length() - 1).split(";");
             var values = new ArrayList<Node>();
             for (String line : lines) {
-                values.add(new Content(line));
+                if (!line.isBlank()) {
+                    values.add(new Content(line));
+                }
             }
             return new Some<>(new Block(values));
         }
         return new None<>();
     }
 
-    private static Node lexNode(String input) {
-        Option<Node> values = lexBlock(input);
-        return values.orElseGet(() -> {
-            if (input.startsWith("def ")) {
-                var paramStart = input.indexOf('(');
-                var name = slice(input, "def ".length(), paramStart);
-                var typeSeparator = input.indexOf(':');
-                var valueSeparator = input.indexOf("=>");
-                var typeString = slice(input, typeSeparator + 1, valueSeparator);
-                String type;
-                if (typeString.equals("I16")) {
-                    type = "int";
-                } else {
-                    type = "unsigned int";
-                }
-                return new Content(type + " " + name + "(){return 0;}");
+    private static Option<Node> lexFunction(String input) {
+        if (input.startsWith("def ")) {
+            var paramStart = input.indexOf('(');
+            var name = slice(input, "def ".length(), paramStart);
+            var typeSeparator = input.indexOf(':');
+            var valueSeparator = input.indexOf("=>");
+            var typeString = slice(input, typeSeparator + 1, valueSeparator);
+            String type;
+            if (typeString.equals("I16")) {
+                type = "int";
+            } else {
+                type = "unsigned int";
             }
-            if (input.startsWith("return ")) {
-                var valueString = slice(input, "return ".length(), input.length());
-                var value = new Content(valueString);
-                return new Return(value);
-            }
-            try {
-                Integer.parseInt(input);
-                return new Content(input);
-            } catch (NumberFormatException e) {
-                return new Content("");
-            }
-        });
+            return new Some<>(new Content(type + " " + name + "(){return 0;}"));
+        }
+        return new None<>();
     }
 
-    private static Node lexNodeTree(String input) throws AttributeException {
+    private static Option<Node> lexInteger(String input) {
+        try {
+            Integer.parseInt(input);
+            return new Some<>(new Content(input));
+        } catch (NumberFormatException e) {
+            return new None<>();
+        }
+    }
+
+    private static Node lexNode(String input) throws LexException {
+        if (input.isBlank()) throw new LexException("Input may not be empty.");
+        return lexBlock(input)
+                .or(lexFunction(input))
+                .or(lexReturn(input))
+                .or(lexInteger(input))
+                .orElseThrow(() -> new LexException("Unknown input: " + input));
+    }
+
+    private static Node lexNodeTree(String input) throws CompileException {
         var node = lexNode(input);
         if (node.is(Node.Type.Return)) {
             var value = node.getValueAsNode();
@@ -69,6 +75,15 @@ public record MagmaCCompiler(String input) {
             return node.withLines(newLines);
         }
         return node;
+    }
+
+    private static Option<Node> lexReturn(String input) {
+        if (input.startsWith("return ")) {
+            var valueString = slice(input, "return ".length(), input.length());
+            var value = new Content(valueString);
+            return new Some<>(new Return(value));
+        }
+        return new None<>();
     }
 
     private static String slice(String input, int start, int end) {
