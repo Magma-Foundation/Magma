@@ -1,98 +1,41 @@
 package com.meti;
 
-import com.meti.option.None;
-import com.meti.option.Option;
-import com.meti.option.Some;
-
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
-    private static Option<Node> lexBlock(String input) {
-        if (input.startsWith("{") && input.endsWith("}")) {
-            var lines = slice(input, 1, input.length() - 1).split(";");
-            var values = new ArrayList<Node>();
-            for (String line : lines) {
-                if (!line.isBlank()) {
-                    values.add(new Content(line));
-                }
-            }
-            return new Some<>(new Block(values));
-        }
-        return new None<>();
+    private static Node lexNode(Input input) throws LexException {
+        if (input.isEmpty()) throw new LexException("Input may not be empty.");
+        return new BlockLexer(input).lexBlock()
+                .or(new FunctionLexer(input).lexFunction())
+                .or(new ReturnLexer(input).lexReturn())
+                .or(new IntegerLexer(input).lexInteger())
+                .orElseThrow(() -> new LexException("Unknown input: " + input.getInput()));
     }
 
-    private static Option<Node> lexFunction(String input) {
-        if (input.startsWith("def ")) {
-            var paramStart = input.indexOf('(');
-            var name = slice(input, "def ".length(), paramStart);
-            var typeSeparator = input.indexOf(':');
-            var valueSeparator = input.indexOf("=>");
-            var typeString = slice(input, typeSeparator + 1, valueSeparator);
-            String type;
-            if (typeString.equals("I16")) {
-                type = "int";
-            } else {
-                type = "unsigned int";
-            }
-            return new Some<>(new Content(type + " " + name + "(){return 0;}"));
-        }
-        return new None<>();
-    }
-
-    private static Option<Node> lexInteger(String input) {
-        try {
-            Integer.parseInt(input);
-            return new Some<>(new Content(input));
-        } catch (NumberFormatException e) {
-            return new None<>();
-        }
-    }
-
-    private static Node lexNode(String input) throws LexException {
-        if (input.isBlank()) throw new LexException("Input may not be empty.");
-        return lexBlock(input)
-                .or(lexFunction(input))
-                .or(lexReturn(input))
-                .or(lexInteger(input))
-                .orElseThrow(() -> new LexException("Unknown input: " + input));
-    }
-
-    private static Node lexNodeTree(String input) throws CompileException {
+    private static Node lexNodeTree(Input input) throws CompileException {
         var node = lexNode(input);
         if (node.is(Node.Type.Return)) {
             var value = node.getValueAsNode();
             var valueString = value.getValueAsString();
-            var child = lexNodeTree(valueString);
+            var child = lexNodeTree(new Input(valueString));
             return node.withValue(child);
         }
         if (node.is(Node.Type.Block)) {
             var lines = node.getLinesAsStream().collect(Collectors.toList());
             var newLines = new ArrayList<Node>();
             for (Node line : lines) {
-                newLines.add(lexNodeTree(line.getValueAsString()));
+                newLines.add(lexNodeTree(new Input(line.getValueAsString())));
             }
             return node.withLines(newLines);
         }
         return node;
     }
 
-    private static Option<Node> lexReturn(String input) {
-        if (input.startsWith("return ")) {
-            var valueString = slice(input, "return ".length(), input.length());
-            var value = new Content(valueString);
-            return new Some<>(new Return(value));
-        }
-        return new None<>();
-    }
-
-    private static String slice(String input, int start, int end) {
-        return input.substring(start, end).trim();
-    }
-
     String compile() throws CompileException {
         if (input.isBlank()) return input;
-        var node = lexNodeTree(input);
+        var root = new Input(this.input);
+        var node = lexNodeTree(root);
         return renderNodeTree(node);
     }
 
