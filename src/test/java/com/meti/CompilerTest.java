@@ -17,7 +17,12 @@ class CompilerTest {
     }
 
     @Test
-    void return_type(){
+    void integer() {
+        assertCompile("420", "420");
+    }
+
+    @Test
+    void return_type() {
         assertCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
     }
 }
