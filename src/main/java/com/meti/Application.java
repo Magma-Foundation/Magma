@@ -21,25 +21,6 @@ public class Application {
         this.module = module;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(module);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Application) obj;
-        return Objects.equals(this.module, that.module);
-    }
-
-    @Override
-    public String toString() {
-        return "Application[" +
-               "module=" + module + ']';
-    }
-
     void run() throws ApplicationException {
         var sources = listSources();
         var targets = new ArrayList<String>();
