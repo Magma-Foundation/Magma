@@ -16,7 +16,7 @@ public class DirectoryApplicationTest {
     private static final NIOPath Out = Root.resolveChild("out");
 
     @Test
-    void test() throws IOException {
+    void test() throws IOException, InterruptedException {
         if(!Parent.exists()) Parent.createAsDirectory();
 
         var child = Parent.resolveChild("child.mg");

@@ -22,7 +22,11 @@ public class SingleApplicationTest {
     }
 
     private void runImpl() throws IOException {
-        new Application(new SingleModule(Source)).run();
+        try {
+            new Application(new SingleModule(Source)).run();
+        } catch (InterruptedException e) {
+            fail(e);
+        }
     }
 
     @Test
