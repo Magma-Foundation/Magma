@@ -4,7 +4,7 @@ import com.meti.module.Module;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public final class BuildingApplication extends Application {
@@ -14,7 +14,7 @@ public final class BuildingApplication extends Application {
     }
 
     @Override
-    protected void build(ArrayList<String> targets) throws ApplicationException {
+    protected void build(Collection<String> targets) throws ApplicationException {
         var targetString = String.join(" ", targets);
         try {
             Out.resolveChild("CMakeLists.txt").ensureAsFile()
