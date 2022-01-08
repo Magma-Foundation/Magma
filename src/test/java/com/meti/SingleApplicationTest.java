@@ -23,7 +23,7 @@ public class SingleApplicationTest {
 
     private void runImpl() {
         try {
-            new BuildingApplication(new SingleModule(Source)).run();
+            new Application(new SingleModule(Source)).run();
         } catch (ApplicationException e) {
             fail(e);
         }

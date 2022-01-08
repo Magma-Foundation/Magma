@@ -23,7 +23,7 @@ public class DirectoryApplicationTest {
         if(!child.exists()) child.createAsFile();
 
         var module = new DirectoryModule(Parent);
-        new BuildingApplication(module).run();
+        new Application(module).run();
 
         assertTrue(Out.resolveChild("child.c").exists());
     }
