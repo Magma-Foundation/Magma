@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 public record MagmaCCompiler(String input) {
     private static Node lexNode(Input input) throws LexException {
         if (input.isEmpty()) throw new LexException("Input may not be empty.");
-        return new BlockLexer(input).lexBlock()
-                .or(new FunctionLexer(input).lexFunction())
-                .or(new ReturnLexer(input).lexReturn())
-                .or(new IntegerLexer(input).lexInteger())
+        return new BlockLexer(input).lex()
+                .or(new FunctionLexer(input).lex())
+                .or(new ReturnLexer(input).lex())
+                .or(new IntegerLexer(input).lex())
                 .orElseThrow(() -> new LexException("Unknown input: " + input.getInput()));
     }
 
