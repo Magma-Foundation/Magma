@@ -19,15 +19,6 @@ public record NIOPath(Path value) {
         return fileName.substring(0, separator);
     }
 
-    public void createAsDirectory() throws IOException {
-        Files.createDirectory(value);
-    }
-
-    public NIOPath createAsFile() throws IOException {
-        Files.createFile(value);
-        return this;
-    }
-
     public void delete() throws IOException {
         Files.deleteIfExists(value);
     }
@@ -40,8 +31,21 @@ public record NIOPath(Path value) {
         if (!exists()) createAsDirectory();
     }
 
+    public boolean exists() {
+        return Files.exists(value);
+    }
+
+    public void createAsDirectory() throws IOException {
+        Files.createDirectory(value);
+    }
+
     public NIOPath ensureAsFile() throws IOException {
         if (!exists()) createAsFile();
+        return this;
+    }
+
+    public NIOPath createAsFile() throws IOException {
+        Files.createFile(value);
         return this;
     }
 
@@ -49,10 +53,6 @@ public record NIOPath(Path value) {
         return exists()
                 ? new Some<>(this)
                 : new None<>();
-    }
-
-    public boolean exists() {
-        return Files.exists(value);
     }
 
     public boolean hasExtensionOf(String expected) {
@@ -83,12 +83,21 @@ public record NIOPath(Path value) {
         return list.stream();
     }
 
+    public NIOPath toAbsolutePath() {
+        return new NIOPath(this.value.toAbsolutePath());
+    }
+
+    public String asString(){
+        return this.value.toString();
+    }
+
     public Stream<NIOPath> walk() throws IOException {
         return Files.walk(value).map(NIOPath::new);
     }
 
-    public void writeAsString(String value) throws IOException {
+    public NIOPath writeAsString(String value) throws IOException {
         Files.writeString(this.value, value);
+        return this;
     }
 
     private static class DeletingVisitor implements FileVisitor<Path> {
