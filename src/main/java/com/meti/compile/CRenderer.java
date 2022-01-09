@@ -2,10 +2,10 @@ package com.meti.compile;
 
 import java.util.stream.Collectors;
 
-public class MagmaRenderer {
+public class CRenderer {
     private final Node root;
 
-    public MagmaRenderer(Node root) {
+    public CRenderer(Node root) {
         this.root = root;
     }
 
@@ -71,7 +71,7 @@ public class MagmaRenderer {
         var current = root;
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();
-            var renderedNode = new MagmaRenderer(node).render();
+            var renderedNode = new CRenderer(node).render();
             current = current.with(type, new NodeAttribute(new Content(renderedNode)));
         }
         return current;
