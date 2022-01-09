@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class CRenderer {
@@ -38,7 +39,7 @@ public class CRenderer {
         }
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
-            var children = node.apply(Attribute.Type.Children).streamNodes().collect(Collectors.toList());
+            var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             for (Node node1 : children) {
                 builder.append(node1.apply(Attribute.Type.Value).asInput().getInput());
             }
@@ -78,8 +79,22 @@ public class CRenderer {
     }
 
     Input render() throws CompileException {
+        return renderAST(root);
+    }
+
+    private Input renderAST(Node root) throws CompileException {
         var withFields = renderSubFields(root);
         var withNodes = renderSubNodes(withFields);
-        return new Input(renderNode(withNodes));
+        var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+        var current = withNodes;
+        for (Attribute.Type type : types) {
+            var oldNodes = withNodes.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newNodes = new ArrayList<Node>();
+            for (Node oldNode : oldNodes) {
+                newNodes.add(new Content(renderAST(oldNode)));
+            }
+            current = current.with(type, new ListNodeAttribute(newNodes));
+        }
+        return new Input(renderNode(current));
     }
 }

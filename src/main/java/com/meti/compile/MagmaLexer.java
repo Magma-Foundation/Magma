@@ -1,14 +1,9 @@
 package com.meti.compile;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class MagmaLexer {
-    private final Input input;
-
-    public MagmaLexer(Input input) {
-        this.input = input;
-    }
-
+public record MagmaLexer(Input input) {
     static Node lexNode(Input input) throws LexException {
         if (input.isEmpty()) throw new LexException("Input may not be empty.");
         return new BlockLexer(input).lex()
@@ -16,22 +11,6 @@ public class MagmaLexer {
                 .or(new ReturnLexer(input).lex())
                 .or(new IntegerLexer(input).lex())
                 .orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
-    }
-
-    Node lex() throws CompileException {
-        var node = lexNode(getInput());
-        var types = node.apply(Attribute.Group.Field).collect(Collectors.toList());
-        var current = node;
-        for (Attribute.Type type : types) {
-            var oldField = current.apply(type).asNode();
-            var oldType = oldField.apply(Attribute.Type.Type).asNode()
-                    .apply(Attribute.Type.Value)
-                    .asInput();
-            var newType = lexType(oldType);
-            var newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
-            current = current.with(type, new NodeAttribute(newField));
-        }
-        return current;
     }
 
     static Node lexType(Input text) throws LexException {
@@ -46,7 +25,42 @@ public class MagmaLexer {
         }
     }
 
-    public Input getInput() {
-        return input;
+    private Node attachFields(Node node) throws AttributeException, LexException {
+        var types = node.apply(Attribute.Group.Field).collect(Collectors.toList());
+        var current = node;
+        for (Attribute.Type type : types) {
+            var oldField = current.apply(type).asNode();
+            var oldType = oldField.apply(Attribute.Type.Type).asNode()
+                    .apply(Attribute.Type.Value)
+                    .asInput();
+            var newType = lexType(oldType);
+            var newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+            current = current.with(type, new NodeAttribute(newField));
+        }
+        return current;
+    }
+
+    private Node attachNodes(Node withFields) throws AttributeException, LexException {
+        var types = withFields.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+        var current = withFields;
+        for (Attribute.Type type : types) {
+            var oldNodes = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newNodes = new ArrayList<Node>();
+            for (Node oldNode : oldNodes) {
+                newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asInput()));
+            }
+            current = current.with(type, new ListNodeAttribute(newNodes));
+        }
+        return current;
+    }
+
+    Node lex() throws CompileException {
+        return lexAST(input);
+    }
+
+    private Node lexAST(Input input) throws LexException, AttributeException {
+        var node = lexNode(input);
+        var withFields = attachFields(node);
+        return attachNodes(withFields);
     }
 }

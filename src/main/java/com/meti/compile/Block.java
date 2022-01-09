@@ -30,6 +30,6 @@ class Block implements Node {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return new Block(attribute.streamNodes().toList());
+        return new Block(attribute.asStreamOfNodes().toList());
     }
 }

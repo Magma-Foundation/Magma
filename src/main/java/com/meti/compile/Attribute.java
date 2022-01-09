@@ -23,7 +23,7 @@ public interface Attribute {
         throw new AttributeException("Not a node.");
     }
 
-    default Stream<Node> streamNodes() throws AttributeException {
+    default Stream<Node> asStreamOfNodes() throws AttributeException {
         throw new AttributeException("Not a list of nodes.");
     }
 

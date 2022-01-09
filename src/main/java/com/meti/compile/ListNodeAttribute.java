@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 public record ListNodeAttribute(List<Node> values) implements Attribute {
     @Override
-    public Stream<Node> streamNodes() throws AttributeException {
+    public Stream<Node> asStreamOfNodes() {
         return values.stream();
     }
 }
