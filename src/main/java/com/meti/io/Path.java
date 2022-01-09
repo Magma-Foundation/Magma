@@ -10,6 +10,12 @@ public interface Path {
 
     String computeFileNameWithoutExtension();
 
+    void createAsDirectory() throws IOException;
+
+    File createAsFile() throws IOException;
+
+    void ensureAsDirectory() throws IOException;
+
     File ensureAsFile() throws IOException;
 
     Option<File> existingAsFile();
@@ -18,8 +24,11 @@ public interface Path {
 
     boolean hasExtensionOf(String expected);
 
+    Path relativize(Path path);
+
     NIOPath resolveChild(String name);
 
     Stream<String> streamNames();
 
+    Path toAbsolutePath();
 }
