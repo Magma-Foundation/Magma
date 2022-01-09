@@ -6,18 +6,31 @@ import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Input;
 import com.meti.compile.node.Node;
+import com.meti.option.None;
+import com.meti.option.Option;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record MagmaLexer(Input input) {
     static Node lexNode(Input input) throws LexException {
         if (input.isEmpty()) throw new LexException("Input may not be empty.");
-        return new BlockLexer(input).lex()
-                .or(new FunctionLexer(input).lex())
-                .or(new ReturnLexer(input).lex())
-                .or(new IntegerLexer(input).lex())
-                .orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
+
+        var lexers = List.of(
+                new BlockLexer(input),
+                new FunctionLexer(input),
+                new ReturnLexer(input),
+                new IntegerLexer(input));
+        Option<Node> current = new None<>();
+        for (Lexer lexer : lexers) {
+            var next = lexer.lex();
+            if (next.isPresent()) {
+                current = next;
+                break;
+            }
+        }
+        return current.orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
     }
 
     static Node lexType(Input text) throws LexException {

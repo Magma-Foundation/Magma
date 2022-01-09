@@ -9,10 +9,6 @@ public record Input(String value) {
         return value.length() == 0;
     }
 
-    public int length() {
-        return value.length();
-    }
-
     public Input slice(int start, int end) {
         return new Input(getInput().substring(start, end));
     }

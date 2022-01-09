@@ -11,13 +11,7 @@ import com.meti.compile.node.Node;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class CRenderer {
-    private final Node root;
-
-    public CRenderer(Node root) {
-        this.root = root;
-    }
-
+public record CRenderer(Node root) {
     private static Input renderField(Node node) throws AttributeException, RenderException {
         var name = node.apply(Attribute.Type.Name).asInput();
         var type = node.apply(Attribute.Type.Type).asNode();

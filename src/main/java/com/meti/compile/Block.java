@@ -8,13 +8,7 @@ import com.meti.compile.node.Node;
 import java.util.List;
 import java.util.stream.Stream;
 
-class Block implements Node {
-    private final List<Node> values;
-
-    public Block(List<Node> values) {
-        this.values = values;
-    }
-
+record Block(List<Node> values) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) {
         return group == Attribute.Group.Nodes

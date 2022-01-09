@@ -6,15 +6,7 @@ import com.meti.compile.attribute.BooleanAttribute;
 import com.meti.compile.attribute.IntegerAttribute;
 import com.meti.compile.node.Node;
 
-public class IntegerType implements Node {
-    private final boolean signed;
-    private final int bits;
-
-    public IntegerType(boolean signed, int bits) {
-        this.signed = signed;
-        this.bits = bits;
-    }
-
+public record IntegerType(boolean signed, int bits) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
