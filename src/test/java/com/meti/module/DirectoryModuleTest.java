@@ -1,6 +1,8 @@
 package com.meti.module;
 
+import com.meti.io.Directory;
 import com.meti.io.NIOPath;
+import com.meti.io.Path;
 import com.meti.source.Source;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -12,28 +14,28 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DirectoryModuleTest {
-    private static final NIOPath Parent = NIOPath.Root.resolveChild("parent");
+    private static final Path Parent = NIOPath.Root.resolveChild("parent");
 
     @Test
     void hasSource() throws IOException {
-        Parent.createAsDirectory();
+        var parent = Parent.createAsDirectory();
 
         var child = Parent.resolveChild("child.mg");
         child.createAsFile();
 
-        var module = new DirectoryModule(Parent);
+        var module = new DirectoryModule(parent);
 
         assertTrue(module.hasSource("child", Collections.emptyList()));
     }
 
     @Test
     void listSources() throws IOException {
-        Parent.createAsDirectory();
+        var parent = Parent.createAsDirectory();
 
         var child = Parent.resolveChild("child.mg");
         child.createAsFile();
 
-        var module = new DirectoryModule(Parent);
+        var module = new DirectoryModule(parent);
         assertTrue(module.listSources()
                 .stream()
                 .map(Source::computeName)
@@ -42,7 +44,7 @@ class DirectoryModuleTest {
 
     @Test
     void listSubSources() throws IOException {
-        Parent.createAsDirectory();
+        var parent = Parent.createAsDirectory();
 
         var child = Parent.resolveChild("child");
         child.createAsDirectory();
@@ -50,12 +52,13 @@ class DirectoryModuleTest {
         var grandChild = child.resolveChild("grandChild.mg");
         grandChild.createAsFile();
 
-        var module = new DirectoryModule(Parent);
+        var module = new DirectoryModule(parent);
         assertTrue(module.hasSource("grandChild", List.of("child")));
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Parent.deleteAsDirectory();
+        Parent.existingAsDirectory()
+                .ifPresent(Directory::deleteAsDirectory);
     }
 }

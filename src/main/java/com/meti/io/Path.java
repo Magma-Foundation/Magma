@@ -10,7 +10,7 @@ public interface Path {
 
     String computeFileNameWithoutExtension();
 
-    void createAsDirectory() throws IOException;
+    Directory createAsDirectory() throws IOException;
 
     File createAsFile() throws IOException;
 

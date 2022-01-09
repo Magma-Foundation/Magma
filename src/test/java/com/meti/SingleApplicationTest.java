@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.io.Directory;
 import com.meti.io.File;
 import com.meti.io.NIOPath;
 import com.meti.io.Path;
@@ -13,7 +14,7 @@ import static com.meti.Application.Out;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleApplicationTest {
-    private static final NIOPath Source = NIOPath.Root.resolveChild("index.mg");
+    private static final Path Source = NIOPath.Root.resolveChild("index.mg");
     private static final Path Target = Out.resolveChild("index.c");
 
     @Test
@@ -49,8 +50,8 @@ public class SingleApplicationTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Source.delete();
-        Out.deleteAsDirectory();
+        Source.existingAsFile().ifPresent(File::delete);
+        Out.existingAsDirectory().ifPresent(Directory::deleteAsDirectory);
     }
 
     @Test
