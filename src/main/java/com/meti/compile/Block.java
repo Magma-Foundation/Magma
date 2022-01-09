@@ -1,8 +1,5 @@
 package com.meti.compile;
 
-import com.meti.Attribute;
-import com.meti.InputAttribute;
-
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -19,7 +16,6 @@ class Block implements Node {
         throw new AttributeException("No attribute exists of name: " + type);
     }
 
-    @Override
     public Stream<Node> getLinesAsStream() {
         return values.stream();
     }
@@ -33,7 +29,6 @@ class Block implements Node {
         return type == Node.Type.Block;
     }
 
-    @Override
     public Node withLines(List<Node> values) {
         return new Block(values);
     }

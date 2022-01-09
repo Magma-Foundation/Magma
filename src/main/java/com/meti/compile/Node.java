@@ -1,31 +1,24 @@
 package com.meti.compile;
 
-import com.meti.Attribute;
-
-import java.util.List;
 import java.util.stream.Stream;
 
 public interface Node {
+    default Stream<Attribute.Type> apply(Attribute.Group group) {
+        return Stream.empty();
+    }
+
     default Attribute apply(Attribute.Type type) throws AttributeException {
         throw new AttributeException("Node had no attributes.");
     }
 
-    default Stream<Node> getLinesAsStream() throws AttributeException {
-        throw new AttributeException("No values are present.");
-    }
-
     boolean is(Type type);
 
-    default Node withLines(List<Node> values) {
-        return this;
-    }
-
-    default Node withValue(Node child) {
-        return this;
+    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        throw new AttributeException("Node does not have attribute to replace of: " + type);
     }
 
     enum Type {
         Content,
-        Block, Function, Field, Return
+        Block, Function, Field, Integer, Return
     }
 }

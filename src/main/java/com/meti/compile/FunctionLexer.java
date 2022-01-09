@@ -12,9 +12,10 @@ public record FunctionLexer(Input input) implements Lexer {
             var name = input.slice("def ".length(), paramStart);
             var typeSeparator = input.getInput().indexOf(':');
             var valueSeparator = input.getInput().indexOf("=>");
-            var type2 = new Content(input.slice(typeSeparator + 1, valueSeparator));
+            var returnType = new Content(input.slice(typeSeparator + 1, valueSeparator));
             var value = new Content(input.slice(valueSeparator + 2));
-            return new Some<>(new Function(name, type2, value));
+            var identity = new Field(name, returnType);
+            return new Some<>(new Function(identity, value));
         }
         return new None<>();
     }

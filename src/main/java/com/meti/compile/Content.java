@@ -1,8 +1,5 @@
 package com.meti.compile;
 
-import com.meti.Attribute;
-import com.meti.InputAttribute;
-
 public record Content(Input input) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {

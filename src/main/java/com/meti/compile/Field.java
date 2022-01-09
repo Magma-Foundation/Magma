@@ -1,8 +1,5 @@
 package com.meti.compile;
 
-import com.meti.Attribute;
-import com.meti.InputAttribute;
-
 public record Field(Input name, Node type) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
@@ -11,6 +8,11 @@ public record Field(Input name, Node type) implements Node {
             case Type -> new NodeAttribute(this.type);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return new Field(name, attribute.asNode());
     }
 
     @Override

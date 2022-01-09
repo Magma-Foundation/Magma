@@ -1,8 +1,5 @@
 package com.meti.compile;
 
-import com.meti.Attribute;
-
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
@@ -12,33 +9,81 @@ public record MagmaCCompiler(String input) {
                 .or(new FunctionLexer(input).lex())
                 .or(new ReturnLexer(input).lex())
                 .or(new IntegerLexer(input).lex())
-                .orElseThrow(() -> new LexException("Unknown input: " + input.getInput()));
+                .orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
     }
 
     private static Node lexNodeTree(Input input) throws CompileException {
         var node = lexNode(input);
-        if (node.is(Node.Type.Return)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            var valueString = value.apply(Attribute.Type.Value).asInput().getInput();
-            var child = lexNodeTree(new Input(valueString));
-            return node.withValue(child);
+        var types = node.apply(Attribute.Group.Field).collect(Collectors.toList());
+        var current = node;
+        for (Attribute.Type type : types) {
+            var oldField = current.apply(type).asNode();
+            var oldType = oldField.apply(Attribute.Type.Type).asNode()
+                    .apply(Attribute.Type.Value)
+                    .asInput();
+            var newType = lexType(oldType);
+            var newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+            current = current.with(type, new NodeAttribute(newField));
         }
-        if (node.is(Node.Type.Block)) {
-            var lines = node.getLinesAsStream().collect(Collectors.toList());
-            var newLines = new ArrayList<Node>();
-            for (Node line : lines) {
-                newLines.add(lexNodeTree(new Input(line.apply(Attribute.Type.Value).asInput().getInput())));
-            }
-            return node.withLines(newLines);
+        return current;
+    }
+
+    private static Node lexType(Input text) throws LexException {
+        var isSigned = text.startsWithChar('I');
+        var isUnsigned = text.startsWithChar('U');
+        if (isSigned || isUnsigned) {
+            var bitsText = text.slice(1);
+            var bits = Integer.parseInt(bitsText.getInput());
+            return new IntegerType(isSigned, bits);
+        } else {
+            throw new LexException("Cannot lex type: " + text);
         }
-        return node;
+    }
+
+    private Node attachFields(Node root) throws CompileException {
+        var types = root.apply(Attribute.Group.Field).collect(Collectors.toList());
+        var current = root;
+        for (Attribute.Type type : types) {
+            var node = root.apply(type).asNode();
+            var renderedNode = renderField(node);
+            current = current.with(type, new NodeAttribute(new Content(renderedNode)));
+        }
+        return current;
+    }
+
+    private Node attachNodes(Node root) throws CompileException {
+        var types = root.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = root;
+        for (Attribute.Type type : types) {
+            var node = root.apply(type).asNode();
+            var renderedNode = renderNodeTree(node);
+            current = current.with(type, new NodeAttribute(new Content(renderedNode)));
+        }
+        return current;
     }
 
     public String compile() throws CompileException {
         if (input.isBlank()) return input;
         var root = new Input(this.input);
         var node = lexNodeTree(root);
-        return renderNodeTree(node);
+        return renderNodeTree(node).getInput();
+    }
+
+    private Input renderField(Node node) throws AttributeException, RenderException {
+        var name = node.apply(Attribute.Type.Name).asInput();
+        var type = node.apply(Attribute.Type.Type).asNode();
+
+        if (type.is(Node.Type.Integer)) {
+            var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
+            var bits = type.apply(Attribute.Type.Bits).asInteger();
+            String suffix;
+            if (bits == 16) suffix = "int";
+            else throw new RenderException("Unknown bit quantity: " + bits);
+            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.getInput();
+            return new Input(value);
+        } else {
+            throw new RenderException("Cannot render type: " + type);
+        }
     }
 
     private String renderNode(Node node) throws CompileException {
@@ -48,12 +93,12 @@ public record MagmaCCompiler(String input) {
                     .asInput()
                     .getInput();
             var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asInput();
+            var renderedValue = value.apply(Attribute.Type.Value).asInput().getInput();
             return text + "()" + renderedValue;
         }
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
-            var children = node.getLinesAsStream().collect(Collectors.toList());
+            var children = node.apply(Attribute.Type.Children).streamNodes().collect(Collectors.toList());
             for (Node node1 : children) {
                 builder.append(node1.apply(Attribute.Type.Value).asInput().getInput());
             }
@@ -70,22 +115,9 @@ public record MagmaCCompiler(String input) {
         }
     }
 
-    private String renderNodeTree(Node node) throws CompileException {
-        Node withValue;
-        if (node.is(Node.Type.Return)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            var valueString = renderNodeTree(value);
-            withValue = node.withValue(new Content(new Input(valueString)));
-        } else if (node.is(Node.Type.Block)) {
-            var lines = node.getLinesAsStream().collect(Collectors.toList());
-            var newLines = new ArrayList<Node>();
-            for (Node line : lines) {
-                newLines.add(new Content(new Input(renderNodeTree(line))));
-            }
-            withValue = node.withLines(newLines);
-        } else {
-            withValue = node;
-        }
-        return renderNode(withValue);
+    private Input renderNodeTree(Node root) throws CompileException {
+        var withFields = attachFields(root);
+        var withNodes = attachNodes(withFields);
+        return new Input(renderNode(withNodes));
     }
 }

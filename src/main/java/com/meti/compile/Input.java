@@ -1,37 +1,35 @@
 package com.meti.compile;
 
-public class Input {
-    private final String input;
-
-    public Input(String input) {
-        this.input = input.trim();
-    }
-
-    boolean endsWithChar() {
-        return hasContent() && getInput().indexOf('}') == input.length() - 1;
-    }
-
-    private boolean hasContent() {
-        return getInput().length() != 0;
-    }
-
-    public String getInput() {
-        return input;
+public record Input(String value) {
+    public Input(String value) {
+        this.value = value.trim();
     }
 
     public boolean isEmpty() {
-        return input.length() == 0;
+        return value.length() == 0;
+    }
+
+    public int length() {
+        return value.length();
     }
 
     Input slice(int start, int end) {
         return new Input(getInput().substring(start, end));
     }
 
-    public Input slice(int offset) {
-        return new Input(input.substring(offset));
+    public String getInput() {
+        return value;
     }
 
-    boolean startsWithChar() {
-        return hasContent() && getInput().indexOf('{') == 0;
+    public Input slice(int offset) {
+        return new Input(value.substring(offset));
+    }
+
+    boolean startsWithChar(char c) {
+        return hasContent() && getInput().indexOf(c) == 0;
+    }
+
+    private boolean hasContent() {
+        return getInput().length() != 0;
     }
 }
