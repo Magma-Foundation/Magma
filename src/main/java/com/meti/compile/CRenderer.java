@@ -5,14 +5,14 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Content;
-import com.meti.compile.node.Input;
+import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
-    private static Input renderField(Node node) throws AttributeException, RenderException {
+    private static Text renderField(Node node) throws AttributeException, RenderException {
         var name = node.apply(Attribute.Type.Name).asInput();
         var type = node.apply(Attribute.Type.Type).asNode();
 
@@ -22,8 +22,8 @@ public record CRenderer(Node root) {
             String suffix;
             if (bits == 16) suffix = "int";
             else throw new RenderException("Unknown bit quantity: " + bits);
-            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.getInput();
-            return new Input(value);
+            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.compute();
+            return new Text(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
         }
@@ -34,25 +34,25 @@ public record CRenderer(Node root) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var text = identity.apply(Attribute.Type.Value)
                     .asInput()
-                    .getInput();
+                    .compute();
             var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asInput().getInput();
+            var renderedValue = value.apply(Attribute.Type.Value).asInput().compute();
             return text + "()" + renderedValue;
         }
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
             var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             for (Node node1 : children) {
-                builder.append(node1.apply(Attribute.Type.Value).asInput().getInput());
+                builder.append(node1.apply(Attribute.Type.Value).asInput().compute());
             }
             return builder.append("}").toString();
         }
         if (node.is(Node.Type.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asInput().getInput();
+            var renderedChild = child.apply(Attribute.Type.Value).asInput().compute();
             return "return " + renderedChild + ";";
         } else if (node.is(Node.Type.Content)) {
-            return node.apply(Attribute.Type.Value).asInput().getInput();
+            return node.apply(Attribute.Type.Value).asInput().compute();
         } else {
             throw new CompileException("Unable to render node:" + node);
         }
@@ -80,11 +80,11 @@ public record CRenderer(Node root) {
         return current;
     }
 
-    Input render() throws CompileException {
+    Text render() throws CompileException {
         return renderAST(root);
     }
 
-    private Input renderAST(Node root) throws CompileException {
+    private Text renderAST(Node root) throws CompileException {
         var withFields = renderSubFields(root);
         var withNodes = renderSubNodes(withFields);
         var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
@@ -97,6 +97,6 @@ public record CRenderer(Node root) {
             }
             current = current.with(type, new ListNodeAttribute(newNodes));
         }
-        return new Input(renderNode(current));
+        return new Text(renderNode(current));
     }
 }

@@ -4,7 +4,7 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
-import com.meti.compile.node.Input;
+import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
 import com.meti.option.None;
 import com.meti.option.Option;
@@ -13,15 +13,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record MagmaLexer(Input input) {
-    static Node lexNode(Input input) throws LexException {
-        if (input.isEmpty()) throw new LexException("Input may not be empty.");
+public record MagmaLexer(Text text) {
+    static Node lexNode(Text text) throws LexException {
+        if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
-                new BlockLexer(input),
-                new FunctionLexer(input),
-                new ReturnLexer(input),
-                new IntegerLexer(input));
+                new BlockLexer(text),
+                new FunctionLexer(text),
+                new ReturnLexer(text),
+                new IntegerLexer(text));
+
         Option<Node> current = new None<>();
         for (Lexer lexer : lexers) {
             var next = lexer.lex();
@@ -30,15 +31,16 @@ public record MagmaLexer(Input input) {
                 break;
             }
         }
-        return current.orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
+
+        return current.orElseThrow(() -> new LexException("Unknown input: " + text.compute()));
     }
 
-    static Node lexType(Input text) throws LexException {
+    static Node lexType(Text text) throws LexException {
         var isSigned = text.startsWithChar('I');
         var isUnsigned = text.startsWithChar('U');
         if (isSigned || isUnsigned) {
             var bitsText = text.slice(1);
-            var bits = Integer.parseInt(bitsText.getInput());
+            var bits = Integer.parseInt(bitsText.compute());
             return new IntegerType(isSigned, bits);
         } else {
             throw new LexException("Cannot lex type: " + text);
@@ -75,11 +77,11 @@ public record MagmaLexer(Input input) {
     }
 
     Node lex() throws CompileException {
-        return lexAST(input);
+        return lexAST(text);
     }
 
-    private Node lexAST(Input input) throws LexException, AttributeException {
-        var node = lexNode(input);
+    private Node lexAST(Text text) throws LexException, AttributeException {
+        var node = lexNode(text);
         var withFields = attachFields(node);
         return attachNodes(withFields);
     }

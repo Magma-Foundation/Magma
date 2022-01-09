@@ -4,15 +4,15 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.InputAttribute;
 
-public record Content(Input input) implements Node {
+public record Content(Text text) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if(type == Attribute.Type.Value) return new InputAttribute(getValueAsString());
         throw new AttributeException("No attribute exists of name: " + type);
     }
 
-    private Input getValueAsString() {
-        return input;
+    private Text getValueAsString() {
+        return text;
     }
 
     @Override

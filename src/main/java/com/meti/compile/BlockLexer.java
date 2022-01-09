@@ -1,7 +1,7 @@
 package com.meti.compile;
 
 import com.meti.compile.node.Content;
-import com.meti.compile.node.Input;
+import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
 import com.meti.option.None;
 import com.meti.option.Option;
@@ -9,15 +9,15 @@ import com.meti.option.Some;
 
 import java.util.ArrayList;
 
-public record BlockLexer(Input input) implements Lexer {
+public record BlockLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (input.startsWithChar('{') && input.getInput().endsWith("}")) {
-            var lines = input.slice(1, input.getInput().length() - 1).getInput().split(";");
+        if (text.startsWithChar('{') && text.compute().endsWith("}")) {
+            var lines = text.slice(1, text.compute().length() - 1).compute().split(";");
             var values = new ArrayList<Node>();
             for (String line : lines) {
                 if (!line.isBlank()) {
-                    values.add(new Content(new Input(line)));
+                    values.add(new Content(new Text(line)));
                 }
             }
             return new Some<>(new Block(values));

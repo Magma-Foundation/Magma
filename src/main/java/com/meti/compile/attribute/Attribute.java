@@ -1,6 +1,6 @@
 package com.meti.compile.attribute;
 
-import com.meti.compile.node.Input;
+import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
 
 import java.util.stream.Stream;
@@ -10,7 +10,7 @@ public interface Attribute {
         throw new AttributeException("Not a boolean.");
     }
 
-    default Input asInput() throws AttributeException {
+    default Text asInput() throws AttributeException {
         throw new AttributeException("Not input.");
     }
 

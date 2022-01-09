@@ -1,10 +1,10 @@
 package com.meti.compile.attribute;
 
-import com.meti.compile.node.Input;
+import com.meti.compile.node.Text;
 
-public record InputAttribute(Input value) implements Attribute {
+public record InputAttribute(Text value) implements Attribute {
     @Override
-    public Input asInput() {
+    public Text asInput() {
         return value;
     }
 }
