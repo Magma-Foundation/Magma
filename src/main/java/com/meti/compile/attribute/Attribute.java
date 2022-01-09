@@ -10,7 +10,7 @@ public interface Attribute {
         throw new AttributeException("Not a boolean.");
     }
 
-    default Text asInput() throws AttributeException {
+    default Text asText() throws AttributeException {
         throw new AttributeException("Not input.");
     }
 

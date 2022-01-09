@@ -8,13 +8,12 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-public record ReturnRenderer(Node node) implements Renderer {
+record StructureRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
-        if (node.is(Node.Type.Return)) {
-            var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asText().compute();
-            return new Some<>(new Text("return ").append(renderedChild).append(";"));
+        if (node.is(Node.Type.Structure)) {
+            var name = node.apply(Attribute.Type.Name).asText();
+            return new Some<>(name.prepend("struct ").append("{};"));
         }
         return new None<>();
     }

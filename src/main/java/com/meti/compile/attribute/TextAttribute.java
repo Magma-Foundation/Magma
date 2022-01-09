@@ -4,7 +4,7 @@ import com.meti.compile.node.Text;
 
 public record TextAttribute(Text value) implements Attribute {
     @Override
-    public Text asInput() {
+    public Text asText() {
         return value;
     }
 }

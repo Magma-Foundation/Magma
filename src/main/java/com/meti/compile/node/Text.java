@@ -28,6 +28,10 @@ public record Text(String value) {
         return value.length() == 0;
     }
 
+    public Text prepend(String prefix) {
+        return new Text(prefix + value);
+    }
+
     public Text slice(int start, int end) {
         return new Text(compute().substring(start, end));
     }

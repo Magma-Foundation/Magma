@@ -55,7 +55,7 @@ public record MagmaLexer(Text text) {
             var oldField = current.apply(type).asNode();
             var oldType = oldField.apply(Attribute.Type.Type).asNode()
                     .apply(Attribute.Type.Value)
-                    .asInput();
+                    .asText();
             var newType = lexType(oldType);
             var newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
             current = current.with(type, new NodeAttribute(newField));
@@ -70,7 +70,7 @@ public record MagmaLexer(Text text) {
             var oldNodes = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
-                newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asInput()));
+                newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asText()));
             }
             current = current.with(type, new ListNodeAttribute(newNodes));
         }

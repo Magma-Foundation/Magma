@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
     private static Text renderField(Node node) throws AttributeException, RenderException {
-        var name = node.apply(Attribute.Type.Name).asInput();
+        var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
         if (type.is(Node.Type.Integer)) {
@@ -34,6 +34,7 @@ public record CRenderer(Node root) {
 
     static Text renderNode(Node node) throws CompileException {
         var renderers = List.of(
+                new StructureRenderer(node),
                 new FunctionRenderer(node),
                 new BlockRenderer(node),
                 new ReturnRenderer(node));
