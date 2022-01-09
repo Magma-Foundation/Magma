@@ -26,18 +26,15 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
         return fileName.substring(0, separator);
     }
 
-    @Override
     public void createAsDirectory() throws IOException {
         Files.createDirectory(value);
     }
 
-    @Override
     public File createAsFile() throws IOException {
         Files.createFile(value);
         return this;
     }
 
-    @Override
     public void ensureAsDirectory() throws IOException {
         if (!exists()) createAsDirectory();
     }
@@ -68,7 +65,6 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
         return expected.equals(actual);
     }
 
-    @Override
     public Path relativize(Path path) {
         var names = path.streamNames().collect(Collectors.toList());
 
@@ -94,7 +90,6 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
         return list.stream();
     }
 
-    @Override
     public Path toAbsolutePath() {
         return new NIOPath(this.value.toAbsolutePath());
     }
@@ -103,12 +98,10 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
         Files.deleteIfExists(value);
     }
 
-    @Override
     public void deleteAsDirectory() throws IOException {
         Files.walkFileTree(value, new DeletingVisitor());
     }
 
-    @Override
     public Stream<Path> walk() throws IOException {
         return Files.walk(value).map(NIOPath::new);
     }

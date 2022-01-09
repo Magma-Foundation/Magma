@@ -7,7 +7,6 @@ import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
