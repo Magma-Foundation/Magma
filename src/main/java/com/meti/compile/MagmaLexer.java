@@ -4,8 +4,8 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
-import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Text;
 import com.meti.option.None;
 import com.meti.option.Option;
 
@@ -18,6 +18,7 @@ public record MagmaLexer(Text text) {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
+                new StructureLexer(text),
                 new BlockLexer(text),
                 new FunctionLexer(text),
                 new ReturnLexer(text),

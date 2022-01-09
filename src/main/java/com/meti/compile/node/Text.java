@@ -1,8 +1,19 @@
 package com.meti.compile.node;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 public record Text(String value) {
     public Text(String value) {
         this.value = value.trim();
+    }
+
+    public Option<Integer> firstIndexOfChar(char c) {
+        var index = value.indexOf(c);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
     }
 
     public boolean isEmpty() {
@@ -27,5 +38,9 @@ public record Text(String value) {
 
     private boolean hasContent() {
         return compute().length() != 0;
+    }
+
+    public boolean startsWithSlice(String slice) {
+        return value.startsWith(slice);
     }
 }

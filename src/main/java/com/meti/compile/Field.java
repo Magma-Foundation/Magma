@@ -2,7 +2,7 @@ package com.meti.compile;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.InputAttribute;
+import com.meti.compile.attribute.TextAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
@@ -11,7 +11,7 @@ public record Field(Text name, Node type) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
-            case Name -> new InputAttribute(name);
+            case Name -> new TextAttribute(name);
             case Type -> new NodeAttribute(this.type);
             default -> throw new AttributeException(type);
         };
