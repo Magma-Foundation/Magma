@@ -1,8 +1,7 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
 
-import com.meti.compile.AttributeException;
-import com.meti.compile.Input;
-import com.meti.compile.Node;
+import com.meti.compile.node.Input;
+import com.meti.compile.node.Node;
 
 import java.util.stream.Stream;
 

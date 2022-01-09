@@ -1,4 +1,8 @@
-package com.meti.compile;
+package com.meti.compile.node;
+
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.InputAttribute;
 
 public record Content(Input input) implements Node {
     @Override

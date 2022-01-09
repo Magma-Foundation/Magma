@@ -1,5 +1,11 @@
 package com.meti.compile;
 
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.BooleanAttribute;
+import com.meti.compile.attribute.IntegerAttribute;
+import com.meti.compile.node.Node;
+
 public class IntegerType implements Node {
     private final boolean signed;
     private final int bits;

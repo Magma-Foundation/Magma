@@ -1,4 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
+
+import com.meti.compile.node.Node;
 
 public record NodeAttribute(Node node) implements Attribute {
     @Override

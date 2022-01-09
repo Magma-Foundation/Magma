@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.compile.node;
 
 public record Input(String value) {
     public Input(String value) {
@@ -13,7 +13,7 @@ public record Input(String value) {
         return value.length();
     }
 
-    Input slice(int start, int end) {
+    public Input slice(int start, int end) {
         return new Input(getInput().substring(start, end));
     }
 
@@ -25,7 +25,7 @@ public record Input(String value) {
         return new Input(value.substring(offset));
     }
 
-    boolean startsWithChar(char c) {
+    public boolean startsWithChar(char c) {
         return hasContent() && getInput().indexOf(c) == 0;
     }
 

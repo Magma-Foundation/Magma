@@ -1,4 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
+
+import com.meti.compile.CompileException;
 
 public class AttributeException extends CompileException {
     public AttributeException(Attribute.Type type) {

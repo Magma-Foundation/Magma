@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.compile.node.Input;
+
 public record MagmaCCompiler(String input) {
     public String compile() throws CompileException {
         if (input.isBlank()) return input;

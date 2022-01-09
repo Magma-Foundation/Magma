@@ -1,5 +1,8 @@
 package com.meti.compile;
 
+import com.meti.compile.node.Content;
+import com.meti.compile.node.Input;
+import com.meti.compile.node.Node;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;

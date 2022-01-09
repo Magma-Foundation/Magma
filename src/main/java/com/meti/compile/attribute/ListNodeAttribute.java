@@ -1,4 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
+
+import com.meti.compile.node.Node;
 
 import java.util.List;
 import java.util.stream.Stream;
