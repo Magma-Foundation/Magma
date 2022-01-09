@@ -11,17 +11,16 @@ class Block implements Node {
     }
 
     @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) {
+        return group == Attribute.Group.Nodes
+                ? Stream.of(Attribute.Type.Children)
+                : Stream.empty();
+    }
+
+    @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if(type == Attribute.Type.Value) return new InputAttribute(getValueAsString());
-        throw new AttributeException("No attribute exists of name: " + type);
-    }
-
-    public Stream<Node> getLinesAsStream() {
-        return values.stream();
-    }
-
-    private Input getValueAsString() throws AttributeException {
-        throw new UnsupportedOperationException();
+        if (type == Attribute.Type.Children) return new ListNodeAttribute(values);
+        throw new AttributeException(type);
     }
 
     @Override
@@ -29,7 +28,8 @@ class Block implements Node {
         return type == Node.Type.Block;
     }
 
-    public Node withLines(List<Node> values) {
-        return new Block(values);
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return new Block(attribute.streamNodes().toList());
     }
 }
