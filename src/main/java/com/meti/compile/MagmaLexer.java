@@ -18,7 +18,7 @@ public class MagmaLexer {
                 .orElseThrow(() -> new LexException("Unknown body: " + input.getInput()));
     }
 
-    Node lexNodeTree() throws CompileException {
+    Node lex() throws CompileException {
         var node = lexNode(getInput());
         var types = node.apply(Attribute.Group.Field).collect(Collectors.toList());
         var current = node;
