@@ -7,12 +7,13 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.meti.io.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NIOPathTest {
-    private static final NIOPath Parent = Root.resolveChild("parent");
+    private static final Path Parent = Root.resolveChild("parent");
 
     @Test
     void hasExtensionOf() {
@@ -24,15 +25,15 @@ class NIOPathTest {
     void relativize() {
         var parent = Root.resolveChild("first");
         var child = parent.resolveChild("second").resolveChild("third.txt");
-        var relativized = parent.relativize(child);
+        var relative = parent.relativize(child);
         var expected = Paths.get("second", "third.txt").toString();
-        var actual = relativized.asString();
+        var actual = relative.asString();
         assertEquals(expected, actual);
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        Parent.deleteAsDirectory();
+        Parent.existingAsDirectory().ifPresent(Directory::deleteAsDirectory);
     }
 
     @Test
@@ -46,7 +47,10 @@ class NIOPathTest {
         grandChild.createAsFile();
 
         var expected = List.of(Parent, child, grandChild);
-        var actual = Parent.walk().collect(Collectors.toList());
+        var actual = Parent.existingAsDirectory()
+                .map(Directory::walk)
+                .orElse(Stream.empty())
+                .collect(Collectors.toList());
         assertIterableEquals(expected, actual);
     }
 }

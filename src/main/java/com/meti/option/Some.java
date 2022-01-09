@@ -1,8 +1,14 @@
 package com.meti.option;
 
+import com.meti.core.C1;
 import com.meti.core.F1;
 
 public record Some<T>(T value) implements Option<T> {
+    @Override
+    public <E extends Exception> void ifPresent(C1<T, E> consumer) throws E {
+        consumer.consume(value);
+    }
+
     @Override
     public boolean isPresent() {
         return true;

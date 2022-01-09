@@ -1,5 +1,6 @@
 package com.meti.module;
 
+import com.meti.io.Directory;
 import com.meti.io.File;
 import com.meti.io.NIOPath;
 import com.meti.io.Path;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record DirectoryModule(NIOPath root) implements Module {
+public record DirectoryModule(Directory root) implements Module {
     public boolean hasSource(String name, List<String> packageList) {
         return packageList.stream()
                 .reduce(root, Path::resolveChild, (previous, next) -> next)

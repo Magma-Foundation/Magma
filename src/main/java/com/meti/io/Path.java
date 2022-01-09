@@ -14,9 +14,11 @@ public interface Path {
 
     File createAsFile() throws IOException;
 
-    void ensureAsDirectory() throws IOException;
+    Directory ensureAsDirectory() throws IOException;
 
     File ensureAsFile() throws IOException;
+
+    Option<Directory> existingAsDirectory();
 
     Option<File> existingAsFile();
 
@@ -26,7 +28,7 @@ public interface Path {
 
     Path relativize(Path path);
 
-    NIOPath resolveChild(String name);
+    Path resolveChild(String name);
 
     Stream<String> streamNames();
 

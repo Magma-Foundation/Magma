@@ -38,14 +38,22 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
     }
 
     @Override
-    public void ensureAsDirectory() throws IOException {
+    public Directory ensureAsDirectory() throws IOException {
         if (!exists()) createAsDirectory();
+        return this;
     }
 
     @Override
     public File ensureAsFile() throws IOException {
         if (!exists()) createAsFile();
         return this;
+    }
+
+    @Override
+    public Option<Directory> existingAsDirectory() {
+        return exists() && Files.isDirectory(value)
+                ? new Some<>(this)
+                : new None<>();
     }
 
     @Override
@@ -80,7 +88,7 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
     }
 
     @Override
-    public NIOPath resolveChild(String name) {
+    public Path resolveChild(String name) {
         return new NIOPath(value.resolve(name));
     }
 

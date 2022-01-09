@@ -1,7 +1,6 @@
 package com.meti;
 
 import com.meti.compile.MagmaCCompiler;
-import com.meti.io.NIOPath;
 import com.meti.io.Path;
 import com.meti.module.Module;
 import com.meti.source.Source;
@@ -14,7 +13,7 @@ import java.util.List;
 import static com.meti.io.NIOPath.Root;
 
 public class Application {
-    public static final NIOPath Out = Root.resolveChild("out");
+    public static final Path Out = Root.resolveChild("out");
     protected static final String AppName = "Application";
     protected final Module module;
 

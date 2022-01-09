@@ -1,8 +1,13 @@
 package com.meti.option;
 
+import com.meti.core.C1;
 import com.meti.core.F1;
 
 public class None<T> implements Option<T> {
+    @Override
+    public <E extends Exception> void ifPresent(C1<T, E> consumer) {
+    }
+
     @Override
     public boolean isPresent() {
         return false;
