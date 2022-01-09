@@ -13,8 +13,8 @@ public record ReturnRenderer(Node node) implements Renderer {
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asText().compute();
-            return new Some<>(new Text("return ").append(renderedChild).append(";"));
+            var renderedChild = child.apply(Attribute.Type.Value).asText();
+            return new Some<>(renderedChild.prepend("return ").append(";"));
         }
         return new None<>();
     }
