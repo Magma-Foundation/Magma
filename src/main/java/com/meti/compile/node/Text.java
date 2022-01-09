@@ -17,6 +17,10 @@ public record Text(String value) {
         return new Text(value + other.value);
     }
 
+    public char apply(int i) {
+        return value.charAt(i);
+    }
+
     public Option<Integer> firstIndexOfChar(char c) {
         var index = value.indexOf(c);
         return index == -1
@@ -30,6 +34,10 @@ public record Text(String value) {
 
     public Text prepend(String prefix) {
         return new Text(prefix + value);
+    }
+
+    public int size() {
+        return value.length();
     }
 
     public Text slice(int start, int end) {

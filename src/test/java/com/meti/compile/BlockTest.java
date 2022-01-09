@@ -11,6 +11,11 @@ public class BlockTest {
     }
 
     @Test
+    void inner() {
+        assertCompile("{{}{}}", "{{}{}}");
+    }
+
+    @Test
     void one_line() {
         assertCompile("{return 420}", "{return 420;}");
     }
