@@ -41,28 +41,15 @@ public record MagmaCCompiler(String input) {
         return renderNodeTree(node);
     }
 
-    private String renderNodeTree(Node node) throws CompileException {
-        Node withValue;
-        if (node.is(Node.Type.Return)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            var valueString = renderNodeTree(value);
-            withValue = node.withValue(new Content(new Input(valueString)));
-        } else if (node.is(Node.Type.Block)) {
-            var lines = node.getLinesAsStream().collect(Collectors.toList());
-            var newLines = new ArrayList<Node>();
-            for (Node line : lines) {
-                newLines.add(new Content(new Input(renderNodeTree(line))));
-            }
-            withValue = node.withLines(newLines);
-        } else {
-            withValue = node;
-        }
-        return renderNode(withValue);
-    }
-
     private String renderNode(Node node) throws CompileException {
-        if(node.is(Node.Type.Function)) {
-            node.apply(Attribute.Type.Name).asInput();
+        if (node.is(Node.Type.Function)) {
+            var identity = node.apply(Attribute.Type.Identity).asNode();
+            var text = identity.apply(Attribute.Type.Value)
+                    .asInput()
+                    .getInput();
+            var value = node.apply(Attribute.Type.Value).asNode();
+            var renderedValue = value.apply(Attribute.Type.Value).asInput();
+            return text + "()" + renderedValue;
         }
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
@@ -81,5 +68,24 @@ public record MagmaCCompiler(String input) {
         } else {
             throw new CompileException("Unable to render node:" + node);
         }
+    }
+
+    private String renderNodeTree(Node node) throws CompileException {
+        Node withValue;
+        if (node.is(Node.Type.Return)) {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            var valueString = renderNodeTree(value);
+            withValue = node.withValue(new Content(new Input(valueString)));
+        } else if (node.is(Node.Type.Block)) {
+            var lines = node.getLinesAsStream().collect(Collectors.toList());
+            var newLines = new ArrayList<Node>();
+            for (Node line : lines) {
+                newLines.add(new Content(new Input(renderNodeTree(line))));
+            }
+            withValue = node.withLines(newLines);
+        } else {
+            withValue = node;
+        }
+        return renderNode(withValue);
     }
 }

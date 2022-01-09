@@ -5,10 +5,6 @@ import com.meti.compile.Input;
 import com.meti.compile.Node;
 
 public interface Attribute {
-    default Node asField() throws AttributeException {
-        throw new AttributeException("Not a field.");
-    }
-
     default Input asInput() throws AttributeException {
         throw new AttributeException("Not input.");
     }
