@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static com.meti.compile.CompiledTest.assertCompile;
 
-class MagmaCCompilerTest {
+public class IntegerTest {
     @Test
-    void compile() {
-        assertCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");
+    void integer() {
+        assertCompile("420", "420");
     }
 }
