@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.compile.common.block;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;

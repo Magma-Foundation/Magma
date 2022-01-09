@@ -1,11 +1,18 @@
-package com.meti.compile;
+package com.meti.compile.magma;
 
+import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.common.block.BlockLexer;
+import com.meti.compile.common.integer.IntegerLexer;
+import com.meti.compile.common.integer.IntegerType;
+import com.meti.compile.lex.LexException;
+import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
+import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.option.None;
 import com.meti.option.Option;
 
@@ -77,7 +84,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    Node lex() throws CompileException {
+    public Node lex() throws CompileException {
         return lexAST(text);
     }
 

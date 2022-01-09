@@ -1,5 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.common.integer;
 
+import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.option.None;

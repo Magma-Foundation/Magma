@@ -1,5 +1,7 @@
-package com.meti.compile;
+package com.meti.compile.magma;
 
+import com.meti.compile.common.Structure;
+import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.option.None;

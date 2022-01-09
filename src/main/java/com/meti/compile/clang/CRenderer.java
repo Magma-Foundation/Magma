@@ -1,12 +1,18 @@
-package com.meti.compile;
+package com.meti.compile.clang;
 
+import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.common.block.BlockRenderer;
+import com.meti.compile.common.integer.IntegerRenderer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
+import com.meti.compile.render.RenderException;
+import com.meti.compile.render.Renderer;
+import com.meti.compile.common.returns.ReturnRenderer;
 import com.meti.option.None;
 import com.meti.option.Option;
 
@@ -73,7 +79,7 @@ public record CRenderer(Node root) {
         return current;
     }
 
-    Text render() throws CompileException {
+    public Text render() throws CompileException {
         return renderAST(root);
     }
 

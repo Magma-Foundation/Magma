@@ -1,5 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.common.integer;
 
+import com.meti.compile.render.Renderer;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.node.Node;
@@ -8,7 +9,7 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-record IntegerRenderer(Node node) implements Renderer {
+public record IntegerRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Integer)) {

@@ -1,19 +1,15 @@
-package com.meti.compile;
+package com.meti.compile.common.integer;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.BooleanAttribute;
 import com.meti.compile.attribute.IntegerAttribute;
 import com.meti.compile.node.Node;
 
-public record IntegerType(boolean signed, int bits) implements Node {
+record IntegerNode(int value) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
-            case Sign -> new BooleanAttribute(signed);
-            case Bits -> new IntegerAttribute(bits);
-            default -> throw new AttributeException(type);
-        };
+        if (type == Attribute.Type.Value) return new IntegerAttribute(value);
+        throw new AttributeException(type);
     }
 
     @Override

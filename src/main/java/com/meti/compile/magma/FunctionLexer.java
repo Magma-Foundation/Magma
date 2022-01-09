@@ -1,8 +1,11 @@
-package com.meti.compile;
+package com.meti.compile.magma;
 
+import com.meti.compile.common.Field;
+import com.meti.compile.common.Function;
+import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
-import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Text;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;

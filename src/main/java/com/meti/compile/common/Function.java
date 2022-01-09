@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.compile.common;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
@@ -8,7 +8,7 @@ import com.meti.compile.node.Node;
 
 import java.util.stream.Stream;
 
-record Function(Node identity, Content body) implements Node {
+public record Function(Node identity, Content body) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {

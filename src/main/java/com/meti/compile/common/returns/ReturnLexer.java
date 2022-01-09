@@ -1,5 +1,6 @@
-package com.meti.compile;
+package com.meti.compile.common.returns;
 
+import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
