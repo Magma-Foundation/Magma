@@ -9,18 +9,14 @@ public record FunctionLexer(Input input) implements Lexer {
     public Option<Node> lex() {
         if (input.getInput().startsWith("def ")) {
             var paramStart = input.getInput().indexOf('(');
-            var name = new Input(input.getInput()).slice("def ".length(), paramStart).getInput();
+            var name = input.slice("def ".length(), paramStart);
             var typeSeparator = input.getInput().indexOf(':');
             var valueSeparator = input.getInput().indexOf("=>");
-            var typeString = new Input(input.getInput()).slice(typeSeparator + 1, valueSeparator).getInput();
-            String type;
-            if (typeString.equals("I16")) {
-                type = "int";
-            } else {
-                type = "unsigned int";
-            }
-            return new Some<>(new Content(type + " " + name + "(){return 0;}"));
+            var type2 = new Content(input.slice(typeSeparator + 1, valueSeparator));
+            var value = new Content(input.slice(valueSeparator + 2));
+            return new Some<>(new Function(name, type2, value));
         }
         return new None<>();
     }
+
 }

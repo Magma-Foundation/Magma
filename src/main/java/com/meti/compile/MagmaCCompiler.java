@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.Attribute;
+
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -16,8 +18,8 @@ public record MagmaCCompiler(String input) {
     private static Node lexNodeTree(Input input) throws CompileException {
         var node = lexNode(input);
         if (node.is(Node.Type.Return)) {
-            var value = node.getValueAsNode();
-            var valueString = value.getValueAsString();
+            var value = node.apply(Attribute.Type.Value).asNode();
+            var valueString = value.apply(Attribute.Type.Value).asInput().getInput();
             var child = lexNodeTree(new Input(valueString));
             return node.withValue(child);
         }
@@ -25,7 +27,7 @@ public record MagmaCCompiler(String input) {
             var lines = node.getLinesAsStream().collect(Collectors.toList());
             var newLines = new ArrayList<Node>();
             for (Node line : lines) {
-                newLines.add(lexNodeTree(new Input(line.getValueAsString())));
+                newLines.add(lexNodeTree(new Input(line.apply(Attribute.Type.Value).asInput().getInput())));
             }
             return node.withLines(newLines);
         }
@@ -42,14 +44,14 @@ public record MagmaCCompiler(String input) {
     private String renderNodeTree(Node node) throws CompileException {
         Node withValue;
         if (node.is(Node.Type.Return)) {
-            var value = node.getValueAsNode();
+            var value = node.apply(Attribute.Type.Value).asNode();
             var valueString = renderNodeTree(value);
-            withValue = node.withValue(new Content(valueString));
+            withValue = node.withValue(new Content(new Input(valueString)));
         } else if (node.is(Node.Type.Block)) {
             var lines = node.getLinesAsStream().collect(Collectors.toList());
             var newLines = new ArrayList<Node>();
             for (Node line : lines) {
-                newLines.add(new Content(renderNodeTree(line)));
+                newLines.add(new Content(new Input(renderNodeTree(line))));
             }
             withValue = node.withLines(newLines);
         } else {
@@ -59,20 +61,23 @@ public record MagmaCCompiler(String input) {
     }
 
     private String renderNode(Node node) throws CompileException {
+        if(node.is(Node.Type.Function)) {
+            node.apply(Attribute.Type.Name).asInput();
+        }
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
             var children = node.getLinesAsStream().collect(Collectors.toList());
             for (Node node1 : children) {
-                builder.append(node1.getValueAsString());
+                builder.append(node1.apply(Attribute.Type.Value).asInput().getInput());
             }
             return builder.append("}").toString();
         }
         if (node.is(Node.Type.Return)) {
-            var child = node.getValueAsNode();
-            var renderedChild = child.getValueAsString();
+            var child = node.apply(Attribute.Type.Value).asNode();
+            var renderedChild = child.apply(Attribute.Type.Value).asInput().getInput();
             return "return " + renderedChild + ";";
         } else if (node.is(Node.Type.Content)) {
-            return node.getValueAsString();
+            return node.apply(Attribute.Type.Value).asInput().getInput();
         } else {
             throw new CompileException("Unable to render node:" + node);
         }

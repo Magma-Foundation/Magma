@@ -14,7 +14,7 @@ public record BlockLexer(Input input) implements Lexer {
             var values = new ArrayList<Node>();
             for (String line : lines) {
                 if (!line.isBlank()) {
-                    values.add(new Content(line));
+                    values.add(new Content(new Input(line)));
                 }
             }
             return new Some<>(new Block(values));

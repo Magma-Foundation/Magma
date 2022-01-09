@@ -27,6 +27,10 @@ public class Input {
         return new Input(getInput().substring(start, end));
     }
 
+    public Input slice(int offset) {
+        return new Input(input.substring(offset));
+    }
+
     boolean startsWithChar() {
         return hasContent() && getInput().indexOf('{') == 0;
     }

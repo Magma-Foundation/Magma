@@ -1,15 +1,13 @@
 package com.meti.compile;
 
+import com.meti.Attribute;
+
 import java.util.List;
 import java.util.stream.Stream;
 
 public interface Node {
-    default Node getValueAsNode() throws AttributeException {
-        throw new AttributeException("No value is present of type Node.");
-    }
-
-    default String getValueAsString() throws AttributeException {
-        throw new AttributeException("Node does not have value as string.");
+    default Attribute apply(Attribute.Type type) throws AttributeException {
+        throw new AttributeException("Node had no attributes.");
     }
 
     default Stream<Node> getLinesAsStream() throws AttributeException {
@@ -28,6 +26,6 @@ public interface Node {
 
     enum Type {
         Content,
-        Block, Return
+        Block, Function, Field, Return
     }
 }

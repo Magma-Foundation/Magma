@@ -9,7 +9,7 @@ public record IntegerLexer(Input input) implements Lexer {
     public Option<Node> lex() {
         try {
             Integer.parseInt(input.getInput());
-            return new Some<>(new Content(input.getInput()));
+            return new Some<>(new Content(new Input(input.getInput())));
         } catch (NumberFormatException e) {
             return new None<>();
         }

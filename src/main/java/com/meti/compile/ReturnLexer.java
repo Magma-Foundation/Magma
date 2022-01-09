@@ -9,7 +9,7 @@ public record ReturnLexer(Input input) implements Lexer {
     public Option<Node> lex() {
         if (input.getInput().startsWith("return ")) {
             var valueString = new Input(input.getInput()).slice("return ".length(), input.getInput().length()).getInput();
-            var value = new Content(valueString);
+            var value = new Content(new Input(valueString));
             return new Some<>(new Return(value));
         }
         return new None<>();
