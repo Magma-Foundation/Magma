@@ -5,10 +5,13 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Content;
-import com.meti.compile.node.Text;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Text;
+import com.meti.option.None;
+import com.meti.option.Option;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
@@ -29,33 +32,21 @@ public record CRenderer(Node root) {
         }
     }
 
-    static String renderNode(Node node) throws CompileException {
-        if (node.is(Node.Type.Function)) {
-            var identity = node.apply(Attribute.Type.Identity).asNode();
-            var text = identity.apply(Attribute.Type.Value)
-                    .asInput()
-                    .compute();
-            var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asInput().compute();
-            return text + "()" + renderedValue;
-        }
-        if (node.is(Node.Type.Block)) {
-            var builder = new StringBuilder().append("{");
-            var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
-            for (Node node1 : children) {
-                builder.append(node1.apply(Attribute.Type.Value).asInput().compute());
+    static Text renderNode(Node node) throws CompileException {
+        var renderers = List.of(
+                new FunctionRenderer(node),
+                new BlockRenderer(node),
+                new ReturnRenderer(node));
+
+        Option<Text> current = new None<>();
+        for (Renderer renderer : renderers) {
+            var result = renderer.render();
+            if (result.isPresent()) {
+                current = result;
             }
-            return builder.append("}").toString();
         }
-        if (node.is(Node.Type.Return)) {
-            var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asInput().compute();
-            return "return " + renderedChild + ";";
-        } else if (node.is(Node.Type.Content)) {
-            return node.apply(Attribute.Type.Value).asInput().compute();
-        } else {
-            throw new CompileException("Unable to render node: " + node);
-        }
+
+        return current.orElseThrow(() -> new CompileException("Unable to render node: " + node));
     }
 
     public static Node renderSubFields(Node root) throws CompileException {
@@ -97,6 +88,6 @@ public record CRenderer(Node root) {
             }
             current = current.with(type, new ListNodeAttribute(newNodes));
         }
-        return new Text(renderNode(current));
+        return renderNode(current);
     }
 }

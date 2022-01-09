@@ -9,6 +9,14 @@ public record Text(String value) {
         this.value = value.trim();
     }
 
+    public Text append(String slice) {
+        return new Text(value + slice);
+    }
+
+    public Text append(Text other) {
+        return new Text(value + other.value);
+    }
+
     public Option<Integer> firstIndexOfChar(char c) {
         var index = value.indexOf(c);
         return index == -1
