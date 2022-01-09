@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.compile.MagmaCCompiler;
 import com.meti.io.NIOPath;
+import com.meti.io.Path;
 import com.meti.module.Module;
 import com.meti.source.Source;
 
@@ -49,7 +50,7 @@ public class Application {
         try {
             Out.ensureAsDirectory();
             var target = source.computePackage()
-                    .reduce(Out, NIOPath::resolveChild, (previous, next) -> next)
+                    .reduce(Out, Path::resolveChild, (previous, next) -> next)
                     .resolveChild(name + ".c")
                     .ensureAsFile()
                     .writeAsString(output);

@@ -1,6 +1,8 @@
 package com.meti;
 
+import com.meti.io.File;
 import com.meti.io.NIOPath;
+import com.meti.io.Path;
 import com.meti.module.SingleModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleApplicationTest {
     private static final NIOPath Source = NIOPath.Root.resolveChild("index.mg");
-    private static final NIOPath Target = Out.resolveChild("index.c");
+    private static final Path Target = Out.resolveChild("index.c");
 
     @Test
     void creates_target() throws IOException {
@@ -39,8 +41,8 @@ public class SingleApplicationTest {
     void empty() throws IOException {
         Source.createAsFile();
         runImpl();
-        assertTrue(Target.existing()
-                .map(NIOPath::readAsString)
+        assertTrue(Target.existingAsFile()
+                .map(File::readAsString)
                 .map(String::isBlank)
                 .orElse(false));
     }
@@ -55,8 +57,8 @@ public class SingleApplicationTest {
     void test_main() throws IOException {
         Source.createAsFile().writeAsString("def main() : I16 => {return 0;}");
         runImpl();
-        assertEquals("int main(){return 0;}", Target.existing()
-                .map(NIOPath::readAsString)
+        assertEquals("int main(){return 0;}", Target.existingAsFile()
+                .map(File::readAsString)
                 .orElse(""));
     }
 }

@@ -4,19 +4,30 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.meti.io.NIOPath.Root;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NIOPathTest {
-    private static final NIOPath Parent = NIOPath.Root.resolveChild("parent");
+    private static final NIOPath Parent = Root.resolveChild("parent");
 
     @Test
     void hasExtensionOf() {
-        var path = NIOPath.Root.resolveChild("test.ing");
+        var path = Root.resolveChild("test.ing");
         assertTrue(path.hasExtensionOf("ing"));
+    }
+
+    @Test
+    void relativize() {
+        var parent = Root.resolveChild("first");
+        var child = parent.resolveChild("second").resolveChild("third.txt");
+        var relativized = parent.relativize(child);
+        var expected = Paths.get("second", "third.txt").toString();
+        var actual = relativized.asString();
+        assertEquals(expected, actual);
     }
 
     @AfterEach

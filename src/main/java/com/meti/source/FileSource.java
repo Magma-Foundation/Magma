@@ -1,16 +1,15 @@
 package com.meti.source;
 
-import com.meti.io.NIOPath;
+import com.meti.io.File;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record PathSource(NIOPath path, List<String> packageList) implements Source {
-
+public record FileSource(File file, List<String> packageList) implements Source {
     @Override
     public String computeName() {
-        return path.computeFileNameWithoutExtension();
+        return file.computeFileNameWithoutExtension();
     }
 
     @Override
@@ -20,6 +19,6 @@ public record PathSource(NIOPath path, List<String> packageList) implements Sour
 
     @Override
     public String read() throws IOException {
-        return path.readAsString();
+        return file.readAsString();
     }
 }
