@@ -54,7 +54,7 @@ public record CRenderer(Node root) {
         } else if (node.is(Node.Type.Content)) {
             return node.apply(Attribute.Type.Value).asInput().compute();
         } else {
-            throw new CompileException("Unable to render node:" + node);
+            throw new CompileException("Unable to render node: " + node);
         }
     }
 
