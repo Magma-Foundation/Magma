@@ -34,6 +34,7 @@ public record CRenderer(Node root) {
 
     static Text renderNode(Node node) throws CompileException {
         var renderers = List.of(
+                new IntegerRenderer(node),
                 new StructureRenderer(node),
                 new FunctionRenderer(node),
                 new BlockRenderer(node),
