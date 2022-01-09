@@ -2,7 +2,6 @@ package com.meti.module;
 
 import com.meti.io.Directory;
 import com.meti.io.File;
-import com.meti.io.NIOPath;
 import com.meti.io.Path;
 import com.meti.source.FileSource;
 import com.meti.source.Source;
