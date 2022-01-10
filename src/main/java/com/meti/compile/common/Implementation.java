@@ -31,7 +31,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    protected Implementation complete(Node node, Set<Node> parameters) {
+    protected Node complete(Node node, Set<Node> parameters) {
         return new Implementation(node, parameters, body);
     }
 
@@ -44,6 +44,6 @@ public final class Implementation extends Function {
 
     @Override
     public boolean is(Type type) {
-        return type == Type.Function;
+        return type == Type.Implementation;
     }
 }

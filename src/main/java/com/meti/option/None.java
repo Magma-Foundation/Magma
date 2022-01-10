@@ -5,7 +5,7 @@ import com.meti.core.F1;
 
 public class None<T> implements Option<T> {
     @Override
-    public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E {
+    public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) {
         return new None<>();
     }
 
@@ -31,6 +31,11 @@ public class None<T> implements Option<T> {
     @Override
     public T orElse(T other) {
         return other;
+    }
+
+    @Override
+    public <E extends Exception> T orElseGet(Supplier<T, E> supplier) throws E {
+        return supplier.get();
     }
 
     @Override

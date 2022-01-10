@@ -37,7 +37,7 @@ public abstract class Function implements Node {
         };
     }
 
-    protected abstract Implementation complete(Node node, Set<Node> parameters);
+    protected abstract Node complete(Node node, Set<Node> parameters);
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {

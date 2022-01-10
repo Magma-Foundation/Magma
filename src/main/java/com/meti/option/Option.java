@@ -16,5 +16,7 @@ public interface Option<T> {
 
     T orElse(T other);
 
+    <E extends Exception> T orElseGet(Supplier<T, E> supplier) throws E;
+
     <E extends Exception> T orElseThrow(Supplier<E, E> supplier) throws E;
 }

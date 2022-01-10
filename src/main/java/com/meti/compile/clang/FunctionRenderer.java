@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public record FunctionRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
-        if (node.is(Node.Type.Function)) {
+        if (node.is(Node.Type.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
 

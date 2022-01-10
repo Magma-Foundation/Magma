@@ -60,7 +60,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         for (Node node : lexed) {
             if (node.is(Node.Type.Boolean)) {
                 resolved.add(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
-            } else if (node.is(Node.Type.Function)) {
+            } else if (node.is(Node.Type.Implementation)) {
                 var oldParameters = node.apply(Attribute.Type.Parameters)
                         .asStreamOfNodes()
                         .collect(Collectors.toList());
