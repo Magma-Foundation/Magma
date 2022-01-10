@@ -1,9 +1,11 @@
 package com.meti;
 
 import com.meti.compile.MagmaCCompiler;
+import com.meti.compile.Output;
 import com.meti.compile.clang.CFormat;
 import com.meti.io.Path;
 import com.meti.module.Module;
+import com.meti.source.Package;
 import com.meti.source.Source;
 
 import java.io.IOException;
@@ -23,9 +25,19 @@ public class Application {
 
     void run() throws ApplicationException {
         var sources = listSources();
-        var targets = new HashSet<String>();
+        var inputMap = new HashMap<Package, String>();
         for (var source : sources) {
-            targets.addAll(Application.compile(source));
+            try {
+                inputMap.put(source.computePackage(), source.read());
+            } catch (IOException e) {
+                throw new ApplicationException(e);
+            }
+        }
+        var outputMap = new MagmaCCompiler(inputMap).compile();
+        var targets = new HashSet<String>();
+        for (Package aPackage : outputMap.keySet()) {
+            var output = compile(aPackage, outputMap.get(aPackage));
+            targets.addAll(output);
         }
 
         build(targets);
@@ -41,15 +53,11 @@ public class Application {
         return sources;
     }
 
-    private static Set<String> compile(Source source) throws ApplicationException {
-        var name = source.computePackage().computeName();
-        var input = Application.readSource(source);
-        var output = new MagmaCCompiler(input).compile();
-
+    private static Set<String> compile(Package package_, Output<String> output) throws ApplicationException {
         try {
             Out.ensureAsDirectory();
 
-            var packagePath = source.computePackage().parent()
+            var packagePath = package_.parent()
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 
@@ -57,7 +65,7 @@ public class Application {
             var formats = output.streamFormats().collect(Collectors.toList());
             for (CFormat format : formats) {
                 var target = packagePath
-                        .resolveChild(name + "." + format.getExtension())
+                        .resolveChild(package_.computeName() + "." + format.getExtension())
                         .ensureAsFile()
                         .writeAsString(output.apply(format, ""));
                 targets.add(Out.relativize(target)
@@ -71,13 +79,5 @@ public class Application {
     }
 
     protected void build(Collection<String> targets) throws ApplicationException {
-    }
-
-    private static String readSource(Source source) throws ApplicationException {
-        try {
-            return source.read();
-        } catch (IOException e) {
-            throw new ApplicationException(e);
-        }
     }
 }

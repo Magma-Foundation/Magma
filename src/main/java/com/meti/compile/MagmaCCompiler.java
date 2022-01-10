@@ -6,21 +6,34 @@ import com.meti.compile.common.block.Splitter;
 import com.meti.compile.magma.MagmaLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
+import com.meti.source.Package;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public record MagmaCCompiler(String input) {
-    public Output<String> compile() throws CompileException {
+public record MagmaCCompiler(Map<Package, String> inputMap) {
+    public Map<Package, Output<String>> compile() throws CompileException {
+        var outputMap = new HashMap<Package, Output<String>>();
+        for (Package aPackage : inputMap.keySet()) {
+            var input = compileInput(aPackage, inputMap.get(aPackage));
+            outputMap.put(aPackage, input);
+        }
+        return outputMap;
+    }
+
+    private Output<String> compileInput(Package package_, String input) throws CompileException {
         if (input.isBlank()) return new EmptyOutput<>();
 
-        var root = new Text(this.input);
-        var input = new Splitter(root).split().collect(Collectors.toList());
+        var root = new Text(input);
+        var lines = new Splitter(root)
+                .split()
+                .collect(Collectors.toList());
+
         var nodes = new ArrayList<Node>();
-        for (Text oldLine : input) {
+        for (Text oldLine : lines) {
             nodes.add(new MagmaLexer(oldLine).lex());
         }
 
@@ -28,7 +41,7 @@ public record MagmaCCompiler(String input) {
         for (Node node : nodes) {
             if (node.is(Node.Type.Structure)) {
                 List<Node> list = new ArrayList<>();
-                if(!map.containsKey(CFormat.Header)) {
+                if (!map.containsKey(CFormat.Header)) {
                     map.put(CFormat.Header, list);
                 } else {
                     list = map.get(CFormat.Header);
@@ -36,7 +49,7 @@ public record MagmaCCompiler(String input) {
                 list.add(node);
             } else {
                 List<Node> list = new ArrayList<>();
-                if(!map.containsKey(CFormat.Source)) {
+                if (!map.containsKey(CFormat.Source)) {
                     map.put(CFormat.Source, list);
                 } else {
                     list = map.get(CFormat.Source);
