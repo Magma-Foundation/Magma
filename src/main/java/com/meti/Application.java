@@ -42,14 +42,14 @@ public class Application {
     }
 
     private static Set<String> compile(Source source) throws ApplicationException {
-        var name = source.computeName();
+        var name = source.computePackage().computeName();
         var input = Application.readSource(source);
         var output = new MagmaCCompiler(input).compile();
 
         try {
             Out.ensureAsDirectory();
 
-            var packagePath = source.computePackage()
+            var packagePath = source.computePackage().parent()
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 

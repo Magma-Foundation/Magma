@@ -3,6 +3,7 @@ package com.meti.module;
 import com.meti.io.Directory;
 import com.meti.io.NIOPath;
 import com.meti.io.Path;
+import com.meti.source.Package;
 import com.meti.source.Source;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,8 @@ class DirectoryModuleTest {
         var module = new DirectoryModule(parent);
         assertTrue(module.listSources()
                 .stream()
-                .map(Source::computeName)
+                .map(Source::computePackage)
+                .map(Package::computeName)
                 .allMatch(name -> module.hasSource(name, Collections.emptyList())));
     }
 
