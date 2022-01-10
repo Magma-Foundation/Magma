@@ -8,11 +8,12 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
+import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.compile.lex.LexException;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Primitive;
 import com.meti.compile.node.Text;
-import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.option.None;
 import com.meti.option.Option;
 
@@ -44,6 +45,13 @@ public record MagmaLexer(Text text) {
     }
 
     static Node lexType(Text text) throws LexException {
+        var values = Primitive.values();
+        for (Primitive value : values) {
+            if (text.compute().equals(value.name())) {
+                return value;
+            }
+        }
+
         var isSigned = text.startsWithChar('I');
         var isUnsigned = text.startsWithChar('U');
         if (isSigned || isUnsigned) {

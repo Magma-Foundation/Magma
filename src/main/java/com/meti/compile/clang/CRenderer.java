@@ -7,12 +7,12 @@ import com.meti.compile.attribute.ListNodeAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
+import com.meti.compile.common.returns.ReturnRenderer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.compile.render.RenderException;
 import com.meti.compile.render.Renderer;
-import com.meti.compile.common.returns.ReturnRenderer;
 import com.meti.option.None;
 import com.meti.option.Option;
 
@@ -25,7 +25,13 @@ public record CRenderer(Node root) {
         var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
-        if (type.is(Node.Type.Integer)) {
+        if (type.is(Node.Type.Primitive)) {
+            var rendered = type.apply(Attribute.Type.Name)
+                    .asText()
+                    .compute()
+                    .toLowerCase();
+            return name.prepend(rendered + " ");
+        } else if (type.is(Node.Type.Integer)) {
             var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
             var bits = type.apply(Attribute.Type.Bits).asInteger();
             String suffix;
