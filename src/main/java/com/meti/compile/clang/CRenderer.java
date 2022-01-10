@@ -8,6 +8,7 @@ import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
 import com.meti.compile.common.returns.ReturnRenderer;
+import com.meti.compile.common.variable.VariableRenderer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
@@ -49,13 +50,14 @@ public record CRenderer(Node root) {
         }
 
         var renderers = List.of(
+                new BlockRenderer(node),
                 new ExternRenderer(node),
+                new FunctionRenderer(node),
                 new ImportRenderer(node),
                 new IntegerRenderer(node),
+                new ReturnRenderer(node),
                 new StructureRenderer(node),
-                new FunctionRenderer(node),
-                new BlockRenderer(node),
-                new ReturnRenderer(node));
+                new VariableRenderer(node));
 
         Option<Text> current = new None<>();
         for (Renderer renderer : renderers) {
