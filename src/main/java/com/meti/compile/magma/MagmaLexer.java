@@ -10,6 +10,7 @@ import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.common.returns.ReturnLexer;
+import com.meti.compile.common.variable.VariableLexer;
 import com.meti.compile.lex.LexException;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
@@ -32,7 +33,8 @@ public record MagmaLexer(Text text) {
                 new BlockLexer(text),
                 new FunctionLexer(text),
                 new ReturnLexer(text),
-                new IntegerLexer(text));
+                new IntegerLexer(text),
+                new VariableLexer(text));
 
         Option<Node> current = new None<>();
         for (Lexer lexer : lexers) {
