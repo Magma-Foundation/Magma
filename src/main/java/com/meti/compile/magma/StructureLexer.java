@@ -24,7 +24,7 @@ public record StructureLexer(Text text) implements Lexer {
     private Structure extract(int fieldsStart) {
         var name = text.slice("struct ".length(), fieldsStart);
         var fields = text.slice(fieldsStart + 1, text.size() - 1);
-        var fieldsList = Arrays.stream(fields.compute().split(";"))
+        var fieldsList = Arrays.stream(fields.computeTrimmed().split(";"))
                 .filter(value -> !value.isBlank())
                 .map(Text::new)
                 .map(Content::new)

@@ -28,7 +28,7 @@ public record CRenderer(Node root) {
         if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText()
-                    .compute()
+                    .computeTrimmed()
                     .toLowerCase();
             return name.prepend(rendered + " ");
         } else if (type.is(Node.Type.Integer)) {
@@ -37,7 +37,7 @@ public record CRenderer(Node root) {
             String suffix;
             if (bits == 16) suffix = "int";
             else throw new RenderException("Unknown bit quantity: " + bits);
-            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.compute();
+            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
             return new Text(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
@@ -46,6 +46,7 @@ public record CRenderer(Node root) {
 
     static Text renderNode(Node node) throws CompileException {
         var renderers = List.of(
+                new ExternRenderer(node),
                 new ImportRenderer(node),
                 new IntegerRenderer(node),
                 new StructureRenderer(node),

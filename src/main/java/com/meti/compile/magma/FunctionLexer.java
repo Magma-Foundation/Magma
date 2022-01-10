@@ -13,11 +13,11 @@ import com.meti.option.Some;
 public record FunctionLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (text.compute().startsWith("def ")) {
-            var paramStart = text.compute().indexOf('(');
+        if (text.computeTrimmed().startsWith("def ")) {
+            var paramStart = text.computeTrimmed().indexOf('(');
             var name = text.slice("def ".length(), paramStart);
-            var typeSeparator = text.compute().indexOf(':');
-            var valueSeparator = text.compute().indexOf("=>");
+            var typeSeparator = text.computeTrimmed().indexOf(':');
+            var valueSeparator = text.computeTrimmed().indexOf("=>");
             var returnType = new Content(text.slice(typeSeparator + 1, valueSeparator));
             var value = new Content(text.slice(valueSeparator + 2));
             var identity = new Field(name, returnType);

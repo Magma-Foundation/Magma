@@ -11,8 +11,8 @@ import com.meti.option.Some;
 public record ReturnLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (text.compute().startsWith("return ")) {
-            var valueString = new Text(text.compute()).slice("return ".length(), text.compute().length()).compute();
+        if (text.computeTrimmed().startsWith("return ")) {
+            var valueString = new Text(text.computeTrimmed()).slice("return ".length(), text.computeTrimmed().length()).computeTrimmed();
             var value = new Content(new Text(valueString));
             return new Some<>(new Return(value));
         }

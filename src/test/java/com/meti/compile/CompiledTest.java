@@ -13,7 +13,7 @@ public class CompiledTest {
         assertCompile(CFormat.Source, input, output);
     }
 
-    static void assertHeaderCompile(String input, String output) {
+    static void assertHeaderCompiles(String input, String output) {
         assertCompile(CFormat.Header, input, output);
     }
 

@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 public record BlockLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (text.startsWithChar('{') && text.compute().endsWith("}")) {
-            var body = text.slice(1, text.compute().length() - 1);
+        if (text.startsWithChar('{') && text.computeTrimmed().endsWith("}")) {
+            var body = text.slice(1, text.computeTrimmed().length() - 1);
             var lines = new Splitter(body)
                     .split()
                     .collect(Collectors.toList());

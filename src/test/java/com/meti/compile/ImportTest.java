@@ -6,9 +6,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static com.meti.compile.CompiledTest.assertHeaderCompiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ImportTest {
+    @Test
+    void extern() {
+        assertHeaderCompiles("extern import stdio", "#include <stdio.h>\n");
+    }
+
     @Test
     void parent() throws CompileException {
         var index = new Packaging("inner", "Index");
@@ -17,7 +23,7 @@ public class ImportTest {
                 new Packaging("Parent"), ""
         )).compile();
 
-        var expected = "#include \"../Parent.h\"";
+        var expected = "#include \"../Parent.h\"\n";
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
@@ -31,7 +37,7 @@ public class ImportTest {
                 new Packaging("Sibling"), ""
         )).compile();
 
-        var expected = "#include \"Sibling.h\"";
+        var expected = "#include \"Sibling.h\"\n";
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);

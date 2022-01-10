@@ -2,16 +2,16 @@ package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
-import static com.meti.compile.CompiledTest.assertHeaderCompile;
+import static com.meti.compile.CompiledTest.assertHeaderCompiles;
 
 public class StructureTest {
     @Test
     void empty() {
-        assertHeaderCompile("struct Empty{}", "struct Empty{};");
+        assertHeaderCompiles("struct Empty{}", "struct Empty{};");
     }
 
     @Test
     void one_field() {
-        assertHeaderCompile("struct Wrapper{value : I16}", "struct Wrapper{int value;};");
+        assertHeaderCompiles("struct Wrapper{value : I16}", "struct Wrapper{int value;};");
     }
 }

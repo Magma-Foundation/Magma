@@ -70,7 +70,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
     private Map<CFormat, List<Node>> divide(ArrayList<Node> newNodes) {
         var map = new HashMap<CFormat, List<Node>>();
         for (Node node : newNodes) {
-            if (node.is(Node.Type.Structure) || node.is(Node.Type.Import)) {
+            if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
                 List<Node> list = new ArrayList<>();
                 if (!map.containsKey(CFormat.Header)) {
                     map.put(CFormat.Header, list);
