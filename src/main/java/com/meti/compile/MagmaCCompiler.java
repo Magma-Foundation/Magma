@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
     public Output<String> compile() throws CompileException {
-        if (input.isBlank()) return new EmptyOutput();
+        if (input.isBlank()) return new EmptyOutput<String>();
 
         var root = new Text(this.input);
         var input = new Splitter(root).split().collect(Collectors.toList());
