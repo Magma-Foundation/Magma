@@ -24,7 +24,7 @@ public class ImportRenderer implements Renderer {
             var packaging = node.apply(Attribute.Type.Value).asPackaging();
             var parent = packaging.streamParent().collect(Collectors.joining("/"));
             var name = packaging.computeName();
-            var formatted = parent.isEmpty() ? name : parent + " " + name;
+            var formatted = parent.isEmpty() ? name : parent + "/" + name;
             return new Some<>(new Text("#include \"" + formatted + ".h\"\n"));
         } else {
             return new None<>();

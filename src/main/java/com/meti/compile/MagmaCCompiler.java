@@ -1,5 +1,8 @@
 package com.meti.compile;
 
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.PackageAttribute;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.block.Splitter;
@@ -24,21 +27,49 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return outputMap;
     }
 
-    private Output<String> compileInput(Packaging packaging, String input) throws CompileException {
+    private Output<String> compileInput(Packaging thisPackage, String input) throws CompileException {
         if (input.isBlank()) return new EmptyOutput<>();
 
         var root = new Text(input);
-        var lines = new Splitter(root)
+        var lines = split(root);
+        var lexed = lex(lines);
+        var formatted = format(thisPackage, lexed);
+        var divided = divide(formatted);
+        return renderMap(divided);
+    }
+
+    private List<Text> split(Text root) {
+        return new Splitter(root)
                 .split()
                 .collect(Collectors.toList());
+    }
 
-        var nodes = new ArrayList<Node>();
+    private ArrayList<Node> lex(List<Text> lines) throws CompileException {
+        var oldNodes = new ArrayList<Node>();
         for (Text oldLine : lines) {
-            nodes.add(new MagmaLexer(oldLine).lex());
+            oldNodes.add(new MagmaLexer(oldLine).lex());
         }
+        return oldNodes;
+    }
 
+    private ArrayList<Node> format(Packaging thisPackage, ArrayList<Node> oldNodes) throws AttributeException {
+        var newNodes = new ArrayList<Node>();
+        for (Node node : oldNodes) {
+            if (node.is(Node.Type.Import)) {
+                var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
+                var newPackage = thisPackage.relativize(thatPackage);
+                var withPackage = node.with(Attribute.Type.Value, new PackageAttribute(newPackage));
+                newNodes.add(withPackage);
+            } else {
+                newNodes.add(node);
+            }
+        }
+        return newNodes;
+    }
+
+    private Map<CFormat, List<Node>> divide(ArrayList<Node> newNodes) {
         var map = new HashMap<CFormat, List<Node>>();
-        for (Node node : nodes) {
+        for (Node node : newNodes) {
             if (node.is(Node.Type.Structure) || node.is(Node.Type.Import)) {
                 List<Node> list = new ArrayList<>();
                 if (!map.containsKey(CFormat.Header)) {
@@ -57,7 +88,10 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 list.add(node);
             }
         }
+        return map;
+    }
 
+    private Output<String> renderMap(Map<CFormat, List<Node>> map) throws CompileException {
         var output = new MappedOutput<>(map);
         return output.map((format, list) -> {
             var builder = new StringBuilder();

@@ -6,13 +6,7 @@ import com.meti.compile.attribute.PackageAttribute;
 import com.meti.compile.node.Node;
 import com.meti.source.Packaging;
 
-public class Import implements Node {
-    private final Packaging packaging_;
-
-    public Import(Packaging packaging_) {
-        this.packaging_ = packaging_;
-    }
-
+public record Import(Packaging packaging_) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new PackageAttribute(packaging_);
@@ -22,5 +16,10 @@ public class Import implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Import;
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return new Import(attribute.asPackaging());
     }
 }

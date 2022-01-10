@@ -10,6 +10,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ImportTest {
     @Test
+    void parent() throws CompileException {
+        var index = new Packaging("inner", "Index");
+        var output = new MagmaCCompiler(Map.of(
+                index, "import Parent",
+                new Packaging("Parent"), ""
+        )).compile();
+
+        var expected = "#include \"../Parent.h\"";
+        var actual = output.get(index).apply(CFormat.Header, "");
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void sibling() throws CompileException {
         var index = new Packaging("Index");
         var output = new MagmaCCompiler(Map.of(
