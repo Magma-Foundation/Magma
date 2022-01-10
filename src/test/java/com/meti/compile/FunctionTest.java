@@ -6,8 +6,13 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
     @Test
-    void empty(){
+    void empty() {
         assertSourceCompile("def empty() : Void => {}", "void empty(){}");
+    }
+
+    @Test
+    void one_parameter() {
+        assertSourceCompile("def one_parameter(value : I16) : Void => {}", "void one_parameter(int value){}");
     }
 
     @Test

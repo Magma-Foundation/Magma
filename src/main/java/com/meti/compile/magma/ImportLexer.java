@@ -23,11 +23,11 @@ public record ImportLexer(Text text) implements Lexer {
         if (text.startsWithSlice("import ")) {
             var root = text.slice("import ".length());
             var package_ = root.lastIndexOfChar('.').map(nameSeparator -> {
-                var args = root.slice(0, nameSeparator).computeTrimmed()
+                var args = root.slice(0, nameSeparator).getTrimmedValue()
                         .split("\\.");
-                var name = root.slice(nameSeparator + 1).computeTrimmed();
+                var name = root.slice(nameSeparator + 1).getTrimmedValue();
                 return new Packaging(name, args);
-            }).orElse(new Packaging(root.computeTrimmed()));
+            }).orElse(new Packaging(root.getTrimmedValue()));
             return new Some<>(new Import(package_));
         }
         return new None<>();

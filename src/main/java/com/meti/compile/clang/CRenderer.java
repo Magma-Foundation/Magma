@@ -4,7 +4,7 @@ import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
-import com.meti.compile.attribute.NodeListAttribute;
+import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
 import com.meti.compile.common.returns.ReturnRenderer;
@@ -27,8 +27,7 @@ public record CRenderer(Node root) {
 
         if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
-                    .asText()
-                    .computeTrimmed()
+                    .asText().getTrimmedValue()
                     .toLowerCase();
             return name.prepend(rendered + " ");
         } else if (type.is(Node.Type.Integer)) {
@@ -37,7 +36,7 @@ public record CRenderer(Node root) {
             String suffix;
             if (bits == 16) suffix = "int";
             else throw new RenderException("Unknown bit quantity: " + bits);
-            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
+            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.getTrimmedValue();
             return new Text(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
@@ -112,7 +111,7 @@ public record CRenderer(Node root) {
             for (Node oldNode : oldNodes) {
                 newNodes.add(new Content(renderAST(oldNode)));
             }
-            current = current.with(type, new NodeListAttribute(newNodes));
+            current = current.with(type, new NodesAttribute(newNodes));
         }
         return current;
     }
@@ -126,7 +125,7 @@ public record CRenderer(Node root) {
             for (Node oldDeclaration : oldDeclarations) {
                 newDeclarations.add(new Content(renderField(oldDeclaration)));
             }
-            current = current.with(type, new NodeListAttribute(newDeclarations));
+            current = current.with(type, new NodesAttribute(newDeclarations));
         }
         return current;
     }

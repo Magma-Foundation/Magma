@@ -10,4 +10,8 @@ public class AttributeException extends CompileException {
     public AttributeException(String message) {
         super(message);
     }
+
+    public AttributeException(Attribute.Group group) {
+        this("Unknown attribute group: " + group);
+    }
 }
