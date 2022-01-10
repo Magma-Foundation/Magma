@@ -17,7 +17,7 @@ public record Function(Node identity, Set<Node> parameters, Node body) implement
             case Declarations -> Stream.of(Attribute.Type.Parameters);
             case Declaration -> Stream.of(Attribute.Type.Identity);
             case Node -> Stream.of(Attribute.Type.Value);
-            default -> throw new AttributeException(group);
+            default -> Stream.empty();
         };
     }
 
