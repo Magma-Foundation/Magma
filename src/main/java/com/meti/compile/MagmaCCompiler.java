@@ -3,6 +3,7 @@ package com.meti.compile;
 import com.meti.compile.attribute.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
+import com.meti.compile.common.Field;
 import com.meti.compile.common.Import;
 import com.meti.compile.common.block.Splitter;
 import com.meti.compile.common.integer.IntegerNode;
@@ -60,21 +61,18 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         for (Node node : lexed) {
             if (node.is(Node.Type.Boolean)) {
                 resolved.add(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
-            } else if (node.is(Node.Type.Implementation)) {
-                var oldParameters = node.apply(Attribute.Type.Parameters)
-                        .asStreamOfNodes()
-                        .collect(Collectors.toList());
-                var newParameters = new ArrayList<Node>();
-                for (Node parameter : oldParameters) {
-                    var oldType = parameter.apply(Attribute.Type.Type).asNode();
-                    if (oldType.is(Node.Type.Primitive) && oldType.apply(Attribute.Type.Name).asText().compute().equals("Bool")) {
-                        var newType = new IntegerType(true, 16);
-                        newParameters.add(parameter.with(Attribute.Type.Type, new NodeAttribute(newType)));
-                    } else {
-                        newParameters.add(parameter);
-                    }
+            } else if (node.is(Node.Type.Abstraction)) {
+                if (node.apply(Attribute.Type.Identity)
+                        .asNode()
+                        .apply(Attribute.Type.Flags)
+                        .asStreamOfFlags()
+                        .noneMatch(value -> value == Field.Flag.Extern)) {
+                    Node with = fixBooleans(node);
+                    resolved.add(with);
                 }
-                resolved.add(node.with(Attribute.Type.Parameters, new NodesAttribute(newParameters)));
+            } else if (node.is(Node.Type.Implementation)) {
+                Node with = fixBooleans(node);
+                resolved.add(with);
             } else {
                 resolved.add(node);
             }
@@ -140,5 +138,22 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             }
             return builder.toString().trim();
         });
+    }
+
+    private Node fixBooleans(Node node) throws AttributeException {
+        var oldParameters = node.apply(Attribute.Type.Parameters)
+                .asStreamOfNodes()
+                .collect(Collectors.toList());
+        var newParameters = new ArrayList<Node>();
+        for (Node parameter : oldParameters) {
+            var oldType = parameter.apply(Attribute.Type.Type).asNode();
+            if (oldType.is(Node.Type.Primitive) && oldType.apply(Attribute.Type.Name).asText().compute().equals("Bool")) {
+                var newType = new IntegerType(true, 16);
+                newParameters.add(parameter.with(Attribute.Type.Type, new NodeAttribute(newType)));
+            } else {
+                newParameters.add(parameter);
+            }
+        }
+        return node.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
     }
 }

@@ -1,5 +1,6 @@
 package com.meti.compile.attribute;
 
+import com.meti.compile.common.Field;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.source.Packaging;
@@ -23,6 +24,10 @@ public interface Attribute {
         throw new AttributeException("Not a package.");
     }
 
+    default Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
+        throw new AttributeException("Not a ist of flags.");
+    }
+
     default Stream<Node> asStreamOfNodes() throws AttributeException {
         throw new AttributeException("Not a list of nodes.");
     }
@@ -35,7 +40,7 @@ public interface Attribute {
         Value,
         Identity,
         Type,
-        Children, Sign, Bits, Fields, Parameters, Body, Name
+        Children, Sign, Bits, Fields, Parameters, Flags, Name
     }
 
     enum Group {
