@@ -2,26 +2,26 @@ package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
-import static com.meti.compile.CompiledTest.assertCompile;
+import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class BlockTest {
     @Test
     void empty_block() {
-        assertCompile("{}", "{}");
+        assertSourceCompile("{}", "{}");
     }
 
     @Test
     void inner() {
-        assertCompile("{{}{}}", "{{}{}}");
+        assertSourceCompile("{{}{}}", "{{}{}}");
     }
 
     @Test
     void one_line() {
-        assertCompile("{return 420}", "{return 420;}");
+        assertSourceCompile("{return 420}", "{return 420;}");
     }
 
     @Test
     void two_lines() {
-        assertCompile("{return 69;return 420;}", "{return 69;return 420;}");
+        assertSourceCompile("{return 69;return 420;}", "{return 69;return 420;}");
     }
 }
