@@ -23,7 +23,13 @@ public class ImportTest {
                 new Packaging("Parent"), ""
         )).compile();
 
-        var expected = "#include \"../Parent.h\"\n";
+        var expected = """
+                #ifndef Index_inner
+
+                #define Index_inner
+                #include "../Parent.h"
+
+                #endif""";
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
@@ -37,7 +43,13 @@ public class ImportTest {
                 new Packaging("Sibling"), ""
         )).compile();
 
-        var expected = "#include \"Sibling.h\"\n";
+        var expected = """
+                #ifndef Index
+
+                #define Index
+                #include "Sibling.h"
+
+                #endif""";
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);

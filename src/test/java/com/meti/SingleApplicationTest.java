@@ -55,7 +55,7 @@ public class SingleApplicationTest {
     void test_main() throws IOException {
         Source.createAsFile().writeAsString("def main() : I16 => {return 0;}");
         runImpl();
-        assertEquals("int main(){return 0;}", Target.existingAsFile()
+        assertEquals("#include \"index.h\"\nint main(){return 0;}", Target.existingAsFile()
                 .map(File::readAsString)
                 .orElse(""));
     }

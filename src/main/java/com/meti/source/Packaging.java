@@ -38,6 +38,11 @@ public class Packaging {
                '}';
     }
 
+    public String formatDeclared() {
+        if (parent.isEmpty()) return name;
+        return String.join("_", parent) + "_" + name;
+    }
+
     public Packaging relativize(Packaging that) {
         if (parent.isEmpty()) return that;
         if (that.parent.isEmpty()) {

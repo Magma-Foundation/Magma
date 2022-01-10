@@ -45,6 +45,10 @@ public record CRenderer(Node root) {
     }
 
     static Text renderNode(Node node) throws CompileException {
+        if (node.is(Node.Type.Content)) {
+            return node.apply(Attribute.Type.Value).asText();
+        }
+
         var renderers = List.of(
                 new ExternRenderer(node),
                 new ImportRenderer(node),

@@ -8,6 +8,7 @@ import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.Import;
 import com.meti.compile.common.block.Splitter;
 import com.meti.compile.magma.MagmaLexer;
+import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.source.Packaging;
@@ -72,8 +73,12 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var map = new HashMap<CFormat, List<Node>>();
         for (Node node : newNodes) {
             if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
-                List<Node> list = new ArrayList<>();
+                List<Node> list;
                 if (!map.containsKey(CFormat.Header)) {
+                    list = new ArrayList<>();
+                    var header = thisPackage.formatDeclared();
+                    list.add(new Content(new Text("\n#ifndef " + header + "\n")));
+                    list.add(new Content(new Text("\n#define " + header + "\n")));
                     map.put(CFormat.Header, list);
                 } else {
                     list = map.get(CFormat.Header);
@@ -91,6 +96,10 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 list.add(node);
             }
         }
+
+        if (map.containsKey(CFormat.Header)) {
+            map.get(CFormat.Header).add(new Content(new Text("\n#endif\n")));
+        }
         return map;
     }
 
@@ -101,7 +110,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             for (Node line : list) {
                 builder.append(new CRenderer(line).render().compute());
             }
-            return builder.toString();
+            return builder.toString().trim();
         });
     }
 }
