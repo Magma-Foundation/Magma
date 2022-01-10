@@ -5,6 +5,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.PackageAttribute;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
+import com.meti.compile.common.Import;
 import com.meti.compile.common.block.Splitter;
 import com.meti.compile.magma.MagmaLexer;
 import com.meti.compile.node.Node;
@@ -34,7 +35,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var lines = split(root);
         var lexed = lex(lines);
         var formatted = format(thisPackage, lexed);
-        var divided = divide(formatted);
+        var divided = divide(thisPackage, formatted);
         return renderMap(divided);
     }
 
@@ -67,7 +68,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return newNodes;
     }
 
-    private Map<CFormat, List<Node>> divide(ArrayList<Node> newNodes) {
+    private Map<CFormat, List<Node>> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
         var map = new HashMap<CFormat, List<Node>>();
         for (Node node : newNodes) {
             if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
@@ -79,8 +80,10 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 }
                 list.add(node);
             } else {
-                List<Node> list = new ArrayList<>();
+                List<Node> list;
                 if (!map.containsKey(CFormat.Source)) {
+                    list = new ArrayList<>();
+                    list.add(new Import(new Packaging(thisPackage.computeName())));
                     map.put(CFormat.Source, list);
                 } else {
                     list = map.get(CFormat.Source);
