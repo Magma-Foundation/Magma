@@ -43,13 +43,13 @@ public record MagmaLexer(Text text) {
             }
         }
 
-        return current.orElseThrow(() -> new LexException("Unknown input: " + text.getTrimmedValue()));
+        return current.orElseThrow(() -> new LexException("Unknown input: " + text.computeTrimmed()));
     }
 
     static Node lexType(Text text) throws LexException {
         var values = Primitive.values();
         for (Primitive value : values) {
-            if (text.getTrimmedValue().equals(value.name())) {
+            if (text.computeTrimmed().equals(value.name())) {
                 return value;
             }
         }
@@ -58,10 +58,10 @@ public record MagmaLexer(Text text) {
         var isUnsigned = text.startsWithChar('U');
         if (isSigned || isUnsigned) {
             var bitsText = text.slice(1);
-            var bits = Integer.parseInt(bitsText.getTrimmedValue());
+            var bits = Integer.parseInt(bitsText.computeTrimmed());
             return new IntegerType(isSigned, bits);
         } else {
-            throw new LexException("Cannot lex type: " + text);
+            throw new LexException("Cannot lex type: " + text.compute());
         }
     }
 
@@ -124,7 +124,7 @@ public record MagmaLexer(Text text) {
 
     private Node lexField(Text text) throws LexException {
         var separator = text.firstIndexOfChar(':')
-                .orElseThrow(() -> new LexException("Invalid field: " + text.getTrimmedValue()));
+                .orElseThrow(() -> new LexException("Invalid field: " + text.computeTrimmed()));
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexType(typeText);

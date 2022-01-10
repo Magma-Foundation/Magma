@@ -19,7 +19,7 @@ record StructureRenderer(Node node) implements Renderer {
             var fields = node.apply(Attribute.Type.Fields).asStreamOfNodes().collect(Collectors.toList());
             var builder = new StringBuilder();
             for (Node field : fields) {
-                builder.append(field.apply(Attribute.Type.Value).asText().getTrimmedValue()).append(";");
+                builder.append(field.apply(Attribute.Type.Value).asText().computeTrimmed()).append(";");
             }
             return new Some<>(name.prepend("struct ")
                     .append("{")

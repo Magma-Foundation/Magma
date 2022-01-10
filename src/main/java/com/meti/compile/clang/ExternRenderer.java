@@ -14,7 +14,7 @@ public record ExternRenderer(Node node) implements Renderer {
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Extern)) {
             return new Some<>(new Text("#include <" + node.apply(Attribute.Type.Value)
-                    .asText().getTrimmedValue() + ".h>\n"));
+                    .asText().computeTrimmed() + ".h>\n"));
         } else {
             return new None<>();
         }

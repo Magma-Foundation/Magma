@@ -52,8 +52,7 @@ public final class Text {
                 : new Some<>(index);
     }
 
-    @Deprecated
-    public String getTrimmedValue() {
+    public String computeTrimmed() {
         return trimmedValue;
     }
 

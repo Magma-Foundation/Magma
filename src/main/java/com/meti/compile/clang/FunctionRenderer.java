@@ -10,7 +10,6 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public record FunctionRenderer(Node node) implements Renderer {
@@ -25,7 +24,7 @@ public record FunctionRenderer(Node node) implements Renderer {
                     .collect(Collectors.toSet());
             var renderedParameterList = new ArrayList<String>();
             for (Node parameter : parameters) {
-                renderedParameterList.add(parameter.apply(Attribute.Type.Value).asText().getTrimmedValue());
+                renderedParameterList.add(parameter.apply(Attribute.Type.Value).asText().computeTrimmed());
             }
 
             renderedParameterList.sort(String::compareTo);

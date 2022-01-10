@@ -10,8 +10,6 @@ import com.meti.option.None;
 import com.meti.option.Option;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public record FunctionLexer(Text text) implements Lexer {
@@ -22,7 +20,7 @@ public record FunctionLexer(Text text) implements Lexer {
                 var name = text.slice("def ".length(), paramStart);
 
                 var paramEnd = text.firstIndexOfChar(')').orElse(-1);
-                var parameters = Arrays.stream(text.slice(paramStart + 1, paramEnd).getTrimmedValue()
+                var parameters = Arrays.stream(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                         .split(","))
                         .filter(value -> !value.isBlank())
                         .map(Text::new)

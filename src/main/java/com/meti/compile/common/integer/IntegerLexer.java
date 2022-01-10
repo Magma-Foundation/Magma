@@ -11,7 +11,7 @@ public record IntegerLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
         try {
-            var value = Integer.parseInt(text.getTrimmedValue());
+            var value = Integer.parseInt(text.computeTrimmed());
             return new Some<>(new IntegerNode(value));
         } catch (NumberFormatException e) {
             return new None<>();
