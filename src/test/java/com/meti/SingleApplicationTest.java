@@ -19,7 +19,7 @@ public class SingleApplicationTest {
 
     @Test
     void creates_target() throws IOException {
-        Source.createAsFile();
+        Source.createAsFile().writeAsString("def main() : I16 => {return 0;}");
         runImpl();
         assertTrue(Target.exists());
     }
@@ -42,10 +42,7 @@ public class SingleApplicationTest {
     void empty() throws IOException {
         Source.createAsFile();
         runImpl();
-        assertTrue(Target.existingAsFile()
-                .map(File::readAsString)
-                .map(String::isBlank)
-                .orElse(false));
+        assertTrue(Target.existingAsFile().isEmpty());
     }
 
     @AfterEach

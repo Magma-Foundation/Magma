@@ -25,7 +25,7 @@ public class DirectoryApplicationTest {
     void test() throws IOException, ApplicationException {
         var parent = Parent.ensureAsDirectory();
         var child = Parent.resolveChild("child.mg");
-        if (!child.exists()) child.createAsFile();
+        if (!child.exists()) child.createAsFile().writeAsString("def main() : I16 => {return 0;}");
 
         var module = new DirectoryModule(parent);
         new Application(module).run();

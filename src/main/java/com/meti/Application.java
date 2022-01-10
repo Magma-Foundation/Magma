@@ -1,14 +1,14 @@
 package com.meti;
 
 import com.meti.compile.MagmaCCompiler;
+import com.meti.compile.clang.CFormat;
 import com.meti.io.Path;
 import com.meti.module.Module;
 import com.meti.source.Source;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.meti.io.NIOPath.Root;
 
@@ -23,9 +23,9 @@ public class Application {
 
     void run() throws ApplicationException {
         var sources = listSources();
-        var targets = new ArrayList<String>();
+        var targets = new HashSet<String>();
         for (var source : sources) {
-            targets.add(Application.compile(source));
+            targets.addAll(Application.compile(source));
         }
 
         build(targets);
@@ -41,7 +41,7 @@ public class Application {
         return sources;
     }
 
-    private static String compile(Source source) throws ApplicationException {
+    private static Set<String> compile(Source source) throws ApplicationException {
         var name = source.computeName();
         var input = Application.readSource(source);
         var output = new MagmaCCompiler(input).compile();
@@ -53,14 +53,18 @@ public class Application {
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 
-            var target = packagePath
-                    .resolveChild(name + ".c")
-                    .ensureAsFile()
-                    .writeAsString(output);
-
-            return Out.relativize(target)
-                    .asString()
-                    .replace("\\", "//");
+            var targets = new HashSet<String>();
+            var formats = output.streamFormats().collect(Collectors.toList());
+            for (CFormat format : formats) {
+                var target = packagePath
+                        .resolveChild(name + "." + format.getExtension())
+                        .ensureAsFile()
+                        .writeAsString(output.apply(format, ""));
+                targets.add(Out.relativize(target)
+                        .asString()
+                        .replace("\\", "//"));
+            }
+            return targets;
         } catch (IOException e) {
             throw new ApplicationException(e);
         }

@@ -9,6 +9,11 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
     public boolean isPresent() {
         return false;
     }
