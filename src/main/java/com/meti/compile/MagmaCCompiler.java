@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(String input) {
-    public Output compile() throws CompileException {
+    public Output<String> compile() throws CompileException {
         if (input.isBlank()) return new EmptyOutput();
 
         var root = new Text(this.input);
@@ -27,6 +27,6 @@ public record MagmaCCompiler(String input) {
             builder.append(new CRenderer(line).render().compute());
         }
 
-        return new MappedOutput(Map.of(CFormat.Source, builder.toString()));
+        return new MappedOutput<>(Map.of(CFormat.Source, builder.toString()));
     }
 }

@@ -4,8 +4,8 @@ import com.meti.compile.clang.CFormat;
 
 import java.util.stream.Stream;
 
-public interface Output {
+public interface Output<T> {
     Stream<CFormat> streamFormats();
 
-    String apply(CFormat types, String other);
+    T apply(CFormat types, T other);
 }

@@ -4,7 +4,7 @@ import com.meti.compile.clang.CFormat;
 
 import java.util.stream.Stream;
 
-public class EmptyOutput implements Output {
+public class EmptyOutput implements Output<String> {
     @Override
     public String apply(CFormat types, String other) {
         return other;
