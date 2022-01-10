@@ -9,16 +9,29 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 public record FunctionRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Function)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
-            var text = identity.apply(Attribute.Type.Value)
-                    .asText();
+            var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
+
+            var parameters = node.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes()
+                    .collect(Collectors.toSet());
+            var renderedParameterList = new HashSet<String>();
+            for (Node parameter : parameters) {
+                renderedParameterList.add(parameter.apply(Attribute.Type.Value).asText().getTrimmedValue());
+            }
+
+            var renderedParameters = String.join(",", renderedParameterList);
+
             var value = node.apply(Attribute.Type.Value).asNode();
             var renderedValue = value.apply(Attribute.Type.Value).asText();
-            return new Some<>(text.append("()").append(renderedValue));
+            return new Some<>(renderedIdentity.append("(" + renderedParameters + ")").append(renderedValue));
         }
         return new None<>();
     }
