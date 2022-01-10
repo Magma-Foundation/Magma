@@ -11,13 +11,7 @@ import com.meti.option.Some;
 
 import java.util.stream.Collectors;
 
-public class ImportRenderer implements Renderer {
-    private final Node node;
-
-    public ImportRenderer(Node node) {
-        this.node = node;
-    }
-
+public record ImportRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Import)) {

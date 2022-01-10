@@ -48,7 +48,7 @@ public class Packaging {
             return new Packaging(that.name, relativeParent);
         }
 
-        var offset = 0;
+        var offset = Math.min(parent.size(), that.parent.size());
         for (int i = 0; i < parent.size() && i < that.parent.size(); i++) {
             if (!parent.get(i).equals(that.parent.get(i))) {
                 offset = i;

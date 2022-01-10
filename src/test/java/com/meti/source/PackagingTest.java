@@ -5,14 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PackagingTest {
-
-    @Test
-    void relativize() {
-        var expected = new Packaging("Sibling");
-        var actual = new Packaging("Index").relativize(expected);
-        assertEquals(expected, actual);
-    }
-
     @Test
     void relativize_cousin() {
         var thisPackage = new Packaging("Index", "Parent");
@@ -22,6 +14,27 @@ class PackagingTest {
         var actual = thisPackage.relativize(thatPackage);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void relativize_sibling() {
+        var expected = new Packaging("Sibling");
+        var actual = new Packaging("Index").relativize(expected);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void relativize_sibling_with_grandparent() {
+        var expected = new Packaging("Sibling", "Grandparent", "Parent");
+        var actual = new Packaging("Index", "Grandparent", "Parent").relativize(expected);
+        assertEquals(new Packaging("Sibling"), actual);
+    }
+
+    @Test
+    void relativize_sibling_with_parent() {
+        var expected = new Packaging("Sibling", "Parent");
+        var actual = new Packaging("Index", "Parent").relativize(expected);
+        assertEquals(new Packaging("Sibling"), actual);
     }
 
     @Test
