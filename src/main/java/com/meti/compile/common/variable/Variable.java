@@ -6,16 +6,10 @@ import com.meti.compile.attribute.TextAttribute;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
-public class Variable implements Node {
-    private final Text value;
-
-    public Variable(Text value) {
-        this.value = value;
-    }
-
+public record Variable(Text value) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) new TextAttribute(value);
+        if (type == Attribute.Type.Value) return new TextAttribute(value);
         throw new AttributeException(type);
     }
 
