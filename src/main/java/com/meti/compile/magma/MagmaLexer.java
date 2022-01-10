@@ -3,7 +3,7 @@ package com.meti.compile.magma;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.ListNodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.integer.IntegerLexer;
@@ -87,7 +87,7 @@ public record MagmaLexer(Text text) {
             for (Node oldNode : oldNodes) {
                 newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asText()));
             }
-            current = current.with(type, new ListNodeAttribute(newNodes));
+            current = current.with(type, new NodeListAttribute(newNodes));
         }
         return current;
     }

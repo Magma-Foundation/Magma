@@ -9,4 +9,9 @@ public class StructureTest {
     void empty() {
         assertCompile("struct Empty{}", "struct Empty{};");
     }
+
+    @Test
+    void one_field() {
+        assertCompile("struct Wrapper{value : I16}", "struct Wrapper{int value;};");
+    }
 }

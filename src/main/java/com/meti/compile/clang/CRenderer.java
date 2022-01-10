@@ -3,7 +3,7 @@ package com.meti.compile.clang;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.ListNodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -100,7 +100,7 @@ public record CRenderer(Node root) {
             for (Node oldNode : oldNodes) {
                 newNodes.add(new Content(renderAST(oldNode)));
             }
-            current = current.with(type, new ListNodeAttribute(newNodes));
+            current = current.with(type, new NodeListAttribute(newNodes));
         }
         return renderNode(current);
     }

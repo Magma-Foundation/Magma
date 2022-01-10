@@ -2,7 +2,7 @@ package com.meti.compile.common.block;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.ListNodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.node.Node;
 
 import java.util.List;
@@ -18,7 +18,7 @@ record Block(List<Node> values) implements Node {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new ListNodeAttribute(values);
+        if (type == Attribute.Type.Children) return new NodeListAttribute(values);
         throw new AttributeException(type);
     }
 

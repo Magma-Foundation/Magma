@@ -21,6 +21,14 @@ public record Text(String value) {
         return value.charAt(i);
     }
 
+    public boolean containsChar(char c) {
+        return value.indexOf(c) != -1;
+    }
+
+    public boolean endsWithChar(char c) {
+        return value.length() != 0 && value.charAt(value.length() - 1) == c;
+    }
+
     public Option<Integer> firstIndexOfChar(char c) {
         var index = value.indexOf(c);
         return index == -1
