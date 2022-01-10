@@ -9,6 +9,7 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -22,10 +23,12 @@ public record FunctionRenderer(Node node) implements Renderer {
             var parameters = node.apply(Attribute.Type.Parameters)
                     .asStreamOfNodes()
                     .collect(Collectors.toSet());
-            var renderedParameterList = new HashSet<String>();
+            var renderedParameterList = new ArrayList<String>();
             for (Node parameter : parameters) {
                 renderedParameterList.add(parameter.apply(Attribute.Type.Value).asText().getTrimmedValue());
             }
+
+            renderedParameterList.sort(String::compareTo);
 
             var renderedParameters = String.join(",", renderedParameterList);
 
