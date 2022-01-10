@@ -5,7 +5,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.IntegerAttribute;
 import com.meti.compile.node.Node;
 
-record IntegerNode(int value) implements Node {
+public record IntegerNode(int value) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new IntegerAttribute(value);

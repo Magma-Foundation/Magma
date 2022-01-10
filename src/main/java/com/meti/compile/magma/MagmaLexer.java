@@ -7,6 +7,7 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.Field;
 import com.meti.compile.common.block.BlockLexer;
+import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.common.returns.ReturnLexer;
@@ -28,6 +29,7 @@ public record MagmaLexer(Text text) {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
+                new BooleanLexer(text),
                 new ImportLexer(text),
                 new StructureLexer(text),
                 new BlockLexer(text),

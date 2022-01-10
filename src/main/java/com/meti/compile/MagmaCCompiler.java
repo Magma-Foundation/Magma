@@ -5,6 +5,7 @@ import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.Import;
 import com.meti.compile.common.block.Splitter;
+import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.magma.MagmaLexer;
 import com.meti.compile.node.Content;
@@ -57,7 +58,9 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
     private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
         var resolved = new ArrayList<Node>();
         for (Node node : lexed) {
-            if (node.is(Node.Type.Function)) {
+            if (node.is(Node.Type.Boolean)) {
+                resolved.add(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
+            } else if (node.is(Node.Type.Function)) {
                 var oldParameters = node.apply(Attribute.Type.Parameters)
                         .asStreamOfNodes()
                         .collect(Collectors.toList());

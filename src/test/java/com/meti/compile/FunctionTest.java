@@ -11,17 +11,22 @@ public class FunctionTest {
     }
 
     @Test
+    void external_operator() {
+        assertSourceCompile("extern operator def !(state : Bool) : Bool;", "");
+    }
+
+    @Test
     void one_parameter() {
         assertSourceCompile("def one_parameter(value : I16) : Void => {}", "void one_parameter(int value){}");
     }
 
     @Test
-    void two_parameters(){
-        assertSourceCompile("def Point(x : I16, y : I16) : Void => {}", "void Point(int x,int y){}");
+    void return_type() {
+        assertSourceCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
     }
 
     @Test
-    void return_type() {
-        assertSourceCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
+    void two_parameters() {
+        assertSourceCompile("def Point(x : I16, y : I16) : Void => {}", "void Point(int x,int y){}");
     }
 }
