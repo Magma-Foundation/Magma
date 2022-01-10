@@ -11,8 +11,13 @@ public class FunctionTest {
     }
 
     @Test
+    void external() {
+        assertSourceCompile("extern def test() : Void", "");
+    }
+
+    @Test
     void external_operator() {
-        assertSourceCompile("extern operator def !(state : Bool) : Bool;", "");
+        assertSourceCompile("extern operator def !(state : Bool) : Bool;! false", "!0");
     }
 
     @Test

@@ -4,6 +4,8 @@ import com.meti.core.C1;
 import com.meti.core.F1;
 
 public interface Option<T> {
+    <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E;
+
     <E extends Exception> void ifPresent(C1<T, E> consumer) throws E;
 
     boolean isEmpty();

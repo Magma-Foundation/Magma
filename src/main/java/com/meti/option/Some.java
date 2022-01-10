@@ -5,6 +5,11 @@ import com.meti.core.F1;
 
 public record Some<T>(T value) implements Option<T> {
     @Override
+    public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E {
+        return mapper.apply(value);
+    }
+
+    @Override
     public <E extends Exception> void ifPresent(C1<T, E> consumer) throws E {
         consumer.consume(value);
     }

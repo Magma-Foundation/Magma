@@ -21,6 +21,7 @@ import com.meti.option.None;
 import com.meti.option.Option;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -147,6 +148,6 @@ public record MagmaLexer(Text text) {
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexType(typeText);
-        return new Field(name, type);
+        return new Field(Collections.emptySet(), name, type);
     }
 }

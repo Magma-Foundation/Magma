@@ -10,13 +10,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Function(Node identity, Set<Node> parameters, Node body) implements Node {
+public abstract class Function implements Node {
+    protected final Node identity;
+    protected final Set<Node> parameters;
+
+    public Function(Node identity, Set<Node> parameters) {
+        this.identity = identity;
+        this.parameters = parameters;
+    }
+
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
             case Declarations -> Stream.of(Attribute.Type.Parameters);
             case Declaration -> Stream.of(Attribute.Type.Identity);
-            case Node -> Stream.of(Attribute.Type.Value);
             default -> Stream.empty();
         };
     }
@@ -26,22 +33,17 @@ public record Function(Node identity, Set<Node> parameters, Node body) implement
         return switch (type) {
             case Identity -> new NodeAttribute(identity);
             case Parameters -> new NodesAttribute(parameters);
-            case Value -> new NodeAttribute(body);
             default -> throw new AttributeException(type);
         };
     }
 
-    @Override
-    public boolean is(Type type) {
-        return type == Type.Function;
-    }
+    protected abstract Implementation complete(Node node, Set<Node> parameters);
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return switch (type) {
-            case Identity -> new Function(attribute.asNode(), parameters, body);
-            case Parameters -> new Function(identity, attribute.asStreamOfNodes().collect(Collectors.toSet()), body);
-            case Value -> new Function(identity, parameters, attribute.asNode());
+            case Identity -> complete(attribute.asNode(), parameters);
+            case Parameters -> complete(identity, attribute.asStreamOfNodes().collect(Collectors.toSet()));
             default -> throw new AttributeException(type);
         };
     }
