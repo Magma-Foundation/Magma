@@ -3,8 +3,9 @@ package com.meti.compile.magma;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
+import com.meti.compile.common.Field;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
@@ -63,16 +64,21 @@ public record MagmaLexer(Text text) {
         }
     }
 
-    private Node attachFields(Node node) throws AttributeException, LexException {
-        var types = node.apply(Attribute.Group.Field).collect(Collectors.toList());
+    private Node attachDeclarations(Node node) throws AttributeException, LexException {
+        var types = node.apply(Attribute.Group.Declaration).collect(Collectors.toList());
         var current = node;
         for (Attribute.Type type : types) {
             var oldField = current.apply(type).asNode();
-            var oldType = oldField.apply(Attribute.Type.Type).asNode()
-                    .apply(Attribute.Type.Value)
-                    .asText();
-            var newType = lexType(oldType);
-            var newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+            Node newField = null;
+            if (oldField.is(Node.Type.Field)) {
+                var oldType = oldField.apply(Attribute.Type.Type).asNode()
+                        .apply(Attribute.Type.Value)
+                        .asText();
+                var newType = lexType(oldType);
+                newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+            } else {
+                newField = lexField(oldField.apply(Attribute.Type.Value).asText());
+            }
             current = current.with(type, new NodeAttribute(newField));
         }
         return current;
@@ -98,7 +104,29 @@ public record MagmaLexer(Text text) {
 
     private Node lexAST(Text text) throws LexException, AttributeException {
         var node = lexNode(text);
-        var withFields = attachFields(node);
-        return attachNodes(withFields);
+        var withFields = attachDeclarations(node);
+
+        var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
+        var current = withFields;
+        for (Attribute.Type type : collect) {
+            var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newDeclarations = new ArrayList<Node>();
+            for (Node declaration : oldDeclarations) {
+                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asText()));
+            }
+
+            current = current.with(type, new NodeListAttribute(newDeclarations));
+        }
+
+        return attachNodes(current);
+    }
+
+    private Node lexField(Text text) throws LexException {
+        var separator = text.firstIndexOfChar(':')
+                .orElseThrow(() -> new LexException("Invalid field: " + text.compute()));
+        var name = text.slice(0, separator);
+        var typeText = text.slice(separator + 1);
+        var type = lexType(typeText);
+        return new Field(name, type);
     }
 }

@@ -3,8 +3,8 @@ package com.meti.compile.clang;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
 import com.meti.compile.common.returns.ReturnRenderer;
@@ -19,6 +19,7 @@ import com.meti.option.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record CRenderer(Node root) {
     private static Text renderField(Node node) throws AttributeException, RenderException {
@@ -64,7 +65,7 @@ public record CRenderer(Node root) {
     }
 
     public static Node renderSubFields(Node root) throws CompileException {
-        var types = root.apply(Attribute.Group.Field).collect(Collectors.toList());
+        var types = root.apply(Attribute.Group.Declaration).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();
@@ -92,6 +93,26 @@ public record CRenderer(Node root) {
     private Text renderAST(Node root) throws CompileException {
         var withFields = renderSubFields(root);
         var withNodes = renderSubNodes(withFields);
+        var withNodeCollections = renderSubNodeCollections(withNodes);
+        var current = withDeclarationCollections(withNodeCollections);
+        return renderNode(current);
+    }
+
+    private Node withDeclarationCollections(Node withNodeCollections) throws AttributeException, RenderException {
+        var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
+        var current = withNodeCollections;
+        for (Attribute.Type type : types) {
+            var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newDeclarations = new ArrayList<Node>();
+            for (Node oldDeclaration : oldDeclarations) {
+                newDeclarations.add(new Content(renderField(oldDeclaration)));
+            }
+            current = current.with(type, new NodeListAttribute(newDeclarations));
+        }
+        return current;
+    }
+
+    private Node renderSubNodeCollections(Node withNodes) throws CompileException {
         var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = withNodes;
         for (Attribute.Type type : types) {
@@ -102,6 +123,6 @@ public record CRenderer(Node root) {
             }
             current = current.with(type, new NodeListAttribute(newNodes));
         }
-        return renderNode(current);
+        return current;
     }
 }

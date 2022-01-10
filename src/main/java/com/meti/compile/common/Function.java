@@ -30,7 +30,7 @@ public record Function(Node identity, Content body) implements Node {
 
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) {
-        return group == Attribute.Group.Field
+        return group == Attribute.Group.Declaration
                 ? Stream.of(Attribute.Type.Identity)
                 : Stream.empty();
     }
