@@ -40,6 +40,13 @@ public record Text(String value) {
         return value.length() == 0;
     }
 
+    public Option<Integer> lastIndexOfChar(char c) {
+        var index = value.lastIndexOf(c);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
+    }
+
     public Text prepend(String prefix) {
         return new Text(prefix + value);
     }

@@ -5,7 +5,7 @@ import com.meti.compile.Output;
 import com.meti.compile.clang.CFormat;
 import com.meti.io.Path;
 import com.meti.module.Module;
-import com.meti.source.Package;
+import com.meti.source.Packaging;
 import com.meti.source.Source;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class Application {
 
     void run() throws ApplicationException {
         var sources = listSources();
-        var inputMap = new HashMap<Package, String>();
+        var inputMap = new HashMap<Packaging, String>();
         for (var source : sources) {
             try {
                 inputMap.put(source.computePackage(), source.read());
@@ -35,8 +35,8 @@ public class Application {
         }
         var outputMap = new MagmaCCompiler(inputMap).compile();
         var targets = new HashSet<String>();
-        for (Package aPackage : outputMap.keySet()) {
-            var output = compile(aPackage, outputMap.get(aPackage));
+        for (Packaging aPackaging : outputMap.keySet()) {
+            var output = compile(aPackaging, outputMap.get(aPackaging));
             targets.addAll(output);
         }
 
@@ -53,11 +53,11 @@ public class Application {
         return sources;
     }
 
-    private static Set<String> compile(Package package_, Output<String> output) throws ApplicationException {
+    private static Set<String> compile(Packaging packaging_, Output<String> output) throws ApplicationException {
         try {
             Out.ensureAsDirectory();
 
-            var packagePath = package_.parent()
+            var packagePath = packaging_.parent()
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 
@@ -65,7 +65,7 @@ public class Application {
             var formats = output.streamFormats().collect(Collectors.toList());
             for (CFormat format : formats) {
                 var target = packagePath
-                        .resolveChild(package_.computeName() + "." + format.getExtension())
+                        .resolveChild(packaging_.computeName() + "." + format.getExtension())
                         .ensureAsFile()
                         .writeAsString(output.apply(format, ""));
                 targets.add(Out.relativize(target)

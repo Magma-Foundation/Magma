@@ -1,7 +1,7 @@
 package com.meti.compile;
 
 import com.meti.compile.clang.CFormat;
-import com.meti.source.Package;
+import com.meti.source.Packaging;
 
 import java.util.Collections;
 
@@ -19,9 +19,12 @@ public class CompiledTest {
 
     private static void assertCompile(CFormat format, String input, String output) {
         try {
-            var package_ = new Package(Collections.emptyList(), "Index");
+            var package_ = new Packaging("Index", Collections.emptyList());
             var compiler = new MagmaCCompiler(Collections.singletonMap(package_, input));
-            var actual = compiler.compile().get(package_).apply(format, "");
+            var actual = compiler.compile()
+                    .get(package_)
+                    .apply(format, "");
+
             assertEquals(output, actual);
         } catch (CompileException e) {
             fail(e);

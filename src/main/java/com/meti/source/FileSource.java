@@ -8,8 +8,8 @@ import java.util.List;
 public record FileSource(File file, List<String> packageList) implements Source {
 
     @Override
-    public Package computePackage() {
-        return new Package(packageList, file.computeFileNameWithoutExtension());
+    public Packaging computePackage() {
+        return new Packaging(file.computeFileNameWithoutExtension(), packageList);
     }
 
     @Override

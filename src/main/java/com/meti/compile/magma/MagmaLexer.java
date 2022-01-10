@@ -27,6 +27,7 @@ public record MagmaLexer(Text text) {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
+                new ImportLexer(text),
                 new StructureLexer(text),
                 new BlockLexer(text),
                 new FunctionLexer(text),
@@ -69,7 +70,7 @@ public record MagmaLexer(Text text) {
         var current = node;
         for (Attribute.Type type : types) {
             var oldField = current.apply(type).asNode();
-            Node newField = null;
+            Node newField;
             if (oldField.is(Node.Type.Field)) {
                 var oldType = oldField.apply(Attribute.Type.Type).asNode()
                         .apply(Attribute.Type.Value)
