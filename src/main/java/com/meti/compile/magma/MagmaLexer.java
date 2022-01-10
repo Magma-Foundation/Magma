@@ -65,7 +65,7 @@ public record MagmaLexer(Text text) {
         }
     }
 
-    private Node attachDeclarations(Node node) throws AttributeException, LexException {
+    private Node attachDeclaration(Node node) throws AttributeException, LexException {
         var types = node.apply(Attribute.Group.Declaration).collect(Collectors.toList());
         var current = node;
         for (Attribute.Type type : types) {
@@ -85,11 +85,37 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private Node attachNodes(Node withFields) throws AttributeException, LexException {
-        var types = withFields.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+    private Node attachDeclarations(Node withFields) throws AttributeException, LexException {
+        var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withFields;
+        for (Attribute.Type type : collect) {
+            var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newDeclarations = new ArrayList<Node>();
+            for (Node declaration : oldDeclarations) {
+                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asText()));
+            }
+
+            current = current.with(type, new NodesAttribute(newDeclarations));
+        }
+        return current;
+    }
+
+    private Node attachNode(Node root) throws AttributeException, LexException {
+        var types = root.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = root;
         for (Attribute.Type type : types) {
-            var oldNodes = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var oldNode = root.apply(type).asNode();
+            var newNode = lexAST(oldNode.apply(Attribute.Type.Value).asText());
+            current = current.with(type, new NodeAttribute(newNode));
+        }
+        return current;
+    }
+
+    private Node attachNodes(Node root) throws AttributeException, LexException {
+        var types = root.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+        var current = root;
+        for (Attribute.Type type : types) {
+            var oldNodes = root.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
                 newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asText()));
@@ -105,21 +131,10 @@ public record MagmaLexer(Text text) {
 
     private Node lexAST(Text text) throws LexException, AttributeException {
         var node = lexNode(text);
-        var withFields = attachDeclarations(node);
-
-        var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
-        var current = withFields;
-        for (Attribute.Type type : collect) {
-            var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newDeclarations = new ArrayList<Node>();
-            for (Node declaration : oldDeclarations) {
-                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asText()));
-            }
-
-            current = current.with(type, new NodesAttribute(newDeclarations));
-        }
-
-        return attachNodes(current);
+        var withFields = attachDeclaration(node);
+        var withDeclarations = attachDeclarations(withFields);
+        var withNode = attachNode(withDeclarations);
+        return attachNodes(withNode);
     }
 
     private Node lexField(Text text) throws LexException {
