@@ -1,12 +1,11 @@
 package com.meti.compile;
 
-import com.meti.compile.attribute.Attribute;
-import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.PackageAttribute;
+import com.meti.compile.attribute.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.Import;
 import com.meti.compile.common.block.Splitter;
+import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.magma.MagmaLexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -35,7 +34,8 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var root = new Text(input);
         var lines = split(root);
         var lexed = lex(lines);
-        var formatted = format(thisPackage, lexed);
+        var resolved = resolve(lexed);
+        var formatted = format(thisPackage, resolved);
         var divided = divide(thisPackage, formatted);
         return renderMap(divided);
     }
@@ -52,6 +52,31 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             oldNodes.add(new MagmaLexer(oldLine).lex());
         }
         return oldNodes;
+    }
+
+    private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
+        var resolved = new ArrayList<Node>();
+        for (Node node : lexed) {
+            if (node.is(Node.Type.Function)) {
+                var oldParameters = node.apply(Attribute.Type.Parameters)
+                        .asStreamOfNodes()
+                        .collect(Collectors.toList());
+                var newParameters = new ArrayList<Node>();
+                for (Node parameter : oldParameters) {
+                    var oldType = parameter.apply(Attribute.Type.Type).asNode();
+                    if (oldType.is(Node.Type.Primitive) && oldType.apply(Attribute.Type.Name).asText().compute().equals("Bool")) {
+                        var newType = new IntegerType(true, 16);
+                        newParameters.add(parameter.with(Attribute.Type.Type, new NodeAttribute(newType)));
+                    } else {
+                        newParameters.add(parameter);
+                    }
+                }
+                resolved.add(node.with(Attribute.Type.Parameters, new NodesAttribute(newParameters)));
+            } else {
+                resolved.add(node);
+            }
+        }
+        return resolved;
     }
 
     private ArrayList<Node> format(Packaging thisPackage, ArrayList<Node> oldNodes) throws AttributeException {
