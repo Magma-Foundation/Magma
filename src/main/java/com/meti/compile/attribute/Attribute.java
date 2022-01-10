@@ -35,7 +35,7 @@ public interface Attribute {
         Value,
         Identity,
         Type,
-        Children, Sign, Bits, Fields, Packaging, Name
+        Children, Sign, Bits, Fields, Name
     }
 
     enum Group {

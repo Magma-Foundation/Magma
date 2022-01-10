@@ -1,4 +1,4 @@
-package com.meti.compile.magma;
+package com.meti.compile.common;
 
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
@@ -15,7 +15,7 @@ public class Import implements Node {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Packaging) return new PackageAttribute(packaging_);
+        if (type == Attribute.Type.Value) return new PackageAttribute(packaging_);
         throw new AttributeException(type);
     }
 

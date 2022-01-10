@@ -1,5 +1,6 @@
 package com.meti.compile.magma;
 
+import com.meti.compile.common.Import;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;

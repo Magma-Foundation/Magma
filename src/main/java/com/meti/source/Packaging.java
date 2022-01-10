@@ -20,7 +20,7 @@ public class Packaging {
         return name;
     }
 
-    public Stream<String> parent() {
+    public Stream<String> streamParent() {
         return parent.stream();
     }
 }

@@ -24,7 +24,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return outputMap;
     }
 
-    private Output<String> compileInput(Packaging packaging_, String input) throws CompileException {
+    private Output<String> compileInput(Packaging packaging, String input) throws CompileException {
         if (input.isBlank()) return new EmptyOutput<>();
 
         var root = new Text(input);
@@ -39,7 +39,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
 
         var map = new HashMap<CFormat, List<Node>>();
         for (Node node : nodes) {
-            if (node.is(Node.Type.Structure)) {
+            if (node.is(Node.Type.Structure) || node.is(Node.Type.Import)) {
                 List<Node> list = new ArrayList<>();
                 if (!map.containsKey(CFormat.Header)) {
                     map.put(CFormat.Header, list);

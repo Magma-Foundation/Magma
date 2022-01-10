@@ -19,7 +19,6 @@ import com.meti.option.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record CRenderer(Node root) {
     private static Text renderField(Node node) throws AttributeException, RenderException {
@@ -47,6 +46,7 @@ public record CRenderer(Node root) {
 
     static Text renderNode(Node node) throws CompileException {
         var renderers = List.of(
+                new ImportRenderer(node),
                 new IntegerRenderer(node),
                 new StructureRenderer(node),
                 new FunctionRenderer(node),
@@ -98,20 +98,6 @@ public record CRenderer(Node root) {
         return renderNode(current);
     }
 
-    private Node withDeclarationCollections(Node withNodeCollections) throws AttributeException, RenderException {
-        var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
-        var current = withNodeCollections;
-        for (Attribute.Type type : types) {
-            var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newDeclarations = new ArrayList<Node>();
-            for (Node oldDeclaration : oldDeclarations) {
-                newDeclarations.add(new Content(renderField(oldDeclaration)));
-            }
-            current = current.with(type, new NodeListAttribute(newDeclarations));
-        }
-        return current;
-    }
-
     private Node renderSubNodeCollections(Node withNodes) throws CompileException {
         var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = withNodes;
@@ -122,6 +108,20 @@ public record CRenderer(Node root) {
                 newNodes.add(new Content(renderAST(oldNode)));
             }
             current = current.with(type, new NodeListAttribute(newNodes));
+        }
+        return current;
+    }
+
+    private Node withDeclarationCollections(Node withNodeCollections) throws AttributeException, RenderException {
+        var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
+        var current = withNodeCollections;
+        for (Attribute.Type type : types) {
+            var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newDeclarations = new ArrayList<Node>();
+            for (Node oldDeclaration : oldDeclarations) {
+                newDeclarations.add(new Content(renderField(oldDeclaration)));
+            }
+            current = current.with(type, new NodeListAttribute(newDeclarations));
         }
         return current;
     }

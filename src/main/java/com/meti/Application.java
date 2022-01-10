@@ -57,7 +57,7 @@ public class Application {
         try {
             Out.ensureAsDirectory();
 
-            var packagePath = packaging_.parent()
+            var packagePath = packaging_.streamParent()
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 
