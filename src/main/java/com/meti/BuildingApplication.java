@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.module.Module;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -45,9 +46,19 @@ public final class BuildingApplication extends Application {
                     .directory(workingDirectory)
                     .start();
 
-            process.getInputStream().transferTo(System.out);
-            process.getErrorStream().transferTo(System.err);
-            process.waitFor();
+            var output = new ByteArrayOutputStream();
+            var stream = new ByteArrayOutputStream();
+
+            process.getInputStream().transferTo(output);
+            process.getErrorStream().transferTo(stream);
+            var exitCode = process.waitFor();
+
+            var errorMessage = stream.toString();
+            if (!errorMessage.isBlank()) {
+                throw new ApplicationException("Failed to build native code with exit code " + exitCode + ": " + errorMessage);
+            }
+
+            System.out.println(output);
         } catch (IOException | InterruptedException e) {
             throw new ApplicationException(e);
         }

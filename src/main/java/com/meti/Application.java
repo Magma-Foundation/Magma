@@ -48,12 +48,19 @@ public class Application {
 
         try {
             Out.ensureAsDirectory();
-            var target = source.computePackage()
-                    .reduce(Out, Path::resolveChild, (previous, next) -> next)
+
+            var packagePath = source.computePackage()
+                    .reduce(Out, Path::resolveChild, (previous, next) -> next);
+            packagePath.ensureAsDirectory();
+
+            var target = packagePath
                     .resolveChild(name + ".c")
                     .ensureAsFile()
                     .writeAsString(output);
-            return Out.relativize(target).asString();
+
+            return Out.relativize(target)
+                    .asString()
+                    .replace("\\", "//");
         } catch (IOException e) {
             throw new ApplicationException(e);
         }

@@ -28,7 +28,7 @@ public record NIOPath(java.nio.file.Path value) implements Path, Directory, File
 
     @Override
     public Directory createAsDirectory() throws IOException {
-        Files.createDirectory(value);
+        Files.createDirectories(value);
         return this;
     }
 
