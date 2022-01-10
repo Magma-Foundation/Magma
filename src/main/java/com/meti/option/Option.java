@@ -14,6 +14,8 @@ public interface Option<T> {
 
     <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) throws E;
 
+    <E extends Exception> Option<T> or(Supplier<Option<T>, E> supplier) throws E;
+
     T orElse(T other);
 
     <E extends Exception> T orElseGet(Supplier<T, E> supplier) throws E;

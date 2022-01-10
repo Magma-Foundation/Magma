@@ -10,8 +10,12 @@ import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.magma.MagmaLexer;
 import com.meti.compile.node.Content;
+import com.meti.compile.node.EmptyNode;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
 import com.meti.source.Packaging;
 
 import java.util.ArrayList;
@@ -59,23 +63,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
     private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
         var resolved = new ArrayList<Node>();
         for (Node node : lexed) {
-            if (node.is(Node.Type.Boolean)) {
-                resolved.add(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
-            } else if (node.is(Node.Type.Abstraction)) {
-                if (node.apply(Attribute.Type.Identity)
-                        .asNode()
-                        .apply(Attribute.Type.Flags)
-                        .asStreamOfFlags()
-                        .noneMatch(value -> value == Field.Flag.Extern)) {
-                    Node with = fixBooleans(node);
-                    resolved.add(with);
-                }
-            } else if (node.is(Node.Type.Implementation)) {
-                Node with = fixBooleans(node);
-                resolved.add(with);
-            } else {
-                resolved.add(node);
-            }
+            resolved.add(resolve(node));
         }
         return resolved;
     }
@@ -138,6 +126,50 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             }
             return builder.toString().trim();
         });
+    }
+
+    private Node resolve(Node node) throws AttributeException {
+        var resolved = toBoolean(node)
+                .or(() -> fixImplementation(node))
+                .or(() -> fixAbstraction(node))
+                .orElse(node);
+        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = resolved;
+        for (Attribute.Type type : list) {
+            var child = current.apply(type).asNode();
+            var resolvedChild = resolve(child);
+            current = current.with(type, new NodeAttribute(resolvedChild));
+        }
+        return current;
+    }
+
+    private Option<Node> toBoolean(Node node) throws AttributeException {
+        if (node.is(Node.Type.Boolean)) {
+            return new Some<>(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
+        }
+        return new None<>();
+    }
+
+    private Option<Node> fixImplementation(Node node) throws AttributeException {
+        return node.is(Node.Type.Implementation)
+                ? new Some<>(fixBooleans(node))
+                : new None<>();
+    }
+
+    private Option<Node> fixAbstraction(Node node) throws AttributeException {
+        if (node.is(Node.Type.Abstraction)) {
+            if (node.apply(Attribute.Type.Identity)
+                    .asNode()
+                    .apply(Attribute.Type.Flags)
+                    .asStreamOfFlags()
+                    .noneMatch(value -> value == Field.Flag.Extern)) {
+                return new Some<>(fixBooleans(node));
+            } else {
+                return new Some<>(new EmptyNode());
+            }
+        } else {
+            return new None<>();
+        }
     }
 
     private Node fixBooleans(Node node) throws AttributeException {

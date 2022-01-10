@@ -37,6 +37,7 @@ public record MagmaLexer(Text text) {
                 new FunctionLexer(text),
                 new ReturnLexer(text),
                 new IntegerLexer(text),
+                new UnaryLexer(text),
                 new VariableLexer(text));
 
         Option<Node> current = new None<>();

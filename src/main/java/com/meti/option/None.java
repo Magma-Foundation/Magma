@@ -29,6 +29,11 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public <E extends Exception> Option<T> or(Supplier<Option<T>, E> supplier) throws E {
+        return supplier.get();
+    }
+
+    @Override
     public T orElse(T other) {
         return other;
     }
