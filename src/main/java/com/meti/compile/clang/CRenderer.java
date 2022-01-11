@@ -6,6 +6,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.block.BlockRenderer;
+import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
 import com.meti.compile.common.returns.ReturnRenderer;
 import com.meti.compile.common.variable.VariableRenderer;
@@ -52,6 +53,7 @@ public record CRenderer(Node root) {
 
         var renderers = List.of(
                 new BlockRenderer(node),
+                new ConditionRenderer(node),
                 new EmptyRenderer(node),
                 new ExternRenderer(node),
                 new FunctionRenderer(node),
