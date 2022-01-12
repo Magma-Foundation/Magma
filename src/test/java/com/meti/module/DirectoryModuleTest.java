@@ -21,19 +21,19 @@ class DirectoryModuleTest {
     void hasSource() throws IOException {
         var parent = Parent.createAsDirectory();
 
-        var child = Parent.resolveChild("child.mg");
+        var child = Parent.resolveChild("value.mg");
         child.createAsFile();
 
         var module = new DirectoryModule(parent);
 
-        assertTrue(module.hasSource("child", Collections.emptyList()));
+        assertTrue(module.hasSource("value", Collections.emptyList()));
     }
 
     @Test
     void listSources() throws IOException {
         var parent = Parent.createAsDirectory();
 
-        var child = Parent.resolveChild("child.mg");
+        var child = Parent.resolveChild("value.mg");
         child.createAsFile();
 
         var module = new DirectoryModule(parent);
@@ -48,14 +48,14 @@ class DirectoryModuleTest {
     void listSubSources() throws IOException {
         var parent = Parent.createAsDirectory();
 
-        var child = Parent.resolveChild("child");
+        var child = Parent.resolveChild("value");
         child.createAsDirectory();
 
         var grandChild = child.resolveChild("grandChild.mg");
         grandChild.createAsFile();
 
         var module = new DirectoryModule(parent);
-        assertTrue(module.hasSource("grandChild", List.of("child")));
+        assertTrue(module.hasSource("grandChild", List.of("value")));
     }
 
     @AfterEach

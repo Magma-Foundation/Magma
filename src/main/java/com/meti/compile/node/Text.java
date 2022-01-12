@@ -5,8 +5,8 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 public final class Text {
-    private final String value;
     public final String trimmedValue;
+    private final String value;
 
     public Text(String value) {
         this.value = value;
@@ -29,6 +29,10 @@ public final class Text {
         return value;
     }
 
+    public String computeTrimmed() {
+        return trimmedValue;
+    }
+
     public boolean containsChar(char c) {
         return trimmedValue.indexOf(c) != -1;
     }
@@ -45,15 +49,18 @@ public final class Text {
                 : new Some<>(index);
     }
 
-    public Option<Integer> firstIndexOfSlice(String slice) {
-        var index = trimmedValue.indexOf(slice);
+    public Option<Integer> firstIndexOfCharWithOffset(char c, int offset) {
+        var index = trimmedValue.indexOf(c, offset);
         return index == -1
                 ? new None<>()
                 : new Some<>(index);
     }
 
-    public String computeTrimmed() {
-        return trimmedValue;
+    public Option<Integer> firstIndexOfSlice(String slice) {
+        var index = trimmedValue.indexOf(slice);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
     }
 
     public boolean isEmpty() {

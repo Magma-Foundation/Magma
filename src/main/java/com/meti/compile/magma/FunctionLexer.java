@@ -47,8 +47,9 @@ public record FunctionLexer(Text text) implements Lexer {
                         .collect(Collectors.<Node>toSet());
 
                 var valueSeparator = text.firstIndexOfSlice("=>");
-                var returnType = text.lastIndexOfChar(':')
-                        .<Node, RuntimeException>map(value -> new Content(text.slice(value + 1, valueSeparator.orElse(text.size()))))
+                var returnType = text.firstIndexOfCharWithOffset(':', paramEnd)
+                        .filter(value -> value < valueSeparator.orElse(text.size()))
+                        .map(value -> sliceToContent(value + 1, valueSeparator))
                         .orElse(new ImplicitType());
 
                 var identity = new Field(flags, name, returnType);
@@ -59,5 +60,11 @@ public record FunctionLexer(Text text) implements Lexer {
                 }).orElseGet(() -> new Abstraction(identity, parameters));
             });
         });
+    }
+
+    private Node sliceToContent(int start, Option<Integer> terminus) {
+        var end = terminus.orElse(text.size());
+        var slice = text.slice(start, end);
+        return new Content(slice);
     }
 }

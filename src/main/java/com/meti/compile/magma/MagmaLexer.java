@@ -6,6 +6,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.Field;
+import com.meti.compile.common.Reference;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
@@ -17,6 +18,7 @@ import com.meti.compile.common.string.StringLexer;
 import com.meti.compile.common.variable.VariableLexer;
 import com.meti.compile.lex.LexException;
 import com.meti.compile.lex.Lexer;
+import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Primitive;
 import com.meti.compile.node.Text;
@@ -58,7 +60,13 @@ public record MagmaLexer(Text text) {
         return current.orElseThrow(() -> new LexException("Unknown input: " + text.computeTrimmed()));
     }
 
-    static Node lexType(Text text) throws LexException {
+    private static Node lexType(Text text) throws LexException {
+        if (text.startsWithChar('&')) {
+            var valueText = text.slice(1);
+            var node = new Content(valueText);
+            return new Reference(node);
+        }
+
         var values = Primitive.values();
         for (Primitive value : values) {
             if (text.computeTrimmed().equals(value.name())) {
@@ -77,6 +85,17 @@ public record MagmaLexer(Text text) {
         }
     }
 
+    static Node lexTypeAST(Text text) throws LexException, AttributeException {
+        var root = lexType(text);
+        var types = root.apply(Attribute.Group.Type).collect(Collectors.toList());
+        var current = root;
+        for (Attribute.Type type : types) {
+            var newChild = lexTypeAST(current.apply(type).asNode().apply(Attribute.Type.Value).asText());
+            current = current.with(type, new NodeAttribute(newChild));
+        }
+        return current;
+    }
+
     private Node attachDeclaration(Node node) throws AttributeException, LexException {
         var types = node.apply(Attribute.Group.Declaration).collect(Collectors.toList());
         var current = node;
@@ -88,7 +107,7 @@ public record MagmaLexer(Text text) {
                 Node newType;
                 if (oldType.is(Node.Type.Content)) {
                     var typeText = oldType.apply(Attribute.Type.Value).asText();
-                    newType = lexType(typeText);
+                    newType = lexTypeAST(typeText);
                 } else {
                     newType = oldType;
                 }
@@ -153,12 +172,12 @@ public record MagmaLexer(Text text) {
         return attachNodes(withNode);
     }
 
-    private Node lexField(Text text) throws LexException {
+    private Node lexField(Text text) throws LexException, AttributeException {
         var separator = text.firstIndexOfChar(':')
                 .orElseThrow(() -> new LexException("Invalid field: " + text.computeTrimmed()));
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
-        var type = lexType(typeText);
+        var type = lexTypeAST(typeText);
         return new Field(Collections.emptySet(), name, type);
     }
 }

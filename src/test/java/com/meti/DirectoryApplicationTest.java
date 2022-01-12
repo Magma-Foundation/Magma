@@ -24,12 +24,12 @@ public class DirectoryApplicationTest {
     @Test
     void test() throws IOException, ApplicationException {
         var parent = Parent.ensureAsDirectory();
-        var child = Parent.resolveChild("child.mg");
+        var child = Parent.resolveChild("value.mg");
         if (!child.exists()) child.createAsFile().writeAsString("def main() : I16 => {return 0;}");
 
         var module = new DirectoryModule(parent);
         new Application(module).run();
 
-        assertTrue(Out.resolveChild("child.c").exists());
+        assertTrue(Out.resolveChild("value.c").exists());
     }
 }

@@ -1,6 +1,10 @@
 extern import stdio;
 
+def describe(name : &I8) => {
+    printf("%s :\n", name);
+}
+
 def main() => {
-    printf("%s", "Hello world!");
+    describe("test");
     return 0;
 }

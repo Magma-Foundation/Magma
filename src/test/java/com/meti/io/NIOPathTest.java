@@ -40,7 +40,7 @@ class NIOPathTest {
     void walk() throws IOException {
         Parent.createAsDirectory();
 
-        var child = Parent.resolveChild("child");
+        var child = Parent.resolveChild("value");
         child.createAsDirectory();
 
         var grandChild = child.resolveChild("grandChild");

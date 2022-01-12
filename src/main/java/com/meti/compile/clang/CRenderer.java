@@ -5,7 +5,9 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
+import com.meti.compile.common.Field;
 import com.meti.compile.common.LineRenderer;
+import com.meti.compile.common.Reference;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -23,6 +25,7 @@ import com.meti.option.None;
 import com.meti.option.Option;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +34,10 @@ public record CRenderer(Node root) {
         var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
-        if (type.is(Node.Type.Primitive)) {
+        if (type.is(Node.Type.Reference)) {
+            var child = type.apply(Attribute.Type.Value).asNode();
+            return renderField(new Field(Collections.emptySet(), name.prepend("*"), child));
+        } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()
                     .toLowerCase();
@@ -48,6 +54,7 @@ public record CRenderer(Node root) {
             throw new RenderException("Cannot render type: " + type);
         }
     }
+
 
     static Text renderNode(Node node) throws CompileException {
         if (node.is(Node.Type.Content)) {
