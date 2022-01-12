@@ -78,7 +78,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return map;
     }
 
-    private Option<Node> fixAbstraction(Node node) throws AttributeException {
+    private Option<Node> fixAbstraction(Node node) throws AttributeException, ResolutionException {
         if (node.is(Node.Type.Abstraction)) {
             if (node.apply(Attribute.Type.Identity)
                     .asNode()
@@ -115,7 +115,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
     }
 
-    private Node fixFunction(Node node) throws AttributeException {
+    private Node fixFunction(Node node) throws AttributeException, ResolutionException {
         var identity = node.apply(Attribute.Type.Identity).asNode();
         var oldReturnType = identity.apply(Attribute.Type.Type).asNode();
         Node newReturnType;
@@ -144,7 +144,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return withIdentity.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
     }
 
-    private Option<Node> fixImplementation(Node node) throws AttributeException {
+    private Option<Node> fixImplementation(Node node) throws AttributeException, ResolutionException {
         return node.is(Node.Type.Implementation)
                 ? new Some<>(fixFunction(node))
                 : new None<>();
@@ -184,7 +184,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         });
     }
 
-    private Node resolveNode(Node root) throws AttributeException {
+    private Node resolveNode(Node root) throws AttributeException, ResolutionException {
         if (root.is(Node.Type.Block)) {
             var children = root.apply(Attribute.Type.Children)
                     .asStreamOfNodes()
@@ -201,11 +201,11 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         } else if (root.is(Node.Type.Integer)) {
             return new IntegerType(true, 16);
         } else {
-            return root;
+            throw new ResolutionException("Cannot resolve: " + root);
         }
     }
 
-    private ArrayList<Node> resolveStage(ArrayList<Node> lexed) throws AttributeException {
+    private ArrayList<Node> resolveStage(ArrayList<Node> lexed) throws CompileException {
         var resolved = new ArrayList<Node>();
         for (Node node : lexed) {
             resolved.add(resolveStage(node));
@@ -213,7 +213,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return resolved;
     }
 
-    private Node resolveStage(Node node) throws AttributeException {
+    private Node resolveStage(Node node) throws CompileException {
         var resolved = toBoolean(node)
                 .or(() -> fixImplementation(node))
                 .or(() -> fixAbstraction(node))
