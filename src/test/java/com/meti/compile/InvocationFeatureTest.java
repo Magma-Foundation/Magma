@@ -6,6 +6,11 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class InvocationFeatureTest {
     @Test
+    void valuesInStrings(){
+        assertSourceCompile("test(\"val:ue\")", "test(\"val:ue\")");
+    }
+
+    @Test
     void block() {
         assertSourceCompile("{test(1);}", "{test(1);}");
     }
