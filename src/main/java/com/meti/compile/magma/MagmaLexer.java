@@ -12,6 +12,7 @@ import com.meti.compile.common.condition.ConditionLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.common.returns.ReturnLexer;
+import com.meti.compile.common.string.StringLexer;
 import com.meti.compile.common.variable.VariableLexer;
 import com.meti.compile.lex.LexException;
 import com.meti.compile.lex.Lexer;
@@ -31,6 +32,7 @@ public record MagmaLexer(Text text) {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
+                new StringLexer(text),
                 new ConditionLexer(text),
                 new BooleanLexer(text),
                 new ImportLexer(text),
