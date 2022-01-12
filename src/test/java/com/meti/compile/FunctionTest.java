@@ -6,8 +6,13 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
     @Test
-    void functionType(){
+    void function_type(){
         assertSourceCompile("let x : () => Void;", "void (*x)();");
+    }
+
+    @Test
+    void function_type_parameters(){
+        assertSourceCompile("let x : (I16, U16) => Void", "void (*x)(int,unsigned int);");
     }
 
     @Test

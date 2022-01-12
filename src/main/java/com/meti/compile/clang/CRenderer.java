@@ -32,7 +32,22 @@ public record CRenderer(Node root) {
         var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
-        if (type.is(Node.Type.Reference)) {
+        if (type.is(Node.Type.Function)) {
+            var returns = type.apply(Attribute.Type.Type).asNode();
+            var returnType = renderType(returns);
+            var oldParameters = type.apply(Attribute.Type.Parameters).asStreamOfNodes().collect(Collectors.toList());
+            var newParameters = new ArrayList<String>();
+            for (Node oldParameter : oldParameters) {
+                var renderedParameter = renderType(oldParameter);
+                newParameters.add(renderedParameter.computeTrimmed());
+            }
+            return returnType.append(" (*")
+                    .append(name)
+                    .append(")")
+                    .append("(")
+                    .append(String.join(",", newParameters))
+                    .append(")");
+        } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
             return renderFieldWithType(new EmptyField(Collections.emptySet(), name.prepend("*"), child));
         } else if (type.is(Node.Type.Primitive)) {
@@ -119,6 +134,10 @@ public record CRenderer(Node root) {
             current = current.with(type, new NodeAttribute(new Content(renderedNode)));
         }
         return current;
+    }
+
+    private static Text renderType(Node oldParameter) throws CompileException {
+        return renderField(new EmptyField(Collections.emptySet(), new Text(""), oldParameter));
     }
 
     public Text render() throws CompileException {
