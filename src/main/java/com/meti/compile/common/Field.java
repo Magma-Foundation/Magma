@@ -40,6 +40,6 @@ public abstract class Field implements Node {
     public enum Flag {
         Extern,
         Operator,
-        Def
+        Let, Const, Def
     }
 }
