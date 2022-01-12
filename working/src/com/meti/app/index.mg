@@ -1,6 +1,6 @@
 extern import stdio;
 
-def main() : I16 => {
-    printf("%s", "Hello World!");
+def main() => {
+    printf("%s", "Hello test!");
     return 0;
 }

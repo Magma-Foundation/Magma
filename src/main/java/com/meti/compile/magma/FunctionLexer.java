@@ -9,7 +9,6 @@ import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.option.Option;
-import com.meti.option.Supplier;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,8 +37,6 @@ public record FunctionLexer(Text text) implements Lexer {
                 }
 
                 var name = keys.slice(space + 1);
-                var typeSeparator = text.lastIndexOfChar(':').orElse(-1);
-
 
                 var paramEnd = text.firstIndexOfChar(')').orElse(-1);
                 var parameters = Arrays.stream(text.slice(paramStart + 1, paramEnd).computeTrimmed()
@@ -49,16 +46,17 @@ public record FunctionLexer(Text text) implements Lexer {
                         .map(Content::new)
                         .collect(Collectors.<Node>toSet());
 
-                return text.firstIndexOfSlice("=>").<Function, RuntimeException>map(valueSeparator -> {
-                    var returnType = new Content(text.slice(typeSeparator + 1, valueSeparator));
-                    var identity = new Field(flags, name, returnType);
-                    var value = new Content(text.slice(valueSeparator + 2));
+                var valueSeparator = text.firstIndexOfSlice("=>");
+                var returnType = text.lastIndexOfChar(':')
+                        .<Node, RuntimeException>map(value -> new Content(text.slice(value + 1, valueSeparator.orElse(text.size()))))
+                        .orElse(new ImplicitType());
+
+                var identity = new Field(flags, name, returnType);
+
+                return valueSeparator.<Function, RuntimeException>map(separator -> {
+                    var value = new Content(text.slice(separator + 2));
                     return new Implementation(identity, parameters, value);
-                }).orElseGet(() -> {
-                    var returnType = new Content(text.slice(typeSeparator + 1));
-                    var identity = new Field(flags, name, returnType);
-                    return new Abstraction(identity, parameters);
-                });
+                }).orElseGet(() -> new Abstraction(identity, parameters));
             });
         });
     }
