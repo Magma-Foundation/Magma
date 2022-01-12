@@ -22,6 +22,6 @@ public interface Node {
 
     enum Type {
         Content,
-        Block, Implementation, Field, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, Condition, If, String, Invocation, Return
+        Block, Implementation, Field, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, Condition, If, String, Invocation, Line, Return
     }
 }

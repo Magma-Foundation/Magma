@@ -5,6 +5,7 @@ import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.Field;
 import com.meti.compile.common.Import;
+import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Splitter;
 import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.integer.IntegerType;
@@ -46,43 +47,6 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return renderMap(divided);
     }
 
-    private List<Text> split(Text root) {
-        return new Splitter(root)
-                .split()
-                .collect(Collectors.toList());
-    }
-
-    private ArrayList<Node> lex(List<Text> lines) throws CompileException {
-        var oldNodes = new ArrayList<Node>();
-        for (Text oldLine : lines) {
-            oldNodes.add(new MagmaLexer(oldLine).lex());
-        }
-        return oldNodes;
-    }
-
-    private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
-        var resolved = new ArrayList<Node>();
-        for (Node node : lexed) {
-            resolved.add(resolve(node));
-        }
-        return resolved;
-    }
-
-    private ArrayList<Node> format(Packaging thisPackage, ArrayList<Node> oldNodes) throws AttributeException {
-        var newNodes = new ArrayList<Node>();
-        for (Node node : oldNodes) {
-            if (node.is(Node.Type.Import)) {
-                var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
-                var newPackage = thisPackage.relativize(thatPackage);
-                var withPackage = node.with(Attribute.Type.Value, new PackageAttribute(newPackage));
-                newNodes.add(withPackage);
-            } else {
-                newNodes.add(node);
-            }
-        }
-        return newNodes;
-    }
-
     private Map<CFormat, List<Node>> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
         var map = new HashMap<CFormat, List<Node>>();
         for (Node node : newNodes) {
@@ -117,45 +81,6 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         return map;
     }
 
-    private Output<String> renderMap(Map<CFormat, List<Node>> map) throws CompileException {
-        var output = new MappedOutput<>(map);
-        return output.map((format, list) -> {
-            var builder = new StringBuilder();
-            for (Node line : list) {
-                builder.append(new CRenderer(line).render().compute());
-            }
-            return builder.toString().trim();
-        });
-    }
-
-    private Node resolve(Node node) throws AttributeException {
-        var resolved = toBoolean(node)
-                .or(() -> fixImplementation(node))
-                .or(() -> fixAbstraction(node))
-                .orElse(node);
-        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
-        var current = resolved;
-        for (Attribute.Type type : list) {
-            var child = current.apply(type).asNode();
-            var resolvedChild = resolve(child);
-            current = current.with(type, new NodeAttribute(resolvedChild));
-        }
-        return current;
-    }
-
-    private Option<Node> toBoolean(Node node) throws AttributeException {
-        if (node.is(Node.Type.Boolean)) {
-            return new Some<>(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
-        }
-        return new None<>();
-    }
-
-    private Option<Node> fixImplementation(Node node) throws AttributeException {
-        return node.is(Node.Type.Implementation)
-                ? new Some<>(fixBooleans(node))
-                : new None<>();
-    }
-
     private Option<Node> fixAbstraction(Node node) throws AttributeException {
         if (node.is(Node.Type.Abstraction)) {
             if (node.apply(Attribute.Type.Identity)
@@ -167,6 +92,27 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             } else {
                 return new Some<>(new EmptyNode());
             }
+        } else {
+            return new None<>();
+        }
+    }
+
+    private Option<Node> fixBlock(Node node) throws AttributeException {
+        if (node.is(Node.Type.Block)) {
+            var oldChildren = node.apply(Attribute.Type.Children)
+                    .asStreamOfNodes()
+                    .collect(Collectors.toList());
+            var newChildren = new ArrayList<Node>();
+            for (Node oldChild : oldChildren) {
+                Node newChild;
+                if (oldChild.is(Node.Type.Invocation)) {
+                    newChild = new Line(oldChild);
+                } else {
+                    newChild = oldChild;
+                }
+                newChildren.add(newChild);
+            }
+            return new Some<>(node.with(Attribute.Type.Children, new NodesAttribute(newChildren)));
         } else {
             return new None<>();
         }
@@ -187,5 +133,82 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             }
         }
         return node.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
+    }
+
+    private Option<Node> fixImplementation(Node node) throws AttributeException {
+        return node.is(Node.Type.Implementation)
+                ? new Some<>(fixBooleans(node))
+                : new None<>();
+    }
+
+    private ArrayList<Node> format(Packaging thisPackage, ArrayList<Node> oldNodes) throws AttributeException {
+        var newNodes = new ArrayList<Node>();
+        for (Node node : oldNodes) {
+            if (node.is(Node.Type.Import)) {
+                var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
+                var newPackage = thisPackage.relativize(thatPackage);
+                var withPackage = node.with(Attribute.Type.Value, new PackageAttribute(newPackage));
+                newNodes.add(withPackage);
+            } else {
+                newNodes.add(node);
+            }
+        }
+        return newNodes;
+    }
+
+    private ArrayList<Node> lex(List<Text> lines) throws CompileException {
+        var oldNodes = new ArrayList<Node>();
+        for (Text oldLine : lines) {
+            oldNodes.add(new MagmaLexer(oldLine).lex());
+        }
+        return oldNodes;
+    }
+
+    private Output<String> renderMap(Map<CFormat, List<Node>> map) throws CompileException {
+        var output = new MappedOutput<>(map);
+        return output.map((format, list) -> {
+            var builder = new StringBuilder();
+            for (Node line : list) {
+                builder.append(new CRenderer(line).render().compute());
+            }
+            return builder.toString().trim();
+        });
+    }
+
+    private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
+        var resolved = new ArrayList<Node>();
+        for (Node node : lexed) {
+            resolved.add(resolve(node));
+        }
+        return resolved;
+    }
+
+    private Node resolve(Node node) throws AttributeException {
+        var resolved = toBoolean(node)
+                .or(() -> fixImplementation(node))
+                .or(() -> fixAbstraction(node))
+                .or(() -> fixBlock(node))
+                .orElse(node);
+        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = resolved;
+        for (Attribute.Type type : list) {
+            var child = current.apply(type).asNode();
+            var resolvedChild = resolve(child);
+            current = current.with(type, new NodeAttribute(resolvedChild));
+        }
+        return current;
+    }
+
+    private List<Text> split(Text root) {
+        return new Splitter(root)
+                .split()
+                .collect(Collectors.toList());
+    }
+
+    private Option<Node> toBoolean(Node node) throws AttributeException {
+        if (node.is(Node.Type.Boolean)) {
+            return new Some<>(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
+        }
+        return new None<>();
     }
 }

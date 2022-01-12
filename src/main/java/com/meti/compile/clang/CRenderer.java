@@ -5,6 +5,7 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
+import com.meti.compile.common.LineRenderer;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -62,6 +63,7 @@ public record CRenderer(Node root) {
                 new ImportRenderer(node),
                 new IntegerRenderer(node),
                 new InvocationRenderer(node),
+                new LineRenderer(node),
                 new ReturnRenderer(node),
                 new StringRenderer(node),
                 new StructureRenderer(node),
