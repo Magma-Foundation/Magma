@@ -24,7 +24,7 @@ public class ValuedField extends Field {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value ? new ValuedField(flags, name, this.type, attribute.asNode()) : this;
+        return type == Attribute.Type.Value ? new ValuedField(flags, name, this.type, attribute.asNode()) : super.with(type, attribute);
     }
 
     @Override

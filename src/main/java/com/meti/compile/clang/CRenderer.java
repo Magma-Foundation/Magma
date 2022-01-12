@@ -2,7 +2,6 @@ package com.meti.compile.clang;
 
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
-import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
@@ -29,13 +28,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
-    private static Text renderField(Node node) throws AttributeException, RenderException {
+    private static Text renderField(Node node) throws CompileException {
         var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
         if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderField(new EmptyField(Collections.emptySet(), name.prepend("*"), child));
+            return renderFieldWithType(new EmptyField(Collections.emptySet(), name.prepend("*"), child));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()
@@ -56,6 +55,16 @@ public record CRenderer(Node root) {
         }
     }
 
+    private static Text renderFieldWithType(Node node) throws CompileException {
+        var common = renderField(node);
+        if (node.is(Node.Type.EmptyField)) {
+            return common;
+        } else {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            var valueText = renderNode(value);
+            return common.append("=").append(valueText);
+        }
+    }
 
     static Text renderNode(Node node) throws CompileException {
         if (node.is(Node.Type.Content)) {
@@ -95,7 +104,7 @@ public record CRenderer(Node root) {
         var current = root;
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();
-            var renderedNode = renderField(node);
+            var renderedNode = renderFieldWithType(node);
             current = current.with(type, new NodeAttribute(new Content(renderedNode)));
         }
         return current;
@@ -138,14 +147,14 @@ public record CRenderer(Node root) {
         return current;
     }
 
-    private Node withDeclarationCollections(Node withNodeCollections) throws AttributeException, RenderException {
+    private Node withDeclarationCollections(Node withNodeCollections) throws CompileException {
         var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withNodeCollections;
         for (Attribute.Type type : types) {
             var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newDeclarations = new ArrayList<Node>();
             for (Node oldDeclaration : oldDeclarations) {
-                newDeclarations.add(new Content(renderField(oldDeclaration)));
+                newDeclarations.add(new Content(renderFieldWithType(oldDeclaration)));
             }
             current = current.with(type, new NodesAttribute(newDeclarations));
         }
