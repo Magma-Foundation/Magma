@@ -184,14 +184,24 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         });
     }
 
-    private Node resolveNode(Node value) throws AttributeException {
-        if (value.is(Node.Type.Block)) {
-            var children = value.apply(Attribute.Type.Children)
+    private Node resolveNode(Node root) throws AttributeException {
+        if (root.is(Node.Type.Block)) {
+            var children = root.apply(Attribute.Type.Children)
                     .asStreamOfNodes()
                     .collect(Collectors.toList());
-            return Primitive.Void;
+            if (children.isEmpty()) {
+                return Primitive.Void;
+            } else {
+                var lastChild = children.get(children.size() - 1);
+                return resolveNode(lastChild);
+            }
+        } else if (root.is(Node.Type.Return)) {
+            var value = root.apply(Attribute.Type.Value).asNode();
+            return resolveNode(value);
+        } else if (root.is(Node.Type.Integer)) {
+            return new IntegerType(true, 16);
         } else {
-            return value;
+            return root;
         }
     }
 

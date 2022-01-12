@@ -11,6 +11,11 @@ public class FunctionTest {
     }
 
     @Test
+    void implicit_return(){
+        assertSourceCompile("def value() => {return 420;}", "int value(){return 420;}");
+    }
+
+    @Test
     void empty() {
         assertSourceCompile("def empty() : Void => {}", "void empty(){}");
     }
