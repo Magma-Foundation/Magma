@@ -3,7 +3,7 @@ package com.meti.compile;
 import com.meti.compile.attribute.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
-import com.meti.compile.common.Field;
+import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.Import;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Splitter;
@@ -84,7 +84,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                     .asNode()
                     .apply(Attribute.Type.Flags)
                     .asStreamOfFlags()
-                    .noneMatch(value -> value == Field.Flag.Extern)) {
+                    .noneMatch(value -> value == EmptyField.Flag.Extern)) {
                 return new Some<>(fixFunction(node));
             } else {
                 return new Some<>(new EmptyNode());

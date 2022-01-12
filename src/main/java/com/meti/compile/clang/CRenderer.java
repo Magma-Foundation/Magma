@@ -5,7 +5,7 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
-import com.meti.compile.common.Field;
+import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.LineRenderer;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
@@ -35,7 +35,7 @@ public record CRenderer(Node root) {
 
         if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderField(new Field(Collections.emptySet(), name.prepend("*"), child));
+            return renderField(new EmptyField(Collections.emptySet(), name.prepend("*"), child));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()

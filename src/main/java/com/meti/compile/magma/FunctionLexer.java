@@ -1,9 +1,6 @@
 package com.meti.compile.magma;
 
-import com.meti.compile.common.Abstraction;
-import com.meti.compile.common.Field;
-import com.meti.compile.common.Function;
-import com.meti.compile.common.Implementation;
+import com.meti.compile.common.*;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -27,9 +24,9 @@ public record FunctionLexer(Text text) implements Lexer {
                         .map(String::toUpperCase)
                         .collect(Collectors.toList());
 
-                var flags = new HashSet<Field.Flag>();
+                var flags = new HashSet<EmptyField.Flag>();
                 for (String flagString : flagStrings) {
-                    for (Field.Flag value : Field.Flag.values()) {
+                    for (EmptyField.Flag value : EmptyField.Flag.values()) {
                         if (value.name().toUpperCase().equals(flagString)) {
                             flags.add(value);
                         }
@@ -52,7 +49,7 @@ public record FunctionLexer(Text text) implements Lexer {
                         .map(value -> sliceToContent(value + 1, valueSeparator))
                         .orElse(new ImplicitType());
 
-                var identity = new Field(flags, name, returnType);
+                var identity = new EmptyField(flags, name, returnType);
 
                 return valueSeparator.<Function, RuntimeException>map(separator -> {
                     var value = new Content(text.slice(separator + 2));

@@ -6,7 +6,17 @@ import com.meti.compile.node.Text;
 
 import java.util.Set;
 
-public record Field(Set<Flag> flags, Text name, Node type) implements Node {
+public abstract class Field implements Node {
+    protected final Set<Flag> flags;
+    protected final Text name;
+    protected final Node type;
+
+    public Field(Set<Flag> flags, Text name, Node type) {
+        this.flags = flags;
+        this.name = name;
+        this.type = type;
+    }
+
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
@@ -18,17 +28,14 @@ public record Field(Set<Flag> flags, Text name, Node type) implements Node {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Field;
-    }
-
-    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         if (type == Attribute.Type.Type) {
-            return new Field(flags, name, attribute.asNode());
+            return complete(attribute.asNode());
         }
         return this;
     }
+
+    protected abstract Field complete(Node type) throws AttributeException;
 
     public enum Flag {
         Extern,

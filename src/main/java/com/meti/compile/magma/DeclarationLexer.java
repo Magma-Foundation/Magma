@@ -1,7 +1,8 @@
 package com.meti.compile.magma;
 
 import com.meti.compile.common.Declaration;
-import com.meti.compile.common.Field;
+import com.meti.compile.common.EmptyField;
+import com.meti.compile.common.ValuedField;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -25,9 +26,9 @@ public record DeclarationLexer(Text text) implements Lexer {
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .collect(Collectors.toList());
-                Set<Field.Flag> innerFlags = new HashSet<>();
+                Set<EmptyField.Flag> innerFlags = new HashSet<>();
                 for (String thisName : flagString) {
-                    for (Field.Flag value : Field.Flag.values()) {
+                    for (EmptyField.Flag value : EmptyField.Flag.values()) {
                         var thatName = value.name();
                         if (thisName.equalsIgnoreCase(thatName)) {
                             innerFlags.add(value);
@@ -43,14 +44,17 @@ public record DeclarationLexer(Text text) implements Lexer {
                 var typeText = text.slice(typeSeparator + 1, valueSeparator);
                 var type = new Content(typeText);
 
-                return new Declaration(new Field(flags, nameText, type));
+                var valueText = text.slice(valueSeparator + 1);
+                var value = new Content(valueText);
+
+                return new Declaration(new ValuedField(flags, nameText, type, value));
             }).orElseGet(() -> {
                 var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
                 var typeText = text.slice(typeSeparator + 1);
                 var type = new Content(typeText);
 
-                return new Declaration(new Field(flags, nameText, type));
+                return new Declaration(new EmptyField(flags, nameText, type));
             });
         });
     }

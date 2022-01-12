@@ -5,7 +5,7 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
-import com.meti.compile.common.Field;
+import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.Reference;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.bool.BooleanLexer;
@@ -103,7 +103,7 @@ public record MagmaLexer(Text text) {
         for (Attribute.Type type : types) {
             var oldField = current.apply(type).asNode();
             Node newField;
-            if (oldField.is(Node.Type.Field)) {
+            if (oldField.is(Node.Type.EmptyField) || oldField.is(Node.Type.ValuedField)) {
                 var oldType = oldField.apply(Attribute.Type.Type).asNode();
                 Node newType;
                 if (oldType.is(Node.Type.Content)) {
@@ -112,7 +112,18 @@ public record MagmaLexer(Text text) {
                 } else {
                     newType = oldType;
                 }
-                newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+
+                var withType = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
+                Node withValue;
+                if (oldField.is(Node.Type.ValuedField)) {
+                    var valueText = oldField.apply(Attribute.Type.Value).asNode().apply(Attribute.Type.Value).asText();
+                    var value = lexNodeAST(valueText);
+                    withValue = withType.with(Attribute.Type.Value, new NodeAttribute(value));
+                } else {
+                    withValue = withType;
+                }
+
+                newField = withValue;
             } else {
                 newField = lexField(oldField.apply(Attribute.Type.Value).asText());
             }
@@ -141,7 +152,7 @@ public record MagmaLexer(Text text) {
         var current = root;
         for (Attribute.Type type : types) {
             var oldNode = root.apply(type).asNode();
-            var newNode = lexAST(oldNode.apply(Attribute.Type.Value).asText());
+            var newNode = lexNodeAST(oldNode.apply(Attribute.Type.Value).asText());
             current = current.with(type, new NodeAttribute(newNode));
         }
         return current;
@@ -154,7 +165,7 @@ public record MagmaLexer(Text text) {
             var oldNodes = root.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
-                newNodes.add(lexAST(oldNode.apply(Attribute.Type.Value).asText()));
+                newNodes.add(lexNodeAST(oldNode.apply(Attribute.Type.Value).asText()));
             }
             current = current.with(type, new NodesAttribute(newNodes));
         }
@@ -162,15 +173,7 @@ public record MagmaLexer(Text text) {
     }
 
     public Node lex() throws CompileException {
-        return lexAST(text);
-    }
-
-    private Node lexAST(Text text) throws LexException, AttributeException {
-        var node = lexNode(text);
-        var withFields = attachDeclaration(node);
-        var withDeclarations = attachDeclarations(withFields);
-        var withNode = attachNode(withDeclarations);
-        return attachNodes(withNode);
+        return lexNodeAST(text);
     }
 
     private Node lexField(Text text) throws LexException, AttributeException {
@@ -179,6 +182,14 @@ public record MagmaLexer(Text text) {
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexTypeAST(typeText);
-        return new Field(Collections.emptySet(), name, type);
+        return new EmptyField(Collections.emptySet(), name, type);
+    }
+
+    private Node lexNodeAST(Text text) throws LexException, AttributeException {
+        var node = lexNode(text);
+        var withFields = attachDeclaration(node);
+        var withDeclarations = attachDeclarations(withFields);
+        var withNode = attachNode(withDeclarations);
+        return attachNodes(withNode);
     }
 }

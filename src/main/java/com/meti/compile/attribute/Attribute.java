@@ -1,6 +1,6 @@
 package com.meti.compile.attribute;
 
-import com.meti.compile.common.Field;
+import com.meti.compile.common.EmptyField;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.source.Packaging;
@@ -24,7 +24,7 @@ public interface Attribute {
         throw new AttributeException("Not a package.");
     }
 
-    default Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
+    default Stream<EmptyField.Flag> asStreamOfFlags() throws AttributeException {
         throw new AttributeException("Not a ist of flags.");
     }
 
