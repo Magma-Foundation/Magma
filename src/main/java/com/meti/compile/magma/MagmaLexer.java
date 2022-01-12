@@ -11,6 +11,7 @@ import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
 import com.meti.compile.common.integer.IntegerLexer;
+import com.meti.compile.common.integer.IntegerTypeLexer;
 import com.meti.compile.common.invoke.InvocationLexer;
 import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.compile.common.string.StringLexer;
@@ -64,13 +65,14 @@ public record MagmaLexer(Text text) {
                 new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),
-                new IntegerLexer(text));
+                new IntegerTypeLexer(text));
 
         Option<Node> found = new None<>();
         for (Lexer lexer : lexers) {
             var option = lexer.lex();
             if (option.isPresent()) {
                 found = option;
+                break;
             }
         }
 
