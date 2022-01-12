@@ -44,6 +44,6 @@ public interface Attribute {
     }
 
     enum Group {
-        Declaration, Nodes, Declarations, Type, Node
+        Declaration, Nodes, Declarations, Type, Node, Types,
     }
 }

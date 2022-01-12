@@ -61,9 +61,11 @@ public record MagmaLexer(Text text) {
 
     private static Node lexType(Text text) throws LexException {
         List<Lexer> lexers = List.of(
+                new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),
                 new IntegerLexer(text));
+
         Option<Node> found = new None<>();
         for (Lexer lexer : lexers) {
             var option = lexer.lex();
