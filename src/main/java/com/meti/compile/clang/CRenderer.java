@@ -65,6 +65,7 @@ public record CRenderer(Node root) {
         var renderers = List.of(
                 new BlockRenderer(node),
                 new ConditionRenderer(node),
+                new DeclarationRenderer(node),
                 new EmptyRenderer(node),
                 new ExternRenderer(node),
                 new FunctionRenderer(node),

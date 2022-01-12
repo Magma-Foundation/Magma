@@ -35,6 +35,7 @@ public record MagmaLexer(Text text) {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
+                new DeclarationLexer(text),
                 new StringLexer(text),
                 new ConditionLexer(text),
                 new BooleanLexer(text),
