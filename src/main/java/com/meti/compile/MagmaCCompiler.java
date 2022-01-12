@@ -192,8 +192,13 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             if (children.isEmpty()) {
                 return Primitive.Void;
             } else {
-                var lastChild = children.get(children.size() - 1);
-                return resolveNode(lastChild);
+                for (int i = children.size() - 1; i >= 0; i--) {
+                    var child = children.get(i);
+                    if (child.is(Node.Type.Return)) {
+                        return resolveNode(child);
+                    }
+                }
+                return Primitive.Void;
             }
         } else if (root.is(Node.Type.Return)) {
             var value = root.apply(Attribute.Type.Value).asNode();

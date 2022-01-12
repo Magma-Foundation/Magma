@@ -7,7 +7,6 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.Field;
 import com.meti.compile.common.LineRenderer;
-import com.meti.compile.common.Reference;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -45,10 +44,12 @@ public record CRenderer(Node root) {
         } else if (type.is(Node.Type.Integer)) {
             var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
             var bits = type.apply(Attribute.Type.Bits).asInteger();
-            String suffix;
-            if (bits == 16) suffix = "int";
-            else throw new RenderException("Unknown bit quantity: " + bits);
-            String value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
+            var suffix = switch (bits) {
+                case 8 -> "char";
+                case 16 -> "int";
+                default -> throw new RenderException("Unknown bit quantity: " + bits);
+            };
+            var value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
             return new Text(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
