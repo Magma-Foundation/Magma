@@ -10,10 +10,7 @@ import com.meti.compile.common.block.Splitter;
 import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.magma.MagmaLexer;
-import com.meti.compile.node.Content;
-import com.meti.compile.node.EmptyNode;
-import com.meti.compile.node.Node;
-import com.meti.compile.node.Text;
+import com.meti.compile.node.*;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
@@ -41,7 +38,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var root = new Text(input);
         var lines = split(root);
         var lexed = lex(lines);
-        var resolved = resolve(lexed);
+        var resolved = resolveStage(lexed);
         var formatted = format(thisPackage, resolved);
         var divided = divide(thisPackage, formatted);
         return renderMap(divided);
@@ -88,7 +85,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                     .apply(Attribute.Type.Flags)
                     .asStreamOfFlags()
                     .noneMatch(value -> value == Field.Flag.Extern)) {
-                return new Some<>(fixBooleans(node));
+                return new Some<>(fixFunction(node));
             } else {
                 return new Some<>(new EmptyNode());
             }
@@ -118,8 +115,20 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
     }
 
-    private Node fixBooleans(Node node) throws AttributeException {
-        var oldParameters = node.apply(Attribute.Type.Parameters)
+    private Node fixFunction(Node node) throws AttributeException {
+        var identity = node.apply(Attribute.Type.Identity).asNode();
+        var oldReturnType = identity.apply(Attribute.Type.Type).asNode();
+        Node newReturnType;
+        if (oldReturnType.is(Node.Type.Implicit)) {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            newReturnType = resolveNode(value);
+        } else {
+            newReturnType = oldReturnType;
+        }
+        var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(newReturnType));
+        var withIdentity = node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+
+        var oldParameters = withIdentity.apply(Attribute.Type.Parameters)
                 .asStreamOfNodes()
                 .collect(Collectors.toList());
         var newParameters = new ArrayList<Node>();
@@ -132,12 +141,12 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 newParameters.add(parameter);
             }
         }
-        return node.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
+        return withIdentity.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
     }
 
     private Option<Node> fixImplementation(Node node) throws AttributeException {
         return node.is(Node.Type.Implementation)
-                ? new Some<>(fixBooleans(node))
+                ? new Some<>(fixFunction(node))
                 : new None<>();
     }
 
@@ -175,15 +184,26 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         });
     }
 
-    private ArrayList<Node> resolve(ArrayList<Node> lexed) throws AttributeException {
+    private Node resolveNode(Node value) throws AttributeException {
+        if (value.is(Node.Type.Block)) {
+            var children = value.apply(Attribute.Type.Children)
+                    .asStreamOfNodes()
+                    .collect(Collectors.toList());
+            return Primitive.Void;
+        } else {
+            return value;
+        }
+    }
+
+    private ArrayList<Node> resolveStage(ArrayList<Node> lexed) throws AttributeException {
         var resolved = new ArrayList<Node>();
         for (Node node : lexed) {
-            resolved.add(resolve(node));
+            resolved.add(resolveStage(node));
         }
         return resolved;
     }
 
-    private Node resolve(Node node) throws AttributeException {
+    private Node resolveStage(Node node) throws AttributeException {
         var resolved = toBoolean(node)
                 .or(() -> fixImplementation(node))
                 .or(() -> fixAbstraction(node))
@@ -193,7 +213,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var current = resolved;
         for (Attribute.Type type : list) {
             var child = current.apply(type).asNode();
-            var resolvedChild = resolve(child);
+            var resolvedChild = resolveStage(child);
             current = current.with(type, new NodeAttribute(resolvedChild));
         }
         return current;
