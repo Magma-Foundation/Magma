@@ -6,26 +6,6 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
     @Test
-    void function_type(){
-        assertSourceCompile("let x : () => Void;", "void (*x)();");
-    }
-
-    @Test
-    void function_type_parameters(){
-        assertSourceCompile("let x : (I16, U16) => Void", "void (*x)(int,unsigned int);");
-    }
-
-    @Test
-    void implicit(){
-        assertSourceCompile("def empty() => {}", "void empty(){}");
-    }
-
-    @Test
-    void implicit_return(){
-        assertSourceCompile("def value() => {return 420;}", "int value(){return 420;}");
-    }
-
-    @Test
     void empty() {
         assertSourceCompile("def empty() : Void => {}", "void empty(){}");
     }
@@ -38,6 +18,31 @@ public class FunctionTest {
     @Test
     void external_operator() {
         assertSourceCompile("extern operator def !(state : Bool) : Bool;! false", "!0");
+    }
+
+    @Test
+    void function_type() {
+        assertSourceCompile("let x : () => Void;", "void (*x)();");
+    }
+
+    @Test
+    void function_type_parameters() {
+        assertSourceCompile("let x : (I16, U16) => Void", "void (*x)(int,unsigned int);");
+    }
+
+    @Test
+    void functional_parameters() {
+        assertSourceCompile("def doSomething(actor : () => Void) => {}", "void doSomething(void (*actor)()){}");
+    }
+
+    @Test
+    void implicit() {
+        assertSourceCompile("def empty() => {}", "void empty(){}");
+    }
+
+    @Test
+    void implicit_return() {
+        assertSourceCompile("def value() => {return 420;}", "int value(){return 420;}");
     }
 
     @Test

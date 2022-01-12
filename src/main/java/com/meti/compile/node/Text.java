@@ -63,6 +63,13 @@ public final class Text {
                 : new Some<>(index);
     }
 
+    public Option<Integer> firstIndexOfSlice(String slice, int offset) {
+        var index = trimmedValue.indexOf(slice, offset);
+        return index == -1
+                ? new None<>()
+                : new Some<>(index);
+    }
+
     public boolean isEmpty() {
         return trimmedValue.length() == 0;
     }

@@ -35,10 +35,21 @@ public record FunctionLexer(Text text) implements Lexer {
                     }
                 }
 
-                if(flags.contains(Field.Flag.Def)) {
+                if (flags.contains(Field.Flag.Def)) {
                     var name = keys.slice(space + 1);
 
-                    var paramEnd = text.firstIndexOfChar(')').orElse(-1);
+                    var depth = 0;
+                    var paramEnd = -1;
+                    for (int i = paramStart + 1; i < text.size(); i++) {
+                        var c = text.apply(i);
+                        if (c == ')' && depth == 0) {
+                            paramEnd = i;
+                        } else {
+                            if (c == '(') depth++;
+                            if (c == ')') depth--;
+                        }
+                    }
+
                     var parameters = Arrays.stream(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                             .split(","))
                             .filter(value -> !value.isBlank())
@@ -46,7 +57,7 @@ public record FunctionLexer(Text text) implements Lexer {
                             .map(Content::new)
                             .collect(Collectors.<Node>toSet());
 
-                    var valueSeparator = text.firstIndexOfSlice("=>");
+                    var valueSeparator = text.firstIndexOfSlice("=>", paramEnd);
                     var returnType = text.firstIndexOfCharWithOffset(':', paramEnd)
                             .filter(value -> value < valueSeparator.orElse(text.size()))
                             .map(value -> sliceToContent(value + 1, valueSeparator))
