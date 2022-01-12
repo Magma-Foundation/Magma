@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public record DeclarationLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        return text.firstIndexOfChar(':').flatMap(typeSeparator -> text.firstIndexOfChar('=').map(valueSeparator -> {
+        return text.firstIndexOfChar(':').map(typeSeparator -> {
             var keys = text.slice(0, typeSeparator);
             var separator = keys.lastIndexOfChar(' ');
             var flags = separator.map(space -> {
@@ -37,12 +37,21 @@ public record DeclarationLexer(Text text) implements Lexer {
                 return innerFlags;
             }).orElse(Collections.emptySet());
 
-            var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
+            return text.firstIndexOfChar('=').map(valueSeparator -> {
+                var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
-            var typeText = text.slice(typeSeparator + 1, valueSeparator);
-            var type = new Content(typeText);
+                var typeText = text.slice(typeSeparator + 1, valueSeparator);
+                var type = new Content(typeText);
 
-            return new Declaration(new Field(flags, nameText, type));
-        }));
+                return new Declaration(new Field(flags, nameText, type));
+            }).orElseGet(() -> {
+                var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
+
+                var typeText = text.slice(typeSeparator + 1);
+                var type = new Content(typeText);
+
+                return new Declaration(new Field(flags, nameText, type));
+            });
+        });
     }
 }
