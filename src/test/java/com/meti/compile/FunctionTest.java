@@ -6,6 +6,11 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
     @Test
+    void functionType(){
+        assertSourceCompile("let x : () => Void;", "void (*x)();");
+    }
+
+    @Test
     void implicit(){
         assertSourceCompile("def empty() => {}", "void empty(){}");
     }

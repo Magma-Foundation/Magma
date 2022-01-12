@@ -101,4 +101,9 @@ public final class Text {
     public boolean startsWithSlice(String slice) {
         return trimmedValue.startsWith(slice);
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }
