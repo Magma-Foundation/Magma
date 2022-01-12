@@ -5,6 +5,12 @@ import com.meti.core.F1;
 
 public record Some<T>(T value) implements Option<T> {
     @Override
+    public <E extends Exception> Option<T> filter(F1<T, Boolean, E> predicate) throws E {
+        if(predicate.apply(value)) return this;
+        return new None<>();
+    }
+
+    @Override
     public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E {
         return mapper.apply(value);
     }

@@ -5,6 +5,11 @@ import com.meti.core.F1;
 
 public class None<T> implements Option<T> {
     @Override
+    public <E extends Exception> Option<T> filter(F1<T, Boolean, E> predicate) {
+        return new None<>();
+    }
+
+    @Override
     public <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) {
         return new None<>();
     }

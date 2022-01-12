@@ -8,6 +8,7 @@ import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
+import com.meti.compile.common.invoke.InvocationRenderer;
 import com.meti.compile.common.returns.ReturnRenderer;
 import com.meti.compile.common.string.StringRenderer;
 import com.meti.compile.common.variable.VariableRenderer;
@@ -60,6 +61,7 @@ public record CRenderer(Node root) {
                 new FunctionRenderer(node),
                 new ImportRenderer(node),
                 new IntegerRenderer(node),
+                new InvocationRenderer(node),
                 new ReturnRenderer(node),
                 new StringRenderer(node),
                 new StructureRenderer(node),

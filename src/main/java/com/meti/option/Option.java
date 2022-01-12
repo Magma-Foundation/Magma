@@ -1,9 +1,12 @@
 package com.meti.option;
 
+import com.meti.compile.node.Node;
 import com.meti.core.C1;
 import com.meti.core.F1;
 
 public interface Option<T> {
+    <E extends Exception> Option<T> filter(F1<T, Boolean, E> predicate) throws E;
+
     <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E;
 
     <E extends Exception> void ifPresent(C1<T, E> consumer) throws E;

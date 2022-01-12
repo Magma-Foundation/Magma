@@ -11,6 +11,8 @@ import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
+import com.meti.compile.common.invoke.Invocation;
+import com.meti.compile.common.invoke.InvocationLexer;
 import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.compile.common.string.StringLexer;
 import com.meti.compile.common.variable.VariableLexer;
@@ -39,6 +41,7 @@ public record MagmaLexer(Text text) {
                 new StructureLexer(text),
                 new BlockLexer(text),
                 new FunctionLexer(text),
+                new InvocationLexer(text),
                 new ReturnLexer(text),
                 new IntegerLexer(text),
                 new UnaryLexer(text),
