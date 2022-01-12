@@ -104,6 +104,6 @@ public final class Text {
 
     @Override
     public String toString() {
-        return value;
+        return "\"" + value + "\"";
     }
 }
