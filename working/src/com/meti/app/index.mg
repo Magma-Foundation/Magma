@@ -1,10 +1,10 @@
 extern import stdio;
 
-def describe(name : &I8) => {
-    printf("%s :\n", name);
+def describe(name : &I8, action : () => Void) => {
+    printf("%s\n", name);
 }
 
 def main() => {
-    describe("test");
+    describe("The assertions");
     return 0;
 }
