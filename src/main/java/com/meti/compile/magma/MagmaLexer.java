@@ -11,7 +11,6 @@ import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
 import com.meti.compile.common.integer.IntegerLexer;
 import com.meti.compile.common.integer.IntegerType;
-import com.meti.compile.common.invoke.Invocation;
 import com.meti.compile.common.invoke.InvocationLexer;
 import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.compile.common.string.StringLexer;
@@ -85,10 +84,14 @@ public record MagmaLexer(Text text) {
             var oldField = current.apply(type).asNode();
             Node newField;
             if (oldField.is(Node.Type.Field)) {
-                var oldType = oldField.apply(Attribute.Type.Type).asNode()
-                        .apply(Attribute.Type.Value)
-                        .asText();
-                var newType = lexType(oldType);
+                var oldType = oldField.apply(Attribute.Type.Type).asNode();
+                Node newType;
+                if (oldType.is(Node.Type.Content)) {
+                    var typeText = oldType.apply(Attribute.Type.Value).asText();
+                    newType = lexType(typeText);
+                } else {
+                    newType = oldType;
+                }
                 newField = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
             } else {
                 newField = lexField(oldField.apply(Attribute.Type.Value).asText());
