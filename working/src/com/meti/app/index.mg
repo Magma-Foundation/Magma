@@ -1,6 +1,6 @@
 extern import stdio;
 
 def main() => {
-    printf("%s", "Hello test!");
+    printf("%s", "Hello world!");
     return 0;
 }
