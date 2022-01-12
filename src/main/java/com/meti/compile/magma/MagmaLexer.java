@@ -6,21 +6,19 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
-import com.meti.compile.common.Reference;
+import com.meti.compile.common.ReferenceLexer;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
 import com.meti.compile.common.integer.IntegerLexer;
-import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.common.invoke.InvocationLexer;
 import com.meti.compile.common.returns.ReturnLexer;
 import com.meti.compile.common.string.StringLexer;
 import com.meti.compile.common.variable.VariableLexer;
 import com.meti.compile.lex.LexException;
 import com.meti.compile.lex.Lexer;
-import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
-import com.meti.compile.node.Primitive;
+import com.meti.compile.node.PrimitiveLexer;
 import com.meti.compile.node.Text;
 import com.meti.option.None;
 import com.meti.option.Option;
@@ -62,28 +60,19 @@ public record MagmaLexer(Text text) {
     }
 
     private static Node lexType(Text text) throws LexException {
-        if (text.startsWithChar('&')) {
-            var valueText = text.slice(1);
-            var node = new Content(valueText);
-            return new Reference(node);
-        }
-
-        var values = Primitive.values();
-        for (Primitive value : values) {
-            if (text.computeTrimmed().equals(value.name())) {
-                return value;
+        List<Lexer> lexers = List.of(
+                new ReferenceLexer(text),
+                new PrimitiveLexer(text),
+                new IntegerLexer(text));
+        Option<Node> found = new None<>();
+        for (Lexer lexer : lexers) {
+            var option = lexer.lex();
+            if (option.isPresent()) {
+                found = option;
             }
         }
 
-        var isSigned = text.startsWithChar('I');
-        var isUnsigned = text.startsWithChar('U');
-        if (isSigned || isUnsigned) {
-            var bitsText = text.slice(1);
-            var bits = Integer.parseInt(bitsText.computeTrimmed());
-            return new IntegerType(isSigned, bits);
-        } else {
-            throw new LexException("Unknown type: \"" + text.compute() + "\"");
-        }
+        return found.orElseThrow(() -> new LexException("Unknown type: \"" + text.compute() + "\""));
     }
 
     static Node lexTypeAST(Text text) throws LexException, AttributeException {
