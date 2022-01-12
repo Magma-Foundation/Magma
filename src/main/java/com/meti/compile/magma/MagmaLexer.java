@@ -81,11 +81,32 @@ public record MagmaLexer(Text text) {
 
     static Node lexTypeAST(Text text) throws LexException, AttributeException {
         var root = lexType(text);
+        var withType = withType(root);
+        return withTypes(withType);
+    }
+
+    private static Node withType(Node root) throws AttributeException, LexException {
         var types = root.apply(Attribute.Group.Type).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
             var newChild = lexTypeAST(current.apply(type).asNode().apply(Attribute.Type.Value).asText());
             current = current.with(type, new NodeAttribute(newChild));
+        }
+        return current;
+    }
+
+    private static Node withTypes(Node root) throws AttributeException, LexException {
+        var types = root.apply(Attribute.Group.Types).collect(Collectors.toList());
+        var current = root;
+        for (Attribute.Type type : types) {
+            var oldTypes = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+
+            var newTypes = new ArrayList<Node>();
+            for (Node oldType : oldTypes) {
+                newTypes.add(lexTypeAST(oldType.apply(Attribute.Type.Value).asText()));
+            }
+
+            current = current.with(type, new NodesAttribute(newTypes));
         }
         return current;
     }
