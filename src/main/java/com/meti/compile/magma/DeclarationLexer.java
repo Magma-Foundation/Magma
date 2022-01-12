@@ -38,7 +38,23 @@ public record DeclarationLexer(Text text) implements Lexer {
                 return innerFlags;
             }).orElse(Collections.emptySet());
 
-            return text.firstIndexOfChar('=').map(valueSeparator -> {
+            int valueSeparator = -1;
+            for (int i = 0; i < text.size(); i++) {
+                var c = text.apply(i);
+                if (c == '=' && !text.slice(i, i + 2).compute().equals("=>")) {
+                    valueSeparator = i;
+                    break;
+                }
+            }
+
+            if (valueSeparator == -1) {
+                var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
+
+                var typeText = text.slice(typeSeparator + 1);
+                var type = new Content(typeText);
+
+                return new Declaration(new EmptyField(flags, nameText, type));
+            } else {
                 var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
                 var typeText = text.slice(typeSeparator + 1, valueSeparator);
@@ -48,14 +64,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                 var value = new Content(valueText);
 
                 return new Declaration(new ValuedField(flags, nameText, type, value));
-            }).orElseGet(() -> {
-                var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
-
-                var typeText = text.slice(typeSeparator + 1);
-                var type = new Content(typeText);
-
-                return new Declaration(new EmptyField(flags, nameText, type));
-            });
+            }
         });
     }
 }

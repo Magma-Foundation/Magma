@@ -42,8 +42,8 @@ public record MagmaLexer(Text text) {
                 new StructureLexer(text),
                 new BlockLexer(text),
                 new FunctionLexer(text),
-                new InvocationLexer(text),
                 new DeclarationLexer(text),
+                new InvocationLexer(text),
                 new ReturnLexer(text),
                 new IntegerLexer(text),
                 new UnaryLexer(text),
@@ -82,7 +82,7 @@ public record MagmaLexer(Text text) {
             var bits = Integer.parseInt(bitsText.computeTrimmed());
             return new IntegerType(isSigned, bits);
         } else {
-            throw new LexException("Cannot lex type: " + text.compute());
+            throw new LexException("Unknown type: \"" + text.compute() + "\"");
         }
     }
 
