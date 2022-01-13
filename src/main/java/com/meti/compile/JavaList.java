@@ -11,6 +11,11 @@ public class JavaList {
         this.value = value;
     }
 
+    public JavaList add(Node node) {
+        value.add(node);
+        return this;
+    }
+
     JavaList insert(int index, Node value) {
         getValue().add(index, value);
         return new JavaList(getValue());

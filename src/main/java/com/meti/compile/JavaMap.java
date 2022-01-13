@@ -6,8 +6,19 @@ import com.meti.option.Supplier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-public record JavaMap<A, B>(Map<A, B> map) {
+public final class JavaMap<A, B> {
+    private final Map<A, B> map;
+
+    public JavaMap() {
+        this(new HashMap<>());
+    }
+
+    public JavaMap(Map<A, B> map) {
+        this.map = map;
+    }
+
     <E extends Exception> JavaMap<A, B> ensure(A key, Supplier<B, E> generator) throws E {
         if (!map.containsKey(key)) {
             var value = generator.get();
@@ -19,8 +30,16 @@ public record JavaMap<A, B>(Map<A, B> map) {
         }
     }
 
-    public B get(A key) {
+    public B apply(A key) {
         return map.get(key);
+    }
+
+    public boolean hasKey(A key) {
+        return map.containsKey(key);
+    }
+
+    public Set<A> keys() {
+        return map.keySet();
     }
 
     <C extends Exception> JavaMap<A, B> mapValue(A key, F1<B, B, C> mapper) throws C {
@@ -43,5 +62,11 @@ public record JavaMap<A, B>(Map<A, B> map) {
             outputMap.put(aA, input);
         }
         return new JavaMap<>(outputMap);
+    }
+
+    public JavaMap<A, B> put(A key, B value) {
+        var copy = new HashMap<>(map);
+        copy.put(key, value);
+        return new JavaMap<>(copy);
     }
 }

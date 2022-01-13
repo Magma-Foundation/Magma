@@ -3,29 +3,28 @@ package com.meti.compile;
 import com.meti.compile.clang.CFormat;
 import com.meti.core.F2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
-public record MappedOutput<T>(Map<CFormat, T> map) implements Output<T> {
+public record MappedOutput<T>(JavaMap<CFormat, T> map) implements Output<T> {
     @Override
     public T apply(CFormat format, T other) {
-        if (map.containsKey(format)) return map.get(format);
+        if (map.hasKey(format)) return map.apply(format);
         return other;
     }
 
     @Override
     public <R, E extends Exception> Output<R> map(F2<CFormat, T, R, E> mapper) throws E {
-        var copy = new HashMap<CFormat, R>();
-        for (CFormat cFormat : new ArrayList<>(map.keySet())) {
-            copy.put(cFormat, mapper.apply(cFormat, map.get(cFormat)));
+        var copy = new JavaMap<CFormat, R>();
+        for (CFormat key : map.keys()) {
+            var oldValue = map.apply(key);
+            var newValue = mapper.apply(key, oldValue);
+            copy = copy.put(key, newValue);
         }
         return new MappedOutput<>(copy);
     }
 
     @Override
     public Stream<CFormat> streamFormats() {
-        return map.keySet().stream();
+        return map.keys().stream();
     }
 }

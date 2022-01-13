@@ -16,7 +16,10 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 import com.meti.source.Packaging;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
@@ -36,13 +39,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return renderMap(divided);
     }
 
-    private Map<CFormat, JavaList> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
-        var map = new HashMap<CFormat, JavaList>();
+    private JavaMap<CFormat, JavaList> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
+        var map = new JavaMap<CFormat, JavaList>();
         for (Node node : newNodes) {
             if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
-                generateHeader(thisPackage, new JavaMap<>(map), node);
+                map = generateHeader(thisPackage, map, node);
             } else {
-                generateSource(thisPackage, map, node);
+                map = generateSource(thisPackage, map, node);
             }
         }
 
@@ -152,15 +155,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
                 .mapValue(CFormat.Header, value -> value.insert(value.size() - 1, node));
     }
 
-    private void generateSource(Packaging thisPackage, HashMap<CFormat, JavaList> map, Node node) {
-        if (!map.containsKey(CFormat.Source)) {
+    private JavaMap<CFormat, JavaList> generateSource(Packaging thisPackage, JavaMap<CFormat, JavaList> javaMap, Node node) {
+        return javaMap.ensure(CFormat.Source, () -> {
             var list = new ArrayList<Node>();
             list.add(new Import(new Packaging(thisPackage.computeName())));
             list.add(node);
-            map.put(CFormat.Source, new JavaList(list));
-        } else {
-            map.get(CFormat.Source).getValue().add(node);
-        }
+            return new JavaList(list);
+        }).mapValue(CFormat.Source, list -> list.add(node));
     }
 
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
@@ -171,7 +172,7 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return oldNodes;
     }
 
-    private Output<String> renderMap(Map<CFormat, JavaList> map) throws CompileException {
+    private Output<String> renderMap(JavaMap<CFormat, JavaList> map) throws CompileException {
         var output = new MappedOutput<>(map);
         return output.map((format, list) -> {
             var builder = new StringBuilder();
