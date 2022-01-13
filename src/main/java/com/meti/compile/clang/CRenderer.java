@@ -6,6 +6,7 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.LineRenderer;
+import com.meti.compile.common.alternate.ElseRenderer;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -90,6 +91,7 @@ public record CRenderer(Node root) {
                 new BlockRenderer(node),
                 new ConditionRenderer(node),
                 new DeclarationRenderer(node),
+                new ElseRenderer(node),
                 new EmptyRenderer(node),
                 new ExternRenderer(node),
                 new FunctionRenderer(node),

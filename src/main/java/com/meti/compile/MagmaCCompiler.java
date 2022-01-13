@@ -184,6 +184,27 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         });
     }
 
+    private Node resolveField(Node field) throws CompileException {
+        if (field.is(Node.Type.ValuedField)) {
+            var oldValue = field.apply(Attribute.Type.Value).asNode();
+            var newValue = resolveStage(oldValue);
+            return field.with(Attribute.Type.Value, new NodeAttribute(newValue));
+        } else {
+            return field;
+        }
+    }
+
+    private Node resolveFieldStage(Node root) throws CompileException {
+        var current = root;
+        var declarations = current.apply(Attribute.Group.Declaration).collect(Collectors.toList());
+        for (Attribute.Type type : declarations) {
+            var oldField = current.apply(type).asNode();
+            var newField = resolveField(oldField);
+            current = current.with(type, new NodeAttribute(newField));
+        }
+        return current;
+    }
+
     private Node resolveNode(Node root) throws AttributeException, ResolutionException {
         if (root.is(Node.Type.Block)) {
             var children = root.apply(Attribute.Type.Children)
@@ -210,6 +231,17 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
     }
 
+    private Node resolveNodeType(Node resolved) throws CompileException {
+        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = resolved;
+        for (Attribute.Type type : list) {
+            var child = current.apply(type).asNode();
+            var resolvedChild = resolveStage(child);
+            current = current.with(type, new NodeAttribute(resolvedChild));
+        }
+        return current;
+    }
+
     private ArrayList<Node> resolveStage(ArrayList<Node> lexed) throws CompileException {
         var resolved = new ArrayList<Node>();
         for (Node node : lexed) {
@@ -224,14 +256,8 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 .or(() -> fixAbstraction(node))
                 .or(() -> fixBlock(node))
                 .orElse(node);
-        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
-        var current = resolved;
-        for (Attribute.Type type : list) {
-            var child = current.apply(type).asNode();
-            var resolvedChild = resolveStage(child);
-            current = current.with(type, new NodeAttribute(resolvedChild));
-        }
-        return current;
+        var current = resolveNodeType(resolved);
+        return resolveFieldStage(current);
     }
 
     private List<Text> split(Text root) {
