@@ -46,7 +46,13 @@ public class FunctionTest {
     }
 
     @Test
-    void innerFunctions() {
+    void innerInnerFunction(){
+        assertSourceCompile("def first() => {def second() => {def third() => {}}}",
+                "void third(){}void second(){}void first(){}");
+    }
+
+    @Test
+    void innerFunction() {
         assertSourceCompile("def outer() => {def inner() => {}}",
                 "void inner(){}void outer(){}");
     }
