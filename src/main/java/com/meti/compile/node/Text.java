@@ -97,6 +97,10 @@ public final class Text {
         return new Text(trimmedValue.substring(offset));
     }
 
+    public Text sliceRaw(int start, int end) {
+        return new Text(value.substring(start, end));
+    }
+
     public boolean startsWithChar(char c) {
         return hasContent() && trimmedValue.indexOf(c) == 0;
     }

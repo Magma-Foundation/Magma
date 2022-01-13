@@ -9,4 +9,9 @@ public class StringTest {
     void value() {
         assertSourceCompile("\"Hello World!\"", "\"Hello World!\"");
     }
+
+    @Test
+    void whitespace() {
+        assertSourceCompile("\" test \"", "\" test \"");
+    }
 }
