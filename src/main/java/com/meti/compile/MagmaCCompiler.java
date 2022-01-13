@@ -102,7 +102,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             var newChildren = new ArrayList<Node>();
             for (Node oldChild : oldChildren) {
                 Node newChild;
-                if (oldChild.is(Node.Type.Invocation)) {
+                if (oldChild.is(Node.Type.Invocation) || oldChild.is(Node.Type.Binary)) {
                     newChild = new Line(oldChild);
                 } else {
                     newChild = oldChild;

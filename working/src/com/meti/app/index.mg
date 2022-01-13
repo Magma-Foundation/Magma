@@ -32,6 +32,6 @@ def lambda0() => {
 }
 
 def main() => {
-    describe("The assertions");
+    describe("The assertions", lambda0);
     return 0;
 }
