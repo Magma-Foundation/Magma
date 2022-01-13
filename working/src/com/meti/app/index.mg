@@ -4,13 +4,13 @@ let result : I16 = true;
 
 def it(message : &I8, action : () => Void) => {
     action();
-    printf("\t%s: ", message);
+    printf("\t%s -> ", message);
     if(result) {
         printf("%s", "PASSING");
     } else {
         printf("%s", "FAILING");
     }
-});
+}
 
 def describe(name : &I8, action : () => Void) => {
     printf("%s\n", name);
