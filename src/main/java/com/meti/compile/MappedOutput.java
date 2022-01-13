@@ -14,13 +14,7 @@ public record MappedOutput<T>(JavaMap<CFormat, T> map) implements Output<T> {
 
     @Override
     public <R, E extends Exception> Output<R> map(F2<CFormat, T, R, E> mapper) throws E {
-        var copy = new JavaMap<CFormat, R>();
-        for (CFormat key : map.keys()) {
-            var oldValue = map.apply(key);
-            var newValue = mapper.apply(key, oldValue);
-            copy = copy.put(key, newValue);
-        }
-        return new MappedOutput<>(copy);
+        return new MappedOutput<>(map.mapValues(mapper));
     }
 
     @Override
