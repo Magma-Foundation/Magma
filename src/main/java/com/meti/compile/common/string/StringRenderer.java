@@ -13,7 +13,10 @@ public record StringRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.String)) {
-            return new Some<>(node.apply(Attribute.Type.Value).asText().prepend("\"").append("\""));
+            return new Some<>(node.apply(Attribute.Type.Value)
+                    .asText()
+                    .prependRaw("\"")
+                    .appendRaw("\""));
         } else {
             return new None<>();
         }

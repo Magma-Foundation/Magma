@@ -21,6 +21,10 @@ public final class Text {
         return new Text(trimmedValue + other.trimmedValue);
     }
 
+    public Text appendRaw(String suffix) {
+        return new Text(value + suffix);
+    }
+
     public char apply(int index) {
         return trimmedValue.charAt(index);
     }
@@ -83,6 +87,10 @@ public final class Text {
 
     public Text prepend(String prefix) {
         return new Text(prefix + trimmedValue);
+    }
+
+    public Text prependRaw(String prefix) {
+        return new Text(prefix + value);
     }
 
     public int size() {
