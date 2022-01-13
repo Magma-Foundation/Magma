@@ -147,11 +147,15 @@ public record CRenderer(Node root) {
     }
 
     private Text renderAST(Node root) throws CompileException {
-        var withFields = renderSubFields(root);
-        var withNodes = renderSubNodes(withFields);
-        var withNodeCollections = renderSubNodeCollections(withNodes);
-        var current = withDeclarationCollections(withNodeCollections);
-        return renderNode(current);
+        try {
+            var withFields = renderSubFields(root);
+            var withNodes = renderSubNodes(withFields);
+            var withNodeCollections = renderSubNodeCollections(withNodes);
+            var current = withDeclarationCollections(withNodeCollections);
+            return renderNode(current);
+        } catch (CompileException e) {
+            throw new CompileException("Failed to render AST of node: " + root, e);
+        }
     }
 
     private Node renderSubNodeCollections(Node withNodes) throws CompileException {
