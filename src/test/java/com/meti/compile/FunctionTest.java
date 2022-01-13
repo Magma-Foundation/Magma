@@ -46,6 +46,12 @@ public class FunctionTest {
     }
 
     @Test
+    void innerFunctions() {
+        assertSourceCompile("def outer() => {def inner() => {}}",
+                "void inner(){}void outer(){}");
+    }
+
+    @Test
     void one_parameter() {
         assertSourceCompile("def one_parameter(value : I16) : Void => {}", "void one_parameter(int value){}");
     }

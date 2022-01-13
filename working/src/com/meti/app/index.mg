@@ -23,11 +23,11 @@ def assertTrue(value : Bool) => {
     }
 }
 
-def lambda1() => {
-    assertTrue(true);
-}
-
 def lambda0() => {
+    def lambda1() => {
+        assertTrue(true);
+    }
+
     it("should assert things to be true.", lambda1);
 }
 
