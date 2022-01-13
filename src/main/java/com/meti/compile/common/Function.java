@@ -1,20 +1,20 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.node.Node;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class Function implements Node {
     protected final Node identity;
-    protected final Set<Node> parameters;
+    protected final JavaList<Node> parameters;
 
-    public Function(Node identity, Set<Node> parameters) {
+    public Function(Node identity, JavaList<Node> parameters) {
         this.identity = identity;
         this.parameters = parameters;
     }
@@ -37,18 +37,14 @@ public abstract class Function implements Node {
         };
     }
 
-    protected abstract Node complete(Node node, Set<Node> parameters);
-
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
         return switch (type) {
             case Identity -> complete(attribute.asNode(), parameters);
-            case Parameters -> Stream<Node> result;Attribute attribute1 = attribute;
-                    result = attribute1.asStreamOfNodes()
-                            .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                            .build();
-                    complete(identity, result.collect(Collectors.toSet()));
+            case Parameters -> complete(identity, attribute.asStreamOfNodes().foldRight(new JavaList<>(), JavaList::add));
             default -> throw new AttributeException(type);
         };
     }
+
+    protected abstract Node complete(Node node, JavaList<Node> parameters);
 }
