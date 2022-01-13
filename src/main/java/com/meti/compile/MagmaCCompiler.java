@@ -31,6 +31,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
+    private static boolean isExternal(Node node) throws AttributeException {
+        return node.apply(Attribute.Type.Identity)
+                .asNode()
+                .apply(Attribute.Type.Flags)
+                .asStreamOfFlags()
+                .noneMatch(value -> value == EmptyField.Flag.Extern);
+    }
+
     public Map<Packaging, Output<String>> compile() throws CompileException {
         return input.mapValues(this::compileInput).getMap();
     }
@@ -57,20 +65,10 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         }
     }
 
-    private Option<Node> fixAbstraction(Node node) throws AttributeException, ResolutionException {
-        if (node.is(Node.Type.Abstraction)) {
-            if (node.apply(Attribute.Type.Identity)
-                    .asNode()
-                    .apply(Attribute.Type.Flags)
-                    .asStreamOfFlags()
-                    .noneMatch(value -> value == EmptyField.Flag.Extern)) {
-                return new Some<>(fixFunction(node));
-            } else {
-                return new Some<>(new EmptyNode());
-            }
-        } else {
-            return new None<>();
-        }
+    private Option<Node> fixAbstraction(Node node) throws CompileException {
+        return new Some<>(node)
+                .filter(value -> value.is(Node.Type.Abstraction))
+                .map(value -> isExternal(value) ? fixFunction(node) : new EmptyNode());
     }
 
     private Option<Node> fixBlock(Node node) throws AttributeException {
@@ -125,10 +123,10 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return withIdentity.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
     }
 
-    private Option<Node> fixImplementation(Node node) throws AttributeException, ResolutionException {
-        return node.is(Node.Type.Implementation)
-                ? new Some<>(fixFunction(node))
-                : new None<>();
+    private Option<Node> fixImplementation(Node node) throws CompileException {
+        return new Some<>(node)
+                .filter(value -> value.is(Node.Type.Implementation))
+                .map(this::fixFunction);
     }
 
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
