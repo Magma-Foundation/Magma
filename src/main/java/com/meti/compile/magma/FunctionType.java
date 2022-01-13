@@ -38,7 +38,11 @@ public record FunctionType(Node returns, List<Node> parameters) implements Node 
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return switch (type) {
             case Type -> new FunctionType(attribute.asNode(), parameters);
-            case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes().collect(Collectors.toList()));
+            case Parameters -> Stream<Node> result;Attribute attribute1 = attribute;
+                    result = attribute1.asStreamOfNodes()
+                            .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                            .build();
+                    new FunctionType(returns, result.collect(Collectors.toList()));
             default -> throw new AttributeException(type);
         };
     }

@@ -38,7 +38,11 @@ public record Invocation(Node caller, List<Node> arguments) implements Node {
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return switch (type) {
             case Caller -> new Invocation(attribute.asNode(), arguments);
-            case Arguments -> new Invocation(caller, attribute.asStreamOfNodes().collect(Collectors.toList()));
+            case Arguments -> Stream<Node> result;Attribute attribute1 = attribute;
+                    result = attribute1.asStreamOfNodes()
+                            .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                            .build();
+                    new Invocation(caller, result.collect(Collectors.toList()));
             default -> this;
         };
     }

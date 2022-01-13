@@ -1,5 +1,6 @@
 package com.meti.compile.node;
 
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 
@@ -16,7 +17,7 @@ public interface Node {
 
     boolean is(Type type);
 
-    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
         throw new AttributeException("Node does not have attribute to replace of: " + type);
     }
 

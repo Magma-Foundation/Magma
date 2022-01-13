@@ -39,7 +39,9 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
         return switch (type) {
             case Operator -> new BinaryOperation(attribute.asNode(), first, second);
             case Arguments -> {
-                var arguments = attribute.asStreamOfNodes().collect(Collectors.toList());
+                var arguments = attribute.asStreamOfNodes()
+                        .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                        .build().collect(Collectors.toList());
                 yield new BinaryOperation(operator, arguments.get(0), arguments.get(1));
             }
             default -> this;

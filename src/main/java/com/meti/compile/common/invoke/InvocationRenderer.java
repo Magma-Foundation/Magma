@@ -11,13 +11,16 @@ import com.meti.option.Some;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record InvocationRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Invocation)) {
             var caller = this.node.apply(Attribute.Type.Caller).asNode();
-            var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
+            var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var renderedArguments = new ArrayList<String>();
             for (Node argument : arguments) {
                 renderedArguments.add(argument.apply(Attribute.Type.Value).asText().computeTrimmed());

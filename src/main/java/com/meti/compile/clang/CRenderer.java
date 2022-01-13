@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record CRenderer(Node root) {
     private static Text renderField(Node node) throws CompileException {
@@ -38,7 +39,9 @@ public record CRenderer(Node root) {
         if (type.is(Node.Type.Function)) {
             var returns = type.apply(Attribute.Type.Type).asNode();
             var returnType = renderType(returns);
-            var oldParameters = type.apply(Attribute.Type.Parameters).asStreamOfNodes().collect(Collectors.toList());
+            var oldParameters = type.apply(Attribute.Type.Parameters).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var newParameters = new ArrayList<String>();
             for (Node oldParameter : oldParameters) {
                 var renderedParameter = renderType(oldParameter);
@@ -166,7 +169,9 @@ public record CRenderer(Node root) {
         var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = withNodes;
         for (Attribute.Type type : types) {
-            var oldNodes = withNodes.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var oldNodes = withNodes.apply(type).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
                 newNodes.add(new Content(renderAST(oldNode)));
@@ -180,7 +185,9 @@ public record CRenderer(Node root) {
         var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withNodeCollections;
         for (Attribute.Type type : types) {
-            var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var oldDeclarations = current.apply(type).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var newDeclarations = new ArrayList<Node>();
             for (Node oldDeclaration : oldDeclarations) {
                 newDeclarations.add(new Content(renderFieldWithType(oldDeclaration)));

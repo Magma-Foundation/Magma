@@ -10,13 +10,16 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 record StructureRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Structure)) {
             var name = node.apply(Attribute.Type.Name).asText();
-            var fields = node.apply(Attribute.Type.Fields).asStreamOfNodes().collect(Collectors.toList());
+            var fields = node.apply(Attribute.Type.Fields).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var builder = new StringBuilder();
             for (Node field : fields) {
                 builder.append(field.apply(Attribute.Type.Value).asText().computeTrimmed()).append(";");

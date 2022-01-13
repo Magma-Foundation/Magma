@@ -1,5 +1,6 @@
 package com.meti.compile.common;
 
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodesAttribute;
@@ -13,8 +14,10 @@ import java.util.stream.Stream;
 
 public record Structure(Text name, List<Node> fields) implements Node {
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return new Structure(name, attribute.asStreamOfNodes().collect(Collectors.toList()));
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
+        return new Structure(name, attribute.asStreamOfNodes()
+                .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                .build().collect(Collectors.toList()));
     }
 
     @Override

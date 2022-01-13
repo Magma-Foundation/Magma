@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
     private static boolean isExternal(Node node) throws AttributeException {
@@ -73,8 +74,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
 
     private Option<Node> fixBlock(Node node) throws AttributeException {
         if (node.is(Node.Type.Block)) {
-            var oldChildren = node.apply(Attribute.Type.Children)
-                    .asStreamOfNodes()
+            var oldChildren = node.apply(Attribute.Type.Children).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build()
                     .collect(Collectors.toList());
             var newChildren = new ArrayList<Node>();
             for (Node oldChild : oldChildren) {
@@ -107,8 +109,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(newReturnType));
         var withIdentity = node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
 
-        var oldParameters = withIdentity.apply(Attribute.Type.Parameters)
-                .asStreamOfNodes()
+        var oldParameters = withIdentity.apply(Attribute.Type.Parameters).asStreamOfNodes()
+                .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                .build()
                 .collect(Collectors.toList());
         var newParameters = new ArrayList<Node>();
         for (Node parameter : oldParameters) {
@@ -169,8 +172,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
 
     private Node resolveNode(Node root) throws AttributeException, ResolutionException {
         if (root.is(Node.Type.Block)) {
-            var children = root.apply(Attribute.Type.Children)
-                    .asStreamOfNodes()
+            var children = root.apply(Attribute.Type.Children).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build()
                     .collect(Collectors.toList());
             if (!children.isEmpty()) {
                 for (int i = children.size() - 1; i >= 0; i--) {
@@ -202,7 +206,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
 
             if (newChild.is(Node.Type.Cache)) {
                 var internalChild = newChild.apply(Attribute.Type.Value).asNode();
-                cached.addAll(newChild.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList()));
+                cached.addAll(newChild.apply(Attribute.Type.Children).asStreamOfNodes()
+                        .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                        .build().collect(Collectors.toList()));
                 current = current.with(type, new NodeAttribute(internalChild));
             } else {
                 current = current.with(type, new NodeAttribute(newChild));
@@ -222,7 +228,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var cached = new ArrayList<Node>();
 
         for (Attribute.Type type : types) {
-            var children = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var children = current.apply(type).asStreamOfNodes()
+                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
+                    .build().collect(Collectors.toList());
             var newChildren = new ArrayList<Node>();
             for (Node oldChild : children) {
                 var newChild = resolveStage(oldChild);

@@ -1,5 +1,6 @@
 package com.meti.compile.attribute;
 
+import com.meti.collect.StreamException;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
@@ -28,9 +29,7 @@ public interface Attribute {
         throw new AttributeException("Not a ist of flags.");
     }
 
-    default Stream<Node> asStreamOfNodes() throws AttributeException {
-        throw new AttributeException("Not a list of nodes.");
-    }
+    com.meti.collect.Stream<Node> asStreamOfNodes() throws StreamException;
 
     default Text asText() throws AttributeException {
         throw new AttributeException("Not input.");

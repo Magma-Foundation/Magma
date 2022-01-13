@@ -1,16 +1,16 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaList;
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.node.Node;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Cache(Node value, List<Node> children) implements Node {
+public record Cache(Node value, JavaList<Node> children) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
@@ -35,10 +35,10 @@ public record Cache(Node value, List<Node> children) implements Node {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
         return switch (type) {
             case Value -> new Cache(attribute.asNode(), children);
-            case Children -> new Cache(value, attribute.asStreamOfNodes().collect(Collectors.toList()));
+            case Children -> new Cache(value, attribute.asStreamOfNodes().foldRight(new JavaList<>(), JavaList::add));
             default -> this;
         };
     }
