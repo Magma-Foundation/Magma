@@ -16,7 +16,7 @@ public class JavaList<T> {
 
     @SafeVarargs
     public static <R> JavaList<R> apply(R... values) {
-        return new JavaList<>(List.of(values));
+        return new JavaList<>(new ArrayList<>(List.of(values)));
     }
 
     public JavaList<T> add(T node) {
@@ -26,7 +26,7 @@ public class JavaList<T> {
 
     public JavaList<T> insert(int index, T value) {
         getValue().add(index, value);
-        return new JavaList<T>(getValue());
+        return new JavaList<>(getValue());
     }
 
     public List<T> getValue() {
