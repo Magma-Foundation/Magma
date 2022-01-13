@@ -17,7 +17,7 @@ public interface Node {
 
     boolean is(Type type);
 
-    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
+    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         throw new AttributeException("Node does not have attribute to replace of: " + type);
     }
 
