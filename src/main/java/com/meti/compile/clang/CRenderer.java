@@ -1,5 +1,6 @@
 package com.meti.compile.clang;
 
+import com.meti.compile.CacheRenderer;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
@@ -91,6 +92,7 @@ public record CRenderer(Node root) {
         var renderers = List.of(
                 new BinaryRenderer(node),
                 new BlockRenderer(node),
+                new CacheRenderer(node),
                 new ConditionRenderer(node),
                 new DeclarationRenderer(node),
                 new ElseRenderer(node),

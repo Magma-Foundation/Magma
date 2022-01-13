@@ -16,10 +16,7 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 import com.meti.source.Packaging;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(Map<Packaging, String> inputMap) {
@@ -102,7 +99,9 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
             var newChildren = new ArrayList<Node>();
             for (Node oldChild : oldChildren) {
                 Node newChild;
-                if (oldChild.is(Node.Type.Invocation) || oldChild.is(Node.Type.Binary)) {
+                if (oldChild.is(Node.Type.Abstraction) || oldChild.is(Node.Type.Implementation)) {
+                    newChild = new Cache(oldChild, Collections.emptyList());
+                } else if (oldChild.is(Node.Type.Invocation) || oldChild.is(Node.Type.Binary)) {
                     newChild = new Line(oldChild);
                 } else {
                     newChild = oldChild;
@@ -231,15 +230,59 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
     }
 
-    private Node resolveNodeAttributes(Node resolved) throws CompileException {
-        var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
-        var current = resolved;
+    private Node resolveNodeAttributes(Node root) throws CompileException {
+        var list = root.apply(Attribute.Group.Node).collect(Collectors.toList());
+        var current = root;
+        var cached = new ArrayList<Node>();
+
         for (Attribute.Type type : list) {
-            var child = current.apply(type).asNode();
-            var resolvedChild = resolveStage(child);
-            current = current.with(type, new NodeAttribute(resolvedChild));
+            var oldChild = current.apply(type).asNode();
+            var newChild = resolveStage(oldChild);
+
+            if (newChild.is(Node.Type.Cache)) {
+                var internalChild = newChild.apply(Attribute.Type.Value).asNode();
+                cached.addAll(newChild.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList()));
+                current = current.with(type, new NodeAttribute(internalChild));
+            } else {
+                current = current.with(type, new NodeAttribute(newChild));
+            }
         }
-        return current;
+
+        if (cached.isEmpty()) {
+            return current;
+        } else {
+            return new Cache(current, cached);
+        }
+    }
+
+    private Node resolveNodesAttributes(Node root) throws CompileException {
+        var types = root.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+        var current = root;
+        var cached = new ArrayList<Node>();
+
+        for (Attribute.Type type : types) {
+            var children = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newChildren = new ArrayList<Node>();
+            for (Node oldChild : children) {
+                var newChild = resolveStage(oldChild);
+
+                if (newChild.is(Node.Type.Cache)) {
+                    var internalChild = newChild.apply(Attribute.Type.Value).asNode();
+                    if (internalChild.is(Node.Type.Implementation)) {
+                        cached.add(internalChild);
+                    }
+                } else {
+                    newChildren.add(newChild);
+                }
+            }
+            current = current.with(type, new NodesAttribute(newChildren));
+        }
+
+        if (cached.isEmpty()) {
+            return current;
+        } else {
+            return new Cache(current, cached);
+        }
     }
 
     private ArrayList<Node> resolveStage(ArrayList<Node> lexed) throws CompileException {
@@ -259,20 +302,6 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         var withNodes = resolveNodeAttributes(resolved);
         var withNodesAttributes = resolveNodesAttributes(withNodes);
         return resolveFieldStage(withNodesAttributes);
-    }
-
-    private Node resolveNodesAttributes(Node withNodes) throws CompileException {
-        var current = withNodes;
-        var types = current.apply(Attribute.Group.Nodes).collect(Collectors.toList());
-        for (Attribute.Type type : types) {
-            var children = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newChildren = new ArrayList<Node>();
-            for (Node child : children) {
-                newChildren.add(resolveStage(child));
-            }
-            current = current.with(type, new NodesAttribute(newChildren));
-        }
-        return current;
     }
 
     private List<Text> split(Text root) {
