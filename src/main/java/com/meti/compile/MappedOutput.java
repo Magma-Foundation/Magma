@@ -24,8 +24,7 @@ public final class MappedOutput<T> implements Output<T> {
 
     @Override
     public T apply(CFormat format, T other) {
-        if (map.hasKey(format)) return map.apply(format);
-        return other;
+        return map.orElse(format, other);
     }
 
     @Override

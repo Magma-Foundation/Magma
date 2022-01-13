@@ -19,6 +19,14 @@ public final class JavaMap<A, B> {
         this.map = map;
     }
 
+    public B apply(A key) throws CollectionException {
+        if (map.containsKey(key)) {
+            return map.get(key);
+        } else {
+            throw new CollectionException("No such key exists: " + key);
+        }
+    }
+
     public <E extends Exception> JavaMap<A, B> ensure(A key, Supplier<B, E> generator) throws E {
         if (!map.containsKey(key)) {
             var value = generator.get();
@@ -30,29 +38,18 @@ public final class JavaMap<A, B> {
         }
     }
 
-    public B apply(A key) {
-        return map.get(key);
-    }
-
-    public boolean hasKey(A key) {
-        return map.containsKey(key);
-    }
-
     public Set<A> keys() {
         return map.keySet();
     }
 
     public <C extends Exception> JavaMap<A, B> mapValue(A key, F1<B, B, C> mapper) throws C {
-        var outputMap = new HashMap<>(map);
-        for (A aA : getMap().keySet()) {
-            var input = mapper.apply(getMap().get(aA));
-            outputMap.put(aA, input);
+        var copy = new HashMap<>(map);
+        if (copy.containsKey(key)) {
+            var oldValue = copy.get(key);
+            var newValue = mapper.apply(oldValue);
+            copy.put(key, newValue);
         }
-        return new JavaMap<>(outputMap);
-    }
-
-    public Map<A, B> getMap() {
-        return map;
+        return new JavaMap<>(copy);
     }
 
     public <C, D extends Exception> JavaMap<A, C> mapValues(F2<A, B, C, D> mapper) throws D {
@@ -62,6 +59,14 @@ public final class JavaMap<A, B> {
             outputMap.put(aA, input);
         }
         return new JavaMap<>(outputMap);
+    }
+
+    public Map<A, B> getMap() {
+        return map;
+    }
+
+    public B orElse(A key, B value) {
+        return map.getOrDefault(key, value);
     }
 
     public JavaMap<A, B> put(A key, B value) {

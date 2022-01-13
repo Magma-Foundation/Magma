@@ -1,9 +1,6 @@
 package com.meti.compile;
 
-import com.meti.collect.JavaList;
-import com.meti.collect.JavaMap;
-import com.meti.collect.Stream;
-import com.meti.collect.StreamException;
+import com.meti.collect.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
 
@@ -15,7 +12,7 @@ public abstract class MappedDivision implements Division {
     }
 
     @Override
-    public Stream<Node> apply(CFormat format) {
+    public Stream<Node> apply(CFormat format) throws CollectionException {
         return map.apply(format).stream();
     }
 

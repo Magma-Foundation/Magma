@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.CollectionException;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.StreamException;
@@ -141,7 +142,7 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return newNodes;
     }
 
-    private String renderDivision(Division division, CFormat format) throws StreamException {
+    private String renderDivision(Division division, CFormat format) throws CollectionException {
         return division.apply(format)
                 .map(CRenderer::new)
                 .map(CRenderer::render)
@@ -160,9 +161,9 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
 
     private Output<String> renderMap(Division division) throws CompileException {
         try {
-            return division.stream().<Output<String>, StreamException>foldRight(new MappedOutput<>(),
+            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
-        } catch (StreamException e) {
+        } catch (CollectionException e) {
             throw new CompileException(e);
         }
     }
