@@ -174,17 +174,15 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
             var children = root.apply(Attribute.Type.Children)
                     .asStreamOfNodes()
                     .collect(Collectors.toList());
-            if (children.isEmpty()) {
-                return Primitive.Void;
-            } else {
+            if (!children.isEmpty()) {
                 for (int i = children.size() - 1; i >= 0; i--) {
                     var child = children.get(i);
                     if (child.is(Node.Type.Return)) {
                         return resolveNode(child);
                     }
                 }
-                return Primitive.Void;
             }
+            return Primitive.Void;
         } else if (root.is(Node.Type.Return)) {
             var value = root.apply(Attribute.Type.Value).asNode();
             return resolveNode(value);
