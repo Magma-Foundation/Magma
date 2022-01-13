@@ -11,15 +11,15 @@ import com.meti.source.Packaging;
 import static com.meti.compile.clang.CFormat.Header;
 import static com.meti.compile.clang.CFormat.Source;
 
-public class CDivision extends MappedDivision {
+public class CDivider extends MappedDivider {
     private final Packaging thisPackage;
 
-    public CDivision(Packaging thisPackage, JavaMap<CFormat, JavaList<Node>> map) {
+    public CDivider(Packaging thisPackage, JavaMap<CFormat, JavaList<Node>> map) {
         super(map);
         this.thisPackage = thisPackage;
     }
 
-    public CDivision(Packaging thisPackage) {
+    public CDivider(Packaging thisPackage) {
         super(new JavaMap<>());
         this.thisPackage = thisPackage;
     }
@@ -56,7 +56,7 @@ public class CDivision extends MappedDivision {
     }
 
     @Override
-    protected Division complete(JavaMap<CFormat, JavaList<Node>> map) {
-        return new CDivision(thisPackage, map);
+    protected Divider complete(JavaMap<CFormat, JavaList<Node>> map) {
+        return new CDivider(thisPackage, map);
     }
 }

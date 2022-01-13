@@ -3,8 +3,10 @@ package com.meti.compile;
 import com.meti.collect.CollectionException;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
-import com.meti.collect.StreamException;
-import com.meti.compile.attribute.*;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.EmptyField;
@@ -29,14 +31,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
-    public static Division divide(Packaging thisPackage, JavaList<Node> list) throws CompileException {
-        try {
-            return list.stream().foldRight(new CDivision(thisPackage), Division::divide);
-        } catch (StreamException e) {
-            throw new CompileException("Failed to divide nodes: ", e);
-        }
-    }
-
     public Map<Packaging, Output<String>> compile() throws CompileException {
         return input.mapValues(this::compileInput).getMap();
     }
@@ -48,9 +42,19 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var lines = split(root);
         var lexed = lex(lines);
         var resolved = resolveStage(lexed);
-        var formatted = format(thisPackage, resolved);
-        var division = divide(thisPackage, new JavaList<>(formatted));
-        return renderMap(division);
+
+        try {
+            var formatter = new CFormatter(thisPackage);
+            var divider = new CDivider(thisPackage);
+
+            var division = new JavaList<>(resolved)
+                    .stream()
+                    .map(formatter::apply)
+                    .foldRight(divider, Divider::divide);
+            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(), (output, format) -> output.append(format, renderDivision(division, format)));
+        } catch (CollectionException e) {
+            throw new CompileException(e);
+        }
     }
 
     private Option<Node> fixAbstraction(Node node) throws AttributeException, ResolutionException {
@@ -127,30 +131,6 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
                 : new None<>();
     }
 
-    private ArrayList<Node> format(Packaging thisPackage, ArrayList<Node> oldNodes) throws AttributeException {
-        var newNodes = new ArrayList<Node>();
-        for (Node node : oldNodes) {
-            if (node.is(Node.Type.Import)) {
-                var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
-                var newPackage = thisPackage.relativize(thatPackage);
-                var withPackage = node.with(Attribute.Type.Value, new PackageAttribute(newPackage));
-                newNodes.add(withPackage);
-            } else {
-                newNodes.add(node);
-            }
-        }
-        return newNodes;
-    }
-
-    private String renderDivision(Division division, CFormat format) throws CollectionException {
-        return division.apply(format)
-                .map(CRenderer::new)
-                .map(CRenderer::render)
-                .map(Text::compute)
-                .foldRight(new StringBuilder(), StringBuilder::append)
-                .toString();
-    }
-
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
         var oldNodes = new ArrayList<Node>();
         for (Text oldLine : lines) {
@@ -159,13 +139,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return oldNodes;
     }
 
-    private Output<String> renderMap(Division division) throws CompileException {
-        try {
-            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
-                    (output, format) -> output.append(format, renderDivision(division, format)));
-        } catch (CollectionException e) {
-            throw new CompileException(e);
-        }
+    private String renderDivision(Divider divider, CFormat format) throws CollectionException {
+        return divider.apply(format)
+                .map(CRenderer::new)
+                .map(CRenderer::render)
+                .map(Text::compute)
+                .foldRight(new StringBuilder(), StringBuilder::append)
+                .toString();
     }
 
     private Node resolveField(Node field) throws CompileException {

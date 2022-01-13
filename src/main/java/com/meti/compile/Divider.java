@@ -6,10 +6,10 @@ import com.meti.collect.StreamException;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
 
-public interface Division {
+public interface Divider {
     Stream<Node> apply(CFormat format) throws CollectionException;
 
-    Division divide(Node node) throws StreamException;
+    Divider divide(Node node) throws StreamException;
 
     Stream<CFormat> stream();
 }
