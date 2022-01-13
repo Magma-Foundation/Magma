@@ -231,7 +231,7 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
     }
 
-    private Node resolveNodeType(Node resolved) throws CompileException {
+    private Node resolveNodeAttributes(Node resolved) throws CompileException {
         var list = resolved.apply(Attribute.Group.Node).collect(Collectors.toList());
         var current = resolved;
         for (Attribute.Type type : list) {
@@ -256,8 +256,23 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
                 .or(() -> fixAbstraction(node))
                 .or(() -> fixBlock(node))
                 .orElse(node);
-        var current = resolveNodeType(resolved);
-        return resolveFieldStage(current);
+        var withNodes = resolveNodeAttributes(resolved);
+        var withNodesAttributes = resolveNodesAttributes(withNodes);
+        return resolveFieldStage(withNodesAttributes);
+    }
+
+    private Node resolveNodesAttributes(Node withNodes) throws CompileException {
+        var current = withNodes;
+        var types = current.apply(Attribute.Group.Nodes).collect(Collectors.toList());
+        for (Attribute.Type type : types) {
+            var children = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+            var newChildren = new ArrayList<Node>();
+            for (Node child : children) {
+                newChildren.add(resolveStage(child));
+            }
+            current = current.with(type, new NodesAttribute(newChildren));
+        }
+        return current;
     }
 
     private List<Text> split(Text root) {

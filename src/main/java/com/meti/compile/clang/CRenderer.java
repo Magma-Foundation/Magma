@@ -7,6 +7,7 @@ import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.LineRenderer;
 import com.meti.compile.common.alternate.ElseRenderer;
+import com.meti.compile.common.binary.BinaryRenderer;
 import com.meti.compile.common.block.BlockRenderer;
 import com.meti.compile.common.condition.ConditionRenderer;
 import com.meti.compile.common.integer.IntegerRenderer;
@@ -88,6 +89,7 @@ public record CRenderer(Node root) {
         }
 
         var renderers = List.of(
+                new BinaryRenderer(node),
                 new BlockRenderer(node),
                 new ConditionRenderer(node),
                 new DeclarationRenderer(node),

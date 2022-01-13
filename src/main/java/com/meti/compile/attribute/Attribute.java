@@ -40,7 +40,7 @@ public interface Attribute {
         Value,
         Identity,
         Type,
-        Children, Sign, Bits, Fields, Parameters, Flags, Caller, Arguments, Name
+        Children, Sign, Bits, Fields, Parameters, Flags, Caller, Arguments, Operator, Name
     }
 
     enum Group {

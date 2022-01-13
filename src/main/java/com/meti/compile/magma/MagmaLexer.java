@@ -8,6 +8,7 @@ import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.ReferenceLexer;
 import com.meti.compile.common.alternate.ElseLexer;
+import com.meti.compile.common.binary.BinaryLexer;
 import com.meti.compile.common.block.BlockLexer;
 import com.meti.compile.common.bool.BooleanLexer;
 import com.meti.compile.common.condition.ConditionLexer;
@@ -47,6 +48,7 @@ public record MagmaLexer(Text text) {
                 new InvocationLexer(text),
                 new ReturnLexer(text),
                 new IntegerLexer(text),
+                new BinaryLexer(text),
                 new UnaryLexer(text),
                 new VariableLexer(text));
 
