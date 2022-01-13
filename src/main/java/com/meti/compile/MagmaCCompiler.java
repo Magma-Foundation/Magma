@@ -46,11 +46,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
                     var header = thisPackage.formatDeclared();
                     list.add(new Content(new Text("\n#ifndef " + header + "\n")));
                     list.add(new Content(new Text("\n#define " + header + "\n")));
+                    list.add(new Content(new Text("\n#endif\n")));
                     map.put(CFormat.Header, list);
                 } else {
                     list = map.get(CFormat.Header);
                 }
-                list.add(node);
+                list.add(list.size() - 1, node);
+
             } else {
                 List<Node> list;
                 if (!map.containsKey(CFormat.Source)) {
@@ -64,9 +66,6 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
             }
         }
 
-        if (map.containsKey(CFormat.Header)) {
-            map.get(CFormat.Header).add(new Content(new Text("\n#endif\n")));
-        }
         return map;
     }
 
