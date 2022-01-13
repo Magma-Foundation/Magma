@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
     public Map<Packaging, Output<String>> compile() throws CompileException {
-        return input.mapValues(this::compileInput).getSelf();
+        return input.mapValues(this::compileInput).getMap();
     }
 
     private Output<String> compileInput(Packaging thisPackage, String input) throws CompileException {
@@ -36,33 +36,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return renderMap(divided);
     }
 
-    private Map<CFormat, List<Node>> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
-        var map = new HashMap<CFormat, List<Node>>();
+    private Map<CFormat, JavaList> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
+        var map = new HashMap<CFormat, JavaList>();
         for (Node node : newNodes) {
             if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
-                List<Node> list;
-                if (!map.containsKey(CFormat.Header)) {
-                    list = new ArrayList<>();
-                    var header = thisPackage.formatDeclared();
-                    list.add(new Content(new Text("\n#ifndef " + header + "\n")));
-                    list.add(new Content(new Text("\n#define " + header + "\n")));
-                    list.add(new Content(new Text("\n#endif\n")));
-                    map.put(CFormat.Header, list);
-                } else {
-                    list = map.get(CFormat.Header);
-                }
-                list.add(list.size() - 1, node);
-
+                generateHeader(thisPackage, new JavaMap<>(map), node);
             } else {
-                List<Node> list;
-                if (!map.containsKey(CFormat.Source)) {
-                    list = new ArrayList<>();
-                    list.add(new Import(new Packaging(thisPackage.computeName())));
-                    map.put(CFormat.Source, list);
-                } else {
-                    list = map.get(CFormat.Source);
-                }
-                list.add(node);
+                generateSource(thisPackage, map, node);
             }
         }
 
@@ -158,6 +138,31 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return newNodes;
     }
 
+    private JavaList generate(Packaging thisPackage) {
+        var header = thisPackage.formatDeclared();
+        List<Node> list = new ArrayList<>();
+        list.add(new Content(new Text("\n#ifndef " + header + "\n")));
+        list.add(new Content(new Text("\n#define " + header + "\n")));
+        list.add(new Content(new Text("\n#endif\n")));
+        return new JavaList(list);
+    }
+
+    private JavaMap<CFormat, JavaList> generateHeader(Packaging thisPackage, JavaMap<CFormat, JavaList> javaMap, Node node) {
+        return javaMap.ensure(CFormat.Header, () -> generate(thisPackage))
+                .mapValue(CFormat.Header, value -> value.insert(value.size() - 1, node));
+    }
+
+    private void generateSource(Packaging thisPackage, HashMap<CFormat, JavaList> map, Node node) {
+        if (!map.containsKey(CFormat.Source)) {
+            var list = new ArrayList<Node>();
+            list.add(new Import(new Packaging(thisPackage.computeName())));
+            list.add(node);
+            map.put(CFormat.Source, new JavaList(list));
+        } else {
+            map.get(CFormat.Source).getValue().add(node);
+        }
+    }
+
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
         var oldNodes = new ArrayList<Node>();
         for (Text oldLine : lines) {
@@ -166,11 +171,11 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return oldNodes;
     }
 
-    private Output<String> renderMap(Map<CFormat, List<Node>> map) throws CompileException {
+    private Output<String> renderMap(Map<CFormat, JavaList> map) throws CompileException {
         var output = new MappedOutput<>(map);
         return output.map((format, list) -> {
             var builder = new StringBuilder();
-            for (Node line : list) {
+            for (Node line : list.getValue()) {
                 builder.append(new CRenderer(line).render().compute());
             }
             return builder.toString().trim();
