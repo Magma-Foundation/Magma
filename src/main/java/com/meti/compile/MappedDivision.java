@@ -13,7 +13,9 @@ public abstract class MappedDivision implements Division {
 
     @Override
     public Stream<Node> apply(CFormat format) throws CollectionException {
-        return map.apply(format).stream();
+        return map.applyOptionally(format)
+                .map(JavaList::stream)
+                .orElse(new EmptyStream<>());
     }
 
     @Override

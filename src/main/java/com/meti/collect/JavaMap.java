@@ -2,6 +2,9 @@ package com.meti.collect;
 
 import com.meti.core.F1;
 import com.meti.core.F2;
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
 import com.meti.option.Supplier;
 
 import java.util.HashMap;
@@ -19,22 +22,20 @@ public final class JavaMap<A, B> {
         this.map = map;
     }
 
-    public B apply(A key) throws CollectionException {
-        if (map.containsKey(key)) {
-            return map.get(key);
-        } else {
-            throw new CollectionException("No such key exists: " + key);
-        }
+    public Option<B> applyOptionally(A key) {
+        return map.containsKey(key)
+                ? new Some<>(map.get(key))
+                : new None<>();
     }
 
     public <E extends Exception> JavaMap<A, B> ensure(A key, Supplier<B, E> generator) throws E {
-        if (!map.containsKey(key)) {
+        if (map.containsKey(key)) {
+            return this;
+        } else {
             var value = generator.get();
             var copy = new HashMap<>(map);
             copy.put(key, value);
             return new JavaMap<>(copy);
-        } else {
-            return this;
         }
     }
 
