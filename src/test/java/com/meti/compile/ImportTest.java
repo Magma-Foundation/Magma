@@ -18,10 +18,11 @@ public class ImportTest {
     @Test
     void parent() throws CompileException {
         var index = new Packaging("inner", "Index");
-        var output = new MagmaCCompiler(Map.of(
+        final Map<Packaging, String> index1 = Map.of(
                 index, "import Parent",
                 new Packaging("Parent"), ""
-        )).compile();
+        );
+        var output = new MagmaCCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
                 #ifndef Index_inner
@@ -38,10 +39,11 @@ public class ImportTest {
     @Test
     void sibling() throws CompileException {
         var index = new Packaging("Index");
-        var output = new MagmaCCompiler(Map.of(
+        final Map<Packaging, String> index1 = Map.of(
                 index, "import Sibling",
                 new Packaging("Sibling"), ""
-        )).compile();
+        );
+        var output = new MagmaCCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
                 #ifndef Index

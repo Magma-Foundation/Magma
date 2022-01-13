@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.compile.JavaMap;
 import com.meti.compile.MagmaCCompiler;
 import com.meti.compile.Output;
 import com.meti.compile.clang.CFormat;
@@ -33,7 +34,7 @@ public class Application {
                 throw new ApplicationException(e);
             }
         }
-        var outputMap = new MagmaCCompiler(inputMap).compile();
+        var outputMap = new MagmaCCompiler(new JavaMap<>(inputMap)).compile();
         var targets = new HashSet<String>();
         for (Packaging aPackaging : outputMap.keySet()) {
             var output = compile(aPackaging, outputMap.get(aPackaging));

@@ -19,14 +19,9 @@ import com.meti.source.Packaging;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public record MagmaCCompiler(Map<Packaging, String> inputMap) {
+public record MagmaCCompiler(JavaMap<Packaging, String> input) {
     public Map<Packaging, Output<String>> compile() throws CompileException {
-        var outputMap = new HashMap<Packaging, Output<String>>();
-        for (Packaging aPackaging : inputMap.keySet()) {
-            var input = compileInput(aPackaging, inputMap.get(aPackaging));
-            outputMap.put(aPackaging, input);
-        }
-        return outputMap;
+        return input.mapValues(this::compileInput).getSelf();
     }
 
     private Output<String> compileInput(Packaging thisPackage, String input) throws CompileException {
@@ -316,4 +311,5 @@ public record MagmaCCompiler(Map<Packaging, String> inputMap) {
         }
         return new None<>();
     }
+
 }
