@@ -7,6 +7,11 @@ import java.util.stream.Stream;
 
 public class EmptyOutput<T> implements Output<T> {
     @Override
+    public Output<T> append(CFormat key, T value) {
+        return new MappedOutput<T>().append(key, value);
+    }
+
+    @Override
     public T apply(CFormat types, T other) {
         return other;
     }

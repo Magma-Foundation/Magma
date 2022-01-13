@@ -1,16 +1,21 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaList;
+import com.meti.collect.JavaMap;
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.EmptyField;
-import com.meti.compile.common.Import;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Splitter;
 import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.integer.IntegerType;
 import com.meti.compile.magma.MagmaLexer;
-import com.meti.compile.node.*;
+import com.meti.compile.node.EmptyNode;
+import com.meti.compile.node.Node;
+import com.meti.compile.node.Primitive;
+import com.meti.compile.node.Text;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
@@ -23,6 +28,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record MagmaCCompiler(JavaMap<Packaging, String> input) {
+    public static Division divide(Packaging thisPackage, JavaList<Node> list) throws CompileException {
+        try {
+            return list.stream().foldRight(new CDivision(thisPackage), Division::divide);
+        } catch (StreamException e) {
+            throw new CompileException("Failed to divide nodes: ", e);
+        }
+    }
+
     public Map<Packaging, Output<String>> compile() throws CompileException {
         return input.mapValues(this::compileInput).getMap();
     }
@@ -35,21 +48,8 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var lexed = lex(lines);
         var resolved = resolveStage(lexed);
         var formatted = format(thisPackage, resolved);
-        var divided = divide(thisPackage, formatted);
-        return renderMap(divided);
-    }
-
-    private JavaMap<CFormat, JavaList> divide(Packaging thisPackage, ArrayList<Node> newNodes) {
-        var map = new JavaMap<CFormat, JavaList>();
-        for (Node node : newNodes) {
-            if (node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)) {
-                map = generateHeader(thisPackage, map, node);
-            } else {
-                map = generateSource(thisPackage, map, node);
-            }
-        }
-
-        return map;
+        var division = divide(thisPackage, new JavaList<>(formatted));
+        return renderMap(division);
     }
 
     private Option<Node> fixAbstraction(Node node) throws AttributeException, ResolutionException {
@@ -141,27 +141,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return newNodes;
     }
 
-    private JavaList generate(Packaging thisPackage) {
-        var header = thisPackage.formatDeclared();
-        List<Node> list = new ArrayList<>();
-        list.add(new Content(new Text("\n#ifndef " + header + "\n")));
-        list.add(new Content(new Text("\n#define " + header + "\n")));
-        list.add(new Content(new Text("\n#endif\n")));
-        return new JavaList(list);
-    }
-
-    private JavaMap<CFormat, JavaList> generateHeader(Packaging thisPackage, JavaMap<CFormat, JavaList> javaMap, Node node) {
-        return javaMap.ensure(CFormat.Header, () -> generate(thisPackage))
-                .mapValue(CFormat.Header, value -> value.insert(value.size() - 1, node));
-    }
-
-    private JavaMap<CFormat, JavaList> generateSource(Packaging thisPackage, JavaMap<CFormat, JavaList> javaMap, Node node) {
-        return javaMap.ensure(CFormat.Source, () -> {
-            var list = new ArrayList<Node>();
-            list.add(new Import(new Packaging(thisPackage.computeName())));
-            list.add(node);
-            return new JavaList(list);
-        }).mapValue(CFormat.Source, list -> list.add(node));
+    private String renderDivision(Division division, CFormat format) throws StreamException {
+        return division.apply(format)
+                .map(CRenderer::new)
+                .map(CRenderer::render)
+                .map(Text::compute)
+                .foldRight(new StringBuilder(), StringBuilder::append)
+                .toString();
     }
 
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
@@ -172,15 +158,13 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         return oldNodes;
     }
 
-    private Output<String> renderMap(JavaMap<CFormat, JavaList> map) throws CompileException {
-        var output = new MappedOutput<>(map);
-        return output.map((format, list) -> {
-            var builder = new StringBuilder();
-            for (Node line : list.getValue()) {
-                builder.append(new CRenderer(line).render().compute());
-            }
-            return builder.toString().trim();
-        });
+    private Output<String> renderMap(Division division) throws CompileException {
+        try {
+            return division.stream().<Output<String>, StreamException>foldRight(new MappedOutput<>(),
+                    (output, format) -> output.append(format, renderDivision(division, format)));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     private Node resolveField(Node field) throws CompileException {

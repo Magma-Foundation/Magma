@@ -1,6 +1,6 @@
 package com.meti;
 
-import com.meti.compile.JavaMap;
+import com.meti.collect.JavaMap;
 import com.meti.compile.MagmaCCompiler;
 import com.meti.compile.Output;
 import com.meti.compile.clang.CFormat;

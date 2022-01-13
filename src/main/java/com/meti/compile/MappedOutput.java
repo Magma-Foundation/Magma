@@ -1,11 +1,27 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaMap;
 import com.meti.compile.clang.CFormat;
 import com.meti.core.F2;
 
 import java.util.stream.Stream;
 
-public record MappedOutput<T>(JavaMap<CFormat, T> map) implements Output<T> {
+public final class MappedOutput<T> implements Output<T> {
+    private final JavaMap<CFormat, T> map;
+
+    public MappedOutput() {
+        this(new JavaMap<>());
+    }
+
+    public MappedOutput(JavaMap<CFormat, T> map) {
+        this.map = map;
+    }
+
+    @Override
+    public Output<T> append(CFormat key, T value) {
+        return new MappedOutput<>(map.put(key, value));
+    }
+
     @Override
     public T apply(CFormat format, T other) {
         if (map.hasKey(format)) return map.apply(format);
