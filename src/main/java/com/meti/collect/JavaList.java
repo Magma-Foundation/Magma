@@ -33,12 +33,8 @@ public class JavaList<T> {
     }
 
     public JavaList<T> insert(int index, T value) {
-        getValue().add(index, value);
-        return new JavaList<>(getValue());
-    }
-
-    public List<T> getValue() {
-        return value;
+        this.value.add(index, value);
+        return new JavaList<>(this.value);
     }
 
     public Option<T> last() {
@@ -47,7 +43,7 @@ public class JavaList<T> {
     }
 
     public int size() {
-        return getValue().size();
+        return value.size();
     }
 
     public Stream<T> stream() {
