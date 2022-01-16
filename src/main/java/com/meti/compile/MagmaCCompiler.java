@@ -28,12 +28,15 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var lines = split(root);
         var lexed = lex(lines);
         try {
-            var transformer = new CMagmaModifier();
+            var resolver = new CMagmaResolver();
+            var modifier = new CMagmaModifier();
             var formatter = new CFormatter(thisPackage);
             var divider = new CDivider(thisPackage);
 
-            var division = new JavaList<>(lexed).stream()
-                    .map(transformer::transformAST)
+            var division = new JavaList<>(lexed)
+                    .stream()
+                    .map(resolver::transformNodeAST)
+                    .map(modifier::transformNodeAST)
                     .map(formatter::apply)
                     .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),

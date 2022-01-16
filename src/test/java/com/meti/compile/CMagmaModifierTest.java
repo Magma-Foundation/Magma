@@ -55,7 +55,7 @@ class CMagmaModifierTest {
 
     private void assertTransforms(Node input, F1<Node, java.lang.Boolean, ?> predicate) {
         try {
-            var transformed = new CMagmaModifier().transformAST(input);
+            var transformed = new CMagmaModifier().transformNodeAST(input);
             var state = predicate.apply(transformed);
             assertTrue(state);
         } catch (Exception e) {

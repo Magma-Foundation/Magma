@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.EmptyStream;
 import com.meti.collect.Stream;
 import com.meti.collect.StreamException;
 import com.meti.collect.Streams;
@@ -9,13 +10,24 @@ import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
 public abstract class AbstractTransformer {
-    protected abstract Stream<Transformer> stream(Node node);
+    protected Stream<Transformer> streamNodeTransformers(Node node) {
+        return new EmptyStream<>();
+    }
 
-    Node transformAST(Node node) throws CompileException {
-        var withNodeGroup = transformNodeGroup(node);
-        var withNodesGroup = transformNodesGroup(withNodeGroup);
-        var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
-        return transformNode(withDeclarationGroup);
+    protected Stream<Transformer> streamTypeTransformers(Node node) {
+        return new EmptyStream<>();
+    }
+
+    private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
+        var oldIdentity = root.apply(type).asNode();
+        if (oldIdentity.is(Node.Type.ValuedField)) {
+            var withType = transformTypeAttribute(oldIdentity, Attribute.Type.Type);
+            var withValue = transformNodeAttribute(withType, Attribute.Type.Value);
+            var newIdentityAttribute = new NodeAttribute(withValue);
+            return root.with(type, newIdentityAttribute);
+        } else {
+            return root;
+        }
     }
 
     private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
@@ -27,36 +39,21 @@ public abstract class AbstractTransformer {
         }
     }
 
-    private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
-        var oldIdentity = root.apply(type).asNode();
-        if (oldIdentity.is(Node.Type.ValuedField)) {
-            var oldValue = oldIdentity.apply(Attribute.Type.Value).asNode();
-            var newValue = transformAST(oldValue);
-            var newValueAttribute = new NodeAttribute(newValue);
-            var newIdentity = oldIdentity.with(Attribute.Type.Value, newValueAttribute);
-            var newIdentityAttribute = new NodeAttribute(newIdentity);
-            return root.with(type, newIdentityAttribute);
-        } else {
-            return root;
-        }
+    private Node transformNode(Node node) throws CompileException {
+        return transformUsingStreams(node, streamNodeTransformers(node));
     }
 
-    private Node transformNode(Node node) throws CompileException {
-        try {
-            return stream(node)
-                    .map(Transformer::transform)
-                    .flatMap(Streams::optionally)
-                    .first()
-                    .orElse(node);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
+    Node transformNodeAST(Node node) throws CompileException {
+        var withNodeGroup = transformNodeGroup(node);
+        var withNodesGroup = transformNodesGroup(withNodeGroup);
+        var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
+        return transformNode(withDeclarationGroup);
     }
 
     private Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
         var previousAttribute = current.apply(type);
         var previous = previousAttribute.asNode();
-        var next = transformAST(previous);
+        var next = transformNodeAST(previous);
         var nextAttribute = new NodeAttribute(next);
         return current.with(type, nextAttribute);
     }
@@ -73,7 +70,7 @@ public abstract class AbstractTransformer {
         try {
             return current.with(type, current.apply(type)
                     .asStreamOfNodes1()
-                    .map(AbstractTransformer.this::transformAST)
+                    .map(AbstractTransformer.this::transformNodeAST)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete());
         } catch (StreamException e) {
@@ -87,6 +84,28 @@ public abstract class AbstractTransformer {
                     .foldRight(withChild, this::transformNodesAttribute);
         } catch (StreamException e) {
             throw new TransformationException(e);
+        }
+    }
+
+    private Node transformTypeAST(Node type) throws CompileException {
+        return transformUsingStreams(type, streamTypeTransformers(type));
+    }
+
+    private Node transformTypeAttribute(Node oldIdentity, Attribute.Type type) throws CompileException {
+        var oldType = oldIdentity.apply(type).asNode();
+        var newType = transformTypeAST(oldType);
+        var newTypeAttribute = new NodeAttribute(newType);
+        return oldIdentity.with(type, newTypeAttribute);
+    }
+
+    private Node transformUsingStreams(Node node, Stream<Transformer> transformers) throws CompileException {
+        try {
+            return transformers.map(Transformer::transform)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
     }
 }

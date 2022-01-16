@@ -6,7 +6,7 @@ import com.meti.compile.node.Node;
 
 public class CMagmaModifier extends AbstractTransformer {
     @Override
-    protected Stream<Transformer> stream(Node node) {
+    protected Stream<Transformer> streamNodeTransformers(Node node) {
         return Streams.apply(
                 new BooleanTransformer(node),
                 new BlockTransformer(node),
