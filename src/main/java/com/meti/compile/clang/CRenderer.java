@@ -1,5 +1,7 @@
 package com.meti.compile.clang;
 
+import com.meti.collect.JavaList;
+import com.meti.collect.StreamException;
 import com.meti.compile.CacheRenderer;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
@@ -25,11 +27,9 @@ import com.meti.compile.render.Renderer;
 import com.meti.option.None;
 import com.meti.option.Option;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record CRenderer(Node root) {
     private static Text renderField(Node node) throws CompileException {
@@ -39,19 +39,23 @@ public record CRenderer(Node root) {
         if (type.is(Node.Type.Function)) {
             var returns = type.apply(Attribute.Type.Type).asNode();
             var returnType = renderType(returns);
-            var oldParameters = type.apply(Attribute.Type.Parameters).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
-            var newParameters = new ArrayList<String>();
-            for (Node oldParameter : oldParameters) {
-                var renderedParameter = renderType(oldParameter);
-                newParameters.add(renderedParameter.computeTrimmed());
+
+            String parameterString;
+            try {
+                parameterString = type.apply(Attribute.Type.Parameters)
+                        .asStreamOfNodes()
+                        .map(CRenderer::renderType)
+                        .map(Text::computeTrimmed)
+                        .foldRight("", (buffer, next) -> buffer + "," + next);
+            } catch (StreamException e) {
+                throw new CompileException(e);
             }
+
             return returnType.append(" (*")
                     .append(name)
                     .append(")")
                     .append("(")
-                    .append(String.join(",", newParameters))
+                    .append(parameterString)
                     .append(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
@@ -169,14 +173,16 @@ public record CRenderer(Node root) {
         var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = withNodes;
         for (Attribute.Type type : types) {
-            var oldNodes = withNodes.apply(type).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
-            var newNodes = new ArrayList<Node>();
-            for (Node oldNode : oldNodes) {
-                newNodes.add(new Content(renderAST(oldNode)));
+            try {
+                var attributes = withNodes.apply(type)
+                        .asStreamOfNodes()
+                        .map(this::renderAST)
+                        .map(Content::new)
+                        .foldRight(new JavaList<Node>(), JavaList::add);
+                current = current.with(type, new NodesAttribute(attributes));
+            } catch (StreamException e) {
+                throw new CompileException(e);
             }
-            current = current.with(type, new NodesAttribute(newNodes));
         }
         return current;
     }
@@ -185,14 +191,16 @@ public record CRenderer(Node root) {
         var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withNodeCollections;
         for (Attribute.Type type : types) {
-            var oldDeclarations = current.apply(type).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
-            var newDeclarations = new ArrayList<Node>();
-            for (Node oldDeclaration : oldDeclarations) {
-                newDeclarations.add(new Content(renderFieldWithType(oldDeclaration)));
+            try {
+                var newDeclarations = current.apply(type)
+                        .asStreamOfNodes()
+                        .map(CRenderer::renderFieldWithType)
+                        .map(Content::new)
+                        .foldRight(new JavaList<Node>(), JavaList::add);
+                current = current.with(type, new NodesAttribute(newDeclarations));
+            } catch (StreamException e) {
+                throw new CompileException(e);
             }
-            current = current.with(type, new NodesAttribute(newDeclarations));
         }
         return current;
     }

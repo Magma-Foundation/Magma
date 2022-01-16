@@ -1,5 +1,6 @@
 package com.meti.compile.attribute;
 
+import com.meti.collect.StreamException;
 import com.meti.compile.CompileException;
 
 public class AttributeException extends CompileException {
@@ -13,5 +14,9 @@ public class AttributeException extends CompileException {
 
     public AttributeException(Attribute.Group group) {
         this("Unknown attribute group: " + group);
+    }
+
+    public AttributeException(Exception cause) {
+        super(cause);
     }
 }

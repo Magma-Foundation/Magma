@@ -1,5 +1,6 @@
 package com.meti.compile.clang;
 
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.node.Node;
@@ -9,10 +10,6 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public record FunctionRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
@@ -20,13 +17,15 @@ public record FunctionRenderer(Node node) implements Renderer {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
 
-            var parameters = node.apply(Attribute.Type.Parameters).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build()
-                    .collect(Collectors.toSet());
-            var renderedParameterList = new ArrayList<String>();
-            for (Node parameter : parameters) {
-                renderedParameterList.add(parameter.apply(Attribute.Type.Value).asText().computeTrimmed());
+            try {
+                var parameters = node.apply(Attribute.Type.Parameters)
+                        .asStreamOfNodes()
+                        .map(value -> value.apply(Attribute.Type.Value))
+                        .map(Attribute::asText)
+                        .map(Text::computeTrimmed)
+                        .foldRight("", (current, next) -> current + next);
+            } catch (StreamException e) {
+                e.printStackTrace();
             }
 
             renderedParameterList.sort(String::compareTo);
