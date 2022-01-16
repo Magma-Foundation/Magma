@@ -1,6 +1,5 @@
 package com.meti.option;
 
-import com.meti.compile.node.Node;
 import com.meti.core.C1;
 import com.meti.core.F1;
 
@@ -16,6 +15,8 @@ public interface Option<T> {
     boolean isPresent();
 
     <R, E extends Exception> Option<R> map(F1<T, R, E> mapper) throws E;
+
+    Option<T> or(Option<T> option);
 
     <E extends Exception> Option<T> or(Supplier<Option<T>, E> supplier) throws E;
 

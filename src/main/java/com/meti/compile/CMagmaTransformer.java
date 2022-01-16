@@ -5,6 +5,8 @@ import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
+import com.meti.compile.common.Line;
+import com.meti.compile.common.block.Block;
 import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.node.Node;
 import com.meti.option.None;
@@ -15,7 +17,29 @@ public record CMagmaTransformer() {
     Node transform(Node node) throws CompileException {
         var withNodeGroup = transformNodeGroup(node);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
-        return transformBoolean(withNodesGroup).orElse(withNodesGroup);
+        return transformBoolean(withNodesGroup)
+                .or(transformBlockOptionally(withNodesGroup))
+                .orElse(withNodesGroup);
+    }
+
+    private Option<Node> transformBlockOptionally(Node root) throws CompileException {
+        if (root.is(Node.Type.Block)) {
+            return new Some<>(transformBlock(root));
+        } else {
+            return new None<>();
+        }
+    }
+
+    private Node transformBlock(Node root) throws CompileException {
+        try {
+            return root.apply(Attribute.Type.Children)
+                    .asStreamOfNodes1()
+                    .map(child -> child.is(Node.Type.Binary) ? new Line(child) : child)
+                    .foldRight(new Block.Builder(), Block.Builder::add)
+                    .complete();
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     private Option<Node> transformBoolean(Node node) throws TransformationException {

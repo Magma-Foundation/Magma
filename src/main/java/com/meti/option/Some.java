@@ -36,6 +36,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> option) {
+        return this;
+    }
+
+    @Override
     public <E extends Exception> Option<T> or(Supplier<Option<T>, E> supplier) {
         return this;
     }

@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Variable(Text value) implements Node {
+    public Variable(String value) {
+        this(new Text(value));
+    }
+
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new TextAttribute(value);

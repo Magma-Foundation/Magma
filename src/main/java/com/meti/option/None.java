@@ -34,6 +34,11 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> option) {
+        return option;
+    }
+
+    @Override
     public <E extends Exception> Option<T> or(Supplier<Option<T>, E> supplier) throws E {
         return supplier.get();
     }
