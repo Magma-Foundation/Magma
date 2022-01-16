@@ -1,14 +1,21 @@
 package com.meti.compile.attribute;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.node.Node;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Deprecated
 public record NodesAttribute(Collection<Node> values) implements Attribute {
     @Override
     public Stream<Node> asStreamOfNodes() {
         return values.stream();
+    }
+
+    @Override
+    public com.meti.collect.Stream<Node> asStreamOfNodes1() throws AttributeException {
+        return new JavaList<>(asStreamOfNodes().collect(Collectors.toList())).stream();
     }
 }

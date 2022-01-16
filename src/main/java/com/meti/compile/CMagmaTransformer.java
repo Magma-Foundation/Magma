@@ -1,9 +1,7 @@
 package com.meti.compile;
 
-import com.meti.compile.attribute.Attribute;
-import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.NodeAttribute;
-import com.meti.compile.attribute.NodesAttribute;
+import com.meti.collect.StreamException;
+import com.meti.compile.attribute.*;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.integer.IntegerNode;
@@ -19,39 +17,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-public class CMagmaTransformer {
-    private final ArrayList<Node> lexed;
-
-    public CMagmaTransformer(ArrayList<Node> lexed) {
-        this.lexed = lexed;
-    }
-
+public record CMagmaTransformer(ArrayList<Node> lexed) {
     private static Option<Node> fixAbstraction(Node node) throws CompileException {
         return new Some<>(node)
                 .filter(value -> value.is(Node.Type.Abstraction))
                 .map(value -> isExternal(value) ? fixFunction(node) : new EmptyNode());
     }
 
-    private static Option<Node> fixBlock(Node node) throws AttributeException {
-        if (node.is(Node.Type.Block)) {
-            var oldChildren = node.apply(Attribute.Type.Children)
-                    .asStreamOfNodes()
-                    .collect(Collectors.toList());
-            var newChildren = new ArrayList<Node>();
-            for (Node oldChild : oldChildren) {
-                Node newChild;
-                if (oldChild.is(Node.Type.Abstraction) || oldChild.is(Node.Type.Implementation)) {
-                    newChild = new Cache(oldChild, Collections.emptyList());
-                } else if (oldChild.is(Node.Type.Invocation) || oldChild.is(Node.Type.Binary)) {
-                    newChild = new Line(oldChild);
-                } else {
-                    newChild = oldChild;
-                }
-                newChildren.add(newChild);
-            }
-            return new Some<>(node.with(Attribute.Type.Children, new NodesAttribute(newChildren)));
-        } else {
-            return new None<>();
+    private static Option<Node> fixBlock(Node node) throws CompileException {
+        return new Some<>(node)
+                .filter(value -> value.is(Node.Type.Block))
+                .map(CMagmaTransformer::fixChildren);
+    }
+
+    private static Node fixChildren(Node node) throws AttributeException, TransformationException {
+        try {
+            var oldChildren = wrapChildren(node);
+            return node.with(Attribute.Type.Children, oldChildren);
+        } catch (StreamException e) {
+            throw new TransformationException(e);
         }
     }
 
@@ -214,6 +198,24 @@ public class CMagmaTransformer {
             return new Some<>(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
         }
         return new None<>();
+    }
+
+    private static Node wrap(Node oldChild) {
+        if (oldChild.is(Node.Type.Abstraction) || oldChild.is(Node.Type.Implementation)) {
+            return new Cache(oldChild, Collections.emptyList());
+        } else if (oldChild.is(Node.Type.Invocation) || oldChild.is(Node.Type.Binary)) {
+            return new Line(oldChild);
+        } else {
+            return oldChild;
+        }
+    }
+
+    private static Attribute wrapChildren(Node node) throws StreamException, AttributeException {
+        return node.apply(Attribute.Type.Children)
+                .asStreamOfNodes1()
+                .map(CMagmaTransformer::wrap)
+                .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                .complete();
     }
 
     public ArrayList<Node> getLexed() {
