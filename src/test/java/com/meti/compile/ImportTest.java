@@ -26,12 +26,14 @@ public class ImportTest {
         var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
+                                
                 #ifndef Index_inner
 
                 #define Index_inner
                 #include "../Parent.h"
 
-                #endif""";
+                #endif
+                """;
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
@@ -47,12 +49,14 @@ public class ImportTest {
         var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
+                                
                 #ifndef Index
 
                 #define Index
                 #include "Sibling.h"
 
-                #endif""";
+                #endif
+                """;
         var actual = output.get(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
