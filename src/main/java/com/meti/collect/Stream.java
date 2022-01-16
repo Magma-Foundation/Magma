@@ -9,6 +9,8 @@ public interface Stream<T> {
 
     Option<T> first() throws StreamException;
 
+    <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) throws StreamException;
+
     <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E;
 
     T head() throws StreamException;
