@@ -6,13 +6,14 @@ import com.meti.compile.attribute.AttributeException;
 import java.util.stream.Stream;
 
 public interface Node {
-    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
-    }
-
     default Attribute apply(Attribute.Type type) throws AttributeException {
         throw new AttributeException("Node had no attributes.");
     }
+
+    @Deprecated
+    Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException;
+
+    com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException;
 
     boolean is(Type type);
 

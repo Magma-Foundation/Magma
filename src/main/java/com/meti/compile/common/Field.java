@@ -1,10 +1,13 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.*;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class Field implements Node {
     protected final Set<Flag> flags;
@@ -25,6 +28,17 @@ public abstract class Field implements Node {
             case Type -> new NodeAttribute(this.type);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    @Deprecated
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return Stream.empty();
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

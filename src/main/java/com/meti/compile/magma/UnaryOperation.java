@@ -1,10 +1,12 @@
 package com.meti.compile.magma;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record UnaryOperation(Node caller, Node callee) implements Node {
@@ -22,6 +24,11 @@ public record UnaryOperation(Node caller, Node callee) implements Node {
             case Arguments -> new NodeAttribute(callee);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

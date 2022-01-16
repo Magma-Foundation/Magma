@@ -1,10 +1,12 @@
 package com.meti.compile.common.condition;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Condition(Type type, Node state, Node body) implements Node {
@@ -22,6 +24,11 @@ public record Condition(Type type, Node state, Node body) implements Node {
             case Value -> new NodeAttribute(body);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

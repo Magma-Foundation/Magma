@@ -1,16 +1,23 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Line(Node node) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node ? Stream.of(Attribute.Type.Value) : Stream.empty();
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

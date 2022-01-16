@@ -1,5 +1,6 @@
 package com.meti.compile.common.invoke;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
@@ -27,6 +28,11 @@ public record Invocation(Node caller, List<Node> arguments) implements Node {
             case Arguments -> new NodesAttribute(arguments);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

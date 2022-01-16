@@ -1,5 +1,6 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
@@ -35,6 +36,11 @@ public abstract class Function implements Node {
             case Parameters -> new NodesAttribute(parameters);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     protected abstract Node complete(Node node, Set<Node> parameters);

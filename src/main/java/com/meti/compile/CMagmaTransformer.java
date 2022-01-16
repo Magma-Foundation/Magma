@@ -39,33 +39,25 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         }
     }
 
-    static Node fixFunction(Node node) throws AttributeException, ResolutionException {
+    static Node fixFunction(Node node) throws AttributeException, ResolutionException, TransformationException {
         var identity = node.apply(Attribute.Type.Identity).asNode();
+
         var oldReturnType = identity.apply(Attribute.Type.Type).asNode();
-        Node newReturnType;
-        if (oldReturnType.is(Node.Type.Implicit)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            newReturnType = resolveNode(value);
-        } else {
-            newReturnType = oldReturnType;
-        }
+        var newReturnType = resolveValue(node, oldReturnType);
+
         var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(newReturnType));
         var withIdentity = node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
 
-        var oldParameters = withIdentity.apply(Attribute.Type.Parameters)
-                .asStreamOfNodes()
-                .collect(Collectors.toList());
-        var newParameters = new ArrayList<Node>();
-        for (Node parameter : oldParameters) {
-            var oldType = parameter.apply(Attribute.Type.Type).asNode();
-            if (oldType.is(Node.Type.Primitive) && oldType.apply(Attribute.Type.Name).asText().compute().equals("Bool")) {
-                var newType = new IntegerType(true, 16);
-                newParameters.add(parameter.with(Attribute.Type.Type, new NodeAttribute(newType)));
-            } else {
-                newParameters.add(parameter);
-            }
+        try {
+            var oldParameters = withIdentity.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes1()
+                    .map(CMagmaTransformer::fixParameter)
+                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .complete();
+            return withIdentity.with(Attribute.Type.Parameters, oldParameters);
+        } catch (StreamException e) {
+            throw new TransformationException(e);
         }
-        return withIdentity.with(Attribute.Type.Parameters, new NodesAttribute(newParameters));
     }
 
     private static Option<Node> fixImplementation(Node node) throws CompileException {
@@ -74,12 +66,35 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
                 .map(CMagmaTransformer::fixFunction);
     }
 
+    private static Node fixParameter(Node parameter) throws AttributeException {
+        var oldType = parameter.apply(Attribute.Type.Type).asNode();
+        if (oldType.is(Node.Type.Primitive) && oldType.apply(Attribute.Type.Name).asText().compute().equals("Bool")) {
+            var newType = new IntegerType(true, 16);
+            var attribute = new NodeAttribute(newType);
+            return parameter.with(Attribute.Type.Type, attribute);
+        } else {
+            return parameter;
+        }
+    }
+
     private static boolean isExternal(Node node) throws AttributeException {
         return node.apply(Attribute.Type.Identity)
                 .asNode()
                 .apply(Attribute.Type.Flags)
                 .asStreamOfFlags()
                 .noneMatch(value -> value == EmptyField.Flag.Extern);
+    }
+
+    private static Node resolveBlock(Node root) throws AttributeException, ResolutionException {
+        try {
+            return root.apply(Attribute.Type.Children)
+                    .asStreamOfNodes1()
+                    .filter(value -> value.is(Node.Type.Return))
+                    .first()
+                    .orElse(Primitive.Void);
+        } catch (StreamException e) {
+            throw new ResolutionException(e);
+        }
     }
 
     static Node resolveField(Node field) throws CompileException {
@@ -93,33 +108,26 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
     }
 
     private static Node resolveFieldStage(Node root) throws CompileException {
-        var current = root;
-        var declarations = current.apply(Attribute.Group.Declaration).collect(Collectors.toList());
-        for (Attribute.Type type : declarations) {
-            var oldField = current.apply(type).asNode();
-            var newField = resolveField(oldField);
-            current = current.with(type, new NodeAttribute(newField));
+        try {
+            return root.apply1(Attribute.Group.Declaration)
+                    .foldRight(root, CMagmaTransformer::resolveFieldAttribute);
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
-        return current;
+    }
+
+    private static Node resolveFieldAttribute(Node current, Attribute.Type type) throws CompileException {
+        var oldField = current.apply(type).asNode();
+        var newField = resolveField(oldField);
+        var attribute = new NodeAttribute(newField);
+        return current.with(type, attribute);
     }
 
     private static Node resolveNode(Node root) throws AttributeException, ResolutionException {
         if (root.is(Node.Type.Block)) {
-            var children = root.apply(Attribute.Type.Children)
-                    .asStreamOfNodes()
-                    .collect(Collectors.toList());
-            if (!children.isEmpty()) {
-                for (int i = children.size() - 1; i >= 0; i--) {
-                    var child = children.get(i);
-                    if (child.is(Node.Type.Return)) {
-                        return resolveNode(child);
-                    }
-                }
-            }
-            return Primitive.Void;
+            return resolveBlock(root);
         } else if (root.is(Node.Type.Return)) {
-            var value = root.apply(Attribute.Type.Value).asNode();
-            return resolveNode(value);
+            return resolveReturn(root);
         } else if (root.is(Node.Type.Integer)) {
             return new IntegerType(true, 16);
         } else {
@@ -182,6 +190,12 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         }
     }
 
+    private static Node resolveReturn(Node root) throws AttributeException, ResolutionException {
+        var apply = root.apply(Attribute.Type.Value);
+        var value = apply.asNode();
+        return resolveNode(value);
+    }
+
     static Node resolveStage(Node node) throws CompileException {
         var resolved = toBoolean(node)
                 .or(() -> fixImplementation(node))
@@ -191,6 +205,17 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         var withNodes = resolveNodeAttributes(resolved);
         var withNodesAttributes = resolveNodesAttributes(withNodes);
         return resolveFieldStage(withNodesAttributes);
+    }
+
+    private static Node resolveValue(Node node, Node oldReturnType) throws AttributeException, ResolutionException {
+        Node newReturnType;
+        if (oldReturnType.is(Node.Type.Implicit)) {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            newReturnType = resolveNode(value);
+        } else {
+            newReturnType = oldReturnType;
+        }
+        return newReturnType;
     }
 
     private static Option<Node> toBoolean(Node node) throws AttributeException {

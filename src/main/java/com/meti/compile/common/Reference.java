@@ -1,10 +1,12 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Reference(Node value) implements Node {
@@ -19,6 +21,11 @@ public record Reference(Node value) implements Node {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new NodeAttribute(value);
         throw new AttributeException(type);
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

@@ -1,11 +1,13 @@
 package com.meti.compile.common.block;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.node.Node;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 record Block(List<Node> values) implements Node {
@@ -20,6 +22,11 @@ record Block(List<Node> values) implements Node {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Children) return new NodesAttribute(values);
         throw new AttributeException(type);
+    }
+
+    @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

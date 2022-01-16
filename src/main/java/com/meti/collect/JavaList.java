@@ -1,5 +1,9 @@
 package com.meti.collect;
 
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,11 @@ public class JavaList<T> {
 
     public List<T> getValue() {
         return value;
+    }
+
+    public Option<T> last() {
+        if (value.isEmpty()) return new None<>();
+        else return new Some<>(value.get(value.size() - 1));
     }
 
     public int size() {
