@@ -23,11 +23,15 @@ public record BlockTransformer(Node root) implements Transformer {
         try {
             return root.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .map(child -> child.is(Node.Type.Binary) ? new Line(child) : child)
+                    .map(child -> shouldBeAsLine(child) ? new Line(child) : child)
                     .foldRight(new Block.Builder(), Block.Builder::add)
                     .complete();
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    private static boolean shouldBeAsLine(Node child) {
+        return child.is(Node.Type.Binary) || child.is(Node.Type.Invocation);
     }
 }
