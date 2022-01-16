@@ -33,7 +33,7 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
             var divider = new CDivider(thisPackage);
 
             var division = new JavaList<>(lexed).stream()
-                    .map(transformer::transformStage)
+                    .map(transformer::transform)
                     .map(formatter::apply)
                     .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),

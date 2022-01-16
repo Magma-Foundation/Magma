@@ -9,7 +9,7 @@ import com.meti.compile.node.Node;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-record Return(Node value) implements Node {
+public record Return(Node value) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
