@@ -13,7 +13,7 @@ public class CompiledTest {
     static void assertHeaderCompiles(String input, String output) {
         try {
             var package_ = new Packaging("Index", Collections.emptyList());
-            var compiler = new MagmaCCompiler(new JavaMap<>(Collections.singletonMap(package_, input)));
+            var compiler = new CMagmaCompiler(new JavaMap<>(Collections.singletonMap(package_, input)));
             var actual = compiler.compile()
                     .get(package_)
                     .apply(CFormat.Header, "");
@@ -30,7 +30,7 @@ public class CompiledTest {
     public static void assertSourceCompile(String input, String output) {
         try {
             var package_ = new Packaging("Index", Collections.emptyList());
-            var compiler = new MagmaCCompiler(new JavaMap<>(Collections.singletonMap(package_, input)));
+            var compiler = new CMagmaCompiler(new JavaMap<>(Collections.singletonMap(package_, input)));
             var before = compiler.compile()
                     .get(package_)
                     .apply(CFormat.Source, "");

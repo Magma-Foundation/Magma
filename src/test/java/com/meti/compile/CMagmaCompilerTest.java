@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.meti.compile.CompiledTest.assertSourceCompile;
 
-class MagmaCCompilerTest {
+class CMagmaCompilerTest {
     @Test
     void compile() {
         assertSourceCompile("def test() : I16 => {return 0;}", "int test(){return 0;}");

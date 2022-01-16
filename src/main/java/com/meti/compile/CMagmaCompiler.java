@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record MagmaCCompiler(JavaMap<Packaging, String> input) {
+public record CMagmaCompiler(JavaMap<Packaging, String> input) {
     public Map<Packaging, Output<String>> compile() throws CompileException {
         return input.mapValues(this::compileInput).getMap();
     }

@@ -23,7 +23,7 @@ public class ImportTest {
                 index, "import Parent",
                 new Packaging("Parent"), ""
         );
-        var output = new MagmaCCompiler(new JavaMap<>(index1)).compile();
+        var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
                 #ifndef Index_inner
@@ -44,7 +44,7 @@ public class ImportTest {
                 index, "import Sibling",
                 new Packaging("Sibling"), ""
         );
-        var output = new MagmaCCompiler(new JavaMap<>(index1)).compile();
+        var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
         var expected = """
                 #ifndef Index
