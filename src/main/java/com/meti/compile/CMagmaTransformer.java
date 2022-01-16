@@ -17,17 +17,10 @@ public record CMagmaTransformer() {
     Node transform(Node node) throws CompileException {
         var withNodeGroup = transformNodeGroup(node);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
-        return transformBoolean(withNodesGroup)
-                .or(transformBlockOptionally(withNodesGroup))
-                .orElse(withNodesGroup);
-    }
-
-    private Option<Node> transformBlockOptionally(Node root) throws CompileException {
-        if (root.is(Node.Type.Block)) {
-            return new Some<>(transformBlock(root));
-        } else {
-            return new None<>();
-        }
+        var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
+        return transformBoolean(withDeclarationGroup)
+                .or(transformBlockOptionally(withDeclarationGroup))
+                .orElse(withDeclarationGroup);
     }
 
     private Node transformBlock(Node root) throws CompileException {
@@ -42,6 +35,14 @@ public record CMagmaTransformer() {
         }
     }
 
+    private Option<Node> transformBlockOptionally(Node root) throws CompileException {
+        if (root.is(Node.Type.Block)) {
+            return new Some<>(transformBlock(root));
+        } else {
+            return new None<>();
+        }
+    }
+
     private Option<Node> transformBoolean(Node node) throws TransformationException {
         if (node.is(Node.Type.Boolean)) {
             try {
@@ -53,6 +54,25 @@ public record CMagmaTransformer() {
             }
         }
         return new None<>();
+    }
+
+    private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
+        try {
+            return withNodesGroup.apply1(Attribute.Group.Declaration)
+                    .foldRight(withNodesGroup, this::transformDeclarationGroup);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node transformDeclarationGroup(Node node1, Attribute.Type type) throws CompileException {
+        var oldIdentity = node1.apply(type).asNode();
+        var oldValue = oldIdentity.apply(Attribute.Type.Value).asNode();
+        var newValue = transform(oldValue);
+        var newValueAttribute = new NodeAttribute(newValue);
+        var newIdentity = oldIdentity.with(Attribute.Type.Value, newValueAttribute);
+        var newIdentityAttribute = new NodeAttribute(newIdentity);
+        return node1.with(type, newIdentityAttribute);
     }
 
     private Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {

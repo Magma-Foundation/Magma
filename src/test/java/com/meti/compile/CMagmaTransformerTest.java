@@ -2,6 +2,8 @@ package com.meti.compile;
 
 import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
+import com.meti.compile.common.Declaration;
+import com.meti.compile.common.ValuedField;
 import com.meti.compile.common.binary.BinaryOperation;
 import com.meti.compile.common.block.Block;
 import com.meti.compile.common.bool.Boolean;
@@ -9,8 +11,12 @@ import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.common.returns.Return;
 import com.meti.compile.common.variable.Variable;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Primitive;
+import com.meti.compile.node.Text;
 import com.meti.core.F1;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -20,6 +26,15 @@ class CMagmaTransformerTest {
     void boolean_child() {
         assertTransforms(new Return(Boolean.False), node -> node.apply(Attribute.Type.Value)
                 .asNode()
+                .is(Node.Type.Integer));
+    }
+
+    @Test
+    void boolean_declared() {
+        var oldIdentity = new ValuedField(Collections.emptySet(), new Text("test"), Primitive.Bool, Boolean.True);
+        assertTransforms(new Declaration(oldIdentity), newIdentity -> newIdentity
+                .apply(Attribute.Type.Identity).asNode()
+                .apply(Attribute.Type.Value).asNode()
                 .is(Node.Type.Integer));
     }
 
