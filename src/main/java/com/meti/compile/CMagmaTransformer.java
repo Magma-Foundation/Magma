@@ -65,14 +65,18 @@ public record CMagmaTransformer() {
         }
     }
 
-    private Node transformDeclarationGroup(Node node1, Attribute.Type type) throws CompileException {
-        var oldIdentity = node1.apply(type).asNode();
-        var oldValue = oldIdentity.apply(Attribute.Type.Value).asNode();
-        var newValue = transform(oldValue);
-        var newValueAttribute = new NodeAttribute(newValue);
-        var newIdentity = oldIdentity.with(Attribute.Type.Value, newValueAttribute);
-        var newIdentityAttribute = new NodeAttribute(newIdentity);
-        return node1.with(type, newIdentityAttribute);
+    private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
+        var oldIdentity = root.apply(type).asNode();
+        if (oldIdentity.is(Node.Type.ValuedField)) {
+            var oldValue = oldIdentity.apply(Attribute.Type.Value).asNode();
+            var newValue = transform(oldValue);
+            var newValueAttribute = new NodeAttribute(newValue);
+            var newIdentity = oldIdentity.with(Attribute.Type.Value, newValueAttribute);
+            var newIdentityAttribute = new NodeAttribute(newIdentity);
+            return root.with(type, newIdentityAttribute);
+        } else {
+            return root;
+        }
     }
 
     private Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
