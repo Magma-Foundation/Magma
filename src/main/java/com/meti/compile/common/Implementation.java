@@ -1,6 +1,5 @@
 package com.meti.compile.common;
 
-import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
@@ -32,7 +31,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    protected Node complete(Node node, JavaList<Node> parameters) {
+    protected Node complete(Node node, Set<Node> parameters) {
         return new Implementation(node, parameters, body);
     }
 

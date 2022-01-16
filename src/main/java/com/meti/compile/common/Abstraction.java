@@ -1,6 +1,5 @@
 package com.meti.compile.common;
 
-import com.meti.collect.JavaList;
 import com.meti.compile.node.Node;
 
 import java.util.Set;
@@ -11,7 +10,7 @@ public class Abstraction extends Function {
     }
 
     @Override
-    protected Node complete(Node node, JavaList<Node> parameters) {
+    protected Node complete(Node node, Set<Node> parameters) {
         return new Abstraction(node, parameters);
     }
 
