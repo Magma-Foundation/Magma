@@ -28,7 +28,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         var lines = split(root);
         var lexed = lex(lines);
         try {
-            var resolver = new CMagmaResolver();
+            var resolver = new CMagmaNodeResolver();
             var modifier = new CMagmaModifier();
             var formatter = new CFormatter(thisPackage);
             var divider = new CDivider(thisPackage);

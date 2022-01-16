@@ -18,6 +18,8 @@ public abstract class AbstractStream<T> implements Stream<T> {
                         next = AbstractStream.this.head();
                     } while (!predicate.apply(next));
                     return next;
+                } catch (EndOfStreamException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new StreamException(e);
                 }

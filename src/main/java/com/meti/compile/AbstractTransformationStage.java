@@ -9,20 +9,13 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
-public abstract class AbstractTransformer {
+public abstract class AbstractTransformationStage {
     protected Stream<Transformer> streamNodeTransformers(Node node) {
         return new EmptyStream<>();
     }
 
     protected Stream<Transformer> streamTypeTransformers(Node node) {
         return new EmptyStream<>();
-    }
-
-    private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
-        var oldIdentity = root.apply(type).asNode();
-        var newIdentity = transformDeclaration(oldIdentity);
-        var newIdentityAttribute = new NodeAttribute(newIdentity);
-        return root.with(type, newIdentityAttribute);
     }
 
     private Node transformDeclaration(Node oldIdentity) throws CompileException {
@@ -34,6 +27,13 @@ public abstract class AbstractTransformer {
         } else {
             return oldIdentity;
         }
+    }
+
+    private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
+        var oldIdentity = root.apply(type).asNode();
+        var newIdentity = transformDeclaration(oldIdentity);
+        var newIdentityAttribute = new NodeAttribute(newIdentity);
+        return root.with(type, newIdentityAttribute);
     }
 
     private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
@@ -57,7 +57,19 @@ public abstract class AbstractTransformer {
     private Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
         try {
             return node1.with(type, node1.apply(type).asStreamOfNodes1()
-                    .map(AbstractTransformer.this::transformDeclaration)
+                    .map(AbstractTransformationStage.this::transformDeclaration)
+                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .complete());
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node transformNodesAttribute(Node current, Attribute.Type type) throws CompileException {
+        try {
+            return current.with(type, current.apply(type)
+                    .asStreamOfNodes1()
+                    .map(AbstractTransformationStage.this::transformNodeAST)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete());
         } catch (StreamException e) {
@@ -69,12 +81,8 @@ public abstract class AbstractTransformer {
         var withNodeGroup = transformNodeGroup(node);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
         var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
-        Node withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
+        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
         return transformNode(withDeclarationsGroup);
-    }
-
-    private Node transformNode(Node node) throws CompileException {
-        return transformUsingStreams(node, streamNodeTransformers(node));
     }
 
     private Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
@@ -93,16 +101,8 @@ public abstract class AbstractTransformer {
         }
     }
 
-    private Node transformNodesAttribute(Node current, Attribute.Type type) throws CompileException {
-        try {
-            return current.with(type, current.apply(type)
-                    .asStreamOfNodes1()
-                    .map(AbstractTransformer.this::transformNodeAST)
-                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
-                    .complete());
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
+    Node transformNode(Node node) throws CompileException {
+        return transformUsingStreams(node, streamNodeTransformers(node));
     }
 
     private Node transformNodesGroup(Node withChild) throws CompileException {

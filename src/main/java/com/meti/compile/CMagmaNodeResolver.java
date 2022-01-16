@@ -10,7 +10,7 @@ import com.meti.compile.node.Primitive;
 import com.meti.option.None;
 import com.meti.option.Some;
 
-public class CMagmaResolver extends AbstractTransformer {
+public class CMagmaNodeResolver extends AbstractTransformationStage {
     @Override
     protected Stream<Transformer> streamNodeTransformers(Node node) {
         return Streams.apply(() -> {
@@ -18,7 +18,8 @@ public class CMagmaResolver extends AbstractTransformer {
                 var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
                 var type = oldIdentity.apply(Attribute.Type.Type).asNode();
                 if (type.is(Node.Type.Implicit)) {
-                    var newType = Primitive.Void;
+                    var value = node.apply(Attribute.Type.Value).asNode();
+                    var newType = new MagmaTypeResolver().transformNode(value);
                     var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(newType));
                     var newNode = node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
                     return new Some<>(newNode);

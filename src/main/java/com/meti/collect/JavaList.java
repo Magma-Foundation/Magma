@@ -41,6 +41,10 @@ public class JavaList<T> {
         return new JavaList<>(this.value);
     }
 
+    public boolean isEmpty() {
+        return value.isEmpty();
+    }
+
     public Option<T> last() {
         if (value.isEmpty()) return new None<>();
         else return new Some<>(value.get(value.size() - 1));
