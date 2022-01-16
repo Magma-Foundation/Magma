@@ -32,12 +32,7 @@ public class CDivider extends MappedDivider {
     }
 
     @Override
-    public Stream<CFormat> stream() {
-        return Streams.apply(Header, Source);
-    }
-
-    @Override
-    public JavaList<Node> generate(CFormat format, Node node) throws StreamException {
+    public JavaList<Node> generate(CFormat format) throws StreamException {
         if (format == Header) {
             var header = thisPackage.formatDeclared();
             return Streams.apply("\n#ifndef " + header + "\n",
@@ -47,7 +42,7 @@ public class CDivider extends MappedDivider {
                     .map(Content::new)
                     .foldRight(new JavaList<>(), JavaList::add);
         }
-        return JavaList.apply(new Import(new Packaging(thisPackage.computeName())), node);
+        return JavaList.apply(new Import(new Packaging(thisPackage.computeName())));
     }
 
     @Override
@@ -58,5 +53,10 @@ public class CDivider extends MappedDivider {
     @Override
     protected Divider complete(JavaMap<CFormat, JavaList<Node>> map) {
         return new CDivider(thisPackage, map);
+    }
+
+    @Override
+    public Stream<CFormat> stream() {
+        return Streams.apply(Header, Source);
     }
 }
