@@ -10,16 +10,13 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record BinaryRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Binary)) {
             var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asText();
-            var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
             var first = arguments.get(0).apply(Attribute.Type.Value).asText();
             var second = arguments.get(1).apply(Attribute.Type.Value).asText();
             return new Some<>(first.append(" ").append(operator).append(" ").append(second));

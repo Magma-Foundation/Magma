@@ -43,11 +43,7 @@ public abstract class Function implements Node {
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return switch (type) {
             case Identity -> complete(attribute.asNode(), parameters);
-            case Parameters -> Stream<Node> result;Attribute attribute1 = attribute;
-                    result = attribute1.asStreamOfNodes()
-                            .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                            .build();
-                    complete(identity, result.collect(Collectors.toSet()));
+            case Parameters -> complete(identity, attribute.asStreamOfNodes().collect(Collectors.toSet()));
             default -> throw new AttributeException(type);
         };
     }

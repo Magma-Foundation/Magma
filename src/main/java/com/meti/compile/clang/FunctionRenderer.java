@@ -11,7 +11,6 @@ import com.meti.option.Some;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record FunctionRenderer(Node node) implements Renderer {
     @Override
@@ -20,9 +19,8 @@ public record FunctionRenderer(Node node) implements Renderer {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
 
-            var parameters = node.apply(Attribute.Type.Parameters).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build()
+            var parameters = node.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes()
                     .collect(Collectors.toSet());
             var renderedParameterList = new ArrayList<String>();
             for (Node parameter : parameters) {

@@ -11,15 +11,12 @@ import com.meti.option.Some;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record CacheRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if(node.is(Node.Type.Cache)){
-            var oldChildren = node.apply(Attribute.Type.Children).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var oldChildren = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             var newChildren = new ArrayList<String>();
             for (Node oldChild : oldChildren) {
                 newChildren.add(oldChild.apply(Attribute.Type.Value).asText().computeTrimmed());

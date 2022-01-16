@@ -29,8 +29,6 @@ record Block(List<Node> values) implements Node {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return new Block(attribute.asStreamOfNodes()
-                .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                .build().toList());
+        return new Block(attribute.asStreamOfNodes().toList());
     }
 }

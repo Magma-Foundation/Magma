@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record MagmaLexer(Text text) {
     static Node lexNode(Text text) throws LexException {
@@ -104,9 +103,7 @@ public record MagmaLexer(Text text) {
         var types = root.apply(Attribute.Group.Types).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
-            var oldTypes = current.apply(type).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var oldTypes = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
 
             var newTypes = new ArrayList<Node>();
             for (Node oldType : oldTypes) {
@@ -157,9 +154,7 @@ public record MagmaLexer(Text text) {
         var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withFields;
         for (Attribute.Type type : collect) {
-            var oldDeclarations = withFields.apply(type).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newDeclarations = new ArrayList<Node>();
             for (Node declaration : oldDeclarations) {
                 newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asText()));
@@ -185,9 +180,7 @@ public record MagmaLexer(Text text) {
         var types = root.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
-            var oldNodes = root.apply(type).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var oldNodes = root.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
                 newNodes.add(lexNodeAST(oldNode.apply(Attribute.Type.Value).asText()));

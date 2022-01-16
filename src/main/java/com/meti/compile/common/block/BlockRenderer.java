@@ -10,16 +10,13 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record BlockRenderer(Node node) implements Renderer {
     @Override
     public Option<Text> render() throws AttributeException {
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
-            var children = node.apply(Attribute.Type.Children).asStreamOfNodes()
-                    .foldRight(Stream.<Node>builder(), Stream.Builder::add)
-                    .build().collect(Collectors.toList());
+            var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             for (Node node1 : children) {
                 builder.append(node1.apply(Attribute.Type.Value).asText().computeTrimmed());
             }
