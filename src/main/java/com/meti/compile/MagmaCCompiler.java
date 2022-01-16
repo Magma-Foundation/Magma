@@ -27,20 +27,26 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var root = new Text(input);
         var lines = split(root);
         var lexed = lex(lines);
-        var resolved = new CMagmaTransformer(lexed).resolveStage();
+        var lexed1 = new JavaList<>(lexed);
+        var resolved = new CMagmaTransformingStage(lexed1).transformStage();
 
         try {
             var formatter = new CFormatter(thisPackage);
             var divider = new CDivider(thisPackage);
 
-            var division = new JavaList<>(resolved)
-                    .stream()
+            var division = resolved.stream()
                     .map(formatter::apply)
                     .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(), (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {
             throw new CompileException(e);
         }
+    }
+
+    private List<Text> split(Text root) {
+        return new Splitter(root)
+                .split()
+                .collect(Collectors.toList());
     }
 
     private ArrayList<Node> lex(List<Text> lines) throws CompileException {
@@ -58,12 +64,6 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
                 .map(Text::compute)
                 .foldRight(new StringBuilder(), StringBuilder::append)
                 .toString();
-    }
-
-    private List<Text> split(Text root) {
-        return new Splitter(root)
-                .split()
-                .collect(Collectors.toList());
     }
 
 }

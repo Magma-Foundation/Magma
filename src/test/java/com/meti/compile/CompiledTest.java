@@ -34,7 +34,6 @@ public class CompiledTest {
             var before = compiler.compile()
                     .get(package_)
                     .apply(CFormat.Source, "");
-
             var separator = before.indexOf('\"', before.indexOf('\"') + 1);
             var after = before.substring(separator + 1).trim();
             assertEquals(output, after);

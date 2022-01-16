@@ -1,7 +1,11 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
-import com.meti.compile.attribute.*;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.integer.IntegerNode;
@@ -13,11 +17,9 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
-public record CMagmaTransformer(ArrayList<Node> lexed) {
+public record CMagmaTransformingStage(JavaList<Node> lexed) {
     private static Option<Node> fixAbstraction(Node node) throws CompileException {
         return new Some<>(node)
                 .filter(value -> value.is(Node.Type.Abstraction))
@@ -27,7 +29,7 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
     private static Option<Node> fixBlock(Node node) throws CompileException {
         return new Some<>(node)
                 .filter(value -> value.is(Node.Type.Block))
-                .map(CMagmaTransformer::fixChildren);
+                .map(CMagmaTransformingStage::fixChildren);
     }
 
     private static Node fixChildren(Node node) throws AttributeException, TransformationException {
@@ -51,7 +53,7 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         try {
             var oldParameters = withIdentity.apply(Attribute.Type.Parameters)
                     .asStreamOfNodes1()
-                    .map(CMagmaTransformer::fixParameter)
+                    .map(CMagmaTransformingStage::fixParameter)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete();
             return withIdentity.with(Attribute.Type.Parameters, oldParameters);
@@ -63,7 +65,7 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
     private static Option<Node> fixImplementation(Node node) throws CompileException {
         return new Some<>(node)
                 .filter(value -> value.is(Node.Type.Implementation))
-                .map(CMagmaTransformer::fixFunction);
+                .map(CMagmaTransformingStage::fixFunction);
     }
 
     private static Node fixParameter(Node parameter) throws AttributeException {
@@ -99,20 +101,9 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
 
     static Node resolveField(Node field) throws CompileException {
         if (field.is(Node.Type.ValuedField)) {
-            var oldValue = field.apply(Attribute.Type.Value).asNode();
-            var newValue = resolveStage(oldValue);
-            return field.with(Attribute.Type.Value, new NodeAttribute(newValue));
+            return transformNodeAttribute(field, Attribute.Type.Value);
         } else {
             return field;
-        }
-    }
-
-    private static Node resolveFieldStage(Node root) throws CompileException {
-        try {
-            return root.apply1(Attribute.Group.Declaration)
-                    .foldRight(root, CMagmaTransformer::resolveFieldAttribute);
-        } catch (StreamException e) {
-            throw new CompileException(e);
         }
     }
 
@@ -121,6 +112,15 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         var newField = resolveField(oldField);
         var attribute = new NodeAttribute(newField);
         return current.with(type, attribute);
+    }
+
+    private static Node resolveFieldStage(Node root) throws CompileException {
+        try {
+            return root.apply1(Attribute.Group.Declaration)
+                    .foldRight(root, CMagmaTransformingStage::resolveFieldAttribute);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     private static Node resolveNode(Node root) throws AttributeException, ResolutionException {
@@ -135,58 +135,15 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         }
     }
 
-    private static Node resolveNodeAttributes(Node root) throws CompileException {
-        var list = root.apply(Attribute.Group.Node).collect(Collectors.toList());
-        var current = root;
-        var cached = new ArrayList<Node>();
-
-        for (Attribute.Type type : list) {
-            var oldChild = current.apply(type).asNode();
-            var newChild = resolveStage(oldChild);
-
-            if (newChild.is(Node.Type.Cache)) {
-                var internalChild = newChild.apply(Attribute.Type.Value).asNode();
-                cached.addAll(newChild.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList()));
-                current = current.with(type, new NodeAttribute(internalChild));
-            } else {
-                current = current.with(type, new NodeAttribute(newChild));
-            }
-        }
-
-        if (cached.isEmpty()) {
-            return current;
-        } else {
-            return new Cache(current, cached);
-        }
-    }
-
     private static Node resolveNodesAttributes(Node root) throws CompileException {
-        var types = root.apply(Attribute.Group.Nodes).collect(Collectors.toList());
-        var current = root;
-        var cached = new ArrayList<Node>();
-
-        for (Attribute.Type type : types) {
-            var children = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newChildren = new ArrayList<Node>();
-            for (Node oldChild : children) {
-                var newChild = resolveStage(oldChild);
-
-                if (newChild.is(Node.Type.Cache)) {
-                    var internalChild = newChild.apply(Attribute.Type.Value).asNode();
-                    if (internalChild.is(Node.Type.Implementation)) {
-                        cached.add(internalChild);
-                    }
-                } else {
-                    newChildren.add(newChild);
-                }
-            }
-            current = current.with(type, new NodesAttribute(newChildren));
-        }
-
-        if (cached.isEmpty()) {
-            return current;
-        } else {
-            return new Cache(current, cached);
+        try {
+            return root.apply1(Attribute.Group.Nodes).foldRight(root, (node, type) -> root.with(type, node.apply(type)
+                    .asStreamOfNodes1()
+                    .map(CMagmaTransformingStage::transformStage)
+                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .complete()));
+        } catch (Exception e) {
+            throw new CompileException(e);
         }
     }
 
@@ -196,33 +153,51 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
         return resolveNode(value);
     }
 
-    static Node resolveStage(Node node) throws CompileException {
+    private static Node resolveValue(Node node, Node oldReturnType) throws AttributeException, ResolutionException {
+        if (oldReturnType.is(Node.Type.Implicit)) {
+            var apply = node.apply(Attribute.Type.Value);
+            var value = apply.asNode();
+            return resolveNode(value);
+        } else {
+            return oldReturnType;
+        }
+    }
+
+    private static Option<Node> toBoolean(Node node) throws AttributeException {
+        if (node.is(Node.Type.Boolean)) {
+            var apply = node.apply(Attribute.Type.Value);
+            var value = apply.asBoolean() ? 1 : 0;
+            var integerNode = new IntegerNode(value);
+            return new Some<>(integerNode);
+        }
+        return new None<>();
+    }
+
+    private static Node transformNodeAttribute(Node node, Attribute.Type type) throws CompileException {
+        var apply = node.apply(type);
+        var oldChild = apply.asNode();
+        var newChild = transformStage(oldChild);
+        var attribute = new NodeAttribute(newChild);
+        return node.with(type, attribute);
+    }
+
+    private static Node transformNodeAttributes(Node root) throws CompileException {
+        try {
+            return root.apply1(Attribute.Group.Node).foldRight(root, CMagmaTransformingStage::transformNodeAttribute);
+        } catch (StreamException e) {
+            throw new TransformationException(e);
+        }
+    }
+
+    static Node transformStage(Node node) throws CompileException {
         var resolved = toBoolean(node)
                 .or(() -> fixImplementation(node))
                 .or(() -> fixAbstraction(node))
                 .or(() -> fixBlock(node))
                 .orElse(node);
-        var withNodes = resolveNodeAttributes(resolved);
+        var withNodes = transformNodeAttributes(resolved);
         var withNodesAttributes = resolveNodesAttributes(withNodes);
         return resolveFieldStage(withNodesAttributes);
-    }
-
-    private static Node resolveValue(Node node, Node oldReturnType) throws AttributeException, ResolutionException {
-        Node newReturnType;
-        if (oldReturnType.is(Node.Type.Implicit)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            newReturnType = resolveNode(value);
-        } else {
-            newReturnType = oldReturnType;
-        }
-        return newReturnType;
-    }
-
-    private static Option<Node> toBoolean(Node node) throws AttributeException {
-        if (node.is(Node.Type.Boolean)) {
-            return new Some<>(new IntegerNode(node.apply(Attribute.Type.Value).asBoolean() ? 1 : 0));
-        }
-        return new None<>();
     }
 
     private static Node wrap(Node oldChild) {
@@ -238,20 +213,18 @@ public record CMagmaTransformer(ArrayList<Node> lexed) {
     private static Attribute wrapChildren(Node node) throws StreamException, AttributeException {
         return node.apply(Attribute.Type.Children)
                 .asStreamOfNodes1()
-                .map(CMagmaTransformer::wrap)
+                .map(CMagmaTransformingStage::wrap)
                 .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                 .complete();
     }
 
-    public ArrayList<Node> getLexed() {
-        return lexed;
-    }
-
-    ArrayList<Node> resolveStage() throws CompileException {
-        var resolved = new ArrayList<Node>();
-        for (Node node : getLexed()) {
-            resolved.add(resolveStage(node));
+    JavaList<Node> transformStage() throws CompileException {
+        try {
+            return lexed.stream()
+                    .map(CMagmaTransformingStage::transformStage)
+                    .foldRight(new JavaList<>(), JavaList::add);
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
-        return resolved;
     }
 }
