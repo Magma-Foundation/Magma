@@ -35,15 +35,11 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        try {
-            return switch (type) {
-                case Value -> new Cache(attribute.asNode(), children);
-                case Children -> new Cache(value, attribute.asStreamOfNodes().foldRight(new JavaList<>(), JavaList::add));
-                default -> this;
-            };
-        } catch (StreamException e) {
-            throw new AttributeException(e);
-        }
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException, StreamException {
+        return switch (type) {
+            case Value -> new Cache(attribute.asNode(), children);
+            case Children -> new Cache(value, attribute.asStreamOfNodes().foldRight(new JavaList<>(), JavaList::add));
+            default -> this;
+        };
     }
 }
