@@ -1,5 +1,10 @@
 package com.meti.compile;
 
-class CMagmaTransformerTest {
+import org.junit.jupiter.api.Test;
 
+class CMagmaTransformerTest {
+    @Test
+    void test() {
+
+    }
 }

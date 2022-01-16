@@ -27,17 +27,17 @@ public record MagmaCCompiler(JavaMap<Packaging, String> input) {
         var root = new Text(input);
         var lines = split(root);
         var lexed = lex(lines);
-        var lexed1 = new JavaList<>(lexed);
-        var resolved = new CMagmaTransformingStage(lexed1).transformStage();
-
         try {
+            var transformer = new CMagmaTransformer();
             var formatter = new CFormatter(thisPackage);
             var divider = new CDivider(thisPackage);
 
-            var division = resolved.stream()
+            var division = new JavaList<>(lexed).stream()
+                    .map(transformer::transformStage)
                     .map(formatter::apply)
                     .foldRight(divider, Divider::divide);
-            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(), (output, format) -> output.append(format, renderDivision(division, format)));
+            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
+                    (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {
             throw new CompileException(e);
         }
