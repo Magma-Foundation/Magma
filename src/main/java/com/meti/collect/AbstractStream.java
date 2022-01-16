@@ -35,6 +35,35 @@ public abstract class AbstractStream<T> implements Stream<T> {
     }
 
     @Override
+    public <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) throws StreamException {
+        return new AbstractStream<>() {
+            private Stream<R> current = null;
+
+            @Override
+            public R head() throws StreamException {
+                if (current == null) updateCurrent();
+                while (true) {
+                    try {
+                        return current.head();
+                    } catch (EndOfStreamException e) {
+                        updateCurrent();
+                    }
+                }
+            }
+
+            private void updateCurrent() throws StreamException {
+                try {
+                    current = mapper.apply(AbstractStream.this.head());
+                } catch (EndOfStreamException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new StreamException(e);
+                }
+            }
+        };
+    }
+
+    @Override
     public <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E {
         R current = identity;
         do {
