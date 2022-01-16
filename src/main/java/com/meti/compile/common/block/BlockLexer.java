@@ -1,5 +1,6 @@
 package com.meti.compile.common.block;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -26,7 +27,7 @@ public record BlockLexer(Text text) implements Lexer {
                     values.add(new Content(line));
                 }
             }
-            return new Some<>(new Block(values));
+            return new Some<>(new Block(new JavaList<>(values)));
         }
         return new None<>();
     }

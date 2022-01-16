@@ -4,6 +4,7 @@ import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.common.integer.IntegerNode;
 import com.meti.compile.node.Node;
 import com.meti.option.None;
@@ -12,8 +13,9 @@ import com.meti.option.Some;
 
 public record CMagmaTransformer() {
     Node transform(Node node) throws CompileException {
-        var withChild = transformNodeGroup(node);
-        return transformBoolean(withChild).orElse(withChild);
+        var withNodeGroup = transformNodeGroup(node);
+        var withNodesGroup = transformNodesGroup(withNodeGroup);
+        return transformBoolean(withNodesGroup).orElse(withNodesGroup);
     }
 
     private Option<Node> transformBoolean(Node node) throws TransformationException {
@@ -42,6 +44,27 @@ public record CMagmaTransformer() {
             return node.apply1(Attribute.Group.Node).foldRight(node, this::transformNodeAttribute);
         } catch (StreamException e) {
             throw new CompileException(e);
+        }
+    }
+
+    private Node transformNodesAttribute(Node current, Attribute.Type type) throws CompileException {
+        try {
+            return current.with(type, current.apply(type)
+                    .asStreamOfNodes1()
+                    .map(CMagmaTransformer.this::transform)
+                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .complete());
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node transformNodesGroup(Node withChild) throws CompileException {
+        try {
+            return withChild.apply1(Attribute.Group.Nodes)
+                    .foldRight(withChild, this::transformNodesAttribute);
+        } catch (StreamException e) {
+            throw new TransformationException(e);
         }
     }
 }

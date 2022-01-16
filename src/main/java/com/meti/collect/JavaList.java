@@ -28,6 +28,10 @@ public class JavaList<T> {
         return this;
     }
 
+    public Option<T> first() {
+        return value.isEmpty() ? new None<>() : new Some<>(value.get(0));
+    }
+
     public JavaList<T> insert(int index, T value) {
         getValue().add(index, value);
         return new JavaList<>(getValue());

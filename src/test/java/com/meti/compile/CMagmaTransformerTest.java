@@ -1,6 +1,9 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaList;
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
+import com.meti.compile.common.block.Block;
 import com.meti.compile.common.bool.Boolean;
 import com.meti.compile.common.returns.Return;
 import com.meti.compile.node.Node;
@@ -26,6 +29,25 @@ class CMagmaTransformerTest {
         } catch (CompileException e) {
             fail(e);
         }
+    }
+
+    @Test
+    void boolean_children() {
+        var input = new Block.Builder()
+                .add(Boolean.True)
+                .add(Boolean.False)
+                .complete();
+        assertTransforms(input, value -> {
+            try {
+                var list = value.apply(Attribute.Type.Children)
+                        .asStreamOfNodes1()
+                        .foldRight(new JavaList<Node>(), JavaList::add);
+                return list.first().filter(first -> first.is(Node.Type.Integer)).isPresent() &&
+                       list.last().filter(last -> last.is(Node.Type.Integer)).isPresent();
+            } catch (StreamException e) {
+                return false;
+            }
+        });
     }
 
     @Test

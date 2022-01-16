@@ -14,4 +14,8 @@ public class AttributeException extends CompileException {
     public AttributeException(Attribute.Group group) {
         this("Unknown attribute group: " + group);
     }
+
+    public AttributeException(Exception cause) {
+        super(cause);
+    }
 }
