@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.Stream;
 import com.meti.collect.StreamException;
 import com.meti.collect.Streams;
 import com.meti.compile.attribute.Attribute;
@@ -7,7 +8,9 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
-public record CMagmaTransformer() {
+public abstract class AbstractTransformer {
+    protected abstract Stream<Transformer> stream(Node node);
+
     Node transformAST(Node node) throws CompileException {
         var withNodeGroup = transformNodeGroup(node);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
@@ -40,10 +43,7 @@ public record CMagmaTransformer() {
 
     private Node transformNode(Node node) throws CompileException {
         try {
-            return Streams.apply(
-                    new BooleanTransformer(node),
-                    new BlockTransformer(node),
-                    new FunctionTransformer(node))
+            return stream(node)
                     .map(Transformer::transform)
                     .flatMap(Streams::optionally)
                     .first()
@@ -73,7 +73,7 @@ public record CMagmaTransformer() {
         try {
             return current.with(type, current.apply(type)
                     .asStreamOfNodes1()
-                    .map(CMagmaTransformer.this::transformAST)
+                    .map(AbstractTransformer.this::transformAST)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete());
         } catch (StreamException e) {

@@ -21,7 +21,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class CMagmaTransformerTest {
+class CMagmaModifierTest {
     @Test
     void boolean_child() {
         assertTransforms(new Return(Boolean.False), node -> node.apply(Attribute.Type.Value)
@@ -55,7 +55,7 @@ class CMagmaTransformerTest {
 
     private void assertTransforms(Node input, F1<Node, java.lang.Boolean, ?> predicate) {
         try {
-            var transformed = new CMagmaTransformer().transformAST(input);
+            var transformed = new CMagmaModifier().transformAST(input);
             var state = predicate.apply(transformed);
             assertTrue(state);
         } catch (Exception e) {
