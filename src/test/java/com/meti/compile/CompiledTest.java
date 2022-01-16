@@ -20,7 +20,7 @@ public class CompiledTest {
 
             var separator = actual.indexOf("#define");
             var toSplit = actual.indexOf('\n', separator);
-            var content = actual.substring(toSplit + 1, actual.length() - "#endif\n".length());
+            var content = actual.substring(toSplit + 1, actual.length() - "\n#endif\n".length());
             assertEquals(output, content);
         } catch (CompileException e) {
             fail(e);
