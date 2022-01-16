@@ -26,20 +26,40 @@ public abstract class AbstractTransformer {
     }
 
     private Node transformDeclaration(Node oldIdentity) throws CompileException {
-        Node newIdentity;
         if (oldIdentity.is(Node.Type.ValuedField)) {
             var withType = transformTypeAttribute(oldIdentity, Attribute.Type.Type);
-            newIdentity = transformNodeAttribute(withType, Attribute.Type.Value);
+            return transformNodeAttribute(withType, Attribute.Type.Value);
+        } else if (oldIdentity.is(Node.Type.EmptyField)) {
+            return transformTypeAttribute(oldIdentity, Attribute.Type.Type);
         } else {
-            newIdentity = oldIdentity;
+            return oldIdentity;
         }
-        return newIdentity;
     }
 
     private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
         try {
             return withNodesGroup.apply1(Attribute.Group.Declaration)
                     .foldRight(withNodesGroup, this::transformDeclarationGroup);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node transformDeclarationsGroup(Node withDeclarationGroup) throws CompileException {
+        try {
+            return withDeclarationGroup.apply1(Attribute.Group.Declarations)
+                    .foldRight(withDeclarationGroup, this::transformDeclarationsGroup);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
+        try {
+            return node1.with(type, node1.apply(type).asStreamOfNodes1()
+                    .map(AbstractTransformer.this::transformDeclaration)
+                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .complete());
         } catch (StreamException e) {
             throw new CompileException(e);
         }
@@ -53,28 +73,8 @@ public abstract class AbstractTransformer {
         return transformNode(withDeclarationsGroup);
     }
 
-    private Node transformDeclarationsGroup(Node withDeclarationGroup) throws CompileException {
-        try {
-            return withDeclarationGroup.apply1(Attribute.Group.Declarations)
-                    .foldRight(withDeclarationGroup, this::transformDeclarationsGroup);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
     private Node transformNode(Node node) throws CompileException {
         return transformUsingStreams(node, streamNodeTransformers(node));
-    }
-
-    private Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
-        try {
-            return node1.with(type, node1.apply(type).asStreamOfNodes1()
-                    .map(AbstractTransformer.this::transformDeclaration)
-                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
-                    .complete());
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
     }
 
     private Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
