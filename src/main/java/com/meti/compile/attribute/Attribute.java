@@ -1,12 +1,11 @@
 package com.meti.compile.attribute;
 
-import com.meti.collect.JavaList;
 import com.meti.compile.common.EmptyField;
+import com.meti.compile.common.Field;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 import com.meti.source.Packaging;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface Attribute {
@@ -26,16 +25,17 @@ public interface Attribute {
         throw new AttributeException("Not a package.");
     }
 
-    default Stream<EmptyField.Flag> asStreamOfFlags() throws AttributeException {
-        throw new AttributeException("Not a ist of flags.");
-    }
+    @Deprecated
+    Stream<EmptyField.Flag> asStreamOfFlags() throws AttributeException;
 
-    com.meti.collect.Stream<Node> asStreamOfNodes1() throws AttributeException;
+    com.meti.collect.Stream<Field.Flag> asStreamOfFlags1() throws AttributeException;
 
     @Deprecated
     default Stream<Node> asStreamOfNodes() throws AttributeException {
         throw new AttributeException("Not a list of nodes.");
     }
+
+    com.meti.collect.Stream<Node> asStreamOfNodes1() throws AttributeException;
 
     default Text asText() throws AttributeException {
         throw new AttributeException("Not input.");

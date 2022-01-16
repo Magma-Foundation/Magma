@@ -8,6 +8,22 @@ import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
 public record CMagmaTransformer() {
+    Node transformAST(Node node) throws CompileException {
+        var withNodeGroup = transformNodeGroup(node);
+        var withNodesGroup = transformNodesGroup(withNodeGroup);
+        var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
+        return transformNode(withDeclarationGroup);
+    }
+
+    private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
+        try {
+            return withNodesGroup.apply1(Attribute.Group.Declaration)
+                    .foldRight(withNodesGroup, this::transformDeclarationGroup);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
     private Node transformDeclarationGroup(Node root, Attribute.Type type) throws CompileException {
         var oldIdentity = root.apply(type).asNode();
         if (oldIdentity.is(Node.Type.ValuedField)) {
@@ -22,27 +38,12 @@ public record CMagmaTransformer() {
         }
     }
 
-    private Node transformDeclarationGroup(Node withNodesGroup) throws CompileException {
-        try {
-            return withNodesGroup.apply1(Attribute.Group.Declaration)
-                    .foldRight(withNodesGroup, this::transformDeclarationGroup);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    Node transformAST(Node node) throws CompileException {
-        var withNodeGroup = transformNodeGroup(node);
-        var withNodesGroup = transformNodesGroup(withNodeGroup);
-        var withDeclarationGroup = transformDeclarationGroup(withNodesGroup);
-        return transformNode(withDeclarationGroup);
-    }
-
     private Node transformNode(Node node) throws CompileException {
         try {
             return Streams.apply(
                     new BooleanTransformer(node),
-                    new BlockTransformer(node))
+                    new BlockTransformer(node),
+                    new FunctionTransformer(node))
                     .map(Transformer::transform)
                     .flatMap(Streams::optionally)
                     .first()

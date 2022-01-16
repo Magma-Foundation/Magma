@@ -28,6 +28,10 @@ public class JavaList<T> {
         return this;
     }
 
+    public boolean contains(T element) {
+        return value.contains(element);
+    }
+
     public Option<T> first() {
         return value.isEmpty() ? new None<>() : new Some<>(value.get(0));
     }
