@@ -38,7 +38,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
                     .map(resolver::transformNodeAST)
                     .map(modifier::transformNodeAST)
                     .map(formatter::apply)
-                    .<Divider<?>, CompileException>foldRight(divider, Divider::divide);
+                    .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {
@@ -60,7 +60,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         return oldNodes;
     }
 
-    private String renderDivision(Divider<?> divider, CFormat format) throws CollectionException {
+    private String renderDivision(Divider divider, CFormat format) throws CollectionException {
         return divider.apply(format)
                 .map(CRenderer::new)
                 .map(CRenderer::render)

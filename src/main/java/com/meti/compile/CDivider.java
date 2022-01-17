@@ -4,6 +4,7 @@ import com.meti.collect.*;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.clang.CFormat;
+import com.meti.compile.common.Abstraction;
 import com.meti.compile.common.Import;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -12,6 +13,8 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 import com.meti.source.Packaging;
+
+import java.util.HashSet;
 
 import static com.meti.compile.clang.CFormat.Header;
 import static com.meti.compile.clang.CFormat.Source;
@@ -30,8 +33,50 @@ public class CDivider extends MappedDivider {
     }
 
     @Override
+    protected Option<JavaList<Node>> decompose(Node node) throws CompileException {
+        if (node.is(Node.Type.Implementation)) {
+            return new Some<>(decomposeImplementation(node));
+        }
+        if (node.is(Node.Type.Cache)) {
+            return new Some<>(decomposeCache(node));
+        }
+        return new None<>();
+    }
+
+    private JavaList<Node> decomposeImplementation(Node node) throws CompileException {
+        try {
+            var identity = node.apply(Attribute.Type.Identity).asNode();
+            var parameters = node.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes1()
+                    .foldRight(new HashSet<Node>(), (nodes, node1) -> {
+                        nodes.add(node1);
+                        return nodes;
+                    });
+            var abstraction = new Abstraction(identity, parameters);
+            return JavaList.apply(abstraction, node);
+        } catch (AttributeException | StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private JavaList<Node> decomposeCache(Node node) throws CompileException {
+        try {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            return node.apply(Attribute.Type.Children)
+                    .asStreamOfNodes1()
+                    .foldRight(new JavaList<Node>(), JavaList::add)
+                    .add(value);
+        } catch (AttributeException | StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    @Override
     protected CFormat apply(Node node) {
-        return node.is(Node.Type.Import) || node.is(Node.Type.Extern) || node.is(Node.Type.Structure)
+        return node.is(Node.Type.Import)
+               || node.is(Node.Type.Extern)
+               || node.is(Node.Type.Structure)
+               || node.is(Node.Type.Abstraction)
                 ? Header
                 : Source;
     }
@@ -48,22 +93,6 @@ public class CDivider extends MappedDivider {
                     .foldRight(new JavaList<>(), JavaList::add);
         }
         return JavaList.apply(new Import(new Packaging(thisPackage.computeName())));
-    }
-
-    @Override
-    protected Option<MappedDivider> decompose(Node node) throws CompileException {
-        if (node.is(Node.Type.Cache)) {
-            try {
-                var value = node.apply(Attribute.Type.Value).asNode();
-                return new Some<>(node.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
-                        .foldRight(this, MappedDivider::divide)
-                        .divide(value));
-            } catch (AttributeException | StreamException e) {
-                throw new CompileException(e);
-            }
-        }
-        return new None<>();
     }
 
     @Override

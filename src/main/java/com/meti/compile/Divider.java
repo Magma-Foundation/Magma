@@ -5,10 +5,10 @@ import com.meti.collect.Stream;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
 
-public interface Divider<T extends Divider<T>> {
+public interface Divider {
     Stream<Node> apply(CFormat format) throws CollectionException;
 
-    T divide(Node node) throws CompileException;
+    Divider divide(Node node) throws CompileException;
 
     Stream<CFormat> stream();
 }

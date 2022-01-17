@@ -2,9 +2,15 @@ package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
+import static com.meti.compile.CompiledTest.assertHeaderCompiles;
 import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
+    @Test
+    void split() {
+        assertHeaderCompiles("def empty() : Void => {}", "void empty();");
+    }
+
     @Test
     void empty() {
         assertSourceCompile("def empty() : Void => {}", "void empty(){}");

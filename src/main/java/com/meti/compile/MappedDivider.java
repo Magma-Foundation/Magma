@@ -5,7 +5,7 @@ import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
 import com.meti.option.Option;
 
-public abstract class MappedDivider implements Divider<MappedDivider> {
+public abstract class MappedDivider implements Divider {
     protected final JavaMap<CFormat, JavaList<Node>> map;
 
     public MappedDivider(JavaMap<CFormat, JavaList<Node>> map) {
@@ -20,21 +20,24 @@ public abstract class MappedDivider implements Divider<MappedDivider> {
     }
 
     @Override
-    public MappedDivider divide(Node node) throws CompileException {
-        return decompose(node).orElseGet(() -> getMappedDivider(node, this));
-    }
-
-    protected abstract Option<MappedDivider> decompose(Node node) throws CompileException;
-
-    private MappedDivider getMappedDivider(Node node, MappedDivider divider) throws CompileException {
+    public Divider divide(Node node) throws CompileException {
         try {
-            var format = divider.apply(node);
-            var withKey = divider.map.ensure(format, () -> divider.generate(format));
-            var withValue = withKey.mapValue(format, value -> divider.modify(format, node, value));
-            return divider.complete(withValue);
+            return decompose(node)
+                    .map(JavaList::stream)
+                    .orElse(Streams.apply(node))
+                    .foldRight(this, MappedDivider::divideImpl);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    protected abstract Option<JavaList<Node>> decompose(Node node) throws CompileException;
+
+    private MappedDivider divideImpl(Node node) throws StreamException {
+        var format = apply(node);
+        var withKey = map.ensure(format, () -> generate(format));
+        var withValue = withKey.mapValue(format, value -> modify(format, node, value));
+        return complete(withValue);
     }
 
     protected abstract CFormat apply(Node node);
