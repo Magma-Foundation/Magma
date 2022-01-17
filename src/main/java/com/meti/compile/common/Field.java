@@ -1,21 +1,21 @@
 package com.meti.compile.common;
 
 import com.meti.collect.JavaList;
+import com.meti.collect.StreamException;
 import com.meti.compile.attribute.*;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class Field implements Node {
-    protected final Set<Flag> flags;
+    protected final JavaList<Flag> flags;
     protected final Text name;
     protected final Node type;
 
-    public Field(Set<Flag> flags, Text name, Node type) {
+    public Field(JavaList<Flag> flags, Text name, Node type) {
         this.flags = flags;
         this.name = name;
         this.type = type;
@@ -66,14 +66,20 @@ public abstract class Field implements Node {
 
     @Override
     public String toString() {
-        var joinedFlags = flags.stream()
-                .map(Flag::toString)
-                .collect(Collectors.joining(",", "[", "]"));
-        return "{" +
-               "\n\t\"flags\":" + joinedFlags +
-               ",\n\t\"name\":" + name +
-               ",\n\t\"type\":" + type +
-               '}';
+        try {
+            var joinedFlags = flags.stream()
+                    .map(Flag::toString)
+                    .foldRight((current, next) -> current + "," + next)
+                    .map(value -> "[" + value + "]")
+                    .orElse("[]");
+            return "{" +
+                   "\n\t\"flags\":" + joinedFlags +
+                   ",\n\t\"name\":" + name +
+                   ",\n\t\"type\":" + type +
+                   '}';
+        } catch (StreamException e) {
+            return "";
+        }
     }
 
     public enum Flag {

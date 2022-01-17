@@ -1,5 +1,6 @@
 package com.meti.compile.clang;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
@@ -25,7 +26,6 @@ import com.meti.option.None;
 import com.meti.option.Option;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,7 @@ public record CRenderer(Node root) {
                     .append(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderFieldWithType(new EmptyField(Collections.emptySet(), name.prepend("*"), child));
+            return renderFieldWithType(new EmptyField(new JavaList<>(), name.prepend("*"), child));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()
@@ -141,7 +141,7 @@ public record CRenderer(Node root) {
     }
 
     private static Text renderType(Node oldParameter) throws CompileException {
-        return renderField(new EmptyField(Collections.emptySet(), new Text(""), oldParameter));
+        return renderField(new EmptyField(new JavaList<>(), new Text(""), oldParameter));
     }
 
     public Text render() throws CompileException {

@@ -12,8 +12,6 @@ import com.meti.compile.node.Primitive;
 import com.meti.compile.node.Text;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,8 +32,8 @@ class FunctionTransformerTest {
     }
 
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(Collections.emptySet(), new Text(name), Primitive.Void);
-        return new Implementation(identity, Collections.emptySet(), value);
+        var identity = new EmptyField(new JavaList<>(), new Text(name), Primitive.Void);
+        return new Implementation(identity, new JavaList<>(), value);
     }
 
     @Test

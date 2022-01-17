@@ -1,18 +1,18 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class ValuedField extends Field {
     private final Node value;
 
-    public ValuedField(Set<Flag> flags, Text name, Node type, Node value) {
+    public ValuedField(JavaList<Flag> flags, Text name, Node type, Node value) {
         super(flags, name, type);
         this.value = value;
     }

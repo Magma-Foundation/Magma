@@ -18,8 +18,6 @@ import com.meti.compile.node.Text;
 import com.meti.core.F1;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class CMagmaModifierTest {
@@ -57,7 +55,7 @@ class CMagmaModifierTest {
 
     @Test
     void boolean_declared() {
-        var oldIdentity = new ValuedField(Collections.emptySet(), new Text("test"), Primitive.Bool, Boolean.True);
+        var oldIdentity = new ValuedField(new JavaList<>(), new Text("test"), Primitive.Bool, Boolean.True);
         assertTransforms(new Declaration(oldIdentity), newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()
@@ -71,8 +69,8 @@ class CMagmaModifierTest {
 
     @Test
     void inner() {
-        var identity = new EmptyField(Collections.emptySet(), new Text("inner"), Primitive.Void);
-        var function = new Implementation(identity, Collections.emptySet(), new Block());
+        var identity = new EmptyField(new JavaList<>(), new Text("inner"), Primitive.Void);
+        var function = new Implementation(identity, new JavaList<>(), new Block());
         var input = new Block(JavaList.apply(function));
         var output = new Cache(new Block(), JavaList.apply(function));
         assertTransforms(input, output);

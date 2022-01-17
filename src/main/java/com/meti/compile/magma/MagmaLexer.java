@@ -1,8 +1,8 @@
 package com.meti.compile.magma;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
-import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.common.EmptyField;
@@ -27,12 +27,11 @@ import com.meti.option.None;
 import com.meti.option.Option;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record MagmaLexer(Text text) {
-    static Node lexNode(Text text) throws LexException {
+    static Node lexNode(Text text) throws CompileException {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
         var lexers = List.of(
@@ -64,7 +63,7 @@ public record MagmaLexer(Text text) {
         return current.orElseThrow(() -> new LexException("Unknown input: " + text.computeTrimmed()));
     }
 
-    private static Node lexType(Text text) throws LexException {
+    private static Node lexType(Text text) throws CompileException {
         List<Lexer> lexers = List.of(
                 new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
@@ -83,13 +82,13 @@ public record MagmaLexer(Text text) {
         return found.orElseThrow(() -> new LexException("Unknown type: \"" + text.compute() + "\""));
     }
 
-    static Node lexTypeAST(Text text) throws LexException, AttributeException {
+    static Node lexTypeAST(Text text) throws CompileException {
         var root = lexType(text);
         var withType = withType(root);
         return withTypes(withType);
     }
 
-    private static Node withType(Node root) throws AttributeException, LexException {
+    private static Node withType(Node root) throws CompileException {
         var types = root.apply(Attribute.Group.Type).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
@@ -99,7 +98,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private static Node withTypes(Node root) throws AttributeException, LexException {
+    private static Node withTypes(Node root) throws CompileException {
         var types = root.apply(Attribute.Group.Types).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
@@ -115,7 +114,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private Node attachDeclaration(Node node) throws AttributeException, LexException {
+    private Node attachDeclaration(Node node) throws CompileException {
         var types = node.apply(Attribute.Group.Declaration).collect(Collectors.toList());
         var current = node;
         for (Attribute.Type type : types) {
@@ -150,7 +149,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private Node attachDeclarations(Node withFields) throws AttributeException, LexException {
+    private Node attachDeclarations(Node withFields) throws CompileException {
         var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
         var current = withFields;
         for (Attribute.Type type : collect) {
@@ -165,7 +164,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private Node attachNode(Node root) throws AttributeException, LexException {
+    private Node attachNode(Node root) throws CompileException {
         var types = root.apply(Attribute.Group.Node).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
@@ -176,7 +175,7 @@ public record MagmaLexer(Text text) {
         return current;
     }
 
-    private Node attachNodes(Node root) throws AttributeException, LexException {
+    private Node attachNodes(Node root) throws CompileException {
         var types = root.apply(Attribute.Group.Nodes).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
@@ -194,16 +193,16 @@ public record MagmaLexer(Text text) {
         return lexNodeAST(text);
     }
 
-    private Node lexField(Text text) throws LexException, AttributeException {
+    private Node lexField(Text text) throws CompileException {
         var separator = text.firstIndexOfChar(':')
                 .orElseThrow(() -> new LexException("Invalid field: " + text.computeTrimmed()));
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexTypeAST(typeText);
-        return new EmptyField(Collections.emptySet(), name, type);
+        return new EmptyField(new JavaList<>(), name, type);
     }
 
-    private Node lexNodeAST(Text text) throws LexException, AttributeException {
+    private Node lexNodeAST(Text text) throws CompileException {
         var node = lexNode(text);
         var withFields = attachDeclaration(node);
         var withDeclarations = attachDeclarations(withFields);

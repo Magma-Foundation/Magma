@@ -1,18 +1,18 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public final class Implementation extends Function {
     private final Node body;
 
-    public Implementation(Node identity, Set<Node> parameters, Node body) {
+    public Implementation(Node identity, JavaList<Node> parameters, Node body) {
         super(identity, parameters);
         this.body = body;
     }
@@ -45,7 +45,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    protected Node complete(Node node, Set<Node> parameters) {
+    protected Node complete(Node node, JavaList<Node> parameters) {
         return new Implementation(node, parameters, body);
     }
 

@@ -14,8 +14,6 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 import com.meti.source.Packaging;
 
-import java.util.HashSet;
-
 import static com.meti.compile.clang.CFormat.Header;
 import static com.meti.compile.clang.CFormat.Source;
 
@@ -48,10 +46,7 @@ public class CDivider extends MappedDivider {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var parameters = node.apply(Attribute.Type.Parameters)
                     .asStreamOfNodes1()
-                    .foldRight(new HashSet<Node>(), (nodes, node1) -> {
-                        nodes.add(node1);
-                        return nodes;
-                    });
+                    .foldRight(new JavaList<Node>(), JavaList::add);
             var abstraction = new Abstraction(identity, parameters);
             return JavaList.apply(abstraction, node);
         } catch (AttributeException | StreamException e) {

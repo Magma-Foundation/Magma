@@ -26,16 +26,22 @@ public interface Attribute {
     }
 
     @Deprecated
-    Stream<EmptyField.Flag> asStreamOfFlags() throws AttributeException;
+    default Stream<EmptyField.Flag> asStreamOfFlags() {
+        throw new UnsupportedOperationException();
+    }
 
-    com.meti.collect.Stream<Field.Flag> asStreamOfFlags1() throws AttributeException;
+    default com.meti.collect.Stream<Field.Flag> asStreamOfFlags1() throws AttributeException {
+        throw new UnsupportedOperationException("Not a list of flags.");
+    }
 
     @Deprecated
     default Stream<Node> asStreamOfNodes() throws AttributeException {
         throw new AttributeException("Not a list of nodes.");
     }
 
-    com.meti.collect.Stream<Node> asStreamOfNodes1() throws AttributeException;
+    default com.meti.collect.Stream<Node> asStreamOfNodes1() throws AttributeException {
+        throw new AttributeException("Not a stream of nodes.");
+    }
 
     default Text asText() throws AttributeException {
         throw new AttributeException("Not input.");

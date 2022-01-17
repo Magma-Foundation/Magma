@@ -1,12 +1,11 @@
 package com.meti.compile.common;
 
+import com.meti.collect.JavaList;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
-import java.util.Set;
-
 public class EmptyField extends Field {
-    public EmptyField(Set<Flag> flags, Text name, Node type) {
+    public EmptyField(JavaList<Flag> flags, Text name, Node type) {
         super(flags, name, type);
     }
 
