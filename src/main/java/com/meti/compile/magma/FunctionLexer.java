@@ -22,6 +22,13 @@ public record FunctionLexer(Text text) implements Lexer {
         });
     }
 
+    @Override
+    public Option<Node> lex() throws CompileException {
+        return text.firstIndexOfChar('(')
+                .filter(value -> text.containsChar(')'))
+                .flatMap(this::extract);
+    }
+
     private JavaList<Field.Flag> extractFlags(Text flagString) throws CompileException {
         try {
             return Streams.apply(flagString.computeTrimmed()
@@ -66,16 +73,13 @@ public record FunctionLexer(Text text) implements Lexer {
         }
     }
 
-    @Override
-    public Option<Node> lex() throws CompileException {
-        return text.firstIndexOfChar('(').flatMap(paramStart -> {
-            var keys = text.slice(0, paramStart);
-            return keys.lastIndexOfChar(' ')
-                    .flatMap(space -> extractWithSeparator(paramStart, keys, space))
-                    .or(() -> paramStart == 0
-                            ? new Some<>(extractFunction(paramStart, new JavaList<>(), new Text("")))
-                            : new None<>());
-        });
+    private Option<Node> extract(Integer paramStart) throws CompileException {
+        var keys = text.slice(0, paramStart);
+        return keys.lastIndexOfChar(' ')
+                .flatMap(space -> extractWithSeparator(paramStart, keys, space))
+                .or(() -> paramStart == 0
+                        ? new Some<>(extractFunction(paramStart, new JavaList<>(), new Text("")))
+                        : new None<>());
     }
 
     private int locateParameterEnd(int paramStart) {

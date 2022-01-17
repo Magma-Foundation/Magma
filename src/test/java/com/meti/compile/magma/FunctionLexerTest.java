@@ -10,8 +10,15 @@ import com.meti.compile.node.Text;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class FunctionLexerTest {
+    @Test
+    void invalid() throws CompileException {
+        assertFalse(new FunctionLexer(new Text("test(() => {})"))
+                .lex()
+                .isPresent());
+    }
 
     @Test
     void lambda() throws CompileException {
