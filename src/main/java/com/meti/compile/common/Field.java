@@ -44,13 +44,16 @@ public abstract class Field implements Node {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        if (type == Attribute.Type.Name) {
+            return complete(attribute.asText(), this.type);
+        }
         if (type == Attribute.Type.Type) {
-            return complete(attribute.asNode());
+            return complete(name, attribute.asNode());
         }
         return this;
     }
 
-    protected abstract Field complete(Node type) throws AttributeException;
+    protected abstract Field complete(Text name, Node type) throws AttributeException;
 
     @Override
     public int hashCode() {

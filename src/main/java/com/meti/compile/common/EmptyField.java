@@ -10,7 +10,7 @@ public class EmptyField extends Field {
     }
 
     @Override
-    protected Field complete(Node type) {
+    protected Field complete(Text name, Node type) {
         return new EmptyField(flags, name, type);
     }
 
