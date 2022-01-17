@@ -9,7 +9,7 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
-public abstract class AbstractTransformationStage {
+public abstract class AbstractTransformationStage extends AbstractStage {
     protected Stream<Transformer> streamNodeTransformers(Node node) {
         return new EmptyStream<>();
     }
