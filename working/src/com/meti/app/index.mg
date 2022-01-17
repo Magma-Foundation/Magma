@@ -26,14 +26,10 @@ def assertTrue(value : Bool) => {
 }
 
 def main() => {
-    def lambda0() => {
-        def lambda1() => {
+    describe("The assertions", () => {
+        it("should assert things to be true.", () => {
             assertTrue(true);
-        }
-
-        it("should assert things to be true.", lambda1);
-    }
-
-    describe("The assertions", lambda0);
+        });
+    });
     return 0;
 }
