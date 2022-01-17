@@ -5,6 +5,7 @@ import com.meti.compile.attribute.*;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,18 +14,6 @@ public abstract class Field implements Node {
     protected final Set<Flag> flags;
     protected final Text name;
     protected final Node type;
-
-    @Override
-    public String toString() {
-        var joinedFlags = flags.stream()
-                .map(Flag::toString)
-                .collect(Collectors.joining(",", "[", "]"));
-        return "{" +
-               "\n\t\"flags\":" + joinedFlags +
-               ",\n\t\"name\":" + name +
-               ",\n\t\"type\":" + type +
-               '}';
-    }
 
     public Field(Set<Flag> flags, Text name, Node type) {
         this.flags = flags;
@@ -62,6 +51,30 @@ public abstract class Field implements Node {
     }
 
     protected abstract Field complete(Node type) throws AttributeException;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flags, name, type);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Field field)) return false;
+        return Objects.equals(flags, field.flags) && Objects.equals(name, field.name) && Objects.equals(type, field.type);
+    }
+
+    @Override
+    public String toString() {
+        var joinedFlags = flags.stream()
+                .map(Flag::toString)
+                .collect(Collectors.joining(",", "[", "]"));
+        return "{" +
+               "\n\t\"flags\":" + joinedFlags +
+               ",\n\t\"name\":" + name +
+               ",\n\t\"type\":" + type +
+               '}';
+    }
 
     public enum Flag {
         Extern,

@@ -4,6 +4,8 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import java.util.Objects;
+
 public final class Text {
     public final String trimmedValue;
     private final String value;
@@ -74,6 +76,23 @@ public final class Text {
                 : new Some<>(index);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(trimmedValue, value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Text text)) return false;
+        return Objects.equals(trimmedValue, text.trimmedValue) && Objects.equals(value, text.value);
+    }
+
+    @Override
+    public String toString() {
+        return "\"" + value + "\"";
+    }
+
     public boolean isEmpty() {
         return trimmedValue.length() == 0;
     }
@@ -119,10 +138,5 @@ public final class Text {
 
     public boolean startsWithSlice(String slice) {
         return trimmedValue.startsWith(slice);
-    }
-
-    @Override
-    public String toString() {
-        return "\"" + value + "\"";
     }
 }
