@@ -36,8 +36,8 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
             var division = new JavaList<>(lexed)
                     .stream()
                     .map(resolver::transformNodeAST)
-                    .map(modifier::transformNodeAST)
                     .map(formatter::transformNodeAST)
+                    .map(modifier::transformNodeAST)
                     .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
