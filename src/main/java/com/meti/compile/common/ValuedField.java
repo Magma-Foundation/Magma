@@ -1,13 +1,13 @@
 package com.meti.compile.common;
 
+import com.meti.collect.EmptyStream;
 import com.meti.collect.JavaList;
+import com.meti.collect.Streams;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
-
-import java.util.stream.Stream;
 
 public class ValuedField extends Field {
     private final Node value;
@@ -23,18 +23,18 @@ public class ValuedField extends Field {
     }
 
     @Override
+    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : new EmptyStream<>();
+    }
+
+    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return type == Attribute.Type.Value ? new ValuedField(flags, name, this.type, attribute.asNode()) : super.with(type, attribute);
     }
 
     @Override
-    protected Field complete(Node type) {
-        return new ValuedField(flags, name, type, value);
-    }
-
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node ? Stream.of(Attribute.Type.Value) : Stream.empty();
+    protected Field complete(Text name, Node type) {
+        return new ValuedField(flags, this.name, type, value);
     }
 
     @Override
