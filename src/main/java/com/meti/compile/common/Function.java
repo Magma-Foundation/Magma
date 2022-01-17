@@ -7,6 +7,7 @@ import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,19 @@ public abstract class Function implements Node {
     public Function(Node identity, Set<Node> parameters) {
         this.identity = identity;
         this.parameters = parameters;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identity, parameters);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Function)) return false;
+        Function function = (Function) o;
+        return Objects.equals(identity, function.identity) && Objects.equals(parameters, function.parameters);
     }
 
     @Override

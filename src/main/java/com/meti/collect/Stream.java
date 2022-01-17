@@ -5,13 +5,19 @@ import com.meti.core.F2;
 import com.meti.option.Option;
 
 public interface Stream<T> {
+    default int count() throws StreamException {
+        return foldRight(0, (current, value) -> current + 1);
+    }
+
+    <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E;
+
     Stream<T> filter(F1<T, Boolean, ?> predicate);
 
     Option<T> first() throws StreamException;
 
     <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) throws StreamException;
 
-    <R, E extends Exception> R foldRight(R identity, F2<R, T, R, E> folder) throws StreamException, E;
+    <E extends Exception> Option<T> foldRight(F2<T, T, T, E> folder) throws StreamException, E;
 
     T head() throws StreamException;
 

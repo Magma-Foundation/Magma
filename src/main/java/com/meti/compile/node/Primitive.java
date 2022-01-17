@@ -19,6 +19,11 @@ public enum Primitive implements Node {
     }
 
     @Override
+    public String toString() {
+        return "\"" + name() + "\"";
+    }
+
+    @Override
     @Deprecated
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Stream.empty();

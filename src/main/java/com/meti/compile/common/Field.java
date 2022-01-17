@@ -14,6 +14,18 @@ public abstract class Field implements Node {
     protected final Text name;
     protected final Node type;
 
+    @Override
+    public String toString() {
+        var joinedFlags = flags.stream()
+                .map(Flag::toString)
+                .collect(Collectors.joining(",", "[", "]"));
+        return "{" +
+               "\n\t\"flags\":" + joinedFlags +
+               ",\n\t\"name\":" + name +
+               ",\n\t\"type\":" + type +
+               '}';
+    }
+
     public Field(Set<Flag> flags, Text name, Node type) {
         this.flags = flags;
         this.name = name;

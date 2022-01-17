@@ -6,9 +6,12 @@ import com.meti.option.Some;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class JavaList<T> {
     private final List<T> value;
+
 
     public JavaList() {
         this(new ArrayList<>());
@@ -33,12 +36,36 @@ public class JavaList<T> {
         return this;
     }
 
+    public T apply(int index) {
+        return value.get(index);
+    }
+
     public boolean contains(T element) {
         return value.contains(element);
     }
 
     public Option<T> first() {
         return value.isEmpty() ? new None<>() : new Some<>(value.get(0));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JavaList<?> javaList = (JavaList<?>) o;
+        return Objects.equals(value, javaList.value);
+    }
+
+    @Override
+    public String toString() {
+        return value.stream()
+                .map(Objects::toString)
+                .collect(Collectors.joining(",", "[", "]"));
     }
 
     public JavaList<T> insert(int index, T value) {

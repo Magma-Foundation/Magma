@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CMagmaModifierTest {
     @Test
@@ -29,6 +28,16 @@ class CMagmaModifierTest {
         assertTransforms(new Return(Boolean.False), node -> node.apply(Attribute.Type.Value)
                 .asNode()
                 .is(Node.Type.Integer));
+    }
+
+    private void assertTransforms(Node input, F1<Node, java.lang.Boolean, ?> predicate) {
+        try {
+            var transformed = new CMagmaModifier().transformNodeAST(input);
+            var state = predicate.apply(transformed);
+            assertTrue(state);
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
     @Test
@@ -46,16 +55,6 @@ class CMagmaModifierTest {
         });
     }
 
-    private void assertTransforms(Node input, F1<Node, java.lang.Boolean, ?> predicate) {
-        try {
-            var transformed = new CMagmaModifier().transformNodeAST(input);
-            var state = predicate.apply(transformed);
-            assertTrue(state);
-        } catch (Exception e) {
-            fail(e);
-        }
-    }
-
     @Test
     void boolean_declared() {
         var oldIdentity = new ValuedField(Collections.emptySet(), new Text("test"), Primitive.Bool, Boolean.True);
@@ -71,10 +70,21 @@ class CMagmaModifierTest {
     }
 
     @Test
-    void inner_functions() {
+    void inner() {
         var identity = new EmptyField(Collections.emptySet(), new Text("inner"), Primitive.Void);
         var function = new Implementation(identity, Collections.emptySet(), new Block());
-        assertTransforms(new Block.Builder().add(function).build(), value -> value.is(Node.Type.Cache));
+        var input = new Block(JavaList.apply(function));
+        var output = new Cache(new Block(), JavaList.apply(function));
+        assertTransforms(input, output);
+    }
+
+    private void assertTransforms(Node input, Node output) {
+        try {
+            var actual = new CMagmaModifier().transformNodeAST(input);
+            assertEquals(output, actual);
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
     @Test

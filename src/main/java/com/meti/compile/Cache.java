@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.CollectionException;
 import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
@@ -7,6 +8,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
+import com.meti.core.F1;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,6 +56,14 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
         }
     }
 
+    @Override
+    public String toString() {
+        return "{" +
+               "\n\t\"value\":" + value +
+               ",\n\t\"children\":" + children +
+               '}';
+    }
+
     public record Builder(Node value, JavaList<Node> children) {
         public Builder(Node value) {
             this(value, new JavaList<>());
@@ -71,6 +81,17 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
     public record Prototype<T extends Node.Builder<T>>(T builder, JavaList<Node> items) {
         public Prototype(T builder, Node... items) {
             this(builder, JavaList.apply(items));
+        }
+
+        public static <T extends Node.Builder<T>, E extends Exception> F1<F1<Node, T, E>, Prototype<T>, E> fromCache(Node cache) throws CollectionException, AttributeException {
+            var value = cache.apply(Attribute.Type.Value).asNode();
+            var children = cache.apply(Attribute.Type.Children)
+                    .asStreamOfNodes1()
+                    .foldRight(new JavaList<Node>(), JavaList::add);
+            return builderSupplier -> {
+                var builder = builderSupplier.apply(value);
+                return new Prototype<T>(builder, children);
+            };
         }
 
         public Prototype<T> merge(Prototype<T> other) {

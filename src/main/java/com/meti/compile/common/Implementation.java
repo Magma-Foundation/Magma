@@ -5,6 +5,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.Node;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -14,6 +15,19 @@ public final class Implementation extends Function {
     public Implementation(Node identity, Set<Node> parameters, Node body) {
         super(identity, parameters);
         this.body = body;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Implementation that = (Implementation) o;
+        return super.equals(o) && Objects.equals(body, that.body);
     }
 
     @Override
@@ -45,5 +59,14 @@ public final class Implementation extends Function {
     @Override
     public boolean is(Type type) {
         return type == Type.Implementation;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+               "\n\t\"identity\":" + identity +
+               ",\n\t\"parameters\":" + parameters +
+               ",\n\t\"body\":" + body +
+               '}';
     }
 }

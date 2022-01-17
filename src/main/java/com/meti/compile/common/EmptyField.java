@@ -1,6 +1,5 @@
 package com.meti.compile.common;
 
-import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 

@@ -28,6 +28,17 @@ public abstract class AbstractStream<T> implements Stream<T> {
     }
 
     @Override
+    public <E extends Exception> Option<T> foldRight(F2<T, T, T, E> folder) throws StreamException, E {
+        return first().map(value -> {
+            try {
+                return foldRight(value, folder);
+            } catch (Exception e) {
+                throw new StreamException(e);
+            }
+        });
+    }
+
+    @Override
     public Option<T> first() throws StreamException {
         try {
             return new Some<>(head());

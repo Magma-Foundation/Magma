@@ -9,6 +9,7 @@ import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public record Block(JavaList<Node> children) implements Node {
@@ -34,6 +35,19 @@ public record Block(JavaList<Node> children) implements Node {
         return group == Attribute.Group.Nodes
                 ? Streams.apply(Attribute.Type.Children)
                 : new EmptyStream<>();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            var childrenAsString = children.stream()
+                    .map(Objects::toString)
+                    .foldRight((current, next) -> current + "," + next)
+                    .orElse("");
+            return "{\"children\":[" + childrenAsString + "]}";
+        } catch (StreamException e) {
+            return "";
+        }
     }
 
     @Override
