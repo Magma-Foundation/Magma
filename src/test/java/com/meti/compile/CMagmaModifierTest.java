@@ -88,6 +88,19 @@ class CMagmaModifierTest {
     }
 
     @Test
+    void inner_inner() {
+        var innerIdentity = new EmptyField(Collections.emptySet(), new Text("inner"), Primitive.Void);
+        var inner = new Implementation(innerIdentity, Collections.emptySet(), new Block());
+
+        var outerIdentity = new EmptyField(Collections.emptySet(), new Text("outer"), Primitive.Void);
+        var outer = new Implementation(outerIdentity, Collections.emptySet(), new Block(JavaList.apply(inner)));
+
+        var input = new Block(JavaList.apply(outer));
+        var output = new Cache(new Block(), JavaList.apply(inner, outer));
+        assertTransforms(input, output);
+    }
+
+    @Test
     void line() {
         assertTransforms(new Block.Builder()
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
