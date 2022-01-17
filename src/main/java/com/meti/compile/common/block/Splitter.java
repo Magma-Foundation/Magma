@@ -22,8 +22,8 @@ public record Splitter(Text text) {
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (c == '{' || c == '(') depth++;
+                if (c == '}' || c == ')') depth--;
                 buffer.append(c);
             }
         }
