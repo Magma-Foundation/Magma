@@ -7,11 +7,6 @@ import static com.meti.compile.CompiledTest.assertSourceCompile;
 
 public class FunctionTest {
     @Test
-    void split() {
-        assertHeaderCompiles("def empty() : Void => {}", "void empty();");
-    }
-
-    @Test
     void empty() {
         assertSourceCompile("def empty() : Void => {}", "void empty(){}");
     }
@@ -58,6 +53,11 @@ public class FunctionTest {
     }
 
     @Test
+    void lambda() {
+        assertSourceCompile("() => {}", "void __lambda0__(){}");
+    }
+
+    @Test
     void one_parameter() {
         assertSourceCompile("def one_parameter(value : I16) : Void => {}", "void one_parameter(int value){}");
     }
@@ -65,6 +65,11 @@ public class FunctionTest {
     @Test
     void return_type() {
         assertSourceCompile("def test() : U16 => {return 0;}", "unsigned int test(){return 0;}");
+    }
+
+    @Test
+    void split() {
+        assertHeaderCompiles("def empty() : Void => {}", "void empty();");
     }
 
     @Test
