@@ -23,12 +23,20 @@ public record BlockTransformer(Node root) implements Transformer {
         try {
             return root.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .map(child -> shouldBeAsLine(child) ? new Line(child) : child)
-                    .foldRight(new Block.Builder(), Block.Builder::add)
-                    .complete();
+                    .map(BlockTransformer::transformChild)
+                    .foldRight(new Cache.Prototype<>(new Block.Builder()), Cache.Prototype::merge)
+                    .toCache();
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    private static Cache.Prototype<Block.Builder> transformChild(Node oldChild) {
+        if (!oldChild.is(Node.Type.Implementation)) {
+            var newChild = shouldBeAsLine(oldChild) ? new Line(oldChild) : oldChild;
+            return new Cache.Prototype<>(new Block.Builder().add(newChild));
+        }
+        return new Cache.Prototype<>(new Block.Builder(), oldChild);
     }
 
     private static boolean shouldBeAsLine(Node child) {

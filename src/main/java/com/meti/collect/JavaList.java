@@ -28,6 +28,11 @@ public class JavaList<T> {
         return this;
     }
 
+    public JavaList<T> addAll(JavaList<T> others) {
+        value.addAll(others.value);
+        return this;
+    }
+
     public boolean contains(T element) {
         return value.contains(element);
     }

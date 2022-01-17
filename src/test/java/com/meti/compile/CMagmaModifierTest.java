@@ -3,6 +3,8 @@ package com.meti.compile;
 import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.common.Declaration;
+import com.meti.compile.common.EmptyField;
+import com.meti.compile.common.Implementation;
 import com.meti.compile.common.ValuedField;
 import com.meti.compile.common.binary.BinaryOperation;
 import com.meti.compile.common.block.Block;
@@ -30,20 +32,11 @@ class CMagmaModifierTest {
     }
 
     @Test
-    void boolean_declared() {
-        var oldIdentity = new ValuedField(Collections.emptySet(), new Text("test"), Primitive.Bool, Boolean.True);
-        assertTransforms(new Declaration(oldIdentity), newIdentity -> newIdentity
-                .apply(Attribute.Type.Identity).asNode()
-                .apply(Attribute.Type.Value).asNode()
-                .is(Node.Type.Integer));
-    }
-
-    @Test
     void boolean_children() {
         var input = new Block.Builder()
                 .add(Boolean.True)
                 .add(Boolean.False)
-                .complete();
+                .build();
         assertTransforms(input, value -> {
             var list = value.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
@@ -64,15 +57,31 @@ class CMagmaModifierTest {
     }
 
     @Test
+    void boolean_declared() {
+        var oldIdentity = new ValuedField(Collections.emptySet(), new Text("test"), Primitive.Bool, Boolean.True);
+        assertTransforms(new Declaration(oldIdentity), newIdentity -> newIdentity
+                .apply(Attribute.Type.Identity).asNode()
+                .apply(Attribute.Type.Value).asNode()
+                .is(Node.Type.Integer));
+    }
+
+    @Test
     void booleans() {
         assertTransforms(Boolean.True, value -> value.is(Node.Type.Integer));
+    }
+
+    @Test
+    void inner_functions() {
+        var identity = new EmptyField(Collections.emptySet(), new Text("inner"), Primitive.Void);
+        var function = new Implementation(identity, Collections.emptySet(), new Block());
+        assertTransforms(new Block.Builder().add(function).build(), value -> value.is(Node.Type.Cache));
     }
 
     @Test
     void line() {
         assertTransforms(new Block.Builder()
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
-                .complete(), value -> value.apply(Attribute.Type.Children).asStreamOfNodes1()
+                .build(), value -> value.apply(Attribute.Type.Children).asStreamOfNodes1()
                 .first()
                 .filter(child -> child.is(Node.Type.Line))
                 .isPresent());

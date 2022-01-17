@@ -25,4 +25,10 @@ public interface Node {
         Content,
         Block, Implementation, EmptyField, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, Condition, If, String, Invocation, Line, Implicit, Reference, Declaration, ValuedField, Function, Else, Binary, Cache, Return
     }
+
+    interface Builder<T extends Builder<T>> {
+        Node build();
+
+        T merge(T other);
+    }
 }

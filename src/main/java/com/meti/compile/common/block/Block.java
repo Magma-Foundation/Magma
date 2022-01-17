@@ -12,6 +12,10 @@ import com.meti.compile.node.Node;
 import java.util.stream.Stream;
 
 public record Block(JavaList<Node> children) implements Node {
+    public Block() {
+        this(new JavaList<>());
+    }
+
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Children) return new NodesAttribute1(children);
@@ -42,13 +46,13 @@ public record Block(JavaList<Node> children) implements Node {
         try {
             return attribute.asStreamOfNodes1()
                     .foldRight(new Builder(), Builder::add)
-                    .complete();
+                    .build();
         } catch (StreamException e) {
             throw new AttributeException(e);
         }
     }
 
-    public record Builder(JavaList<Node> children) {
+    public record Builder(JavaList<Node> children) implements Node.Builder<Builder> {
         public Builder() {
             this(new JavaList<>());
         }
@@ -57,8 +61,14 @@ public record Block(JavaList<Node> children) implements Node {
             return new Builder(children.add(child));
         }
 
-        public Node complete() {
+        @Override
+        public Node build() {
             return new Block(children());
+        }
+
+        @Override
+        public Builder merge(Builder other) {
+            return new Builder(children.addAll(other.children));
         }
     }
 }
