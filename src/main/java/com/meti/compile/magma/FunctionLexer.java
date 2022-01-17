@@ -15,26 +15,16 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 public record FunctionLexer(Text text) implements Lexer {
-    @Override
-    public Option<Node> lex() throws CompileException {
-        return text.firstIndexOfChar('(').flatMap(paramStart -> {
-            var keys = text.slice(0, paramStart);
-            return keys.lastIndexOfChar(' ').flatMap(space -> {
-                var flags = extractFlags(keys, space);
-                if (flags.contains(Field.Flag.Def)) {
-                    var function = extractFunction(paramStart, keys, space, flags);
-                    return new Some<>(function);
-                } else {
-                    return new None<>();
-                }
-            });
+    private Option<Function> attachValue(EmptyField identity, JavaList<Node> parameters, Option<Integer> valueSeparator) {
+        return valueSeparator.map(separator -> {
+            var value = new Content(text.slice(separator + 2));
+            return new Implementation(identity, parameters, value);
         });
     }
 
-    private JavaList<Field.Flag> extractFlags(Text keys, Integer space) throws CompileException {
+    private JavaList<Field.Flag> extractFlags(Text flagString) throws CompileException {
         try {
-            return Streams.apply(keys.slice(0, space)
-                    .computeTrimmed()
+            return Streams.apply(flagString.computeTrimmed()
                     .split(" "))
                     .filter(value -> !value.isBlank())
                     .map(String::toUpperCase)
@@ -45,9 +35,8 @@ public record FunctionLexer(Text text) implements Lexer {
         }
     }
 
-    private Function extractFunction(int paramStart, Text keys, Integer space, JavaList<Field.Flag> flags) throws CompileException {
+    private Function extractFunction(int paramStart, JavaList<Field.Flag> flags, Text name) throws CompileException {
         try {
-            var name = keys.slice(space + 1);
             int paramEnd = locateParameterEnd(paramStart);
             var parameters = splitParameters(paramStart, paramEnd);
             var valueSeparator = text.firstIndexOfSlice("=>", paramEnd);
@@ -60,9 +49,31 @@ public record FunctionLexer(Text text) implements Lexer {
         }
     }
 
-    private Stream<Field.Flag> validateFlag(String flagString) {
-        return Streams.apply(Field.Flag.values())
-                .filter(flag -> flag.name().equalsIgnoreCase(flagString));
+    private Node extractReturnType(int paramEnd, Option<Integer> valueSeparator) {
+        return text.firstIndexOfCharWithOffset(':', paramEnd)
+                .filter(value -> value < valueSeparator.orElse(text.size()))
+                .map(value -> sliceToContent(value + 1, valueSeparator))
+                .orElse(ImplicitType.ImplicitType_);
+    }
+
+    private Option<Node> extractWithSeparator(Integer paramStart, Text keys, Integer space) throws CompileException {
+        var flags = extractFlags(keys.slice(0, space));
+        if (flags.contains(Field.Flag.Def)) {
+            var function = extractFunction(paramStart, flags, keys.slice(space + 1));
+            return new Some<>(function);
+        } else {
+            return new None<>();
+        }
+    }
+
+    @Override
+    public Option<Node> lex() throws CompileException {
+        return text.firstIndexOfChar('(').map(paramStart -> {
+            var keys = text.slice(0, paramStart);
+            return keys.lastIndexOfChar(' ')
+                    .flatMap(space -> extractWithSeparator(paramStart, keys, space))
+                    .orElseGet(() -> extractFunction(paramStart, new JavaList<>(), new Text("")));
+        });
     }
 
     private int locateParameterEnd(Integer paramStart) {
@@ -80,32 +91,23 @@ public record FunctionLexer(Text text) implements Lexer {
         return paramEnd;
     }
 
+    private Node sliceToContent(int start, Option<Integer> terminus) {
+        var end = terminus.orElse(text.size());
+        var slice = text.slice(start, end);
+        return new Content(slice);
+    }
+
     private JavaList<Node> splitParameters(Integer paramStart, int paramEnd) throws com.meti.collect.StreamException {
         return Streams.apply(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                 .split(","))
                 .filter(value -> !value.isBlank())
                 .map(Text::new)
                 .map(Content::new)
-                .foldRight(new JavaList<Node>(), JavaList::add);
+                .foldRight(new JavaList<>(), JavaList::add);
     }
 
-    private Node extractReturnType(int paramEnd, Option<Integer> valueSeparator) {
-        return text.firstIndexOfCharWithOffset(':', paramEnd)
-                .filter(value -> value < valueSeparator.orElse(text.size()))
-                .map(value -> sliceToContent(value + 1, valueSeparator))
-                .orElse(new ImplicitType());
-    }
-
-    private Option<Function> attachValue(EmptyField identity, JavaList<Node> parameters, Option<Integer> valueSeparator) {
-        return valueSeparator.map(separator -> {
-            var value = new Content(text.slice(separator + 2));
-            return new Implementation(identity, parameters, value);
-        });
-    }
-
-    private Node sliceToContent(int start, Option<Integer> terminus) {
-        var end = terminus.orElse(text.size());
-        var slice = text.slice(start, end);
-        return new Content(slice);
+    private Stream<Field.Flag> validateFlag(String flagString) {
+        return Streams.apply(Field.Flag.values())
+                .filter(flag -> flag.name().equalsIgnoreCase(flagString));
     }
 }

@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EmptyNode implements Node {
+    public static final EmptyNode EmptyNode_ = new EmptyNode();
+
+    private EmptyNode() {
+    }
+
     @Override
     @Deprecated
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {

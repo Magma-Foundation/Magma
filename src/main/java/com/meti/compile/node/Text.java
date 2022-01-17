@@ -85,7 +85,7 @@ public final class Text {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Text text)) return false;
-        return Objects.equals(trimmedValue, text.trimmedValue) && Objects.equals(value, text.value);
+        return Objects.equals(trimmedValue, text.trimmedValue);
     }
 
     @Override

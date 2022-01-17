@@ -23,7 +23,7 @@ class FunctionTransformerTest {
         var cache = new Cache(new Block(), JavaList.apply(child, parent));
         var grandParent = createFunction("grandParent", cache);
 
-        var output = new FunctionTransformer(grandParent).transform().orElse(new EmptyNode());
+        var output = new FunctionTransformer(grandParent).transform().orElse(EmptyNode.EmptyNode_);
         var outputCache = output.apply(Attribute.Type.Children).asStreamOfNodes1()
                 .foldRight(new JavaList<Node>(), JavaList::add);
 
@@ -40,7 +40,7 @@ class FunctionTransformerTest {
     void inner() throws CompileException {
         var inner = createFunction("inner", new Block());
         var outer = createFunction("outer", new Cache(new Block(), JavaList.apply(inner)));
-        var output = new FunctionTransformer(outer).transform().orElse(new EmptyNode());
+        var output = new FunctionTransformer(outer).transform().orElse(EmptyNode.EmptyNode_);
         assertTrue(output.is(Node.Type.Cache));
     }
 }

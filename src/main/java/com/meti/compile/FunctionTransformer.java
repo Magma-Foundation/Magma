@@ -16,7 +16,7 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
     @Override
     public Option<Node> transform() throws CompileException {
         if (oldNode.is(Node.Type.Abstraction)) {
-            return new Some<>(isExternal() ? new EmptyNode() : oldNode);
+            return new Some<>(isExternal() ? EmptyNode.EmptyNode_ : oldNode);
         }
         if (oldNode.is(Node.Type.Implementation)) {
             var function = transformImplementation();

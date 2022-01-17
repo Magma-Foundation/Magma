@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CMagmaModifierTest {
     @Test
     void boolean_child() {
-        assertTransforms(new Return(Boolean.False), node -> node.apply(Attribute.Type.Value)
+        assertTransforms(new Return(Boolean.False), (F1<Node, java.lang.Boolean, ?>) node -> node.apply(Attribute.Type.Value)
                 .asNode()
                 .is(Node.Type.Integer));
     }
@@ -44,7 +44,7 @@ class CMagmaModifierTest {
                 .add(Boolean.True)
                 .add(Boolean.False)
                 .build();
-        assertTransforms(input, value -> {
+        assertTransforms(input, (F1<Node, java.lang.Boolean, ?>) value -> {
             var list = value.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
                     .foldRight(new JavaList<Node>(), JavaList::add);
@@ -56,7 +56,7 @@ class CMagmaModifierTest {
     @Test
     void boolean_declared() {
         var oldIdentity = new ValuedField(new JavaList<>(), new Text("test"), Primitive.Bool, Boolean.True);
-        assertTransforms(new Declaration(oldIdentity), newIdentity -> newIdentity
+        assertTransforms(new Declaration(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()
                 .is(Node.Type.Integer));
@@ -64,7 +64,7 @@ class CMagmaModifierTest {
 
     @Test
     void booleans() {
-        assertTransforms(Boolean.True, value -> value.is(Node.Type.Integer));
+        assertTransforms(Boolean.True, (F1<Node, java.lang.Boolean, ?>) value -> value.is(Node.Type.Integer));
     }
 
     @Test
@@ -89,7 +89,7 @@ class CMagmaModifierTest {
     void line() {
         assertTransforms(new Block.Builder()
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
-                .build(), value -> value.apply(Attribute.Type.Children).asStreamOfNodes1()
+                .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Type.Children).asStreamOfNodes1()
                 .first()
                 .filter(child -> child.is(Node.Type.Line))
                 .isPresent());

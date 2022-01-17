@@ -1,5 +1,6 @@
 package com.meti.compile.node;
 
+import com.meti.collect.EmptyStream;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 
@@ -10,10 +11,13 @@ public interface Node {
         throw new AttributeException("Node had no attributes.");
     }
 
-    @Deprecated
-    Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException;
+    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return Stream.empty();
+    }
 
-    com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException;
+    default com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+        return new EmptyStream<>();
+    }
 
     boolean is(Type type);
 
