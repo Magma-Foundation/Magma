@@ -18,7 +18,7 @@ public interface Attribute {
     }
 
     default Node asNode() throws AttributeException {
-        throw new AttributeException("Not a node.");
+        throw new AttributeException("Not a oldNode.");
     }
 
     default Packaging asPackaging() throws AttributeException {

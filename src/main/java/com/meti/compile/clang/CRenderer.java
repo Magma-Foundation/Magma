@@ -117,7 +117,7 @@ public record CRenderer(Node root) {
             }
         }
 
-        return current.orElseThrow(() -> new CompileException("Unable to render node: " + node));
+        return current.orElseThrow(() -> new CompileException("Unable to render oldNode: " + node));
     }
 
     public static Node renderSubFields(Node root) throws CompileException {
@@ -158,7 +158,7 @@ public record CRenderer(Node root) {
             var current = withDeclarationCollections(withNodeCollections);
             return renderNode(current);
         } catch (CompileException e) {
-            throw new CompileException("Failed to render AST of node: " + root, e);
+            throw new CompileException("Failed to render AST of oldNode: " + root, e);
         }
     }
 

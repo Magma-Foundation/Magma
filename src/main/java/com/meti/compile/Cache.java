@@ -54,7 +54,21 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
         }
     }
 
-    public record Prototype<T extends Builder<T>>(T builder, JavaList<Node> items) {
+    public record Builder(Node value, JavaList<Node> children) {
+        public Builder(Node value) {
+            this(value, new JavaList<>());
+        }
+
+        Builder add(Node child) {
+            return new Builder(value, children.add(child));
+        }
+
+        Node build() {
+            return new Cache(value, children);
+        }
+    }
+
+    public record Prototype<T extends Node.Builder<T>>(T builder, JavaList<Node> items) {
         public Prototype(T builder, Node... items) {
             this(builder, JavaList.apply(items));
         }
