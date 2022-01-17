@@ -29,8 +29,7 @@ public abstract class Function implements Node {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Function)) return false;
-        Function function = (Function) o;
+        if (!(o instanceof Function function)) return false;
         return Objects.equals(identity, function.identity) && Objects.equals(parameters, function.parameters);
     }
 
