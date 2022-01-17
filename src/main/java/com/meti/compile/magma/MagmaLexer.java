@@ -120,7 +120,7 @@ public record MagmaLexer(Text text) {
         for (Attribute.Type type : types) {
             var oldField = current.apply(type).asNode();
             Node newField;
-            if (oldField.is(Node.Type.EmptyField) || oldField.is(Node.Type.ValuedField)) {
+            if (oldField.is(Node.Type.Declaration) || oldField.is(Node.Type.Initialization)) {
                 var oldType = oldField.apply(Attribute.Type.Type).asNode();
                 Node newType;
                 if (oldType.is(Node.Type.Content)) {
@@ -132,7 +132,7 @@ public record MagmaLexer(Text text) {
 
                 var withType = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
                 Node withValue;
-                if (withType.is(Node.Type.ValuedField)) {
+                if (withType.is(Node.Type.Initialization)) {
                     var valueText = withType.apply(Attribute.Type.Value).asNode().apply(Attribute.Type.Value).asText();
                     var value = lexNodeAST(valueText);
                     withValue = withType.with(Attribute.Type.Value, new NodeAttribute(value));

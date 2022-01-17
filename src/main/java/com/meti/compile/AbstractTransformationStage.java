@@ -19,10 +19,10 @@ public abstract class AbstractTransformationStage extends AbstractStage {
     }
 
     private Node transformDeclaration(Node oldIdentity) throws CompileException {
-        if (oldIdentity.is(Node.Type.ValuedField)) {
+        if (oldIdentity.is(Node.Type.Initialization)) {
             var withType = transformTypeAttribute(oldIdentity, Attribute.Type.Type);
             return transformNodeAttribute(withType, Attribute.Type.Value);
-        } else if (oldIdentity.is(Node.Type.EmptyField)) {
+        } else if (oldIdentity.is(Node.Type.Declaration)) {
             return transformTypeAttribute(oldIdentity, Attribute.Type.Type);
         } else {
             return oldIdentity;

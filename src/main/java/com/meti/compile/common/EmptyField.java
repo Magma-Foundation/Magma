@@ -16,6 +16,6 @@ public class EmptyField extends Field {
 
     @Override
     public boolean is(Type type) {
-        return type == Type.EmptyField;
+        return type == Type.Declaration;
     }
 }

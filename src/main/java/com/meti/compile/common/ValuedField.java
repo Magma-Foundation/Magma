@@ -39,6 +39,6 @@ public class ValuedField extends Field {
 
     @Override
     public boolean is(Type type) {
-        return type == Type.ValuedField;
+        return type == Type.Initialization;
     }
 }

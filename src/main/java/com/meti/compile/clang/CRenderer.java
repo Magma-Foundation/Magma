@@ -74,7 +74,7 @@ public record CRenderer(Node root) {
 
     private static Text renderFieldWithType(Node node) throws CompileException {
         var common = renderField(node);
-        if (node.is(Node.Type.EmptyField)) {
+        if (node.is(Node.Type.Declaration)) {
             return common;
         } else {
             var value = node.apply(Attribute.Type.Value).asNode();
