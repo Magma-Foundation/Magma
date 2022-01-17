@@ -68,15 +68,17 @@ public record FunctionLexer(Text text) implements Lexer {
 
     @Override
     public Option<Node> lex() throws CompileException {
-        return text.firstIndexOfChar('(').map(paramStart -> {
+        return text.firstIndexOfChar('(').flatMap(paramStart -> {
             var keys = text.slice(0, paramStart);
             return keys.lastIndexOfChar(' ')
                     .flatMap(space -> extractWithSeparator(paramStart, keys, space))
-                    .orElseGet(() -> extractFunction(paramStart, new JavaList<>(), new Text("")));
+                    .or(() -> paramStart == 0
+                            ? new Some<>(extractFunction(paramStart, new JavaList<>(), new Text("")))
+                            : new None<>());
         });
     }
 
-    private int locateParameterEnd(Integer paramStart) {
+    private int locateParameterEnd(int paramStart) {
         var depth = 0;
         var paramEnd = -1;
         for (int i = paramStart + 1; i < text.size(); i++) {
