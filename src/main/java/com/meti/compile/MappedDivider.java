@@ -3,8 +3,9 @@ package com.meti.compile;
 import com.meti.collect.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
+import com.meti.option.Option;
 
-public abstract class MappedDivider implements Divider {
+public abstract class MappedDivider implements Divider<MappedDivider> {
     protected final JavaMap<CFormat, JavaList<Node>> map;
 
     public MappedDivider(JavaMap<CFormat, JavaList<Node>> map) {
@@ -19,18 +20,28 @@ public abstract class MappedDivider implements Divider {
     }
 
     @Override
-    public Divider divide(Node node) throws StreamException {
-        var format = apply(node);
-        var withKey = map.ensure(format, () -> generate(format));
-        var withValue = withKey.mapValue(format, value -> modify(format, node, value));
-        return complete(withValue);
+    public MappedDivider divide(Node node) throws CompileException {
+        return decompose(node).orElseGet(() -> getMappedDivider(node, this));
+    }
+
+    protected abstract Option<MappedDivider> decompose(Node node) throws CompileException;
+
+    private MappedDivider getMappedDivider(Node node, MappedDivider divider) throws CompileException {
+        try {
+            var format = divider.apply(node);
+            var withKey = divider.map.ensure(format, () -> divider.generate(format));
+            var withValue = withKey.mapValue(format, value -> divider.modify(format, node, value));
+            return divider.complete(withValue);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     protected abstract CFormat apply(Node node);
 
-    public abstract JavaList<Node> generate(CFormat format) throws StreamException;
+    protected abstract JavaList<Node> generate(CFormat format) throws StreamException;
 
     protected abstract JavaList<Node> modify(CFormat format, Node node, JavaList<Node> value);
 
-    protected abstract Divider complete(JavaMap<CFormat, JavaList<Node>> map) throws StreamException;
+    protected abstract MappedDivider complete(JavaMap<CFormat, JavaList<Node>> map) throws StreamException;
 }

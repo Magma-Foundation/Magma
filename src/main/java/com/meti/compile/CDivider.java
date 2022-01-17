@@ -1,11 +1,16 @@
 package com.meti.compile;
 
 import com.meti.collect.*;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.common.Import;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
+import com.meti.option.None;
+import com.meti.option.Option;
+import com.meti.option.Some;
 import com.meti.source.Packaging;
 
 import static com.meti.compile.clang.CFormat.Header;
@@ -46,12 +51,29 @@ public class CDivider extends MappedDivider {
     }
 
     @Override
-    protected JavaList<Node> modify(CFormat format, Node node, JavaList<Node> value) {
-        return format == Header ? value.insert(value.size() - 1, node) : value.add(node);
+    protected Option<MappedDivider> decompose(Node node) throws CompileException {
+        if (node.is(Node.Type.Cache)) {
+            try {
+                var value = node.apply(Attribute.Type.Value).asNode();
+                return new Some<>(node.apply(Attribute.Type.Children)
+                        .asStreamOfNodes1()
+                        .foldRight(this, MappedDivider::divide)
+                        .divide(value));
+            } catch (AttributeException | StreamException e) {
+                throw new CompileException(e);
+            }
+        }
+        return new None<>();
     }
 
     @Override
-    protected Divider complete(JavaMap<CFormat, JavaList<Node>> map) {
+    protected JavaList<Node> modify(CFormat format, Node node, JavaList<Node> value) {
+        if (format == Header) return value.insert(value.size() - 1, node);
+        return value.add(node);
+    }
+
+    @Override
+    protected MappedDivider complete(JavaMap<CFormat, JavaList<Node>> map) {
         return new CDivider(thisPackage, map);
     }
 

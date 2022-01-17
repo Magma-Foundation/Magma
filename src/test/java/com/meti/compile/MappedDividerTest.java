@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MappedDividerTest {
 
     @Test
-    void divide() throws CollectionException {
+    void divide() throws CollectionException, CompileException {
         var list = new CDivider(new Packaging(""))
                 .divide(new IntegerNode(10))
                 .apply(CFormat.Source)
