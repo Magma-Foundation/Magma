@@ -83,18 +83,22 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
             this(builder, JavaList.apply(items));
         }
 
-        public static <T extends Node.Builder<T>, E extends Exception> F1<F1<Node, T, E>, Prototype<T>, E> fromCache(Node cache) throws CollectionException, AttributeException {
+        public static <T extends Node.Builder<T>, E extends Exception> F1<F1<Node, Prototype<T>, E>, Prototype<T>, E> fromCache(Node cache) throws CollectionException, AttributeException {
             var value = cache.apply(Attribute.Type.Value).asNode();
             var children = cache.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
                     .foldRight(new JavaList<Node>(), JavaList::add);
             return builderSupplier -> {
-                var builder = builderSupplier.apply(value);
-                return new Prototype<T>(builder, children);
+                var prototype = builderSupplier.apply(value);
+                return prototype.append(children);
             };
         }
 
-        public Prototype<T> merge(Prototype<T> other) {
+        public Prototype<T> append(JavaList<Node> children) {
+            return new Prototype<>(builder, items.addAll(children));
+        }
+
+        public Prototype<T> append(Prototype<T> other) {
             var newBuilder = builder.merge(other.builder);
             var newItems = items.addAll(other.items);
             return new Prototype<>(newBuilder, newItems);
