@@ -1,5 +1,6 @@
 package com.meti.app.compile.text;
 
+import com.meti.api.collect.IndexException;
 import com.meti.api.option.Option;
 
 public interface Text {
@@ -7,7 +8,7 @@ public interface Text {
 
     Text appendText(Text other);
 
-    char apply(int index);
+    char apply(int index) throws IndexException;
 
     /**
      * Computes the value of this {@link Text} object as-is, with no trimming involved.

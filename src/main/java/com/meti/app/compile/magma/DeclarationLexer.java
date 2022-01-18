@@ -1,5 +1,6 @@
 package com.meti.app.compile.magma;
 
+import com.meti.api.collect.IndexException;
 import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
@@ -39,15 +40,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                 return innerFlags;
             }).orElse(List.createList());
             if (flags.contains(Field.Flag.Let) || flags.contains(Field.Flag.Const)) {
-                int valueSeparator = -1;
-                for (int i = 0; i < text.size(); i++) {
-                    var c = text.apply(i);
-                    if (c == '=' && !text.slice(i, i + 2).compute().equals("=>")) {
-                        valueSeparator = i;
-                        break;
-                    }
-                }
-
+                int valueSeparator = findValueSeparator();
                 if (valueSeparator == -1) {
                     var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
@@ -70,5 +63,21 @@ public record DeclarationLexer(Text text) implements Lexer {
                 return new None<>();
             }
         });
+    }
+
+    private int findValueSeparator() {
+        try {
+            int valueSeparator = -1;
+            for (int i = 0; i < text.size(); i++) {
+                var c = text.apply(i);
+                if (c == '=' && !text.slice(i, i + 2).compute().equals("=>")) {
+                    valueSeparator = i;
+                    break;
+                }
+            }
+            return valueSeparator;
+        } catch (IndexException e) {
+            return -1;
+        }
     }
 }

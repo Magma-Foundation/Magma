@@ -1,5 +1,6 @@
 package com.meti.app.compile.magma;
 
+import com.meti.api.collect.IndexException;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
@@ -84,18 +85,22 @@ public record FunctionLexer(Text text) implements Lexer {
     }
 
     private int locateParameterEnd(int paramStart) {
-        var depth = 0;
-        var paramEnd = -1;
-        for (int i = paramStart + 1; i < text.size(); i++) {
-            var c = text.apply(i);
-            if (c == ')' && depth == 0) {
-                paramEnd = i;
-            } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
+        try {
+            var depth = 0;
+            var paramEnd = -1;
+            for (int i = paramStart + 1; i < text.size(); i++) {
+                var c = text.apply(i);
+                if (c == ')' && depth == 0) {
+                    paramEnd = i;
+                } else {
+                    if (c == '(') depth++;
+                    if (c == ')') depth--;
+                }
             }
+            return paramEnd;
+        } catch (IndexException e) {
+            return -1;
         }
-        return paramEnd;
     }
 
     private Node sliceToContent(int start, Option<Integer> terminus) {
