@@ -1,6 +1,6 @@
 package com.meti.api.io;
 
-import com.meti.option.Option;
+import com.meti.api.option.Option;
 
 import java.io.IOException;
 import java.util.stream.Stream;

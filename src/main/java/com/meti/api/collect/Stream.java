@@ -2,7 +2,7 @@ package com.meti.api.collect;
 
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
-import com.meti.option.Option;
+import com.meti.api.option.Option;
 
 public interface Stream<T> {
     default int count() throws StreamException {

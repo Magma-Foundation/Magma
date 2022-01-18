@@ -2,9 +2,9 @@ package com.meti.api.collect;
 
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
-import com.meti.option.None;
-import com.meti.option.Option;
-import com.meti.option.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     @Override

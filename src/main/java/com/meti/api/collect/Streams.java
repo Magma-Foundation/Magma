@@ -1,6 +1,6 @@
 package com.meti.api.collect;
 
-import com.meti.option.Option;
+import com.meti.api.option.Option;
 
 public class Streams {
     public static <T> Stream<T> optionally(Option<T> option) {

@@ -1,8 +1,8 @@
 package com.meti.api.collect;
 
-import com.meti.option.None;
-import com.meti.option.Option;
-import com.meti.option.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.util.ArrayList;
 import java.util.List;
