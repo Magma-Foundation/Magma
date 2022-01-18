@@ -3,17 +3,18 @@ package com.meti.app.compile.common.string;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Text;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record String(Text value) implements Node {
+public record String(Input value) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new TextAttribute(value);
+        if (type == Attribute.Type.Value) return new InputAttribute(value);
         throw new AttributeException(type);
     }
 

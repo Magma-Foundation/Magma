@@ -3,7 +3,7 @@ package com.meti.app.compile.common;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Text;
 
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public record Extern(Text root) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new TextAttribute(root);
+        if (type == Attribute.Type.Value) return new InputAttribute(root);
         throw new AttributeException(type);
     }
 

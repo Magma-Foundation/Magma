@@ -5,12 +5,12 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.Option;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 
-public record InvocationLexer(Text text) implements Lexer {
+public record InvocationLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() throws CompileException {
         return text.firstIndexOfChar('(')
@@ -46,9 +46,9 @@ public record InvocationLexer(Text text) implements Lexer {
                     .stream()
                     .filter(s -> !s.isBlank())
                     .map(RootText::new)
-                    .map(Content::new)
+                    .map(InputNode::new)
                     .foldRight(List.<Node>createList(), List::add);
-            var caller = new Content(callerText);
+            var caller = new InputNode(callerText);
             return new Invocation(caller, arguments);
         } catch (StreamException e) {
             throw new CompileException(e);

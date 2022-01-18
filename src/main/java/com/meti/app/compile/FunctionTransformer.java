@@ -46,7 +46,7 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
             if (identity.apply(Attribute.Type.Flags)
                         .asStreamOfFlags1()
                         .count() == 0) {
-                var name = identity.apply(Attribute.Type.Name).asText();
+                var name = identity.apply(Attribute.Type.Name).asInput();
                 function = new Cache(new Variable(name), oldNode);
             } else {
                 function = oldNode;

@@ -3,7 +3,7 @@ package com.meti.app.compile.node;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.text.RootText;
 
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ public enum Primitive implements Node {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new TextAttribute(new RootText(name()));
+        if (type == Attribute.Type.Name) return new InputAttribute(new RootText(name()));
         throw new AttributeException(type);
     }
 

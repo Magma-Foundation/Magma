@@ -8,6 +8,7 @@ import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
@@ -42,15 +43,15 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         }
     }
 
-    private java.util.List<com.meti.app.compile.text.Text> split(RootText root) {
+    private java.util.List<Input> split(RootText root) {
         return new Splitter(root)
                 .split()
                 .collect(Collectors.toList());
     }
 
-    private ArrayList<Node> lex(java.util.List<com.meti.app.compile.text.Text> lines) throws CompileException {
+    private ArrayList<Node> lex(java.util.List<Input> lines) throws CompileException {
         var oldNodes = new ArrayList<Node>();
-        for (Text oldLine : lines) {
+        for (var oldLine : lines) {
             oldNodes.add(new MagmaLexer(oldLine).lex());
         }
         return oldNodes;

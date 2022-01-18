@@ -8,30 +8,30 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
 import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.LineRenderer;
-import com.meti.app.compile.common.alternate.ElseRenderer;
-import com.meti.app.compile.common.binary.BinaryRenderer;
-import com.meti.app.compile.common.block.BlockRenderer;
-import com.meti.app.compile.common.condition.ConditionRenderer;
-import com.meti.app.compile.common.integer.IntegerRenderer;
-import com.meti.app.compile.common.invoke.InvocationRenderer;
-import com.meti.app.compile.common.returns.ReturnRenderer;
-import com.meti.app.compile.common.string.StringRenderer;
-import com.meti.app.compile.common.variable.VariableRenderer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.common.LineProcessor;
+import com.meti.app.compile.common.alternate.ElseProcessor;
+import com.meti.app.compile.common.binary.BinaryProcessor;
+import com.meti.app.compile.common.block.BlockProcessor;
+import com.meti.app.compile.common.condition.ConditionProcessor;
+import com.meti.app.compile.common.integer.IntegerProcessor;
+import com.meti.app.compile.common.invoke.InvocationProcessor;
+import com.meti.app.compile.common.returns.ReturnProcessor;
+import com.meti.app.compile.common.string.StringProcessor;
+import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.OutputNode;
+import com.meti.app.compile.process.Processor;
+import com.meti.app.compile.render.EmptyProcessor;
+import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.render.EmptyRenderer;
-import com.meti.app.compile.render.RenderException;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
     private static Output renderField(Node node) throws CompileException {
-        var name = node.apply(Attribute.Type.Name).asText();
+        var name = node.apply(Attribute.Type.Name).asInput();
         var type = node.apply(Attribute.Type.Type).asNode();
 
         if (type.is(Node.Type.Function)) {
@@ -44,19 +44,21 @@ public record CRenderer(Node root) {
                 newParameters.add(renderedParameter.computeTrimmed());
             }
             return returnType.appendSlice(" (*")
-                    .appendOutput(name)
+                    .appendOutput(name.toOutput())
                     .appendSlice(")")
                     .appendSlice("(")
                     .appendSlice(String.join(",", newParameters))
                     .appendSlice(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderFieldWithType(new EmptyField(name.prepend("*"), child, List.createList()));
+            return renderFieldWithType(new EmptyField(name.toOutput().prepend("*"), child, List.createList()));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
-                    .asText().computeTrimmed()
+                    .asInput()
+                    .toOutput()
+                    .computeTrimmed()
                     .toLowerCase();
-            return name.prepend(rendered + " ");
+            return name.toOutput().prepend(rendered + " ");
         } else if (type.is(Node.Type.Integer)) {
             var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
             var bits = type.apply(Attribute.Type.Bits).asInteger();
@@ -65,7 +67,9 @@ public record CRenderer(Node root) {
                 case 16 -> "int";
                 default -> throw new RenderException("Unknown bit quantity: " + bits);
             };
-            var value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
+            var value = (isSigned ? "" : "unsigned ") + suffix + " " + name
+                    .toOutput()
+                    .computeTrimmed();
             return new RootText(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
@@ -84,32 +88,34 @@ public record CRenderer(Node root) {
     }
 
     static Output renderNode(Node node) throws CompileException {
-        if (node.is(Node.Type.Content)) {
-            return node.apply(Attribute.Type.Value).asText();
+        if (node.is(Node.Type.Input)) {
+            return node.apply(Attribute.Type.Value)
+                    .asInput()
+                    .toOutput();
         }
 
         var renderers = java.util.List.of(
-                new BinaryRenderer(node),
-                new BlockRenderer(node),
-                new ConditionRenderer(node),
-                new DeclarationRenderer(node),
-                new ElseRenderer(node),
-                new EmptyRenderer(node),
-                new ExternRenderer(node),
-                new FunctionRenderer(node),
-                new ImportRenderer(node),
-                new IntegerRenderer(node),
-                new InvocationRenderer(node),
-                new LineRenderer(node),
-                new ReturnRenderer(node),
-                new StringRenderer(node),
+                new BinaryProcessor(node),
+                new BlockProcessor(node),
+                new ConditionProcessor(node),
+                new DeclarationProcessor(node),
+                new ElseProcessor(node),
+                new EmptyProcessor(node),
+                new ExternProcessor(node),
+                new FunctionProcessor(node),
+                new ImportProcessor(node),
+                new IntegerProcessor(node),
+                new InvocationProcessor(node),
+                new LineProcessor(node),
+                new ReturnProcessor(node),
+                new StringProcessor(node),
                 new StructureRenderer(node),
-                new UnaryRenderer(node),
-                new VariableRenderer(node));
+                new UnaryProcessor(node),
+                new VariableProcessor(node));
 
         Option<Output> current = new None<>();
-        for (Renderer renderer : renderers) {
-            var result = renderer.render();
+        for (Processor<Output> renderer : renderers) {
+            var result = renderer.process();
             if (result.isPresent()) {
                 current = result;
             }
@@ -124,7 +130,7 @@ public record CRenderer(Node root) {
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();
             var renderedNode = renderFieldWithType(node);
-            current = current.with(type, new NodeAttribute(new Content(renderedNode)));
+            current = current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
         }
         return current;
     }
@@ -135,7 +141,7 @@ public record CRenderer(Node root) {
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();
             var renderedNode = new CRenderer(node).render();
-            current = current.with(type, new NodeAttribute(new Content(renderedNode)));
+            current = current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
         }
         return current;
     }
@@ -167,7 +173,7 @@ public record CRenderer(Node root) {
             var oldNodes = withNodes.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
-                newNodes.add(new Content(renderAST(oldNode)));
+                newNodes.add(new OutputNode(renderAST(oldNode)));
             }
             current = current.with(type, new NodesAttribute(newNodes));
         }
@@ -181,7 +187,7 @@ public record CRenderer(Node root) {
             var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newDeclarations = new ArrayList<Node>();
             for (Node oldDeclaration : oldDeclarations) {
-                newDeclarations.add(new Content(renderFieldWithType(oldDeclaration)));
+                newDeclarations.add(new OutputNode(renderFieldWithType(oldDeclaration)));
             }
             current = current.with(type, new NodesAttribute(newDeclarations));
         }

@@ -8,26 +8,25 @@ import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.text.Text;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
 
-public record FunctionRenderer(Node node) implements Renderer {
+public record FunctionProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws CompileException {
+    public Option<Output> process() throws CompileException {
         if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
-            var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
+            var renderedIdentity = identity.apply(Attribute.Type.Value).asOutput();
 
             ArrayList<String> parameters;
             try {
                 parameters = node.apply(Attribute.Type.Parameters)
                         .asStreamOfNodes1()
                         .map(value -> value.apply(Attribute.Type.Value))
-                        .map(Attribute::asText)
-                        .map(Text::computeTrimmed)
+                        .map(Attribute::asOutput)
+                        .map(Output::computeTrimmed)
                         .foldRight(new ArrayList<>(), (strings, s) -> {
                             strings.add(s);
                             return strings;
@@ -49,7 +48,7 @@ public record FunctionRenderer(Node node) implements Renderer {
         Output withValue;
         if (node.is(Node.Type.Implementation)) {
             var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asText();
+            var renderedValue = value.apply(Attribute.Type.Value).asOutput();
             withValue = withIdentity.appendOutput(renderedValue);
         } else {
             withValue = withIdentity.appendSlice(";");

@@ -6,15 +6,15 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.render.Renderer;
 
-public record ReturnRenderer(Node node) implements Renderer {
+public record ReturnProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asText();
+            var renderedChild = child.apply(Attribute.Type.Value).asOutput();
             return new Some<>(renderedChild.prepend("return ").appendSlice(";"));
         }
         return new None<>();

@@ -7,10 +7,10 @@ import com.meti.app.compile.common.Extern;
 import com.meti.app.compile.common.Import;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 import com.meti.app.source.Packaging;
 
-public record ImportLexer(Text text) implements Lexer {
+public record ImportLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
         if (text.startsWithSlice("extern ")) {

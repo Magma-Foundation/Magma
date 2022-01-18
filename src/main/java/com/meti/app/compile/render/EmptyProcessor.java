@@ -5,12 +5,13 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 
-public record EmptyRenderer(Node node) implements Renderer {
+public record EmptyProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Empty)) {
             return new Some<>(new RootText(""));
         } else {

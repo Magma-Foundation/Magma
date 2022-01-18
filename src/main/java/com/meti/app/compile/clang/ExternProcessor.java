@@ -6,16 +6,18 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.render.Renderer;
 
-public record ExternRenderer(Node node) implements Renderer {
+public record ExternProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Extern)) {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
-                    .asText().computeTrimmed() + ".h>\n"));
+                    .asInput()
+                    .toOutput()
+                    .computeTrimmed() + ".h>\n"));
         } else {
             return new None<>();
         }

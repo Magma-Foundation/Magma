@@ -8,12 +8,13 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Text;
 
 public class ValuedField extends Field {
     private final Node value;
 
-    public ValuedField(List<Flag> flags, Text name, Node type, Node value) {
+    public ValuedField(List<Flag> flags, Input name, Node type, Node value) {
         super(flags, name, type);
         this.value = value;
     }
@@ -36,7 +37,7 @@ public class ValuedField extends Field {
     }
 
     @Override
-    protected Field complete(Text name, Node type) {
+    protected Field complete(Input name, Node type) {
         return new ValuedField(flags, this.name, type, value);
     }
 

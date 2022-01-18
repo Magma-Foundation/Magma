@@ -10,14 +10,14 @@ import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.ValuedField;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public record DeclarationLexer(Text text) implements Lexer {
+public record DeclarationLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
         return text.firstIndexOfChar(':').flatMap(typeSeparator -> {
@@ -45,17 +45,17 @@ public record DeclarationLexer(Text text) implements Lexer {
                     var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
                     var typeText = text.slice(typeSeparator + 1);
-                    var type = new Content(typeText);
+                    var type = new InputNode(typeText);
 
                     return new Some<>(new Declaration(new EmptyField(nameText, type, flags)));
                 } else {
                     var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 
                     var typeText = text.slice(typeSeparator + 1, valueSeparator);
-                    var type = new Content(typeText);
+                    var type = new InputNode(typeText);
 
                     var valueText = text.slice(valueSeparator + 1);
-                    var value = new Content(valueText);
+                    var value = new InputNode(valueText);
 
                     return new Some<>(new Declaration(new ValuedField(flags, nameText, type, value)));
                 }

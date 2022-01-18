@@ -6,10 +6,10 @@ import com.meti.api.option.None;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
 
 public class CFormatter extends StreamStage {
@@ -25,15 +25,15 @@ public class CFormatter extends StreamStage {
         return Streams.apply(() -> {
             if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
                 var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
-                var oldName = oldIdentity.apply(Attribute.Type.Name).asText();
-                Text newName;
+                var oldName = oldIdentity.apply(Attribute.Type.Name).asInput();
+                Input newName;
                 if (oldName.isEmpty()) {
                     counter++;
                     newName = new RootText("__lambda" + counter + "__");
                 } else {
                     newName = oldName;
                 }
-                var newIdentity = oldIdentity.with(Attribute.Type.Name, new TextAttribute(newName));
+                var newIdentity = oldIdentity.with(Attribute.Type.Name, new InputAttribute(newName));
                 return new Some<>(node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity)));
             } else {
                 return new None<>();

@@ -6,9 +6,8 @@ import com.meti.api.option.None;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.BooleanResolver;
 
 public class CMagmaNodeResolver extends StreamStage {
     @Override
@@ -33,15 +32,6 @@ public class CMagmaNodeResolver extends StreamStage {
 
     @Override
     protected Stream<Transformer> streamTypeTransformers(Node node) {
-        return Streams.apply(() -> {
-            if (node.is(Node.Type.Primitive) && node.apply(Attribute.Type.Name)
-                    .asText()
-                    .computeTrimmed()
-                    .equals(Primitive.Bool.name())) {
-                return new Some<>(new IntegerType(true, 16));
-            } else {
-                return new None<>();
-            }
-        });
+        return Streams.apply(new BooleanResolver(node));
     }
 }

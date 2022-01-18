@@ -2,19 +2,20 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Text;
 
 public class EmptyField extends Field {
-    public EmptyField(Text name, Node type, Flag... flags) {
+    public EmptyField(Input name, Node type, Flag... flags) {
         this(name, type, List.apply(flags));
     }
 
-    public EmptyField(Text name, Node type, List<Flag> flags) {
+    public EmptyField(Input name, Node type, List<Flag> flags) {
         super(flags, name, type);
     }
 
     @Override
-    protected Field complete(Text name, Node type) {
+    protected Field complete(Input name, Node type) {
         return new EmptyField(name, type, flags);
     }
 

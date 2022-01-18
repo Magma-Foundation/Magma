@@ -11,12 +11,13 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.common.*;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 
-public record FunctionLexer(Text text) implements Lexer {
+public record FunctionLexer(Input text) implements Lexer {
     private Function extractFunction(int paramStart, List<Field.Flag> flags, Text name) throws CompileException {
         try {
             int paramEnd = locateParameterEnd(paramStart);
@@ -53,7 +54,7 @@ public record FunctionLexer(Text text) implements Lexer {
 
     private Option<Function> attachValue(EmptyField identity, List<Node> parameters, Option<Integer> valueSeparator) {
         return valueSeparator.map(separator -> {
-            var value = new Content(text.slice(separator + 2));
+            var value = new InputNode(text.slice(separator + 2));
             return new Implementation(identity, value, parameters);
         });
     }
@@ -106,7 +107,7 @@ public record FunctionLexer(Text text) implements Lexer {
     private Node sliceToContent(int start, Option<Integer> terminus) {
         var end = terminus.orElse(text.size());
         var slice = text.slice(start, end);
-        return new Content(slice);
+        return new InputNode(slice);
     }
 
     private List<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {
@@ -114,7 +115,7 @@ public record FunctionLexer(Text text) implements Lexer {
                 .split(","))
                 .filter(value -> !value.isBlank())
                 .map(RootText::new)
-                .map(Content::new)
+                .map(InputNode::new)
                 .foldRight(List.createList(), List::add);
     }
 

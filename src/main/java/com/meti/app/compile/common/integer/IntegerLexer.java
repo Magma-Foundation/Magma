@@ -5,14 +5,17 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record IntegerLexer(Text text) implements Lexer {
+public record IntegerLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
+        return text.map(this::toInteger).map(IntegerNode::new);
+    }
+
+    private Option<Integer> toInteger(String s) {
         try {
-            var value = Integer.parseInt(text.computeTrimmed());
-            return new Some<>(new IntegerNode(value));
+            return new Some<>(Integer.parseInt(s));
         } catch (NumberFormatException e) {
             return new None<>();
         }
