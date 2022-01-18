@@ -20,7 +20,7 @@ record BlockResolver(Node node, StreamStage parent) implements Transformer {
                         .foldRight(new JavaList<Node>(), JavaList::add);
                 return new Some<>(children
                         .last()
-                        .map(parent::transformNode)
+                        .map(parent::apply)
                         .orElse(Primitive.Void));
             } catch (StreamException e) {
                 throw new CompileException(e);

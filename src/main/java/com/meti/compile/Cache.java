@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Cache(Node value, JavaList<Node> children) implements Node {
+    public Cache(Node value, Node... children) {
+        this(value, JavaList.apply(children));
+    }
+
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {

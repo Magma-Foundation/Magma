@@ -11,7 +11,7 @@ record ReturnResolver(Node node, MagmaTypeResolver parent) implements Transforme
     public Option<Node> transform() throws CompileException {
         if (node.is(Node.Type.Return)) {
             var oldChild = node.apply(Attribute.Type.Value).asNode();
-            var newChild = parent.transformNode(oldChild);
+            var newChild = parent.apply(oldChild);
             return new Some<>(newChild);
         } else {
             return new None<>();

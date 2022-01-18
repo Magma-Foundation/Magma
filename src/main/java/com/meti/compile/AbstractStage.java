@@ -50,7 +50,7 @@ public abstract class AbstractStage implements Stage {
         var withNodesGroup = transformNodesGroup(withNodeGroup);
         var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
         var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
-        return transformNode(withDeclarationsGroup);
+        return apply(withDeclarationsGroup);
     }
 
     protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
@@ -97,5 +97,7 @@ public abstract class AbstractStage implements Stage {
         return oldIdentity.with(Attribute.Type.Type, newTypeAttribute);
     }
 
-    protected abstract Node transformType(Node type) throws CompileException;
+    protected Node transformType(Node type) throws CompileException {
+        return type;
+    }
 }

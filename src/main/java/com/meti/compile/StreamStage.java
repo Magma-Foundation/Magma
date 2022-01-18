@@ -30,7 +30,7 @@ public abstract class StreamStage extends AbstractStage {
     }
 
     @Override
-    public Node transformNode(Node node) throws CompileException {
+    public Node apply(Node node) throws CompileException {
         return transformUsingStreams(node, streamNodeTransformers(node));
     }
 
