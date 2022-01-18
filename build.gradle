@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass.set('com.meti.Main')
+    mainClass.set('com.meti.app.Main')
     tasks.run.setWorkingDir(new File("./working"))
 }
 
