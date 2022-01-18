@@ -1,21 +1,25 @@
 package com.meti.app.compile.common.variable;
 
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.AbstractRenderer;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.render.Renderer;
 
-public record VariableRenderer(Node node) implements Renderer {
+public final class VariableRenderer extends AbstractRenderer {
+    public VariableRenderer(Node node) {
+        super(node);
+    }
+
     @Override
-    public Option<Output> render() throws AttributeException {
-        if (node.is(Node.Type.Variable)) {
-            return new Some<>(node.apply(Attribute.Type.Value).asOutput());
-        } else {
-            return new None<>();
-        }
+    protected boolean validate() {
+        return node.is(Node.Type.Variable);
+    }
+
+    @Override
+    protected Output createNode() throws AttributeException {
+        return node.apply(Attribute.Type.Value)
+                .asInput()
+                .toOutput();
     }
 }
