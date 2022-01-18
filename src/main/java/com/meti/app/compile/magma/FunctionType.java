@@ -1,17 +1,16 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
 import com.meti.app.compile.node.Node;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record FunctionType(Node returns, List<Node> parameters) implements Node {
+public record FunctionType(Node returns, java.util.List parameters) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
@@ -32,7 +31,7 @@ public record FunctionType(Node returns, List<Node> parameters) implements Node 
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

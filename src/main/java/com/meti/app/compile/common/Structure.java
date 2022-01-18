@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodesAttribute;
@@ -8,14 +8,13 @@ import com.meti.app.compile.attribute.TextAttribute;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Text;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Structure(Text name, List<Node> fields) implements Node {
+public record Structure(Text name, java.util.List fields) implements Node {
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

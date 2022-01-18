@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
@@ -32,7 +32,7 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
                     .asNode()
                     .apply(Attribute.Type.Flags)
                     .asStreamOfFlags1()
-                    .foldRight(new JavaList<>(), JavaList::add)
+                    .foldRight(new List<>(), List::add)
                     .contains(Field.Flag.Extern);
         } catch (StreamException | AttributeException e) {
             return false;

@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
@@ -13,7 +13,7 @@ import com.meti.app.compile.node.Text;
 public class ValuedField extends Field {
     private final Node value;
 
-    public ValuedField(JavaList<Flag> flags, Text name, Node type, Node value) {
+    public ValuedField(List<Flag> flags, Text name, Node type, Node value) {
         super(flags, name, type);
         this.value = value;
     }

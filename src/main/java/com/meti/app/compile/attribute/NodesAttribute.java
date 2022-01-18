@@ -1,6 +1,6 @@
 package com.meti.app.compile.attribute;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.Node;
 
 import java.util.Collection;
@@ -16,6 +16,6 @@ public record NodesAttribute(Collection<Node> values) implements Attribute {
 
     @Override
     public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
-        return new JavaList<>(asStreamOfNodes().collect(Collectors.toList())).stream();
+        return new List<>(asStreamOfNodes().collect(Collectors.toList())).stream();
     }
 }

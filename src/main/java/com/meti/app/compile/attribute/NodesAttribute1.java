@@ -1,12 +1,12 @@
 package com.meti.app.compile.attribute;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
 
 import java.util.stream.Stream;
 
-public record NodesAttribute1(JavaList<Node> values) implements Attribute {
+public record NodesAttribute1(List<Node> values) implements Attribute {
     @Override
     public Stream<Node> asStreamOfNodes() {
         try {
@@ -23,9 +23,9 @@ public record NodesAttribute1(JavaList<Node> values) implements Attribute {
         return values.stream();
     }
 
-    public record Builder(JavaList<Node> values) {
+    public record Builder(List<Node> values) {
         public Builder() {
-            this(new JavaList<>());
+            this(new List<>());
         }
 
         public Builder add(Node next) {

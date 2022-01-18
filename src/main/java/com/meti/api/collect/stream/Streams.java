@@ -1,6 +1,6 @@
 package com.meti.api.collect.stream;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.option.Option;
 
 public class Streams {
@@ -10,6 +10,6 @@ public class Streams {
 
     @SafeVarargs
     public static <T> Stream<T> apply(T... strings) {
-        return JavaList.apply(strings).stream();
+        return List.apply(strings).stream();
     }
 }

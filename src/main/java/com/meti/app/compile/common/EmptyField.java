@@ -1,15 +1,15 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Text;
 
 public class EmptyField extends Field {
     public EmptyField(Text name, Node type, Flag... flags) {
-        this(name, type, JavaList.apply(flags));
+        this(name, type, List.apply(flags));
     }
 
-    public EmptyField(Text name, Node type, JavaList<Flag> flags) {
+    public EmptyField(Text name, Node type, List<Flag> flags) {
         super(flags, name, type);
     }
 

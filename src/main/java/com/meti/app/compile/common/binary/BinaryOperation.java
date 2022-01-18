@@ -1,13 +1,12 @@
 package com.meti.app.compile.common.binary;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
 import com.meti.app.compile.node.Node;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,14 +24,14 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Operator -> new NodeAttribute(operator);
-            case Arguments -> new NodesAttribute(List.of(first, second));
+            case Arguments -> new NodesAttribute(java.util.List.of(first, second));
             default -> throw new AttributeException(type);
         };
     }
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

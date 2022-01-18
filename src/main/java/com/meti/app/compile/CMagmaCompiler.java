@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
@@ -12,7 +12,6 @@ import com.meti.app.compile.node.Text;
 import com.meti.app.source.Packaging;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         try {
             var pipeline = new CMagmaPipeline(thisPackage);
             var divider = new CDivider(thisPackage);
-            var division = new JavaList<>(lexed)
+            var division = new List<>(lexed)
                     .stream()
                     .map(pipeline::perform)
                     .foldRight(divider, Divider::divide);
@@ -41,13 +40,13 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         }
     }
 
-    private List<Text> split(Text root) {
+    private java.util.List<Text> split(Text root) {
         return new Splitter(root)
                 .split()
                 .collect(Collectors.toList());
     }
 
-    private ArrayList<Node> lex(List<Text> lines) throws CompileException {
+    private ArrayList<Node> lex(java.util.List<Text> lines) throws CompileException {
         var oldNodes = new ArrayList<Node>();
         for (Text oldLine : lines) {
             oldNodes.add(new MagmaLexer(oldLine).lex());

@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -12,13 +12,13 @@ import com.meti.app.compile.node.Node;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public record Block(JavaList<Node> children) implements Node {
+public record Block(List<Node> children) implements Node {
     public Block() {
-        this(new JavaList<>());
+        this(new List<>());
     }
 
     public Block(Node... children) {
-        this(JavaList.apply(children));
+        this(List.apply(children));
     }
 
     @Override
@@ -70,9 +70,9 @@ public record Block(JavaList<Node> children) implements Node {
         }
     }
 
-    public record Builder(JavaList<Node> children) implements Node.Builder<Builder> {
+    public record Builder(List<Node> children) implements Node.Builder<Builder> {
         public Builder() {
-            this(new JavaList<>());
+            this(new List<>());
         }
 
         public Builder add(Node child) {

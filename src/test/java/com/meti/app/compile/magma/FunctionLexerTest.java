@@ -1,6 +1,6 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
@@ -24,8 +24,8 @@ class FunctionLexerTest {
     void lambda() throws CompileException {
         var node = new FunctionLexer(new Text("() => {}"))
                 .lex();
-        var identity = new EmptyField(new Text(""), ImplicitType.ImplicitType_, new JavaList<>());
-        var expected = new Implementation(identity, new Content(new Text("{}")), new JavaList<>());
+        var identity = new EmptyField(new Text(""), ImplicitType.ImplicitType_, new List<>());
+        var expected = new Implementation(identity, new Content(new Text("{}")), new List<>());
         var actual = node.orElse(EmptyNode.EmptyNode_);
         assertEquals(expected, actual);
     }

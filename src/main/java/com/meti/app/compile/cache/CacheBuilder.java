@@ -1,6 +1,6 @@
 package com.meti.app.compile.cache;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
@@ -8,9 +8,9 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
 
-public record CacheBuilder<T>(T value, JavaList<Node> items) {
+public record CacheBuilder<T>(T value, List<Node> items) {
     public CacheBuilder(T root, Node... items) {
-        this(root, JavaList.apply(items));
+        this(root, List.apply(items));
     }
 
     public static CacheBuilder<Node> apply(Node root) {
@@ -19,17 +19,17 @@ public record CacheBuilder<T>(T value, JavaList<Node> items) {
                 var value = root.apply(Attribute.Type.Value).asNode();
                 var children = root.apply(Attribute.Type.Children)
                         .asStreamOfNodes1()
-                        .foldRight(new JavaList<Node>(), JavaList::add);
+                        .foldRight(new List<Node>(), List::add);
                 return new CacheBuilder<>(value, children);
             } catch (AttributeException | StreamException e) {
-                return new CacheBuilder<>(root, new JavaList<>());
+                return new CacheBuilder<>(root, new List<>());
             }
         } else {
-            return new CacheBuilder<>(root, new JavaList<>());
+            return new CacheBuilder<>(root, new List<>());
         }
     }
 
-    public CacheBuilder<T> append(JavaList<Node> children) {
+    public CacheBuilder<T> append(List<Node> children) {
         return new CacheBuilder<>(value, items.addAll(children));
     }
 

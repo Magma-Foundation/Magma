@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.bool;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.BooleanAttribute;
@@ -34,7 +34,7 @@ public enum Boolean implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

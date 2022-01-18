@@ -1,6 +1,6 @@
 package com.meti.app.compile.clang;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.CompileException;
@@ -26,7 +26,6 @@ import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
@@ -51,7 +50,7 @@ public record CRenderer(Node root) {
                     .append(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderFieldWithType(new EmptyField(name.prepend("*"), child, new JavaList<>()));
+            return renderFieldWithType(new EmptyField(name.prepend("*"), child, new List<>()));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()
@@ -88,7 +87,7 @@ public record CRenderer(Node root) {
             return node.apply(Attribute.Type.Value).asText();
         }
 
-        var renderers = List.of(
+        var renderers = java.util.List.of(
                 new BinaryRenderer(node),
                 new BlockRenderer(node),
                 new ConditionRenderer(node),
@@ -141,7 +140,7 @@ public record CRenderer(Node root) {
     }
 
     private static Text renderType(Node oldParameter) throws CompileException {
-        return renderField(new EmptyField(new Text(""), oldParameter, new JavaList<>()));
+        return renderField(new EmptyField(new Text(""), oldParameter, new List<>()));
     }
 
     public Text render() throws CompileException {

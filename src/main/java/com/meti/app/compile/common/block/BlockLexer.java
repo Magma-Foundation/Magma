@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -27,7 +27,7 @@ public record BlockLexer(Text text) implements Lexer {
                     values.add(new Content(line));
                 }
             }
-            return new Some<>(new Block(new JavaList<>(values)));
+            return new Some<>(new Block(new List<>(values)));
         }
         return new None<>();
     }

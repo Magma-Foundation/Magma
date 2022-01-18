@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
@@ -13,10 +13,10 @@ public final class Implementation extends Function {
     private final Node body;
 
     public Implementation(Node identity, Node body, Node... parameters) {
-        this(identity, body, JavaList.apply(parameters));
+        this(identity, body, List.apply(parameters));
     }
 
-    public Implementation(Node identity, Node body, JavaList<Node> parameters) {
+    public Implementation(Node identity, Node body, List<Node> parameters) {
         super(identity, parameters);
         this.body = body;
     }
@@ -43,7 +43,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    protected Node complete(Node node, JavaList<Node> parameters) {
+    protected Node complete(Node node, List<Node> parameters) {
         return new Implementation(node, body, parameters);
     }
 

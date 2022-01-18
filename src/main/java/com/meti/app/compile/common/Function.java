@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 
 public abstract class Function implements Node {
     protected final Node identity;
-    protected final JavaList<Node> parameters;
+    protected final List<Node> parameters;
 
-    public Function(Node identity, JavaList<Node> parameters) {
+    public Function(Node identity, List<Node> parameters) {
         this.identity = identity;
         this.parameters = parameters;
     }
@@ -41,7 +41,7 @@ public abstract class Function implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override
@@ -50,7 +50,7 @@ public abstract class Function implements Node {
             return switch (type) {
                 case Identity -> complete(attribute.asNode(), parameters);
                 case Parameters -> complete(identity, attribute.asStreamOfNodes1()
-                        .foldRight(new JavaList<>(), JavaList::add));
+                        .foldRight(new List<>(), List::add));
                 default -> throw new AttributeException(type);
             };
         } catch (StreamException e) {
@@ -58,7 +58,7 @@ public abstract class Function implements Node {
         }
     }
 
-    protected abstract Node complete(Node node, JavaList<Node> parameters);
+    protected abstract Node complete(Node node, List<Node> parameters);
 
     @Override
     public int hashCode() {

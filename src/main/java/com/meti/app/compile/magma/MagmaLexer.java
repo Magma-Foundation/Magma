@@ -1,6 +1,6 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.CompileException;
@@ -27,14 +27,13 @@ import com.meti.app.compile.node.PrimitiveLexer;
 import com.meti.app.compile.node.Text;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public record MagmaLexer(Text text) {
     static Node lexNode(Text text) throws CompileException {
         if (text.isEmpty()) throw new LexException("Input may not be empty.");
 
-        var lexers = List.of(
+        var lexers = java.util.List.of(
                 new ElseLexer(text),
                 new StringLexer(text),
                 new ConditionLexer(text),
@@ -64,7 +63,7 @@ public record MagmaLexer(Text text) {
     }
 
     private static Node lexType(Text text) throws CompileException {
-        List<Lexer> lexers = List.of(
+        java.util.List<Lexer> lexers = java.util.List.<Lexer>of(
                 new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),
@@ -199,7 +198,7 @@ public record MagmaLexer(Text text) {
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexTypeAST(typeText);
-        return new EmptyField(name, type, new JavaList<>());
+        return new EmptyField(name, type, new List<>());
     }
 
     private Node lexNodeAST(Text text) throws CompileException {

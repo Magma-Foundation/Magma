@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.core.F1;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.common.Declaration;
@@ -46,7 +46,7 @@ class CMagmaModifierTest {
         assertTransforms(input, (F1<Node, java.lang.Boolean, ?>) value -> {
             var list = value.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .foldRight(new JavaList<Node>(), JavaList::add);
+                    .foldRight(new List<Node>(), List::add);
             return list.first().filter(first -> first.is(Node.Type.Integer)).isPresent() &&
                    list.last().filter(last -> last.is(Node.Type.Integer)).isPresent();
         });
@@ -54,7 +54,7 @@ class CMagmaModifierTest {
 
     @Test
     void boolean_declared() {
-        var oldIdentity = new ValuedField(new JavaList<>(), new Text("test"), Primitive.Bool, Boolean.True);
+        var oldIdentity = new ValuedField(new List<>(), new Text("test"), Primitive.Bool, Boolean.True);
         assertTransforms(new Declaration(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()

@@ -1,6 +1,6 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -15,7 +15,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Text;
 
 public record FunctionLexer(Text text) implements Lexer {
-    private Function extractFunction(int paramStart, JavaList<Field.Flag> flags, Text name) throws CompileException {
+    private Function extractFunction(int paramStart, List<Field.Flag> flags, Text name) throws CompileException {
         try {
             int paramEnd = locateParameterEnd(paramStart);
             var parameters = splitParameters(paramStart, paramEnd);
@@ -36,20 +36,20 @@ public record FunctionLexer(Text text) implements Lexer {
                 .flatMap(this::extract);
     }
 
-    private JavaList<Field.Flag> extractFlags(Text flagString) throws CompileException {
+    private List<Field.Flag> extractFlags(Text flagString) throws CompileException {
         try {
             return Streams.apply(flagString.computeTrimmed()
                     .split(" "))
                     .filter(value -> !value.isBlank())
                     .map(String::toUpperCase)
                     .flatMap(this::validateFlag)
-                    .foldRight(new JavaList<>(), JavaList::add);
+                    .foldRight(new List<>(), List::add);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
     }
 
-    private Option<Function> attachValue(EmptyField identity, JavaList<Node> parameters, Option<Integer> valueSeparator) {
+    private Option<Function> attachValue(EmptyField identity, List<Node> parameters, Option<Integer> valueSeparator) {
         return valueSeparator.map(separator -> {
             var value = new Content(text.slice(separator + 2));
             return new Implementation(identity, value, parameters);
@@ -78,7 +78,7 @@ public record FunctionLexer(Text text) implements Lexer {
         return keys.lastIndexOfChar(' ')
                 .flatMap(space -> extractWithSeparator(paramStart, keys, space))
                 .or(() -> paramStart == 0
-                        ? new Some<>(extractFunction(paramStart, new JavaList<>(), new Text("")))
+                        ? new Some<>(extractFunction(paramStart, new List<>(), new Text("")))
                         : new None<>());
     }
 
@@ -103,13 +103,13 @@ public record FunctionLexer(Text text) implements Lexer {
         return new Content(slice);
     }
 
-    private JavaList<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {
+    private List<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {
         return Streams.apply(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                 .split(","))
                 .filter(value -> !value.isBlank())
                 .map(Text::new)
                 .map(Content::new)
-                .foldRight(new JavaList<>(), JavaList::add);
+                .foldRight(new List<>(), List::add);
     }
 
     private Stream<Field.Flag> validateFlag(String flagString) {

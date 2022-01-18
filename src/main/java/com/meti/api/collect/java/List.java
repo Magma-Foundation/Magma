@@ -9,33 +9,32 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class JavaList<T> {
-    private final List<T> value;
+public class List<T> {
+    private final java.util.List<T> value;
 
 
-    public JavaList() {
+    public List() {
         this(new ArrayList<>());
     }
 
-    public JavaList(List<T> value) {
+    public List(java.util.List<T> value) {
         this.value = value;
     }
 
     @SafeVarargs
-    public static <R> JavaList<R> apply(R... values) {
-        return new JavaList<>(new ArrayList<>(List.of(values)));
+    public static <R> List<R> apply(R... values) {
+        return new List<>(new ArrayList<>(java.util.List.of(values)));
     }
 
-    public JavaList<T> add(T node) {
+    public List<T> add(T node) {
         value.add(node);
         return this;
     }
 
-    public JavaList<T> addAll(JavaList<T> others) {
+    public List<T> addAll(List<T> others) {
         value.addAll(others.value);
         return this;
     }
@@ -61,8 +60,8 @@ public class JavaList<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        JavaList<?> javaList = (JavaList<?>) o;
-        return Objects.equals(value, javaList.value);
+        List<?> list = (List<?>) o;
+        return Objects.equals(value, list.value);
     }
 
     @Override
@@ -72,9 +71,9 @@ public class JavaList<T> {
                 .collect(Collectors.joining(",", "[", "]"));
     }
 
-    public JavaList<T> insert(int index, T value) {
+    public List<T> insert(int index, T value) {
         this.value.add(index, value);
-        return new JavaList<>(this.value);
+        return new List<>(this.value);
     }
 
     public boolean isEmpty() {

@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
@@ -12,16 +12,16 @@ import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.node.Node;
 
 public abstract class MappedDivider implements Divider {
-    protected final JavaMap<CFormat, JavaList<Node>> map;
+    protected final JavaMap<CFormat, List<Node>> map;
 
-    public MappedDivider(JavaMap<CFormat, JavaList<Node>> map) {
+    public MappedDivider(JavaMap<CFormat, List<Node>> map) {
         this.map = map;
     }
 
     @Override
     public Stream<Node> apply(CFormat format) throws CollectionException {
         return map.applyOptionally(format)
-                .map(JavaList::stream)
+                .map(List::stream)
                 .orElse(new EmptyStream<>());
     }
 
@@ -29,7 +29,7 @@ public abstract class MappedDivider implements Divider {
     public Divider divide(Node node) throws CompileException {
         try {
             return decompose(node)
-                    .map(JavaList::stream)
+                    .map(List::stream)
                     .orElse(Streams.apply(node))
                     .foldRight(this, MappedDivider::divideImpl);
         } catch (StreamException e) {
@@ -37,7 +37,7 @@ public abstract class MappedDivider implements Divider {
         }
     }
 
-    protected abstract Option<JavaList<Node>> decompose(Node node) throws CompileException;
+    protected abstract Option<List<Node>> decompose(Node node) throws CompileException;
 
     private MappedDivider divideImpl(Node node) throws StreamException {
         var format = apply(node);
@@ -48,9 +48,9 @@ public abstract class MappedDivider implements Divider {
 
     protected abstract CFormat apply(Node node);
 
-    protected abstract JavaList<Node> generate(CFormat format) throws StreamException;
+    protected abstract List<Node> generate(CFormat format) throws StreamException;
 
-    protected abstract JavaList<Node> modify(CFormat format, Node node, JavaList<Node> value);
+    protected abstract List<Node> modify(CFormat format, Node node, List<Node> value);
 
-    protected abstract MappedDivider complete(JavaMap<CFormat, JavaList<Node>> map) throws StreamException;
+    protected abstract MappedDivider complete(JavaMap<CFormat, List<Node>> map) throws StreamException;
 }

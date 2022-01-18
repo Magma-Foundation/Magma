@@ -1,6 +1,6 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -27,7 +27,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .collect(Collectors.toList());
-                JavaList<Field.Flag> innerFlags = new JavaList<>();
+                List<Field.Flag> innerFlags = new List<>();
                 for (String thisName : flagString) {
                     for (EmptyField.Flag value : EmptyField.Flag.values()) {
                         var thatName = value.name();
@@ -37,7 +37,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                     }
                 }
                 return innerFlags;
-            }).orElse(new JavaList<Field.Flag>());
+            }).orElse(new List<Field.Flag>());
             if (flags.contains(Field.Flag.Let) || flags.contains(Field.Flag.Const)) {
                 int valueSeparator = -1;
                 for (int i = 0; i < text.size(); i++) {

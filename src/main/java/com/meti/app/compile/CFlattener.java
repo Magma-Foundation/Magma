@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
@@ -24,13 +24,13 @@ public class CFlattener extends AbstractStage {
                 var withChildren = node.apply(Attribute.Type.Children)
                         .asStreamOfNodes1()
                         .map(this::flattenCache)
-                        .flatMap(JavaList::stream)
-                        .foldRight(new JavaList<Node>(), JavaList::add);
+                        .flatMap(List::stream)
+                        .foldRight(new List<Node>(), List::add);
                 if (innerCache.is(Node.Type.Cache)) {
                     var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
                     var withSubChildren = innerCache.apply(Attribute.Type.Children)
                             .asStreamOfNodes1()
-                            .foldRight(withChildren, JavaList::add);
+                            .foldRight(withChildren, List::add);
                     return new Cache(innerValue, withSubChildren);
                 } else {
                     return new Cache(innerCache, withChildren);
@@ -46,14 +46,14 @@ public class CFlattener extends AbstractStage {
         }
     }
 
-    private JavaList<Node> flattenCache(Node parent) throws AttributeException, StreamException {
+    private List<Node> flattenCache(Node parent) throws AttributeException, StreamException {
         if (parent.is(Node.Type.Cache)) {
             var value = parent.apply(Attribute.Type.Value).asNode();
             return parent.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .foldRight(JavaList.apply(value), JavaList::add);
+                    .foldRight(List.apply(value), List::add);
         } else {
-            return JavaList.apply(parent);
+            return List.apply(parent);
         }
     }
 
@@ -83,11 +83,11 @@ public class CFlattener extends AbstractStage {
         }
     }
 
-    private CacheBuilder<JavaList<Node>> flattenChildren(Node root, Attribute.Type type) throws StreamException, AttributeException {
+    private CacheBuilder<List<Node>> flattenChildren(Node root, Attribute.Type type) throws StreamException, AttributeException {
         return root.apply(type)
                 .asStreamOfNodes1()
                 .map(CacheBuilder::apply)
-                .foldRight(new CacheBuilder<>(new JavaList<>()),
-                        (previous, next) -> previous.append(next, JavaList::add));
+                .foldRight(new CacheBuilder<>(new List<>()),
+                        (previous, next) -> previous.append(next, List::add));
     }
 }

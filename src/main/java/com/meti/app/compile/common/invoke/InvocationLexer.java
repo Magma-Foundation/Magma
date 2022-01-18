@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.invoke;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.Option;
 import com.meti.app.compile.CompileException;
@@ -24,7 +24,7 @@ public record InvocationLexer(Text text) implements Lexer {
             var slice = text.slice(start + 1, end)
                     .computeTrimmed();
 
-            var lines = new JavaList<String>();
+            var lines = new List<String>();
             var buffer = new StringBuilder();
             int depth = 0;
             for (int i = 0; i < slice.length(); i++) {
@@ -46,7 +46,7 @@ public record InvocationLexer(Text text) implements Lexer {
                     .filter(s -> !s.isBlank())
                     .map(Text::new)
                     .map(Content::new)
-                    .foldRight(new JavaList<Node>(), JavaList::add);
+                    .foldRight(new List<Node>(), List::add);
             var caller = new Content(callerText);
             return new Invocation(caller, arguments);
         } catch (StreamException e) {

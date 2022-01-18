@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.node.Node;
@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class Field implements Node {
-    protected final JavaList<Flag> flags;
+    protected final List<Flag> flags;
     protected final Text name;
     protected final Node type;
 
-    public Field(JavaList<Flag> flags, Text name, Node type) {
+    public Field(List<Flag> flags, Text name, Node type) {
         this.flags = flags;
         this.name = name;
         this.type = type;
@@ -39,7 +39,7 @@ public abstract class Field implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

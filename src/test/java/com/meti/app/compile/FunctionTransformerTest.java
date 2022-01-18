@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FunctionTransformerTest {
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(new Text(name), Primitive.Void, new JavaList<>());
-        return new Implementation(identity, value, new JavaList<>());
+        var identity = new EmptyField(new Text(name), Primitive.Void, new List<>());
+        return new Implementation(identity, value, new List<>());
     }
 
     @Test
     void inner() throws CompileException {
         var inner = createFunction("inner", new Block());
-        var outer = createFunction("outer", new Cache(new Block(), JavaList.apply(inner)));
+        var outer = createFunction("outer", new Cache(new Block(), List.apply(inner)));
         var output = new FunctionTransformer(outer).transform().orElse(EmptyNode.EmptyNode_);
         assertTrue(output.is(Node.Type.Cache));
     }

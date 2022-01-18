@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.invoke;
 
-import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
@@ -14,16 +14,16 @@ import java.util.stream.Stream;
 
 public final class Invocation implements Node {
     private final Node caller;
-    private final JavaList<Node> arguments;
+    private final List<Node> arguments;
 
-    public Invocation(Node caller, JavaList<Node> arguments) {
+    public Invocation(Node caller, List<Node> arguments) {
         this.caller = caller;
         this.arguments = arguments;
     }
 
     public Invocation(Node caller, Node... arguments) {
         this.caller = caller;
-        this.arguments = JavaList.apply(arguments);
+        this.arguments = List.apply(arguments);
     }
 
     @Override
@@ -46,7 +46,7 @@ public final class Invocation implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
+        return new List<>(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override
@@ -61,7 +61,7 @@ public final class Invocation implements Node {
                 case Caller -> new Invocation(attribute.asNode(), arguments);
                 case Arguments -> new Invocation(caller, attribute
                         .asStreamOfNodes1()
-                        .foldRight(new JavaList<>(), JavaList::add));
+                        .foldRight(new List<>(), List::add));
                 default -> this;
             };
         } catch (StreamException e) {
