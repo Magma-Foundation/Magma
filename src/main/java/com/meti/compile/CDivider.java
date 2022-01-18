@@ -41,31 +41,6 @@ public class CDivider extends MappedDivider {
         return new None<>();
     }
 
-    private JavaList<Node> decomposeImplementation(Node node) throws CompileException {
-        try {
-            var identity = node.apply(Attribute.Type.Identity).asNode();
-            var parameters = node.apply(Attribute.Type.Parameters)
-                    .asStreamOfNodes1()
-                    .foldRight(new JavaList<Node>(), JavaList::add);
-            var abstraction = new Abstraction(identity, parameters);
-            return JavaList.apply(abstraction, node);
-        } catch (AttributeException | StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    private JavaList<Node> decomposeCache(Node node) throws CompileException {
-        try {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            return node.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
-                    .foldRight(new JavaList<Node>(), JavaList::add)
-                    .add(value);
-        } catch (AttributeException | StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
     @Override
     protected CFormat apply(Node node) {
         return node.is(Node.Type.Import)
@@ -99,6 +74,33 @@ public class CDivider extends MappedDivider {
     @Override
     protected MappedDivider complete(JavaMap<CFormat, JavaList<Node>> map) {
         return new CDivider(thisPackage, map);
+    }
+
+    private JavaList<Node> decomposeCache(Node node) throws CompileException {
+        try {
+            var value = node.apply(Attribute.Type.Value).asNode();
+            return node.apply(Attribute.Type.Children)
+                    .asStreamOfNodes1()
+                    .map(this::decompose)
+                    .map(option -> option.orElse(new JavaList<>()))
+                    .foldRight(new JavaList<Node>(), JavaList::addAll)
+                    .add(value);
+        } catch (AttributeException | StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private JavaList<Node> decomposeImplementation(Node node) throws CompileException {
+        try {
+            var identity = node.apply(Attribute.Type.Identity).asNode();
+            var parameters = node.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes1()
+                    .foldRight(new JavaList<Node>(), JavaList::add);
+            var abstraction = new Abstraction(identity, parameters);
+            return JavaList.apply(abstraction, node);
+        } catch (AttributeException | StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     @Override

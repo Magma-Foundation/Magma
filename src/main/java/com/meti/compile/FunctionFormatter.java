@@ -9,13 +9,14 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-class FunctionFormatter implements Transformer {
-    private final Node node;
-    private int counter = 0;
+record FunctionFormatter(Node node) implements Transformer {
+    /*
+    Not sure whether this should be static or not yet,
+    this could potentially be dangerous...
 
-    public FunctionFormatter(Node node) {
-        this.node = node;
-    }
+    - SirMathhman, 1/17/2021
+     */
+    private static int counter = -1;
 
     @Override
     public Option<Node> transform() throws CompileException {
@@ -24,7 +25,8 @@ class FunctionFormatter implements Transformer {
             var oldName = oldIdentity.apply(Attribute.Type.Name).asText();
             Text newName;
             if (oldName.isEmpty()) {
-                newName = new Text("__lambda" + counter++ + "__");
+                counter++;
+                newName = new Text("__lambda" + counter + "__");
             } else {
                 newName = oldName;
             }
