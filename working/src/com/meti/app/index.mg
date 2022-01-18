@@ -20,13 +20,15 @@ def describe(name : &I8, action : () => Void) => {
 }
 
 def assertTrue(value : Bool) => {
-    if(! value) {
-        result = false;
-    }
+    if(! value) result = false;
+}
+
+def assertFalse(value : Bool) => {
+    if(value) result = true;
 }
 
 def main() => {
-    describe("The assertions", () => {
+    describe("The assertions test", () => {
         it("should assert things to be true.", () => {
             assertTrue(true);
         });

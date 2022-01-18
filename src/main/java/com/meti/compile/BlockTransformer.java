@@ -2,6 +2,8 @@ package com.meti.compile;
 
 import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.cache.Cache;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Block;
@@ -35,14 +37,19 @@ public record BlockTransformer(Node root) implements Transformer {
         }
     }
 
-    private static Node transformInContext(Node oldChild) {
+    private static Node transformInContext(Node oldChild) throws AttributeException {
         if (oldChild.is(Node.Type.Implementation)) {
             return new Cache(EmptyNode_, oldChild);
         }
-        return shouldBeAsLine(oldChild) ? new Line(oldChild) : oldChild;
-    }
-
-    private static boolean shouldBeAsLine(Node child) {
-        return child.is(Node.Type.Binary) || child.is(Node.Type.Invocation);
+        if (oldChild.is(Node.Type.Binary) || oldChild.is(Node.Type.Invocation)) return new Line(oldChild);
+        if (oldChild.is(Node.Type.If)) {
+            var value = oldChild.apply(Attribute.Type.Value).asNode();
+            if (value.is(Node.Type.Block)) {
+                return oldChild;
+            } else {
+                return oldChild.with(Attribute.Type.Value, new NodeAttribute(new Line(value)));
+            }
+        }
+        return oldChild;
     }
 }
