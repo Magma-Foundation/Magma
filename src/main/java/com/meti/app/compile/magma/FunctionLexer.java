@@ -1,9 +1,9 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.JavaList;
-import com.meti.api.collect.Stream;
-import com.meti.api.collect.StreamException;
-import com.meti.api.collect.Streams;
+import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -103,7 +103,7 @@ public record FunctionLexer(Text text) implements Lexer {
         return new Content(slice);
     }
 
-    private JavaList<Node> splitParameters(Integer paramStart, int paramEnd) throws com.meti.api.collect.StreamException {
+    private JavaList<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {
         return Streams.apply(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                 .split(","))
                 .filter(value -> !value.isBlank())

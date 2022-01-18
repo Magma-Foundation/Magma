@@ -1,4 +1,4 @@
-package com.meti.api.collect;
+package com.meti.api.collect.stream;
 
 public class EmptyStream<T> extends AbstractStream<T> {
     @Override

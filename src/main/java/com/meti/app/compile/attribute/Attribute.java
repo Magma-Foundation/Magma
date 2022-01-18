@@ -30,7 +30,7 @@ public interface Attribute {
         throw new UnsupportedOperationException();
     }
 
-    default com.meti.api.collect.Stream<Field.Flag> asStreamOfFlags1() throws AttributeException {
+    default com.meti.api.collect.stream.Stream<Field.Flag> asStreamOfFlags1() throws AttributeException {
         throw new UnsupportedOperationException("Not a list of flags.");
     }
 
@@ -39,7 +39,7 @@ public interface Attribute {
         throw new AttributeException("Not a list of nodes.");
     }
 
-    default com.meti.api.collect.Stream<Node> asStreamOfNodes1() throws AttributeException {
+    default com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
         throw new AttributeException("Not a stream of nodes.");
     }
 

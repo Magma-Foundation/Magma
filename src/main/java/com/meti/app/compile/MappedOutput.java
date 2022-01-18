@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.JavaMap;
+import com.meti.api.collect.java.JavaMap;
 import com.meti.api.core.F2;
 import com.meti.app.compile.clang.CFormat;
 

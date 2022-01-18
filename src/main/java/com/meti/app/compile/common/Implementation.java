@@ -1,6 +1,6 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.JavaList;
+import com.meti.api.collect.java.JavaList;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;

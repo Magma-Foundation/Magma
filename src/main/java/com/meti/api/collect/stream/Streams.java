@@ -1,5 +1,6 @@
-package com.meti.api.collect;
+package com.meti.api.collect.stream;
 
+import com.meti.api.collect.java.JavaList;
 import com.meti.api.option.Option;
 
 public class Streams {

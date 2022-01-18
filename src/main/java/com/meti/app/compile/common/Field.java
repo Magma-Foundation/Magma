@@ -1,7 +1,7 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.JavaList;
-import com.meti.api.collect.StreamException;
+import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Text;
@@ -38,7 +38,7 @@ public abstract class Field implements Node {
     }
 
     @Override
-    public com.meti.api.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 

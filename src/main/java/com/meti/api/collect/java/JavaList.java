@@ -1,5 +1,9 @@
-package com.meti.api.collect;
+package com.meti.api.collect.java;
 
+import com.meti.api.collect.stream.AbstractStream;
+import com.meti.api.collect.stream.EndOfStreamException;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;

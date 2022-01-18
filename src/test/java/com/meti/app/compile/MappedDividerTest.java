@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.JavaList;
+import com.meti.api.collect.java.JavaList;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.node.Node;

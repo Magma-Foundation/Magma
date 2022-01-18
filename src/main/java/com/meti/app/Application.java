@@ -1,6 +1,6 @@
 package com.meti.app;
 
-import com.meti.api.collect.JavaMap;
+import com.meti.api.collect.java.JavaMap;
 import com.meti.api.io.Path;
 import com.meti.app.compile.CMagmaCompiler;
 import com.meti.app.compile.Output;

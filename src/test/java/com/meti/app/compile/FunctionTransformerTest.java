@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.JavaList;
+import com.meti.api.collect.java.JavaList;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;

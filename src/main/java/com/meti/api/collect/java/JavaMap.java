@@ -1,4 +1,4 @@
-package com.meti.api.collect;
+package com.meti.api.collect.java;
 
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;

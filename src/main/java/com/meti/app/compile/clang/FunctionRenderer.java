@@ -1,6 +1,6 @@
 package com.meti.app.compile.clang;
 
-import com.meti.api.collect.StreamException;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;

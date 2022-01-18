@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.StreamException;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute1;

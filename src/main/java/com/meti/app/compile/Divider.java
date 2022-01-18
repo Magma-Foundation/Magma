@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.Stream;
+import com.meti.api.collect.stream.Stream;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.node.Node;
 

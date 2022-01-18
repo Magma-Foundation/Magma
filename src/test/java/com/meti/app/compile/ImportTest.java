@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.JavaMap;
+import com.meti.api.collect.java.JavaMap;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.source.Packaging;
 import org.junit.jupiter.api.Test;

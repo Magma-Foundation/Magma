@@ -1,6 +1,6 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.JavaList;
+import com.meti.api.collect.java.JavaList;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;

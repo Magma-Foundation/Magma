@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.Stream;
-import com.meti.api.collect.Streams;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;

@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.api.collect.JavaList;
+import com.meti.api.collect.java.JavaList;
 import com.meti.api.core.F1;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.common.Declaration;

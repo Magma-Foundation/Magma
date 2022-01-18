@@ -1,9 +1,9 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.api.collect.EmptyStream;
-import com.meti.api.collect.JavaList;
-import com.meti.api.collect.StreamException;
-import com.meti.api.collect.Streams;
+import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.stream.EmptyStream;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodesAttribute1;
@@ -35,7 +35,7 @@ public record Block(JavaList<Node> children) implements Node {
     }
 
     @Override
-    public com.meti.api.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
                 ? Streams.apply(Attribute.Type.Children)
                 : new EmptyStream<>();
