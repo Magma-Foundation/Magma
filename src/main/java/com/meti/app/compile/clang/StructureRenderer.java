@@ -23,11 +23,7 @@ final class StructureRenderer extends AbstractProcessor<Output> {
         try {
             var name = renderName();
             var fields = renderFields();
-            return name.prepend("struct ")
-                    .appendSlice("{")
-                    .appendSlice(fields)
-                    .appendSlice("}")
-                    .appendSlice(";");
+            return name.prepend("struct ").appendSlice(fields).appendSlice(";");
         } catch (AttributeException | StreamException e) {
             throw new CompileException(e);
         }
