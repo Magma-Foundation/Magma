@@ -1,6 +1,7 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;

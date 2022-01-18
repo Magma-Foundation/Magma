@@ -1,6 +1,7 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
@@ -50,7 +51,7 @@ public abstract class Function implements Node {
             return switch (type) {
                 case Identity -> complete(attribute.asNode(), parameters);
                 case Parameters -> complete(identity, attribute.asStreamOfNodes1()
-                        .foldRight(List.createList(), List::add));
+                        .foldRight(List.<Node>createList(), List::add));
                 default -> throw new AttributeException(type);
             };
         } catch (StreamException e) {
