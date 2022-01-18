@@ -36,11 +36,13 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
 
             var division = new JavaList<>(lexed)
                     .stream()
-                    .map(resolver::transformNodeAST)
-                    .map(formatter::transformNodeAST)
-                    .map(modifier::transformNodeAST)
-                    .map(flattener::transformNodeAST)
-                    .foldRight(divider, Divider::divide);
+                    .map(value -> {
+                        var resolved = resolver.transformNodeAST(value);
+                        var formatted = formatter.transformNodeAST(resolved);
+                        var modified = modifier.transformNodeAST(formatted);
+                        var flattened = flattener.transformNodeAST(modified);
+                        return flattened;
+                    }).foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {

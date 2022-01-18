@@ -15,11 +15,18 @@ import com.meti.option.Option;
 import com.meti.option.Some;
 
 public record FunctionLexer(Text text) implements Lexer {
-    private Option<Function> attachValue(EmptyField identity, JavaList<Node> parameters, Option<Integer> valueSeparator) {
-        return valueSeparator.map(separator -> {
-            var value = new Content(text.slice(separator + 2));
-            return new Implementation(identity, parameters, value);
-        });
+    private Function extractFunction(int paramStart, JavaList<Field.Flag> flags, Text name) throws CompileException {
+        try {
+            int paramEnd = locateParameterEnd(paramStart);
+            var parameters = splitParameters(paramStart, paramEnd);
+            var valueSeparator = text.firstIndexOfSlice("=>", paramEnd);
+            var returnType = extractReturnType(paramEnd, valueSeparator);
+            var identity = new EmptyField(name, returnType, flags);
+            var map = attachValue(identity, parameters, valueSeparator);
+            return map.orElseGet(() -> new Abstraction(identity, parameters));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     @Override
@@ -42,18 +49,11 @@ public record FunctionLexer(Text text) implements Lexer {
         }
     }
 
-    private Function extractFunction(int paramStart, JavaList<Field.Flag> flags, Text name) throws CompileException {
-        try {
-            int paramEnd = locateParameterEnd(paramStart);
-            var parameters = splitParameters(paramStart, paramEnd);
-            var valueSeparator = text.firstIndexOfSlice("=>", paramEnd);
-            var returnType = extractReturnType(paramEnd, valueSeparator);
-            var identity = new EmptyField(flags, name, returnType);
-            var map = attachValue(identity, parameters, valueSeparator);
-            return map.orElseGet(() -> new Abstraction(identity, parameters));
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
+    private Option<Function> attachValue(EmptyField identity, JavaList<Node> parameters, Option<Integer> valueSeparator) {
+        return valueSeparator.map(separator -> {
+            var value = new Content(text.slice(separator + 2));
+            return new Implementation(identity, value, parameters);
+        });
     }
 
     private Node extractReturnType(int paramEnd, Option<Integer> valueSeparator) {

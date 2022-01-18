@@ -33,8 +33,8 @@ class FunctionTransformerTest {
     }
 
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(new JavaList<>(), new Text(name), Primitive.Void);
-        return new Implementation(identity, new JavaList<>(), value);
+        var identity = new EmptyField(new Text(name), Primitive.Void, new JavaList<>());
+        return new Implementation(identity, value, new JavaList<>());
     }
 
     @Test

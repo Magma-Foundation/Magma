@@ -72,6 +72,7 @@ public abstract class Field implements Node {
         try {
             var joinedFlags = flags.stream()
                     .map(Flag::toString)
+                    .map(value -> "\"" + value + "\"")
                     .foldRight((current, next) -> current + "," + next)
                     .map(value -> "[" + value + "]")
                     .orElse("[]");

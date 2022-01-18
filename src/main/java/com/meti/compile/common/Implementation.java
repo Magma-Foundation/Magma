@@ -12,9 +12,39 @@ import java.util.stream.Stream;
 public final class Implementation extends Function {
     private final Node body;
 
-    public Implementation(Node identity, JavaList<Node> parameters, Node body) {
+    public Implementation(Node identity, Node body, Node... parameters) {
+        this(identity, body, JavaList.apply(parameters));
+    }
+
+    public Implementation(Node identity, Node body, JavaList<Node> parameters) {
         super(identity, parameters);
         this.body = body;
+    }
+
+    @Override
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        return type == Attribute.Type.Value
+                ? new NodeAttribute(body)
+                : super.apply(type);
+    }
+
+    @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Node
+                ? Stream.of(Attribute.Type.Value)
+                : super.apply(group);
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return type == Attribute.Type.Value
+                ? new Implementation(identity, attribute.asNode(), parameters)
+                : super.with(type, attribute);
+    }
+
+    @Override
+    protected Node complete(Node node, JavaList<Node> parameters) {
+        return new Implementation(node, body, parameters);
     }
 
     @Override
@@ -28,32 +58,6 @@ public final class Implementation extends Function {
         if (o == null || getClass() != o.getClass()) return false;
         Implementation that = (Implementation) o;
         return super.equals(o) && Objects.equals(body, that.body);
-    }
-
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Value)
-                : super.apply(group);
-    }
-
-    @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new NodeAttribute(body)
-                : super.apply(type);
-    }
-
-    @Override
-    protected Node complete(Node node, JavaList<Node> parameters) {
-        return new Implementation(node, parameters, body);
-    }
-
-    @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new Implementation(identity, parameters, attribute.asNode())
-                : super.with(type, attribute);
     }
 
     @Override

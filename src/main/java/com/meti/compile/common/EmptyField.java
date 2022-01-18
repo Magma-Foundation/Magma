@@ -5,13 +5,17 @@ import com.meti.compile.node.Node;
 import com.meti.compile.node.Text;
 
 public class EmptyField extends Field {
-    public EmptyField(JavaList<Flag> flags, Text name, Node type) {
+    public EmptyField(Text name, Node type, Flag... flags) {
+        this(name, type, JavaList.apply(flags));
+    }
+
+    public EmptyField(Text name, Node type, JavaList<Flag> flags) {
         super(flags, name, type);
     }
 
     @Override
     protected Field complete(Text name, Node type) {
-        return new EmptyField(flags, name, type);
+        return new EmptyField(name, type, flags);
     }
 
     @Override

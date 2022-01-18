@@ -54,7 +54,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                     var typeText = text.slice(typeSeparator + 1);
                     var type = new Content(typeText);
 
-                    return new Some<>(new Declaration(new EmptyField(flags, nameText, type)));
+                    return new Some<>(new Declaration(new EmptyField(nameText, type, flags)));
                 } else {
                     var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
 

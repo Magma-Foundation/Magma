@@ -1,10 +1,7 @@
 package com.meti.compile;
 
-import com.meti.collect.CollectionException;
-import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
-import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.cache.Cache;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Block;
@@ -28,34 +25,19 @@ public record BlockTransformer(Node root) implements Transformer {
         try {
             return root.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .map(BlockTransformer::transformChild)
-                    .foldRight(new Cache.Prototype<>(new Block.Builder()), Cache.Prototype::append)
-                    .toCache();
+                    .map(BlockTransformer::transformInContext)
+                    .foldRight(new Block.Builder(), Block.Builder::add)
+                    .build();
         } catch (StreamException e) {
             throw new CompileException(e);
         }
     }
 
-    private static Cache.Prototype<Block.Builder> transformChild(Node oldChild) throws CollectionException, AttributeException {
-        var prototype = createPrototype(oldChild);
-        if (oldChild.is(Node.Type.Cache)) {
-            var value = oldChild.apply(Attribute.Type.Value).asNode();
-            var children = oldChild.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
-                    .foldRight(new JavaList<Node>(), JavaList::add);
-            var newPrototype = createPrototype(value);
-            return newPrototype.append(children);
-        } else {
-            return prototype;
-        }
-    }
-
-    private static Cache.Prototype<Block.Builder> createPrototype(Node oldChild) {
+    private static Node transformInContext(Node oldChild) {
         if (oldChild.is(Node.Type.Implementation)) {
-            return new Cache.Prototype<>(new Block.Builder(), oldChild);
+            return new Cache(new Block(), oldChild);
         }
-        var newChild = shouldBeAsLine(oldChild) ? new Line(oldChild) : oldChild;
-        return new Cache.Prototype<>(new Block.Builder().add(newChild));
+        return shouldBeAsLine(oldChild) ? new Line(oldChild) : oldChild;
     }
 
     private static boolean shouldBeAsLine(Node child) {

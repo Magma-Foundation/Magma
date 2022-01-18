@@ -70,8 +70,8 @@ class CMagmaModifierTest {
 
     @Test
     void inner() {
-        var identity = new EmptyField(new JavaList<>(), new Text("inner"), Primitive.Void);
-        var function = new Implementation(identity, new JavaList<>(), new Block());
+        var identity = new EmptyField(new Text("inner"), Primitive.Void, new JavaList<>());
+        var function = new Implementation(identity, new Block(), new JavaList<>());
         var input = new Block(JavaList.apply(function));
         var output = new Cache(new Block(), JavaList.apply(function));
         assertTransforms(input, output);

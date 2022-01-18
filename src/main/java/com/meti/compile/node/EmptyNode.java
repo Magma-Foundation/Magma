@@ -14,6 +14,11 @@ public class EmptyNode implements Node {
     }
 
     @Override
+    public String toString() {
+        return "\"Empty\"";
+    }
+
+    @Override
     @Deprecated
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Stream.empty();
