@@ -1,6 +1,5 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.JavaList;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Text;
