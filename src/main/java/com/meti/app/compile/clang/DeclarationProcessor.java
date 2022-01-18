@@ -6,7 +6,7 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.render.Processor;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 
 public record DeclarationProcessor(Node node) implements Processor<Output> {
