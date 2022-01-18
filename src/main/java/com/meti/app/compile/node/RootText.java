@@ -129,11 +129,6 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text prependRaw(String prefix) {
-        return new RootText(prefix + value);
-    }
-
-    @Override
     public int size() {
         return trimmedValue.length();
     }

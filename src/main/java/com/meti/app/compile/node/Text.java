@@ -35,8 +35,6 @@ public interface Text {
 
     Text prepend(String prefix);
 
-    Text prependRaw(String prefix);
-
     int size();
 
     Text slice(int start, int end);
