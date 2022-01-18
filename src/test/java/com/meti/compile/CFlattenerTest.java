@@ -31,6 +31,18 @@ class CFlattenerTest {
     }
 
     @Test
+    void inner_cache() throws CompileException {
+        var inner = new Cache(new Variable("first"), new Variable("second"));
+        var outer = new Cache(inner, new Variable("third"));
+
+        var actual = new CFlattener().transformNodeAST(outer);
+        var expected = new Cache(new Variable("first"),
+                new Variable("third"),
+                new Variable("second"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void once() throws CompileException {
         var input = new Block(new Cache(EmptyNode_, new Variable("test")));
         var actual = new CFlattener().transformNodeAST(input);
