@@ -1,5 +1,11 @@
 plugins {
+    id 'application'
     id 'java'
+}
+
+application {
+    mainClass.set('com.meti.Main')
+    tasks.run.setWorkingDir(new File("./working"))
 }
 
 group 'com.meti'
