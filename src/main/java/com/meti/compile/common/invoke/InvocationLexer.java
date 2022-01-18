@@ -2,7 +2,6 @@ package com.meti.compile.common.invoke;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
-import com.meti.collect.Streams;
 import com.meti.compile.CompileException;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
@@ -22,9 +21,28 @@ public record InvocationLexer(Text text) implements Lexer {
     private Invocation extract(Integer start, Integer end) throws CompileException {
         try {
             var callerText = text.slice(0, start);
-            var arguments = Streams.apply(text.slice(start + 1, end)
-                    .computeTrimmed()
-                    .split(","))
+            var slice = text.slice(start + 1, end)
+                    .computeTrimmed();
+
+            var lines = new JavaList<String>();
+            var buffer = new StringBuilder();
+            int depth = 0;
+            for (int i = 0; i < slice.length(); i++) {
+                var c = slice.charAt(i);
+                if (c == ',' && depth == 0) {
+                    lines.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else {
+                    if (c == '(') depth++;
+                    if (c == ')') depth--;
+                    buffer.append(c);
+                }
+            }
+
+            lines.add(buffer.toString());
+
+            var arguments = lines
+                    .stream()
                     .filter(s -> !s.isBlank())
                     .map(Text::new)
                     .map(Content::new)

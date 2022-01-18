@@ -203,10 +203,14 @@ public record MagmaLexer(Text text) {
     }
 
     private Node lexNodeAST(Text text) throws CompileException {
-        var node = lexNode(text);
-        var withFields = attachDeclaration(node);
-        var withDeclarations = attachDeclarations(withFields);
-        var withNode = attachNode(withDeclarations);
-        return attachNodes(withNode);
+        try {
+            var node = lexNode(text);
+            var withFields = attachDeclaration(node);
+            var withDeclarations = attachDeclarations(withFields);
+            var withNode = attachNode(withDeclarations);
+            return attachNodes(withNode);
+        } catch (CompileException e) {
+            throw new CompileException("Failed to lex node: \"" + text + "\"", e);
+        }
     }
 }
