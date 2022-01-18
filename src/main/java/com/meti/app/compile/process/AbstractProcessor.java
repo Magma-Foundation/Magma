@@ -3,11 +3,10 @@ package com.meti.app.compile.process;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.AttributeException;
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Output;
 
-public abstract class AbstractProcessor implements Processor<Output> {
+public abstract class AbstractProcessor<T> implements Processor<T> {
     protected final Node node;
 
     public AbstractProcessor(Node node) {
@@ -15,15 +14,11 @@ public abstract class AbstractProcessor implements Processor<Output> {
     }
 
     @Override
-    public Option<Output> process() throws AttributeException {
-        if (validate()) {
-            return new Some<>(createNode());
-        } else {
-            return new None<>();
-        }
+    public Option<T> process() throws CompileException {
+        return validate() ? new Some<>(createNode()) : new None<T>();
     }
 
     protected abstract boolean validate();
 
-    protected abstract Output createNode() throws AttributeException;
+    protected abstract T createNode() throws CompileException;
 }

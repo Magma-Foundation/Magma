@@ -6,7 +6,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.AbstractProcessor;
 import com.meti.app.compile.text.Output;
 
-public final class VariableProcessor extends AbstractProcessor {
+public final class VariableProcessor extends AbstractProcessor<Output> {
     public VariableProcessor(Node node) {
         super(node);
     }

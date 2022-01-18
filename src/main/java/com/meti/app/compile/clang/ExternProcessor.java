@@ -15,7 +15,9 @@ public record ExternProcessor(Node node) implements Processor<Output> {
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Extern)) {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
-                    .asOutput().computeTrimmed() + ".h>\n"));
+                    .asInput()
+                    .toOutput()
+                    .computeTrimmed() + ".h>\n"));
         } else {
             return new None<>();
         }

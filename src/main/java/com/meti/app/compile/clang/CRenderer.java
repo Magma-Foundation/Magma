@@ -109,7 +109,7 @@ public record CRenderer(Node root) {
                 new LineProcessor(node),
                 new ReturnProcessor(node),
                 new StringProcessor(node),
-                new StructureProcessor(node),
+                new StructureRenderer(node),
                 new UnaryProcessor(node),
                 new VariableProcessor(node));
 

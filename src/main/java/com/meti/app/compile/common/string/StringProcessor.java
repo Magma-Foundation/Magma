@@ -13,7 +13,10 @@ public record StringProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.String)) {
-            return new Some<>(node.apply(Attribute.Type.Value).asOutput());
+            return new Some<>(node
+                    .apply(Attribute.Type.Value)
+                    .asInput()
+                    .toOutput());
         } else {
             return new None<>();
         }
