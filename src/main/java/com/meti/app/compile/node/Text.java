@@ -1,142 +1,51 @@
 package com.meti.app.compile.node;
 
-import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 
-import java.util.Objects;
+public interface Text {
+    Text append(String slice);
 
-public final class Text {
-    public final String trimmedValue;
-    private final String value;
+    Text append(Text other);
 
-    public Text(String value) {
-        this.value = value;
-        trimmedValue = value.trim();
-    }
+    Text appendRaw(String suffix);
 
-    public Text append(String slice) {
-        return new Text(trimmedValue + slice);
-    }
+    char apply(int index);
 
-    public Text append(Text other) {
-        return new Text(trimmedValue + other.trimmedValue);
-    }
+    String compute();
 
-    public Text appendRaw(String suffix) {
-        return new Text(value + suffix);
-    }
+    String computeTrimmed();
 
-    public char apply(int index) {
-        return trimmedValue.charAt(index);
-    }
+    boolean containsChar(char c);
 
-    public String compute() {
-        return value;
-    }
+    boolean endsWithChar(char c);
 
-    public String computeTrimmed() {
-        return trimmedValue;
-    }
+    Option<Integer> firstIndexOfChar(char c);
 
-    public boolean containsChar(char c) {
-        return trimmedValue.indexOf(c) != -1;
-    }
+    Option<Integer> firstIndexOfCharWithOffset(char c, int offset);
 
-    public boolean endsWithChar(char c) {
-        var trimmed = trimmedValue;
-        return trimmed.length() != 0 && trimmed.charAt(trimmed.length() - 1) == c;
-    }
+    Option<Integer> firstIndexOfSlice(String slice);
 
-    public Option<Integer> firstIndexOfChar(char c) {
-        var index = trimmedValue.indexOf(c);
-        return index == -1
-                ? new None<>()
-                : new Some<>(index);
-    }
+    Option<Integer> firstIndexOfSlice(String slice, int offset);
 
-    public Option<Integer> firstIndexOfCharWithOffset(char c, int offset) {
-        var index = trimmedValue.indexOf(c, offset);
-        return index == -1
-                ? new None<>()
-                : new Some<>(index);
-    }
+    boolean hasContent();
 
-    public Option<Integer> firstIndexOfSlice(String slice) {
-        var index = trimmedValue.indexOf(slice);
-        return index == -1
-                ? new None<>()
-                : new Some<>(index);
-    }
+    boolean isEmpty();
 
-    public Option<Integer> firstIndexOfSlice(String slice, int offset) {
-        var index = trimmedValue.indexOf(slice, offset);
-        return index == -1
-                ? new None<>()
-                : new Some<>(index);
-    }
+    Option<Integer> lastIndexOfChar(char c);
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(trimmedValue, value);
-    }
+    Text prepend(String prefix);
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Text text)) return false;
-        return Objects.equals(trimmedValue, text.trimmedValue);
-    }
+    Text prependRaw(String prefix);
 
-    @Override
-    public String toString() {
-        return "\"" + value + "\"";
-    }
+    int size();
 
-    public boolean isEmpty() {
-        return trimmedValue.length() == 0;
-    }
+    Text slice(int start, int end);
 
-    public Option<Integer> lastIndexOfChar(char c) {
-        var index = trimmedValue.lastIndexOf(c);
-        return index == -1
-                ? new None<>()
-                : new Some<>(index);
-    }
+    Text slice(int offset);
 
-    public Text prepend(String prefix) {
-        return new Text(prefix + trimmedValue);
-    }
+    Text sliceRaw(int start, int end);
 
-    public Text prependRaw(String prefix) {
-        return new Text(prefix + value);
-    }
+    boolean startsWithChar(char c);
 
-    public int size() {
-        return trimmedValue.length();
-    }
-
-    public Text slice(int start, int end) {
-        return new Text(trimmedValue.substring(start, end));
-    }
-
-    public Text slice(int offset) {
-        return new Text(trimmedValue.substring(offset));
-    }
-
-    public Text sliceRaw(int start, int end) {
-        return new Text(value.substring(start, end));
-    }
-
-    public boolean startsWithChar(char c) {
-        return hasContent() && trimmedValue.indexOf(c) == 0;
-    }
-
-    private boolean hasContent() {
-        return trimmedValue.length() != 0;
-    }
-
-    public boolean startsWithSlice(String slice) {
-        return trimmedValue.startsWith(slice);
-    }
+    boolean startsWithSlice(String slice);
 }

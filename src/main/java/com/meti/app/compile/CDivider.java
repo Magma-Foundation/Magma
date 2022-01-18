@@ -15,7 +15,7 @@ import com.meti.app.compile.common.Abstraction;
 import com.meti.app.compile.common.Import;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.source.Packaging;
 
 import static com.meti.app.compile.clang.CFormat.Header;
@@ -62,7 +62,7 @@ public class CDivider extends MappedDivider {
             return Streams.apply("\n#ifndef " + header + "\n",
                     "\n#define " + header + "\n",
                     "\n#endif\n")
-                    .map(Text::new)
+                    .map(RootText::new)
                     .map(Content::new)
                     .foldRight(List.createList(), List::add);
         }

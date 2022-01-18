@@ -13,7 +13,7 @@ import com.meti.app.compile.common.returns.Return;
 import com.meti.app.compile.common.variable.Variable;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.node.RootText;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,7 +54,7 @@ class CMagmaModifierTest {
 
     @Test
     void boolean_declared() {
-        var oldIdentity = new ValuedField(List.createList(), new Text("test"), Primitive.Bool, Boolean.True);
+        var oldIdentity = new ValuedField(List.createList(), new RootText("test"), Primitive.Bool, Boolean.True);
         assertTransforms(new Declaration(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()

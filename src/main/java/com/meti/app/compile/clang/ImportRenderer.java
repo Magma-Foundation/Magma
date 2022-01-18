@@ -6,6 +6,7 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 import com.meti.app.compile.render.Renderer;
 
@@ -19,7 +20,7 @@ public record ImportRenderer(Node node) implements Renderer {
             var parent = packaging.streamParent().collect(Collectors.joining("/"));
             var name = packaging.computeName();
             var formatted = parent.isEmpty() ? name : parent + "/" + name;
-            return new Some<>(new Text("#include \"" + formatted + ".h\"\n"));
+            return new Some<>(new RootText("#include \"" + formatted + ".h\"\n"));
         } else {
             return new None<>();
         }

@@ -5,17 +5,14 @@ import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.node.EmptyNode;
-import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.node.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FunctionTransformerTest {
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(new Text(name), Primitive.Void, List.createList());
+        var identity = new EmptyField(new RootText(name), Primitive.Void, List.createList());
         return new Implementation(identity, value, List.createList());
     }
 

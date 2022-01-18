@@ -1,7 +1,6 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -13,6 +12,7 @@ import com.meti.app.compile.common.*;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 public record FunctionLexer(Text text) implements Lexer {
@@ -79,7 +79,7 @@ public record FunctionLexer(Text text) implements Lexer {
         return keys.lastIndexOfChar(' ')
                 .flatMap(space -> extractWithSeparator(paramStart, keys, space))
                 .or(() -> paramStart == 0
-                        ? new Some<>(extractFunction(paramStart, List.createList(), new Text("")))
+                        ? new Some<>(extractFunction(paramStart, List.createList(), new RootText("")))
                         : new None<>());
     }
 
@@ -108,7 +108,7 @@ public record FunctionLexer(Text text) implements Lexer {
         return Streams.apply(text.slice(paramStart + 1, paramEnd).computeTrimmed()
                 .split(","))
                 .filter(value -> !value.isBlank())
-                .map(Text::new)
+                .map(RootText::new)
                 .map(Content::new)
                 .foldRight(List.createList(), List::add);
     }

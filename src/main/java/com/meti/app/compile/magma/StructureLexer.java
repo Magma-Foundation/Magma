@@ -6,6 +6,7 @@ import com.meti.app.compile.common.Structure;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public record StructureLexer(Text text) implements Lexer {
         var fields = text.slice(fieldsStart + 1, text.size() - 1);
         var fieldsList = Arrays.stream(fields.computeTrimmed().split(";"))
                 .filter(value -> !value.isBlank())
-                .map(Text::new)
+                .map(RootText::new)
                 .map(Content::new)
                 .collect(Collectors.<Node>toList());
         return new Structure(name, fieldsList);

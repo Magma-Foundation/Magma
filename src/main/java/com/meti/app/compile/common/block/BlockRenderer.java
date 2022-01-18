@@ -6,6 +6,7 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 import com.meti.app.compile.render.Renderer;
 
@@ -20,7 +21,7 @@ public record BlockRenderer(Node node) implements Renderer {
             for (Node node1 : children) {
                 builder.append(node1.apply(Attribute.Type.Value).asText().computeTrimmed());
             }
-            return new Some<>(new Text(builder.append("}").toString()));
+            return new Some<>(new RootText(builder.append("}").toString()));
         }
         return new None<>();
     }

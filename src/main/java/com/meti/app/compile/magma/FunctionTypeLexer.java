@@ -4,6 +4,7 @@ import com.meti.api.option.Option;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 import java.util.Arrays;
@@ -21,7 +22,7 @@ public record FunctionTypeLexer(Text text) implements Lexer {
         var parameters = Arrays.stream(text.slice(1, end).computeTrimmed().split(","))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
-                .map(Text::new)
+                .map(RootText::new)
                 .map(Content::new)
                 .collect(Collectors.<Node>toList());
         return text.firstIndexOfSlice("=>").map(separator -> {

@@ -8,6 +8,7 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 public class ValuedField extends Field {
@@ -30,7 +31,9 @@ public class ValuedField extends Field {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value ? new ValuedField(flags, name, this.type, attribute.asNode()) : super.with(type, attribute);
+        return type == Attribute.Type.Value
+                ? new ValuedField(flags, name, this.type, attribute.asNode())
+                : super.with(type, attribute);
     }
 
     @Override

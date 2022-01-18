@@ -7,6 +7,7 @@ import com.meti.app.compile.CompileException;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 public record InvocationLexer(Text text) implements Lexer {
@@ -44,7 +45,7 @@ public record InvocationLexer(Text text) implements Lexer {
             var arguments = lines
                     .stream()
                     .filter(s -> !s.isBlank())
-                    .map(Text::new)
+                    .map(RootText::new)
                     .map(Content::new)
                     .foldRight(List.<Node>createList(), List::add);
             var caller = new Content(callerText);

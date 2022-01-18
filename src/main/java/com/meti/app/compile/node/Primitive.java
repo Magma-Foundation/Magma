@@ -14,7 +14,7 @@ public enum Primitive implements Node {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new TextAttribute(new Text(name()));
+        if (type == Attribute.Type.Name) return new TextAttribute(new RootText(name()));
         throw new AttributeException(type);
     }
 

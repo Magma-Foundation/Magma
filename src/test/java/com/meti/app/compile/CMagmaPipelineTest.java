@@ -6,7 +6,7 @@ import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.Primitive;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.source.Packaging;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class CMagmaPipelineTest {
 
     @Test
     void perform() throws CompileException {
-        var identity = new EmptyField(new Text("test"), Primitive.Void, Field.Flag.Def);
+        var identity = new EmptyField(new RootText("test"), Primitive.Void, Field.Flag.Def);
         var impl = new Implementation(identity, new Block());
         var root = new Block(impl);
 

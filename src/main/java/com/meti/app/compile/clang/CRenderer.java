@@ -20,6 +20,7 @@ import com.meti.app.compile.common.string.StringRenderer;
 import com.meti.app.compile.common.variable.VariableRenderer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 import com.meti.app.compile.render.EmptyRenderer;
 import com.meti.app.compile.render.RenderException;
@@ -65,7 +66,7 @@ public record CRenderer(Node root) {
                 default -> throw new RenderException("Unknown bit quantity: " + bits);
             };
             var value = (isSigned ? "" : "unsigned ") + suffix + " " + name.computeTrimmed();
-            return new Text(value);
+            return new RootText(value);
         } else {
             throw new RenderException("Cannot render type: " + type);
         }
@@ -140,7 +141,7 @@ public record CRenderer(Node root) {
     }
 
     private static Text renderType(Node oldParameter) throws CompileException {
-        return renderField(new EmptyField(new Text(""), oldParameter, List.createList()));
+        return renderField(new EmptyField(new RootText(""), oldParameter, List.createList()));
     }
 
     public Text render() throws CompileException {

@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.node.RootText;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,7 +12,7 @@ class SplitterTest {
 
     @Test
     void split() {
-        var value = new Text("test(() => {})");
+        var value = new RootText("test(() => {})");
         var actual = new Splitter(value)
                 .split()
                 .collect(Collectors.toList());

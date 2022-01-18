@@ -8,6 +8,7 @@ import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 import com.meti.app.source.Packaging;
 
@@ -23,7 +24,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
     private Output<String> compileInput(Packaging thisPackage, String input) throws CompileException {
         if (input.isBlank()) return new EmptyOutput<>();
 
-        var root = new Text(input);
+        var root = new RootText(input);
         var lines = split(root);
         var lexed = lex(lines);
         try {
@@ -40,7 +41,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         }
     }
 
-    private java.util.List<Text> split(Text root) {
+    private java.util.List<Text> split(RootText root) {
         return new Splitter(root)
                 .split()
                 .collect(Collectors.toList());

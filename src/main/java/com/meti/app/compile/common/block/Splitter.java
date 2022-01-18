@@ -1,8 +1,10 @@
 package com.meti.app.compile.common.block;
 
+import com.meti.app.compile.node.RootText;
 import com.meti.app.compile.node.Text;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record Splitter(Text text) {
@@ -30,7 +32,7 @@ public record Splitter(Text text) {
 
         lines.add(buffer.toString());
         return lines.stream()
-                .map(Text::new)
+                .map((Function<String, Text>) RootText::new)
                 .filter(text -> !text.isEmpty());
     }
 }
