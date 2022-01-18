@@ -5,6 +5,7 @@ import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
+import com.meti.compile.cache.Cache;
 import com.meti.compile.common.Line;
 import com.meti.compile.common.block.Block;
 import com.meti.compile.node.Node;

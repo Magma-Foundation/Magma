@@ -17,6 +17,10 @@ public record Block(JavaList<Node> children) implements Node {
         this(new JavaList<>());
     }
 
+    public Block(Node... children) {
+        this(JavaList.apply(children));
+    }
+
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Children) return new NodesAttribute1(children);
@@ -38,19 +42,6 @@ public record Block(JavaList<Node> children) implements Node {
     }
 
     @Override
-    public String toString() {
-        try {
-            var childrenAsString = children.stream()
-                    .map(Objects::toString)
-                    .foldRight((current, next) -> current + "," + next)
-                    .orElse("");
-            return "{\"children\":[" + childrenAsString + "]}";
-        } catch (StreamException e) {
-            return "";
-        }
-    }
-
-    @Override
     public boolean is(Type type) {
         return type == Type.Block;
     }
@@ -63,6 +54,19 @@ public record Block(JavaList<Node> children) implements Node {
                     .build();
         } catch (StreamException e) {
             throw new AttributeException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        try {
+            var childrenAsString = children.stream()
+                    .map(Objects::toString)
+                    .foldRight((current, next) -> current + "," + next)
+                    .orElse("");
+            return "{\"children\":[" + childrenAsString + "]}";
+        } catch (StreamException e) {
+            return "";
         }
     }
 
