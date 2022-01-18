@@ -43,12 +43,12 @@ public record CRenderer(Node root) {
                 var renderedParameter = renderType(oldParameter);
                 newParameters.add(renderedParameter.computeTrimmed());
             }
-            return returnType.append(" (*")
-                    .append(name)
-                    .append(")")
-                    .append("(")
-                    .append(String.join(",", newParameters))
-                    .append(")");
+            return returnType.appendSlice(" (*")
+                    .appendText(name)
+                    .appendSlice(")")
+                    .appendSlice("(")
+                    .appendSlice(String.join(",", newParameters))
+                    .appendSlice(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
             return renderFieldWithType(new EmptyField(name.prepend("*"), child, List.createList()));
@@ -79,7 +79,7 @@ public record CRenderer(Node root) {
         } else {
             var value = node.apply(Attribute.Type.Value).asNode();
             var valueText = renderNode(value);
-            return common.append("=").append(valueText);
+            return common.appendSlice("=").appendText(valueText);
         }
     }
 

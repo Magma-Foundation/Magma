@@ -20,7 +20,7 @@ public record FunctionLexer(Text text) implements Lexer {
         try {
             int paramEnd = locateParameterEnd(paramStart);
             var parameters = splitParameters(paramStart, paramEnd);
-            var valueSeparator = text.firstIndexOfSlice("=>", paramEnd);
+            var valueSeparator = text.firstIndexOfSliceWithOffset("=>", paramEnd);
             var returnType = extractReturnType(paramEnd, valueSeparator);
             var identity = new EmptyField(name, returnType, flags);
             var map = attachValue(identity, parameters, valueSeparator);

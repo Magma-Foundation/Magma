@@ -3,9 +3,9 @@ package com.meti.app.compile.node;
 import com.meti.api.option.Option;
 
 public interface Text {
-    Text append(String slice);
+    Text appendSlice(String slice);
 
-    Text append(Text other);
+    Text appendText(Text other);
 
     Text appendRaw(String suffix);
 
@@ -25,7 +25,7 @@ public interface Text {
 
     Option<Integer> firstIndexOfSlice(String slice);
 
-    Option<Integer> firstIndexOfSlice(String slice, int offset);
+    Option<Integer> firstIndexOfSliceWithOffset(String slice, int offset);
 
     boolean hasContent();
 

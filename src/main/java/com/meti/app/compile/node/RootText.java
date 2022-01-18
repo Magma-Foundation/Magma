@@ -16,12 +16,12 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text append(String slice) {
+    public Text appendSlice(String slice) {
         return new RootText(trimmedValue + slice);
     }
 
     @Override
-    public Text append(Text other) {
+    public Text appendText(Text other) {
         return new RootText(trimmedValue + other.computeTrimmed());
     }
 
@@ -81,7 +81,7 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Option<Integer> firstIndexOfSlice(String slice, int offset) {
+    public Option<Integer> firstIndexOfSliceWithOffset(String slice, int offset) {
         var index = trimmedValue.indexOf(slice, offset);
         return index == -1
                 ? new None<>()

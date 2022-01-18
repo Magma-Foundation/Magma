@@ -19,7 +19,7 @@ public record BinaryRenderer(Node node) implements Renderer {
             var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
             var first = arguments.get(0).apply(Attribute.Type.Value).asText();
             var second = arguments.get(1).apply(Attribute.Type.Value).asText();
-            return new Some<>(first.append(" ").append(operator).append(" ").append(second));
+            return new Some<>(first.appendSlice(" ").appendText(operator).appendSlice(" ").appendText(second));
         } else {
             return new None<>();
         }

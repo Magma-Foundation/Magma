@@ -37,7 +37,7 @@ public record FunctionRenderer(Node node) implements Renderer {
 
             parameters.sort(String::compareTo);
             var renderedParameters = String.join(",", parameters);
-            var withIdentity = renderedIdentity.append("(" + renderedParameters + ")");
+            var withIdentity = renderedIdentity.appendSlice("(" + renderedParameters + ")");
             var withValue = attachValue(withIdentity);
             return new Some<>(withValue);
         }
@@ -49,9 +49,9 @@ public record FunctionRenderer(Node node) implements Renderer {
         if (node.is(Node.Type.Implementation)) {
             var value = node.apply(Attribute.Type.Value).asNode();
             var renderedValue = value.apply(Attribute.Type.Value).asText();
-            withValue = withIdentity.append(renderedValue);
+            withValue = withIdentity.appendText(renderedValue);
         } else {
-            withValue = withIdentity.append(";");
+            withValue = withIdentity.appendSlice(";");
         }
         return withValue;
     }

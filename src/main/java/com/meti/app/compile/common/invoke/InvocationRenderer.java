@@ -24,9 +24,9 @@ public record InvocationRenderer(Node node) implements Renderer {
             }
             return new Some<>(caller.apply(Attribute.Type.Value)
                     .asText()
-                    .append("(")
-                    .append(String.join(",", renderedArguments))
-                    .append(")"));
+                    .appendSlice("(")
+                    .appendSlice(String.join(",", renderedArguments))
+                    .appendSlice(")"));
         } else {
             return new None<>();
         }

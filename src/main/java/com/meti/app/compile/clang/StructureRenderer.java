@@ -22,10 +22,10 @@ record StructureRenderer(Node node) implements Renderer {
                 builder.append(field.apply(Attribute.Type.Value).asText().computeTrimmed()).append(";");
             }
             return new Some<>(name.prepend("struct ")
-                    .append("{")
-                    .append(builder.toString())
-                    .append("}")
-                    .append(";"));
+                    .appendSlice("{")
+                    .appendSlice(builder.toString())
+                    .appendSlice("}")
+                    .appendSlice(";"));
         }
         return new None<>();
     }

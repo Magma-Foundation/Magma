@@ -17,7 +17,7 @@ public record LineRenderer(Node node) implements Renderer {
                     .asNode()
                     .apply(Attribute.Type.Value)
                     .asText()
-                    .append(";"));
+                    .appendSlice(";"));
         } else {
             return new None<>();
         }

@@ -15,7 +15,7 @@ public record UnaryRenderer(Node node) implements Renderer {
         if (node.is(Node.Type.Unary)) {
             var caller = node.apply(Attribute.Type.Caller).asNode().apply(Attribute.Type.Value).asText();
             var callee = node.apply(Attribute.Type.Arguments).asNode().apply(Attribute.Type.Value).asText();
-            return new Some<>(caller.append(" ").append(callee));
+            return new Some<>(caller.appendSlice(" ").appendText(callee));
         } else {
             return new None<>();
         }

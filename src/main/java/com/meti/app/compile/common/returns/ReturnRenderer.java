@@ -15,7 +15,7 @@ public record ReturnRenderer(Node node) implements Renderer {
         if (node.is(Node.Type.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
             var renderedChild = child.apply(Attribute.Type.Value).asText();
-            return new Some<>(renderedChild.prepend("return ").append(";"));
+            return new Some<>(renderedChild.prepend("return ").appendSlice(";"));
         }
         return new None<>();
     }
