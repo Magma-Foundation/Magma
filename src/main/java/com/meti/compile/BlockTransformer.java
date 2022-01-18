@@ -10,6 +10,8 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import static com.meti.compile.node.EmptyNode.EmptyNode_;
+
 public record BlockTransformer(Node root) implements Transformer {
     @Override
     public Option<Node> transform() throws CompileException {
@@ -35,7 +37,7 @@ public record BlockTransformer(Node root) implements Transformer {
 
     private static Node transformInContext(Node oldChild) {
         if (oldChild.is(Node.Type.Implementation)) {
-            return new Cache(new Block(), oldChild);
+            return new Cache(EmptyNode_, oldChild);
         }
         return shouldBeAsLine(oldChild) ? new Line(oldChild) : oldChild;
     }

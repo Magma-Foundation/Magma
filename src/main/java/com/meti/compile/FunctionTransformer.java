@@ -4,9 +4,9 @@ import com.meti.collect.JavaList;
 import com.meti.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
-import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.cache.Cache;
 import com.meti.compile.common.Field;
+import com.meti.compile.common.variable.Variable;
 import com.meti.compile.node.EmptyNode;
 import com.meti.compile.node.Node;
 import com.meti.option.None;
@@ -20,7 +20,7 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
             return new Some<>(isExternal() ? EmptyNode.EmptyNode_ : oldNode);
         }
         if (oldNode.is(Node.Type.Implementation)) {
-            var function = transformImplementation();
+            var function = transformFunction();
             return new Some<>(function);
         }
         return new None<>();
@@ -39,26 +39,21 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
         }
     }
 
-    private Node transformImplementation() throws CompileException {
+    private Node transformFunction() throws CompileException {
         try {
-            var outerValue = this.oldNode.apply(Attribute.Type.Value).asNode();
-            if (outerValue.is(Node.Type.Cache)) {
-                return transformCachedImplementation(outerValue);
+            var identity = oldNode.apply(Attribute.Type.Identity).asNode();
+            Node function;
+            if (identity.apply(Attribute.Type.Flags)
+                        .asStreamOfFlags1()
+                        .count() == 0) {
+                var name = identity.apply(Attribute.Type.Name).asText();
+                function = new Cache(new Variable(name), oldNode);
             } else {
-                return oldNode;
+                function = oldNode;
             }
-        } catch (AttributeException | StreamException e) {
+            return function;
+        } catch (StreamException | AttributeException e) {
             throw new CompileException(e);
         }
-    }
-
-    private Node transformCachedImplementation(Node outerValue) throws AttributeException, StreamException {
-        var innerValue = outerValue.apply(Attribute.Type.Value).asNode();
-        var newNode = oldNode.with(Attribute.Type.Value, new NodeAttribute(innerValue));
-
-        return outerValue.apply(Attribute.Type.Children)
-                .asStreamOfNodes1()
-                .foldRight(new Cache.Builder(newNode), Cache.Builder::add)
-                .build();
     }
 }

@@ -28,21 +28,12 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         var lines = split(root);
         var lexed = lex(lines);
         try {
-            var resolver = new CMagmaNodeResolver();
-            var modifier = new CMagmaModifier();
-            var formatter = new CFormatter(thisPackage);
-            var flattener = new CFlattener();
+            var pipeline = new CMagmaPipeline(thisPackage);
             var divider = new CDivider(thisPackage);
-
             var division = new JavaList<>(lexed)
                     .stream()
-                    .map(value -> {
-                        var resolved = resolver.transformNodeAST(value);
-                        var formatted = formatter.transformNodeAST(resolved);
-                        var modified = modifier.transformNodeAST(formatted);
-                        var flattened = flattener.transformNodeAST(modified);
-                        return flattened;
-                    }).foldRight(divider, Divider::divide);
+                    .map(pipeline::perform)
+                    .foldRight(divider, Divider::divide);
             return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {

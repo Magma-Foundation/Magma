@@ -54,7 +54,7 @@ public class FunctionTest {
 
     @Test
     void lambda() {
-        assertSourceCompile("() => {}", "void __lambda0__(){}");
+        assertSourceCompile("() => {}", "void __lambda0__(){}__lambda0__");
     }
 
     @Test

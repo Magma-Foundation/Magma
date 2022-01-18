@@ -2,10 +2,7 @@ package com.meti.compile;
 
 import com.meti.collect.JavaList;
 import com.meti.compile.attribute.Attribute;
-import com.meti.compile.cache.Cache;
 import com.meti.compile.common.Declaration;
-import com.meti.compile.common.EmptyField;
-import com.meti.compile.common.Implementation;
 import com.meti.compile.common.ValuedField;
 import com.meti.compile.common.binary.BinaryOperation;
 import com.meti.compile.common.block.Block;
@@ -19,7 +16,8 @@ import com.meti.compile.node.Text;
 import com.meti.core.F1;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class CMagmaModifierTest {
     @Test
@@ -66,24 +64,6 @@ class CMagmaModifierTest {
     @Test
     void booleans() {
         assertTransforms(Boolean.True, (F1<Node, java.lang.Boolean, ?>) value -> value.is(Node.Type.Integer));
-    }
-
-    @Test
-    void inner() {
-        var identity = new EmptyField(new Text("inner"), Primitive.Void, new JavaList<>());
-        var function = new Implementation(identity, new Block(), new JavaList<>());
-        var input = new Block(JavaList.apply(function));
-        var output = new Cache(new Block(), JavaList.apply(function));
-        assertTransforms(input, output);
-    }
-
-    private void assertTransforms(Node input, Node output) {
-        try {
-            var actual = new CMagmaModifier().transformNodeAST(input);
-            assertEquals(output, actual);
-        } catch (Exception e) {
-            fail(e);
-        }
     }
 
     @Test
