@@ -7,15 +7,15 @@ import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Output;
 
-public abstract class AbstractRenderer implements Renderer {
+public abstract class AbstractProcessor implements Processor<Output> {
     protected final Node node;
 
-    public AbstractRenderer(Node node) {
+    public AbstractProcessor(Node node) {
         this.node = node;
     }
 
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (validate()) {
             return new Some<>(createNode());
         } else {

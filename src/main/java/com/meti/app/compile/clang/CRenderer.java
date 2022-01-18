@@ -8,24 +8,23 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
 import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.LineRenderer;
-import com.meti.app.compile.common.alternate.ElseRenderer;
-import com.meti.app.compile.common.binary.BinaryRenderer;
-import com.meti.app.compile.common.block.BlockRenderer;
-import com.meti.app.compile.common.condition.ConditionRenderer;
-import com.meti.app.compile.common.integer.IntegerRenderer;
-import com.meti.app.compile.common.invoke.InvocationRenderer;
-import com.meti.app.compile.common.returns.ReturnRenderer;
-import com.meti.app.compile.common.string.StringRenderer;
-import com.meti.app.compile.common.variable.VariableRenderer;
-import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.common.LineProcessor;
+import com.meti.app.compile.common.alternate.ElseProcessor;
+import com.meti.app.compile.common.binary.BinaryProcessor;
+import com.meti.app.compile.common.block.BlockProcessor;
+import com.meti.app.compile.common.condition.ConditionProcessor;
+import com.meti.app.compile.common.integer.IntegerProcessor;
+import com.meti.app.compile.common.invoke.InvocationProcessor;
+import com.meti.app.compile.common.returns.ReturnProcessor;
+import com.meti.app.compile.common.string.StringProcessor;
+import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
+import com.meti.app.compile.render.EmptyProcessor;
+import com.meti.app.compile.render.Processor;
+import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.render.EmptyRenderer;
-import com.meti.app.compile.render.RenderException;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -96,27 +95,27 @@ public record CRenderer(Node root) {
         }
 
         var renderers = java.util.List.of(
-                new BinaryRenderer(node),
-                new BlockRenderer(node),
-                new ConditionRenderer(node),
-                new DeclarationRenderer(node),
-                new ElseRenderer(node),
-                new EmptyRenderer(node),
-                new ExternRenderer(node),
-                new FunctionRenderer(node),
-                new ImportRenderer(node),
-                new IntegerRenderer(node),
-                new InvocationRenderer(node),
-                new LineRenderer(node),
-                new ReturnRenderer(node),
-                new StringRenderer(node),
-                new StructureRenderer(node),
-                new UnaryRenderer(node),
-                new VariableRenderer(node));
+                new BinaryProcessor(node),
+                new BlockProcessor(node),
+                new ConditionProcessor(node),
+                new DeclarationProcessor(node),
+                new ElseProcessor(node),
+                new EmptyProcessor(node),
+                new ExternProcessor(node),
+                new FunctionProcessor(node),
+                new ImportProcessor(node),
+                new IntegerProcessor(node),
+                new InvocationProcessor(node),
+                new LineProcessor(node),
+                new ReturnProcessor(node),
+                new StringProcessor(node),
+                new StructureProcessor(node),
+                new UnaryProcessor(node),
+                new VariableProcessor(node));
 
         Option<Output> current = new None<>();
-        for (Renderer renderer : renderers) {
-            var result = renderer.render();
+        for (Processor<Output> renderer : renderers) {
+            var result = renderer.process();
             if (result.isPresent()) {
                 current = result;
             }

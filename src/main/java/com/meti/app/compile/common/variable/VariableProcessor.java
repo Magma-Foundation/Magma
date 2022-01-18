@@ -3,11 +3,11 @@ package com.meti.app.compile.common.variable;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.render.AbstractRenderer;
+import com.meti.app.compile.render.AbstractProcessor;
 import com.meti.app.compile.text.Output;
 
-public final class VariableRenderer extends AbstractRenderer {
-    public VariableRenderer(Node node) {
+public final class VariableProcessor extends AbstractProcessor {
+    public VariableProcessor(Node node) {
         super(node);
     }
 

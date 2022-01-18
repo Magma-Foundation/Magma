@@ -6,14 +6,14 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.stream.Collectors;
 
-record StructureRenderer(Node node) implements Renderer {
+record StructureProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Structure)) {
             var name = node.apply(Attribute.Type.Name).asOutput();
             var fields = node.apply(Attribute.Type.Fields).asStreamOfNodes().collect(Collectors.toList());

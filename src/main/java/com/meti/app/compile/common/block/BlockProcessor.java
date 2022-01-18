@@ -6,15 +6,15 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.Processor;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.stream.Collectors;
 
-public record BlockRenderer(Node node) implements Renderer {
+public record BlockProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Block)) {
             var builder = new StringBuilder().append("{");
             var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());

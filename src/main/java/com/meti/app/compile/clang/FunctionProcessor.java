@@ -8,15 +8,14 @@ import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.text.Text;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
 
-public record FunctionRenderer(Node node) implements Renderer {
+public record FunctionProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws CompileException {
+    public Option<Output> process() throws CompileException {
         if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asOutput();

@@ -6,12 +6,12 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.render.Renderer;
 
-public record ElseRenderer(Node node) implements Renderer {
+public record ElseProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Else)) {
             var value = node.apply(Attribute.Type.Value).asNode()
                     .apply(Attribute.Type.Value).asOutput();

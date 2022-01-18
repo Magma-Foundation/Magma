@@ -6,15 +6,15 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.render.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.render.Renderer;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public record InvocationRenderer(Node node) implements Renderer {
+public record InvocationProcessor(Node node) implements Processor<Output> {
     @Override
-    public Option<Output> render() throws AttributeException {
+    public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Invocation)) {
             var caller = this.node.apply(Attribute.Type.Caller).asNode();
             var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
