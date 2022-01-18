@@ -8,6 +8,7 @@ import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
@@ -17,12 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record CMagmaCompiler(JavaMap<Packaging, String> input) {
-    public Map<Packaging, Output<String>> compile() throws CompileException {
+    public Map<Packaging, Target<String>> compile() throws CompileException {
         return input.mapValues(this::compileInput).getMap();
     }
 
-    private Output<String> compileInput(Packaging thisPackage, String input) throws CompileException {
-        if (input.isBlank()) return new EmptyOutput<>();
+    private Target<String> compileInput(Packaging thisPackage, String input) throws CompileException {
+        if (input.isBlank()) return new EmptyTarget<>();
 
         var root = new RootText(input);
         var lines = split(root);
@@ -34,20 +35,20 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
                     .stream()
                     .map(pipeline::perform)
                     .foldRight(divider, Divider::divide);
-            return division.stream().<Output<String>, CollectionException>foldRight(new MappedOutput<>(),
+            return division.stream().<Target<String>, CollectionException>foldRight(new MappedTarget<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {
             throw new CompileException(e);
         }
     }
 
-    private java.util.List<Text> split(RootText root) {
+    private java.util.List<com.meti.app.compile.text.Text> split(RootText root) {
         return new Splitter(root)
                 .split()
                 .collect(Collectors.toList());
     }
 
-    private ArrayList<Node> lex(java.util.List<Text> lines) throws CompileException {
+    private ArrayList<Node> lex(java.util.List<com.meti.app.compile.text.Text> lines) throws CompileException {
         var oldNodes = new ArrayList<Node>();
         for (Text oldLine : lines) {
             oldNodes.add(new MagmaLexer(oldLine).lex());
@@ -59,7 +60,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         return divider.apply(format)
                 .map(CRenderer::new)
                 .map(CRenderer::render)
-                .map(Text::compute)
+                .map(Output::compute)
                 .foldRight(new StringBuilder(), StringBuilder::append)
                 .toString();
     }

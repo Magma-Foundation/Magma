@@ -3,25 +3,8 @@ package com.meti.app.compile.text;
 import com.meti.api.collect.IndexException;
 import com.meti.api.option.Option;
 
-public interface Text {
-    Text appendSlice(String slice);
-
-    Text appendText(Text other);
-
+public interface Text extends Output {
     char apply(int index) throws IndexException;
-
-    /**
-     * Computes the value of this {@link Text} object as-is, with no trimming involved.
-     * @return The raw value.
-     */
-    String compute();
-
-    /**
-     * Computes the trimmed value of this {@link Text} object.
-     * Equivalent to {@link #compute()} followed by {@link String#trim()}.
-     * @return The trimmed value.
-     */
-    String computeTrimmed();
 
     /**
      * Returns true if this character is contained within the trimmed value of this text,

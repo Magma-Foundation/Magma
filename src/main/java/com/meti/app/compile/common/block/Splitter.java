@@ -1,6 +1,7 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.IndexException;
+import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 

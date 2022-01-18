@@ -2,8 +2,8 @@ package com.meti.app.compile.render;
 
 import com.meti.api.option.Option;
 import com.meti.app.compile.CompileException;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Output;
 
 public interface Renderer {
-    Option<Text> render() throws CompileException;
+    Option<Output> render() throws CompileException;
 }

@@ -16,12 +16,12 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text appendSlice(String slice) {
+    public Output appendSlice(String slice) {
         return new RootText(trimmedValue + slice);
     }
 
     @Override
-    public Text appendText(Text other) {
+    public Output appendOutput(Output other) {
         return new RootText(trimmedValue + other.computeTrimmed());
     }
 

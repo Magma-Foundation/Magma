@@ -5,10 +5,10 @@ import com.meti.app.compile.clang.CFormat;
 
 import java.util.stream.Stream;
 
-public class EmptyOutput<T> implements Output<T> {
+public class EmptyTarget<T> implements Target<T> {
     @Override
-    public Output<T> append(CFormat key, T value) {
-        return new MappedOutput<T>().append(key, value);
+    public Target<T> append(CFormat key, T value) {
+        return new MappedTarget<T>().append(key, value);
     }
 
     @Override
@@ -17,8 +17,8 @@ public class EmptyOutput<T> implements Output<T> {
     }
 
     @Override
-    public <R, E extends Exception> Output<R> map(F2<CFormat, T, R, E> mapper) throws E {
-        return new EmptyOutput<>();
+    public <R, E extends Exception> Target<R> map(F2<CFormat, T, R, E> mapper) throws E {
+        return new EmptyTarget<>();
     }
 
     @Override

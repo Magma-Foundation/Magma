@@ -4,12 +4,12 @@ import com.meti.api.option.Option;
 
 public record SlicedText(String root, int from, int to) implements Text {
     @Override
-    public Text appendSlice(String slice) {
+    public Output appendSlice(String slice) {
         return null;
     }
 
     @Override
-    public Text appendText(Text other) {
+    public Output appendOutput(Output other) {
         return null;
     }
 

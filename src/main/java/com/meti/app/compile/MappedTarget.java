@@ -6,20 +6,20 @@ import com.meti.app.compile.clang.CFormat;
 
 import java.util.stream.Stream;
 
-public final class MappedOutput<T> implements Output<T> {
+public final class MappedTarget<T> implements Target<T> {
     private final JavaMap<CFormat, T> map;
 
-    public MappedOutput() {
+    public MappedTarget() {
         this(new JavaMap<>());
     }
 
-    public MappedOutput(JavaMap<CFormat, T> map) {
+    public MappedTarget(JavaMap<CFormat, T> map) {
         this.map = map;
     }
 
     @Override
-    public Output<T> append(CFormat key, T value) {
-        return new MappedOutput<>(map.put(key, value));
+    public Target<T> append(CFormat key, T value) {
+        return new MappedTarget<>(map.put(key, value));
     }
 
     @Override
@@ -28,8 +28,8 @@ public final class MappedOutput<T> implements Output<T> {
     }
 
     @Override
-    public <R, E extends Exception> Output<R> map(F2<CFormat, T, R, E> mapper) throws E {
-        return new MappedOutput<>(map.mapValues(mapper));
+    public <R, E extends Exception> Target<R> map(F2<CFormat, T, R, E> mapper) throws E {
+        return new MappedTarget<>(map.mapValues(mapper));
     }
 
     @Override

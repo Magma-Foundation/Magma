@@ -3,7 +3,7 @@ package com.meti.app;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.api.io.Path;
 import com.meti.app.compile.CMagmaCompiler;
-import com.meti.app.compile.Output;
+import com.meti.app.compile.Target;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.module.Module;
 import com.meti.app.source.Packaging;
@@ -54,7 +54,7 @@ public class Application {
         return sources;
     }
 
-    private static Set<String> compile(Packaging packaging_, Output<String> output) throws ApplicationException {
+    private static Set<String> compile(Packaging packaging_, Target<String> output) throws ApplicationException {
         try {
             Out.ensureAsDirectory();
 

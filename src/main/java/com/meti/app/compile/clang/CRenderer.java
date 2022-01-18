@@ -20,8 +20,8 @@ import com.meti.app.compile.common.string.StringRenderer;
 import com.meti.app.compile.common.variable.VariableRenderer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 import com.meti.app.compile.render.EmptyRenderer;
 import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.render.Renderer;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
-    private static Text renderField(Node node) throws CompileException {
+    private static Output renderField(Node node) throws CompileException {
         var name = node.apply(Attribute.Type.Name).asText();
         var type = node.apply(Attribute.Type.Type).asNode();
 
@@ -44,7 +44,7 @@ public record CRenderer(Node root) {
                 newParameters.add(renderedParameter.computeTrimmed());
             }
             return returnType.appendSlice(" (*")
-                    .appendText(name)
+                    .appendOutput(name)
                     .appendSlice(")")
                     .appendSlice("(")
                     .appendSlice(String.join(",", newParameters))
@@ -72,18 +72,18 @@ public record CRenderer(Node root) {
         }
     }
 
-    private static Text renderFieldWithType(Node node) throws CompileException {
+    private static Output renderFieldWithType(Node node) throws CompileException {
         var common = renderField(node);
         if (node.is(Node.Type.Declaration)) {
             return common;
         } else {
             var value = node.apply(Attribute.Type.Value).asNode();
             var valueText = renderNode(value);
-            return common.appendSlice("=").appendText(valueText);
+            return common.appendSlice("=").appendOutput(valueText);
         }
     }
 
-    static Text renderNode(Node node) throws CompileException {
+    static Output renderNode(Node node) throws CompileException {
         if (node.is(Node.Type.Content)) {
             return node.apply(Attribute.Type.Value).asText();
         }
@@ -107,7 +107,7 @@ public record CRenderer(Node root) {
                 new UnaryRenderer(node),
                 new VariableRenderer(node));
 
-        Option<Text> current = new None<>();
+        Option<Output> current = new None<>();
         for (Renderer renderer : renderers) {
             var result = renderer.render();
             if (result.isPresent()) {
@@ -140,15 +140,15 @@ public record CRenderer(Node root) {
         return current;
     }
 
-    private static Text renderType(Node oldParameter) throws CompileException {
+    private static Output renderType(Node oldParameter) throws CompileException {
         return renderField(new EmptyField(new RootText(""), oldParameter, List.createList()));
     }
 
-    public Text render() throws CompileException {
+    public Output render() throws CompileException {
         return renderAST(root);
     }
 
-    private Text renderAST(Node root) throws CompileException {
+    private Output renderAST(Node root) throws CompileException {
         try {
             var withFields = renderSubFields(root);
             var withNodes = renderSubNodes(withFields);

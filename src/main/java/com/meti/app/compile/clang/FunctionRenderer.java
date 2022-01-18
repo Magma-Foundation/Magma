@@ -8,6 +8,7 @@ import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.Text;
 import com.meti.app.compile.render.Renderer;
 
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 
 public record FunctionRenderer(Node node) implements Renderer {
     @Override
-    public Option<Text> render() throws CompileException {
+    public Option<Output> render() throws CompileException {
         if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
@@ -44,12 +45,12 @@ public record FunctionRenderer(Node node) implements Renderer {
         return new None<>();
     }
 
-    private Text attachValue(Text withIdentity) throws AttributeException {
-        Text withValue;
+    private Output attachValue(Output withIdentity) throws AttributeException {
+        Output withValue;
         if (node.is(Node.Type.Implementation)) {
             var value = node.apply(Attribute.Type.Value).asNode();
             var renderedValue = value.apply(Attribute.Type.Value).asText();
-            withValue = withIdentity.appendText(renderedValue);
+            withValue = withIdentity.appendOutput(renderedValue);
         } else {
             withValue = withIdentity.appendSlice(";");
         }
