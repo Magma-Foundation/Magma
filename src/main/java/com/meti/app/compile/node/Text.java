@@ -43,8 +43,6 @@ public interface Text {
 
     Text slice(int offset);
 
-    Text sliceRaw(int start, int end);
-
     boolean startsWithChar(char c);
 
     boolean startsWithSlice(String slice);

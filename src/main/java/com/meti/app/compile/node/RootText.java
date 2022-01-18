@@ -149,11 +149,6 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text sliceRaw(int start, int end) {
-        return new RootText(value.substring(start, end));
-    }
-
-    @Override
     public boolean startsWithChar(char c) {
         return hasContent() && trimmedValue.indexOf(c) == 0;
     }
