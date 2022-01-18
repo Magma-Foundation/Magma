@@ -50,7 +50,7 @@ public record CRenderer(Node root) {
                     .append(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderFieldWithType(new EmptyField(name.prepend("*"), child, new List<>()));
+            return renderFieldWithType(new EmptyField(name.prepend("*"), child, List.createList()));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asText().computeTrimmed()
@@ -140,7 +140,7 @@ public record CRenderer(Node root) {
     }
 
     private static Text renderType(Node oldParameter) throws CompileException {
-        return renderField(new EmptyField(new Text(""), oldParameter, new List<>()));
+        return renderField(new EmptyField(new Text(""), oldParameter, List.createList()));
     }
 
     public Text render() throws CompileException {

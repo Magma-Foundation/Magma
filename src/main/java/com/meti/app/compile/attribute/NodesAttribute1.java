@@ -25,7 +25,7 @@ public record NodesAttribute1(List<Node> values) implements Attribute {
 
     public record Builder(List<Node> values) {
         public Builder() {
-            this(new List<>());
+            this(List.createList());
         }
 
         public Builder add(Node next) {

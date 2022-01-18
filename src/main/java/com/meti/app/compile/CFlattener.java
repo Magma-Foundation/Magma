@@ -25,7 +25,7 @@ public class CFlattener extends AbstractStage {
                         .asStreamOfNodes1()
                         .map(this::flattenCache)
                         .flatMap(List::stream)
-                        .foldRight(new List<Node>(), List::add);
+                        .foldRight(List.<Node>createList(), List::add);
                 if (innerCache.is(Node.Type.Cache)) {
                     var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
                     var withSubChildren = innerCache.apply(Attribute.Type.Children)
@@ -87,7 +87,7 @@ public class CFlattener extends AbstractStage {
         return root.apply(type)
                 .asStreamOfNodes1()
                 .map(CacheBuilder::apply)
-                .foldRight(new CacheBuilder<>(new List<>()),
+                .foldRight(new CacheBuilder<>(List.createList()),
                         (previous, next) -> previous.append(next, List::add));
     }
 }

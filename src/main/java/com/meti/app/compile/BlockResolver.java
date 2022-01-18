@@ -17,7 +17,7 @@ record BlockResolver(Node node, StreamStage parent) implements Transformer {
                 var children = node.apply(Attribute.Type.Children)
                         .asStreamOfNodes1()
                         .filter(value -> value.is(Node.Type.Return))
-                        .foldRight(new List<Node>(), List::add);
+                        .foldRight(List.<Node>createList(), List::add);
                 return new Some<>(children
                         .last()
                         .map(parent::apply)

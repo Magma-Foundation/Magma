@@ -24,8 +24,8 @@ class FunctionLexerTest {
     void lambda() throws CompileException {
         var node = new FunctionLexer(new Text("() => {}"))
                 .lex();
-        var identity = new EmptyField(new Text(""), ImplicitType.ImplicitType_, new List<>());
-        var expected = new Implementation(identity, new Content(new Text("{}")), new List<>());
+        var identity = new EmptyField(new Text(""), ImplicitType.ImplicitType_, List.createList());
+        var expected = new Implementation(identity, new Content(new Text("{}")), List.createList());
         var actual = node.orElse(EmptyNode.EmptyNode_);
         assertEquals(expected, actual);
     }

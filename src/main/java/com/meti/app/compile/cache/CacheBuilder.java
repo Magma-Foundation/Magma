@@ -19,13 +19,13 @@ public record CacheBuilder<T>(T value, List<Node> items) {
                 var value = root.apply(Attribute.Type.Value).asNode();
                 var children = root.apply(Attribute.Type.Children)
                         .asStreamOfNodes1()
-                        .foldRight(new List<Node>(), List::add);
+                        .foldRight(List.<Node>createList(), List::add);
                 return new CacheBuilder<>(value, children);
             } catch (AttributeException | StreamException e) {
-                return new CacheBuilder<>(root, new List<>());
+                return new CacheBuilder<>(root, List.createList());
             }
         } else {
-            return new CacheBuilder<>(root, new List<>());
+            return new CacheBuilder<>(root, List.createList());
         }
     }
 

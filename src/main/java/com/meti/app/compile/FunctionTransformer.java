@@ -32,7 +32,7 @@ public record FunctionTransformer(Node oldNode) implements Transformer {
                     .asNode()
                     .apply(Attribute.Type.Flags)
                     .asStreamOfFlags1()
-                    .foldRight(new List<>(), List::add)
+                    .foldRight(List.createList(), List::add)
                     .contains(Field.Flag.Extern);
         } catch (StreamException | AttributeException e) {
             return false;

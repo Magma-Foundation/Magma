@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FunctionTransformerTest {
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(new Text(name), Primitive.Void, new List<>());
-        return new Implementation(identity, value, new List<>());
+        var identity = new EmptyField(new Text(name), Primitive.Void, List.createList());
+        return new Implementation(identity, value, List.createList());
     }
 
     @Test

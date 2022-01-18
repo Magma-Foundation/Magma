@@ -198,7 +198,7 @@ public record MagmaLexer(Text text) {
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexTypeAST(typeText);
-        return new EmptyField(name, type, new List<>());
+        return new EmptyField(name, type, List.createList());
     }
 
     private Node lexNodeAST(Text text) throws CompileException {

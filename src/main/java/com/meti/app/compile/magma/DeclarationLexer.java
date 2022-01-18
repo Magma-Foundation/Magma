@@ -27,7 +27,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .collect(Collectors.toList());
-                List<Field.Flag> innerFlags = new List<>();
+                List<Field.Flag> innerFlags = List.createList();
                 for (String thisName : flagString) {
                     for (EmptyField.Flag value : EmptyField.Flag.values()) {
                         var thatName = value.name();
@@ -37,7 +37,7 @@ public record DeclarationLexer(Text text) implements Lexer {
                     }
                 }
                 return innerFlags;
-            }).orElse(new List<Field.Flag>());
+            }).orElse(List.createList());
             if (flags.contains(Field.Flag.Let) || flags.contains(Field.Flag.Const)) {
                 int valueSeparator = -1;
                 for (int i = 0; i < text.size(); i++) {

@@ -43,7 +43,7 @@ public record FunctionLexer(Text text) implements Lexer {
                     .filter(value -> !value.isBlank())
                     .map(String::toUpperCase)
                     .flatMap(this::validateFlag)
-                    .foldRight(new List<>(), List::add);
+                    .foldRight(List.createList(), List::add);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
@@ -78,7 +78,7 @@ public record FunctionLexer(Text text) implements Lexer {
         return keys.lastIndexOfChar(' ')
                 .flatMap(space -> extractWithSeparator(paramStart, keys, space))
                 .or(() -> paramStart == 0
-                        ? new Some<>(extractFunction(paramStart, new List<>(), new Text("")))
+                        ? new Some<>(extractFunction(paramStart, List.createList(), new Text("")))
                         : new None<>());
     }
 
@@ -109,7 +109,7 @@ public record FunctionLexer(Text text) implements Lexer {
                 .filter(value -> !value.isBlank())
                 .map(Text::new)
                 .map(Content::new)
-                .foldRight(new List<>(), List::add);
+                .foldRight(List.createList(), List::add);
     }
 
     private Stream<Field.Flag> validateFlag(String flagString) {

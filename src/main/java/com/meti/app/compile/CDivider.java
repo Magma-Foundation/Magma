@@ -64,7 +64,7 @@ public class CDivider extends MappedDivider {
                     "\n#endif\n")
                     .map(Text::new)
                     .map(Content::new)
-                    .foldRight(new List<>(), List::add);
+                    .foldRight(List.createList(), List::add);
         }
         return List.apply(new Import(new Packaging(thisPackage.computeName())));
     }
@@ -86,8 +86,8 @@ public class CDivider extends MappedDivider {
             return node.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
                     .map(this::decompose)
-                    .map(option -> option.orElse(new List<>()))
-                    .foldRight(new List<Node>(), List::addAll)
+                    .map(option -> option.orElse(List.createList()))
+                    .foldRight(List.<Node>createList(), List::addAll)
                     .add(value);
         } catch (AttributeException | StreamException e) {
             throw new CompileException(e);
@@ -99,7 +99,7 @@ public class CDivider extends MappedDivider {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var parameters = node.apply(Attribute.Type.Parameters)
                     .asStreamOfNodes1()
-                    .foldRight(new List<Node>(), List::add);
+                    .foldRight(List.<Node>createList(), List::add);
             var abstraction = new Abstraction(identity, parameters);
             return List.apply(abstraction, node);
         } catch (AttributeException | StreamException e) {

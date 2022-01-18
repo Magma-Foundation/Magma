@@ -24,7 +24,7 @@ public record InvocationLexer(Text text) implements Lexer {
             var slice = text.slice(start + 1, end)
                     .computeTrimmed();
 
-            var lines = new List<String>();
+            var lines = List.<String>createList();
             var buffer = new StringBuilder();
             int depth = 0;
             for (int i = 0; i < slice.length(); i++) {
@@ -46,7 +46,7 @@ public record InvocationLexer(Text text) implements Lexer {
                     .filter(s -> !s.isBlank())
                     .map(Text::new)
                     .map(Content::new)
-                    .foldRight(new List<Node>(), List::add);
+                    .foldRight(List.<Node>createList(), List::add);
             var caller = new Content(callerText);
             return new Invocation(caller, arguments);
         } catch (StreamException e) {

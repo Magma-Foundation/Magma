@@ -15,18 +15,25 @@ import java.util.stream.Collectors;
 public class List<T> {
     private final java.util.List<T> value;
 
-
-    public List() {
+    private List() {
         this(new ArrayList<>());
     }
 
-    public List(java.util.List<T> value) {
+    private List(java.util.List<T> value) {
         this.value = value;
     }
 
     @SafeVarargs
     public static <R> List<R> apply(R... values) {
-        return new List<>(new ArrayList<>(java.util.List.of(values)));
+        return createList(new ArrayList<>(java.util.List.of(values)));
+    }
+
+    public static <T> List<T> createList() {
+        return new List<T>();
+    }
+
+    public static <T> List<T> createList(java.util.List<T> value) {
+        return new List<T>(value);
     }
 
     public List<T> add(T node) {
@@ -73,7 +80,7 @@ public class List<T> {
 
     public List<T> insert(int index, T value) {
         this.value.add(index, value);
-        return new List<>(this.value);
+        return createList(this.value);
     }
 
     public boolean isEmpty() {

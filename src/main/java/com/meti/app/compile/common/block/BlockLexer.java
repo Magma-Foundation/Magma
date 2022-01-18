@@ -27,7 +27,7 @@ public record BlockLexer(Text text) implements Lexer {
                     values.add(new Content(line));
                 }
             }
-            return new Some<>(new Block(new List<>(values)));
+            return new Some<>(new Block(List.createList(values)));
         }
         return new None<>();
     }

@@ -16,6 +16,6 @@ public record NodesAttribute(Collection<Node> values) implements Attribute {
 
     @Override
     public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
-        return new List<>(asStreamOfNodes().collect(Collectors.toList())).stream();
+        return List.createList(asStreamOfNodes().collect(Collectors.toList())).stream();
     }
 }

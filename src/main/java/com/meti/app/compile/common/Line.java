@@ -17,7 +17,7 @@ public record Line(Node node) implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new List<>(apply(group).collect(Collectors.toList())).stream();
+        return List.createList(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override

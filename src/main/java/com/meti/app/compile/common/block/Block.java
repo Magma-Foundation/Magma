@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public record Block(List<Node> children) implements Node {
     public Block() {
-        this(new List<>());
+        this(List.createList());
     }
 
     public Block(Node... children) {
@@ -72,7 +72,7 @@ public record Block(List<Node> children) implements Node {
 
     public record Builder(List<Node> children) implements Node.Builder<Builder> {
         public Builder() {
-            this(new List<>());
+            this(List.createList());
         }
 
         public Builder add(Node child) {

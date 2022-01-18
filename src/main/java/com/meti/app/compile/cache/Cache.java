@@ -38,7 +38,7 @@ public record Cache(Node value, List<Node> children) implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new List<>(apply(group).collect(Collectors.toList())).stream();
+        return List.createList(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override
@@ -52,7 +52,7 @@ public record Cache(Node value, List<Node> children) implements Node {
             return switch (type) {
                 case Value -> new Cache(attribute.asNode(), children);
                 case Children -> new Cache(value, attribute.asStreamOfNodes1()
-                        .foldRight(new List<>(), List::add));
+                        .foldRight(List.createList(), List::add));
                 default -> this;
             };
         } catch (StreamException e) {
@@ -71,7 +71,7 @@ public record Cache(Node value, List<Node> children) implements Node {
     @Deprecated
     public record Builder(Node value, List<Node> children) {
         public Builder(Node value) {
-            this(value, new List<>());
+            this(value, List.createList());
         }
 
         public Builder add(Node child) {
@@ -93,7 +93,7 @@ public record Cache(Node value, List<Node> children) implements Node {
             var value = cache.apply(Attribute.Type.Value).asNode();
             var children = cache.apply(Attribute.Type.Children)
                     .asStreamOfNodes1()
-                    .foldRight(new List<Node>(), List::add);
+                    .foldRight(List.<Node>createList(), List::add);
             return builderSupplier -> {
                 var prototype = builderSupplier.apply(value);
                 return prototype.append(children);
