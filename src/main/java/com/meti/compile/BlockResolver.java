@@ -9,7 +9,7 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-record BlockResolver(Node node, AbstractTransformationStage parent) implements Transformer {
+record BlockResolver(Node node, StreamStage parent) implements Transformer {
     @Override
     public Option<Node> transform() throws CompileException {
         if (node.is(Node.Type.Block)) {

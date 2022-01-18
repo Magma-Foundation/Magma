@@ -5,7 +5,7 @@ import com.meti.collect.Streams;
 import com.meti.compile.node.Node;
 import com.meti.source.Packaging;
 
-public class CFormatter extends AbstractTransformationStage {
+public class CFormatter extends StreamStage {
     private final Packaging thisPackage;
 
     public CFormatter(Packaging thisPackage) {

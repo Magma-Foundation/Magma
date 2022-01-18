@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public record Declaration(Node identity) implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Declaration
+        return group == Attribute.Group.Definition
                 ? Stream.of(Attribute.Type.Identity)
                 : Stream.empty();
     }

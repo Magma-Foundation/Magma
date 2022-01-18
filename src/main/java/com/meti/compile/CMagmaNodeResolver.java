@@ -10,7 +10,7 @@ import com.meti.compile.node.Primitive;
 import com.meti.option.None;
 import com.meti.option.Some;
 
-public class CMagmaNodeResolver extends AbstractTransformationStage {
+public class CMagmaNodeResolver extends StreamStage {
     @Override
     protected Stream<Transformer> streamNodeTransformers(Node node) {
         return Streams.apply(() -> {

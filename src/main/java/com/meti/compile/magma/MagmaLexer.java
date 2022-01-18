@@ -115,7 +115,7 @@ public record MagmaLexer(Text text) {
     }
 
     private Node attachDeclaration(Node node) throws CompileException {
-        var types = node.apply(Attribute.Group.Declaration).collect(Collectors.toList());
+        var types = node.apply(Attribute.Group.Definition).collect(Collectors.toList());
         var current = node;
         for (Attribute.Type type : types) {
             var oldField = current.apply(type).asNode();

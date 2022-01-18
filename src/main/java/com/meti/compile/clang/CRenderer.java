@@ -119,7 +119,7 @@ public record CRenderer(Node root) {
     }
 
     public static Node renderSubFields(Node root) throws CompileException {
-        var types = root.apply(Attribute.Group.Declaration).collect(Collectors.toList());
+        var types = root.apply(Attribute.Group.Definition).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
             var node = root.apply(type).asNode();

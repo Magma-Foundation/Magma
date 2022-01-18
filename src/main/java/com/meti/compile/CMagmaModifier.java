@@ -4,7 +4,7 @@ import com.meti.collect.Stream;
 import com.meti.collect.Streams;
 import com.meti.compile.node.Node;
 
-public class CMagmaModifier extends AbstractTransformationStage {
+public class CMagmaModifier extends StreamStage {
     @Override
     protected Stream<Transformer> streamNodeTransformers(Node node) {
         return Streams.apply(
