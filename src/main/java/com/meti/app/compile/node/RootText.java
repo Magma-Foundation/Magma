@@ -26,11 +26,6 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text appendRaw(String suffix) {
-        return new RootText(value + suffix);
-    }
-
-    @Override
     public char apply(int index) {
         return trimmedValue.charAt(index);
     }

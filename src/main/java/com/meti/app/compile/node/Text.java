@@ -7,8 +7,6 @@ public interface Text {
 
     Text appendText(Text other);
 
-    Text appendRaw(String suffix);
-
     char apply(int index);
 
     String compute();
