@@ -7,7 +7,7 @@ import com.meti.app.compile.common.Extern;
 import com.meti.app.compile.common.Import;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
 
 public record ImportLexer(Text text) implements Lexer {

@@ -3,7 +3,7 @@ package com.meti.app.compile.attribute;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
 
 import java.util.stream.Stream;

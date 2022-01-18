@@ -4,8 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 import java.util.Objects;
 import java.util.stream.Collectors;

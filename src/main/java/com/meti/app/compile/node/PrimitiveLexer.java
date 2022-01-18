@@ -4,6 +4,7 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
+import com.meti.app.compile.text.Text;
 
 public record PrimitiveLexer(Text text) implements Lexer {
     @Override

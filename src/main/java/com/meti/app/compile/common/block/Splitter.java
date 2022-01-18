@@ -1,7 +1,7 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.RootText;
+import com.meti.app.compile.text.Text;
 
 import java.util.ArrayList;
 import java.util.function.Function;

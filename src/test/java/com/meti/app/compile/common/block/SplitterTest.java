@@ -1,6 +1,6 @@
 package com.meti.app.compile.common.block;
 
-import com.meti.app.compile.node.RootText;
+import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

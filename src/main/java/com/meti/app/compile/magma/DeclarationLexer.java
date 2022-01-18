@@ -11,7 +11,7 @@ import com.meti.app.compile.common.ValuedField;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

@@ -13,7 +13,7 @@ import com.meti.app.compile.common.returns.Return;
 import com.meti.app.compile.common.variable.Variable;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
-import com.meti.app.compile.node.RootText;
+import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

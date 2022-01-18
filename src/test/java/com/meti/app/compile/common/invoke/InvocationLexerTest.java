@@ -2,7 +2,7 @@ package com.meti.app.compile.common.invoke;
 
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.node.Content;
-import com.meti.app.compile.node.RootText;
+import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;

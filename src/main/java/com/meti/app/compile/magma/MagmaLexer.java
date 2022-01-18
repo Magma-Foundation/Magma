@@ -24,8 +24,7 @@ import com.meti.app.compile.lex.LexException;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.PrimitiveLexer;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

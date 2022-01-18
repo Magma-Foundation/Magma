@@ -5,8 +5,8 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.RootText;
+import com.meti.app.compile.text.Text;
 
 public record EmptyRenderer(Node node) implements Renderer {
     @Override

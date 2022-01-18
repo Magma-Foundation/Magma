@@ -6,8 +6,7 @@ import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodesAttribute;
 import com.meti.app.compile.attribute.TextAttribute;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

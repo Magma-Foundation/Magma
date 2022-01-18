@@ -5,7 +5,7 @@ import com.meti.api.option.Option;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 public record ConditionLexer(Text text) implements Lexer {
     @Override

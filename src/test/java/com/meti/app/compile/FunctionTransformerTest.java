@@ -6,6 +6,7 @@ import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.*;
+import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

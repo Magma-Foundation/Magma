@@ -8,8 +8,7 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 public class ValuedField extends Field {
     private final Node value;

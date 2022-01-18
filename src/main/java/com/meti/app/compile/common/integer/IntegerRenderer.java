@@ -6,8 +6,8 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.RootText;
+import com.meti.app.compile.text.Text;
 import com.meti.app.compile.render.Renderer;
 
 public record IntegerRenderer(Node node) implements Renderer {

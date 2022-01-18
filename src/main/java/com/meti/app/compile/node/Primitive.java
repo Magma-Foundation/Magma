@@ -4,6 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.text.RootText;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

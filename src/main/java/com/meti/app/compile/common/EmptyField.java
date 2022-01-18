@@ -2,8 +2,7 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.Text;
 
 public class EmptyField extends Field {
     public EmptyField(Text name, Node type, Flag... flags) {

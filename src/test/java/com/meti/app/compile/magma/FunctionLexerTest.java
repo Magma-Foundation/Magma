@@ -6,7 +6,7 @@ import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.node.Content;
 import com.meti.app.compile.node.EmptyNode;
-import com.meti.app.compile.node.RootText;
+import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

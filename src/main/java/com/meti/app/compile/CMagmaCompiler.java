@@ -8,8 +8,8 @@ import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.RootText;
-import com.meti.app.compile.node.Text;
+import com.meti.app.compile.text.RootText;
+import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
 
 import java.util.ArrayList;
