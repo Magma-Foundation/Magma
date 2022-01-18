@@ -1,7 +1,7 @@
-package com.meti.collect;
+package com.meti.api.collect;
 
-import com.meti.core.F1;
-import com.meti.core.F2;
+import com.meti.api.core.F1;
+import com.meti.api.core.F2;
 import com.meti.option.Option;
 
 public interface Stream<T> {

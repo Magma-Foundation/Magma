@@ -1,7 +1,7 @@
 package com.meti.compile;
 
+import com.meti.api.core.F2;
 import com.meti.compile.clang.CFormat;
-import com.meti.core.F2;
 
 import java.util.stream.Stream;
 

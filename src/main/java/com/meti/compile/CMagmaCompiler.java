@@ -1,8 +1,8 @@
 package com.meti.compile;
 
-import com.meti.collect.CollectionException;
-import com.meti.collect.JavaList;
-import com.meti.collect.JavaMap;
+import com.meti.api.collect.CollectionException;
+import com.meti.api.collect.JavaList;
+import com.meti.api.collect.JavaMap;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.clang.CRenderer;
 import com.meti.compile.common.block.Splitter;

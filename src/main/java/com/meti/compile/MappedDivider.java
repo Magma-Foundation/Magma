@@ -1,6 +1,6 @@
 package com.meti.compile;
 
-import com.meti.collect.*;
+import com.meti.api.collect.*;
 import com.meti.compile.clang.CFormat;
 import com.meti.compile.node.Node;
 import com.meti.option.Option;

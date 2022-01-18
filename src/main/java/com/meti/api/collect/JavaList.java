@@ -1,4 +1,4 @@
-package com.meti.collect;
+package com.meti.api.collect;
 
 import com.meti.option.None;
 import com.meti.option.Option;

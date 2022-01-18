@@ -1,14 +1,14 @@
 package com.meti;
 
-import com.meti.io.Directory;
-import com.meti.io.Path;
+import com.meti.api.io.Directory;
+import com.meti.api.io.Path;
 import com.meti.module.DirectoryModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static com.meti.io.NIOPath.Root;
+import static com.meti.api.io.NIOPath.Root;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryApplicationTest {

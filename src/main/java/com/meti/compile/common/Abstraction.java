@@ -1,6 +1,6 @@
 package com.meti.compile.common;
 
-import com.meti.collect.JavaList;
+import com.meti.api.collect.JavaList;
 import com.meti.compile.node.Node;
 
 public class Abstraction extends Function {

@@ -1,7 +1,7 @@
 package com.meti.compile.common.invoke;
 
-import com.meti.collect.JavaList;
-import com.meti.collect.StreamException;
+import com.meti.api.collect.JavaList;
+import com.meti.api.collect.StreamException;
 import com.meti.compile.CompileException;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;

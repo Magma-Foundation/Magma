@@ -1,7 +1,6 @@
 package com.meti.compile;
 
 import com.meti.ApplicationException;
-import com.meti.collect.StreamException;
 
 public class CompileException extends ApplicationException {
     public CompileException(String message) {

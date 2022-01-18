@@ -1,4 +1,4 @@
-package com.meti.io;
+package com.meti.api.io;
 
 import java.io.IOException;
 import java.util.stream.Stream;

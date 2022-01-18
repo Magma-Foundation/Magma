@@ -1,14 +1,14 @@
 package com.meti.compile.cache;
 
-import com.meti.collect.CollectionException;
-import com.meti.collect.JavaList;
-import com.meti.collect.StreamException;
+import com.meti.api.collect.CollectionException;
+import com.meti.api.collect.JavaList;
+import com.meti.api.collect.StreamException;
+import com.meti.api.core.F1;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.node.Node;
-import com.meti.core.F1;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,7 +37,7 @@ public record Cache(Node value, JavaList<Node> children) implements Node {
     }
 
     @Override
-    public com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return new JavaList<>(apply(group).collect(Collectors.toList())).stream();
     }
 

@@ -1,6 +1,6 @@
 package com.meti.compile.clang;
 
-import com.meti.collect.StreamException;
+import com.meti.api.collect.StreamException;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;

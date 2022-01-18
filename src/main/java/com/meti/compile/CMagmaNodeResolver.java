@@ -1,7 +1,7 @@
 package com.meti.compile;
 
-import com.meti.collect.Stream;
-import com.meti.collect.Streams;
+import com.meti.api.collect.Stream;
+import com.meti.api.collect.Streams;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.common.integer.IntegerType;

@@ -1,6 +1,6 @@
 package com.meti;
 
-import com.meti.io.NIOPath;
+import com.meti.api.io.NIOPath;
 import com.meti.module.DirectoryModule;
 
 import java.io.IOException;

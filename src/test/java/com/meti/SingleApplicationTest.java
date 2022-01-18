@@ -1,9 +1,9 @@
 package com.meti;
 
-import com.meti.io.Directory;
-import com.meti.io.File;
-import com.meti.io.NIOPath;
-import com.meti.io.Path;
+import com.meti.api.io.Directory;
+import com.meti.api.io.File;
+import com.meti.api.io.NIOPath;
+import com.meti.api.io.Path;
 import com.meti.module.SingleModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.meti.compile.node;
 
-import com.meti.collect.EmptyStream;
+import com.meti.api.collect.EmptyStream;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 
@@ -15,7 +15,7 @@ public interface Node {
         return Stream.empty();
     }
 
-    default com.meti.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    default com.meti.api.collect.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return new EmptyStream<>();
     }
 

@@ -1,6 +1,6 @@
 package com.meti.compile.magma;
 
-import com.meti.collect.JavaList;
+import com.meti.api.collect.JavaList;
 import com.meti.compile.CompileException;
 import com.meti.compile.common.EmptyField;
 import com.meti.compile.common.Implementation;

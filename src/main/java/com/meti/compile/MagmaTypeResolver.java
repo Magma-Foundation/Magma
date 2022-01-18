@@ -1,7 +1,7 @@
 package com.meti.compile;
 
-import com.meti.collect.Stream;
-import com.meti.collect.Streams;
+import com.meti.api.collect.Stream;
+import com.meti.api.collect.Streams;
 import com.meti.compile.node.Node;
 
 public class MagmaTypeResolver extends StreamStage {

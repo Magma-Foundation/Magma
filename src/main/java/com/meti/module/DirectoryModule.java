@@ -1,8 +1,8 @@
 package com.meti.module;
 
-import com.meti.io.Directory;
-import com.meti.io.File;
-import com.meti.io.Path;
+import com.meti.api.io.Directory;
+import com.meti.api.io.File;
+import com.meti.api.io.Path;
 import com.meti.source.FileSource;
 import com.meti.source.Source;
 

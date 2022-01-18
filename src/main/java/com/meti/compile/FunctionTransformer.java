@@ -1,7 +1,7 @@
 package com.meti.compile;
 
-import com.meti.collect.JavaList;
-import com.meti.collect.StreamException;
+import com.meti.api.collect.JavaList;
+import com.meti.api.collect.StreamException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.AttributeException;
 import com.meti.compile.cache.Cache;

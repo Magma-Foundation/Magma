@@ -1,6 +1,6 @@
 package com.meti.compile.clang;
 
-import com.meti.collect.JavaList;
+import com.meti.api.collect.JavaList;
 import com.meti.compile.CompileException;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;

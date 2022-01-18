@@ -1,9 +1,9 @@
 package com.meti.compile;
 
-import com.meti.collect.EmptyStream;
-import com.meti.collect.Stream;
-import com.meti.collect.StreamException;
-import com.meti.collect.Streams;
+import com.meti.api.collect.EmptyStream;
+import com.meti.api.collect.Stream;
+import com.meti.api.collect.StreamException;
+import com.meti.api.collect.Streams;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.node.Node;
 

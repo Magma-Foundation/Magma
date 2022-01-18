@@ -1,6 +1,6 @@
 package com.meti.compile.common.block;
 
-import com.meti.collect.JavaList;
+import com.meti.api.collect.JavaList;
 import com.meti.compile.lex.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;

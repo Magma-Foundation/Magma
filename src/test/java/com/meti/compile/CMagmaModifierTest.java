@@ -1,6 +1,7 @@
 package com.meti.compile;
 
-import com.meti.collect.JavaList;
+import com.meti.api.collect.JavaList;
+import com.meti.api.core.F1;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.common.Declaration;
 import com.meti.compile.common.ValuedField;
@@ -13,7 +14,6 @@ import com.meti.compile.common.variable.Variable;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Primitive;
 import com.meti.compile.node.Text;
-import com.meti.core.F1;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

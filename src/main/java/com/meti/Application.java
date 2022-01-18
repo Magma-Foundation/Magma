@@ -1,10 +1,10 @@
 package com.meti;
 
-import com.meti.collect.JavaMap;
+import com.meti.api.collect.JavaMap;
+import com.meti.api.io.Path;
 import com.meti.compile.CMagmaCompiler;
 import com.meti.compile.Output;
 import com.meti.compile.clang.CFormat;
-import com.meti.io.Path;
 import com.meti.module.Module;
 import com.meti.source.Packaging;
 import com.meti.source.Source;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.meti.io.NIOPath.Root;
+import static com.meti.api.io.NIOPath.Root;
 
 public class Application {
     public static final Path Out = Root.resolveChild("out");
