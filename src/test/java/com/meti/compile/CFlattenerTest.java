@@ -14,6 +14,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CFlattenerTest {
     @Test
+    void five() throws CompileException {
+        var innerIdentity = new EmptyField(new Text("inner"), Primitive.Void);
+        var innerBody = new Block();
+        var inner = new Implementation(innerIdentity, innerBody);
+
+        var outerIdentity = new EmptyField(new Text("outer"), Primitive.Void);
+        var outerBody = new Block(new Cache(EmptyNode_, inner));
+        var outer = new Implementation(outerIdentity, outerBody);
+        var input = new Cache(EmptyNode_, outer);
+
+        var outerCopy = new Implementation(outerIdentity, new Block(EmptyNode_));
+
+        var expected = new Cache(EmptyNode_, outerCopy, inner);
+        var actual = new CFlattener().transformNodeAST(input);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void four() throws CompileException {
         var innerIdentity = new EmptyField(new Text("inner"), Primitive.Void);
         var innerBody = new Block();
