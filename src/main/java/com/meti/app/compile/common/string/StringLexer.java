@@ -11,8 +11,7 @@ public record StringLexer(Text text) implements Lexer {
     @Override
     public Option<Node> lex() {
         if (text.startsWithChar('\"') && text.endsWithChar('\"')) {
-            var value = text.sliceRaw(1, text.size() - 1);
-            return new Some<>(new String(value));
+            return new Some<>(new String(text));
         } else {
             return new None<>();
         }
