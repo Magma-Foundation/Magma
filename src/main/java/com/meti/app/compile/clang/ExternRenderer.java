@@ -15,7 +15,7 @@ public record ExternRenderer(Node node) implements Renderer {
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.Extern)) {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
-                    .asText().computeTrimmed() + ".h>\n"));
+                    .asOutput().computeTrimmed() + ".h>\n"));
         } else {
             return new None<>();
         }

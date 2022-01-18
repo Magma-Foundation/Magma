@@ -3,11 +3,11 @@ package com.meti.app.compile.common.condition;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record ConditionLexer(Text text) implements Lexer {
+public record ConditionLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
         if (text.startsWithSlice("if")) {
@@ -21,8 +21,8 @@ public record ConditionLexer(Text text) implements Lexer {
     private Condition lexImpl(Integer start, Integer end) {
         var callerText = text.slice(start + 1, end);
         var calleeText = text.slice(end + 1);
-        var condition = new Content(callerText);
-        var body = new Content(calleeText);
+        var condition = new InputNode(callerText);
+        var body = new InputNode(calleeText);
         return new Condition(Node.Type.If, condition, body);
     }
 }

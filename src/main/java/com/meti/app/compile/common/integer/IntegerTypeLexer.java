@@ -5,9 +5,9 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record IntegerTypeLexer(Text text) implements Lexer {
+public record IntegerTypeLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
         var isSigned = text.startsWithChar('I');

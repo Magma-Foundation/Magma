@@ -14,7 +14,7 @@ public record ReturnRenderer(Node node) implements Renderer {
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asText();
+            var renderedChild = child.apply(Attribute.Type.Value).asOutput();
             return new Some<>(renderedChild.prepend("return ").appendSlice(";"));
         }
         return new None<>();

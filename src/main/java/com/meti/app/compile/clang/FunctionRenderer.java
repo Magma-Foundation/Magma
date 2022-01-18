@@ -19,15 +19,15 @@ public record FunctionRenderer(Node node) implements Renderer {
     public Option<Output> render() throws CompileException {
         if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
-            var renderedIdentity = identity.apply(Attribute.Type.Value).asText();
+            var renderedIdentity = identity.apply(Attribute.Type.Value).asOutput();
 
             ArrayList<String> parameters;
             try {
                 parameters = node.apply(Attribute.Type.Parameters)
                         .asStreamOfNodes1()
                         .map(value -> value.apply(Attribute.Type.Value))
-                        .map(Attribute::asText)
-                        .map(Text::computeTrimmed)
+                        .map(Attribute::asOutput)
+                        .map(Output::computeTrimmed)
                         .foldRight(new ArrayList<>(), (strings, s) -> {
                             strings.add(s);
                             return strings;
@@ -49,7 +49,7 @@ public record FunctionRenderer(Node node) implements Renderer {
         Output withValue;
         if (node.is(Node.Type.Implementation)) {
             var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asText();
+            var renderedValue = value.apply(Attribute.Type.Value).asOutput();
             withValue = withIdentity.appendOutput(renderedValue);
         } else {
             withValue = withIdentity.appendSlice(";");

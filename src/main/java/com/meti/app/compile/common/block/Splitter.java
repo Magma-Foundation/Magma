@@ -1,7 +1,7 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.IndexException;
-import com.meti.app.compile.text.Output;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 
@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record Splitter(Text text) {
-    public Stream<Text> split() {
+    public Stream<Input> split() {
         try {
             var lines = new ArrayList<String>();
             var buffer = new StringBuilder();
@@ -35,8 +35,8 @@ public record Splitter(Text text) {
 
             lines.add(buffer.toString());
             return lines.stream()
-                    .map((Function<String, Text>) RootText::new)
-                    .filter(text -> !text.isEmpty());
+                    .map((Function<String, Input>) RootText::new)
+                    .filter(input -> !input.isEmpty());
         } catch (IndexException e) {
             return Stream.empty();
         }

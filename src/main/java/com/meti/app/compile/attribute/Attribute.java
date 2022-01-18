@@ -3,7 +3,8 @@ package com.meti.app.compile.attribute;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
+import com.meti.app.compile.text.Output;
 import com.meti.app.source.Packaging;
 
 import java.util.stream.Stream;
@@ -13,12 +14,20 @@ public interface Attribute {
         throw new AttributeException("Not a boolean.");
     }
 
+    default Input asInput() throws AttributeException {
+        throw new AttributeException("Not output.");
+    }
+
     default int asInteger() throws AttributeException {
         throw new AttributeException("Not an integer.");
     }
 
     default Node asNode() throws AttributeException {
         throw new AttributeException("Not a oldNode.");
+    }
+
+    default Output asOutput() throws AttributeException {
+        throw new AttributeException("Not output.");
     }
 
     default Packaging asPackaging() throws AttributeException {
@@ -41,10 +50,6 @@ public interface Attribute {
 
     default com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
         throw new AttributeException("Not a stream of nodes.");
-    }
-
-    default Text asText() throws AttributeException {
-        throw new AttributeException("Not input.");
     }
 
     enum Type {

@@ -4,16 +4,16 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record ElseLexer(Text text) implements Lexer {
+public record ElseLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
         if (text.startsWithSlice("else ")) {
             var valueText = text.slice("else ".length());
-            var value = new Content(valueText);
+            var value = new InputNode(valueText);
             return new Some<>(new Else(value));
         }
         return new None<>();

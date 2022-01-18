@@ -17,4 +17,6 @@ public interface Output {
      * @return The trimmed value.
      */
     String computeTrimmed();
+
+    Text prepend(String prefix);
 }

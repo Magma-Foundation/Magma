@@ -1,8 +1,9 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
@@ -24,16 +25,14 @@ import com.meti.app.compile.lex.LexException;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.PrimitiveLexer;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public record MagmaLexer(Text text) {
-    static Node lexNode(Text text) throws CompileException {
-        if (text.isEmpty()) throw new LexException("Input may not be empty.");
-
-        var lexers = java.util.List.of(
+public record MagmaLexer(Input text) {
+    private static Stream<? extends Lexer> streamNodeLexers(Input text) {
+        return Streams.apply(
                 new ElseLexer(text),
                 new StringLexer(text),
                 new ConditionLexer(text),
@@ -49,40 +48,28 @@ public record MagmaLexer(Text text) {
                 new BinaryLexer(text),
                 new UnaryLexer(text),
                 new VariableLexer(text));
-
-        Option<Node> current = new None<>();
-        for (Lexer lexer : lexers) {
-            var next = lexer.lex();
-            if (next.isPresent()) {
-                current = next;
-                break;
-            }
-        }
-
-        return current.orElseThrow(() -> new LexException("Unknown input: " + text.computeTrimmed()));
     }
 
-    private static Node lexType(Text text) throws CompileException {
-        java.util.List<Lexer> lexers = java.util.List.<Lexer>of(
-                new FunctionTypeLexer(text),
+    private static Node lexStreams(Input text, Stream<? extends Lexer> lexers) throws CompileException {
+        try {
+            return lexers.map(Lexer::lex)
+                    .flatMap(Streams::optionally)
+                    .headOptionally()
+                    .orElseThrow(() -> new LexException("Unknown input: " + text));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private static Stream<? extends Lexer> streamTypeLexers(Input text) {
+        return Streams.apply(new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),
                 new IntegerTypeLexer(text));
-
-        Option<Node> found = new None<>();
-        for (Lexer lexer : lexers) {
-            var option = lexer.lex();
-            if (option.isPresent()) {
-                found = option;
-                break;
-            }
-        }
-
-        return found.orElseThrow(() -> new LexException("Unknown type: \"" + text.compute() + "\""));
     }
 
-    static Node lexTypeAST(Text text) throws CompileException {
-        var root = lexType(text);
+    static Node lexTypeAST(Input text) throws CompileException {
+        var root = lexStreams(text, streamTypeLexers(text));
         var withType = withType(root);
         return withTypes(withType);
     }
@@ -91,7 +78,7 @@ public record MagmaLexer(Text text) {
         var types = root.apply(Attribute.Group.Type).collect(Collectors.toList());
         var current = root;
         for (Attribute.Type type : types) {
-            var newChild = lexTypeAST(current.apply(type).asNode().apply(Attribute.Type.Value).asText());
+            var newChild = lexTypeAST(current.apply(type).asNode().apply(Attribute.Type.Value).asInput());
             current = current.with(type, new NodeAttribute(newChild));
         }
         return current;
@@ -105,7 +92,7 @@ public record MagmaLexer(Text text) {
 
             var newTypes = new ArrayList<Node>();
             for (Node oldType : oldTypes) {
-                newTypes.add(lexTypeAST(oldType.apply(Attribute.Type.Value).asText()));
+                newTypes.add(lexTypeAST(oldType.apply(Attribute.Type.Value).asInput()));
             }
 
             current = current.with(type, new NodesAttribute(newTypes));
@@ -122,8 +109,8 @@ public record MagmaLexer(Text text) {
             if (oldField.is(Node.Type.Declaration) || oldField.is(Node.Type.Initialization)) {
                 var oldType = oldField.apply(Attribute.Type.Type).asNode();
                 Node newType;
-                if (oldType.is(Node.Type.Content)) {
-                    var typeText = oldType.apply(Attribute.Type.Value).asText();
+                if (oldType.is(Node.Type.Input)) {
+                    var typeText = oldType.apply(Attribute.Type.Value).asInput();
                     newType = lexTypeAST(typeText);
                 } else {
                     newType = oldType;
@@ -132,7 +119,7 @@ public record MagmaLexer(Text text) {
                 var withType = oldField.with(Attribute.Type.Type, new NodeAttribute(newType));
                 Node withValue;
                 if (withType.is(Node.Type.Initialization)) {
-                    var valueText = withType.apply(Attribute.Type.Value).asNode().apply(Attribute.Type.Value).asText();
+                    var valueText = withType.apply(Attribute.Type.Value).asNode().apply(Attribute.Type.Value).asInput();
                     var value = lexNodeAST(valueText);
                     withValue = withType.with(Attribute.Type.Value, new NodeAttribute(value));
                 } else {
@@ -141,7 +128,7 @@ public record MagmaLexer(Text text) {
 
                 newField = withValue;
             } else {
-                newField = lexField(oldField.apply(Attribute.Type.Value).asText());
+                newField = lexField(oldField.apply(Attribute.Type.Value).asInput());
             }
             current = current.with(type, new NodeAttribute(newField));
         }
@@ -155,7 +142,7 @@ public record MagmaLexer(Text text) {
             var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newDeclarations = new ArrayList<Node>();
             for (Node declaration : oldDeclarations) {
-                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asText()));
+                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asInput()));
             }
 
             current = current.with(type, new NodesAttribute(newDeclarations));
@@ -168,7 +155,7 @@ public record MagmaLexer(Text text) {
         var current = root;
         for (Attribute.Type type : types) {
             var oldNode = root.apply(type).asNode();
-            var newNode = lexNodeAST(oldNode.apply(Attribute.Type.Value).asText());
+            var newNode = lexNodeAST(oldNode.apply(Attribute.Type.Value).asInput());
             current = current.with(type, new NodeAttribute(newNode));
         }
         return current;
@@ -181,7 +168,7 @@ public record MagmaLexer(Text text) {
             var oldNodes = root.apply(type).asStreamOfNodes().collect(Collectors.toList());
             var newNodes = new ArrayList<Node>();
             for (Node oldNode : oldNodes) {
-                newNodes.add(lexNodeAST(oldNode.apply(Attribute.Type.Value).asText()));
+                newNodes.add(lexNodeAST(oldNode.apply(Attribute.Type.Value).asInput()));
             }
             current = current.with(type, new NodesAttribute(newNodes));
         }
@@ -192,18 +179,19 @@ public record MagmaLexer(Text text) {
         return lexNodeAST(text);
     }
 
-    private Node lexField(Text text) throws CompileException {
+    private Node lexField(Input text) throws CompileException {
         var separator = text.firstIndexOfChar(':')
-                .orElseThrow(() -> new LexException("Invalid field: " + text.computeTrimmed()));
+                .orElseThrow(() -> new LexException("Invalid field: " + text));
         var name = text.slice(0, separator);
         var typeText = text.slice(separator + 1);
         var type = lexTypeAST(typeText);
         return new EmptyField(name, type, List.createList());
     }
 
-    private Node lexNodeAST(Text text) throws CompileException {
+    private Node lexNodeAST(Input text) throws CompileException {
         try {
-            var node = lexNode(text);
+            if (text.isEmpty()) throw new LexException("Input may not be empty.");
+            var node = lexStreams(text, streamNodeLexers(text));
             var withFields = attachDeclaration(node);
             var withDeclarations = attachDeclarations(withFields);
             var withNode = attachNode(withDeclarations);

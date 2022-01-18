@@ -15,10 +15,10 @@ public record BinaryRenderer(Node node) implements Renderer {
     @Override
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.Binary)) {
-            var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asText();
+            var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asOutput();
             var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
-            var first = arguments.get(0).apply(Attribute.Type.Value).asText();
-            var second = arguments.get(1).apply(Attribute.Type.Value).asText();
+            var first = arguments.get(0).apply(Attribute.Type.Value).asOutput();
+            var second = arguments.get(1).apply(Attribute.Type.Value).asOutput();
             return new Some<>(first.appendSlice(" ").appendOutput(operator).appendSlice(" ").appendOutput(second));
         } else {
             return new None<>();

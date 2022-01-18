@@ -4,7 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.attribute.NodesAttribute;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Text;
 
@@ -31,7 +31,7 @@ public record Structure(Text name, java.util.List fields) implements Node {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new TextAttribute(name);
+        if (type == Attribute.Type.Name) return new InputAttribute(name);
         if (type == Attribute.Type.Fields) return new NodesAttribute(fields);
         throw new AttributeException(type);
     }

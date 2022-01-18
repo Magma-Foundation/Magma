@@ -19,7 +19,7 @@ public record BlockRenderer(Node node) implements Renderer {
             var builder = new StringBuilder().append("{");
             var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             for (Node node1 : children) {
-                builder.append(node1.apply(Attribute.Type.Value).asText().computeTrimmed());
+                builder.append(node1.apply(Attribute.Type.Value).asOutput().computeTrimmed());
             }
             return new Some<>(new RootText(builder.append("}").toString()));
         }

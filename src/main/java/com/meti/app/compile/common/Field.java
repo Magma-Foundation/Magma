@@ -4,7 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -12,10 +12,10 @@ import java.util.stream.Stream;
 
 public abstract class Field implements Node {
     protected final List<Flag> flags;
-    protected final Text name;
+    protected final Input name;
     protected final Node type;
 
-    public Field(List<Flag> flags, Text name, Node type) {
+    public Field(List<Flag> flags, Input name, Node type) {
         this.flags = flags;
         this.name = name;
         this.type = type;
@@ -24,7 +24,7 @@ public abstract class Field implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
-            case Name -> new TextAttribute(name);
+            case Name -> new InputAttribute(name);
             case Flags -> new FlagsAttribute(flags);
             case Type -> new NodeAttribute(this.type);
             default -> throw new AttributeException(type);
@@ -45,7 +45,7 @@ public abstract class Field implements Node {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         if (type == Attribute.Type.Name) {
-            return complete(attribute.asText(), this.type);
+            return complete(attribute.asInput(), this.type);
         }
         if (type == Attribute.Type.Type) {
             return complete(name, attribute.asNode());
@@ -53,7 +53,7 @@ public abstract class Field implements Node {
         return this;
     }
 
-    protected abstract Field complete(Text name, Node type) throws AttributeException;
+    protected abstract Field complete(Input name, Node type) throws AttributeException;
 
     @Override
     public int hashCode() {

@@ -2,7 +2,9 @@ package com.meti.api.collect.stream;
 
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
+import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public interface Stream<T> {
     default int count() throws StreamException {
@@ -18,6 +20,14 @@ public interface Stream<T> {
     <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) throws StreamException;
 
     <E extends Exception> Option<T> foldRight(F2<T, T, T, E> folder) throws StreamException, E;
+
+    default Option<T> headOptionally() throws StreamException {
+        try {
+            return new Some<>(head());
+        } catch (EndOfStreamException e) {
+            return new None<>();
+        }
+    }
 
     T head() throws StreamException;
 

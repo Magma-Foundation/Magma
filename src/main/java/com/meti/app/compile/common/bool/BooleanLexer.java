@@ -5,14 +5,13 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record BooleanLexer(Text text) implements Lexer {
+public record BooleanLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        var trimmed = text.computeTrimmed();
-        var state = trimmed.equals("true");
-        if (trimmed.equals("false") || state) {
+        var state = text.equalsSlice("true");
+        if (text.equalsSlice("false") || state) {
             return new Some<>(state ? Boolean.True : Boolean.False);
         }
         return new None<>();

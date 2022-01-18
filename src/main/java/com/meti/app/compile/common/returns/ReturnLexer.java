@@ -4,17 +4,16 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record ReturnLexer(Text text) implements Lexer {
+public record ReturnLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (text.computeTrimmed().startsWith("return ")) {
-            var valueString = new RootText(text.computeTrimmed()).slice("return ".length(), text.computeTrimmed().length()).computeTrimmed();
-            var value = new Content(new RootText(valueString));
+        if (text.startsWithSlice("return ")) {
+            var valueString = text.slice("return ".length(), text.size());
+            var value = new InputNode(valueString);
             return new Some<>(new Return(value));
         }
         return new None<>();

@@ -13,7 +13,7 @@ public record StringRenderer(Node node) implements Renderer {
     @Override
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.String)) {
-            return new Some<>(node.apply(Attribute.Type.Value).asText());
+            return new Some<>(node.apply(Attribute.Type.Value).asOutput());
         } else {
             return new None<>();
         }

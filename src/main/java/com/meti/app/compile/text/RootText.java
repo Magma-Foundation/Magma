@@ -1,5 +1,6 @@
 package com.meti.app.compile.text;
 
+import com.meti.api.core.F1;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -49,6 +50,11 @@ public final class RootText implements Text {
     public boolean endsWithChar(char c) {
         var trimmed = trimmedValue;
         return trimmed.length() != 0 && trimmed.charAt(trimmed.length() - 1) == c;
+    }
+
+    @Override
+    public boolean equalsSlice(String slice) {
+        return this.trimmedValue.equals(slice);
     }
 
     @Override
@@ -111,11 +117,21 @@ public final class RootText implements Text {
     }
 
     @Override
+    public Output toOutput() {
+        return this;
+    }
+
+    @Override
     public Option<Integer> lastIndexOfChar(char c) {
         var index = trimmedValue.lastIndexOf(c);
         return index == -1
                 ? new None<>()
                 : new Some<>(index);
+    }
+
+    @Override
+    public <T, E extends Exception> T map(F1<String, T, E> mapper) throws E {
+        return mapper.apply(trimmedValue);
     }
 
     @Override

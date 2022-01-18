@@ -13,7 +13,7 @@ import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.common.Abstraction;
 import com.meti.app.compile.common.Import;
-import com.meti.app.compile.node.Content;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
@@ -63,7 +63,7 @@ public class CDivider extends MappedDivider {
                     "\n#define " + header + "\n",
                     "\n#endif\n")
                     .map(RootText::new)
-                    .map(Content::new)
+                    .map(InputNode::new)
                     .foldRight(List.createList(), List::add);
         }
         return List.apply(new Import(new Packaging(thisPackage.computeName())));

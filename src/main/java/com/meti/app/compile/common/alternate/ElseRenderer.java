@@ -14,7 +14,7 @@ public record ElseRenderer(Node node) implements Renderer {
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.Else)) {
             var value = node.apply(Attribute.Type.Value).asNode()
-                    .apply(Attribute.Type.Value).asText();
+                    .apply(Attribute.Type.Value).asOutput();
             return new Some<>(value.prepend("else "));
         } else {
             return new None<>();

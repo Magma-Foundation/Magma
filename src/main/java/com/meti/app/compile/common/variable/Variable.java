@@ -3,22 +3,23 @@ package com.meti.app.compile.common.variable;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.TextAttribute;
+import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Variable(Text value) implements Node {
+public record Variable(Input value) implements Node {
     public Variable(String value) {
         this(new RootText(value));
     }
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new TextAttribute(value);
+        if (type == Attribute.Type.Value) return new InputAttribute(value);
         throw new AttributeException(type);
     }
 
@@ -41,7 +42,7 @@ public record Variable(Text value) implements Node {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return type == Attribute.Type.Value
-                ? new Variable(attribute.asText())
+                ? new Variable(attribute.asInput())
                 : this;
     }
 }

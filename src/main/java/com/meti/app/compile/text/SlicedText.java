@@ -1,5 +1,6 @@
 package com.meti.app.compile.text;
 
+import com.meti.api.core.F1;
 import com.meti.api.option.Option;
 
 public record SlicedText(String root, int from, int to) implements Text {
@@ -39,6 +40,11 @@ public record SlicedText(String root, int from, int to) implements Text {
     }
 
     @Override
+    public boolean equalsSlice(String slice) {
+        return false;
+    }
+
+    @Override
     public Option<Integer> firstIndexOfChar(char c) {
         return null;
     }
@@ -74,6 +80,11 @@ public record SlicedText(String root, int from, int to) implements Text {
     }
 
     @Override
+    public <T, E extends Exception> T map(F1<String, T, E> mapper) throws E {
+        return null;
+    }
+
+    @Override
     public Text prepend(String prefix) {
         return null;
     }
@@ -101,5 +112,10 @@ public record SlicedText(String root, int from, int to) implements Text {
     @Override
     public boolean startsWithSlice(String slice) {
         return false;
+    }
+
+    @Override
+    public Output toOutput() {
+        return null;
     }
 }

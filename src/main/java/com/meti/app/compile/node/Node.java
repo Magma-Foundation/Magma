@@ -26,7 +26,7 @@ public interface Node {
     }
 
     enum Type {
-        Content,
+        Input,
         Block,
         Implementation,
         Declaration,
@@ -49,7 +49,7 @@ public interface Node {
         Function,
         Else,
         Binary, Cache,
-        Return
+        Output, Return
     }
 
     interface Builder<T extends Builder<T>> {

@@ -35,7 +35,7 @@ public class CMagmaNodeResolver extends StreamStage {
     protected Stream<Transformer> streamTypeTransformers(Node node) {
         return Streams.apply(() -> {
             if (node.is(Node.Type.Primitive) && node.apply(Attribute.Type.Name)
-                    .asText()
+                    .asOutput()
                     .computeTrimmed()
                     .equals(Primitive.Bool.name())) {
                 return new Some<>(new IntegerType(true, 16));

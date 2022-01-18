@@ -16,7 +16,7 @@ public record DeclarationRenderer(Node node) implements Renderer {
             var text = node.apply(Attribute.Type.Identity)
                     .asNode()
                     .apply(Attribute.Type.Value)
-                    .asText();
+                    .asOutput();
             return new Some<>(text.appendSlice(";"));
         } else {
             return new None<>();

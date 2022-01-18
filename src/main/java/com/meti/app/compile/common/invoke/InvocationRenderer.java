@@ -20,10 +20,10 @@ public record InvocationRenderer(Node node) implements Renderer {
             var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
             var renderedArguments = new ArrayList<String>();
             for (Node argument : arguments) {
-                renderedArguments.add(argument.apply(Attribute.Type.Value).asText().computeTrimmed());
+                renderedArguments.add(argument.apply(Attribute.Type.Value).asOutput().computeTrimmed());
             }
             return new Some<>(caller.apply(Attribute.Type.Value)
-                    .asText()
+                    .asOutput()
                     .appendSlice("(")
                     .appendSlice(String.join(",", renderedArguments))
                     .appendSlice(")"));

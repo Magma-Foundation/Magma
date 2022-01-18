@@ -13,8 +13,8 @@ public record UnaryRenderer(Node node) implements Renderer {
     @Override
     public Option<Output> render() throws AttributeException {
         if (node.is(Node.Type.Unary)) {
-            var caller = node.apply(Attribute.Type.Caller).asNode().apply(Attribute.Type.Value).asText();
-            var callee = node.apply(Attribute.Type.Arguments).asNode().apply(Attribute.Type.Value).asText();
+            var caller = node.apply(Attribute.Type.Caller).asNode().apply(Attribute.Type.Value).asOutput();
+            var callee = node.apply(Attribute.Type.Arguments).asNode().apply(Attribute.Type.Value).asOutput();
             return new Some<>(caller.appendSlice(" ").appendOutput(callee));
         } else {
             return new None<>();

@@ -1,20 +1,22 @@
 package com.meti.app.compile.node;
 
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 import com.meti.app.compile.lex.Lexer;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.Input;
 
-public record PrimitiveLexer(Text text) implements Lexer {
+public record PrimitiveLexer(Input text) implements Lexer {
     @Override
     public Option<Node> lex() {
-        var values = Primitive.values();
-        for (Primitive value : values) {
-            if (text.computeTrimmed().equals(value.name())) {
-                return new Some<>(value);
-            }
+        try {
+            return Streams.apply(Primitive.values())
+                    .filter(value -> text.equalsSlice(value.name()))
+                    .headOptionally()
+                    .map(value -> value);
+        } catch (StreamException e) {
+            return new None<>();
         }
-        return new None<>();
     }
 }
