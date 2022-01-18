@@ -9,12 +9,33 @@ public interface Text {
 
     char apply(int index);
 
+    /**
+     * Computes the value of this {@link Text} object as-is, with no trimming involved.
+     * @return The raw value.
+     */
     String compute();
 
+    /**
+     * Computes the trimmed value of this {@link Text} object.
+     * Equivalent to {@link #compute()} followed by {@link String#trim()}.
+     * @return The trimmed value.
+     */
     String computeTrimmed();
 
+    /**
+     * Returns true if this character is contained within the trimmed value of this text,
+     * otherwise false.
+     * @param c The character for which to search.
+     * @return Whether the character is contained within this text.
+     */
     boolean containsChar(char c);
 
+    /**
+     * Returns whether if this trimmed text by the given character.
+     * If the text is empty, then false is returned.
+     * @param c The character.
+     * @return Whether the character ends this text.
+     */
     boolean endsWithChar(char c);
 
     Option<Integer> firstIndexOfChar(char c);
