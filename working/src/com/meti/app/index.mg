@@ -4,14 +4,14 @@ let result : I16 = true;
 
 def it(message : &I8, action : () => Void) => {
     action();
-    printf("\t%s -> ", message);
+    printf(" - %s -> ", message);
     let status : &I8;
     if(result) {
         status = "Passing";
     } else {
         status = "Failing";
     }
-    printf("%s", status);
+    printf("%s\n", status);
 }
 
 def describe(name : &I8, action : () => Void) => {
@@ -29,8 +29,12 @@ def assertFalse(value : Bool) => {
 
 def main() => {
     describe("The assertions test", () => {
-        it("should assert things to be true.", () => {
+        it("should assert a state to be true", () => {
             assertTrue(true);
+        });
+
+        it("should assert a state to be false", () => {
+            assertFalse(false);
         });
     });
     return 0;
