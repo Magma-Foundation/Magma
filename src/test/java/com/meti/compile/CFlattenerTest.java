@@ -8,18 +8,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MagmaFlattenerTest {
+class CFlattenerTest {
     @Test
     void node() throws CompileException {
         var expected = new Cache(new Return(new Variable("first")), new Variable("second"));
-        var actual = new MagmaFlattener().apply(new Return(new Cache(new Variable("first"), new Variable("second"))));
+        var actual = new CFlattener().apply(new Return(new Cache(new Variable("first"), new Variable("second"))));
         assertEquals(expected, actual);
     }
 
     @Test
     void nodes() throws CompileException {
         var expected = new Cache(new Block(new Variable("first")), new Variable("second"));
-        var actual = new MagmaFlattener().apply(new Block(new Cache(new Variable("first"), new Variable("second"))));
+        var actual = new CFlattener().apply(new Block(new Cache(new Variable("first"), new Variable("second"))));
         assertEquals(expected, actual);
     }
 }

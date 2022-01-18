@@ -9,7 +9,7 @@ import com.meti.compile.attribute.NodesAttribute1;
 import com.meti.compile.cache.CacheBuilder;
 import com.meti.compile.node.Node;
 
-public class MagmaFlattener extends AbstractStage {
+public class CFlattener extends AbstractStage {
     @Override
     public Node apply(Node node) throws CompileException {
         try {
@@ -57,7 +57,7 @@ public class MagmaFlattener extends AbstractStage {
     }
 
     @Override
-    protected Node transformDefinition(Node definition) {
-        return definition;
+    protected Node transformDefinition(Node definition) throws CompileException {
+        return apply(definition);
     }
 }
