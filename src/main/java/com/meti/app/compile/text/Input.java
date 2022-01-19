@@ -8,20 +8,20 @@ public interface Input {
     char apply(int index) throws IndexException;
 
     /**
-     * Returns true if this character is contained within the trimmed value of this text,
+     * Returns true if this character is contained within the trimmed value of this input,
      * otherwise false.
      *
      * @param c The character for which to search.
-     * @return Whether the character is contained within this text.
+     * @return Whether the character is contained within this input.
      */
     boolean containsChar(char c);
 
     /**
-     * Returns whether if this trimmed text by the given character.
-     * If the text is empty, then false is returned.
+     * Returns whether if this trimmed input by the given character.
+     * If the input is empty, then false is returned.
      *
      * @param c The character.
-     * @return Whether the character ends this text.
+     * @return Whether the character ends this input.
      */
     boolean endsWithChar(char c);
 

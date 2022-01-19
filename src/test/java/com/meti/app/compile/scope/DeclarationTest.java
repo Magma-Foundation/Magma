@@ -12,6 +12,11 @@ public class DeclarationTest {
     }
 
     @Test
+    void implicit() {
+        assertSourceCompile("const x = 420", "int x=420;");
+    }
+
+    @Test
     void empty() {
         assertSourceCompile("let x : I16", "int x;");
     }
