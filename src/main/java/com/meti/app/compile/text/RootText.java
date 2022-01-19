@@ -53,6 +53,11 @@ public final class RootText implements Text {
     }
 
     @Override
+    public boolean equalsInput(Input other) {
+        return other.equalsSlice(trimmedValue);
+    }
+
+    @Override
     public boolean equalsSlice(String slice) {
         return this.trimmedValue.equals(slice);
     }

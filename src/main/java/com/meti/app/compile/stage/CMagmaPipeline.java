@@ -4,9 +4,9 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.text.Input;
 import com.meti.app.source.Packaging;
-
-import java.util.Stack;
 
 public class CMagmaPipeline {
     private final CMagmaNodeResolver resolver = new CMagmaNodeResolver();
@@ -23,7 +23,7 @@ public class CMagmaPipeline {
     public Stream<Node> apply() throws CompileException {
         try {
             var parsed = input.stream()
-                    .foldRight(new State(), State::add)
+                    .foldRight(new State(), this::parse)
                     .stream()
                     .foldRight(List.<Node>createList(), List::add);
             var resolved = perform(resolver, parsed);
@@ -35,24 +35,59 @@ public class CMagmaPipeline {
         }
     }
 
+    private State parse(State state, Node node) throws CompileException {
+        if (node.is(Node.Type.Declaration)) {
+            var identity = node.apply(Attribute.Type.Identity).asNode();
+            var name = identity.apply(Attribute.Type.Name).asInput();
+            if (state.isDefined(name)) {
+                throw new CompileException(name.toOutput().compute() + " is already defined.");
+            } else {
+                return state.define(identity).add(node);
+            }
+        }
+        return state.add(node);
+    }
+
     private List<Node> perform(AbstractStage stage, List<Node> current) throws StreamException {
         return current.stream()
                 .map(stage::transformNodeAST)
                 .foldRight(List.createList(), List::add);
     }
 
-    record State(Stack<List<Node>> scope, List<Node> current) {
+    record State(List<List<Node>> scope, List<Node> buffer) {
         public State() {
-            this(new Stack<>(), List.createList());
+            this(List.createList(), List.createList());
         }
 
         public State add(Node node) {
-            var next = current.add(node);
+            var next = buffer.add(node);
             return new State(scope, next);
         }
 
+        public State define(Node definition) throws CompileException {
+            if (definition.is(Node.Type.Declaration) || definition.is(Node.Type.Initialization)) {
+                var newScope = scope.ensure(List::createList)
+                        .mapLast(nodeList -> nodeList.add(definition));
+
+                return new State(newScope, buffer);
+            }
+
+            throw new CompileException(definition + " must be a definition.");
+        }
+
+        public boolean isDefined(Input name) {
+            try {
+                return scope.stream().flatMap(List::stream)
+                        .map(value -> value.apply(Attribute.Type.Name))
+                        .map(Attribute::asInput)
+                        .anyMatch(name::equalsInput);
+            } catch (StreamException e) {
+                return false;
+            }
+        }
+
         public Stream<Node> stream() {
-            return current.stream();
+            return buffer.stream();
         }
     }
 }

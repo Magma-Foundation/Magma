@@ -64,7 +64,7 @@ public record Block(List<Node> children) implements Node {
                     .map(Objects::toString)
                     .foldRight((current, next) -> current + "," + next)
                     .orElse("");
-            return "{\"children\":[" + childrenAsString + "]}";
+            return "{\"buffer\":[" + childrenAsString + "]}";
         } catch (StreamException e) {
             return "";
         }

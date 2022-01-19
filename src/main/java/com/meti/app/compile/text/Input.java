@@ -10,6 +10,7 @@ public interface Input {
     /**
      * Returns true if this character is contained within the trimmed value of this text,
      * otherwise false.
+     *
      * @param c The character for which to search.
      * @return Whether the character is contained within this text.
      */
@@ -18,10 +19,13 @@ public interface Input {
     /**
      * Returns whether if this trimmed text by the given character.
      * If the text is empty, then false is returned.
+     *
      * @param c The character.
      * @return Whether the character ends this text.
      */
     boolean endsWithChar(char c);
+
+    boolean equalsInput(Input other);
 
     boolean equalsSlice(String slice);
 

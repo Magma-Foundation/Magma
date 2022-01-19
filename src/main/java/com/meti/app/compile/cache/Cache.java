@@ -64,7 +64,7 @@ public record Cache(Node value, List<Node> children) implements Node {
     public String toString() {
         return "{" +
                "\n\t\"value\":" + value +
-               ",\n\t\"children\":" + children +
+               ",\n\t\"buffer\":" + children +
                '}';
     }
 

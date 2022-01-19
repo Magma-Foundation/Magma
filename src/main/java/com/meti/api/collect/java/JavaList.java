@@ -4,9 +4,11 @@ import com.meti.api.collect.stream.AbstractStream;
 import com.meti.api.collect.stream.EndOfStreamException;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.core.F1;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
+import com.meti.api.option.Supplier;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -57,7 +59,7 @@ public class JavaList<T> implements List<T> {
     }
 
     @Override
-    public JavaList<T> add(T node) {
+    public List<T> add(T node) {
         value.add(node);
         return this;
     }
@@ -65,22 +67,26 @@ public class JavaList<T> implements List<T> {
     @Override
     public List<T> addAll(List<T> others) {
         try {
-            return others.stream().foldRight(this, JavaList::add);
+            return others.stream().<List<T>, RuntimeException>foldRight(this, List::add);
         } catch (StreamException e) {
             return new JavaList<>();
         }
     }
-
 
     @Override
     public T apply(int index) {
         return value.get(index);
     }
 
-
     @Override
     public boolean contains(T element) {
         return value.contains(element);
+    }
+
+    @Override
+    public <E extends Exception> List<T> ensure(Supplier<T, E> supplier) throws E {
+        if (value.isEmpty()) value.add(supplier.get());
+        return this;
     }
 
     @Override
@@ -104,6 +110,17 @@ public class JavaList<T> implements List<T> {
     public Option<T> last() {
         if (value.isEmpty()) return new None<>();
         else return new Some<>(value.get(value.size() - 1));
+    }
+
+    @Override
+    public <E extends Exception> List<T> mapLast(F1<T, T, E> mapper) throws E {
+        if (!isEmpty()) {
+            var lastIndex = value.size() - 1;
+            var last = value.get(lastIndex);
+            var mapped = mapper.apply(last);
+            value.set(lastIndex, mapped);
+        }
+        return this;
     }
 
     @Override
