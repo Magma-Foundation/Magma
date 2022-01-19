@@ -34,6 +34,9 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
                     .anyMatch(value -> value > 1)) {
                 throw new CompileException("Duplicate flags are not allowed.");
             }
+            if (flags.contains(Field.Flag.Const) && flags.contains(Field.Flag.Let)) {
+                throw new CompileException("Definition cannot be mutable and immutable at the same time.");
+            }
         } catch (StreamException e) {
             throw new CompileException(e);
         }

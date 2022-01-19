@@ -7,6 +7,11 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class DeclarationTest {
     @Test
+    void conflicting_flags() {
+        assertDoesNotCompile("const let x = 420");
+    }
+
+    @Test
     void duplicate_flags() {
         assertDoesNotCompile("const const x = 420");
     }
