@@ -1,13 +1,12 @@
 package com.meti.app.compile.cache;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 
 public record CacheBuilder<T>(T value, List<Node> items) {
     public CacheBuilder(T root, Node... items) {

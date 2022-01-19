@@ -8,13 +8,13 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.common.Abstraction;
 import com.meti.app.compile.common.Import;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
 

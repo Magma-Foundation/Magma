@@ -1,4 +1,4 @@
-package com.meti.app.compile.attribute;
+package com.meti.app.compile.node.attribute;
 
 public record BooleanAttribute(boolean value) implements Attribute {
     @Override

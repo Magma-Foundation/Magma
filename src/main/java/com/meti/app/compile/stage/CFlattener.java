@@ -2,13 +2,13 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.NodesAttribute1;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.cache.CacheBuilder;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 public class CFlattener extends AbstractStage {
     @Override

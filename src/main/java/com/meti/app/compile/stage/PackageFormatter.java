@@ -3,9 +3,9 @@ package com.meti.app.compile.stage;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.PackageAttribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.PackageAttribute;
 import com.meti.app.source.Packaging;
 
 class PackageFormatter implements Transformer {

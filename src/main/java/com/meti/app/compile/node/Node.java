@@ -1,8 +1,8 @@
 package com.meti.app.compile.node;
 
 import com.meti.api.collect.stream.EmptyStream;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 
 import java.util.stream.Stream;
 

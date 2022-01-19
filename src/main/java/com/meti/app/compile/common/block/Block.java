@@ -1,14 +1,13 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodesAttribute1;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 import java.util.Objects;
 import java.util.stream.Stream;

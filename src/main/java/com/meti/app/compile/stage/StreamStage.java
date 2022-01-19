@@ -4,8 +4,8 @@ import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
 
 public abstract class StreamStage extends AbstractStage {
     @Override

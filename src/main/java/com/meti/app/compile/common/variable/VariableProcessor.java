@@ -1,8 +1,8 @@
 package com.meti.app.compile.common.variable;
 
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.AbstractProcessor;
 import com.meti.app.compile.text.Output;
 

@@ -2,8 +2,8 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.*;
 import com.meti.app.compile.text.Input;
 
 import java.util.Objects;

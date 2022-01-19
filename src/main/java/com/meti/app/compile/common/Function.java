@@ -1,13 +1,12 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.NodesAttribute1;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,7 +50,7 @@ public abstract class Function implements Node {
             return switch (type) {
                 case Identity -> complete(attribute.asNode(), parameters);
                 case Parameters -> complete(identity, attribute.asStreamOfNodes1()
-                        .foldRight(List.<Node>createList(), List::add));
+                        .foldRight(List.createList(), List::add));
                 default -> throw new AttributeException(type);
             };
         } catch (StreamException e) {

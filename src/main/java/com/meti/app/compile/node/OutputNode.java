@@ -1,8 +1,8 @@
 package com.meti.app.compile.node;
 
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.OutputAttribute;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.OutputAttribute;
 import com.meti.app.compile.text.Output;
 
 public record OutputNode(Output output) implements Node {

@@ -5,13 +5,13 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.variable.Variable;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.stage.Transformer;
 

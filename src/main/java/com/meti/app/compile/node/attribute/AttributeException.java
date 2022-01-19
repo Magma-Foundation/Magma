@@ -1,4 +1,4 @@
-package com.meti.app.compile.attribute;
+package com.meti.app.compile.node.attribute;
 
 import com.meti.app.compile.stage.CompileException;
 

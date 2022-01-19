@@ -2,7 +2,6 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.core.F1;
-import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.common.Declaration;
 import com.meti.app.compile.common.ValuedField;
 import com.meti.app.compile.common.binary.BinaryOperation;
@@ -13,6 +12,7 @@ import com.meti.app.compile.common.returns.Return;
 import com.meti.app.compile.common.variable.Variable;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
