@@ -59,6 +59,8 @@ public record DeclarationLexer(Input input) implements Processor<Node> {
 
     private Option<Integer> findValueSeparator() {
         try {
+            if (input.size() < 2) return new None<>();
+
             for (int i = 0; i < input.size(); i++) {
                 var c = input.apply(i);
                 if (c == '=' && !input.slice(i, i + 2).compute().equals("=>")) {
