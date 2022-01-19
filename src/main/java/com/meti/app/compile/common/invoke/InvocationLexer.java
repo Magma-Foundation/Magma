@@ -3,10 +3,10 @@ package com.meti.app.compile.common.invoke;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.Option;
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 

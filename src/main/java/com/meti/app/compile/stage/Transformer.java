@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.stage;
 
 import com.meti.api.option.Option;
 import com.meti.app.compile.node.Node;

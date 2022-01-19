@@ -1,7 +1,7 @@
-package com.meti.app.compile;
+package com.meti.app.compile.stage;
 
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.java.JavaMap;
+import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;

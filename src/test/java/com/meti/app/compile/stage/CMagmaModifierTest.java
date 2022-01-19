@@ -2,7 +2,6 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.core.F1;
-import com.meti.app.compile.CMagmaModifier;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.common.Declaration;
 import com.meti.app.compile.common.ValuedField;

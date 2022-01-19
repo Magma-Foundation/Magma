@@ -1,11 +1,11 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
-import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.EmptyNode;
+import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 

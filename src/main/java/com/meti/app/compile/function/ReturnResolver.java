@@ -1,12 +1,15 @@
-package com.meti.app.compile;
+package com.meti.app.compile.function;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
+import com.meti.app.compile.magma.MagmaTypeResolver;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.stage.CompileException;
+import com.meti.app.compile.stage.Transformer;
 
-record ReturnResolver(Node node, MagmaTypeResolver parent) implements Transformer {
+public record ReturnResolver(Node node, MagmaTypeResolver parent) implements Transformer {
     @Override
     public Option<Node> transform() throws CompileException {
         if (node.is(Node.Type.Return)) {

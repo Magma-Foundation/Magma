@@ -4,7 +4,6 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
@@ -25,6 +24,7 @@ import com.meti.app.compile.lex.LexException;
 import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.PrimitiveLexer;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 
 import java.util.ArrayList;

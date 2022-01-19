@@ -1,7 +1,7 @@
 package com.meti.app.compile.common.invoke;
 
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 

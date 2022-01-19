@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.scope;
 
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
@@ -11,6 +11,8 @@ import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.Line;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.stage.CompileException;
+import com.meti.app.compile.stage.Transformer;
 
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 

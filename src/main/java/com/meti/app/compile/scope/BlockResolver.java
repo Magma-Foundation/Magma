@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.scope;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
@@ -8,8 +8,11 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.stage.CompileException;
+import com.meti.app.compile.stage.StreamStage;
+import com.meti.app.compile.stage.Transformer;
 
-record BlockResolver(Node node, StreamStage parent) implements Transformer {
+public record BlockResolver(Node node, StreamStage parent) implements Transformer {
     @Override
     public Option<Node> transform() throws CompileException {
         if (node.is(Node.Type.Block)) {

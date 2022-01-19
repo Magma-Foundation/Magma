@@ -1,8 +1,8 @@
-package com.meti.app.compile;
+package com.meti.app.compile.stage;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.java.List;
 import com.meti.api.collect.java.JavaMap;
+import com.meti.api.collect.java.List;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
@@ -11,7 +11,6 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 import com.meti.app.source.Packaging;
 
 import java.util.ArrayList;

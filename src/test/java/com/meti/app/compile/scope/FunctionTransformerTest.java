@@ -1,15 +1,15 @@
 package com.meti.app.compile.scope;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.FunctionTransformer;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
+import com.meti.app.compile.function.FunctionTransformer;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 

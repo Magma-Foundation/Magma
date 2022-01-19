@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.primitive;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
@@ -7,6 +7,8 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.stage.TransformationException;
+import com.meti.app.compile.stage.Transformer;
 
 public record BooleanTransformer(Node node) implements Transformer {
     @Override

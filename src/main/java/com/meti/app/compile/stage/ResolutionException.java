@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.stage;
 
 public class ResolutionException extends CompileException {
     public ResolutionException(String message) {

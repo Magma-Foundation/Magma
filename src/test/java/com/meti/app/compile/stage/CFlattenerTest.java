@@ -1,7 +1,5 @@
 package com.meti.app.compile.stage;
 
-import com.meti.app.compile.CFlattener;
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;

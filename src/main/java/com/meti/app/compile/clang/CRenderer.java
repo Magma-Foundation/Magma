@@ -3,7 +3,6 @@ package com.meti.app.compile.clang;
 import com.meti.api.collect.java.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.app.compile.CompileException;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
 import com.meti.app.compile.attribute.NodesAttribute;
@@ -23,6 +22,7 @@ import com.meti.app.compile.node.OutputNode;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.render.RenderException;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 

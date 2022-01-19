@@ -2,6 +2,9 @@ package com.meti.app.compile;
 
 import com.meti.api.collect.java.JavaMap;
 import com.meti.app.compile.clang.CFormat;
+import com.meti.app.compile.stage.CMagmaCompiler;
+import com.meti.app.compile.stage.CompileException;
+import com.meti.app.compile.stage.Target;
 import com.meti.app.source.Packaging;
 
 import java.util.Collections;
