@@ -1,14 +1,14 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.option.Option;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
-public record UnaryLexer(Input text) implements Lexer {
+public record UnaryLexer(Input text) implements Processor<Node> {
     @Override
-    public Option<Node> lex() {
+    public Option<Node> process() {
         return text.firstIndexOfChar(' ').map(separator -> {
             var callerString = text.slice(0, separator);
             var caller = new InputNode(callerString);

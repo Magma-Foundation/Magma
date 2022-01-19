@@ -8,14 +8,21 @@ import com.meti.app.compile.process.AbstractProcessor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 
-final class StructureRenderer extends AbstractProcessor<Output> {
+final class StructureRenderer extends AbstractProcessor<Node, Output> {
     public StructureRenderer(Node node) {
         super(node);
     }
 
-    @Override
-    protected boolean validate() {
-        return node.is(Node.Type.Structure);
+    private String renderFields() throws StreamException, AttributeException {
+        return input.apply(Attribute.Type.Fields)
+                .asStreamOfNodes1()
+                .map(value -> value.apply(Attribute.Type.Value))
+                .map(Attribute::asOutput)
+                .map(Output::computeTrimmed)
+                .map(value -> value + ";")
+                .foldRight((current, next) -> current + next)
+                .map(value -> "{" + value + "}")
+                .orElse("{}");
     }
 
     @Override
@@ -30,20 +37,13 @@ final class StructureRenderer extends AbstractProcessor<Output> {
     }
 
     private Output renderName() throws AttributeException {
-        return node.apply(Attribute.Type.Name)
+        return input.apply(Attribute.Type.Name)
                 .asInput()
                 .toOutput();
     }
 
-    private String renderFields() throws StreamException, AttributeException {
-        return node.apply(Attribute.Type.Fields)
-                .asStreamOfNodes1()
-                .map(value -> value.apply(Attribute.Type.Value))
-                .map(Attribute::asOutput)
-                .map(Output::computeTrimmed)
-                .map(value -> value + ";")
-                .foldRight((current, next) -> current + next)
-                .map(value -> "{" + value + "}")
-                .orElse("{}");
+    @Override
+    protected boolean validate() {
+        return input.is(Node.Type.Structure);
     }
 }

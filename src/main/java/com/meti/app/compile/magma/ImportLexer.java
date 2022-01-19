@@ -5,14 +5,14 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.common.Extern;
 import com.meti.app.compile.common.Import;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 import com.meti.app.source.Packaging;
 
-public record ImportLexer(Input text) implements Lexer {
+public record ImportLexer(Input text) implements Processor<Node> {
     @Override
-    public Option<Node> lex() {
+    public Option<Node> process() {
         if (text.startsWithSlice("extern ")) {
             var slice = text.slice("extern ".length());
             if (slice.startsWithSlice("import ")) {

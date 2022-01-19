@@ -3,16 +3,16 @@ package com.meti.app.compile.common.invoke;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.Option;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 
-public record InvocationLexer(Input text) implements Lexer {
+public record InvocationLexer(Input text) implements Processor<Node> {
     @Override
-    public Option<Node> lex() throws CompileException {
+    public Option<Node> process() throws CompileException {
         return text.firstIndexOfChar('(')
                 .flatMap(start -> text.lastIndexOfChar(')')
                         .filter(end -> end >= start)

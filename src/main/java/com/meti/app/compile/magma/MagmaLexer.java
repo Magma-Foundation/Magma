@@ -18,12 +18,12 @@ import com.meti.app.compile.common.returns.ReturnLexer;
 import com.meti.app.compile.common.string.StringLexer;
 import com.meti.app.compile.common.variable.VariableLexer;
 import com.meti.app.compile.lex.LexException;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.PrimitiveLexer;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 
@@ -31,7 +31,18 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record MagmaLexer(Input text) {
-    private static Stream<? extends Lexer> streamNodeLexers(Input text) {
+    private static Node lexStreams(Input text, Stream<? extends Processor<Node>> lexers) throws CompileException {
+        try {
+            return lexers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .headOptionally()
+                    .orElseThrow(() -> new LexException("Unknown input: " + text));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private static Stream<? extends Processor<Node>> streamNodeLexers(Input text) {
         return Streams.apply(
                 new ElseLexer(text),
                 new StringLexer(text),
@@ -50,18 +61,7 @@ public record MagmaLexer(Input text) {
                 new VariableLexer(text));
     }
 
-    private static Node lexStreams(Input text, Stream<? extends Lexer> lexers) throws CompileException {
-        try {
-            return lexers.map(Lexer::lex)
-                    .flatMap(Streams::optionally)
-                    .headOptionally()
-                    .orElseThrow(() -> new LexException("Unknown input: " + text));
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    private static Stream<? extends Lexer> streamTypeLexers(Input text) {
+    private static Stream<? extends Processor<Node>> streamTypeLexers(Input text) {
         return Streams.apply(new FunctionTypeLexer(text),
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),

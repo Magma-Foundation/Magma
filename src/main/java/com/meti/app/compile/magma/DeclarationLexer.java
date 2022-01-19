@@ -9,17 +9,17 @@ import com.meti.app.compile.common.Declaration;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.ValuedField;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public record DeclarationLexer(Input text) implements Lexer {
+public record DeclarationLexer(Input text) implements Processor<Node> {
     @Override
-    public Option<Node> lex() {
+    public Option<Node> process() {
         return text.firstIndexOfChar(':').flatMap(typeSeparator -> {
             var keys = text.slice(0, typeSeparator);
             var separator = keys.lastIndexOfChar(' ');

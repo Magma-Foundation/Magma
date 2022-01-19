@@ -9,15 +9,15 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.common.*;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.compile.text.Text;
 
-public record FunctionLexer(Input text) implements Lexer {
+public record FunctionLexer(Input text) implements Processor<Node> {
     private Function extractFunction(int paramStart, List<Field.Flag> flags, Text name) throws CompileException {
         try {
             int paramEnd = locateParameterEnd(paramStart);
@@ -33,7 +33,7 @@ public record FunctionLexer(Input text) implements Lexer {
     }
 
     @Override
-    public Option<Node> lex() throws CompileException {
+    public Option<Node> process() throws CompileException {
         return text.firstIndexOfChar('(')
                 .filter(value -> text.containsChar(')'))
                 .flatMap(this::extract);

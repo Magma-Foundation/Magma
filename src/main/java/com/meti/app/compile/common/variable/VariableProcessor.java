@@ -6,19 +6,19 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.AbstractProcessor;
 import com.meti.app.compile.text.Output;
 
-public final class VariableProcessor extends AbstractProcessor<Output> {
+public final class VariableProcessor extends AbstractProcessor<Node, Output> {
     public VariableProcessor(Node node) {
         super(node);
     }
 
     @Override
     protected boolean validate() {
-        return node.is(Node.Type.Variable);
+        return input.is(Node.Type.Variable);
     }
 
     @Override
     protected Output createNode() throws AttributeException {
-        return node.apply(Attribute.Type.Value)
+        return input.apply(Attribute.Type.Value)
                 .asInput()
                 .toOutput();
     }

@@ -13,7 +13,7 @@ class InvocationLexerTest {
     @Test
     void lex() throws CompileException {
         var actual = new InvocationLexer(new RootText("test(() => {})"))
-                .lex()
+                .process()
                 .orElse(EmptyNode_);
         var expected = new Invocation(new InputNode(new RootText("test")), new InputNode(new RootText("() => {}")));
         assertEquals(actual, expected);

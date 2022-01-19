@@ -16,14 +16,14 @@ class FunctionLexerTest {
     @Test
     void invalid() throws CompileException {
         assertFalse(new FunctionLexer(new RootText("test(() => {})"))
-                .lex()
+                .process()
                 .isPresent());
     }
 
     @Test
     void lambda() throws CompileException {
         var node = new FunctionLexer(new RootText("() => {}"))
-                .lex();
+                .process();
         var identity = new EmptyField(new RootText(""), ImplicitType.ImplicitType_, List.createList());
         var expected = new Implementation(identity, new InputNode(new RootText("{}")), List.createList());
         var actual = node.orElse(EmptyNode.EmptyNode_);
