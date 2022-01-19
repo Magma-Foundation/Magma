@@ -29,6 +29,8 @@ public interface List<T> {
 
     boolean contains(T element);
 
+    int count(T element);
+
     <E extends Exception> List<T> ensure(Supplier<T, E> supplier) throws E;
 
     Option<T> first();

@@ -84,6 +84,17 @@ public class JavaList<T> implements List<T> {
     }
 
     @Override
+    public int count(T element) {
+        var counter = 0;
+        for (T t : value) {
+            if (t.equals(element)) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+
+    @Override
     public <E extends Exception> List<T> ensure(Supplier<T, E> supplier) throws E {
         if (value.isEmpty()) value.add(supplier.get());
         return this;

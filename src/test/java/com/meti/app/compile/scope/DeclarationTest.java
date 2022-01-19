@@ -7,8 +7,13 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class DeclarationTest {
     @Test
-    void repeated() {
-        assertDoesNotCompile("const x : I16=420;const x : U16=420;");
+    void duplicate_flags() {
+        assertDoesNotCompile("const const x = 420");
+    }
+
+    @Test
+    void empty() {
+        assertSourceCompile("let x : I16", "int x;");
     }
 
     @Test
@@ -17,8 +22,8 @@ public class DeclarationTest {
     }
 
     @Test
-    void empty() {
-        assertSourceCompile("let x : I16", "int x;");
+    void repeated() {
+        assertDoesNotCompile("const x : I16=420;const x : U16=420;");
     }
 
     @Test

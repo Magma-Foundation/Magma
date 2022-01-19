@@ -19,20 +19,28 @@ import com.meti.app.compile.text.Input;
 
 import static com.meti.app.compile.magma.ImplicitType.ImplicitType_;
 
-public record DeclarationLexer(Input input) implements Processor<Node> {
+public record DefinitionLexer(Input input) implements Processor<Node> {
     @Override
     public Option<Node> process() throws CompileException {
-        var typeSeparator1 = input.firstIndexOfChar(':');
+        var typeSeparatorOptional = input.firstIndexOfChar(':');
         var valueSeparator = findValueSeparator();
 
-        var keys = input.slice(0, typeSeparator1.or(valueSeparator).orElse(input.size()));
+        var keys = input.slice(0, typeSeparatorOptional.or(valueSeparator).orElse(input.size()));
         var separator = keys.lastIndexOfChar(' ');
         var flags = lexFlags(keys, separator);
+        try {
+            if (flags.stream()
+                    .map(flags::count)
+                    .anyMatch(value -> value > 1)) {
+                throw new CompileException("Duplicate flags are not allowed.");
+            }
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
 
         var nameText = separator.map(space -> keys.slice(space + 1)).orElse(keys);
-
         if (flags.contains(Field.Flag.Let) || flags.contains(Field.Flag.Const)) {
-            return typeSeparator1.<Option<Node>, RuntimeException>map(typeSeparator -> new Some<>(valueSeparator.map(s -> {
+            return typeSeparatorOptional.<Option<Node>, RuntimeException>map(typeSeparator -> new Some<>(valueSeparator.map(s -> {
                 var typeText = input.slice(typeSeparator + 1, s);
                 var type = new InputNode(typeText);
 

@@ -52,7 +52,7 @@ public record MagmaLexer(Input text) {
                 new StructureLexer(text),
                 new BlockLexer(text),
                 new FunctionLexer(text),
-                new DeclarationLexer(text),
+                new DefinitionLexer(text),
                 new InvocationLexer(text),
                 new ReturnLexer(text),
                 new IntegerLexer(text),
