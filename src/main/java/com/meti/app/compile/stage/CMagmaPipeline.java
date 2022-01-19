@@ -45,6 +45,12 @@ public class CMagmaPipeline {
                 return state.define(identity).add(node);
             }
         }
+        if (node.is(Node.Type.Variable)) {
+            var value = node.apply(Attribute.Type.Value).asInput();
+            if (!state.isDefined(value)) {
+                throw new CompileException(value.toOutput().compute() + " is not defined.");
+            }
+        }
         return state.add(node);
     }
 
