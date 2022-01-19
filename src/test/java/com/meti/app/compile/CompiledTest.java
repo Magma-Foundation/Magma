@@ -41,9 +41,8 @@ public class CompiledTest {
 
     public static void assertSourceCompile(String input, String output) {
         try {
-            var package_ = new Packaging("Index", Collections.emptyList());
             var compile = compileImpl(input);
-            var before = compile.get(package_).apply(CFormat.Source, "");
+            var before = compile.get(Package_).apply(CFormat.Source, "");
             var separator = before.indexOf('\"', before.indexOf('\"') + 1);
             var after = before.substring(separator + 1).trim();
             assertEquals(output, after);
