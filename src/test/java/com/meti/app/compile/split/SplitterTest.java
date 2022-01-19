@@ -1,6 +1,7 @@
-package com.meti.app.compile.common.block;
+package com.meti.app.compile.split;
 
 import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
