@@ -8,13 +8,12 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.stage.StreamStage;
-import com.meti.app.compile.stage.Transformer;
 
-public record BlockResolver(Node node, StreamStage parent) implements Transformer {
-    @Override
-    public Option<Node> transform() throws CompileException {
+public record BlockResolver(Node node, StreamStage parent) implements Processor<Node> {
+    public Option<Node> process() throws CompileException {
         if (node.is(Node.Type.Block)) {
             try {
                 var children = node.apply(Attribute.Type.Children)

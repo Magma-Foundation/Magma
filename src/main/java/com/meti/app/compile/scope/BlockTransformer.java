@@ -11,14 +11,13 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.stage.Transformer;
 
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
-public record BlockTransformer(Node root) implements Transformer {
-    @Override
-    public Option<Node> transform() throws CompileException {
+public record BlockTransformer(Node root) implements Processor<Node> {
+    public Option<Node> process() throws CompileException {
         if (root.is(Node.Type.Block)) {
             var output = transformBlock(root);
             return new Some<>(output);

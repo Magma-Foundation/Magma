@@ -6,6 +6,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.process.Processor;
 
 public abstract class StreamStage extends AbstractStage {
     @Override
@@ -25,7 +26,7 @@ public abstract class StreamStage extends AbstractStage {
         return transformUsingStreams(type, streamTypeTransformers(type));
     }
 
-    protected Stream<Transformer> streamTypeTransformers(Node node) {
+    protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
         return new EmptyStream<>();
     }
 
@@ -34,18 +35,18 @@ public abstract class StreamStage extends AbstractStage {
         return transformUsingStreams(node, streamNodeTransformers(node));
     }
 
-    private Node transformUsingStreams(Node node, Stream<Transformer> transformers) throws CompileException {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node node) {
+        return new EmptyStream<>();
+    }
+
+    private Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
         try {
-            return transformers.map(Transformer::transform)
+            return transformers.map(Processor::process)
                     .flatMap(Streams::optionally)
                     .first()
                     .orElse(node);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
-    }
-
-    protected Stream<Transformer> streamNodeTransformers(Node node) {
-        return new EmptyStream<>();
     }
 }

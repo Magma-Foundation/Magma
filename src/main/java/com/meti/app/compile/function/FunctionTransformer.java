@@ -12,12 +12,11 @@ import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.stage.Transformer;
 
-public record FunctionTransformer(Node oldNode) implements Transformer {
-    @Override
-    public Option<Node> transform() throws CompileException {
+public record FunctionTransformer(Node oldNode) implements Processor<Node> {
+    public Option<Node> process() throws CompileException {
         if (oldNode.is(Node.Type.Abstraction)) {
             return new Some<>(isExternal() ? EmptyNode.EmptyNode_ : oldNode);
         }

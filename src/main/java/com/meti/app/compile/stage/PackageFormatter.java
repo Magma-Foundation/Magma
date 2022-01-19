@@ -6,9 +6,10 @@ import com.meti.api.option.Some;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.PackageAttribute;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.source.Packaging;
 
-class PackageFormatter implements Transformer {
+class PackageFormatter implements Processor<Node> {
     private final Node node;
     private final Packaging thisPackage;
 
@@ -17,8 +18,7 @@ class PackageFormatter implements Transformer {
         this.thisPackage = thisPackage;
     }
 
-    @Override
-    public Option<Node> transform() throws CompileException {
+    public Option<Node> process() throws CompileException {
         if (node.is(Node.Type.Import)) {
             var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
             var newPackage = thisPackage.relativize(thatPackage);

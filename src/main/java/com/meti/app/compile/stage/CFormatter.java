@@ -8,6 +8,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.InputAttribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
@@ -21,7 +22,7 @@ public class CFormatter extends StreamStage {
     }
 
     @Override
-    protected Stream<Transformer> streamNodeTransformers(Node node) {
+    protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
         return Streams.apply(() -> {
             if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
                 var oldIdentity = node.apply(Attribute.Type.Identity).asNode();

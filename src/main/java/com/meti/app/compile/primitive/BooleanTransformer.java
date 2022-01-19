@@ -7,12 +7,11 @@ import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.TransformationException;
-import com.meti.app.compile.stage.Transformer;
 
-public record BooleanTransformer(Node node) implements Transformer {
-    @Override
-    public Option<Node> transform() throws TransformationException {
+public record BooleanTransformer(Node node) implements Processor<Node> {
+    public Option<Node> process() throws TransformationException {
         if (node.is(Node.Type.Boolean)) {
             try {
                 var value = node.apply(Attribute.Type.Value);
