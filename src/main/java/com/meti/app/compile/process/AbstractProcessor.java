@@ -14,7 +14,7 @@ public abstract class AbstractProcessor<I, O> implements Processor<O> {
 
     @Override
     public Option<O> process() throws CompileException {
-        return validate() ? new Some<>(createNode()) : new None<O>();
+        return validate() ? new Some<>(createNode()) : new None<>();
     }
 
     protected abstract boolean validate();
