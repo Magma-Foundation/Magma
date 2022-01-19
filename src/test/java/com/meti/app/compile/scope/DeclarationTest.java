@@ -2,11 +2,17 @@ package com.meti.app.compile.scope;
 
 import org.junit.jupiter.api.Test;
 
+import static com.meti.app.compile.CompiledTest.assertDoesNotCompile;
 import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class DeclarationTest {
     @Test
-    void empty(){
+    void repeated() {
+        assertDoesNotCompile("const x : I16=420;const x : U16=420;");
+    }
+
+    @Test
+    void empty() {
         assertSourceCompile("let x : I16", "int x;");
     }
 
