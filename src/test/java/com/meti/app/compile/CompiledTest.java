@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CompiledTest {
-    static void assertHeaderCompiles(String input, String output) {
+    public static void assertHeaderCompiles(String input, String output) {
         try {
             var package_ = new Packaging("Index", Collections.emptyList());
             var compiler = new CMagmaCompiler(new JavaMap<>(Collections.singletonMap(package_, input)));

@@ -45,7 +45,7 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    Node transformNodeAST(Node node) throws CompileException {
+    public Node transformNodeAST(Node node) throws CompileException {
         var withNodeGroup = transformNodeGroup(node);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
         var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);

@@ -1,4 +1,4 @@
-package com.meti.app.compile;
+package com.meti.app.compile.stage;
 
 import org.junit.jupiter.api.Test;
 

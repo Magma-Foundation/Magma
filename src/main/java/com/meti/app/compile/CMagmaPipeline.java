@@ -13,7 +13,7 @@ public class CMagmaPipeline {
         this.formatter = new CFormatter(thisPackage);
     }
 
-    Node perform(Node value) throws CompileException {
+    public Node perform(Node value) throws CompileException {
         var resolved = resolver.transformNodeAST(value);
         var formatted = formatter.transformNodeAST(resolved);
         var modified = modifier.transformNodeAST(formatted);

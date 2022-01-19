@@ -1,5 +1,6 @@
-package com.meti.app.compile;
+package com.meti.app.compile.operate;
 
+import com.meti.app.compile.CompiledTest;
 import org.junit.jupiter.api.Test;
 
 public class AssignmentTest {

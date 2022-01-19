@@ -1,6 +1,8 @@
-package com.meti.app.compile;
+package com.meti.app.compile.extern;
 
 import com.meti.api.collect.java.JavaMap;
+import com.meti.app.compile.CMagmaCompiler;
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.source.Packaging;
 import org.junit.jupiter.api.Test;
