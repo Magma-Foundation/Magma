@@ -2,9 +2,15 @@ package com.meti.app.compile.function;
 
 import org.junit.jupiter.api.Test;
 
+import static com.meti.app.compile.CompiledTest.assertDoesNotCompile;
 import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class BlockTest {
+    @Test
+    void undefined() {
+        assertDoesNotCompile("{const x = 420}x");
+    }
+
     @Test
     void empty_block() {
         assertSourceCompile("{}", "{}");
