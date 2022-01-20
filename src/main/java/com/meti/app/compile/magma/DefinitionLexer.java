@@ -74,7 +74,8 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
 
             for (int i = 0; i < input.size(); i++) {
                 var c = input.apply(i);
-                if (c == '=' && !input.slice(i, i + 2).compute().equals("=>")) {
+                var offset = Math.min(i + 2, input.size());
+                if (c == '=' && !input.slice(i, offset).compute().equals("=>")) {
                     return new Some<>(i);
                 }
             }
