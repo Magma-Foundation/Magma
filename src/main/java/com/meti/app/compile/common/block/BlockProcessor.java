@@ -19,7 +19,7 @@ public record BlockProcessor(Node node) implements Processor<Output> {
             var builder = new StringBuilder().append("{");
             var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
             for (Node node1 : children) {
-                builder.append(node1.apply(Attribute.Type.Value).asOutput().computeTrimmed());
+                builder.append(node1.apply(Attribute.Type.Value).asOutput().compute());
             }
             return new Some<>(new RootText(builder.append("}").toString()));
         }

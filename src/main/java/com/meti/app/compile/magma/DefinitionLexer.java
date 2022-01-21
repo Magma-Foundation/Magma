@@ -75,7 +75,7 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
             for (int i = 0; i < input.size(); i++) {
                 var c = input.apply(i);
                 var offset = Math.min(i + 2, input.size());
-                if (c == '=' && !input.slice(i, offset).compute().equals("=>")) {
+                if (c == '=' && !input.slice(i, offset).computeRaw().equals("=>")) {
                     return new Some<>(i);
                 }
             }
@@ -88,7 +88,7 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
     private List<Field.Flag> lexFlags(Input keys, Option<Integer> separator) throws CompileException {
         try {
             return separator.map(space -> Streams.apply(keys.slice(0, space)
-                    .computeTrimmed()
+                    .compute()
                     .split(" "))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())

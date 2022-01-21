@@ -36,7 +36,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
 
     private List<Field.Flag> extractFlags(RootText flagString) throws CompileException {
         try {
-            return Streams.apply(flagString.computeTrimmed()
+            return Streams.apply(flagString.compute()
                     .split(" "))
                     .filter(value -> !value.isBlank())
                     .map(String::toUpperCase)
@@ -110,7 +110,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
     }
 
     private List<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {
-        return Streams.apply(text.slice(paramStart + 1, paramEnd).computeTrimmed()
+        return Streams.apply(text.slice(paramStart + 1, paramEnd).compute()
                 .split(","))
                 .filter(value -> !value.isBlank())
                 .map(RootText::new)

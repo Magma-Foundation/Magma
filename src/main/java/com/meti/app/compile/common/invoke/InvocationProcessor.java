@@ -20,7 +20,7 @@ public record InvocationProcessor(Node node) implements Processor<Output> {
             var arguments = node.apply(Attribute.Type.Arguments).asStreamOfNodes().collect(Collectors.toList());
             var renderedArguments = new ArrayList<String>();
             for (Node argument : arguments) {
-                renderedArguments.add(argument.apply(Attribute.Type.Value).asOutput().computeTrimmed());
+                renderedArguments.add(argument.apply(Attribute.Type.Value).asOutput().compute());
             }
             return new Some<>(caller.apply(Attribute.Type.Value)
                     .asOutput()

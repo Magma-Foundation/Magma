@@ -23,7 +23,7 @@ public record InvocationLexer(Input text) implements Processor<Node> {
         try {
             var callerText = text.slice(0, start);
             var slice = text.slice(start + 1, end)
-                    .computeTrimmed();
+                    .compute();
 
             var lines = List.<String>createList();
             var buffer = new StringBuilder();

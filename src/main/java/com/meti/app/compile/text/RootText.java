@@ -23,7 +23,7 @@ public final class RootText implements Output, Input {
 
     @Override
     public Output appendOutput(Output other) {
-        return new RootText(trimmedValue + other.computeTrimmed());
+        return new RootText(trimmedValue + other.compute());
     }
 
     @Override
@@ -33,12 +33,12 @@ public final class RootText implements Output, Input {
 
     @Override
     public String compute() {
-        return value;
+        return trimmedValue;
     }
 
     @Override
-    public String computeTrimmed() {
-        return trimmedValue;
+    public String computeRaw() {
+        return value;
     }
 
     @Override

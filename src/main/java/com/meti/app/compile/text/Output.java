@@ -6,19 +6,18 @@ public interface Output {
     Output appendOutput(Output other);
 
     /**
-     * Computes the value of this {@link Output} object as-is, with no trimming involved.
+     * Computes the trimmed value of this text.
      *
-     * @return The raw value.
+     * @return The trimmed value.
      */
     String compute();
 
     /**
-     * Computes the trimmed value of this {@link Output} object.
-     * Equivalent to {@link #compute()} followed by {@link String#trim()}.
+     * Computes the value of this {@link Output} object as-is, with no trimming involved.
      *
-     * @return The trimmed value.
+     * @return The raw value.
      */
-    String computeTrimmed();
+    String computeRaw();
 
     RootText prepend(String prefix);
 }

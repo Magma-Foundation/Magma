@@ -48,7 +48,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         return divider.apply(format)
                 .map(CRenderer::new)
                 .map(CRenderer::render)
-                .map(Output::compute)
+                .map(Output::computeRaw)
                 .foldRight(new StringBuilder(), StringBuilder::append)
                 .toString();
     }

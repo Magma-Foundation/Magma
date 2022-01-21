@@ -18,7 +18,7 @@ final class StructureRenderer extends AbstractProcessor<Node, Output> {
                 .asStreamOfNodes1()
                 .map(value -> value.apply(Attribute.Type.Value))
                 .map(Attribute::asOutput)
-                .map(Output::computeTrimmed)
+                .map(Output::compute)
                 .map(value -> value + ";")
                 .foldRight((current, next) -> current + next)
                 .map(value -> "{" + value + "}")

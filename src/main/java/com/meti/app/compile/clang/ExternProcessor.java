@@ -17,7 +17,7 @@ public record ExternProcessor(Node node) implements Processor<Output> {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
                     .asInput()
                     .toOutput()
-                    .computeTrimmed() + ".h>\n"));
+                    .compute() + ".h>\n"));
         } else {
             return new None<>();
         }

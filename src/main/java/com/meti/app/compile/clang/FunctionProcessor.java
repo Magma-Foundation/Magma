@@ -26,7 +26,7 @@ public record FunctionProcessor(Node node) implements Processor<Output> {
                         .asStreamOfNodes1()
                         .map(value -> value.apply(Attribute.Type.Value))
                         .map(Attribute::asOutput)
-                        .map(Output::computeTrimmed)
+                        .map(Output::compute)
                         .foldRight(new ArrayList<>(), (strings, s) -> {
                             strings.add(s);
                             return strings;

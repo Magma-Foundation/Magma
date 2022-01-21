@@ -15,7 +15,7 @@ public record BooleanResolver(Node node) implements Processor<Node> {
         if (node.is(Node.Type.Primitive) && node.apply(Attribute.Type.Name)
                 .asInput()
                 .toOutput()
-                .computeTrimmed()
+                .compute()
                 .equals(Primitive.Bool.name())) {
             return new Some<>(new IntegerType(true, 16));
         } else {

@@ -41,7 +41,7 @@ public record CRenderer(Node root) {
             var newParameters = new ArrayList<String>();
             for (Node oldParameter : oldParameters) {
                 var renderedParameter = renderType(oldParameter);
-                newParameters.add(renderedParameter.computeTrimmed());
+                newParameters.add(renderedParameter.compute());
             }
             return returnType.appendSlice(" (*")
                     .appendOutput(name.toOutput())
@@ -56,7 +56,7 @@ public record CRenderer(Node root) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asInput()
                     .toOutput()
-                    .computeTrimmed()
+                    .compute()
                     .toLowerCase();
             return name.toOutput().prepend(rendered + " ");
         } else if (type.is(Node.Type.Integer)) {
@@ -69,7 +69,7 @@ public record CRenderer(Node root) {
             };
             var value = (isSigned ? "" : "unsigned ") + suffix + " " + name
                     .toOutput()
-                    .computeTrimmed();
+                    .compute();
             return new RootText(value);
         } else {
             throw new RenderException("Cannot render type: " + type);

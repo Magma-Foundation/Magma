@@ -23,11 +23,11 @@ public record ImportLexer(Input text) implements Processor<Node> {
         if (text.startsWithSlice("import ")) {
             var root = text.slice("import ".length());
             var package_ = root.lastIndexOfChar('.').map(nameSeparator -> {
-                var args = root.slice(0, nameSeparator).computeTrimmed()
+                var args = root.slice(0, nameSeparator).compute()
                         .split("\\.");
-                var name = root.slice(nameSeparator + 1).computeTrimmed();
+                var name = root.slice(nameSeparator + 1).compute();
                 return new Packaging(name, args);
-            }).orElse(new Packaging(root.computeTrimmed()));
+            }).orElse(new Packaging(root.compute()));
             return new Some<>(new Import(package_));
         }
         return new None<>();

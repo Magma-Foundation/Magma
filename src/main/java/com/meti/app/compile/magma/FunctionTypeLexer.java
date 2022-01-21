@@ -19,7 +19,7 @@ public record FunctionTypeLexer(Input text) implements Processor<Node> {
     }
 
     private Option<Node> extract(Integer end) {
-        var parameters = Arrays.stream(text.slice(1, end).computeTrimmed().split(","))
+        var parameters = Arrays.stream(text.slice(1, end).compute().split(","))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
                 .map(RootText::new)
