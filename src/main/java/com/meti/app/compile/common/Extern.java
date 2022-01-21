@@ -5,12 +5,12 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.InputAttribute;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.text.RootText;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Extern(Text root) implements Node {
+public record Extern(RootText root) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new InputAttribute(root);

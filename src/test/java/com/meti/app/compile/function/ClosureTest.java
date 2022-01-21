@@ -14,4 +14,10 @@ public class ClosureTest {
     void in_function() {
         assertSourceCompile("def outer() => {def inner() => {}}", "void inner(){}void outer(){}");
     }
+
+    @Test
+    void scope() {
+        assertSourceCompile("def outer() => {def inner() => {}}",
+                "void inner(){}void outer(){struct outer_t this;}");
+    }
 }

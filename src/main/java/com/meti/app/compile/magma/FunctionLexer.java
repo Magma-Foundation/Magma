@@ -15,20 +15,15 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 
 public record FunctionLexer(Input text) implements Processor<Node> {
-    private Function extractFunction(int paramStart, List<Field.Flag> flags, Text name) throws CompileException {
-        try {
-            int paramEnd = locateParameterEnd(paramStart);
-            var parameters = splitParameters(paramStart, paramEnd);
-            var valueSeparator = text.firstIndexOfSliceWithOffset("=>", paramEnd);
-            var returnType = extractReturnType(paramEnd, valueSeparator);
-            var identity = new EmptyField(name, returnType, flags);
-            var map = attachValue(identity, parameters, valueSeparator);
-            return map.orElseGet(() -> new Abstraction(identity, parameters));
-        } catch (StreamException e) {
-            throw new CompileException(e);
+    private Option<Node> extractWithSeparator(Integer paramStart, RootText keys, Integer space) throws CompileException {
+        var flags = extractFlags(keys.slice(0, space));
+        if (flags.contains(Field.Flag.Def)) {
+            var function = extractFunction(paramStart, flags, keys.slice(space + 1));
+            return new Some<>(function);
+        } else {
+            return new None<>();
         }
     }
 
@@ -39,7 +34,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
                 .flatMap(this::extract);
     }
 
-    private List<Field.Flag> extractFlags(Text flagString) throws CompileException {
+    private List<Field.Flag> extractFlags(RootText flagString) throws CompileException {
         try {
             return Streams.apply(flagString.computeTrimmed()
                     .split(" "))
@@ -66,13 +61,17 @@ public record FunctionLexer(Input text) implements Processor<Node> {
                 .orElse(ImplicitType.ImplicitType_);
     }
 
-    private Option<Node> extractWithSeparator(Integer paramStart, Text keys, Integer space) throws CompileException {
-        var flags = extractFlags(keys.slice(0, space));
-        if (flags.contains(Field.Flag.Def)) {
-            var function = extractFunction(paramStart, flags, keys.slice(space + 1));
-            return new Some<>(function);
-        } else {
-            return new None<>();
+    private Function extractFunction(int paramStart, List<Field.Flag> flags, RootText name) throws CompileException {
+        try {
+            int paramEnd = locateParameterEnd(paramStart);
+            var parameters = splitParameters(paramStart, paramEnd);
+            var valueSeparator = text.firstIndexOfSliceWithOffset("=>", paramEnd);
+            var returnType = extractReturnType(paramEnd, valueSeparator);
+            var identity = new EmptyField(name, returnType, flags);
+            var map = attachValue(identity, parameters, valueSeparator);
+            return map.orElseGet(() -> new Abstraction(identity, parameters));
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
     }
 

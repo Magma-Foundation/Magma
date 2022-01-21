@@ -7,7 +7,7 @@ import com.meti.api.option.Some;
 
 import java.util.Objects;
 
-public final class RootText implements Text {
+public final class RootText implements Output, Input {
     public final String trimmedValue;
     private final String value;
 
@@ -94,8 +94,7 @@ public final class RootText implements Text {
                 : new Some<>(index);
     }
 
-    @Override
-    public boolean hasContent() {
+    private boolean hasContent() {
         return trimmedValue.length() != 0;
     }
 
@@ -150,7 +149,7 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Text slice(int start, int end) {
+    public RootText slice(int start, int end) {
         return new RootText(trimmedValue.substring(start, end));
     }
 

@@ -45,9 +45,9 @@ public interface Input {
 
     int size();
 
-    Text slice(int start, int end);
+    RootText slice(int start, int end);
 
-    Text slice(int offset);
+    RootText slice(int offset);
 
     boolean startsWithChar(char c);
 
