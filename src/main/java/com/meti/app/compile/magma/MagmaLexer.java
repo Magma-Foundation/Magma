@@ -42,6 +42,12 @@ public record MagmaLexer(Input text) {
         }
     }
 
+    static Node lexTypeAST(Input text) throws CompileException {
+        var root = lexStreams(text, streamTypeLexers(text));
+        var withType = withType(root);
+        return withTypes(withType);
+    }
+
     private static Stream<? extends Processor<Node>> streamNodeLexers(Input text) {
         return Streams.apply(
                 new ElseLexer(text),
@@ -66,12 +72,6 @@ public record MagmaLexer(Input text) {
                 new ReferenceLexer(text),
                 new PrimitiveLexer(text),
                 new IntegerTypeLexer(text));
-    }
-
-    static Node lexTypeAST(Input text) throws CompileException {
-        var root = lexStreams(text, streamTypeLexers(text));
-        var withType = withType(root);
-        return withTypes(withType);
     }
 
     private static Node withType(Node root) throws CompileException {
@@ -136,18 +136,27 @@ public record MagmaLexer(Input text) {
     }
 
     private Node attachDeclarations(Node withFields) throws CompileException {
-        var collect = withFields.apply(Attribute.Group.Declarations).collect(Collectors.toList());
-        var current = withFields;
-        for (Attribute.Type type : collect) {
-            var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newDeclarations = new ArrayList<Node>();
-            for (Node declaration : oldDeclarations) {
-                newDeclarations.add(lexField(declaration.apply(Attribute.Type.Value).asInput()));
-            }
+        try {
+            return withFields.apply1(Attribute.Group.Declarations)
+                    .foldRight(withFields, (current, type) -> {
+                        var oldDeclarations = withFields.apply(type).asStreamOfNodes().collect(Collectors.toList());
+                        var newDeclarations = new ArrayList<Node>();
+                        for (Node declaration : oldDeclarations) {
+                            var field = declaration;
+                            Node toAdd;
+                            if (field.is(Node.Type.Input)) {
+                                toAdd = lexField(field.apply(Attribute.Type.Value).asInput());
+                            } else {
+                                toAdd = field;
+                            }
+                            newDeclarations.add(toAdd);
+                        }
 
-            current = current.with(type, new NodesAttribute(newDeclarations));
+                        return current.with(type, new NodesAttribute(newDeclarations));
+                    });
+        } catch (StreamException e) {
+            return withFields;
         }
-        return current;
     }
 
     private Node attachNode(Node root) throws CompileException {

@@ -6,7 +6,6 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.common.Structure;
-import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
@@ -30,11 +29,21 @@ public record StructureLexer(Input text) implements Processor<Node> {
             var fieldsList = Streams.apply(fields.toOutput().compute().split(";"))
                     .filter(value -> !value.isBlank())
                     .map(RootText::new)
-                    .map(InputNode::new)
+                    .map(this::lexMember)
                     .foldRight(List.<Node>createList(), List::add);
             return new Structure(name, fieldsList);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    private Node lexMember(Input member) throws CompileException {
+        return new FieldLexer(member)
+                .process()
+                .orElseThrow(() -> {
+                    var format = "'%s' is not a valid member.";
+                    var message = format.formatted(member.toOutput().compute());
+                    return new CompileException(message);
+                });
     }
 }

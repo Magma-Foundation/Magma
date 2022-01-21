@@ -1,6 +1,7 @@
 package com.meti.app.compile.clang;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.common.EmptyField;
@@ -189,16 +190,18 @@ public record CRenderer(Node root) {
     }
 
     private Node withDeclarationCollections(Node withNodeCollections) throws CompileException {
-        var types = withNodeCollections.apply(Attribute.Group.Declarations).collect(Collectors.toList());
-        var current = withNodeCollections;
-        for (Attribute.Type type : types) {
-            var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newDeclarations = new ArrayList<Node>();
-            for (Node oldDeclaration : oldDeclarations) {
-                newDeclarations.add(new OutputNode(renderFieldWithType(oldDeclaration)));
-            }
-            current = current.with(type, new NodesAttribute(newDeclarations));
+        try {
+            return withNodeCollections.apply1(Attribute.Group.Declarations)
+                    .foldRight(withNodeCollections, (current, type) -> {
+                        var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+                        var newDeclarations = new ArrayList<Node>();
+                        for (Node oldDeclaration : oldDeclarations) {
+                            newDeclarations.add(new OutputNode(renderFieldWithType(oldDeclaration)));
+                        }
+                        return current.with(type, new NodesAttribute(newDeclarations));
+                    });
+        } catch (StreamException e) {
+            return withNodeCollections;
         }
-        return current;
     }
 }
