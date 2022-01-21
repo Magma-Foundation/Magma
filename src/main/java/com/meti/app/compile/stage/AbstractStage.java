@@ -6,7 +6,20 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-public abstract class AbstractStage implements Stage {
+public abstract class AbstractStage {
+    public Node transformNodeAST(Node node) throws CompileException {
+        var before = beforeTraversal(node);
+        var withNodeGroup = transformNodeGroup(before);
+        var withNodesGroup = transformNodesGroup(withNodeGroup);
+        var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
+        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
+        return afterTraversal(withDeclarationsGroup);
+    }
+
+    protected Node beforeTraversal(Node root) throws CompileException {
+        return root;
+    }
+
     protected Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
         try {
             return node1.with(type, node1.apply(type).asStreamOfNodes1()
@@ -45,12 +58,8 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    public Node transformNodeAST(Node node) throws CompileException {
-        var withNodeGroup = transformNodeGroup(node);
-        var withNodesGroup = transformNodesGroup(withNodeGroup);
-        var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
-        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
-        return apply(withDeclarationsGroup);
+    protected Node afterTraversal(Node root) {
+        return root;
     }
 
     protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {

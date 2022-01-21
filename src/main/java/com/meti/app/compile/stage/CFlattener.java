@@ -2,7 +2,6 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.cache.CacheBuilder;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -13,37 +12,7 @@ import com.meti.app.compile.node.attribute.NodesAttribute1;
 public class CFlattener extends AbstractStage {
     @Override
     protected Node transformDefinition(Node definition) throws CompileException {
-        return apply(definition);
-    }
-
-    @Override
-    public Node apply(Node node) throws CompileException {
-        try {
-            if (node.is(Node.Type.Cache)) {
-                var innerCache = node.apply(Attribute.Type.Value).asNode();
-                var withChildren = node.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
-                        .map(this::flattenCache)
-                        .flatMap(List::stream)
-                        .foldRight(List.<Node>createList(), List::add);
-                if (innerCache.is(Node.Type.Cache)) {
-                    var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
-                    var withSubChildren = innerCache.apply(Attribute.Type.Children)
-                            .asStreamOfNodes1()
-                            .foldRight(withChildren, List::add);
-                    return new Cache(innerValue, withSubChildren);
-                } else {
-                    return new Cache(innerCache, withChildren);
-                }
-            }
-
-            var prototype = new CacheBuilder<>(node);
-            var withNodeAttributes = flattenNodeAttributes(node, prototype);
-            var withNodesAttributes = flattenNodesAttributes(node, withNodeAttributes);
-            return withNodesAttributes.build(value -> value);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
+        return transformNodeAST(definition);
     }
 
     private List<Node> flattenCache(Node parent) throws AttributeException, StreamException {

@@ -26,7 +26,7 @@ public class DefinitionResolver extends AbstractProcessor<Node, Node> {
         var type = oldIdentity.apply(Attribute.Type.Type).asNode();
         if (type.is(Node.Type.Implicit)) {
             var value = oldIdentity.apply(Attribute.Type.Value).asNode();
-            var valueType = new MagmaTypeResolver().apply(value);
+            var valueType = new MagmaTypeResolver().transformNodeAST(value);
             var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(valueType));
             return node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
         }

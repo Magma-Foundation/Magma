@@ -18,7 +18,7 @@ public record ImplementationResolver(Node node) implements Processor<Node> {
             var type = oldIdentity.apply(Attribute.Type.Type).asNode();
             if (type.is(Node.Type.Implicit)) {
                 var value = node.apply(Attribute.Type.Value).asNode();
-                var newType = new MagmaTypeResolver().apply(value);
+                var newType = new MagmaTypeResolver().transformNodeAST(value);
                 var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(newType));
                 var newNode = node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
                 return new Some<>(newNode);

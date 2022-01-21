@@ -22,7 +22,7 @@ public record BlockResolver(Node node, StreamStage parent) implements Processor<
                         .foldRight(List.<Node>createList(), List::add);
                 return new Some<>(children
                         .last()
-                        .map(parent::apply)
+                        .map(parent::transformNodeAST)
                         .orElse(Primitive.Void));
             } catch (StreamException e) {
                 throw new CompileException(e);

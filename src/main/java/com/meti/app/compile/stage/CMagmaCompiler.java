@@ -8,6 +8,7 @@ import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
+import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
@@ -37,10 +38,11 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
     }
 
     private List<Node> lex(RootText root) throws StreamException {
+        var lexer = new MagmaLexer();
         return new Splitter(root)
                 .split()
-                .map(MagmaLexer::new)
-                .map(MagmaLexer::lex)
+                .map(InputNode::new)
+                .map(lexer::transformNodeAST)
                 .foldRight(List.createList(), List::add);
     }
 

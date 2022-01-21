@@ -13,7 +13,7 @@ public record ReturnResolver(Node node, MagmaTypeResolver parent) implements Pro
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Type.Return)) {
             var oldChild = node.apply(Attribute.Type.Value).asNode();
-            var newChild = parent.apply(oldChild);
+            var newChild = parent.transformNodeAST(oldChild);
             return new Some<>(newChild);
         } else {
             return new None<>();

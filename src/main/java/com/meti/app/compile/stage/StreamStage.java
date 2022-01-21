@@ -10,6 +10,11 @@ import com.meti.app.compile.process.Processor;
 
 public abstract class StreamStage extends AbstractStage {
     @Override
+    protected Node beforeTraversal(Node root) throws CompileException {
+        return transformUsingStreams(root, streamNodeTransformers(root));
+    }
+
+    @Override
     protected Node transformDefinition(Node definition) throws CompileException {
         if (definition.is(Node.Type.Initialization)) {
             var withType = transformTypeAttribute(definition);
@@ -26,16 +31,11 @@ public abstract class StreamStage extends AbstractStage {
         return transformUsingStreams(type, streamTypeTransformers(type));
     }
 
-    protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
+    protected Stream<Processor<Node>> streamNodeTransformers(Node node) throws CompileException {
         return new EmptyStream<>();
     }
 
-    @Override
-    public Node apply(Node node) throws CompileException {
-        return transformUsingStreams(node, streamNodeTransformers(node));
-    }
-
-    protected Stream<Processor<Node>> streamTypeTransformers(Node node) {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node node) throws CompileException {
         return new EmptyStream<>();
     }
 
