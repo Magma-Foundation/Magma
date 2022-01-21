@@ -2,6 +2,7 @@ package com.meti.app.compile.magma;
 
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.common.ReferenceLexer;
 import com.meti.app.compile.common.alternate.ElseLexer;
@@ -25,6 +26,11 @@ import com.meti.app.compile.stage.StreamStage;
 import com.meti.app.compile.text.Input;
 
 public class MagmaLexer extends StreamStage {
+    @Override
+    protected Node beforeTraversal(Node root) throws CompileException {
+        return transformUsingStreams(root, streamNodeTransformers(root));
+    }
+
     @Override
     protected Stream<Processor<Node>> streamNodeTransformers(Node node) throws CompileException {
         try {
@@ -76,5 +82,17 @@ public class MagmaLexer extends StreamStage {
                 new ReferenceLexer(input),
                 new PrimitiveLexer(input),
                 new IntegerTypeLexer(input));
+    }
+
+    @Override
+    protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+        try {
+            return transformers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 }

@@ -17,7 +17,7 @@ import com.meti.app.source.Packaging;
 
 public class CMagmaPipeline {
     private final CMagmaNodeResolver resolver = new CMagmaNodeResolver();
-    private final CMagmaModifier modifier = new CMagmaModifier();
+    private final AfterStreamStage modifier = new CMagmaModifier();
     private final CFormatter formatter;
     private final List<Node> input;
     private final CFlattener flattener = new CFlattener();

@@ -40,7 +40,9 @@ public abstract class AbstractStage {
         }
     }
 
-    protected abstract Node transformDefinition(Node definition) throws CompileException;
+    protected Node afterTraversal(Node root) throws CompileException {
+        return root;
+    }
 
     protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
         var oldIdentity = root.apply(type).asNode();
@@ -58,8 +60,8 @@ public abstract class AbstractStage {
         }
     }
 
-    protected Node afterTraversal(Node root) {
-        return root;
+    protected Node transformDefinition(Node definition) throws CompileException {
+        return definition;
     }
 
     protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {

@@ -1,6 +1,7 @@
 package com.meti.app.compile.stage;
 
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Some;
@@ -13,7 +14,7 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
 
-public class CFormatter extends StreamStage {
+public class CFormatter extends AfterStreamStage {
     private final Packaging thisPackage;
     private int counter = -1;
 
@@ -40,5 +41,17 @@ public class CFormatter extends StreamStage {
                 return new None<>();
             }
         }, new PackageFormatter(thisPackage, node));
+    }
+
+    @Override
+    protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+        try {
+            return transformers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 }
