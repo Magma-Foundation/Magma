@@ -1,9 +1,9 @@
 package com.meti.app.compile.text;
 
 public interface Output {
-    Output appendSlice(String slice);
-
     Output appendOutput(Output other);
+
+    Output appendSlice(String slice);
 
     /**
      * Computes the trimmed value of this text.
@@ -19,5 +19,5 @@ public interface Output {
      */
     String computeRaw();
 
-    RootText prepend(String prefix);
+    Output prepend(String prefix);
 }

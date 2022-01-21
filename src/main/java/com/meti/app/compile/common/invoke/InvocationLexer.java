@@ -22,7 +22,7 @@ public record InvocationLexer(Input text) implements Processor<Node> {
     private Invocation extract(Integer start, Integer end) throws CompileException {
         try {
             var callerText = text.slice(0, start);
-            var slice = text.slice(start + 1, end)
+            var slice = text.slice(start + 1, end).toOutput()
                     .compute();
 
             var lines = List.<String>createList();

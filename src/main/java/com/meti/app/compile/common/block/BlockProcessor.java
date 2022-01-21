@@ -21,7 +21,7 @@ public record BlockProcessor(Node node) implements Processor<Output> {
             for (Node node1 : children) {
                 builder.append(node1.apply(Attribute.Type.Value).asOutput().compute());
             }
-            return new Some<>(new RootText(builder.append("}").toString()));
+            return new Some<>(new RootText(builder.append("}").toString()).toOutput());
         }
         return new None<>();
     }

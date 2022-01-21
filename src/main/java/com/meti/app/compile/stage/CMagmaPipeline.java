@@ -3,9 +3,15 @@ package com.meti.app.compile.stage;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.common.Declaration;
+import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.scope.StructureType;
 import com.meti.app.compile.text.Input;
+import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
 
 public class CMagmaPipeline {
@@ -36,6 +42,38 @@ public class CMagmaPipeline {
     }
 
     private State parse(State state, Node node) throws CompileException {
+        if (node.is(Node.Type.Implementation)) {
+            try {
+                var oldValue = node.apply(Attribute.Type.Value).asNode();
+                var oldChildren = oldValue.apply(Attribute.Type.Children)
+                        .asStreamOfNodes1()
+                        .foldRight(List.<Node>createList(), List::add);
+
+                var hasSubFunction = oldChildren.stream().anyMatch(child -> child.is(Node.Type.Implementation));
+                List<Node> newChildren;
+                if (hasSubFunction) {
+                    var scoped = node.apply(Attribute.Type.Identity).asNode().apply(Attribute.Type.Name).asInput().toOutput();
+
+                    var formattedName = scoped.appendSlice("_this").compute();
+                    var formattedType = scoped.appendSlice("_t").compute();
+
+                    var name = new RootText(formattedName);
+                    var type = new StructureType(new RootText(formattedType));
+
+                    var identity = new EmptyField(name, type);
+                    newChildren = oldChildren.insert(0, new Declaration(identity));
+                } else {
+                    newChildren = oldChildren;
+                }
+
+                var newValue = oldValue.with(Attribute.Type.Children, new NodesAttribute1(newChildren));
+                var newNode = node.with(Attribute.Type.Value, new NodeAttribute(newValue));
+                return state.add(newNode);
+            } catch (StreamException e) {
+                throw new CompileException(e);
+            }
+        }
+
         if (node.is(Node.Type.Declaration)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var name = identity.apply(Attribute.Type.Name).asInput();

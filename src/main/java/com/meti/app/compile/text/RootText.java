@@ -7,7 +7,7 @@ import com.meti.api.option.Some;
 
 import java.util.Objects;
 
-public final class RootText implements Output, Input {
+public final class RootText implements Input {
     public final String trimmedValue;
     private final String value;
 
@@ -17,28 +17,8 @@ public final class RootText implements Output, Input {
     }
 
     @Override
-    public Output appendSlice(String slice) {
-        return new RootText(trimmedValue + slice);
-    }
-
-    @Override
-    public Output appendOutput(Output other) {
-        return new RootText(trimmedValue + other.compute());
-    }
-
-    @Override
     public char apply(int index) {
         return trimmedValue.charAt(index);
-    }
-
-    @Override
-    public String compute() {
-        return trimmedValue;
-    }
-
-    @Override
-    public String computeRaw() {
-        return value;
     }
 
     @Override
@@ -122,7 +102,7 @@ public final class RootText implements Output, Input {
 
     @Override
     public Output toOutput() {
-        return this;
+        return new StringOutput(value);
     }
 
     @Override
@@ -136,11 +116,6 @@ public final class RootText implements Output, Input {
     @Override
     public <T, E extends Exception> T map(F1<String, T, E> mapper) throws E {
         return mapper.apply(trimmedValue);
-    }
-
-    @Override
-    public RootText prepend(String prefix) {
-        return new RootText(prefix + trimmedValue);
     }
 
     @Override

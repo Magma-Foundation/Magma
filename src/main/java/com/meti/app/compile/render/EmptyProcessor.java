@@ -13,7 +13,7 @@ public record EmptyProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Empty)) {
-            return new Some<>(new RootText(""));
+            return new Some<>(new RootText("").toOutput());
         } else {
             return new None<>();
         }

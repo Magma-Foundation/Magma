@@ -18,6 +18,6 @@ public class ClosureTest {
     @Test
     void scope() {
         assertSourceCompile("def outer() => {def inner() => {}}",
-                "void inner(){}void outer(){struct outer_t this;}");
+                "void inner(){}void outer(){struct outer_t outer_this;}");
     }
 }

@@ -34,6 +34,14 @@ public record CRenderer(Node root) {
         var name = node.apply(Attribute.Type.Name).asInput();
         var type = node.apply(Attribute.Type.Type).asNode();
 
+        if (type.is(Node.Type.Structure)) {
+            return type.apply(Attribute.Type.Name).asInput()
+                    .toOutput()
+                    .prepend("struct ")
+                    .appendSlice(" ")
+                    .appendSlice(name.toOutput()
+                            .computeRaw());
+        }
         if (type.is(Node.Type.Function)) {
             var returns = type.apply(Attribute.Type.Type).asNode();
             var returnType = renderType(returns);
@@ -51,7 +59,7 @@ public record CRenderer(Node root) {
                     .appendSlice(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
-            return renderFieldWithType(new EmptyField(name.toOutput().prepend("*"), child, List.createList()));
+            return renderFieldWithType(new EmptyField(new RootText(name.toOutput().prepend("*").compute()), child, List.createList()));
         } else if (type.is(Node.Type.Primitive)) {
             var rendered = type.apply(Attribute.Type.Name)
                     .asInput()
@@ -70,7 +78,7 @@ public record CRenderer(Node root) {
             var value = (isSigned ? "" : "unsigned ") + suffix + " " + name
                     .toOutput()
                     .compute();
-            return new RootText(value);
+            return new RootText(value).toOutput();
         } else {
             throw new RenderException("Cannot render type: " + type);
         }
@@ -101,7 +109,7 @@ public record CRenderer(Node root) {
                 new DeclarationProcessor(node),
                 new ElseProcessor(node),
                 new EmptyProcessor(node),
-                new ExternProcessor(node),
+                new ExternRenderer(node),
                 new FunctionProcessor(node),
                 new ImportProcessor(node),
                 new IntegerProcessor(node),

@@ -20,7 +20,7 @@ public record ImportProcessor(Node node) implements Processor<Output> {
             var parent = packaging.streamParent().collect(Collectors.joining("/"));
             var name = packaging.computeName();
             var formatted = parent.isEmpty() ? name : parent + "/" + name;
-            return new Some<>(new RootText("#include \"" + formatted + ".h\"\n"));
+            return new Some<>(new RootText("#include \"" + formatted + ".h\"\n").toOutput());
         } else {
             return new None<>();
         }

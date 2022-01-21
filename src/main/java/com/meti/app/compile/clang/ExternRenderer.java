@@ -10,14 +10,15 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 
-public record ExternProcessor(Node node) implements Processor<Output> {
+public record ExternRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Extern)) {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
                     .asInput()
                     .toOutput()
-                    .compute() + ".h>\n"));
+                    .compute() + ".h>\n")
+                    .toOutput());
         } else {
             return new None<>();
         }

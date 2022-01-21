@@ -14,7 +14,7 @@ public record IntegerProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Integer)) {
-            return new Some<>(new RootText(String.valueOf(node.apply(Attribute.Type.Value).asInteger())));
+            return new Some<>(new RootText(String.valueOf(node.apply(Attribute.Type.Value).asInteger())).toOutput());
         } else {
             return new None<>();
         }

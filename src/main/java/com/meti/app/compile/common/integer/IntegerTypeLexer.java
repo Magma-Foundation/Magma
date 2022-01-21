@@ -13,7 +13,7 @@ public record IntegerTypeLexer(Input text) implements Processor<Node> {
         var isSigned = text.startsWithChar('I');
         var isUnsigned = text.startsWithChar('U');
         if (isSigned || isUnsigned) {
-            var bitsText = text.slice(1);
+            var bitsText = text.slice(1).toOutput();
             var bits = Integer.parseInt(bitsText.compute());
             return new Some<>(new IntegerType(isSigned, bits));
         } else {
