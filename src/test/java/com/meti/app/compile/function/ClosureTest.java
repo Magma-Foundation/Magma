@@ -2,6 +2,7 @@ package com.meti.app.compile.function;
 
 import org.junit.jupiter.api.Test;
 
+import static com.meti.app.compile.CompiledTest.assertHeaderCompiles;
 import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class ClosureTest {
@@ -16,7 +17,13 @@ public class ClosureTest {
     }
 
     @Test
-    void scope() {
+    void scope_header() {
+        assertHeaderCompiles("def outer() => {def inner() => {}}",
+                "struct outer_{}");
+    }
+
+    @Test
+    void scope_source() {
         assertSourceCompile("def outer() => {def inner() => {}}",
                 "void inner(){}void outer(){struct outer_t outer_this;}");
     }

@@ -5,6 +5,7 @@ import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.common.Declaration;
 import com.meti.app.compile.common.EmptyField;
+import com.meti.app.compile.common.Structure;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
@@ -57,18 +58,19 @@ public class CMagmaPipeline {
                     var formattedName = scoped.appendSlice("_this").compute();
                     var formattedType = scoped.appendSlice("_t").compute();
 
-                    var name = new RootText(formattedName);
-                    var type = new StructureType(new RootText(formattedType));
+                    var scopeName = new RootText(formattedName);
+                    var structureName = new RootText(formattedType);
+                    var type = new StructureType(structureName);
 
-                    var identity = new EmptyField(name, type);
+                    var identity = new EmptyField(scopeName, type);
                     newChildren = oldChildren.insert(0, new Declaration(identity));
-                } else {
-                    newChildren = oldChildren;
-                }
+                    var newValue = oldValue.with(Attribute.Type.Children, new NodesAttribute1(newChildren));
+                    var newNode = node.with(Attribute.Type.Value, new NodeAttribute(newValue));
 
-                var newValue = oldValue.with(Attribute.Type.Children, new NodesAttribute1(newChildren));
-                var newNode = node.with(Attribute.Type.Value, new NodeAttribute(newValue));
-                return state.add(newNode);
+                    return state.add(newNode).add(new Structure(structureName));
+                } else {
+                    return state.add(node);
+                }
             } catch (StreamException e) {
                 throw new CompileException(e);
             }
