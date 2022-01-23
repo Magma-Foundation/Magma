@@ -10,6 +10,7 @@ import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
@@ -37,7 +38,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
         }
     }
 
-    private List<Node> lex(RootText root) throws StreamException {
+    private List<Node> lex(Input root) throws StreamException {
         var lexer = new MagmaLexer();
         return new Splitter(root)
                 .split()

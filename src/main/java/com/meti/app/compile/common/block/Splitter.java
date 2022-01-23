@@ -1,5 +1,6 @@
 package com.meti.app.compile.common.block;
 
+import com.meti.api.collect.IndexException;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
@@ -7,7 +8,7 @@ import com.meti.api.core.F1;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 
-public record Splitter(RootText text) {
+public record Splitter(Input text) {
     public com.meti.api.collect.stream.Stream<Input> split() {
         try {
             var lines = List.<String>createList();
@@ -35,7 +36,7 @@ public record Splitter(RootText text) {
             return lines.stream()
                     .map((F1<String, Input, ?>) RootText::new)
                     .filter(input -> !input.isEmpty());
-        } catch (StreamException e) {
+        } catch (StreamException | IndexException e) {
             return new EmptyStream<>();
         }
     }
