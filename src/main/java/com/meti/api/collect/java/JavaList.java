@@ -11,6 +11,7 @@ import com.meti.api.option.Some;
 import com.meti.api.option.Supplier;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -25,36 +26,14 @@ public class JavaList<T> implements List<T> {
         this.value = value;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JavaList<?> list = (JavaList<?>) o;
-        return Objects.equals(value, list.value);
-    }
-
-    @Override
-    public String toString() {
-        return value.stream()
-                .map(Objects::toString)
-                .collect(Collectors.joining(",", "[", "]"));
-    }
-
-    private class JavaListStream extends AbstractStream<T> {
-        private int counter = 0;
-
-        @Override
-        public T head() throws StreamException {
-            if (counter < size()) {
-                return value.get(counter++);
-            } else {
-                throw new EndOfStreamException("No more elements left in list.");
-            }
+    public static <T> java.util.List<T> toNativeList(List<T> self) {
+        try {
+            return self.stream().foldRight(new ArrayList<>(), (current, next) -> {
+                current.add(next);
+                return current;
+            });
+        } catch (StreamException e) {
+            return Collections.emptyList();
         }
     }
 
@@ -105,7 +84,6 @@ public class JavaList<T> implements List<T> {
         return value.isEmpty() ? new None<>() : new Some<>(value.get(0));
     }
 
-
     @Override
     public List<T> insert(int index, T value) {
         this.value.add(index, value);
@@ -142,6 +120,39 @@ public class JavaList<T> implements List<T> {
     @Override
     public Stream<T> stream() {
         return new JavaListStream();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JavaList<?> list = (JavaList<?>) o;
+        return Objects.equals(value, list.value);
+    }
+
+    @Override
+    public String toString() {
+        return value.stream()
+                .map(Objects::toString)
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private class JavaListStream extends AbstractStream<T> {
+        private int counter = 0;
+
+        @Override
+        public T head() throws StreamException {
+            if (counter < size()) {
+                return value.get(counter++);
+            } else {
+                throw new EndOfStreamException("No more elements left in list.");
+            }
+        }
     }
 
 

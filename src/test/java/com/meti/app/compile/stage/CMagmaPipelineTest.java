@@ -1,33 +1,33 @@
 package com.meti.app.compile.stage;
 
+import com.meti.api.collect.java.JavaList;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
+import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.source.Packaging;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class CMagmaPipelineTest {
-
     @Test
-    void perform() throws CompileException, StreamException {
-        var identity = new EmptyField(new RootText("test"), Primitive.Void, Field.Flag.Def);
-        var impl = new Implementation(identity, new Block());
-        var root = new Block(impl);
+    void inner_function() throws CompileException, StreamException {
+        var innerIdentity = new EmptyField(new RootText("inner"), Primitive.Void);
+        var inner = new Implementation(innerIdentity, new Block());
 
-        var expected = new Cache(new Block(EmptyNode_), impl);
-        var actual = new CMagmaPipeline(new Packaging("Index"), List.apply(root))
-                .apply()
-                .head();
+        var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void);
+        var outer = new Implementation(outerIdentity, new Block(inner));
 
-        assertEquals(expected, actual);
+        var expected = Collections.emptyList();
+        var actual = JavaList.toNativeList(new CMagmaPipeline(outer)
+                .pipe()
+                .foldRight(List.<Node>createList(), List::add));
+        assertIterableEquals(expected, actual);
     }
 }

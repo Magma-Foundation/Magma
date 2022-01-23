@@ -22,12 +22,20 @@ public class CMagmaPipeline {
     private final List<Node> input;
     private final CFlattener flattener = new CFlattener();
 
+    public CMagmaPipeline(Node... input) {
+        this(List.apply(input));
+    }
+
+    public CMagmaPipeline(List<Node> input) {
+        this(new Packaging(""), input);
+    }
+
     public CMagmaPipeline(Packaging thisPackage, List<Node> input) {
         this.formatter = new CFormatter(thisPackage);
         this.input = input;
     }
 
-    public Stream<Node> apply() throws CompileException {
+    public Stream<Node> pipe() throws CompileException {
         try {
             var parsed = input.stream()
                     .foldRight(new State(), this::parse)

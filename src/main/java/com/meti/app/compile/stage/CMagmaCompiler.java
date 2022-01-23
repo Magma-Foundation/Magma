@@ -29,7 +29,7 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
             var inputNodes = lex(root);
             var pipeline = new CMagmaPipeline(thisPackage, inputNodes);
             var divider = new CDivider(thisPackage);
-            var division = pipeline.apply()
+            var division = pipeline.pipe()
                     .foldRight(divider, Divider::divide);
             return division.stream().<Target<String>, CollectionException>foldRight(new MappedTarget<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
