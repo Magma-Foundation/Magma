@@ -11,8 +11,6 @@ import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class CMagmaPipelineTest {
@@ -24,7 +22,7 @@ class CMagmaPipelineTest {
         var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void);
         var outer = new Implementation(outerIdentity, new Block(inner));
 
-        var expected = Collections.emptyList();
+        var expected = java.util.List.of(1, 3);
         var actual = JavaList.toNativeList(new CMagmaPipeline(outer)
                 .pipe()
                 .foldRight(List.<Node>createList(), List::add));
