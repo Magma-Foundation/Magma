@@ -17,9 +17,9 @@ public class ClosureTest {
     }
 
     @Test
-    void scope_header() {
+    void header() {
         assertHeaderCompiles("def outer() => {def inner() => {}}",
-                "struct outer_{}");
+                "void inner();void outer();struct outer_{}");
     }
 
     @Test
