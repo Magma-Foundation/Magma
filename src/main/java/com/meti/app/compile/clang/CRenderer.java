@@ -100,11 +100,10 @@ public record CRenderer(Node root) {
 
     public static Node renderSubFields(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Definition).foldRight(root, (current, type) -> {
-                var node = current.apply(type).asNode();
+            return root.apply1(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
                 var renderedNode = renderFieldWithType(node);
-                return current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
-            });
+                return new OutputNode(renderedNode);
+            }));
         } catch (StreamException e) {
             throw new CompileException(e);
         }

@@ -53,10 +53,7 @@ public interface Attribute {
     }
 
     enum Type {
-        Value,
-        Identity,
-        Type,
-        Children, Sign, Bits, Fields, Parameters, Flags, Caller, Arguments, Operator, Name
+        Value, Identity, Type, Children, Sign, Bits, Fields, Parameters, Flags, Caller, Arguments, Operator, Name
     }
 
     enum Group {
