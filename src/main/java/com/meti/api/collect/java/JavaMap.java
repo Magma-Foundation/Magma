@@ -1,5 +1,8 @@
 package com.meti.api.collect.java;
 
+import com.meti.api.collect.CollectionException;
+import com.meti.api.collect.NoElementException;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
 import com.meti.api.option.None;
@@ -7,6 +10,7 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.api.option.Supplier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +24,12 @@ public final class JavaMap<A, B> implements com.meti.api.collect.java.Map<A, B> 
 
     public JavaMap(Map<A, B> map) {
         this.map = map;
+    }
+
+    @Override
+    public B apply(A key) throws CollectionException {
+        if (map.containsKey(key)) return map.get(key);
+        throw new NoElementException("Could not find value for key: '" + key + "'.");
     }
 
     @Override
@@ -77,5 +87,10 @@ public final class JavaMap<A, B> implements com.meti.api.collect.java.Map<A, B> 
         var copy = new HashMap<>(map);
         copy.put(key, value);
         return new JavaMap<>(copy);
+    }
+
+    @Override
+    public Stream<A> streamKeys() {
+        return new JavaList<>(new ArrayList<>(map.keySet())).stream();
     }
 }

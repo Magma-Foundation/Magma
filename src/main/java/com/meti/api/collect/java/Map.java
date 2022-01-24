@@ -1,5 +1,7 @@
 package com.meti.api.collect.java;
 
+import com.meti.api.collect.CollectionException;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.core.F1;
 import com.meti.api.core.F2;
 import com.meti.api.option.Option;
@@ -8,6 +10,8 @@ import com.meti.api.option.Supplier;
 import java.util.Set;
 
 public interface Map<A, B> {
+    B apply(A key) throws CollectionException;
+
     Option<B> applyOptionally(A key);
 
     <E extends Exception> Map<A, B> ensure(A key, Supplier<B, E> generator) throws E;
@@ -21,4 +25,6 @@ public interface Map<A, B> {
     B orElse(A key, B value);
 
     JavaMap<A, B> put(A key, B value);
+
+    Stream<A> streamKeys();
 }
