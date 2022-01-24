@@ -1,15 +1,15 @@
 package com.meti.app.compile.cache;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.EmptyStream;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record Cache(Node value, List<Node> children) implements Node {
     public Cache(Node value, Node... children) {
@@ -26,17 +26,12 @@ public record Cache(Node value, List<Node> children) implements Node {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Stream.of(Attribute.Type.Value);
-            case Nodes -> Stream.of(Attribute.Type.Children);
-            default -> Stream.empty();
+            case Node -> Streams.apply(Attribute.Type.Value);
+            case Nodes -> Streams.apply(Attribute.Type.Children);
+            default -> new EmptyStream<>();
         };
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override
