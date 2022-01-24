@@ -55,15 +55,11 @@ public final class JavaMap<A, B> {
 
     public <C, D extends Exception> JavaMap<A, C> mapValues(F2<A, B, C, D> mapper) throws D {
         var outputMap = new HashMap<A, C>();
-        for (A aA : getMap().keySet()) {
-            var input = mapper.apply(aA, getMap().get(aA));
+        for (A aA : map.keySet()) {
+            var input = mapper.apply(aA, map.get(aA));
             outputMap.put(aA, input);
         }
         return new JavaMap<>(outputMap);
-    }
-
-    public Map<A, B> getMap() {
-        return map;
     }
 
     public B orElse(A key, B value) {

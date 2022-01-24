@@ -3,6 +3,7 @@ package com.meti.app.compile.stage;
 import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.map.Maps;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 public record CMagmaCompiler(JavaMap<Packaging, String> input) {
     public Map<Packaging, Target<String>> compile() throws CompileException {
-        return input.mapValues(this::compileInput).getMap();
+        return Maps.toNativeMap(input.mapValues(this::compileInput));
     }
 
     private Target<String> compileInput(Packaging thisPackage, String input) throws CompileException {
