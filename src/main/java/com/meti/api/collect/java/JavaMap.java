@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class JavaMap<A, B> {
+public final class JavaMap<A, B> implements com.meti.api.collect.java.Map<A, B> {
     private final Map<A, B> map;
 
     public JavaMap() {
@@ -22,13 +22,15 @@ public final class JavaMap<A, B> {
         this.map = map;
     }
 
+    @Override
     public Option<B> applyOptionally(A key) {
         return map.containsKey(key)
                 ? new Some<>(map.get(key))
                 : new None<>();
     }
 
-    public <E extends Exception> JavaMap<A, B> ensure(A key, Supplier<B, E> generator) throws E {
+    @Override
+    public <E extends Exception> com.meti.api.collect.java.Map<A, B> ensure(A key, Supplier<B, E> generator) throws E {
         if (map.containsKey(key)) {
             return this;
         } else {
@@ -39,11 +41,13 @@ public final class JavaMap<A, B> {
         }
     }
 
+    @Override
     public Set<A> keys() {
         return map.keySet();
     }
 
-    public <C extends Exception> JavaMap<A, B> mapValue(A key, F1<B, B, C> mapper) throws C {
+    @Override
+    public <C extends Exception> com.meti.api.collect.java.Map<A, B> mapValue(A key, F1<B, B, C> mapper) throws C {
         var copy = new HashMap<>(map);
         if (copy.containsKey(key)) {
             var oldValue = copy.get(key);
@@ -53,6 +57,7 @@ public final class JavaMap<A, B> {
         return new JavaMap<>(copy);
     }
 
+    @Override
     public <C, D extends Exception> JavaMap<A, C> mapValues(F2<A, B, C, D> mapper) throws D {
         var outputMap = new HashMap<A, C>();
         for (A aA : map.keySet()) {
@@ -62,10 +67,12 @@ public final class JavaMap<A, B> {
         return new JavaMap<>(outputMap);
     }
 
+    @Override
     public B orElse(A key, B value) {
         return map.getOrDefault(key, value);
     }
 
+    @Override
     public JavaMap<A, B> put(A key, B value) {
         var copy = new HashMap<>(map);
         copy.put(key, value);

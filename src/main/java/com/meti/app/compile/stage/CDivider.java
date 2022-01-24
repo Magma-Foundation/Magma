@@ -2,6 +2,7 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.java.Map;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -24,7 +25,7 @@ import static com.meti.app.compile.clang.CFormat.Source;
 public class CDivider extends MappedDivider {
     private final Packaging thisPackage;
 
-    public CDivider(Packaging thisPackage, JavaMap<CFormat, List<Node>> map) {
+    public CDivider(Packaging thisPackage, Map<CFormat, List<Node>> map) {
         super(map);
         this.thisPackage = thisPackage;
     }
@@ -76,7 +77,7 @@ public class CDivider extends MappedDivider {
     }
 
     @Override
-    protected MappedDivider complete(JavaMap<CFormat, List<Node>> map) {
+    protected MappedDivider complete(Map<CFormat, List<Node>> map) {
         return new CDivider(thisPackage, map);
     }
 

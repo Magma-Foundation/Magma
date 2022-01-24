@@ -1,8 +1,8 @@
 package com.meti.app.compile.stage;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.java.Map;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -11,9 +11,9 @@ import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.node.Node;
 
 public abstract class MappedDivider implements Divider {
-    protected final JavaMap<CFormat, List<Node>> map;
+    protected final Map<CFormat, List<Node>> map;
 
-    public MappedDivider(JavaMap<CFormat, List<Node>> map) {
+    public MappedDivider(Map<CFormat, List<Node>> map) {
         this.map = map;
     }
 
@@ -51,5 +51,5 @@ public abstract class MappedDivider implements Divider {
 
     protected abstract List<Node> modify(CFormat format, Node node, List<Node> value);
 
-    protected abstract MappedDivider complete(JavaMap<CFormat, List<Node>> map) throws StreamException;
+    protected abstract MappedDivider complete(Map<CFormat, List<Node>> map) throws StreamException;
 }
