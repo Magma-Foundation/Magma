@@ -18,7 +18,7 @@ import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
@@ -109,30 +109,27 @@ public record CRenderer(Node root) {
         }
     }
 
-    public static Node renderSubNodes(Node root) throws CompileException {
-        var types = root.apply(Attribute.Group.Node).collect(Collectors.toList());
-        var current = root;
-        for (Attribute.Type type : types) {
-            var node = root.apply(type).asNode();
-            var renderedNode = new CRenderer(node).render();
-            current = current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
-        }
-        return current;
-    }
-
     private static Output renderType(Node oldParameter) throws CompileException {
         return renderField(new EmptyField(new RootText(""), oldParameter, List.createList()));
+    }
+
+    public Node renderSubNodes(Node root) throws CompileException {
+        try {
+            return root.apply1(Attribute.Group.Node).foldRight(root, (current, type) -> current.mapAsNode(type, input -> new OutputNode(renderAST(input))));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     public Output render() throws CompileException {
         return renderAST(root);
     }
 
-    private Output renderAST(Node root) throws CompileException {
+    Output renderAST(Node root) throws CompileException {
         try {
             var withFields = renderDefinitionGroup(root);
             var withNodes = renderSubNodes(withFields);
-            var withNodeCollections = renderSubNodeCollections(withNodes);
+            var withNodeCollections = renderNodesGroup(withNodes);
             var current = withDeclarationCollections(withNodeCollections);
             return renderNode(current);
         } catch (CompileException e) {
@@ -140,18 +137,18 @@ public record CRenderer(Node root) {
         }
     }
 
-    private Node renderSubNodeCollections(Node withNodes) throws CompileException {
-        var types = withNodes.apply(Attribute.Group.Nodes).collect(Collectors.toList());
-        var current = withNodes;
-        for (Attribute.Type type : types) {
-            var oldNodes = withNodes.apply(type).asStreamOfNodes().collect(Collectors.toList());
-            var newNodes = new ArrayList<Node>();
-            for (Node oldNode : oldNodes) {
-                newNodes.add(new OutputNode(renderAST(oldNode)));
-            }
-            current = current.with(type, new NodesAttribute(newNodes));
+    private Node renderNodesGroup(Node root) throws CompileException {
+        try {
+            return root.apply1(Attribute.Group.Nodes).foldRight(root, (current, type) -> {
+                try {
+                    return root.mapAsNodeStream(type, stream -> stream.map(this::renderAST).map(OutputNode::new));
+                } catch (StreamException e) {
+                    throw new AttributeException(e);
+                }
+            });
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
-        return current;
     }
 
     private Node withDeclarationCollections(Node withNodeCollections) throws CompileException {
