@@ -36,12 +36,7 @@ public record CRenderer(Node root) {
         var type = node.apply(Attribute.Type.Type).asNode();
 
         if (type.is(Node.Type.Structure)) {
-            return type.apply(Attribute.Type.Name).asInput()
-                    .toOutput()
-                    .prepend("struct ")
-                    .appendSlice(" ")
-                    .appendSlice(name.toOutput()
-                            .computeRaw());
+            return type.apply(Attribute.Type.Name).asInput().toOutput().prepend("struct ").appendSlice(" ").appendSlice(name.toOutput().computeRaw());
         }
         if (type.is(Node.Type.Function)) {
             var returns = type.apply(Attribute.Type.Type).asNode();
@@ -52,21 +47,12 @@ public record CRenderer(Node root) {
                 var renderedParameter = renderType(oldParameter);
                 newParameters.add(renderedParameter.compute());
             }
-            return returnType.appendSlice(" (*")
-                    .appendOutput(name.toOutput())
-                    .appendSlice(")")
-                    .appendSlice("(")
-                    .appendSlice(String.join(",", newParameters))
-                    .appendSlice(")");
+            return returnType.appendSlice(" (*").appendOutput(name.toOutput()).appendSlice(")").appendSlice("(").appendSlice(String.join(",", newParameters)).appendSlice(")");
         } else if (type.is(Node.Type.Reference)) {
             var child = type.apply(Attribute.Type.Value).asNode();
             return renderFieldWithType(new EmptyField(new RootText(name.toOutput().prepend("*").compute()), child, List.createList()));
         } else if (type.is(Node.Type.Primitive)) {
-            var rendered = type.apply(Attribute.Type.Name)
-                    .asInput()
-                    .toOutput()
-                    .compute()
-                    .toLowerCase();
+            var rendered = type.apply(Attribute.Type.Name).asInput().toOutput().compute().toLowerCase();
             return name.toOutput().prepend(rendered + " ");
         } else if (type.is(Node.Type.Integer)) {
             var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
@@ -76,9 +62,7 @@ public record CRenderer(Node root) {
                 case 16 -> "int";
                 default -> throw new RenderException("Unknown bit quantity: " + bits);
             };
-            var value = (isSigned ? "" : "unsigned ") + suffix + " " + name
-                    .toOutput()
-                    .compute();
+            var value = (isSigned ? "" : "unsigned ") + suffix + " " + name.toOutput().compute();
             return new RootText(value).toOutput();
         } else {
             throw new RenderException("Cannot render type: " + type);
@@ -98,29 +82,10 @@ public record CRenderer(Node root) {
 
     static Output renderNode(Node node) throws CompileException {
         if (node.is(Node.Type.Input)) {
-            return node.apply(Attribute.Type.Value)
-                    .asInput()
-                    .toOutput();
+            return node.apply(Attribute.Type.Value).asInput().toOutput();
         }
 
-        var renderers = java.util.List.of(
-                new BinaryProcessor(node),
-                new BlockProcessor(node),
-                new ConditionProcessor(node),
-                new DeclarationProcessor(node),
-                new ElseProcessor(node),
-                new EmptyProcessor(node),
-                new ExternRenderer(node),
-                new FunctionProcessor(node),
-                new ImportProcessor(node),
-                new IntegerProcessor(node),
-                new InvocationProcessor(node),
-                new LineProcessor(node),
-                new ReturnProcessor(node),
-                new StringProcessor(node),
-                new StructureRenderer(node),
-                new UnaryProcessor(node),
-                new VariableProcessor(node));
+        var renderers = java.util.List.of(new BinaryProcessor(node), new BlockProcessor(node), new ConditionProcessor(node), new DeclarationProcessor(node), new ElseProcessor(node), new EmptyProcessor(node), new ExternRenderer(node), new FunctionProcessor(node), new ImportProcessor(node), new IntegerProcessor(node), new InvocationProcessor(node), new LineProcessor(node), new ReturnProcessor(node), new StringProcessor(node), new StructureRenderer(node), new UnaryProcessor(node), new VariableProcessor(node));
 
         Option<Output> current = new None<>();
         for (Processor<Output> renderer : renderers) {
@@ -134,14 +99,15 @@ public record CRenderer(Node root) {
     }
 
     public static Node renderSubFields(Node root) throws CompileException {
-        var types = root.apply(Attribute.Group.Definition).collect(Collectors.toList());
-        var current = root;
-        for (Attribute.Type type : types) {
-            var node = root.apply(type).asNode();
-            var renderedNode = renderFieldWithType(node);
-            current = current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
+        try {
+            return root.apply1(Attribute.Group.Definition).foldRight(root, (current, type) -> {
+                var node = current.apply(type).asNode();
+                var renderedNode = renderFieldWithType(node);
+                return current.with(type, new NodeAttribute(new OutputNode(renderedNode)));
+            });
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
-        return current;
     }
 
     public static Node renderSubNodes(Node root) throws CompileException {
@@ -191,15 +157,14 @@ public record CRenderer(Node root) {
 
     private Node withDeclarationCollections(Node withNodeCollections) throws CompileException {
         try {
-            return withNodeCollections.apply1(Attribute.Group.Declarations)
-                    .foldRight(withNodeCollections, (current, type) -> {
-                        var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
-                        var newDeclarations = new ArrayList<Node>();
-                        for (Node oldDeclaration : oldDeclarations) {
-                            newDeclarations.add(new OutputNode(renderFieldWithType(oldDeclaration)));
-                        }
-                        return current.with(type, new NodesAttribute(newDeclarations));
-                    });
+            return withNodeCollections.apply1(Attribute.Group.Declarations).foldRight(withNodeCollections, (current, type) -> {
+                var oldDeclarations = current.apply(type).asStreamOfNodes().collect(Collectors.toList());
+                var newDeclarations = new ArrayList<Node>();
+                for (Node oldDeclaration : oldDeclarations) {
+                    newDeclarations.add(new OutputNode(renderFieldWithType(oldDeclaration)));
+                }
+                return current.with(type, new NodesAttribute(newDeclarations));
+            });
         } catch (StreamException e) {
             return withNodeCollections;
         }

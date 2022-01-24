@@ -11,6 +11,7 @@ public interface Node {
         throw new AttributeException("Node had no attributes.");
     }
 
+    @Deprecated
     default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Stream.empty();
     }
@@ -26,30 +27,7 @@ public interface Node {
     }
 
     enum Type {
-        Input,
-        Block,
-        Implementation,
-        Declaration,
-        Integer,
-        Structure,
-        Primitive,
-        Import,
-        Extern,
-        Variable,
-        Boolean,
-        Abstraction,
-        Unary, Empty,
-        If,
-        String,
-        Invocation,
-        Line,
-        Implicit,
-        Reference,
-        Initialization,
-        Function,
-        Else,
-        Binary, Cache,
-        Output, Return
+        Input, Block, Implementation, Declaration, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, If, String, Invocation, Line, Implicit, Reference, Initialization, Function, Else, Binary, Cache, Output, Return
     }
 
     interface Builder<T extends Builder<T>> {
