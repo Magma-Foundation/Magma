@@ -44,4 +44,11 @@ public record Variable(Input value) implements Node {
                 ? new Variable(attribute.asInput())
                 : this;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+               "\n\t\"value\":" + value +
+               '}';
+    }
 }

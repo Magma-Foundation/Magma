@@ -11,16 +11,16 @@ import java.util.stream.Stream;
 
 public record Declaration(Node identity) implements Node {
     @Override
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        if (type == Attribute.Type.Identity) return new NodeAttribute(identity);
+        throw new AttributeException(type);
+    }
+
+    @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Definition
                 ? Stream.of(Attribute.Type.Identity)
                 : Stream.empty();
-    }
-
-    @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Identity) return new NodeAttribute(identity);
-        throw new AttributeException(type);
     }
 
     @Override
@@ -38,5 +38,12 @@ public record Declaration(Node identity) implements Node {
         return type == Attribute.Type.Identity
                 ? new Declaration(attribute.asNode())
                 : this;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+               "\n\t\"identity\":" + identity +
+               '}';
     }
 }

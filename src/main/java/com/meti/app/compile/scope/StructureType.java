@@ -17,4 +17,11 @@ public record StructureType(Input name) implements Node {
     public boolean is(Type type) {
         return type == Type.Structure;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+               "\n\t\"name\":" + name +
+               '}';
+    }
 }
