@@ -15,7 +15,11 @@ public class ObjectNode implements JSONNode {
         this.internalMap = internalMap;
     }
 
-    public ObjectNode append(String name, Object value) {
+    public ObjectNode appendString(String name, String value) {
+        return appendObject(name, "\"" + value + "\"");
+    }
+
+    public ObjectNode appendObject(String name, Object value) {
         return new ObjectNode(internalMap.put(name, value.toString()));
     }
 

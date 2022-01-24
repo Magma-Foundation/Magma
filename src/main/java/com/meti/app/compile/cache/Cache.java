@@ -56,7 +56,7 @@ public record Cache(Node value, List<Node> children) implements Node {
     @Override
     public String toString() {
         return new ObjectNode()
-                .append("value", value)
-                .append("children", children).format();
+                .appendObject("value", value)
+                .appendObject("children", children).format();
     }
 }
