@@ -1,6 +1,5 @@
 package com.meti.app.compile.magma;
 
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -37,7 +36,7 @@ public class MagmaLexer extends StreamStage {
             if (node.is(Node.Type.Input)) {
                 return streamNodeTransformers(node.apply(Attribute.Type.Value).asInput());
             } else {
-                return new EmptyStream<>();
+                return Streams.empty();
             }
         } catch (AttributeException e) {
             throw new CompileException(e);
@@ -70,7 +69,7 @@ public class MagmaLexer extends StreamStage {
                 var input = node.apply(Attribute.Type.Value).asInput();
                 return streamTypeTransformers(input);
             } else {
-                return new EmptyStream<>();
+                return Streams.empty();
             }
         } catch (AttributeException e) {
             throw new CompileException(e);

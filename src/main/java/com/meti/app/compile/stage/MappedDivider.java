@@ -3,7 +3,6 @@ package com.meti.app.compile.stage;
 import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -22,7 +21,7 @@ public abstract class MappedDivider implements Divider {
     public Stream<Node> apply(CFormat format) throws CollectionException {
         return map.applyOptionally(format)
                 .map(List::stream)
-                .orElse(new EmptyStream<>());
+                .orElse(Streams.empty());
     }
 
     @Override

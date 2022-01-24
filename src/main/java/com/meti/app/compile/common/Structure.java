@@ -1,7 +1,6 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
@@ -27,7 +26,7 @@ public record Structure(Input name, List<Node> fields) implements Node {
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) {
         return group == Attribute.Group.Definitions
                 ? Streams.apply(Attribute.Type.Fields)
-                : new EmptyStream<>();
+                : Streams.empty();
     }
 
 

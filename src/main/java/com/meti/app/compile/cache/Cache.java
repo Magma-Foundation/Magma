@@ -1,7 +1,6 @@
 package com.meti.app.compile.cache;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
@@ -30,7 +29,7 @@ public record Cache(Node value, List<Node> children) implements Node {
         return switch (group) {
             case Node -> Streams.apply(Attribute.Type.Value);
             case Nodes -> Streams.apply(Attribute.Type.Children);
-            default -> new EmptyStream<>();
+            default -> Streams.empty();
         };
     }
 

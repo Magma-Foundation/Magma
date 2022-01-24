@@ -1,7 +1,6 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
@@ -38,7 +37,7 @@ public record Block(List<Node> children) implements Node {
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
                 ? Streams.apply(Attribute.Type.Children)
-                : new EmptyStream<>();
+                : Streams.empty();
     }
 
     @Override

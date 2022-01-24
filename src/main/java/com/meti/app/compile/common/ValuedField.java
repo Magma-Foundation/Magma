@@ -1,7 +1,6 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
@@ -25,7 +24,7 @@ public class ValuedField extends Field {
 
     @Override
     public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : new EmptyStream<>();
+        return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : Streams.empty();
     }
 
     @Override

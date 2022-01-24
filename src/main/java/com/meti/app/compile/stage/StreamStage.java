@@ -1,7 +1,7 @@
 package com.meti.app.compile.stage;
 
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
@@ -29,6 +29,6 @@ public abstract class StreamStage extends AbstractStage {
     protected abstract Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException;
 
     protected Stream<Processor<Node>> streamTypeTransformers(Node node) throws CompileException {
-        return new EmptyStream<>();
+        return Streams.empty();
     }
 }

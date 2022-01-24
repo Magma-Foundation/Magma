@@ -1,7 +1,7 @@
 package com.meti.app.compile.node;
 
-import com.meti.api.collect.stream.EmptyStream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -37,7 +37,7 @@ public interface Node {
     }
 
     default com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new EmptyStream<>();
+        return Streams.empty();
     }
 
     boolean is(Type type);
