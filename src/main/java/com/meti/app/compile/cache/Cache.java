@@ -54,9 +54,6 @@ public record Cache(Node value, List<Node> children) implements Node {
 
     @Override
     public String toString() {
-        return "{" +
-               "\n\t\"value\":" + value +
-               ",\n\t\"buffer\":" + children +
-               '}';
+        return JSONBuilder.createJSONBuilder(children, value).toString2();
     }
 }
