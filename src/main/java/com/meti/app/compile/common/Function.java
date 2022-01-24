@@ -33,7 +33,7 @@ public abstract class Function implements Node {
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Declarations -> Stream.of(Attribute.Type.Parameters);
+            case Definitions -> Stream.of(Attribute.Type.Parameters);
             case Definition -> Stream.of(Attribute.Type.Identity);
             default -> Stream.empty();
         };

@@ -25,7 +25,7 @@ public record Structure(Input name, List<Node> fields) implements Node {
 
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) {
-        return group == Attribute.Group.Declarations
+        return group == Attribute.Group.Definitions
                 ? Streams.apply(Attribute.Type.Fields)
                 : new EmptyStream<>();
     }
