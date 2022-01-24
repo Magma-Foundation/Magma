@@ -98,7 +98,7 @@ public record CRenderer(Node root) {
         return current.orElseThrow(() -> new CompileException("Unable to render oldNode: " + node));
     }
 
-    public static Node renderSubFields(Node root) throws CompileException {
+    public static Node renderDefinitionGroup(Node root) throws CompileException {
         try {
             return root.apply1(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
                 var renderedNode = renderFieldWithType(node);
@@ -130,7 +130,7 @@ public record CRenderer(Node root) {
 
     private Output renderAST(Node root) throws CompileException {
         try {
-            var withFields = renderSubFields(root);
+            var withFields = renderDefinitionGroup(root);
             var withNodes = renderSubNodes(withFields);
             var withNodeCollections = renderSubNodeCollections(withNodes);
             var current = withDeclarationCollections(withNodeCollections);
