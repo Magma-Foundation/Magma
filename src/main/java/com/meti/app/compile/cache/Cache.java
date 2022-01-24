@@ -1,9 +1,7 @@
 package com.meti.app.compile.cache;
 
-import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.api.core.F1;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -66,53 +64,5 @@ public record Cache(Node value, List<Node> children) implements Node {
                "\n\t\"value\":" + value +
                ",\n\t\"buffer\":" + children +
                '}';
-    }
-
-    @Deprecated
-    public record Builder(Node value, List<Node> children) {
-        public Builder(Node value) {
-            this(value, List.createList());
-        }
-
-        public Builder add(Node child) {
-            return new Builder(value, children.add(child));
-        }
-
-        public Node build() {
-            return new Cache(value, children);
-        }
-    }
-
-    @Deprecated
-    public record Prototype<T extends Node.Builder<T>>(T builder, List<Node> items) {
-        public Prototype(T builder, Node... items) {
-            this(builder, List.apply(items));
-        }
-
-        public static <T extends Node.Builder<T>, E extends Exception> F1<F1<Node, Prototype<T>, E>, Prototype<T>, E> fromCache(Node cache) throws CollectionException, AttributeException {
-            var value = cache.apply(Attribute.Type.Value).asNode();
-            var children = cache.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
-                    .foldRight(List.<Node>createList(), List::add);
-            return builderSupplier -> {
-                var prototype = builderSupplier.apply(value);
-                return prototype.append(children);
-            };
-        }
-
-        public Prototype<T> append(List<Node> children) {
-            return new Prototype<>(builder, items.addAll(children));
-        }
-
-        public Prototype<T> append(Prototype<T> other) {
-            var newBuilder = builder.merge(other.builder);
-            var newItems = items.addAll(other.items);
-            return new Prototype<>(newBuilder, newItems);
-        }
-
-        public Node toCache() {
-            var built = builder.build();
-            return items.isEmpty() ? built : new Cache(built, items);
-        }
     }
 }
