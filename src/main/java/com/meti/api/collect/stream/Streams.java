@@ -14,7 +14,7 @@ public class Streams {
     }
 
     public static <T> Stream<T> empty() {
-        return new EmptyStream<T>();
+        return new EmptyStream<>();
     }
 
     private static class EmptyStream<T> extends AbstractStream<T> {
