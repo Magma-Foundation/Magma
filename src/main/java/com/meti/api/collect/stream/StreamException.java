@@ -7,6 +7,10 @@ public class StreamException extends CollectionException {
         super(message);
     }
 
+    public StreamException(String message, Exception cause) {
+        super(message, cause);
+    }
+
     public StreamException(Exception cause) {
         super(cause);
     }

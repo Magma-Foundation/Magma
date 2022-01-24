@@ -9,7 +9,7 @@ public record InputNode(Input input) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new InputAttribute(input);
-        throw new AttributeException(type);
+        throw new AttributeException(this, type);
     }
 
     @Override

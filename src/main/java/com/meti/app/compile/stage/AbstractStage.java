@@ -33,7 +33,7 @@ public abstract class AbstractStage {
 
     protected Node transformDeclarationsGroup(Node withDeclarationGroup) throws CompileException {
         try {
-            return withDeclarationGroup.apply1(Attribute.Group.Declarations)
+            return withDeclarationGroup.apply1(Attribute.Group.Definitions)
                     .foldRight(withDeclarationGroup, this::transformDeclarationsGroup);
         } catch (StreamException e) {
             throw new CompileException(e);

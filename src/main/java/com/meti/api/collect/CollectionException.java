@@ -8,4 +8,8 @@ public class CollectionException extends Exception {
     public CollectionException(Throwable cause) {
         super(cause);
     }
+
+    public CollectionException(String message, Exception cause) {
+        super(message, cause);
+    }
 }
