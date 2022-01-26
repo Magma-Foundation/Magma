@@ -1,7 +1,10 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -9,10 +12,8 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public abstract class Function implements Node {
+public abstract class Function extends AbstractNode {
     protected final Node identity;
     protected final List<Node> parameters;
 
@@ -31,17 +32,12 @@ public abstract class Function implements Node {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Definitions -> Stream.of(Attribute.Type.Parameters);
-            case Definition -> Stream.of(Attribute.Type.Identity);
-            default -> Stream.empty();
+            case Definitions -> Streams.apply(Attribute.Type.Parameters);
+            case Definition -> Streams.apply(Attribute.Type.Identity);
+            default -> Streams.empty();
         };
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
     }
 
     @Override
