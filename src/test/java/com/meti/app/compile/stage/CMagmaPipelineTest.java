@@ -5,6 +5,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
+import com.meti.app.compile.common.Field;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.Node;
@@ -34,10 +35,10 @@ class CMagmaPipelineTest {
      */
     @Test
     void inner_function() throws CompileException, StreamException {
-        var innerIdentity = new EmptyField(new RootText("inner"), Primitive.Void);
+        var innerIdentity = new EmptyField(new RootText("inner"), Primitive.Void, Field.Flag.Def);
         var inner = new Implementation(innerIdentity, new Block());
 
-        var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void);
+        var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void, Field.Flag.Def);
         var outer = new Implementation(outerIdentity, new Block(inner));
 
         var first = new Implementation(outerIdentity, new Block());
