@@ -6,10 +6,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class JSONFormatterTest {
     @Test
-    void simple(){
-        var expected = "{\n\t\"value\" : 100\n}";
+    void braces_in_string() {
+        var expected = "{\n\t\"value\" : \"one\t{\ttwo\t}\tthree\"\n}";
         var actual = new JSONFormatter(new ObjectNode()
-                .addObject("value", 100))
+                .addString("value", "one\t{\ttwo\t}\tthree"))
+                .toString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void compact() {
+        var actual = new JSONFormatter("[]").toString();
+        assertEquals("[]", actual);
+    }
+
+    @Test
+    void compact_inner() {
+        var expected = "{\n\t\"value\" : []\n}";
+        var actual = new JSONFormatter(new ObjectNode()
+                .addObject("value", new ArrayNode()))
                 .toString();
         assertEquals(expected, actual);
     }
@@ -31,16 +46,10 @@ class JSONFormatterTest {
     }
 
     @Test
-    void compact() {
-        var actual = new JSONFormatter("[]").toString();
-        assertEquals("[]", actual);
-    }
-
-    @Test
-    void compact_inner() {
-        var expected = "{\n\t\"value\" : []\n}";
+    void simple() {
+        var expected = "{\n\t\"value\" : 100\n}";
         var actual = new JSONFormatter(new ObjectNode()
-                .addObject("value", new ArrayNode()))
+                .addObject("value", 100))
                 .toString();
         assertEquals(expected, actual);
     }
