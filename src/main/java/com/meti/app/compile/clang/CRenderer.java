@@ -30,12 +30,28 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public record CRenderer(Node root) {
+    public static Node renderDefinitionGroup(Node root) throws CompileException {
+        try {
+            return root.apply(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
+                var renderedNode = renderFieldWithType(node);
+                return new OutputNode(renderedNode);
+            }));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
     private static Output renderField(Node node) throws CompileException {
         var name = node.apply(Attribute.Type.Name).asInput();
         var type = node.apply(Attribute.Type.Type).asNode();
 
         if (type.is(Node.Type.Structure)) {
-            return type.apply(Attribute.Type.Name).asInput().toOutput().prepend("struct ").appendSlice(" ").appendSlice(name.toOutput().computeRaw());
+            return type.apply(Attribute.Type.Name)
+                    .asInput()
+                    .toOutput()
+                    .prepend("struct ")
+                    .appendSlice(" ")
+                    .appendSlice(name.toOutput().computeRaw());
         }
         if (type.is(Node.Type.Function)) {
             var returns = type.apply(Attribute.Type.Type).asNode();
@@ -97,27 +113,8 @@ public record CRenderer(Node root) {
         return current.orElseThrow(() -> new CompileException("Unable to render oldNode: " + node));
     }
 
-    public static Node renderDefinitionGroup(Node root) throws CompileException {
-        try {
-            return root.apply(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
-                var renderedNode = renderFieldWithType(node);
-                return new OutputNode(renderedNode);
-            }));
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
     private static Output renderType(Node oldParameter) throws CompileException {
         return renderField(new EmptyField(new RootText(""), oldParameter, List.createList()));
-    }
-
-    public Node renderNodeGroup(Node root) throws CompileException {
-        try {
-            return root.apply(Attribute.Group.Node).foldRight(root, (current, type) -> current.mapAsNode(type, input -> new OutputNode(renderAST(input))));
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
     }
 
     public Output render() throws CompileException {
@@ -136,11 +133,12 @@ public record CRenderer(Node root) {
         }
     }
 
-    private Node renderNodesGroup(Node root) throws CompileException {
+    private Node renderDefinitionsGroup(Node root) throws CompileException {
         try {
-            return root.apply(Attribute.Group.Nodes).foldRight(root, (current, type) -> {
+            return root.apply(Attribute.Group.Definitions).foldRight(root, (current, type) -> {
                 try {
-                    return root.mapAsNodeStream(type, stream -> stream.map(this::renderAST).map(OutputNode::new));
+                    return current.mapAsNodeStream(type, input -> input.map(CRenderer::renderFieldWithType)
+                            .map(OutputNode::new));
                 } catch (StreamException e) {
                     throw new AttributeException(e);
                 }
@@ -150,12 +148,19 @@ public record CRenderer(Node root) {
         }
     }
 
-    private Node renderDefinitionsGroup(Node root) throws CompileException {
+    public Node renderNodeGroup(Node root) throws CompileException {
         try {
-            return root.apply(Attribute.Group.Definitions).foldRight(root, (current, type) -> {
+            return root.apply(Attribute.Group.Node).foldRight(root, (current, type) -> current.mapAsNode(type, input -> new OutputNode(renderAST(input))));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Node renderNodesGroup(Node root) throws CompileException {
+        try {
+            return root.apply(Attribute.Group.Nodes).foldRight(root, (current, type) -> {
                 try {
-                    return current.mapAsNodeStream(type, input -> input.map(CRenderer::renderFieldWithType)
-                            .map(OutputNode::new));
+                    return root.mapAsNodeStream(type, stream -> stream.map(this::renderAST).map(OutputNode::new));
                 } catch (StreamException e) {
                     throw new AttributeException(e);
                 }
