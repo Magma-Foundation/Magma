@@ -14,7 +14,10 @@ class EmptyFieldTest {
         var expected = """
                 {
                 \t"name" : "test",
-                \t"type" : {},
+                \t"type" : {
+                \t\t"bits" : 16,
+                \t\t"signed" : true
+                \t},
                 \t"flags" : [
                 \t\t"Const"
                 \t]
