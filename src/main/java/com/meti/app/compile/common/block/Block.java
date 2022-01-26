@@ -4,6 +4,10 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.EmptyNode;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -18,6 +22,18 @@ public record Block(List<Node> children) implements Node {
 
     public Block(Node... children) {
         this(List.apply(children));
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        try {
+            var jsonChildren = children.stream()
+                    .map(Node::toJSON)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::add);
+            return new ObjectNode().add("children", jsonChildren);
+        } catch (StreamException e) {
+            return new EmptyNode();
+        }
     }
 
     @Override
