@@ -15,7 +15,7 @@ public class ObjectNode implements JSONNode {
         this.internalMap = internalMap;
     }
 
-    public ObjectNode add(String name, Object value) {
+    public ObjectNode addObject(String name, Object value) {
         return new ObjectNode(internalMap.put(name, value.toString()));
     }
 
@@ -26,5 +26,9 @@ public class ObjectNode implements JSONNode {
         } catch (StreamException e) {
             return "";
         }
+    }
+
+    public JSONNode addString(String name, String value) {
+        return addObject(name, "\"" + value + "\"");
     }
 }

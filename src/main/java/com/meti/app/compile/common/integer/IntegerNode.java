@@ -20,7 +20,7 @@ public record IntegerNode(int value) implements Node {
 
     @Override
     public JSONNode toJSON() {
-        return new ObjectNode().add("value", value);
+        return new ObjectNode().addObject("value", value);
     }
 
     @Deprecated

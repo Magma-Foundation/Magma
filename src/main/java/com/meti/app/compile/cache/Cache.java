@@ -76,8 +76,8 @@ public final class Cache extends AbstractNode {
                     .build();
 
             return new ObjectNode()
-                    .add("value", value.toJSON())
-                    .add("children", jsonChildren);
+                    .addObject("value", value.toJSON())
+                    .addObject("children", jsonChildren);
         } catch (StreamException e) {
             return new EmptyNode();
         }

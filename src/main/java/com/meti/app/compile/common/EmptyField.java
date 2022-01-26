@@ -27,9 +27,9 @@ public class EmptyField extends Field {
                     .build();
 
             return new ObjectNode()
-                    .add("name", name.toOutput().compute())
-                    .add("type", type.toJSON())
-                    .add("flags", flags);
+                    .addObject("name", name.toOutput().compute())
+                    .addObject("type", type.toJSON())
+                    .addObject("flags", flags);
         } catch (StreamException e) {
             return new EmptyNode();
         }

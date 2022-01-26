@@ -11,7 +11,7 @@ public class EmptyNode implements Node {
 
     @Override
     public JSONNode toJSON() {
-        return new ObjectNode().add("empty", true);
+        return new ObjectNode().addObject("empty", true);
     }
 
     @Override

@@ -9,14 +9,14 @@ class JSONFormatterTest {
     void simple(){
         var expected = "{\n\t\"value\" : 100\n}";
         var actual = new JSONFormatter(new ObjectNode()
-                .add("value", 100))
+                .addObject("value", 100))
                 .toString();
         assertEquals(expected, actual);
     }
 
     @Test
     void preserve() {
-        var inner = new ObjectNode().add("value", 100);
+        var inner = new ObjectNode().addObject("value", 100);
         var root = new ArrayNode.Builder()
                 .addObject(inner)
                 .build();
@@ -40,7 +40,7 @@ class JSONFormatterTest {
     void compact_inner() {
         var expected = "{\n\t\"value\" : []\n}";
         var actual = new JSONFormatter(new ObjectNode()
-                .add("value", new ArrayNode()))
+                .addObject("value", new ArrayNode()))
                 .toString();
         assertEquals(expected, actual);
     }

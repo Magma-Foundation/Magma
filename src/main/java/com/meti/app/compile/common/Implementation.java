@@ -67,9 +67,9 @@ public final class Implementation extends Function {
                     .build();
 
             return new ObjectNode()
-                    .add("identity", identity.toJSON())
-                    .add("parameters", jsonParameters)
-                    .add("body", body.toJSON());
+                    .addObject("identity", identity.toJSON())
+                    .addObject("parameters", jsonParameters)
+                    .addObject("body", body.toJSON());
         } catch (StreamException e) {
             return new EmptyNode();
         }
