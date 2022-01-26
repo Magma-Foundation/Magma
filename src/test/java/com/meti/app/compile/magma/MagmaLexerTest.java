@@ -2,12 +2,14 @@ package com.meti.app.compile.magma;
 
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
+import com.meti.app.compile.common.Fields;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.common.returns.Return;
 import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,27 @@ class MagmaLexerTest {
         var identity = new EmptyField(new RootText("main"), new IntegerType(true, 16), Field.Flag.Def);
         var body = new Block(new Return(new IntegerNode(0)));
         var expected = new Implementation(identity, body);
+        assertEquals(expected, output);
+    }
+
+    @Test
+    void implementation_with_parameters() throws CompileException {
+        var lexer = new MagmaLexer();
+        var output = lexer.transformNodeAST(new InputNode(new RootText("def empty(state : Bool) : Void => {}")));
+
+        var identity = new Fields.Builder()
+                .withName("empty")
+                .withType(Primitive.Void)
+                .withFlag(Field.Flag.Def)
+                .build();
+
+        var parameter = new Fields.Builder()
+                .withName("state")
+                .withType(Primitive.Bool)
+                .build();
+
+        var body = new Block(new Return(new IntegerNode(0)));
+        var expected = new Implementation(identity, body, parameter);
         assertEquals(expected, output);
     }
 }

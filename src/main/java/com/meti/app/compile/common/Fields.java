@@ -27,5 +27,9 @@ public class Fields {
         public Builder withType(String type) {
             return new Builder(name, new InputNode(new RootText(type)), flags);
         }
+
+        public Builder withType(Node type) {
+            return new Builder(name, type, flags);
+        }
     }
 }
