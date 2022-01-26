@@ -23,23 +23,17 @@ public final class Implementation extends Function {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new NodeAttribute(body)
-                : super.apply(type);
+        return type == Attribute.Type.Value ? new NodeAttribute(body) : super.apply(type);
     }
 
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Value)
-                : super.apply(group);
+        return group == Attribute.Group.Node ? Stream.of(Attribute.Type.Value) : super.apply(group);
     }
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new Implementation(identity, attribute.asNode(), parameters)
-                : super.with(type, attribute);
+        return type == Attribute.Type.Value ? new Implementation(identity, attribute.asNode(), parameters) : super.with(type, attribute);
     }
 
     @Override
@@ -65,12 +59,13 @@ public final class Implementation extends Function {
         return type == Type.Implementation;
     }
 
+/*    @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().append("identity", identity.toJSON()).append("parameters", );
+    }*/
+
     @Override
     public String toString() {
-        return "{" +
-               "\n\t\"identity\":" + identity +
-               ",\n\t\"parameters\":" + parameters +
-               ",\n\t\"body\":" + body +
-               '}';
+        return "{" + "\n\t\"identity\":" + identity + ",\n\t\"parameters\":" + parameters + ",\n\t\"body\":" + body + '}';
     }
 }

@@ -20,7 +20,7 @@ public class ObjectNode implements JSONNode {
     }
 
     @Override
-    public String format() {
+    public String toFormat() {
         var value = toString();
         var buffer = new StringBuilder();
         var length = value.length();
@@ -30,10 +30,10 @@ public class ObjectNode implements JSONNode {
             var c = value.charAt(i);
             if (c == ':') {
                 buffer.append(" : ");
-            } else if (c == '{') {
+            } else if (c == '{' || c == '[') {
                 buffer.append(c).append("\n").append("\t".repeat(depth + 1));
                 depth += 1;
-            } else if (c == '}') {
+            } else if (c == '}' || c == ']') {
                 depth -= 1;
                 buffer.append('\n').append("\t".repeat(depth)).append(c);
             } else {
