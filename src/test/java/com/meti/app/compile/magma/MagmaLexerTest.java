@@ -39,7 +39,8 @@ class MagmaLexerTest {
     @Test
     void implementation_with_parameters() throws CompileException {
         var lexer = new MagmaLexer();
-        var output = lexer.transformNodeAST(new InputNode(new RootText("def empty(state : Bool) : Void => {}")));
+        var input = new InputNode(new RootText("def empty(state : Bool) : Void => {return 0}"));
+        var output = lexer.transformNodeAST(input);
 
         var identity = new Fields.Builder()
                 .withName("empty")
