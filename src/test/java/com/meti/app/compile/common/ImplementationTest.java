@@ -20,7 +20,9 @@ class ImplementationTest {
                 \t"parameters" : [],
                 \t"identity" : {
                 \t\t"name" : "test",
-                \t\t"type" : {},
+                \t\t"type" : {
+                \t\t\t"value" : "Void"
+                \t\t},
                 \t\t"flags" : [
                 \t\t\t"Def"
                 \t\t]
