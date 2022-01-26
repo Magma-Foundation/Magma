@@ -4,14 +4,28 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.api.json.*;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.EmptyNode;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-public record Cache(Node value, List<Node> children) implements Node {
+import java.util.Objects;
+
+public final class Cache extends AbstractNode {
+    private final Node value;
+    private final List<Node> children;
+
+    public Cache(Node value, List<Node> children) {
+        this.value = value;
+        this.children = children;
+    }
+
     public Cache(Node value, Node... children) {
         this(value, List.apply(children));
     }
@@ -54,11 +68,6 @@ public record Cache(Node value, List<Node> children) implements Node {
     }
 
     @Override
-    public String toString() {
-        return new JSONFormatter(toJSON()).toString();
-    }
-
-    @Override
     public JSONNode toJSON() {
         try {
             var jsonChildren = children.stream()
@@ -73,4 +82,27 @@ public record Cache(Node value, List<Node> children) implements Node {
             return new EmptyNode();
         }
     }
+
+    public Node value() {
+        return value;
+    }
+
+    public List<Node> children() {
+        return children;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Cache) obj;
+        return Objects.equals(this.value, that.value) &&
+               Objects.equals(this.children, that.children);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, children);
+    }
+
 }
