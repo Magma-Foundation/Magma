@@ -25,7 +25,11 @@ public record ArrayNode(List<String> children) implements JSONNode {
             this(List.createList());
         }
 
-        public Builder add(Object obj) {
+        public Builder addString(String value) {
+            return new Builder(children.add("\"" + value + "\""));
+        }
+
+        public Builder addObject(Object obj) {
             return new Builder(children.add(obj.toString()));
         }
 

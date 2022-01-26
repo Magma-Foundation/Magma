@@ -69,7 +69,7 @@ public final class Implementation extends Function {
         try {
             var jsonParameters = parameters.stream()
                     .map(Node::toJSON)
-                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::add)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
                     .build();
 
             return new ObjectNode()

@@ -29,7 +29,7 @@ public record Block(List<Node> children) implements Node {
         try {
             var jsonChildren = children.stream()
                     .map(Node::toJSON)
-                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::add);
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject);
             return new ObjectNode().add("children", jsonChildren);
         } catch (StreamException e) {
             return new EmptyNode();

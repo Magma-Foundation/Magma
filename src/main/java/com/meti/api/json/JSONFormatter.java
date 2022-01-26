@@ -17,6 +17,8 @@ public record JSONFormatter(String value) {
             var c = value().charAt(i);
             if (c == ':') {
                 buffer.append(" : ");
+            } else if (c == ',') {
+                buffer.append(c).append('\n').append("\t".repeat(depth));
             } else if (c == '{' || c == '[') {
                 buffer.append(c).append('\n').append("\t".repeat(depth + 1));
                 depth += 1;

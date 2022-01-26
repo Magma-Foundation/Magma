@@ -23,7 +23,7 @@ public class EmptyField extends Field {
         try {
             var flags = this.flags.stream()
                     .map(Enum::name)
-                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::add)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addString)
                     .build();
 
             return new ObjectNode()
