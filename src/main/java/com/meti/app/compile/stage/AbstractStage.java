@@ -6,7 +6,8 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-public abstract class AbstractStage {
+public abstract class AbstractStage implements Stage {
+    @Override
     public Node transformNodeAST(Node node) throws CompileException {
         var before = beforeTraversal(node);
         var withNodeGroup = transformNodeGroup(before);
@@ -33,7 +34,7 @@ public abstract class AbstractStage {
 
     protected Node transformDeclarationsGroup(Node withDeclarationGroup) throws CompileException {
         try {
-            return withDeclarationGroup.apply1(Attribute.Group.Definitions)
+            return withDeclarationGroup.apply(Attribute.Group.Definitions)
                     .foldRight(withDeclarationGroup, this::transformDeclarationsGroup);
         } catch (StreamException e) {
             throw new CompileException(e);
@@ -53,7 +54,7 @@ public abstract class AbstractStage {
 
     protected Node transformDefinitionGroup(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Definition)
+            return root.apply(Attribute.Group.Definition)
                     .foldRight(root, this::transformDefinitionGroup);
         } catch (StreamException e) {
             throw new CompileException(e);
@@ -74,7 +75,7 @@ public abstract class AbstractStage {
 
     protected Node transformNodeGroup(Node node) throws CompileException {
         try {
-            return node.apply1(Attribute.Group.Node).foldRight(node, this::transformNodeAttribute);
+            return node.apply(Attribute.Group.Node).foldRight(node, this::transformNodeAttribute);
         } catch (StreamException e) {
             throw new CompileException(e);
         }
@@ -94,7 +95,7 @@ public abstract class AbstractStage {
 
     protected Node transformNodesGroup(Node withChild) throws CompileException {
         try {
-            return withChild.apply1(Attribute.Group.Nodes)
+            return withChild.apply(Attribute.Group.Nodes)
                     .foldRight(withChild, this::transformNodesAttribute);
         } catch (StreamException e) {
             throw new TransformationException(e);

@@ -4,6 +4,10 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.EmptyNode;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -21,13 +25,26 @@ public record Block(List<Node> children) implements Node {
     }
 
     @Override
+    public JSONNode toJSON() {
+        try {
+            var jsonChildren = children.stream()
+                    .map(Node::toJSON)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
+                    .build();
+            return new ObjectNode().addObject("children", jsonChildren);
+        } catch (StreamException e) {
+            return new EmptyNode();
+        }
+    }
+
+    @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Children) return new NodesAttribute1(children);
         throw new AttributeException(type);
     }
 
     @Override
-    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
                 ? Streams.apply(Attribute.Type.Children)
                 : Streams.empty();
@@ -62,7 +79,7 @@ public record Block(List<Node> children) implements Node {
         }
     }
 
-    public record Builder(List<Node> children) implements Node.Builder<Builder> {
+    public record Builder(List<Node> children) {
         public Builder() {
             this(List.createList());
         }
@@ -71,14 +88,8 @@ public record Block(List<Node> children) implements Node {
             return new Builder(children.add(child));
         }
 
-        @Override
         public Node build() {
-            return new Block(children());
-        }
-
-        @Override
-        public Builder merge(Builder other) {
-            return new Builder(children.addAll(other.children));
+            return new Block(children);
         }
     }
 }

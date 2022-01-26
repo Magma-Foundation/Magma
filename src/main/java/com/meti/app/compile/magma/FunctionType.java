@@ -11,8 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record FunctionType(Node returns, java.util.List parameters) implements Node {
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
         return switch (group) {
             case Type -> Stream.of(Attribute.Type.Type);
             case Types -> Stream.of(Attribute.Type.Parameters);
@@ -30,8 +29,8 @@ public record FunctionType(Node returns, java.util.List parameters) implements N
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override

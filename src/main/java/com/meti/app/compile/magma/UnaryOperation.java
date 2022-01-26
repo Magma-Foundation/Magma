@@ -10,8 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record UnaryOperation(Node caller, Node callee) implements Node {
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
                 ? Stream.of(Attribute.Type.Caller, Attribute.Type.Arguments)
                 : Stream.empty();
@@ -27,8 +26,8 @@ public record UnaryOperation(Node caller, Node callee) implements Node {
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override

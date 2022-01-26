@@ -15,43 +15,20 @@ public class ObjectNode implements JSONNode {
         this.internalMap = internalMap;
     }
 
-    public ObjectNode appendString(String name, String value) {
-        return appendObject(name, "\"" + value + "\"");
-    }
-
-    public ObjectNode appendObject(String name, Object value) {
+    public ObjectNode addObject(String name, Object value) {
         return new ObjectNode(internalMap.put(name, value.toString()));
-    }
-
-    @Override
-    public String format() {
-        var value = toString();
-        var buffer = new StringBuilder();
-        for (int i = 0; i < value.length(); i++) {
-            var c = value.charAt(i);
-            if (c == '{') {
-                buffer.append(c).append("\n\t");
-            } else if (c == ':') {
-                buffer.append(" : ");
-            } else if (c == '}') {
-                buffer.append("\n").append(c);
-            } else {
-                buffer.append(c);
-            }
-        }
-        return buffer.toString();
     }
 
     @Override
     public String toString() {
         try {
-            return internalMap.streamKeys()
-                    .map(key -> "\"" + key + "\":" + internalMap.apply(key))
-                    .foldRight((current, next) -> current + "," + next)
-                    .map(value -> "{" + value + "}")
-                    .orElse("{}");
+            return internalMap.streamKeys().map(key -> "\"" + key + "\":" + internalMap.apply(key)).foldRight((current, next) -> current + "," + next).map(value -> "{" + value + "}").orElse("{}");
         } catch (StreamException e) {
             return "";
         }
+    }
+
+    public JSONNode addString(String name, String value) {
+        return addObject(name, "\"" + value + "\"");
     }
 }

@@ -16,16 +16,15 @@ public record Declaration(Node identity) implements Node {
         throw new AttributeException(type);
     }
 
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Definition
                 ? Stream.of(Attribute.Type.Identity)
                 : Stream.empty();
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override

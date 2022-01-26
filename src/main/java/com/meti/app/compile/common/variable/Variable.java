@@ -1,6 +1,8 @@
 package com.meti.app.compile.common.variable;
 
-import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -8,10 +10,15 @@ import com.meti.app.compile.node.attribute.InputAttribute;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
 
-public record Variable(Input value) implements Node {
+public final class Variable extends AbstractNode {
+    private final Input value;
+
+    public Variable(Input value) {
+        this.value = value;
+    }
+
     public Variable(String value) {
         this(new RootText(value));
     }
@@ -22,16 +29,6 @@ public record Variable(Input value) implements Node {
         throw new AttributeException(type);
     }
 
-    @Override
-    @Deprecated
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
-    }
 
     @Override
     public boolean is(Type type) {
@@ -46,9 +43,15 @@ public record Variable(Input value) implements Node {
     }
 
     @Override
-    public String toString() {
-        return "{" +
-               "\n\t\"value\":" + value +
-               '}';
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Variable) obj;
+        return Objects.equals(this.value, that.value);
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().addString("value", value.toOutput().compute());
     }
 }

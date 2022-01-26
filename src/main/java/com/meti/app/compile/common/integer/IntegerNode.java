@@ -1,6 +1,8 @@
 package com.meti.app.compile.common.integer;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -17,14 +19,18 @@ public record IntegerNode(int value) implements Node {
     }
 
     @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().addObject("value", value);
+    }
+
     @Deprecated
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
         return Stream.empty();
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
