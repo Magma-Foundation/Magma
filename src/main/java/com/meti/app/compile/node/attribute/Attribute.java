@@ -1,5 +1,6 @@
 package com.meti.app.compile.node.attribute;
 
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
@@ -27,7 +28,13 @@ public interface Attribute {
     }
 
     default Output asOutput() throws AttributeException {
-        throw new AttributeException("Not output, but rather '" + getClass() + "'.");
+        var format = "Not output, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
+        var message = format.formatted(getClass(), toJSON());
+        throw new AttributeException(message);
+    }
+
+    default JSONNode toJSON() {
+        throw new UnsupportedOperationException(getClass() + " cannot be converted into JSON yet.");
     }
 
     default Packaging asPackaging() throws AttributeException {
