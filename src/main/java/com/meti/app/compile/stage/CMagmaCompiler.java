@@ -59,5 +59,4 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
                 .foldRight(new StringBuilder(), StringBuilder::append)
                 .toString();
     }
-
 }
