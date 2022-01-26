@@ -27,23 +27,31 @@ import com.meti.app.compile.text.Input;
 public class MagmaLexer extends StreamStage {
     @Override
     protected Node beforeTraversal(Node root) throws CompileException {
-        return transformUsingStreams(root, streamNodeTransformers(root));
-    }
-
-    @Override
-    protected Stream<Processor<Node>> streamNodeTransformers(Node node) throws CompileException {
         try {
-            if (node.is(Node.Type.Input)) {
-                return streamNodeTransformers(node.apply(Attribute.Type.Value).asInput());
+            if (root.is(Node.Type.Input)) {
+                var input = root.apply(Attribute.Type.Value).asInput();
+                return transformUsingStreams(root, streamNodeLexers(input));
             } else {
-                return Streams.empty();
+                return root;
             }
         } catch (AttributeException e) {
             throw new CompileException(e);
         }
     }
 
-    private Stream<Processor<Node>> streamNodeTransformers(com.meti.app.compile.text.Input input) {
+    @Override
+    protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+        try {
+            return transformers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private Stream<Processor<Node>> streamNodeLexers(Input input) {
         return Streams.apply(
                 new ElseLexer(input),
                 new StringLexer(input),
@@ -81,17 +89,5 @@ public class MagmaLexer extends StreamStage {
                 new ReferenceLexer(input),
                 new PrimitiveLexer(input),
                 new IntegerTypeLexer(input));
-    }
-
-    @Override
-    protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
-        try {
-            return transformers.map(Processor::process)
-                    .flatMap(Streams::optionally)
-                    .first()
-                    .orElse(node);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
     }
 }

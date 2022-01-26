@@ -7,8 +7,6 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
 
 public abstract class StreamStage extends AbstractStage {
-    protected abstract Stream<Processor<Node>> streamNodeTransformers(Node node) throws CompileException;
-
     @Override
     protected Node transformDefinition(Node definition) throws CompileException {
         if (definition.is(Node.Type.Initialization)) {

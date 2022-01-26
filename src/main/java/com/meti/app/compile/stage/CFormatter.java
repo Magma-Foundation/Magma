@@ -22,7 +22,6 @@ public class CFormatter extends AfterStreamStage {
         this.thisPackage = thisPackage;
     }
 
-    @Override
     protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
         return Streams.apply(() -> {
             if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {

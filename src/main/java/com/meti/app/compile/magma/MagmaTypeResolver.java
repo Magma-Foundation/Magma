@@ -17,8 +17,7 @@ public class MagmaTypeResolver extends StreamStage {
         return transformUsingStreams(root, streamNodeTransformers(root));
     }
 
-    @Override
-    protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
+    private Stream<Processor<Node>> streamNodeTransformers(Node node) {
         return Streams.apply(
                 new BlockResolver(node, this),
                 new ReturnResolver(node, this),

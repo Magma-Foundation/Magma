@@ -10,7 +10,6 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.scope.BlockTransformer;
 
 public class CMagmaModifier extends AfterStreamStage {
-    @Override
     protected Stream<Processor<Node>> streamNodeTransformers(Node node) {
         return Streams.apply(
                 new BooleanTransformer(node),
