@@ -11,7 +11,7 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-public interface Node {
+public interface Node extends JSONable {
     default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Streams.empty();
     }
@@ -42,6 +42,7 @@ public interface Node {
         }
     }
 
+    @Override
     default JSONNode toJSON() throws JSONException {
         var format = "Instances of '%s' cannot be converted to JSON yet.";
         var message = format.formatted(getClass());
