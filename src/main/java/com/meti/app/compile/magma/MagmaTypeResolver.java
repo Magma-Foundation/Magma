@@ -9,19 +9,11 @@ import com.meti.app.compile.primitive.IntResolver;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.scope.BlockResolver;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.stage.StreamStage;
 
-public class MagmaTypeResolver extends StreamStage {
+public class MagmaTypeResolver extends NodeStage {
     @Override
     protected Node beforeNodeTraversal(Node root) throws CompileException {
         return transformUsingStreams(root, streamNodeTransformers(root));
-    }
-
-    private Stream<Processor<Node>> streamNodeTransformers(Node node) {
-        return Streams.apply(
-                new BlockResolver(node, this),
-                new ReturnResolver(node, this),
-                new IntResolver(node));
     }
 
     @Override
@@ -34,5 +26,12 @@ public class MagmaTypeResolver extends StreamStage {
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    private Stream<Processor<Node>> streamNodeTransformers(Node node) {
+        return Streams.apply(
+                new BlockResolver(node, this),
+                new ReturnResolver(node, this),
+                new IntResolver(node));
     }
 }

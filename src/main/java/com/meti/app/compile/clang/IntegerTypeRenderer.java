@@ -8,8 +8,8 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public class IntegerTypeRenderer extends AbstractTypeRenderer {
-    public IntegerTypeRenderer(Input name, Node type, Node.Type nodeType) {
-        super(name, type, nodeType);
+    public IntegerTypeRenderer(Input name, Node type) {
+        super(name, type, Node.Type.Integer);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Some;
+import com.meti.app.compile.magma.NodeStage;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.InputAttribute;
@@ -14,7 +15,7 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
 
-public class CFormatter extends AfterStreamStage {
+public class CFormatter extends NodeStage {
     private final Packaging thisPackage;
     private int counter = -1;
 

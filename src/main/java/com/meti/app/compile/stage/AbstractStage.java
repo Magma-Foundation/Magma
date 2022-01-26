@@ -5,16 +5,11 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.text.Input;
 
 public abstract class AbstractStage implements Stage {
-    @Override
-    public Node transformNodeAST(Node node) throws CompileException {
-        var before = beforeNodeTraversal(node);
-        var withNodeGroup = transformNodeGroup(before);
-        var withNodesGroup = transformNodesGroup(withNodeGroup);
-        var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
-        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
-        return afterTraversal(withDeclarationsGroup);
+    protected Node transformDefinition(Node definition) throws CompileException {
+        return definition;
     }
 
     protected Node beforeNodeTraversal(Node root) throws CompileException {
@@ -41,8 +36,14 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node afterTraversal(Node root) throws CompileException {
-        return root;
+    @Override
+    public Node transformNodeAST(Node node) throws CompileException {
+        var before = beforeNodeTraversal(node);
+        var withNodeGroup = transformNodeGroup(before);
+        var withNodesGroup = transformNodesGroup(withNodeGroup);
+        var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
+        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
+        return afterTraversal(withDeclarationsGroup);
     }
 
     protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
@@ -61,8 +62,8 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node transformDefinition(Node definition) throws CompileException {
-        return definition;
+    protected Node afterTraversal(Node root) throws CompileException {
+        return root;
     }
 
     protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
@@ -103,13 +104,15 @@ public abstract class AbstractStage implements Stage {
     }
 
     protected Node transformTypeAttribute(Node oldIdentity) throws CompileException {
+        var name = oldIdentity.apply(Attribute.Type.Name).asInput();
         var oldType = oldIdentity.apply(Attribute.Type.Type).asNode();
-        var newType = transformType(oldType);
+
+        var newType = transformType(name, oldType);
         var newTypeAttribute = new NodeAttribute(newType);
         return oldIdentity.with(Attribute.Type.Type, newTypeAttribute);
     }
 
-    protected Node transformType(Node type) throws CompileException {
+    protected Node transformType(Input name, Node type) throws CompileException {
         return type;
     }
 }

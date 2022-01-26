@@ -22,10 +22,9 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.stage.StreamStage;
 import com.meti.app.compile.text.Input;
 
-public class MagmaLexer extends StreamStage {
+public class MagmaLexer extends NodeStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
         if (definition.is(Node.Type.Input)) {
@@ -53,7 +52,7 @@ public class MagmaLexer extends StreamStage {
     }
 
     @Override
-    protected Stream<Processor<Node>> streamTypeTransformers(Node node) throws CompileException {
+    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node node) throws CompileException {
         try {
             if (node.is(Node.Type.Input)) {
                 var input = node.apply(Attribute.Type.Value).asInput();

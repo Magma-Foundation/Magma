@@ -1,12 +1,14 @@
 package com.meti.app.compile.stage;
 
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
+import com.meti.app.compile.text.Input;
 
-public abstract class StreamStage extends AbstractStage {
+public abstract class StreamStage<T> extends AbstractStage {
     @Override
     protected Node transformDefinition(Node definition) throws CompileException {
         var newDefinition = beforeDefinitionTraversal(definition);
@@ -26,13 +28,36 @@ public abstract class StreamStage extends AbstractStage {
     }
 
     @Override
-    protected Node transformType(Node type) throws CompileException {
-        return transformUsingStreams(type, streamTypeTransformers(type));
+    protected Node transformType(Input name, Node type) throws CompileException {
+        return transformUsingStreams1(type, streamTypeTransformers(name, type));
     }
 
-    protected abstract Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException;
+    protected Node transformUsingStreams1(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+        try {
+            return transformers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
 
-    protected Stream<Processor<Node>> streamTypeTransformers(Node node) throws CompileException {
+    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node node) throws CompileException {
         return Streams.empty();
     }
+
+    protected Node transformUsingStreams(Node node, Stream<Processor<T>> transformers) throws CompileException {
+        try {
+            return transformers.map(Processor::process)
+                    .flatMap(Streams::optionally)
+                    .first()
+                    .map(this::wrap)
+                    .orElse(node);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    protected abstract Node wrap(T t);
 }

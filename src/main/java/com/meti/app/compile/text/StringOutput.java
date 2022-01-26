@@ -1,5 +1,7 @@
 package com.meti.app.compile.text;
 
+import com.meti.api.core.F1;
+
 public record StringOutput(String buffer) implements Output {
     public StringOutput() {
         this("");
@@ -23,6 +25,11 @@ public record StringOutput(String buffer) implements Output {
     @Override
     public String computeRaw() {
         return buffer;
+    }
+
+    @Override
+    public <E extends Exception> Output map(F1<String, String, E> mapper) throws E {
+        return new StringOutput(mapper.apply(buffer));
     }
 
     @Override
