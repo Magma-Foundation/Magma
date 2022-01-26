@@ -1,6 +1,8 @@
 package com.meti.app.compile.node;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 
@@ -14,8 +16,8 @@ public class EmptyNode implements Node {
     }
 
     @Override
-    public String toString() {
-        return "\"Empty\"";
+    public JSONNode toJSON() {
+        return new ObjectNode().add("empty", true);
     }
 
     @Override
