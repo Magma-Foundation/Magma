@@ -32,7 +32,7 @@ public record FunctionTransformer(Node oldNode) implements Processor<Node> {
             return oldNode.apply(Attribute.Type.Identity)
                     .asNode()
                     .apply(Attribute.Type.Flags)
-                    .asStreamOfFlags1()
+                    .asStreamOfFlags()
                     .foldRight(List.createList(), List::add)
                     .contains(Field.Flag.Extern);
         } catch (StreamException | AttributeException e) {
@@ -45,7 +45,7 @@ public record FunctionTransformer(Node oldNode) implements Processor<Node> {
             var identity = oldNode.apply(Attribute.Type.Identity).asNode();
             Node function;
             if (identity.apply(Attribute.Type.Flags)
-                        .asStreamOfFlags1()
+                        .asStreamOfFlags()
                         .count() == 0) {
                 var name = identity.apply(Attribute.Type.Name).asInput();
                 function = new Cache(new Variable(name), oldNode);

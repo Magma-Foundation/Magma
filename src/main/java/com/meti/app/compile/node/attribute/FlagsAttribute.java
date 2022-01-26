@@ -7,7 +7,7 @@ import com.meti.app.compile.common.Field;
 
 public record FlagsAttribute(List<Field.Flag> flags) implements Attribute {
     @Override
-    public Stream<Field.Flag> asStreamOfFlags1() throws AttributeException {
+    public Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
         return flags.stream();
     }
 
