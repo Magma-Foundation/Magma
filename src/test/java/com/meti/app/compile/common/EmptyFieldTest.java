@@ -1,5 +1,6 @@
 package com.meti.app.compile.common;
 
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONFormatter;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.text.RootText;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EmptyFieldTest {
     @Test
-    void toJSON() {
+    void toJSON() throws JSONException {
         var expected = """
                 {
                 \t"name" : "test",

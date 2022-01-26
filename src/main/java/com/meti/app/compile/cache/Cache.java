@@ -4,10 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.api.json.ArrayNode;
-import com.meti.api.json.EmptyNode;
-import com.meti.api.json.JSONNode;
-import com.meti.api.json.ObjectNode;
+import com.meti.api.json.*;
 import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -21,22 +18,13 @@ public final class Cache extends AbstractNode {
     private final Node value;
     private final List<Node> children;
 
-    public Cache(Node value, List<Node> children) {
-        this.value = value;
-        this.children = children;
-    }
-
     public Cache(Node value, Node... children) {
         this(value, List.apply(children));
     }
 
-    @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
-            case Value -> new NodeAttribute(value);
-            case Children -> new NodesAttribute1(children);
-            default -> throw new AttributeException(type);
-        };
+    public Cache(Node value, List<Node> children) {
+        this.value = value;
+        this.children = children;
     }
 
     @Override
@@ -54,6 +42,15 @@ public final class Cache extends AbstractNode {
     }
 
     @Override
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        return switch (type) {
+            case Value -> new NodeAttribute(value);
+            case Children -> new NodesAttribute1(children);
+            default -> throw new AttributeException(type);
+        };
+    }
+
+    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         try {
             return switch (type) {
@@ -68,7 +65,7 @@ public final class Cache extends AbstractNode {
     }
 
     @Override
-    public JSONNode toJSON() {
+    public JSONNode toJSON() throws JSONException {
         try {
             var jsonChildren = children.stream()
                     .map(Node::toJSON)
@@ -83,12 +80,13 @@ public final class Cache extends AbstractNode {
         }
     }
 
-    public Node value() {
-        return value;
-    }
-
     public List<Node> children() {
         return children;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, children);
     }
 
     @Override
@@ -100,9 +98,8 @@ public final class Cache extends AbstractNode {
                Objects.equals(this.children, that.children);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(value, children);
+    public Node value() {
+        return value;
     }
 
 }

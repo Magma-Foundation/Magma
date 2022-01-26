@@ -5,7 +5,7 @@ import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.json.ArrayNode;
-import com.meti.api.json.EmptyNode;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
@@ -25,7 +25,7 @@ public record Block(List<Node> children) implements Node {
     }
 
     @Override
-    public JSONNode toJSON() {
+    public JSONNode toJSON() throws JSONException {
         try {
             var jsonChildren = children.stream()
                     .map(Node::toJSON)
@@ -33,7 +33,7 @@ public record Block(List<Node> children) implements Node {
                     .build();
             return new ObjectNode().addObject("children", jsonChildren);
         } catch (StreamException e) {
-            return new EmptyNode();
+            throw new JSONException("Failed to convert node to JSON.", e);
         }
     }
 

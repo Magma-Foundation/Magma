@@ -3,6 +3,7 @@ package com.meti.app.compile.common;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -53,7 +54,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public ObjectNode toJSON() {
+    public ObjectNode toJSON() throws JSONException {
         return super.toJSON().addObject("body", body.toJSON());
     }
 

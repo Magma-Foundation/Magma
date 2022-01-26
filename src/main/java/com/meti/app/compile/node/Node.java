@@ -4,6 +4,7 @@ import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -41,8 +42,10 @@ public interface Node {
         }
     }
 
-    default JSONNode toJSON() {
-        throw new UnsupportedOperationException("Instances of '" + getClass() + "' cannot be converted to JSON yet.");
+    default JSONNode toJSON() throws JSONException {
+        var format = "Instances of '%s' cannot be converted to JSON yet.";
+        var message = format.formatted(getClass());
+        throw new JSONException(message);
     }
 
     enum Type {

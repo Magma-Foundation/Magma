@@ -1,5 +1,6 @@
 package com.meti.app.compile.common;
 
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONFormatter;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.Primitive;
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ImplementationTest {
     @Test
-    void toJSON() {
+    void toJSON() throws JSONException {
         var expected = """
                 {
                 \t"body" : {

@@ -5,6 +5,7 @@ import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.json.ArrayNode;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
@@ -43,7 +44,7 @@ public abstract class Function extends AbstractNode {
     }
 
     @Override
-    public ObjectNode toJSON() {
+    public ObjectNode toJSON() throws JSONException {
         ObjectNode objectNode;
         try {
             var jsonParameters = parameters.stream()

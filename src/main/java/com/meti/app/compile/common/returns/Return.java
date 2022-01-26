@@ -1,19 +1,26 @@
 package com.meti.app.compile.common.returns;
 
-import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public record Return(Node value) implements Node {
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+    @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Value)
-                : Stream.empty();
+                ? Streams.apply(Attribute.Type.Value)
+                : Streams.empty();
+    }
+
+    @Override
+    public boolean is(Type type) {
+        return type == Node.Type.Return;
     }
 
     @Override
@@ -23,17 +30,12 @@ public record Return(Node value) implements Node {
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return List.createList(apply2(group).collect(Collectors.toList())).stream();
-    }
-
-    @Override
-    public boolean is(Type type) {
-        return type == Node.Type.Return;
-    }
-
-    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return new Return(attribute.asNode());
+    }
+
+    @Override
+    public JSONNode toJSON() throws JSONException {
+        return new ObjectNode().addObject("value", value);
     }
 }

@@ -2,6 +2,7 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.*;
@@ -43,7 +44,7 @@ public abstract class Field implements Node {
     }
 
     @Override
-    public JSONNode toJSON() {
+    public JSONNode toJSON() throws JSONException {
         throw new UnsupportedOperationException();
     }
 
