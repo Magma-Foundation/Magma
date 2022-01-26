@@ -1,5 +1,6 @@
 package com.meti.app.compile.node;
 
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
@@ -9,8 +10,6 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
-
-import java.util.stream.Stream;
 
 public interface Node {
     default JSONNode toJSON() {
@@ -37,7 +36,7 @@ public interface Node {
         throw new AttributeException("Node had no attributes.");
     }
 
-    default com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Streams.empty();
     }
 
@@ -49,11 +48,5 @@ public interface Node {
 
     enum Type {
         Input, Block, Implementation, Declaration, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, If, String, Invocation, Line, Implicit, Reference, Initialization, Function, Else, Binary, Cache, Output, Return
-    }
-
-    interface Builder<T extends Builder<T>> {
-        Node build();
-
-        T merge(T other);
     }
 }

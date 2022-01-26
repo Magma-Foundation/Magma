@@ -79,7 +79,7 @@ public record Block(List<Node> children) implements Node {
         }
     }
 
-    public record Builder(List<Node> children) implements Node.Builder<Builder> {
+    public record Builder(List<Node> children) {
         public Builder() {
             this(List.createList());
         }
@@ -88,14 +88,8 @@ public record Block(List<Node> children) implements Node {
             return new Builder(children.add(child));
         }
 
-        @Override
         public Node build() {
-            return new Block(children());
-        }
-
-        @Override
-        public Builder merge(Builder other) {
-            return new Builder(children.addAll(other.children));
+            return new Block(children);
         }
     }
 }
