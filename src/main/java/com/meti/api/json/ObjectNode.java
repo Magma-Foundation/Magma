@@ -21,7 +21,20 @@ public class ObjectNode implements JSONNode {
 
     @Override
     public String format() {
-        return toString();
+        var value = toString();
+        var buffer = new StringBuilder();
+        var length = value.length();
+        for (int i = 0; i < length; i++) {
+            var c = value.charAt(i);
+            if(c == '{') {
+                buffer.append(c).append("\n\t");
+            } else if(c == '}') {
+                buffer.append('\n').append(c);
+            } else {
+                buffer.append(c);
+            }
+        }
+        return buffer.toString();
     }
 
     @Override
