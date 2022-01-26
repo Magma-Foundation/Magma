@@ -1,7 +1,11 @@
 package com.meti.api.json;
 
 public record JSONFormatter(String value) {
-    String format() {
+    public JSONFormatter(JSONNode root) {
+        this(root.toString());
+    }
+
+    public String toString() {
         var buffer = new StringBuilder();
         var length = value().length();
         var depth = 0;

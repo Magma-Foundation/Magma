@@ -3,12 +3,11 @@ package com.meti.api.json;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 
-public record ArrayNode(List<JSONNode> children) implements JSONNode {
+public record ArrayNode(List<String> children) implements JSONNode {
     @Override
     public String toString() {
         try {
             return children.stream()
-                    .map(JSONNode::toString)
                     .foldRight((current, next) -> current + "," + next)
                     .map(value -> '[' + value + ']')
                     .orElse("[]");
@@ -17,21 +16,16 @@ public record ArrayNode(List<JSONNode> children) implements JSONNode {
         }
     }
 
-    public String toFormat() {
-        var value = toString();
-        return value;
-    }
-
-    public record Builder(List<JSONNode> children) {
+    public record Builder(List<String> children) {
         public Builder() {
             this(List.createList());
         }
 
-        public Builder add(JSONNode node) {
-            return new Builder(children.add(node));
+        public Builder add(Object obj) {
+            return new Builder(children.add(obj.toString()));
         }
 
-        public JSONNode builder() {
+        public JSONNode build() {
             return new ArrayNode(children);
         }
     }

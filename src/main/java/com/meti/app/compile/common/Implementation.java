@@ -70,7 +70,7 @@ public final class Implementation extends Function {
             var jsonParameters = parameters.stream()
                     .map(Node::toJSON)
                     .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::add)
-                    .builder();
+                    .build();
 
             return new ObjectNode()
                     .add("identity", identity.toJSON())

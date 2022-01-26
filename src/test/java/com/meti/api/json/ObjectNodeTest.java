@@ -10,14 +10,14 @@ class ObjectNodeTest {
         var expected = "{\n\t\"outer\" : {\n\t\t\"inner\" : 5\n\t}\n}";
         var inner = new ObjectNode().add("inner", 5);
         var outer = new ObjectNode().add("outer", inner);
-        assertEquals(expected, new JSONFormatter(outer.toString()).format());
+        assertEquals(expected, new JSONFormatter(outer.toString()).toString());
     }
 
     @Test
     void format() {
         var expected = "{\n\t\"value\" : 5\n}";
         var actual = new ObjectNode().add("value", 5);
-        var formatted = new JSONFormatter(actual.toString()).format();
+        var formatted = new JSONFormatter(actual.toString()).toString();
         assertEquals(expected, formatted);
     }
 
