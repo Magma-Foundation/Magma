@@ -2,6 +2,7 @@ package com.meti.app.compile.node;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.InputAttribute;
@@ -20,9 +21,9 @@ public enum Primitive implements Node {
         throw new AttributeException(type);
     }
 
-    @Override
-    public JSONNode toJSON() {
-        throw new UnsupportedOperationException();
+    @Deprecated
+    private Stream<Attribute.Type> apply2(Attribute.Group group) {
+        return Stream.empty();
     }
 
     @Override
@@ -30,9 +31,9 @@ public enum Primitive implements Node {
         return "\"" + name() + "\"";
     }
 
-    @Deprecated
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
+    @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().addString("value", name());
     }
 
     @Override

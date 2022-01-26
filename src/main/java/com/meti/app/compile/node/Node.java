@@ -11,8 +11,24 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 public interface Node {
-    default JSONNode toJSON() {
-        throw new UnsupportedOperationException();
+    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return Streams.empty();
+    }
+
+    boolean is(Type type);
+
+    default <E extends Exception> Node mapAsNode(Attribute.Type type, F1<Node, Node, E> mapper) throws E, AttributeException {
+        var input = apply(type).asNode();
+        var output = mapper.apply(input);
+        return with(type, new NodeAttribute(output));
+    }
+
+    default Attribute apply(Attribute.Type type) throws AttributeException {
+        throw new AttributeException("Node had no attributes.");
+    }
+
+    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        throw new AttributeException("Node does not have attribute to replace of: " + type);
     }
 
     default <E extends Exception> Node mapAsNodeStream(Attribute.Type type, F1<com.meti.api.collect.stream.Stream<Node>, com.meti.api.collect.stream.Stream<? extends Node>, E> mapper) throws E, AttributeException {
@@ -25,24 +41,8 @@ public interface Node {
         }
     }
 
-    default <E extends Exception> Node mapAsNode(Attribute.Type type, F1<Node, Node, E> mapper) throws E, AttributeException {
-        var input = apply(type).asNode();
-        var output = mapper.apply(input);
-        return with(type, new NodeAttribute(output));
-    }
-
-    default Attribute apply(Attribute.Type type) throws AttributeException {
-        throw new AttributeException("Node had no attributes.");
-    }
-
-    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Streams.empty();
-    }
-
-    boolean is(Type type);
-
-    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        throw new AttributeException("Node does not have attribute to replace of: " + type);
+    default JSONNode toJSON() {
+        throw new UnsupportedOperationException("Instances of '" + getClass() + "' cannot be converted to JSON yet.");
     }
 
     enum Type {

@@ -42,7 +42,8 @@ public abstract class Function extends AbstractNode {
         };
     }
 
-    protected ObjectNode toJson() {
+    @Override
+    public ObjectNode toJSON() {
         ObjectNode objectNode;
         try {
             var jsonParameters = parameters.stream()
