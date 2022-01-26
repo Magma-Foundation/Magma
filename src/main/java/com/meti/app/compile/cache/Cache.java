@@ -4,6 +4,8 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONFormatter;
+import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -55,8 +57,8 @@ public record Cache(Node value, List<Node> children) implements Node {
 
     @Override
     public String toString() {
-        return new ObjectNode()
+        return new JSONFormatter(((JSONNode) new ObjectNode()
                 .append("value", value)
-                .append("children", children).toFormat();
+                .append("children", children)).toString()).format();
     }
 }
