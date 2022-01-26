@@ -9,14 +9,20 @@ import com.meti.app.compile.process.Processor;
 public abstract class StreamStage extends AbstractStage {
     @Override
     protected Node transformDefinition(Node definition) throws CompileException {
-        if (definition.is(Node.Type.Initialization)) {
-            var withType = transformTypeAttribute(definition);
+        var newDefinition = beforeDefinitionTraversal(definition);
+
+        if (newDefinition.is(Node.Type.Initialization)) {
+            var withType = transformTypeAttribute(newDefinition);
             return transformNodeAttribute(withType, Attribute.Type.Value);
-        } else if (definition.is(Node.Type.Declaration)) {
-            return transformTypeAttribute(definition);
+        } else if (newDefinition.is(Node.Type.Declaration)) {
+            return transformTypeAttribute(newDefinition);
         } else {
-            return definition;
+            return newDefinition;
         }
+    }
+
+    protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
+        return definition;
     }
 
     @Override

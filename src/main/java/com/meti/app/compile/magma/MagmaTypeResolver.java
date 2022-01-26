@@ -13,7 +13,7 @@ import com.meti.app.compile.stage.StreamStage;
 
 public class MagmaTypeResolver extends StreamStage {
     @Override
-    protected Node beforeTraversal(Node root) throws CompileException {
+    protected Node beforeNodeTraversal(Node root) throws CompileException {
         return transformUsingStreams(root, streamNodeTransformers(root));
     }
 

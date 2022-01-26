@@ -9,7 +9,7 @@ import com.meti.app.compile.node.attribute.NodesAttribute1;
 public abstract class AbstractStage implements Stage {
     @Override
     public Node transformNodeAST(Node node) throws CompileException {
-        var before = beforeTraversal(node);
+        var before = beforeNodeTraversal(node);
         var withNodeGroup = transformNodeGroup(before);
         var withNodesGroup = transformNodesGroup(withNodeGroup);
         var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
@@ -17,7 +17,7 @@ public abstract class AbstractStage implements Stage {
         return afterTraversal(withDeclarationsGroup);
     }
 
-    protected Node beforeTraversal(Node root) throws CompileException {
+    protected Node beforeNodeTraversal(Node root) throws CompileException {
         return root;
     }
 
