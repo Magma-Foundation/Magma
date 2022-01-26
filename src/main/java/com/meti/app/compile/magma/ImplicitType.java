@@ -1,6 +1,7 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 
 public class ImplicitType implements Node {
@@ -16,6 +17,6 @@ public class ImplicitType implements Node {
 
     @Override
     public JSONNode toJSON() {
-        throw new UnsupportedOperationException();
+        return new ObjectNode().addObject("implicit", true);
     }
 }
