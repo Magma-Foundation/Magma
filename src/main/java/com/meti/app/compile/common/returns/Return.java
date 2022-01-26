@@ -36,6 +36,6 @@ public record Return(Node value) implements Node {
 
     @Override
     public JSONNode toJSON() throws JSONException {
-        return new ObjectNode().addObject("value", value);
+        return new ObjectNode().addObject("returns", value.toJSON());
     }
 }
