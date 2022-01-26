@@ -16,7 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MagmaLexerTest {
     @Test
-    void lex() throws CompileException {
+    void block() throws CompileException {
+        var lexer = new MagmaLexer();
+
+        var expected = new Block(new Return(new IntegerNode(0)));
+        var actual = lexer.transformNodeAST(new InputNode(new RootText("{return 0;}")));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void implementation() throws CompileException {
         var lexer = new MagmaLexer();
         var output = lexer.transformNodeAST(new InputNode(new RootText("def main() : I16 => {return 0;}")));
         var identity = new EmptyField(new RootText("main"), new IntegerType(true, 16), Field.Flag.Def);

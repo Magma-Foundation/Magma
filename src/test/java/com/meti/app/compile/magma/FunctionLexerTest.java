@@ -2,11 +2,14 @@ package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.common.EmptyField;
+import com.meti.app.compile.common.Field;
+import com.meti.app.compile.common.Fields;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,5 +31,19 @@ class FunctionLexerTest {
         var expected = new Implementation(identity, new InputNode(new RootText("{}")), List.createList());
         var actual = node.orElse(EmptyNode.EmptyNode_);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void simple() throws CompileException {
+        var identity = new Fields.Builder()
+                .withName("main")
+                .withType("I16")
+                .withFlag(Field.Flag.Def)
+                .build();
+        var body = new InputNode(new RootText("{return 0;}"));
+        var expected = new Implementation(identity, body);
+        new FunctionLexer(new RootText("def main() : I16 => {return 0;}"))
+                .process()
+                .ifPresentOrElse(actual -> assertEquals(expected, actual), Assertions::fail);
     }
 }

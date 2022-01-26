@@ -2,6 +2,7 @@ package com.meti.api.option;
 
 import com.meti.api.core.C1;
 import com.meti.api.core.F1;
+import com.meti.api.core.Runnable;
 
 public class None<T> implements Option<T> {
     @Override
@@ -16,6 +17,11 @@ public class None<T> implements Option<T> {
 
     @Override
     public <E extends Exception> void ifPresent(C1<T, E> consumer) {
+    }
+
+    @Override
+    public <E extends Exception> void ifPresentOrElse(C1<T, E> consumer, Runnable<E> runnable) throws E {
+        runnable.run();
     }
 
     @Override

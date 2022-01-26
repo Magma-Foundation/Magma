@@ -28,7 +28,7 @@ public class ObjectNode implements JSONNode {
         }
     }
 
-    public JSONNode addString(String name, String value) {
+    public ObjectNode addString(String name, String value) {
         return addObject(name, "\"" + value + "\"");
     }
 }

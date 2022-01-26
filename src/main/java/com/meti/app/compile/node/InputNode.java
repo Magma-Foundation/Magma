@@ -7,6 +7,8 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.InputAttribute;
 import com.meti.app.compile.text.Input;
 
+import java.util.Objects;
+
 public final class InputNode extends AbstractNode {
     private final Input input;
 
@@ -18,6 +20,18 @@ public final class InputNode extends AbstractNode {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new InputAttribute(input);
         throw new AttributeException(this, type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(input);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InputNode inputNode)) return false;
+        return Objects.equals(input, inputNode.input);
     }
 
     @Override

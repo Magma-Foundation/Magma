@@ -51,55 +51,60 @@ public class CMagmaPipeline {
     }
 
     private State parse(State state, Node node) throws CompileException {
-        if (node.is(Node.Type.Implementation)) {
-            try {
-                var oldValue = node.apply(Attribute.Type.Value).asNode();
-                var oldChildren = oldValue.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
-                        .foldRight(List.<Node>createList(), List::add);
+        try {
+            if (node.is(Node.Type.Implementation)) {
+                try {
+                    var oldValue = node.apply(Attribute.Type.Value).asNode();
+                    var oldChildren = oldValue.apply(Attribute.Type.Children)
+                            .asStreamOfNodes1()
+                            .foldRight(List.<Node>createList(), List::add);
 
-                var hasSubFunction = oldChildren.stream().anyMatch(child -> child.is(Node.Type.Implementation));
-                List<Node> newChildren;
-                if (hasSubFunction) {
-                    var scoped = node.apply(Attribute.Type.Identity).asNode().apply(Attribute.Type.Name).asInput().toOutput();
+                    var hasSubFunction = oldChildren.stream().anyMatch(child -> child.is(Node.Type.Implementation));
+                    List<Node> newChildren;
+                    if (hasSubFunction) {
+                        var scoped = node.apply(Attribute.Type.Identity).asNode().apply(Attribute.Type.Name).asInput().toOutput();
 
-                    var formattedName = scoped.appendSlice("_this").compute();
-                    var formattedType = scoped.appendSlice("_t").compute();
+                        var formattedName = scoped.appendSlice("_this").compute();
+                        var formattedType = scoped.appendSlice("_t").compute();
 
-                    var scopeName = new RootText(formattedName);
-                    var structureName = new RootText(formattedType);
-                    var type = new StructureType(structureName);
+                        var scopeName = new RootText(formattedName);
+                        var structureName = new RootText(formattedType);
+                        var type = new StructureType(structureName);
 
-                    var identity = new EmptyField(scopeName, type);
-                    newChildren = oldChildren.insert(0, new Declaration(identity));
-                    var newValue = oldValue.with(Attribute.Type.Children, new NodesAttribute1(newChildren));
-                    var newNode = node.with(Attribute.Type.Value, new NodeAttribute(newValue));
+                        var identity = new EmptyField(scopeName, type);
+                        newChildren = oldChildren.insert(0, new Declaration(identity));
+                        var newValue = oldValue.with(Attribute.Type.Children, new NodesAttribute1(newChildren));
+                        var newNode = node.with(Attribute.Type.Value, new NodeAttribute(newValue));
 
-                    return state.add(newNode).add(new Structure(structureName));
-                } else {
-                    return state.add(node);
+                        return state.add(newNode).add(new Structure(structureName));
+                    } else {
+                        return state.add(node);
+                    }
+                } catch (StreamException e) {
+                    throw new CompileException(e);
                 }
-            } catch (StreamException e) {
-                throw new CompileException(e);
             }
-        }
-
-        if (node.is(Node.Type.Declaration)) {
-            var identity = node.apply(Attribute.Type.Identity).asNode();
-            var name = identity.apply(Attribute.Type.Name).asInput();
-            if (state.isDefined(name)) {
-                throw new CompileException(name.toOutput().compute() + " is already defined.");
-            } else {
-                return state.define(identity).add(node);
+            if (node.is(Node.Type.Declaration)) {
+                var identity = node.apply(Attribute.Type.Identity).asNode();
+                var name = identity.apply(Attribute.Type.Name).asInput();
+                if (state.isDefined(name)) {
+                    throw new CompileException(name.toOutput().compute() + " is already defined.");
+                } else {
+                    return state.define(identity).add(node);
+                }
             }
-        }
-        if (node.is(Node.Type.Variable)) {
-            var value = node.apply(Attribute.Type.Value).asInput();
-            if (!state.isDefined(value)) {
-                throw new CompileException(value.toOutput().compute() + " is not defined.");
+            if (node.is(Node.Type.Variable)) {
+                var value = node.apply(Attribute.Type.Value).asInput();
+                if (!state.isDefined(value)) {
+                    throw new CompileException(value.toOutput().compute() + " is not defined.");
+                }
             }
+            return state.add(node);
+        } catch (CompileException e) {
+            var format = "Failed to parse node:\n-----\n%s\n-----\n";
+            var message = format.formatted(node);
+            throw new CompileException(message, e);
         }
-        return state.add(node);
     }
 
     private List<Node> perform(AbstractStage stage, List<Node> current) throws StreamException {
