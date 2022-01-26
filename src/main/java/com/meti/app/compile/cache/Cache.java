@@ -4,8 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.api.json.JSONFormatter;
-import com.meti.api.json.ObjectNode;
+import com.meti.api.json.*;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -56,9 +55,22 @@ public record Cache(Node value, List<Node> children) implements Node {
 
     @Override
     public String toString() {
-        return new JSONFormatter(new ObjectNode()
-                .add("value", value)
-                .add("children", children))
-                .toString();
+        return new JSONFormatter(toJSON()).toString();
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        try {
+            var jsonChildren = children.stream()
+                    .map(Node::toJSON)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
+                    .build();
+
+            return new ObjectNode()
+                    .add("value", value.toJSON())
+                    .add("children", jsonChildren);
+        } catch (StreamException e) {
+            return new EmptyNode();
+        }
     }
 }

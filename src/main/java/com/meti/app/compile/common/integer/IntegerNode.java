@@ -1,6 +1,8 @@
 package com.meti.app.compile.common.integer;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -14,6 +16,11 @@ public record IntegerNode(int value) implements Node {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Value) return new IntegerAttribute(value);
         throw new AttributeException(type);
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().add("value", value);
     }
 
     @Override

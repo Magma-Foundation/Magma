@@ -12,7 +12,9 @@ public record JSONFormatter(String value) {
         var length = value().length();
         var depth = 0;
 
-        var stack = new Stack<Boolean>();
+        var objectStack = new Stack<Boolean>();
+        var arrayStack = new Stack<Boolean>();
+
         for (int i = 0; i < length; i++) {
             var c = value().charAt(i);
             if (c == ':') {
@@ -23,10 +25,14 @@ public record JSONFormatter(String value) {
                 buffer.append(c).append('\n').append("\t".repeat(depth + 1));
                 depth += 1;
 
-                stack.push(false);
+                if (c == '{') {
+                    objectStack.push(false);
+                } else {
+                    arrayStack.push(false);
+                }
             } else if (c == '}' || c == ']') {
                 depth -= 1;
-                if (stack.pop()) {
+                if ((c == '}' && objectStack.pop()) || (c == ']' && arrayStack.pop())) {
                     buffer.append('\n').append("\t".repeat(depth)).append(c);
                 } else {
                     buffer = new StringBuilder(buffer.toString().trim());
@@ -35,8 +41,15 @@ public record JSONFormatter(String value) {
             } else {
                 buffer.append(c);
 
-                stack.pop();
-                stack.push(true);
+                if (!objectStack.isEmpty()) {
+                    objectStack.pop();
+                    objectStack.push(true);
+                }
+
+                if (!arrayStack.isEmpty()) {
+                    arrayStack.pop();
+                    arrayStack.push(true);
+                }
             }
         }
         return buffer.toString();
