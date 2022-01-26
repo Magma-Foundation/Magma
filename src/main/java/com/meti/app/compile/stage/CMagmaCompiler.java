@@ -11,6 +11,7 @@ import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
@@ -49,9 +50,11 @@ public record CMagmaCompiler(JavaMap<Packaging, String> input) {
     }
 
     private String renderDivision(Divider divider, CFormat format) throws CollectionException {
+        var cRenderer = new CRenderer();
         return divider.apply(format)
-                .map(CRenderer::new)
-                .map(CRenderer::render)
+                .map(cRenderer::transformNodeAST)
+                .map(value -> value.apply(Attribute.Type.Value))
+                .map(Attribute::asOutput)
                 .map(Output::computeRaw)
                 .foldRight(new StringBuilder(), StringBuilder::append)
                 .toString();

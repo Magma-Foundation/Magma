@@ -14,25 +14,13 @@ import com.meti.app.compile.common.string.StringProcessor;
 import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
-import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.stage.AfterStreamStage;
-import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public final class CRenderer extends AfterStreamStage<Output> {
-    private final Node root;
-
-    public CRenderer(Node root) {
-        this.root = root;
-    }
-
-    public Output render() throws CompileException {
-        return transformNodeAST(root).apply(Attribute.Type.Value).asOutput();
-    }
-
     @Override
     protected Stream<Processor<Output>> streamNodeTransformers(Node root) {
         return Streams.apply(
