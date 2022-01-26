@@ -12,7 +12,7 @@ class EmptyFieldTest {
     void toJSON() {
         var expected = """
                 {
-                \t"name" : test,
+                \t"name" : "test",
                 \t"type" : {},
                 \t"flags" : [
                 \t\t"Const"
