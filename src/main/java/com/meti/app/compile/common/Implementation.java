@@ -2,7 +2,10 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.api.json.*;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.EmptyNode;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -70,10 +73,5 @@ public final class Implementation extends Function {
         } catch (StreamException e) {
             return new EmptyNode();
         }
-    }
-
-    @Override
-    public String toString() {
-        return new JSONFormatter(toJSON()).toString();
     }
 }
