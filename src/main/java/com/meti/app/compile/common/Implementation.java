@@ -1,7 +1,9 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.api.json.ArrayNode;
 import com.meti.api.json.EmptyNode;
 import com.meti.api.json.JSONNode;
@@ -31,6 +33,12 @@ public final class Implementation extends Function {
     }
 
     @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        if (group == Attribute.Group.Node) return Streams.apply(Attribute.Type.Value);
+        else return super.apply(group);
+    }
+
+    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return type == Attribute.Type.Value ? new Implementation(identity, attribute.asNode(), parameters) : super.with(type, attribute);
     }
@@ -38,11 +46,6 @@ public final class Implementation extends Function {
     @Override
     protected Node complete(Node node, List<Node> parameters) {
         return new Implementation(node, body, parameters);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(body);
     }
 
     @Override
