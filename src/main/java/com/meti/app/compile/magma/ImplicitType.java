@@ -1,5 +1,6 @@
 package com.meti.app.compile.magma;
 
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 
 public class ImplicitType implements Node {
@@ -11,5 +12,10 @@ public class ImplicitType implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Implicit;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 }

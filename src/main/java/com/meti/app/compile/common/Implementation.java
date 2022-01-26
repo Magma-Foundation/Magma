@@ -2,12 +2,8 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
-import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.api.json.ArrayNode;
-import com.meti.api.json.EmptyNode;
 import com.meti.api.json.JSONNode;
-import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -57,24 +53,12 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Implementation;
+    public JSONNode toJSON() {
+        return super.toJson().addObject("body", body.toJSON());
     }
 
     @Override
-    public JSONNode toJSON() {
-        try {
-            var jsonParameters = parameters.stream()
-                    .map(Node::toJSON)
-                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
-                    .build();
-
-            return new ObjectNode()
-                    .addObject("identity", identity.toJSON())
-                    .addObject("parameters", jsonParameters)
-                    .addObject("body", body.toJSON());
-        } catch (StreamException e) {
-            return new EmptyNode();
-        }
+    public boolean is(Type type) {
+        return type == Type.Implementation;
     }
 }

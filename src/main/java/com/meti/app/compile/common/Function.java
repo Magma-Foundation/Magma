@@ -4,6 +4,8 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -38,6 +40,23 @@ public abstract class Function extends AbstractNode {
             case Definition -> Streams.apply(Attribute.Type.Identity);
             default -> Streams.empty();
         };
+    }
+
+    protected ObjectNode toJson() {
+        ObjectNode objectNode;
+        try {
+            var jsonParameters = parameters.stream()
+                    .map(Node::toJSON)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
+                    .build();
+
+            objectNode = new ObjectNode()
+                    .addObject("identity", identity.toJSON())
+                    .addObject("parameters", jsonParameters);
+        } catch (StreamException e) {
+            objectNode = new ObjectNode();
+        }
+        return objectNode;
     }
 
     @Override

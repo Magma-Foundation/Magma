@@ -1,6 +1,7 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -33,6 +34,11 @@ public record UnaryOperation(Node caller, Node callee) implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Unary;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

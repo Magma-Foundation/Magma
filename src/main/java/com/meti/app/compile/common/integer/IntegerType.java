@@ -1,6 +1,7 @@
 package com.meti.app.compile.common.integer;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -33,5 +34,10 @@ public record IntegerType(boolean signed, int bits) implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Integer;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 }

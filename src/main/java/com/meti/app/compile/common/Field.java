@@ -2,6 +2,7 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.*;
 import com.meti.app.compile.text.Input;
@@ -39,6 +40,11 @@ public abstract class Field implements Node {
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return List.createList(apply2(group).collect(Collectors.toList())).stream();
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

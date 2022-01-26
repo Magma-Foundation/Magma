@@ -1,5 +1,6 @@
 package com.meti.app.compile.node;
 
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.OutputAttribute;
@@ -15,5 +16,10 @@ public record OutputNode(Output output) implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Output;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 }

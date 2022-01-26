@@ -1,6 +1,7 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -17,6 +18,11 @@ public record Line(Node node) implements Node {
     @Override
     public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return List.createList(apply2(group).collect(Collectors.toList())).stream();
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

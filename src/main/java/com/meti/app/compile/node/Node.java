@@ -5,7 +5,6 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.json.JSONNode;
-import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
@@ -13,7 +12,7 @@ import com.meti.app.compile.node.attribute.NodesAttribute1;
 
 public interface Node {
     default JSONNode toJSON() {
-        return new ObjectNode();
+        throw new UnsupportedOperationException();
     }
 
     default <E extends Exception> Node mapAsNodeStream(Attribute.Type type, F1<com.meti.api.collect.stream.Stream<Node>, com.meti.api.collect.stream.Stream<? extends Node>, E> mapper) throws E, AttributeException {

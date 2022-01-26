@@ -1,6 +1,7 @@
 package com.meti.app.compile.common.bool;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -39,5 +40,10 @@ public enum Boolean implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Boolean;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 }

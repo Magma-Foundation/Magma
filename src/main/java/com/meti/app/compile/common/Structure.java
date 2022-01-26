@@ -3,6 +3,7 @@ package com.meti.app.compile.common;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -33,6 +34,11 @@ public record Structure(Input name, List<Node> fields) implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Structure;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

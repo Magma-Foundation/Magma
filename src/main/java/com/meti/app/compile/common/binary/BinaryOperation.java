@@ -1,6 +1,7 @@
 package com.meti.app.compile.common.binary;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -36,6 +37,11 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     @Override
     public boolean is(Type type) {
         return type == Type.Binary;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

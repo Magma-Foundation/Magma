@@ -2,6 +2,7 @@ package com.meti.app.compile.common.invoke;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -51,6 +52,11 @@ public final class Invocation implements Node {
     @Override
     public boolean is(Type type) {
         return type == Type.Invocation;
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
