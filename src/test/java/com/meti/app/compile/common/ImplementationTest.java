@@ -18,7 +18,7 @@ class ImplementationTest {
                 \t},
                 \t"parameters" : [],
                 \t"identity" : {
-                \t\t"name" : test,
+                \t\t"name" : "test",
                 \t\t"type" : {},
                 \t\t"flags" : [
                 \t\t\t"Def"
