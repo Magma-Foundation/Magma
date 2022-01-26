@@ -58,7 +58,7 @@ public record Cache(Node value, List<Node> children) implements Node {
     @Override
     public String toString() {
         return new JSONFormatter(((JSONNode) new ObjectNode()
-                .append("value", value)
-                .append("children", children)).toString()).format();
+                .add("value", value)
+                .add("children", children)).toString()).format();
     }
 }
