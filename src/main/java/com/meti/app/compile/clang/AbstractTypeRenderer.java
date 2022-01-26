@@ -5,7 +5,6 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
-import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
@@ -27,5 +26,5 @@ public abstract class AbstractTypeRenderer implements Processor<Node> {
         return type.is(nodeType) ? new Some<>(new OutputNode((processValid()))) : new None<>();
     }
 
-    protected abstract Output processValid() throws AttributeException;
+    protected abstract Output processValid() throws CompileException;
 }
