@@ -6,7 +6,8 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-public abstract class AbstractStage {
+public abstract class AbstractStage implements Stage {
+    @Override
     public Node transformNodeAST(Node node) throws CompileException {
         var before = beforeTraversal(node);
         var withNodeGroup = transformNodeGroup(before);
