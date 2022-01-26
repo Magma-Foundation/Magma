@@ -7,8 +7,8 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public class PrimitiveTypeRenderer extends AbstractTypeRenderer {
-    public PrimitiveTypeRenderer(Input name, Node type, Node.Type nodeType) {
-        super(name, type, nodeType);
+    public PrimitiveTypeRenderer(Input name, Node type) {
+        super(name, type, Node.Type.Primitive);
     }
 
     @Override
