@@ -23,11 +23,11 @@ public interface Attribute {
     }
 
     default Node asNode() throws AttributeException {
-        throw new AttributeException("Not a oldNode.");
+        throw new AttributeException("Not a node.");
     }
 
     default Output asOutput() throws AttributeException {
-        throw new AttributeException("Not output.");
+        throw new AttributeException("Not output, but rather '" + getClass() + "'.");
     }
 
     default Packaging asPackaging() throws AttributeException {
