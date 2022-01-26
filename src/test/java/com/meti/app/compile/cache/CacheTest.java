@@ -12,7 +12,9 @@ class CacheTest {
     void toJSON() {
         var expected = """
                 {
-                \t"value" : {},
+                \t"value" : {
+                \t\t"value" : "first"
+                \t},
                 \t"children" : [
                 \t\t{
                 \t\t\t"value" : 10
