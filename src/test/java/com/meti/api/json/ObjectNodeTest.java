@@ -15,7 +15,7 @@ class ObjectNodeTest {
 
     @Test
     void format() {
-        var expected = "{\n\t\"value\":5\n}";
+        var expected = "{\n\t\"value\" : 5\n}";
         var actual = new ObjectNode().append("value", 5);
         var formatted = actual.format();
         assertEquals(expected, formatted);
