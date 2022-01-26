@@ -4,6 +4,10 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 
 public record ArrayNode(List<String> children) implements JSONNode {
+    public ArrayNode() {
+        this(List.createList());
+    }
+
     @Override
     public String toString() {
         try {

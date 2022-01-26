@@ -1,5 +1,7 @@
 package com.meti.api.json;
 
+import java.util.Stack;
+
 public record JSONFormatter(String value) {
     public JSONFormatter(JSONNode root) {
         this(root.toString());
@@ -9,7 +11,8 @@ public record JSONFormatter(String value) {
         StringBuilder buffer = new StringBuilder();
         var length = value().length();
         var depth = 0;
-        var hasContent = false;
+
+        var stack = new Stack<Boolean>();
         for (int i = 0; i < length; i++) {
             var c = value().charAt(i);
             if (c == ':') {
@@ -17,9 +20,11 @@ public record JSONFormatter(String value) {
             } else if (c == '{' || c == '[') {
                 buffer.append(c).append('\n').append("\t".repeat(depth + 1));
                 depth += 1;
+
+                stack.push(false);
             } else if (c == '}' || c == ']') {
                 depth -= 1;
-                if (hasContent) {
+                if (stack.pop()) {
                     buffer.append('\n').append("\t".repeat(depth)).append(c);
                 } else {
                     buffer = new StringBuilder(buffer.toString().trim());
@@ -27,7 +32,9 @@ public record JSONFormatter(String value) {
                 }
             } else {
                 buffer.append(c);
-                hasContent = true;
+
+                stack.pop();
+                stack.push(true);
             }
         }
         return buffer.toString();
