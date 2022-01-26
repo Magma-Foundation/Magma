@@ -23,7 +23,7 @@ public class ValuedField extends Field {
     }
 
     @Override
-    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : Streams.empty();
     }
 

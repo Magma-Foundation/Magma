@@ -37,12 +37,7 @@ public interface Node {
         throw new AttributeException("Node had no attributes.");
     }
 
-    @Deprecated
-    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
-    }
-
-    default com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    default com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return Streams.empty();
     }
 

@@ -99,7 +99,7 @@ public record CRenderer(Node root) {
 
     public static Node renderDefinitionGroup(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
+            return root.apply(Attribute.Group.Definition).foldRight(root, (current, type) -> current.mapAsNode(type, node -> {
                 var renderedNode = renderFieldWithType(node);
                 return new OutputNode(renderedNode);
             }));
@@ -114,7 +114,7 @@ public record CRenderer(Node root) {
 
     public Node renderNodeGroup(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Node).foldRight(root, (current, type) -> current.mapAsNode(type, input -> new OutputNode(renderAST(input))));
+            return root.apply(Attribute.Group.Node).foldRight(root, (current, type) -> current.mapAsNode(type, input -> new OutputNode(renderAST(input))));
         } catch (StreamException e) {
             throw new CompileException(e);
         }
@@ -138,7 +138,7 @@ public record CRenderer(Node root) {
 
     private Node renderNodesGroup(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Nodes).foldRight(root, (current, type) -> {
+            return root.apply(Attribute.Group.Nodes).foldRight(root, (current, type) -> {
                 try {
                     return root.mapAsNodeStream(type, stream -> stream.map(this::renderAST).map(OutputNode::new));
                 } catch (StreamException e) {
@@ -152,7 +152,7 @@ public record CRenderer(Node root) {
 
     private Node renderDefinitionsGroup(Node root) throws CompileException {
         try {
-            return root.apply1(Attribute.Group.Definitions).foldRight(root, (current, type) -> {
+            return root.apply(Attribute.Group.Definitions).foldRight(root, (current, type) -> {
                 try {
                     return current.mapAsNodeStream(type, input -> input.map(CRenderer::renderFieldWithType)
                             .map(OutputNode::new));

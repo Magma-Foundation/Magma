@@ -53,7 +53,7 @@ public class CFlattener extends AbstractStage {
     }
 
     private CacheBuilder<Node> flattenNodeAttributes(Node node, CacheBuilder<Node> previous) throws StreamException, AttributeException {
-        return node.apply1(Attribute.Group.Node).foldRight(previous, (builder, type) -> {
+        return node.apply(Attribute.Group.Node).foldRight(previous, (builder, type) -> {
             var child = node.apply(type).asNode();
             var childCache = CacheBuilder.apply(child);
             return builder.append(childCache, (current, next) -> current.with(type, new NodeAttribute(next)));
@@ -62,7 +62,7 @@ public class CFlattener extends AbstractStage {
 
     private CacheBuilder<Node> flattenNodesAttributes(Node node, CacheBuilder<Node> previous) throws CompileException {
         try {
-            return node.apply1(Attribute.Group.Nodes).foldRight(previous, (builder, type) -> attachChildren(node, builder, type));
+            return node.apply(Attribute.Group.Nodes).foldRight(previous, (builder, type) -> attachChildren(node, builder, type));
         } catch (StreamException e) {
             throw new CompileException(e);
         }

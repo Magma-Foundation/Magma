@@ -44,7 +44,7 @@ public record Block(List<Node> children) implements Node {
     }
 
     @Override
-    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
                 ? Streams.apply(Attribute.Type.Children)
                 : Streams.empty();

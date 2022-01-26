@@ -40,7 +40,7 @@ public final class Cache extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
             case Node -> Streams.apply(Attribute.Type.Value);
             case Nodes -> Streams.apply(Attribute.Type.Children);

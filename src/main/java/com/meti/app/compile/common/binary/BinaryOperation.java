@@ -11,8 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record BinaryOperation(Node operator, Node first, Node second) implements Node {
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
         return switch (group) {
             case Node -> Stream.of(Attribute.Type.Operator);
             case Nodes -> Stream.of(Attribute.Type.Arguments);
@@ -30,8 +29,8 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override

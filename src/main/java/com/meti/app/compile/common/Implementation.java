@@ -9,7 +9,6 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public final class Implementation extends Function {
     private final Node body;
@@ -26,11 +25,6 @@ public final class Implementation extends Function {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return type == Attribute.Type.Value ? new NodeAttribute(body) : super.apply(type);
-    }
-
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node ? Stream.of(Attribute.Type.Value) : super.apply(group);
     }
 
     @Override

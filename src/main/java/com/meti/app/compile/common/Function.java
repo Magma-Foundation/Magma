@@ -32,7 +32,7 @@ public abstract class Function extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
             case Definitions -> Streams.apply(Attribute.Type.Parameters);
             case Definition -> Streams.apply(Attribute.Type.Identity);
