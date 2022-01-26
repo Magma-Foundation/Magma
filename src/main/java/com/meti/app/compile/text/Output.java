@@ -1,5 +1,7 @@
 package com.meti.app.compile.text;
 
+import com.meti.api.core.F1;
+
 public interface Output {
     Output appendOutput(Output other);
 
@@ -18,6 +20,8 @@ public interface Output {
      * @return The raw value.
      */
     String computeRaw();
+
+    <E extends Exception> Output map(F1<String, String, E> mapper) throws E;
 
     Output prepend(String prefix);
 }
