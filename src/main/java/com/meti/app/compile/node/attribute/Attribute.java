@@ -33,9 +33,7 @@ public interface Attribute {
         throw new AttributeException(message);
     }
 
-    default JSONNode toJSON() {
-        throw new UnsupportedOperationException(getClass() + " cannot be converted into JSON yet.");
-    }
+    JSONNode toJSON();
 
     default Packaging asPackaging() throws AttributeException {
         throw new AttributeException("Not a package.");

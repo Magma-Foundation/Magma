@@ -2,6 +2,7 @@ package com.meti.app.compile.node.attribute;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 
 import java.util.stream.Stream;
@@ -21,6 +22,11 @@ public record NodesAttribute1(List<Node> values) implements Attribute {
     @Override
     public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
         return values.stream();
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException(getClass() + " cannot be converted into JSON yet.");
     }
 
     public record Builder(List<Node> values) {
