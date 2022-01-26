@@ -10,7 +10,7 @@ import com.meti.app.compile.text.StringOutput;
 
 public class FunctionTypeRenderer extends AbstractTypeRenderer {
     public FunctionTypeRenderer(Input name, Node type) {
-        super(name, type);
+        super(name, type, Node.Type.Function);
     }
 
     @Override

@@ -1,6 +1,9 @@
 package com.meti.app.compile.text;
 
 public record StringOutput(String buffer) implements Output {
+    public StringOutput() {
+        this("");
+    }
 
     @Override
     public Output appendOutput(Output other) {

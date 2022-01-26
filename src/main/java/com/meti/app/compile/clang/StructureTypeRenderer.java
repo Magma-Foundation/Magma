@@ -8,7 +8,7 @@ import com.meti.app.compile.text.Output;
 
 class StructureTypeRenderer extends AbstractTypeRenderer {
     StructureTypeRenderer(Input name, Node type) {
-        super(name, type);
+        super(name, type, Node.Type.Structure);
     }
 
     @Override

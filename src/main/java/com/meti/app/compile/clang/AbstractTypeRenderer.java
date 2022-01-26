@@ -15,10 +15,10 @@ public abstract class AbstractTypeRenderer implements Processor<Node> {
     protected final Node type;
     protected final Node.Type nodeType;
 
-    public AbstractTypeRenderer(Input name, Node type) {
+    public AbstractTypeRenderer(Input name, Node type, Node.Type nodeType) {
         this.name = name;
         this.type = type;
-        nodeType = Node.Type.Structure;
+        this.nodeType = nodeType;
     }
 
     @Override
