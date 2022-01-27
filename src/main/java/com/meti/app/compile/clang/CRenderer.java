@@ -15,17 +15,39 @@ import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.stage.AfterStreamStage;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public final class CRenderer extends AfterStreamStage<Output> {
     @Override
-    protected Node afterDefinitionTraversal(Node transformed) throws AttributeException {
-        return transformed.apply(Attribute.Type.Type).asNode();
+    protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
+        return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
+    }
+
+    @Override
+    protected Node afterDefinitionTraversal(Node transformed) throws CompileException {
+        if (!transformed.is(Node.Type.Declaration) && !transformed.is(Node.Type.Initialization)) {
+            var format = "Invalid field:\n-----\n%s\n-----\n";
+            var message = format.formatted(transformed);
+            throw new CompileException(message);
+        }
+
+        var innerType = transformed.apply(Attribute.Type.Type).asNode();
+        if (transformed.is(Node.Type.Declaration)) {
+            return innerType;
+        } else {
+            var value = transformed.apply(Attribute.Type.Value).asNode()
+                    .apply(Attribute.Type.Value)
+                    .asOutput();
+            return new OutputNode(innerType.apply(Attribute.Type.Value)
+                    .asOutput()
+                    .appendSlice("=")
+                    .appendOutput(value));
+        }
     }
 
     @Override
@@ -50,7 +72,7 @@ public final class CRenderer extends AfterStreamStage<Output> {
                 new BinaryProcessor(root),
                 new BlockProcessor(root),
                 new ConditionProcessor(root),
-                new DeclarationProcessor(root),
+                new DefinitionRenderer(root),
                 new ElseProcessor(root),
                 new EmptyProcessor(root),
                 new ExternRenderer(root),

@@ -5,7 +5,6 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
@@ -32,7 +31,7 @@ public abstract class StreamStage<T> extends AbstractStage {
         }
     }
 
-    protected Node afterDefinitionTraversal(Node transformed) throws AttributeException {
+    protected Node afterDefinitionTraversal(Node transformed) throws CompileException {
         return transformed;
     }
 

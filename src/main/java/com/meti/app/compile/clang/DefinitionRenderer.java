@@ -9,7 +9,7 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 
-public record DeclarationProcessor(Node node) implements Processor<Output> {
+public record DefinitionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Declaration)) {
