@@ -81,7 +81,7 @@ public final class CRenderer extends AfterStreamStage<Output> {
                 new EmptyProcessor(root),
                 new ExternRenderer(root),
                 new FunctionRenderer(root),
-                new ImportProcessor(root),
+                new ImportRenderer(root),
                 new IntegerProcessor(root),
                 new InvocationProcessor(root),
                 new LineProcessor(root),

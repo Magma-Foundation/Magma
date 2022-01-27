@@ -12,7 +12,7 @@ import com.meti.app.compile.text.RootText;
 
 import java.util.stream.Collectors;
 
-public record ImportProcessor(Node node) implements Processor<Output> {
+public record ImportRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.Import)) {

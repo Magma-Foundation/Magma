@@ -9,15 +9,7 @@ import com.meti.app.compile.node.attribute.PackageAttribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.source.Packaging;
 
-class PackageFormatter implements Processor<Node> {
-    private final Node node;
-    private final Packaging thisPackage;
-
-    public PackageFormatter(Packaging thisPackage, Node node) {
-        this.node = node;
-        this.thisPackage = thisPackage;
-    }
-
+record PackageFormatter(Packaging thisPackage, Node node) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Type.Import)) {
             var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
