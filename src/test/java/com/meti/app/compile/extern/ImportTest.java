@@ -22,14 +22,13 @@ public class ImportTest {
     @Test
     void parent() throws CompileException, CollectionException {
         var index = new Packaging("inner", "Index");
-        final Map<Packaging, String> index1 = Map.of(
+        var index1 = Map.of(
                 index, "import Parent",
                 new Packaging("Parent"), ""
         );
-        var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
-        var expected = """
-                                
+        var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
+        var expected = """      
                 #ifndef Index_inner
 
                 #define Index_inner
@@ -37,8 +36,8 @@ public class ImportTest {
 
                 #endif
                 """;
-        var actual = output.apply(index).apply(CFormat.Header, "");
 
+        var actual = output.apply(index).apply(CFormat.Header, "");
         assertEquals(expected, actual);
     }
 
