@@ -15,6 +15,8 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
+import java.util.Objects;
+
 public final class Invocation extends AbstractNode {
     private final Node caller;
     private final List<Node> arguments;
@@ -78,5 +80,17 @@ public final class Invocation extends AbstractNode {
         } catch (StreamException e) {
             return new ObjectNode();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(caller, arguments);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Invocation that)) return false;
+        return Objects.equals(caller, that.caller) && Objects.equals(arguments, that.arguments);
     }
 }
