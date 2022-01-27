@@ -16,13 +16,16 @@ public class IntegerTypeRenderer extends AbstractTypeRenderer {
     protected Output processValid() throws CompileException {
         var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
         var bits = type.apply(Attribute.Type.Bits).asInteger();
-        var suffix = switch (bits) {
+        var prefix = switch (bits) {
             case 8 -> "char";
             case 16 -> "int";
             default -> throw new RenderException("Unknown bit quantity: " + bits);
         };
 
         var signedFlag = isSigned ? "" : "unsigned ";
-        return name.toOutput().prepend(signedFlag).prepend(" ").prepend(suffix).prepend(" ");
+        return name.toOutput()
+                .prepend(" ")
+                .prepend(prefix)
+                .prepend(signedFlag);
     }
 }

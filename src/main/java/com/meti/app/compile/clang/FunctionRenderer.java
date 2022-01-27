@@ -12,7 +12,7 @@ import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.StringOutput;
 
-public record FunctionProcessor(Node node) implements Processor<Output> {
+public record FunctionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws CompileException {
         if (node.is(Node.Type.Abstraction) || node.is(Node.Type.Implementation)) {
