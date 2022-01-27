@@ -1,6 +1,7 @@
 package com.meti.app.compile.node.attribute;
 
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 
 public record NodeAttribute(Node node) implements Attribute {
@@ -11,6 +12,6 @@ public record NodeAttribute(Node node) implements Attribute {
 
     @Override
     public JSONNode toJSON() {
-        throw new UnsupportedOperationException(getClass() + " cannot be converted into JSON yet.");
+        return new ObjectNode().addObject("node", node);
     }
 }

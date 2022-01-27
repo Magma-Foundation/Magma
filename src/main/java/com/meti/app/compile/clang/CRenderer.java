@@ -27,8 +27,12 @@ public final class CRenderer extends AfterStreamStage<Output> {
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
         if (definition.is(Node.Type.Initialization)) {
             return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
-        } else {
+        } else if (definition.is(Node.Type.Declaration)) {
             return definition;
+        } else {
+            var format = "Not a definition:\n-----\n%s\n-----\n";
+            var message = format.formatted(definition);
+            throw new CompileException(message);
         }
     }
 
