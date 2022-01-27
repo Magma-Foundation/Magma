@@ -22,7 +22,7 @@ public class EmptyTarget<T> implements Target<T> {
     }
 
     @Override
-    public Stream<CFormat> streamFormats() {
+    public Stream<CFormat> streamFormats1() {
         return Stream.empty();
     }
 }

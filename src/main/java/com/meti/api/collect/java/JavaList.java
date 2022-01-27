@@ -22,7 +22,7 @@ public class JavaList<T> implements List<T> {
         this(new ArrayList<>());
     }
 
-    JavaList(java.util.List<T> value) {
+    public JavaList(java.util.List<T> value) {
         this.value = value;
     }
 

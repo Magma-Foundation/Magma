@@ -9,7 +9,7 @@ import java.util.List;
 
 public record SingleModule(Path path) implements Module {
     @Override
-    public List<Source> listSources() {
+    public List<Source> listSources1() {
         return path.existingAsFile()
                 .map(value -> new FileSource(value, Collections.emptyList()))
                 .<List<Source>, RuntimeException>map(List::of)

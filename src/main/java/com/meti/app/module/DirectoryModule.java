@@ -19,11 +19,11 @@ public record DirectoryModule(Directory root) implements Module {
     }
 
     @Override
-    public List<Source> listSources() throws IOException {
+    public List<Source> listSources1() throws IOException {
         var oldSources = root.walk().collect(Collectors.toList());
         var newSources = new ArrayList<Source>();
         for (Path oldSource : oldSources) {
-            if(oldSource.hasExtensionOf("mg")) {
+            if (oldSource.hasExtensionOf("mg")) {
                 newSources.add(createSource(oldSource.ensureAsFile()));
             }
         }

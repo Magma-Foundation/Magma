@@ -1,5 +1,6 @@
 package com.meti.app.compile.extern;
 
+import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.JavaMap;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.stage.CMagmaCompiler;
@@ -19,7 +20,7 @@ public class ImportTest {
     }
 
     @Test
-    void parent() throws CompileException {
+    void parent() throws CompileException, CollectionException {
         var index = new Packaging("inner", "Index");
         final Map<Packaging, String> index1 = Map.of(
                 index, "import Parent",
@@ -36,13 +37,13 @@ public class ImportTest {
 
                 #endif
                 """;
-        var actual = output.get(index).apply(CFormat.Header, "");
+        var actual = output.apply(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void sibling() throws CompileException {
+    void sibling() throws CompileException, CollectionException {
         var index = new Packaging("Index");
         final Map<Packaging, String> index1 = Map.of(
                 index, "import Sibling",
@@ -59,7 +60,7 @@ public class ImportTest {
 
                 #endif
                 """;
-        var actual = output.get(index).apply(CFormat.Header, "");
+        var actual = output.apply(index).apply(CFormat.Header, "");
 
         assertEquals(expected, actual);
     }

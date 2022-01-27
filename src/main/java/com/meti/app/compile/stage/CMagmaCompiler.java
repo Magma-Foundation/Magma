@@ -1,10 +1,8 @@
 package com.meti.app.compile.stage;
 
 import com.meti.api.collect.CollectionException;
-import com.meti.api.collect.java.JavaMap;
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.map.Maps;
-import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.java.Map;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
@@ -12,41 +10,42 @@ import com.meti.app.compile.magma.MagmaLexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 import com.meti.app.source.Packaging;
 
-import java.util.Map;
+public final class CMagmaCompiler {
+    private final Map<Packaging, String> input;
+    private final MagmaLexer lexer = new MagmaLexer();
 
-public record CMagmaCompiler(JavaMap<Packaging, String> input) {
+    public CMagmaCompiler(Map<Packaging, String> input) {
+        this.input = input;
+    }
+
     public Map<Packaging, Target<String>> compile() throws CompileException {
-        return Maps.toNativeMap(input.mapValues(this::compileInput));
+        return input.mapValues(this::compileInput);
     }
 
     private Target<String> compileInput(Packaging thisPackage, String input) throws CompileException {
         try {
             if (input.isBlank()) return new EmptyTarget<>();
+
             var root = new RootText(input);
-            var inputNodes = lex(root);
+            var inputNodes = new Splitter(root)
+                    .split()
+                    .map(InputNode::new)
+                    .map(lexer::transformNodeAST)
+                    .<List<Node>, RuntimeException>foldRight(List.createList(), List::add);
+
             var pipeline = new CMagmaPipeline(thisPackage, inputNodes);
             var divider = new CDivider(thisPackage);
-            var division = pipeline.pipe()
-                    .foldRight(divider, Divider::divide);
+
+            var division = pipeline.pipe().foldRight(divider, Divider::divide);
             return division.stream().<Target<String>, CollectionException>foldRight(new MappedTarget<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
         } catch (CollectionException e) {
             throw new CompileException(e);
         }
-    }
-
-    private List<Node> lex(Input root) throws StreamException {
-        var lexer = new MagmaLexer();
-        return new Splitter(root)
-                .split()
-                .map(InputNode::new)
-                .map(lexer::transformNodeAST)
-                .foldRight(List.createList(), List::add);
     }
 
     private String renderDivision(Divider divider, CFormat format) throws CollectionException {

@@ -37,7 +37,7 @@ class DirectoryModuleTest {
         child.createAsFile();
 
         var module = new DirectoryModule(parent);
-        assertTrue(module.listSources()
+        assertTrue(module.listSources1()
                 .stream()
                 .map(Source::computePackage)
                 .map(Packaging::computeName)
