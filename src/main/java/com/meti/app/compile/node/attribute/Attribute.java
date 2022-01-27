@@ -1,5 +1,6 @@
 package com.meti.app.compile.node.attribute;
 
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
@@ -36,11 +37,11 @@ public interface Attribute {
         throw new AttributeException("Not a package.");
     }
 
-    default com.meti.api.collect.stream.Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
+    default Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
         throw new UnsupportedOperationException("Not a list of flags.");
     }
 
-    default com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
+    default Stream<Node> asStreamOfNodes1() throws AttributeException {
         throw new AttributeException("Not a stream of nodes.");
     }
 
