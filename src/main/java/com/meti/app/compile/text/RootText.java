@@ -106,6 +106,11 @@ public final class RootText implements Input {
     }
 
     @Override
+    public Output toTrimmedOutput() {
+        return new StringOutput(trimmedValue);
+    }
+
+    @Override
     public Option<Integer> lastIndexOfChar(char c) {
         var index = trimmedValue.lastIndexOf(c);
         return index == -1

@@ -54,4 +54,6 @@ public interface Input {
     boolean startsWithSlice(String slice);
 
     Output toOutput();
+
+    Output toTrimmedOutput();
 }

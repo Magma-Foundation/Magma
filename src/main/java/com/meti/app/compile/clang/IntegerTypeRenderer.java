@@ -23,7 +23,7 @@ public class IntegerTypeRenderer extends AbstractTypeRenderer {
         };
 
         var signedFlag = isSigned ? "" : "unsigned ";
-        return name.toOutput()
+        return name.toTrimmedOutput()
                 .prepend(" ")
                 .prepend(prefix)
                 .prepend(signedFlag);
