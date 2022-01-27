@@ -25,7 +25,11 @@ import com.meti.app.compile.text.Output;
 public final class CRenderer extends AfterStreamStage<Output> {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
-        return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
+        if (definition.is(Node.Type.Initialization)) {
+            return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
+        } else {
+            return definition;
+        }
     }
 
     @Override
