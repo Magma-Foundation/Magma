@@ -14,6 +14,8 @@ import com.meti.app.compile.common.string.StringProcessor;
 import com.meti.app.compile.common.variable.VariableProcessor;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.OutputNode;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.stage.AfterStreamStage;
@@ -21,6 +23,27 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public final class CRenderer extends AfterStreamStage<Output> {
+    @Override
+    protected Node afterDefinitionTraversal(Node transformed) throws AttributeException {
+        return transformed.apply(Attribute.Type.Type).asNode();
+    }
+
+    @Override
+    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node type) {
+        return Streams.apply(
+                new IntegerTypeRenderer(name, type),
+                new FunctionTypeRenderer(name, type),
+                new PrimitiveTypeRenderer(name, type),
+                new ReferenceTypeRenderer(name, type),
+                new StructureTypeRenderer(name, type)
+        );
+    }
+
+    @Override
+    protected Node wrap(Output output) {
+        return new OutputNode(output);
+    }
+
     @Override
     protected Stream<Processor<Output>> streamNodeTransformers(Node root) {
         return Streams.apply(
@@ -41,21 +64,5 @@ public final class CRenderer extends AfterStreamStage<Output> {
                 new StructureRenderer(root),
                 new UnaryProcessor(root),
                 new VariableProcessor(root));
-    }
-
-    @Override
-    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node type) {
-        return Streams.apply(
-                new IntegerTypeRenderer(name, type),
-                new FunctionTypeRenderer(name, type),
-                new PrimitiveTypeRenderer(name, type),
-                new ReferenceTypeRenderer(name, type),
-                new StructureTypeRenderer(name, type)
-        );
-    }
-
-    @Override
-    protected Node wrap(Output output) {
-        return new OutputNode(output);
     }
 }
