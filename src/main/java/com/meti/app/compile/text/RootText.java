@@ -102,7 +102,7 @@ public final class RootText implements Input {
 
     @Override
     public Output toOutput() {
-        return new StringOutput(trimmedValue);
+        return new StringOutput(value);
     }
 
     @Override
