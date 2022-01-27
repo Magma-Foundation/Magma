@@ -60,7 +60,7 @@ public class CDivider extends MappedDivider {
     public List<Node> generate(CFormat format) throws StreamException {
         if (format == Header) {
             var header = thisPackage.formatDeclared();
-            return Streams.apply("\n#ifndef " + header + "\n",
+            return Streams.apply("#ifndef " + header + "\n",
                     "\n#define " + header + "\n",
                     "\n#endif\n")
                     .map(RootText::new)

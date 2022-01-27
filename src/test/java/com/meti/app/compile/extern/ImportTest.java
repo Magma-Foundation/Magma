@@ -50,8 +50,7 @@ public class ImportTest {
         );
         var output = new CMagmaCompiler(new JavaMap<>(index1)).compile();
 
-        var expected = """
-                                
+        var expected = """   
                 #ifndef Index
 
                 #define Index
