@@ -17,7 +17,7 @@ public record BlockResolver(Node node, StreamStage<Node> parent) implements Proc
         if (node.is(Node.Type.Block)) {
             try {
                 var children = node.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .filter(value -> value.is(Node.Type.Return))
                         .foldRight(List.<Node>createList(), List::add);
                 return new Some<>(children

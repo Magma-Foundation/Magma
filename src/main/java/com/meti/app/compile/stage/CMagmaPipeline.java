@@ -56,7 +56,7 @@ public class CMagmaPipeline {
                 try {
                     var oldValue = node.apply(Attribute.Type.Value).asNode();
                     var oldChildren = oldValue.apply(Attribute.Type.Children)
-                            .asStreamOfNodes1()
+                            .asStreamOfNodes()
                             .foldRight(List.<Node>createList(), List::add);
 
                     var hasSubFunction = oldChildren.stream().anyMatch(child -> child.is(Node.Type.Implementation));

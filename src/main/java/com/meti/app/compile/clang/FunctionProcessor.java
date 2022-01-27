@@ -23,7 +23,7 @@ public record FunctionProcessor(Node node) implements Processor<Output> {
             ArrayList<String> parameters;
             try {
                 parameters = node.apply(Attribute.Type.Parameters)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .map(value -> value.apply(Attribute.Type.Value))
                         .map(Attribute::asOutput)
                         .map(Output::compute)

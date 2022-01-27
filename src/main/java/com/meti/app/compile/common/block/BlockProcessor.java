@@ -17,7 +17,7 @@ public record BlockProcessor(Node node) implements Processor<Output> {
         if (node.is(Node.Type.Block)) {
             try {
                 var output = node.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .map(child -> child.apply(Attribute.Type.Value))
                         .map(Attribute::asOutput)
                         .foldRight(Output::appendOutput)

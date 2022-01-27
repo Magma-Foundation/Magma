@@ -85,7 +85,7 @@ public class CDivider extends MappedDivider {
         try {
             var value = node.apply(Attribute.Type.Value).asNode();
             return node.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .map(this::decompose)
                     .map(option -> option.orElse(List.createList()))
                     .foldRight(List.<Node>createList(), List::addAll)
@@ -99,7 +99,7 @@ public class CDivider extends MappedDivider {
         try {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var parameters = node.apply(Attribute.Type.Parameters)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .foldRight(List.<Node>createList(), List::add);
             var abstraction = new Abstraction(identity, parameters);
             return List.apply(abstraction, node);

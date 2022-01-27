@@ -18,7 +18,7 @@ public record BinaryProcessor(Node node) implements Processor<Output> {
             try {
                 var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asOutput();
                 var arguments = node.apply(Attribute.Type.Arguments)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .foldRight(List.<Node>createList(), List::add);
 
                 var first = arguments.apply(0).apply(Attribute.Type.Value).asOutput();

@@ -39,7 +39,7 @@ public record FunctionType(Node returns, List<Node> parameters) implements Node 
         try {
             return switch (type) {
                 case Type -> new FunctionType(attribute.asNode(), parameters);
-                case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes1()
+                case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
                 default -> throw new AttributeException(type);
             };

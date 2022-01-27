@@ -41,7 +41,7 @@ public interface Attribute {
         throw new UnsupportedOperationException("Not a list of flags.");
     }
 
-    default Stream<Node> asStreamOfNodes1() throws AttributeException {
+    default Stream<Node> asStreamOfNodes() throws AttributeException {
         throw new AttributeException("Not a stream of nodes.");
     }
 

@@ -43,7 +43,7 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
             return switch (type) {
                 case Operator -> new BinaryOperation(attribute.asNode(), first, second);
                 case Arguments -> {
-                    var arguments = attribute.asStreamOfNodes1()
+                    var arguments = attribute.asStreamOfNodes()
                             .foldRight(List.<Node>createList(), List::add);
                     yield new BinaryOperation(operator, arguments.apply(0), arguments.apply(1));
                 }

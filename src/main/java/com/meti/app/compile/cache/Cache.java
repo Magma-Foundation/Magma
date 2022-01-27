@@ -55,7 +55,7 @@ public final class Cache extends AbstractNode {
         try {
             return switch (type) {
                 case Value -> new Cache(attribute.asNode(), children);
-                case Children -> new Cache(value, attribute.asStreamOfNodes1()
+                case Children -> new Cache(value, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
                 default -> this;
             };

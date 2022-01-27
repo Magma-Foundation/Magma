@@ -66,7 +66,7 @@ public abstract class Function extends AbstractNode {
         try {
             return switch (type) {
                 case Identity -> complete(attribute.asNode(), parameters);
-                case Parameters -> complete(identity, attribute.asStreamOfNodes1()
+                case Parameters -> complete(identity, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
                 default -> throw new AttributeException(type);
             };

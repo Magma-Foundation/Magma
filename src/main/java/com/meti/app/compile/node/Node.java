@@ -34,7 +34,7 @@ public interface Node extends JSONable {
 
     default <E extends Exception> Node mapAsNodeStream(Attribute.Type type, F1<com.meti.api.collect.stream.Stream<Node>, com.meti.api.collect.stream.Stream<? extends Node>, E> mapper) throws E, AttributeException {
         try {
-            var input = apply(type).asStreamOfNodes1();
+            var input = apply(type).asStreamOfNodes();
             var output = mapper.apply(input).foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add).complete();
             return with(type, output);
         } catch (StreamException e) {

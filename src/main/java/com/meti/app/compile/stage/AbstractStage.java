@@ -18,7 +18,7 @@ public abstract class AbstractStage implements Stage {
 
     protected Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
         try {
-            return node1.with(type, node1.apply(type).asStreamOfNodes1()
+            return node1.with(type, node1.apply(type).asStreamOfNodes()
                     .map(this::transformDefinition)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete());
@@ -85,7 +85,7 @@ public abstract class AbstractStage implements Stage {
     protected Node transformNodesAttribute(Node current, Attribute.Type type) throws CompileException {
         try {
             return current.with(type, current.apply(type)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .map(AbstractStage.this::transformNodeAST)
                     .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
                     .complete());

@@ -29,7 +29,7 @@ public record BlockTransformer(Node root) implements Processor<Node> {
     private static Node transformBlock(Node root) throws CompileException {
         try {
             return root.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .map(BlockTransformer::transformInContext)
                     .foldRight(new Block.Builder(), Block.Builder::add)
                     .build();

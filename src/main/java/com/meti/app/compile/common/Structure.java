@@ -44,7 +44,7 @@ public record Structure(Input name, List<Node> fields) implements Node {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         try {
-            return new Structure(name, attribute.asStreamOfNodes1()
+            return new Structure(name, attribute.asStreamOfNodes()
                     .foldRight(List.createList(), List::add));
         } catch (StreamException e) {
             throw new AttributeException(e);

@@ -65,7 +65,7 @@ public final class Invocation implements Node {
             return switch (type) {
                 case Caller -> new Invocation(attribute.asNode(), arguments);
                 case Arguments -> new Invocation(caller, attribute
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
                 default -> this;
             };

@@ -18,7 +18,7 @@ public class FunctionTypeRenderer extends AbstractTypeRenderer {
         try {
             var returns = type.apply(Attribute.Type.Type).asOutput();
             var parameters = type.apply(Attribute.Type.Parameters)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .map(value -> value.apply(Attribute.Type.Value))
                     .map(Attribute::asOutput)
                     .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))

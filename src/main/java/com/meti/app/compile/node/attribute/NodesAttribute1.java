@@ -7,7 +7,7 @@ import com.meti.app.compile.node.Node;
 public record NodesAttribute1(List<Node> values) implements Attribute {
 
     @Override
-    public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes() throws AttributeException {
         return values.stream();
     }
 

@@ -17,14 +17,14 @@ public class CFlattener extends AbstractStage {
             if (root.is(Node.Type.Cache)) {
                 var innerCache = root.apply(Attribute.Type.Value).asNode();
                 var withChildren = root.apply(Attribute.Type.Children)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .map(this::flattenCache)
                         .flatMap(List::stream)
                         .foldRight(List.<Node>createList(), List::add);
                 if (innerCache.is(Node.Type.Cache)) {
                     var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
                     var withSubChildren = innerCache.apply(Attribute.Type.Children)
-                            .asStreamOfNodes1()
+                            .asStreamOfNodes()
                             .foldRight(withChildren, List::add);
                     return new Cache(innerValue, withSubChildren);
                 } else {
@@ -45,7 +45,7 @@ public class CFlattener extends AbstractStage {
         if (parent.is(Node.Type.Cache)) {
             var value = parent.apply(Attribute.Type.Value).asNode();
             return parent.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .foldRight(List.apply(value), List::add);
         } else {
             return List.apply(parent);
@@ -80,7 +80,7 @@ public class CFlattener extends AbstractStage {
 
     private CacheBuilder<List<Node>> flattenChildren(Node root, Attribute.Type type) throws StreamException, AttributeException {
         return root.apply(type)
-                .asStreamOfNodes1()
+                .asStreamOfNodes()
                 .map(CacheBuilder::apply)
                 .foldRight(new CacheBuilder<>(List.createList()),
                         (previous, next) -> previous.append(next, List::add));

@@ -58,7 +58,7 @@ public record Block(List<Node> children) implements Node {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         try {
-            return attribute.asStreamOfNodes1()
+            return attribute.asStreamOfNodes()
                     .foldRight(new Builder(), Builder::add)
                     .build();
         } catch (StreamException e) {

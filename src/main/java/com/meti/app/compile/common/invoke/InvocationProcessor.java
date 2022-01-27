@@ -18,7 +18,7 @@ public record InvocationProcessor(Node node) implements Processor<Output> {
             try {
                 var caller = this.node.apply(Attribute.Type.Caller).asNode();
                 var renderedArguments = node.apply(Attribute.Type.Arguments)
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .map(value -> value.apply(Attribute.Type.Value))
                         .map(Attribute::asOutput)
                         .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))

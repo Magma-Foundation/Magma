@@ -45,7 +45,7 @@ class CMagmaModifierTest {
                 .build();
         assertTransforms(input, (F1<Node, java.lang.Boolean, ?>) value -> {
             var list = value.apply(Attribute.Type.Children)
-                    .asStreamOfNodes1()
+                    .asStreamOfNodes()
                     .foldRight(List.<Node>createList(), List::add);
             return list.first().filter(first -> first.is(Node.Type.Integer)).isPresent() &&
                    list.last().filter(last -> last.is(Node.Type.Integer)).isPresent();
@@ -70,7 +70,7 @@ class CMagmaModifierTest {
     void line() {
         assertTransforms(new Block.Builder()
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
-                .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Type.Children).asStreamOfNodes1()
+                .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Type.Children).asStreamOfNodes()
                 .first()
                 .filter(child -> child.is(Node.Type.Line))
                 .isPresent());
