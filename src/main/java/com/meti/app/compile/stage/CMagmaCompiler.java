@@ -29,8 +29,8 @@ public final class CMagmaCompiler {
     private Target<String> compileInput(Packaging thisPackage, String input) throws CompileException {
         try {
             if (input.isBlank()) return new EmptyTarget<>();
-
             var root = new RootText(input);
+
             var inputNodes = new Splitter(root)
                     .split()
                     .map(InputNode::new)
