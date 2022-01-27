@@ -7,8 +7,6 @@ import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.source.Packaging;
 
-import java.util.stream.Stream;
-
 public interface Attribute {
     default boolean asBoolean() throws AttributeException {
         throw new AttributeException("Not a boolean.");
@@ -40,11 +38,6 @@ public interface Attribute {
 
     default com.meti.api.collect.stream.Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
         throw new UnsupportedOperationException("Not a list of flags.");
-    }
-
-    @Deprecated
-    default Stream<Node> asStreamOfNodes() throws AttributeException {
-        throw new AttributeException("Not a list of nodes.");
     }
 
     default com.meti.api.collect.stream.Stream<Node> asStreamOfNodes1() throws AttributeException {

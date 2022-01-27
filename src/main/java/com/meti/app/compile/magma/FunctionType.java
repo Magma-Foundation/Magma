@@ -1,36 +1,23 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public record FunctionType(Node returns, java.util.List parameters) implements Node {
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+public record FunctionType(Node returns, List<Node> parameters) implements Node {
+    @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Type -> Stream.of(Attribute.Type.Type);
-            case Types -> Stream.of(Attribute.Type.Parameters);
-            default -> Stream.empty();
+            case Type -> Streams.apply(Attribute.Type.Type);
+            case Types -> Streams.apply(Attribute.Type.Parameters);
+            default -> Streams.empty();
         };
-    }
-
-    @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
-            case Type -> new NodeAttribute(returns);
-            case Parameters -> new NodesAttribute(parameters);
-            default -> throw new AttributeException(type);
-        };
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
@@ -39,11 +26,25 @@ public record FunctionType(Node returns, java.util.List parameters) implements N
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
-            case Type -> new FunctionType(attribute.asNode(), parameters);
-            case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes().collect(Collectors.toList()));
+            case Type -> new NodeAttribute(returns);
+            case Parameters -> new NodesAttribute1(parameters);
             default -> throw new AttributeException(type);
         };
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        try {
+            return switch (type) {
+                case Type -> new FunctionType(attribute.asNode(), parameters);
+                case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes1()
+                        .foldRight(List.createList(), List::add));
+                default -> throw new AttributeException(type);
+            };
+        } catch (StreamException e) {
+            return this;
+        }
     }
 }
