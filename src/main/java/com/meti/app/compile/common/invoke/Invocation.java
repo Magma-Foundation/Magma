@@ -1,19 +1,21 @@
 package com.meti.app.compile.common.invoke;
 
 import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public final class Invocation implements Node {
+public final class Invocation extends AbstractNode {
     private final Node caller;
     private final List<Node> arguments;
 
@@ -28,25 +30,12 @@ public final class Invocation implements Node {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
-            case Caller -> new NodeAttribute(caller);
-            case Arguments -> new NodesAttribute1(arguments);
-            default -> throw new AttributeException(type);
-        };
-    }
-
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Stream.of(Attribute.Type.Caller);
-            case Nodes -> Stream.of(Attribute.Type.Arguments);
-            default -> Stream.empty();
+            case Node -> Streams.apply(Attribute.Type.Caller);
+            case Nodes -> Streams.apply(Attribute.Type.Arguments);
+            default -> Streams.empty();
         };
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
@@ -55,8 +44,12 @@ public final class Invocation implements Node {
     }
 
     @Override
-    public JSONNode toJSON() {
-        throw new UnsupportedOperationException();
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        return switch (type) {
+            case Caller -> new NodeAttribute(caller);
+            case Arguments -> new NodesAttribute1(arguments);
+            default -> throw new AttributeException(type);
+        };
     }
 
     @Override
@@ -75,22 +68,15 @@ public final class Invocation implements Node {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(caller, arguments);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Invocation that)) return false;
-        return Objects.equals(caller, that.caller) && Objects.equals(arguments, that.arguments);
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-               "\n\t\"caller\":" + caller +
-               ",\n\t\"arguments\":" + arguments +
-               '}';
+    public JSONNode toJSON() throws JSONException {
+        try {
+            var withCaller = new ObjectNode().addJSONable("caller", this.caller);
+            var withArguments = arguments.stream()
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addJSON)
+                    .build();
+            return withCaller.addObject("arguments", withArguments);
+        } catch (StreamException e) {
+            return new ObjectNode();
+        }
     }
 }

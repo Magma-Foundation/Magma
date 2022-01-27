@@ -16,7 +16,7 @@ public class ObjectNode implements JSONNode {
         this.internalMap = internalMap;
     }
 
-    public ObjectNode addJSON(String name, JSONable value) throws JSONException {
+    public ObjectNode addJSONable(String name, JSONable value) throws JSONException {
         return addObject(name, value.toJSON());
     }
 

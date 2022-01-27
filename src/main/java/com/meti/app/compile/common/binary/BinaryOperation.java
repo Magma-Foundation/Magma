@@ -57,8 +57,8 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     @Override
     public JSONNode toJSON() throws JSONException {
         return new ObjectNode()
-                .addJSON("operator", operator)
-                .addJSON("first", first)
-                .addJSON("second", second);
+                .addJSONable("operator", operator)
+                .addJSONable("first", first)
+                .addJSONable("second", second);
     }
 }

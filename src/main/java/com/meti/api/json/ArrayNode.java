@@ -2,6 +2,7 @@ package com.meti.api.json;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.node.JSONable;
 
 public record ArrayNode(List<String> children) implements JSONNode {
     public ArrayNode() {
@@ -25,12 +26,16 @@ public record ArrayNode(List<String> children) implements JSONNode {
             this(List.createList());
         }
 
-        public Builder addString(String value) {
-            return new Builder(children.add("\"" + value + "\""));
+        public Builder addJSON(JSONable node) throws JSONException {
+            return addObject(node.toJSON());
         }
 
         public Builder addObject(Object obj) {
             return new Builder(children.add(obj.toString()));
+        }
+
+        public Builder addString(String value) {
+            return new Builder(children.add("\"" + value + "\""));
         }
 
         public JSONNode build() {
