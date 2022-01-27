@@ -25,7 +25,9 @@ public interface Node extends JSONable {
     }
 
     default Attribute apply(Attribute.Type type) throws AttributeException {
-        throw new AttributeException("Node had no attributes.");
+        var format = "Node instance of '%s' has no attributes.";
+        var message = format.formatted(getClass());
+        throw new AttributeException(message);
     }
 
     default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
