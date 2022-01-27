@@ -6,13 +6,14 @@ import com.meti.api.json.ArrayNode;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.*;
 import com.meti.app.compile.text.Input;
 
 import java.util.Objects;
 
-public abstract class Field implements Node {
+public abstract class Field extends AbstractNode {
     protected final List<Flag> flags;
     protected final Input name;
     protected final Node type;
