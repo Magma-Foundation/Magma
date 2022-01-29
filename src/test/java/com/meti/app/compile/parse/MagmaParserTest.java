@@ -9,8 +9,6 @@ import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.stage.CompileException;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class MagmaParserTest {
@@ -23,7 +21,7 @@ class MagmaParserTest {
         var inner = new Implementation(innerIdentity, new Block());
         var outer = new Implementation(outerIdentity, new Block(inner));
 
-        var expected = Collections.emptyList();
+        var expected = java.util.List.of(1, 2);
         var actual = JavaList.toNativeList(new MagmaParser(List.apply(outer)).parse());
 
         assertIterableEquals(expected, actual);
