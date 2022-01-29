@@ -3,7 +3,7 @@ package com.meti.app.compile.node;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 
-public class EmptyNode implements Node {
+public class EmptyNode extends AbstractNode {
     public static final EmptyNode EmptyNode_ = new EmptyNode();
 
     private EmptyNode() {
