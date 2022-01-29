@@ -1,6 +1,7 @@
 package com.meti.app.compile.scope;
 
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
@@ -21,7 +22,7 @@ public record StructureType(Input name) implements Node {
 
     @Override
     public JSONNode toJSON() {
-        throw new UnsupportedOperationException();
+        return new ObjectNode().addString("name", name.toOutput().compute());
     }
 
     @Override
