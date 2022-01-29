@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class MagmaParserTest {
     @Test
-    void test() throws CompileException, StreamException {
+    void inner_functions() throws CompileException, StreamException {
         var identityBuilder = new Fields.Builder().withFlag(Field.Flag.Def);
         var innerIdentity = identityBuilder.withName("inner").build();
         var outerIdentity = identityBuilder.withName("outer").build();
