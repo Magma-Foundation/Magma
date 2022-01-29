@@ -8,14 +8,19 @@ import com.meti.api.json.ArrayNode;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 
-import java.util.Objects;
+public final class Block extends AbstractNode {
+    private final List<Node> children;
 
-public record Block(List<Node> children) implements Node {
+    public Block(List<Node> children) {
+        this.children = children;
+    }
+
     public Block() {
         this(List.createList());
     }
@@ -63,19 +68,6 @@ public record Block(List<Node> children) implements Node {
                     .build();
         } catch (StreamException e) {
             throw new AttributeException(e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        try {
-            var childrenAsString = children.stream()
-                    .map(Objects::toString)
-                    .foldRight((current, next) -> current + "," + next)
-                    .orElse("");
-            return "{\"buffer\":[" + childrenAsString + "]}";
-        } catch (StreamException e) {
-            return "";
         }
     }
 
