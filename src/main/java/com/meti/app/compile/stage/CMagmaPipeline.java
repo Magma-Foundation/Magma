@@ -45,8 +45,16 @@ public class CMagmaPipeline {
             var formatted = perform(formatter, resolved);
             var modified = perform(modifier, formatted);
             return perform(flattener, modified).stream();
-        } catch (StreamException e) {
-            throw new CompileException(e);
+        } catch (StreamException | CompileException e) {
+            try {
+                var separator = "\n-----\n";
+                var content = input.stream()
+                        .map(Object::toString)
+                        .foldRight("", (current, next) -> current + separator + next);
+                throw new CompileException("Failed to pipe values:" + separator + content + separator, e);
+            } catch (StreamException streamException) {
+                throw new CompileException(e);
+            }
         }
     }
 

@@ -43,8 +43,10 @@ public final class CMagmaCompiler {
             var division = pipeline.pipe().foldRight(divider, Divider::divide);
             return division.stream().<Target<String>, CollectionException>foldRight(new MappedTarget<>(),
                     (output, format) -> output.append(format, renderDivision(division, format)));
-        } catch (CollectionException e) {
-            throw new CompileException(e);
+        } catch (CollectionException | CompileException e) {
+            var format = "Failed to compile input:\n-----\n%s\n-----\n";
+            var message = format.formatted(input);
+            throw new CompileException(message, e);
         }
     }
 
