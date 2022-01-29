@@ -38,12 +38,18 @@ public abstract class AbstractStage implements Stage {
 
     @Override
     public Node transformNodeAST(Node node) throws CompileException {
-        var before = beforeNodeTraversal(node);
-        var withNodeGroup = transformNodeGroup(before);
-        var withNodesGroup = transformNodesGroup(withNodeGroup);
-        var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
-        var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
-        return afterTraversal(withDeclarationsGroup);
+        try {
+            var before = beforeNodeTraversal(node);
+            var withNodeGroup = transformNodeGroup(before);
+            var withNodesGroup = transformNodesGroup(withNodeGroup);
+            var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
+            var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
+            return afterTraversal(withDeclarationsGroup);
+        } catch (CompileException e) {
+            var format = "Failed to transform node:\n-----\n%s\n-----\n";
+            var message = format.formatted(node);
+            throw new CompileException(message, e);
+        }
     }
 
     protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
