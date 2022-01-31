@@ -8,7 +8,7 @@ import com.meti.app.compile.stage.CompileException;
 
 public class MagmaParser {
     private final List<Node> input;
-    private final List<String> names = List.createList();
+    private List<String> names = List.createList();
 
     public MagmaParser(List<Node> input) {
         this.input = input;
@@ -24,18 +24,21 @@ public class MagmaParser {
                 if (names.contains(name)) {
                     throw new CompileException("'" + name + "' is already defined.");
                 } else {
-                    names.add(name);
+                    names = names.add(name);
+                    output = output.add(element);
                 }
-            }
-
-            if (element.is(Node.Type.Variable)) {
+            } else if (element.is(Node.Type.Variable)) {
                 var value = element.apply(Attribute.Type.Value).asInput();
                 var format = value.toOutput().compute();
                 if (!names.contains(format)) {
                     throw new CompileException("'%s' is not defined.".formatted(format));
+                } else {
+                    output = output.add(element);
                 }
+            } else {
+                output = output.add(element);
             }
         }
-        return input;
+        return output;
     }
 }
