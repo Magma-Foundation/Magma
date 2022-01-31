@@ -27,6 +27,14 @@ public class MagmaParser {
                     names.add(name);
                 }
             }
+
+            if (element.is(Node.Type.Variable)) {
+                var value = element.apply(Attribute.Type.Value).asInput();
+                var format = value.toOutput().compute();
+                if (!names.contains(format)) {
+                    throw new CompileException("'%s' is not defined.".formatted(format));
+                }
+            }
         }
         return input;
     }
