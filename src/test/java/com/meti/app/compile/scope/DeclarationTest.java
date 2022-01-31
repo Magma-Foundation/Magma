@@ -27,6 +27,11 @@ public class DeclarationTest {
     }
 
     @Test
+    void type_conflict() {
+        assertDoesNotCompile("const x : I16 = true");
+    }
+
+    @Test
     void type_none() {
         assertSourceCompile("const x = 420", "int x=420;");
     }
