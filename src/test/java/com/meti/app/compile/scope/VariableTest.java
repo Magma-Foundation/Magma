@@ -7,13 +7,18 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class VariableTest {
     @Test
-    void test() {
-        assertSourceCompile("def wrapper(value : I16) : I16 => {return value;}", "int wrapper(int value){return value;}");
+    void defined() {
+        assertSourceCompile("const x : I16 = 420;x", "int x=420;x");
     }
 
     @Test
-    void defined() {
-        assertSourceCompile("const x : I16 = 420;x", "int x=420;x");
+    void resolved() {
+        assertSourceCompile("const x = 420; const y = x;", "int x=420;int y=x;");
+    }
+
+    @Test
+    void test() {
+        assertSourceCompile("def wrapper(value : I16) : I16 => {return value;}", "int wrapper(int value){return value;}");
     }
 
     @Test

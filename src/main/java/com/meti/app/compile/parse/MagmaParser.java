@@ -2,11 +2,11 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.option.Option;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.stage.CompileException;
 
@@ -30,15 +30,7 @@ public class MagmaParser {
                 } else {
                     if (oldIdentity.is(Node.Type.Initialization)) {
                         var value = oldIdentity.apply(Attribute.Type.Value).asNode();
-                        Node actualType;
-                        if (value.is(Node.Type.Boolean)) {
-                            actualType = Primitive.Bool;
-                        } else if (value.is(Node.Type.Integer)) {
-                            actualType = new IntegerType(true, 16);
-                        } else {
-                            throw new CompileException("Cannot resolve type of node: " + value);
-                        }
-
+                        var actualType = resolveNode(value);
                         var expectedType = oldIdentity.apply(Attribute.Type.Type).asNode();
 
                         /*
@@ -76,7 +68,36 @@ public class MagmaParser {
         return output;
     }
 
-    private boolean isDefined(String name) throws StreamException, AttributeException {
-        return frame.stream().anyMatch(declaration -> declaration.apply(Attribute.Type.Name).asInput().equalsSlice(name));
+    private boolean isDefined(String name) throws StreamException {
+        return lookup(name).isPresent();
+    }
+
+    private Node resolveNode(Node value) throws CompileException, StreamException {
+        Node actualType;
+        if (value.is(Node.Type.Variable)) {
+            var variableName = value.apply(Attribute.Type.Value).asInput()
+                    .toOutput()
+                    .compute();
+            actualType = lookup(variableName)
+                    .map(node -> node.apply(Attribute.Type.Type).asNode())
+                    .orElseThrow(() -> {
+                        var format = "'%s' is not defined.";
+                        var message = format.formatted(variableName);
+                        return new CompileException(message);
+                    });
+        } else if (value.is(Node.Type.Boolean)) {
+            actualType = Primitive.Bool;
+        } else if (value.is(Node.Type.Integer)) {
+            actualType = new IntegerType(true, 16);
+        } else {
+            throw new CompileException("Cannot resolve type of node: " + value);
+        }
+        return actualType;
+    }
+
+    private Option<Node> lookup(String name) throws StreamException {
+        return frame.stream()
+                .filter(declaration -> declaration.apply(Attribute.Type.Name).asInput().equalsSlice(name))
+                .headOptionally();
     }
 }
