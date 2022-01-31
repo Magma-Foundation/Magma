@@ -2,7 +2,6 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.api.option.Option;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
@@ -69,16 +68,15 @@ public class MagmaParser {
     }
 
     private boolean isDefined(String name) throws StreamException {
-        return lookup(name).isPresent();
+        return new Scope(frame).lookup(name).isPresent();
     }
 
     private Node resolveNode(Node value) throws CompileException, StreamException {
-        Node actualType;
         if (value.is(Node.Type.Variable)) {
             var variableName = value.apply(Attribute.Type.Value).asInput()
                     .toOutput()
                     .compute();
-            actualType = lookup(variableName)
+            return new Scope(frame).lookup(variableName)
                     .map(node -> node.apply(Attribute.Type.Type).asNode())
                     .orElseThrow(() -> {
                         var format = "'%s' is not defined.";
@@ -86,18 +84,11 @@ public class MagmaParser {
                         return new CompileException(message);
                     });
         } else if (value.is(Node.Type.Boolean)) {
-            actualType = Primitive.Bool;
+            return Primitive.Bool;
         } else if (value.is(Node.Type.Integer)) {
-            actualType = new IntegerType(true, 16);
+            return new IntegerType(true, 16);
         } else {
             throw new CompileException("Cannot resolve type of node: " + value);
         }
-        return actualType;
-    }
-
-    private Option<Node> lookup(String name) throws StreamException {
-        return frame.stream()
-                .filter(declaration -> declaration.apply(Attribute.Type.Name).asInput().equalsSlice(name))
-                .headOptionally();
     }
 }
