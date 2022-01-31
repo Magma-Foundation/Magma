@@ -17,9 +17,8 @@ public class MagmaParser {
     }
 
     public List<Node> parse() throws StreamException, CompileException {
-        var scope = new Scope(List.createList());
-        var output = List.<Node>createList();
-        var state = new State(scope, output);
+        var state = new State();
+
         for (int i = 0; i < input.size(); i++) {
             var element = input.apply(i);
             if (element.is(Node.Type.Declaration)) {
@@ -93,6 +92,10 @@ public class MagmaParser {
     private static class State {
         private Scope scope;
         private List<Node> output;
+
+        private State() {
+            this(new Scope(), List.createList());
+        }
 
         private State(Scope scope, List<Node> output) {
             this.scope = scope;

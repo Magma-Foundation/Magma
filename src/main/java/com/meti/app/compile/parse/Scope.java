@@ -9,6 +9,10 @@ import com.meti.app.compile.node.attribute.Attribute;
 public class Scope {
     private final List<Node> frame;
 
+    public Scope() {
+        this(List.createList());
+    }
+
     public Scope(List<Node> frame) {
         this.frame = frame;
     }
