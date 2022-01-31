@@ -11,25 +11,26 @@ import com.meti.app.compile.stage.CompileException;
 
 public class MagmaParser {
     private final List<Node> input;
-    private List<Node> frame = List.createList();
 
     public MagmaParser(List<Node> input) {
         this.input = input;
     }
 
     public List<Node> parse() throws StreamException, CompileException {
+        var scope = new Scope(List.createList());
         var output = List.<Node>createList();
+        var state = new State(scope, output);
         for (int i = 0; i < input.size(); i++) {
             var element = input.apply(i);
             if (element.is(Node.Type.Declaration)) {
                 var oldIdentity = element.apply(Attribute.Type.Identity).asNode();
                 var name = oldIdentity.apply(Attribute.Type.Name).asInput().toOutput().compute();
-                if (isDefined(name)) {
+                if (state.getScope().isDefined(name)) {
                     throw new CompileException("'" + name + "' is already defined.");
                 } else {
                     if (oldIdentity.is(Node.Type.Initialization)) {
                         var value = oldIdentity.apply(Attribute.Type.Value).asNode();
-                        var actualType = resolveNode(value);
+                        var actualType = resolveNode(value, state.getScope());
                         var expectedType = oldIdentity.apply(Attribute.Type.Type).asNode();
 
                         /*
@@ -45,38 +46,35 @@ public class MagmaParser {
                         }
 
                         var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
-                        frame = frame.add(newIdentity);
-                        output = output.add(element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity)));
+
+                        state.setScope(state.getScope().define(newIdentity));
+                        state.setOutput(state.getOutput().add(element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity))));
                     } else {
-                        frame = frame.add(oldIdentity);
-                        output = output.add(element);
+                        state.setScope(state.getScope().define(oldIdentity));
+                        state.setOutput(state.getOutput().add(element));
                     }
                 }
             } else if (element.is(Node.Type.Variable)) {
                 var value = element.apply(Attribute.Type.Value).asInput();
                 var format = value.toOutput().compute();
-                if (!isDefined(format)) {
+                if (!state.getScope().isDefined(format)) {
                     throw new CompileException("'%s' is not defined.".formatted(format));
                 } else {
-                    output = output.add(element);
+                    state.setOutput(state.getOutput().add(element));
                 }
             } else {
-                output = output.add(element);
+                state.setOutput(state.getOutput().add(element));
             }
         }
-        return output;
+        return state.getOutput();
     }
 
-    private boolean isDefined(String name) throws StreamException {
-        return new Scope(frame).lookup(name).isPresent();
-    }
-
-    private Node resolveNode(Node value) throws CompileException, StreamException {
+    private Node resolveNode(Node value, Scope scope) throws CompileException, StreamException {
         if (value.is(Node.Type.Variable)) {
             var variableName = value.apply(Attribute.Type.Value).asInput()
                     .toOutput()
                     .compute();
-            return new Scope(frame).lookup(variableName)
+            return scope.lookup(variableName)
                     .map(node -> node.apply(Attribute.Type.Type).asNode())
                     .orElseThrow(() -> {
                         var format = "'%s' is not defined.";
@@ -89,6 +87,32 @@ public class MagmaParser {
             return new IntegerType(true, 16);
         } else {
             throw new CompileException("Cannot resolve type of node: " + value);
+        }
+    }
+
+    private static class State {
+        private Scope scope;
+        private List<Node> output;
+
+        private State(Scope scope, List<Node> output) {
+            this.scope = scope;
+            this.output = output;
+        }
+
+        public List<Node> getOutput() {
+            return output;
+        }
+
+        public void setOutput(List<Node> output) {
+            this.output = output;
+        }
+
+        public Scope getScope() {
+            return scope;
+        }
+
+        public void setScope(Scope scope) {
+            this.scope = scope;
         }
     }
 }
