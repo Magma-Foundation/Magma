@@ -1,16 +1,18 @@
 package com.meti.app.compile.scope;
 
-import com.meti.app.compile.CompiledTest;
 import org.junit.jupiter.api.Test;
+
+import static com.meti.app.compile.CompiledTest.assertDoesNotCompile;
+import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class AssignTest {
     @Test
-    void test() {
-        CompiledTest.assertSourceCompile("x = 69", "x = 69");
+    void immutable() {
+        assertDoesNotCompile("const x=420;x=69");
     }
 
     @Test
-    void test_boolean() {
-        CompiledTest.assertSourceCompile("x = false", "x = 0");
+    void nominal() {
+        assertSourceCompile("x = 69", "x = 69");
     }
 }
