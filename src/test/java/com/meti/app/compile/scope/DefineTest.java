@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static com.meti.app.compile.CompiledTest.assertDoesNotCompile;
 import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
-public class DeclarationTest {
+public class DefineTest {
     @Test
     void flag_conflict() {
         assertDoesNotCompile("const let x = 420");
