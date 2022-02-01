@@ -54,7 +54,7 @@ class CMagmaModifierTest {
 
     @Test
     void boolean_declared() {
-        var oldIdentity = new ValuedField(List.createList(), new RootText("test"), Primitive.Bool, Boolean.True);
+        var oldIdentity = new ValuedField(new RootText("test"), Primitive.Bool, Boolean.True, List.createList());
         assertTransforms(new Declaration(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()

@@ -49,7 +49,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
             var valueText = input.slice(s + 1);
             var value = new InputNode(valueText);
 
-            return new ValuedField(flags, nameText, type, value);
+            return new ValuedField(nameText, type, value, flags);
         }).orElseGet(() -> {
             var typeText = input.slice(typeSeparator + 1);
             var type = new InputNode(typeText);
@@ -59,7 +59,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
             var valueText = input.slice(integer + 1);
             var value = new InputNode(valueText);
 
-            return new ValuedField(flags, nameText, ImplicitType_, value);
+            return new ValuedField(nameText, ImplicitType_, value, flags);
         }));
         return field;
     }

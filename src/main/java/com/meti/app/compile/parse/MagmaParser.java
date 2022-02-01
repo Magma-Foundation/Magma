@@ -10,13 +10,7 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-public class MagmaParser {
-    private final List<Node> input;
-
-    public MagmaParser(List<Node> input) {
-        this.input = input;
-    }
-
+public record MagmaParser(List<? extends Node> input) {
     public List<Node> parse() throws StreamException, CompileException {
         var state = new State();
 
