@@ -3,6 +3,10 @@ package com.meti.app.compile.parse;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.core.F1;
+import com.meti.api.core.F2;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
@@ -16,15 +20,36 @@ public record MagmaParser(List<? extends Node> input) {
 
         for (int i = 0; i < input.size(); i++) {
             var element = input.apply(i);
-            if (element.is(Node.Type.Declaration)) {
-                state = parseDefinition(state, element);
-            } else if (element.is(Node.Type.Variable)) {
-                state = parseVariable(state, element);
-            } else {
-                state = state.mapOutput(output -> output.add(element));
-            }
+            State parent = parseAST(state, element);
+            state = parent;
         }
         return state.getOutput();
+    }
+
+    private State parseAST(State state, Node element) throws Exception {
+        var parent = parse(state, element);
+        parent.mapCurrent(new F2<State, Node, State, Exception>() {
+            @Override
+            public State apply(State state, Node node) throws Exception {
+                node.apply(Attribute.Group.Nodes).foldRight(state, new F2<State, Attribute.Type, State, Exception>() {
+                    @Override
+                    public State apply(State state, Attribute.Type type) throws Exception {
+                        return node.apply(type).asStreamOfNodes().foldRight(state, );
+                    }
+                });
+            }
+        });
+        return parent;
+    }
+
+    private State parse(State state, Node element) throws StreamException, CompileException {
+        if (element.is(Node.Type.Declaration)) {
+            return parseDefinition(state, element);
+        } else if (element.is(Node.Type.Variable)) {
+            return parseVariable(state, element);
+        } else {
+            return state.append(element);
+        }
     }
 
     private State parseDefinition(State state, Node element) throws StreamException, CompileException {
@@ -71,7 +96,7 @@ public record MagmaParser(List<? extends Node> input) {
         if (!state.getScope().isDefined(format)) {
             throw new CompileException("'%s' is not defined.".formatted(format));
         } else {
-            state = state.mapOutput(output -> output.add(element));
+            state = state.append(element);
         }
         return state;
     }
@@ -98,16 +123,28 @@ public record MagmaParser(List<? extends Node> input) {
     }
 
     private static class State {
+        private final Option<Node> current;
         private Scope scope;
         private List<Node> output;
 
         private State() {
-            this(new Scope(), List.createList());
+            this(new Scope(), List.createList(), new None<Node>());
         }
 
-        private State(Scope scope, List<Node> output) {
+        private State(Scope scope, List<Node> output, Option<Node> current) {
             this.scope = scope;
             this.output = output;
+            this.current = current;
+        }
+
+        private State append(Node element) {
+            return current
+                    .map(value -> new State(scope, output.add(value), new Some<>(element)))
+                    .orElse(new State(scope, output, new Some<>(element)));
+        }
+
+        public <E extends Exception> State mapCurrent(F2<State, Node, State, E> mapper) throws E {
+            return current.map(value -> mapper.apply(this, value)).orElse(this);
         }
 
         private <E extends Exception> State mapOutput(F1<List<Node>, List<Node>, E> mapper) throws E {
