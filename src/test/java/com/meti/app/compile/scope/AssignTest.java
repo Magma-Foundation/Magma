@@ -1,16 +1,16 @@
-package com.meti.app.compile.operate;
+package com.meti.app.compile.scope;
 
 import com.meti.app.compile.CompiledTest;
 import org.junit.jupiter.api.Test;
 
-public class AssignmentTest {
+public class AssignTest {
     @Test
-    void test(){
+    void test() {
         CompiledTest.assertSourceCompile("x = 69", "x = 69");
     }
 
     @Test
-    void test_boolean(){
+    void test_boolean() {
         CompiledTest.assertSourceCompile("x = false", "x = 0");
     }
 }
