@@ -7,6 +7,11 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class BlockTest {
     @Test
+    void redefined() {
+        assertSourceCompile("{const x=420;}const x=69;", "{int x=420;}int x=69;");
+    }
+
+    @Test
     void defined() {
         assertSourceCompile("const x=420;{x}", "int x=420;{x}");
     }
