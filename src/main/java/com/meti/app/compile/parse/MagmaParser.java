@@ -2,6 +2,7 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.core.F1;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
@@ -22,50 +23,63 @@ public class MagmaParser {
         for (int i = 0; i < input.size(); i++) {
             var element = input.apply(i);
             if (element.is(Node.Type.Declaration)) {
-                var oldIdentity = element.apply(Attribute.Type.Identity).asNode();
-                var name = oldIdentity.apply(Attribute.Type.Name).asInput().toOutput().compute();
-                if (state.getScope().isDefined(name)) {
-                    throw new CompileException("'" + name + "' is already defined.");
-                } else {
-                    if (oldIdentity.is(Node.Type.Initialization)) {
-                        var value = oldIdentity.apply(Attribute.Type.Value).asNode();
-                        var actualType = resolveNode(value, state.getScope());
-                        var expectedType = oldIdentity.apply(Attribute.Type.Type).asNode();
-
-                        /*
-                        Check for potential implicit conversions here...
-                         */
-                        Node typeToDefine;
-                        if (expectedType.is(Node.Type.Implicit) || actualType.equals(expectedType)) {
-                            typeToDefine = actualType;
-                        } else {
-                            var format = "Expected a type of '%s' but was actually '%s'.";
-                            var message = format.formatted(expectedType, actualType);
-                            throw new CompileException(message);
-                        }
-
-                        var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
-
-                        state.setScope(state.getScope().define(newIdentity));
-                        state.setOutput(state.getOutput().add(element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity))));
-                    } else {
-                        state.setScope(state.getScope().define(oldIdentity));
-                        state.setOutput(state.getOutput().add(element));
-                    }
-                }
+                state = parseDefinition(state, element);
             } else if (element.is(Node.Type.Variable)) {
-                var value = element.apply(Attribute.Type.Value).asInput();
-                var format = value.toOutput().compute();
-                if (!state.getScope().isDefined(format)) {
-                    throw new CompileException("'%s' is not defined.".formatted(format));
-                } else {
-                    state.setOutput(state.getOutput().add(element));
-                }
+                state = parseVariable(state, element);
             } else {
-                state.setOutput(state.getOutput().add(element));
+                state = state.mapOutput(output -> output.add(element));
             }
         }
         return state.getOutput();
+    }
+
+    private State parseDefinition(State state, Node element) throws StreamException, CompileException {
+        var oldIdentity = element.apply(Attribute.Type.Identity).asNode();
+        var name = oldIdentity.apply(Attribute.Type.Name).asInput().toOutput().compute();
+        if (state.getScope().isDefined(name)) {
+            throw new CompileException("'" + name + "' is already defined.");
+        } else {
+            if (oldIdentity.is(Node.Type.Initialization)) {
+                var value = oldIdentity.apply(Attribute.Type.Value).asNode();
+                var actualType = resolveNode(value, state.getScope());
+                var expectedType = oldIdentity.apply(Attribute.Type.Type).asNode();
+
+                /*
+                Check for potential implicit conversions here...
+                 */
+                Node typeToDefine;
+                if (expectedType.is(Node.Type.Implicit) || actualType.equals(expectedType)) {
+                    typeToDefine = actualType;
+                } else {
+                    var format = "Expected a type of '%s' but was actually '%s'.";
+                    var message = format.formatted(expectedType, actualType);
+                    throw new CompileException(message);
+                }
+
+                var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
+                var withType = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+
+                state = state
+                        .mapScope(scope -> scope.define(newIdentity))
+                        .mapOutput(nodeList -> nodeList.add(withType));
+            } else {
+                state = state
+                        .mapScope(scope -> scope.define(oldIdentity))
+                        .mapOutput(output -> output.add(element));
+            }
+        }
+        return state;
+    }
+
+    private State parseVariable(State state, Node element) throws StreamException, CompileException {
+        var value = element.apply(Attribute.Type.Value).asInput();
+        var format = value.toOutput().compute();
+        if (!state.getScope().isDefined(format)) {
+            throw new CompileException("'%s' is not defined.".formatted(format));
+        } else {
+            state = state.mapOutput(output -> output.add(element));
+        }
+        return state;
     }
 
     private Node resolveNode(Node value, Scope scope) throws CompileException, StreamException {
@@ -102,20 +116,34 @@ public class MagmaParser {
             this.output = output;
         }
 
+        private <E extends Exception> State mapOutput(F1<List<Node>, List<Node>, E> mapper) throws E {
+            var oldOutput = getOutput();
+            var newOutput = mapper.apply(oldOutput);
+            return setOutput(newOutput);
+        }
+
         public List<Node> getOutput() {
             return output;
         }
 
-        public void setOutput(List<Node> output) {
+        public State setOutput(List<Node> output) {
             this.output = output;
+            return this;
+        }
+
+        private <E extends Exception> State mapScope(F1<Scope, Scope, E> mapper) throws E {
+            var oldScope = getScope();
+            var newScope = mapper.apply(oldScope);
+            return setScope(newScope);
         }
 
         public Scope getScope() {
             return scope;
         }
 
-        public void setScope(Scope scope) {
+        public State setScope(Scope scope) {
             this.scope = scope;
+            return this;
         }
     }
 }
