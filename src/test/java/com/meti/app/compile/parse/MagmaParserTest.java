@@ -11,10 +11,11 @@ import com.meti.app.compile.stage.CompileException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MagmaParserTest {
     @Test
-    void redefined_blocks() throws CompileException, StreamException {
+    void redefined_after_blocks() throws CompileException, StreamException {
         var type = new IntegerType(true, 16);
         var value = new IntegerNode(100);
         var identity = new ValuedField("x", type, value);
@@ -26,5 +27,17 @@ class MagmaParserTest {
         var actual = JavaList.toNativeList(output);
 
         assertIterableEquals(expected, actual);
+    }
+
+    @Test
+    void redefined_inside_blocks() {
+        var type = new IntegerType(true, 16);
+        var value = new IntegerNode(100);
+        var identity = new ValuedField("x", type, value);
+
+        var input = List.apply(identity, new Block(identity));
+        var parser = new MagmaParser(input);
+
+        assertThrows(CompileException.class, parser::parse);
     }
 }
