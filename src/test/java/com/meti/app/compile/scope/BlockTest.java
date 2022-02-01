@@ -1,4 +1,4 @@
-package com.meti.app.compile.function;
+package com.meti.app.compile.scope;
 
 import org.junit.jupiter.api.Test;
 
@@ -7,8 +7,8 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class BlockTest {
     @Test
-    void undefined() {
-        assertDoesNotCompile("{const x = 420}x");
+    void defined() {
+        assertSourceCompile("const x=420;{x}", "int x=420;{x}");
     }
 
     @Test
@@ -29,5 +29,10 @@ public class BlockTest {
     @Test
     void two_lines() {
         assertSourceCompile("{return 69;return 420;}", "{return 69;return 420;}");
+    }
+
+    @Test
+    void undefined() {
+        assertDoesNotCompile("{const x = 420}x");
     }
 }
