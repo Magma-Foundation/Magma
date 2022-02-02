@@ -13,7 +13,7 @@ public class IntegerTypeRenderer extends OutputRenderer {
     }
 
     @Override
-    protected Output processValid() throws CompileException {
+    protected Output processImpl() throws CompileException {
         var name = identity.apply(Attribute.Type.Name).asInput();
         var type = identity.apply(Attribute.Type.Type).asNode();
 

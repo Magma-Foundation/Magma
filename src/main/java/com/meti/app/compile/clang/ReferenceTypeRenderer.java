@@ -11,7 +11,7 @@ public class ReferenceTypeRenderer extends NodeTypeRenderer {
     }
 
     @Override
-    protected Node processValid() throws CompileException {
+    protected Node processImpl() throws CompileException {
         var name = identity.apply(Attribute.Type.Name)
                 .asInput()
                 .toOutput()

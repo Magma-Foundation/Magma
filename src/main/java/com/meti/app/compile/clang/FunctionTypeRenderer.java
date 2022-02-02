@@ -13,7 +13,7 @@ public class FunctionTypeRenderer extends OutputRenderer {
     }
 
     @Override
-    protected Output processValid() throws CompileException {
+    protected Output processImpl() throws CompileException {
         try {
             var name = identity.apply(Attribute.Type.Name).asInput();
             var returns = identity.apply(Attribute.Type.Type).asOutput();

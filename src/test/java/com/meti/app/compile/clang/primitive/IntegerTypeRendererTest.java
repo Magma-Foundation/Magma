@@ -15,7 +15,7 @@ class IntegerTypeRendererTest {
 
         var expected = "unsigned int x";
         var actual = new IntegerTypeRenderer(identity)
-                .processValid()
+                .processImpl()
                 .compute();
 
         assertEquals(expected, actual);

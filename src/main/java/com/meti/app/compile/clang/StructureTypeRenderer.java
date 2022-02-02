@@ -11,7 +11,7 @@ class StructureTypeRenderer extends OutputRenderer {
     }
 
     @Override
-    protected Output processValid() throws AttributeException {
+    protected Output processImpl() throws AttributeException {
         var name = identity.apply(Attribute.Type.Name).asInput();
         return name.toOutput()
                 .prepend("struct ")

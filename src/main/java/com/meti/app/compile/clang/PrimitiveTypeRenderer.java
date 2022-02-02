@@ -11,7 +11,7 @@ public class PrimitiveTypeRenderer extends OutputRenderer {
     }
 
     @Override
-    protected Output processValid() throws AttributeException {
+    protected Output processImpl() throws AttributeException {
         var type = identity.apply(Attribute.Type.Type).asOutput();
         var name = identity.apply(Attribute.Type.Name).asInput().toOutput();
         return type.appendSlice(" ").appendOutput(name);
