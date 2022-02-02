@@ -64,7 +64,7 @@ public final class CRenderer extends AfterStreamStage<Output> {
                 new IntegerTypeRenderer(name, type),
                 new FunctionTypeRenderer(name, type),
                 new PrimitiveTypeRenderer(name, type),
-                new ReferenceTypeRenderer(name, type),
+                new ReferenceTypeRenderer(name),
                 new StructureTypeRenderer(name, type)
         );
     }

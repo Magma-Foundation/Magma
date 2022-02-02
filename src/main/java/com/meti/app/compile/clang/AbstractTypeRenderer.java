@@ -4,27 +4,25 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.OutputNode;
+import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.text.Input;
-import com.meti.app.compile.text.Output;
 
 public abstract class AbstractTypeRenderer implements Processor<Node> {
-    protected final Input name;
-    protected final Node type;
-    protected final Node.Type nodeType;
+    protected final Node identity;
+    private final Node.Type type;
 
-    public AbstractTypeRenderer(Input name, Node type, Node.Type nodeType) {
-        this.name = name;
+    protected AbstractTypeRenderer(Node identity, Node.Type type) {
+        this.identity = identity;
         this.type = type;
-        this.nodeType = nodeType;
     }
 
     @Override
     public Option<Node> process() throws CompileException {
-        return type.is(nodeType) ? new Some<>(new OutputNode((processValid()))) : new None<>();
+        return identity.apply(Attribute.Type.Type).asNode().is(type)
+                ? new Some<>(processValid())
+                : new None<>();
     }
 
-    protected abstract Output processValid() throws CompileException;
+    protected abstract Node processValid() throws CompileException;
 }
