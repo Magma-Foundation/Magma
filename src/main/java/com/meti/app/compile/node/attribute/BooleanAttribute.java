@@ -1,6 +1,7 @@
 package com.meti.app.compile.node.attribute;
 
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 
 public record BooleanAttribute(boolean value) implements Attribute {
     @Override
@@ -10,6 +11,6 @@ public record BooleanAttribute(boolean value) implements Attribute {
 
     @Override
     public JSONNode toJSON() {
-        throw new UnsupportedOperationException(getClass() + " cannot be converted into JSON yet.");
+        return new ObjectNode().addObject("state", value);
     }
 }
