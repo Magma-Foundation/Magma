@@ -2,7 +2,7 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.core.F1;
-import com.meti.app.compile.common.Declaration;
+import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.common.ValuedField;
 import com.meti.app.compile.common.binary.BinaryOperation;
 import com.meti.app.compile.common.block.Block;
@@ -55,7 +55,7 @@ class CMagmaModifierTest {
     @Test
     void boolean_declared() {
         var oldIdentity = new ValuedField(new RootText("test"), Primitive.Bool, Boolean.True, List.createList());
-        assertTransforms(new Declaration(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
+        assertTransforms(new Definition(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()
                 .is(Node.Type.Integer));

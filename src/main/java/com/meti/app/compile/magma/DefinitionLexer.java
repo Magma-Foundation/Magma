@@ -3,7 +3,7 @@ package com.meti.app.compile.magma;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.Option;
-import com.meti.app.compile.common.Declaration;
+import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -18,7 +18,7 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
         return new FieldLexer(input)
                 .process()
                 .filter(this::hasFlags)
-                .map(Declaration::new);
+                .map(Definition::new);
     }
 
     private boolean hasFlags(Node field) {

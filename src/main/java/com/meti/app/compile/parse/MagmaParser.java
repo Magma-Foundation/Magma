@@ -12,9 +12,17 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.stage.CompileException;
 
+import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
+
 public record MagmaParser(List<? extends Node> input) {
     public List<Node> parse() throws StreamException, CompileException {
-        return parseNodeList(input);
+        try {
+            return input.stream()
+                    .foldRight(new StateBuffer(), (current, next) -> current.append(state -> parseAST(state.apply(next))))
+                    .list;
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     private State parse(State state) throws CompileException {
@@ -65,25 +73,17 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
-    private List<Node> parseNodeList(List<? extends Node> list) throws CompileException {
+    private State parseNodesAttribute(State root, Node node) throws CompileException {
         try {
-            return list.stream()
-                    .foldRightWithInitializer(StateBuffer::new, (current, next) -> current.append(state -> parseAST(state.apply(next))))
-                    .map(buffer -> buffer.list)
-                    .orElse(List.createList());
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    private State parseNodesAttribute(State oldState, Node node) throws CompileException {
-        try {
-            return node.apply(Attribute.Group.Nodes).foldRight(oldState, (current, type) -> {
+            return node.apply(Attribute.Group.Nodes).foldRight(root, (oldState, type) -> {
                 try {
-                    var input = node.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
-                    var output = MagmaParser.this.parseNodeList(input);
-                    var attribute = new NodesAttribute(output);
-                    return current.apply(node.with(type, attribute));
+                    var current = oldState.current;
+                    var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
+                    var result = input.stream().foldRight(new StateBuffer(),
+                            (buffer, next) -> buffer.append(state -> MagmaParser.this.parseAST(state.apply(next))));
+                    var attribute = new NodesAttribute(result.list);
+                    var newCurrent = current.with(type, attribute);
+                    return result.state.apply(newCurrent);
                 } catch (StreamException e) {
                     throw new CompileException(e);
                 }
@@ -128,6 +128,10 @@ public record MagmaParser(List<? extends Node> input) {
         private final Node current;
         private Scope scope;
 
+        public State() {
+            this(EmptyNode_);
+        }
+
         public State(Node current) {
             this(current, new Scope());
         }
@@ -165,8 +169,8 @@ public record MagmaParser(List<? extends Node> input) {
         private final List<Node> list;
         private final State state;
 
-        private StateBuffer(Node first) {
-            this(List.createList(), new State(first));
+        private StateBuffer() {
+            this(List.createList(), new State());
         }
 
         private StateBuffer(List<Node> list, State state) {

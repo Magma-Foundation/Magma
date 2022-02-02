@@ -11,10 +11,10 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
-public final class Declaration extends AbstractNode {
+public final class Definition extends AbstractNode {
     private final Node identity;
 
-    public Declaration(Node identity) {
+    public Definition(Node identity) {
         this.identity = identity;
     }
 
@@ -36,7 +36,7 @@ public final class Declaration extends AbstractNode {
 
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Identity ? new Declaration(attribute.asNode()) : this;
+        return type == Attribute.Type.Identity ? new Definition(attribute.asNode()) : this;
     }
 
     @Override
