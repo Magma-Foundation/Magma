@@ -12,7 +12,7 @@ import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 
 public record MagmaResolver(Node root, Scope scope) {
-    Type resolve() throws CompileException {
+    public Type resolve() throws CompileException {
         if (root.is(Node.Role.Variable)) {
             var variableName = root.apply(Attribute.Type.Value).asInput()
                     .toOutput()

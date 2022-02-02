@@ -5,7 +5,7 @@ import com.meti.app.compile.node.Node;
 
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
-class State {
+public class State {
     private final Node current;
     private final Scope scope;
 

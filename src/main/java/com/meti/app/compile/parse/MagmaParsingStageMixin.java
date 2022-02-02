@@ -2,6 +2,7 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
+import com.meti.app.compile.feature.function.ImplementationVisitor;
 
 public interface MagmaParsingStageMixin extends VisitationStage<Parser> {
     @Override
