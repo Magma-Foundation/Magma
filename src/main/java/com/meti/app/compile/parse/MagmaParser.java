@@ -12,7 +12,7 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute1;
 import com.meti.app.compile.stage.CompileException;
 
-public record MagmaParser(List<Node> input) {
+public record MagmaParser(List<? extends Node> input) {
     public List<Node> parse() throws StreamException, CompileException {
         return parseNodeList(input);
     }
@@ -69,7 +69,7 @@ public record MagmaParser(List<Node> input) {
         }
     }
 
-    private List<Node> parseNodeList(List<Node> list) throws CompileException {
+    private List<Node> parseNodeList(List<? extends Node> list) throws CompileException {
         try {
             return list.stream()
                     .foldRightWithInitializer(StateBuffer::new, (current, next) -> current.append(state -> parseAST(state.apply(next))))
