@@ -70,9 +70,8 @@ public record MagmaParser(List<? extends Node> input) {
             }
 
             var newIdentity = definition.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
-            var withType = state.getCurrent().with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
 
-            return state.mapScope(scope -> scope.define(newIdentity)).apply(withType);
+            return state.mapScope(scope -> scope.define(newIdentity)).apply(newIdentity);
         } else {
             return state.mapScope(scope -> scope.define(definition));
         }
