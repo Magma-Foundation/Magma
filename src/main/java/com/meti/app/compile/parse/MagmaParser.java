@@ -30,18 +30,27 @@ public record MagmaParser(List<? extends Node> input) {
             return parseVariable(state);
         } else if (element.is(Node.Type.Block)) {
             return state.mapScope(Scope::enter);
+        } else if (element.is(Node.Type.Implementation)) {
+            var identity = element.apply(Attribute.Type.Identity).asNode();
+            var expectedType = identity.apply(Attribute.Type.Type).asNode();
+            var value = element.apply(Attribute.Type.Value).asNode();
+            var actualType = resolveNode(value, state.scope);
+
+            Node typeToSet;
+            if (expectedType.is(Node.Type.Implicit)) {
+                typeToSet = actualType;
+            } else if (expectedType.equals(actualType)) {
+                typeToSet = expectedType;
+            } else {
+                var format = "Expected function to return '%s', but was actually '%s'.";
+                var message = format.formatted(expectedType, actualType);
+                throw new CompileException(message);
+            }
+            var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
+            var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+            return state.apply(newElement);
         } else {
             return state;
-        }
-    }
-
-    public List<Node> parse() throws StreamException, CompileException {
-        try {
-            return input.stream()
-                    .foldRight(new StateBuffer(), (current, next) -> current.append(state -> parseAST(state.apply(next))))
-                    .list;
-        } catch (StreamException e) {
-            throw new CompileException(e);
         }
     }
 
@@ -53,6 +62,16 @@ public record MagmaParser(List<? extends Node> input) {
                 var newState = parseAST(oldState.apply(previous));
                 return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
             });
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    public List<Node> parse() throws StreamException, CompileException {
+        try {
+            return input.stream()
+                    .foldRight(new StateBuffer(), (current, next) -> current.append(state -> parseAST(state.apply(next))))
+                    .list;
         } catch (StreamException e) {
             throw new CompileException(e);
         }
@@ -144,6 +163,20 @@ public record MagmaParser(List<? extends Node> input) {
             return Primitive.Bool;
         } else if (value.is(Node.Type.Integer)) {
             return new IntegerType(true, 16);
+        } else if (value.is(Node.Type.Return)) {
+            var innerValue = value.apply(Attribute.Type.Value).asNode();
+            return resolveNode(innerValue, scope);
+        } else if (value.is(Node.Type.Block)) {
+            try {
+                return value.apply(Attribute.Type.Children)
+                        .asStreamOfNodes()
+                        .foldRight(List.<Node>createList(), List::add)
+                        .last()
+                        .map(last -> resolveNode(last, scope))
+                        .orElse(Primitive.Void);
+            } catch (StreamException e) {
+                throw new CompileException(e);
+            }
         } else {
             throw new CompileException("Cannot resolve type of node: " + value);
         }
