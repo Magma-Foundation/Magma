@@ -13,6 +13,10 @@ import com.meti.app.compile.node.attribute.TypesAttribute;
 public class Union extends AbstractNode implements Type {
     private final List<Type> options;
 
+    public Union(Type... options) {
+        this(List.apply(options));
+    }
+
     public Union(List<Type> options) {
         this.options = options;
     }
@@ -41,9 +45,16 @@ public class Union extends AbstractNode implements Type {
     }
 
     @Override
+    public boolean isAssignableTo(Type other) throws AttributeException {
+        try {
+            return options.stream().anyMatch(other::isInstanceOf);
+        } catch (StreamException e) {
+            throw new AttributeException(e);
+        }
+    }
+
+    @Override
     public Node reduce() throws AttributeException {
-        return options.first().orElseThrow(() -> {
-            return new AttributeException("Union is empty.");
-        });
+        return options.first().orElseThrow(() -> new AttributeException("Union is empty."));
     }
 }

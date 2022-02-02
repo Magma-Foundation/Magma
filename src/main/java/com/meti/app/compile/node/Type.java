@@ -4,7 +4,11 @@ import com.meti.app.compile.node.attribute.AttributeException;
 
 public interface Type extends Node {
     default boolean isAssignableTo(Type other) throws AttributeException {
-        return other.is(Role.Primitive) || this.equals(other);
+        return this.equals(other);
+    }
+
+    default boolean isInstanceOf(Type other) {
+        return this.equals(other);
     }
 
     default Node reduce() throws AttributeException {
