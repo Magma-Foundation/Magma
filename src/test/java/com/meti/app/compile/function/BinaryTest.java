@@ -7,7 +7,8 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 public class BinaryTest {
     @Test
     void inequality() {
-        assertSourceCompile("x != y", "x != y");
+        assertSourceCompile("const x = 420; const y = 69; x != y;",
+                "int x=420;int y=69;x != y;");
     }
 
     @Test
