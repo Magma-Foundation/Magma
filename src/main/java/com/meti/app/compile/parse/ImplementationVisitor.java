@@ -12,7 +12,7 @@ public class ImplementationVisitor extends AbstractParser {
     }
 
     @Override
-    protected boolean isValid(State state) {
+    protected boolean isValid() {
         return state.queryCurrent(value -> value.is(Node.Type.Implementation));
     }
 

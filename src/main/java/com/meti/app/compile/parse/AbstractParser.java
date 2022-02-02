@@ -14,10 +14,10 @@ public abstract class AbstractParser implements Parser {
 
     @Override
     public Option<State> onEnter() {
-        return isValid(state) ? new Some<>(onEnterImpl()) : new None<>();
+        return isValid() ? new Some<>(onEnterImpl()) : new None<>();
     }
 
-    protected abstract boolean isValid(State state);
+    protected abstract boolean isValid();
 
     protected State onEnterImpl() {
         return state;
@@ -25,7 +25,7 @@ public abstract class AbstractParser implements Parser {
 
     @Override
     public Option<State> onExit() {
-        return isValid(state) ? new Some<>(onExitImpl()) : new None<>();
+        return isValid() ? new Some<>(onExitImpl()) : new None<>();
     }
 
     protected State onExitImpl() {
@@ -34,7 +34,7 @@ public abstract class AbstractParser implements Parser {
 
     @Override
     public Option<State> onParse() throws CompileException {
-        return isValid(state) ? new Some<>(onParseImpl()) : new None<>();
+        return isValid() ? new Some<>(onParseImpl()) : new None<>();
     }
 
     protected State onParseImpl() throws CompileException {
