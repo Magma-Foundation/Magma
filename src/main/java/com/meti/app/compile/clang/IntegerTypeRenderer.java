@@ -4,11 +4,10 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public class IntegerTypeRenderer extends AbstractTypeRenderer {
-    public IntegerTypeRenderer(Input name, Node type) {
+    public IntegerTypeRenderer(Node type) {
         super(name, type, Node.Type.Integer);
     }
 

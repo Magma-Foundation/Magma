@@ -6,7 +6,6 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.primitive.BooleanResolver;
 import com.meti.app.compile.process.Processor;
-import com.meti.app.compile.text.Input;
 
 public class CMagmaNodeResolver extends AfterNodeStreamStage {
     @Override
@@ -27,7 +26,7 @@ public class CMagmaNodeResolver extends AfterNodeStreamStage {
     }
 
     @Override
-    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node node) {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node identity) {
         return Streams.apply(new BooleanResolver(node));
     }
 }

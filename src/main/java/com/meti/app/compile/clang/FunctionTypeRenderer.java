@@ -4,12 +4,11 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.StringOutput;
 
 public class FunctionTypeRenderer extends AbstractTypeRenderer {
-    public FunctionTypeRenderer(Input name, Node type) {
+    public FunctionTypeRenderer(Node type) {
         super(name, type, Node.Type.Function);
     }
 

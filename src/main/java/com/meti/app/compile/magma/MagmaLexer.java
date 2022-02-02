@@ -52,7 +52,7 @@ public class MagmaLexer extends NodeStage {
     }
 
     @Override
-    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node node) throws CompileException {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
         try {
             if (node.is(Node.Type.Input)) {
                 var input = node.apply(Attribute.Type.Value).asInput();

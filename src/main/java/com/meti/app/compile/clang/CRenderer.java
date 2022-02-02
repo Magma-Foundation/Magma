@@ -19,7 +19,6 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.stage.AfterStreamStage;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 
 public final class CRenderer extends AfterStreamStage<Output> {
@@ -59,13 +58,13 @@ public final class CRenderer extends AfterStreamStage<Output> {
     }
 
     @Override
-    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node type) {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node identity) {
         return Streams.apply(
-                new IntegerTypeRenderer(name, type),
-                new FunctionTypeRenderer(name, type),
-                new PrimitiveTypeRenderer(name, type),
-                new ReferenceTypeRenderer(name),
-                new StructureTypeRenderer(name, type)
+                new IntegerTypeRenderer(identity),
+                new FunctionTypeRenderer(identity),
+                new PrimitiveTypeRenderer(identity),
+                new ReferenceTypeRenderer(identity),
+                new StructureTypeRenderer(identity)
         );
     }
 

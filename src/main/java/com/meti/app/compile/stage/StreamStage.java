@@ -37,7 +37,7 @@ public abstract class StreamStage<T> extends AbstractStage {
 
     @Override
     protected Node transformType(Input name, Node type) throws CompileException {
-        return transformUsingStreams1(type, streamTypeTransformers(name, type));
+        return transformUsingStreams1(type, streamTypeTransformers(name));
     }
 
     protected Node transformUsingStreams1(Node node, Stream<Processor<Node>> transformers) throws CompileException {
@@ -51,7 +51,7 @@ public abstract class StreamStage<T> extends AbstractStage {
         }
     }
 
-    protected Stream<Processor<Node>> streamTypeTransformers(Input name, Node node) throws CompileException {
+    protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
         return Streams.empty();
     }
 
