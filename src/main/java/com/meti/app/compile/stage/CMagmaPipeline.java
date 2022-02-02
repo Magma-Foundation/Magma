@@ -9,7 +9,6 @@ import com.meti.app.source.Packaging;
 
 public class CMagmaPipeline {
     private final CMagmaNodeResolver resolver = new CMagmaNodeResolver();
-    private final AfterStreamStage modifier = new CMagmaModifier();
     private final CFormatter formatter;
     private final List<Node> input;
     private final CFlattener flattener = new CFlattener();
@@ -32,8 +31,7 @@ public class CMagmaPipeline {
             var parsed = new MagmaParser(this.input).parse();
             var resolved = perform(resolver, parsed);
             var formatted = perform(formatter, resolved);
-            var modified = perform(modifier, formatted);
-            return perform(flattener, modified).stream();
+            return perform(flattener, formatted).stream();
         } catch (StreamException | CompileException e) {
             try {
                 var separator = "\n-----\n";
