@@ -19,12 +19,8 @@ public interface Attribute {
     }
 
     private <T> T failDefault(String format) throws AttributeException {
-        try {
-            var message = format.formatted(getClass(), toJSON());
-            throw new AttributeException(message);
-        } catch (JSONException e) {
-            throw new AttributeException(e);
-        }
+        var message = format.formatted(getClass(), toString());
+        throw new AttributeException(message);
     }
 
     JSONNode toJSON() throws JSONException;
