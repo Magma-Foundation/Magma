@@ -84,7 +84,8 @@ public abstract class AbstractVisitor implements Visitor {
 
     protected abstract State createInitialState();
 
-    public List<Node> parse() throws StreamException, CompileException {
+    @Override
+    public List<Node> visit() throws StreamException, CompileException {
         try {
             var initial = createInitialState();
             return input.stream()
