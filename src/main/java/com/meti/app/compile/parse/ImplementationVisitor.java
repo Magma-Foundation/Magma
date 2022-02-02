@@ -4,7 +4,6 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 
 public class ImplementationVisitor extends AbstractParser {
@@ -21,10 +20,10 @@ public class ImplementationVisitor extends AbstractParser {
     protected State onParseImpl() throws CompileException {
         var element = state.getCurrent();
         var identity = element.apply(Attribute.Type.Identity).asNode();
-        var expectedType = identity.apply(Attribute.Type.Type).asNode();
+        var expectedType = identity.apply(Attribute.Type.Type).asType();
         var value = element.apply(Attribute.Type.Value).asNode();
 
-        var assignableTypes = new MagmaResolver(value, state.getScope()).resolveNodeToMultiple();
+        var assignableTypes = new MagmaResolver(value, state.getScope()).resolve();
         var typeToSet = isAssignableTo(expectedType, assignableTypes);
 
         var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
@@ -32,15 +31,15 @@ public class ImplementationVisitor extends AbstractParser {
         return state.apply(newElement);
     }
 
-    private Node isAssignableTo(Node expectedType, com.meti.api.collect.java.List<Type> assignableTypes) throws CompileException {
+    private Node isAssignableTo(Type expectedType, Type actualType) throws CompileException {
         Node typeToSet;
         if (expectedType.is(Node.Role.Implicit)) {
-            typeToSet = assignableTypes.first().orElse(Primitive.Void);
-        } else if (assignableTypes.contains(expectedType)) {
+            typeToSet = actualType.reduce();
+        } else if (expectedType.isAssignableTo(actualType)) {
             typeToSet = expectedType;
         } else {
             var format = "Expected function to return '%s', but was actually '%s'.";
-            var message = format.formatted(expectedType, assignableTypes);
+            var message = format.formatted(expectedType, actualType);
             throw new CompileException(message);
         }
         return typeToSet;

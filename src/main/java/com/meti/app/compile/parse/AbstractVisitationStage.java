@@ -6,7 +6,6 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.option.Option;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
@@ -17,14 +16,6 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
     public AbstractVisitationStage(List<? extends Node> input) {
         this.input = input;
-    }
-
-    private static boolean isAssignableToAny(List<Type> actualTypes, Type expectedType) {
-        try {
-            return actualTypes.stream().anyMatch(expectedType::isAssignableTo);
-        } catch (StreamException e) {
-            return false;
-        }
     }
 
     protected static State parseDefinitionAttributes(State root) throws CompileException {
@@ -67,7 +58,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
             throw new CompileException("'" + name + "' is already defined.");
         } else if (definition.is(Node.Role.Initialization)) {
             var value = definition.apply(Attribute.Type.Value).asNode();
-            var actualType = new MagmaResolver(value, state.getScope()).resolveNodeToMultiple();
+            var actualType = new MagmaResolver(value, state.getScope()).resolve();
 
             var expectedType = definition.apply(Attribute.Type.Type).asType();
 
@@ -76,12 +67,8 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                  */
             Node typeToDefine;
             if (expectedType.is(Node.Role.Implicit)) {
-                typeToDefine = actualType.first().orElseThrow(() -> {
-                    var format = "No types could be assigned to:\n%s";
-                    var message = format.formatted(value);
-                    return new CompileException(message);
-                });
-            } else if (isAssignableToAny(actualType, expectedType)) {
+                typeToDefine = actualType.reduce();
+            } else if (expectedType.isAssignableTo(actualType)) {
                 typeToDefine = expectedType;
             } else {
                 var format = "Expected a type of '%s' but was actually '%s'.";

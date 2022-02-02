@@ -46,6 +46,6 @@ public interface Node extends JSONable {
         Implicit, Import, Initialization, Input,
         Integer, Invocation, Line, Output,
         Primitive, Reference, Return, String,
-        Structure, Unary, Variable
+        Structure, Unary, Union, Variable
     }
 }

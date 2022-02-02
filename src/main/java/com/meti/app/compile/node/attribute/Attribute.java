@@ -49,6 +49,10 @@ public interface Attribute {
         throw new AttributeException("Not a stream of nodes.");
     }
 
+    default Stream<com.meti.app.compile.node.Type> asStreamOfTypes() throws AttributeException {
+        throw new AttributeException("Not a stream of types.");
+    }
+
     default com.meti.app.compile.node.Type asType() throws AttributeException {
         var format = "Not a type, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
         var message = format.formatted(getClass(), toJSON());
