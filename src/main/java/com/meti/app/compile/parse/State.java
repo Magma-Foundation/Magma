@@ -6,8 +6,8 @@ import com.meti.app.compile.node.Node;
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
 class State {
-    public final Node current;
-    public Scope scope;
+    private final Node current;
+    private final Scope scope;
 
     public State() {
         this(EmptyNode_);
@@ -26,6 +26,10 @@ class State {
         return new State(element, scope);
     }
 
+    public Node getCurrent() {
+        return current;
+    }
+
     public <E extends Exception> State mapCurrent(F1<Node, Node, E> mapper) throws E {
         return new State(mapper.apply(current), scope);
     }
@@ -33,15 +37,10 @@ class State {
     public <E extends Exception> State mapScope(F1<Scope, Scope, E> mapper) throws E {
         var oldScope = getScope();
         var newScope = mapper.apply(oldScope);
-        return setScope(newScope);
+        return new State(current, newScope);
     }
 
     public Scope getScope() {
         return scope;
-    }
-
-    public State setScope(Scope scope) {
-        this.scope = scope;
-        return this;
     }
 }
