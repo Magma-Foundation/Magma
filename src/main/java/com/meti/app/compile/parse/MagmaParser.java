@@ -79,7 +79,7 @@ public record MagmaParser(List<? extends Node> input) {
                 try {
                     var current = oldState.current;
                     var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
-                    var result = input.stream().foldRight(new StateBuffer(),
+                    var result = input.stream().foldRight(new StateBuffer(oldState),
                             (buffer, next) -> buffer.append(state -> MagmaParser.this.parseAST(state.apply(next))));
                     var attribute = new NodesAttribute(result.list);
                     var newCurrent = current.with(type, attribute);
@@ -176,6 +176,10 @@ public record MagmaParser(List<? extends Node> input) {
         private StateBuffer(List<Node> list, State state) {
             this.list = list;
             this.state = state;
+        }
+
+        private StateBuffer(State state) {
+            this(List.createList(), state);
         }
 
         public <E extends Exception> StateBuffer append(F1<State, State, E> mapper) throws E {
