@@ -14,14 +14,14 @@ class NodeAttributeTest {
 
         var expected = """
                 {
-                \t"node":{
+                \t"node" : {
                 \t\t"returns" : {
                 \t\t\t"value" : "test"
                 \t\t}
                 \t}
                 }""";
-        var actual = new NodeAttribute(outer).toString();
 
+        var actual = new NodeAttribute(outer).toString();
         assertEquals(expected, actual);
     }
 }

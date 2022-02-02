@@ -1,6 +1,7 @@
 package com.meti.app.compile.node.attribute;
 
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.common.Field;
 import com.meti.app.compile.node.Node;
@@ -14,27 +15,30 @@ public interface Attribute {
     }
 
     default Input asInput() throws AttributeException {
-        var format = "Not input, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
-        var message = format.formatted(getClass(), toJSON());
-        throw new AttributeException(message);
+        return failDefault("Not input, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
     }
 
-    JSONNode toJSON();
+    private <T> T failDefault(String format) throws AttributeException {
+        try {
+            var message = format.formatted(getClass(), toJSON());
+            throw new AttributeException(message);
+        } catch (JSONException e) {
+            throw new AttributeException(e);
+        }
+    }
+
+    JSONNode toJSON() throws JSONException;
 
     default int asInteger() throws AttributeException {
         throw new AttributeException("Not an integer.");
     }
 
     default Node asNode() throws AttributeException {
-        var format = "Not a node, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
-        var message = format.formatted(getClass(), toJSON());
-        throw new AttributeException(message);
+        return failDefault("Not a node, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
     }
 
     default Output asOutput() throws AttributeException {
-        var format = "Not output, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
-        var message = format.formatted(getClass(), toJSON());
-        throw new AttributeException(message);
+        return failDefault("Not output, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
     }
 
     default Packaging asPackaging() throws AttributeException {
@@ -49,14 +53,8 @@ public interface Attribute {
         throw new AttributeException("Not a stream of nodes.");
     }
 
-    default Stream<com.meti.app.compile.node.Type> asStreamOfTypes() throws AttributeException {
-        throw new AttributeException("Not a stream of types.");
-    }
-
     default com.meti.app.compile.node.Type asType() throws AttributeException {
-        var format = "Not a type, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
-        var message = format.formatted(getClass(), toJSON());
-        throw new AttributeException(message);
+        return failDefault("Not a type, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
     }
 
     enum Type {

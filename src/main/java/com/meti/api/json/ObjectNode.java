@@ -31,7 +31,11 @@ public class ObjectNode implements JSONNode {
     @Override
     public String toString() {
         try {
-            return internalMap.streamKeys().map(key -> "\"" + key + "\":" + internalMap.apply(key)).foldRight((current, next) -> current + "," + next).map(value -> "{" + value + "}").orElse("{}");
+            return internalMap.streamKeys()
+                    .map(key -> "\"" + key + "\":" + internalMap.apply(key))
+                    .foldRight((current, next) -> current + "," + next)
+                    .map(value -> "{" + value + "}")
+                    .orElse("{}");
         } catch (StreamException e) {
             return "";
         }

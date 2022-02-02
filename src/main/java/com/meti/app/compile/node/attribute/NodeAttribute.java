@@ -1,5 +1,6 @@
 package com.meti.app.compile.node.attribute;
 
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
@@ -12,8 +13,8 @@ public final class NodeAttribute extends AbstractAttribute {
     }
 
     @Override
-    public JSONNode toJSON() {
-        return new ObjectNode().addObject("node", node);
+    public JSONNode toJSON() throws JSONException {
+        return new ObjectNode().addJSONable("node", node);
     }
 
     @Override
