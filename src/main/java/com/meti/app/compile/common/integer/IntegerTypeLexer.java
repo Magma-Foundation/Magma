@@ -3,13 +3,13 @@ package com.meti.app.compile.common.integer;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
-public record IntegerTypeLexer(Input text) implements Processor<Node> {
+public record IntegerTypeLexer(Input text) implements Processor<Type> {
     @Override
-    public Option<Node> process() {
+    public Option<Type> process() {
         var isSigned = text.startsWithChar('I');
         var isUnsigned = text.startsWithChar('U');
         if (isSigned || isUnsigned) {

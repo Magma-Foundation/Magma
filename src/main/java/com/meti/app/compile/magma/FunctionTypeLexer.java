@@ -7,19 +7,20 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
 
-public record FunctionTypeLexer(Input text) implements Processor<Node> {
+public record FunctionTypeLexer(Input text) implements Processor<Type> {
     @Override
-    public Option<Node> process() {
+    public Option<Type> process() {
         return text.firstIndexOfChar(')')
                 .filter(value -> text.startsWithChar('('))
                 .flatMap(this::extract);
     }
 
-    private Option<Node> extract(Integer end) {
+    private Option<Type> extract(Integer end) {
         try {
             var parameters = Streams.apply(text.slice(1, end)
                     .toOutput()

@@ -4,13 +4,13 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
-public record PrimitiveLexer(Input text) implements Processor<Node> {
+public record PrimitiveLexer(Input text) implements Processor<Type> {
     @Override
-    public Option<Node> process() {
+    public Option<Type> process() {
         try {
             return Streams.apply(Primitive.values())
                     .filter(value -> text.equalsSlice(value.name()))

@@ -19,7 +19,7 @@ import com.meti.app.compile.lex.LexException;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
-import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.TypeAttribute;
 import com.meti.app.compile.primitive.PrimitiveLexer;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
@@ -63,7 +63,7 @@ public class MagmaLexer extends NodeStage {
                             new ReferenceTypeLexer(input),
                             new PrimitiveLexer(input),
                             new IntegerTypeLexer(input))
-                            .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Type.Type, new NodeAttribute(result))));
+                            .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Type.Type, new TypeAttribute(result))));
                 } catch (StreamException e) {
                     throw new CompileException(e);
                 }
