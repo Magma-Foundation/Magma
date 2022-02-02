@@ -16,7 +16,8 @@ import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 public record MagmaParser(List<? extends Node> input) {
     private State parseAST(State state) throws CompileException {
         var before = beforeAST(state);
-        var withDefinitionsAttributes = parseDefinitionsAttributes(before);
+        var withDefinitionAttributes = parseDefinitionAttributes(before);
+        var withDefinitionsAttributes = parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = pareNodeAttributes(withNodesAttributes);
         return afterAST(withNodeAttributes);
@@ -24,9 +25,7 @@ public record MagmaParser(List<? extends Node> input) {
 
     private State beforeAST(State state) throws CompileException {
         var element = state.current;
-        if (element.is(Node.Type.Declaration)) {
-            return parseDefinition(state);
-        } else if (element.is(Node.Type.Variable)) {
+        if (element.is(Node.Type.Variable)) {
             return parseVariable(state);
         } else if (element.is(Node.Type.Block)) {
             return state.mapScope(Scope::enter);
@@ -58,6 +57,51 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
+    private State parseDefinitionAttributes(State root) throws CompileException {
+        try {
+            var current = root.current;
+            return current.apply(Attribute.Group.Definition).foldRight(root, (oldState, type) -> {
+                var previous = current.apply(type).asNode();
+                var newState = parseField(oldState.apply(previous));
+                return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
+            });
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    private State afterAST(State state) throws CompileException {
+        var root = state.current;
+        if (root.is(Node.Type.Block)) {
+            return state.mapScope(Scope::exit);
+        } else if (root.is(Node.Type.Implementation)) {
+            return parseDefinedImplementation(state, root);
+        } else {
+            return state;
+        }
+    }
+
+    private State parseDefinedImplementation(State state, Node element) throws CompileException {
+        var identity = element.apply(Attribute.Type.Identity).asNode();
+        var expectedType = identity.apply(Attribute.Type.Type).asNode();
+        var value = element.apply(Attribute.Type.Value).asNode();
+        var assignableTypes = resolveNodeToMultiple(value, state.scope);
+
+        Node typeToSet;
+        if (expectedType.is(Node.Type.Implicit)) {
+            typeToSet = assignableTypes.first().orElse(Primitive.Void);
+        } else if (assignableTypes.contains(expectedType)) {
+            typeToSet = expectedType;
+        } else {
+            var format = "Expected function to return '%s', but was actually '%s'.";
+            var message = format.formatted(expectedType, assignableTypes);
+            throw new CompileException(message);
+        }
+        var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
+        var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+        return state.apply(newElement);
+    }
+
     private State parseDefinitionsAttributes(State root) throws CompileException {
         try {
             return root.current.apply(Attribute.Group.Definitions).foldRight(root, (oldState, type) -> {
@@ -75,17 +119,6 @@ public record MagmaParser(List<? extends Node> input) {
             });
         } catch (StreamException e) {
             throw new CompileException(e);
-        }
-    }
-
-    private State afterAST(State state) throws CompileException {
-        var root = state.current;
-        if (root.is(Node.Type.Block)) {
-            return state.mapScope(Scope::exit);
-        } else if (root.is(Node.Type.Implementation)) {
-            return parseDefinedImplementation(state, root);
-        } else {
-            return state;
         }
     }
 
@@ -119,34 +152,6 @@ public record MagmaParser(List<? extends Node> input) {
         } else {
             return state.mapScope(scope -> scope.define(definition));
         }
-    }
-
-    private State parseDefinedImplementation(State state, Node element) throws CompileException {
-        var identity = element.apply(Attribute.Type.Identity).asNode();
-        var expectedType = identity.apply(Attribute.Type.Type).asNode();
-        var value = element.apply(Attribute.Type.Value).asNode();
-        var assignableTypes = resolveNodeToMultiple(value, state.scope);
-
-        Node typeToSet;
-        if (expectedType.is(Node.Type.Implicit)) {
-            typeToSet = assignableTypes.first().orElse(Primitive.Void);
-        } else if (assignableTypes.contains(expectedType)) {
-            typeToSet = expectedType;
-        } else {
-            var format = "Expected function to return '%s', but was actually '%s'.";
-            var message = format.formatted(expectedType, assignableTypes);
-            throw new CompileException(message);
-        }
-        var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
-        var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
-        return state.apply(newElement);
-    }
-
-    private State parseDefinition(State state) throws CompileException {
-        var root = state.current;
-        var oldIdentity = root.apply(Attribute.Type.Identity).asNode();
-        var newIdentity = parseField(state.apply(oldIdentity));
-        return newIdentity.mapCurrent(value -> root.with(Attribute.Type.Identity, new NodeAttribute(value)));
     }
 
     private State parseNodesAttribute(State root) throws CompileException {
