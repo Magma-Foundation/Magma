@@ -55,7 +55,7 @@ public class MagmaLexer extends NodeStage {
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
         if (identity.is(Node.Role.Declaration) || identity.is(Node.Role.Initialization)) {
-            var type = identity.apply(Attribute.Type.Type).asNode();
+            var type = identity.apply(Attribute.Type.Type).asType();
             if (type.is(Node.Role.Input)) {
                 var input = type.apply(Attribute.Type.Value).asInput();
                 try {
