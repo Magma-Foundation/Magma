@@ -15,7 +15,7 @@ public class VariableParser extends UnitedParser {
     }
 
     @Override
-    protected State onEnterImpl() throws CompileException {
+    protected State onParseImpl() throws CompileException {
         var value = state.getCurrent().apply(Attribute.Type.Value).asInput();
         var format = value.toOutput().compute();
         if (!state.getScope().isDefined(format)) {

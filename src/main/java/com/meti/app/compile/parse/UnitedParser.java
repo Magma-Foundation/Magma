@@ -28,6 +28,15 @@ public abstract class UnitedParser implements Parser {
         return isValid(state) ? new Some<>(onExitImpl()) : new None<>();
     }
 
+    @Override
+    public Option<State> onParse() throws CompileException {
+        return isValid(state) ? new Some<>(onParseImpl()) : new None<>();
+    }
+
+    protected State onParseImpl() throws CompileException {
+        return state;
+    }
+
     protected State onExitImpl() throws CompileException {
         return state;
     }

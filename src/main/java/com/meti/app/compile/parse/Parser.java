@@ -7,4 +7,6 @@ public interface Parser {
     Option<State> onEnter() throws CompileException;
 
     Option<State> onExit() throws CompileException;
+
+    Option<State> onParse() throws CompileException;
 }

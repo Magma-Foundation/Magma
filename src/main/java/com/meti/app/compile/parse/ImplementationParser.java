@@ -17,7 +17,7 @@ public class ImplementationParser extends UnitedParser {
     }
 
     @Override
-    protected State onExitImpl() throws CompileException {
+    protected State onParseImpl() throws CompileException {
         var element = state.getCurrent();
         var identity = element.apply(Attribute.Type.Identity).asNode();
         var expectedType = identity.apply(Attribute.Type.Type).asNode();
