@@ -12,7 +12,7 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.stage.StreamStage;
 
-public record BlockResolver(Node node, StreamStage<Node> parent) implements Processor<Node> {
+public record BlockResolver(Node node, StreamStage parent) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Type.Block)) {
             try {

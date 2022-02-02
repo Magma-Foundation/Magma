@@ -6,15 +6,16 @@ import com.meti.app.compile.render.RenderException;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 
-public class IntegerTypeRenderer extends AbstractTypeRenderer {
-    public IntegerTypeRenderer(Node type) {
-        super(name, type, Node.Type.Integer);
+public class IntegerTypeRenderer extends OutputRenderer {
+    public IntegerTypeRenderer(Node identity) {
+        super(identity, Node.Type.Integer);
     }
 
     @Override
     protected Output processValid() throws CompileException {
-        var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
-        var bits = type.apply(Attribute.Type.Bits).asInteger();
+        var name = identity.apply(Attribute.Type.Name).asInput();
+        var isSigned = identity.apply(Attribute.Type.Sign).asBoolean();
+        var bits = identity.apply(Attribute.Type.Bits).asInteger();
         var prefix = switch (bits) {
             case 8 -> "char";
             case 16 -> "int";

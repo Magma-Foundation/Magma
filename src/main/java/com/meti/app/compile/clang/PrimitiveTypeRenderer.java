@@ -2,21 +2,20 @@ package com.meti.app.compile.clang;
 
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.stage.CompileException;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.text.Output;
 
-public class PrimitiveTypeRenderer extends AbstractTypeRenderer {
-    public PrimitiveTypeRenderer(Node type) {
-        super(name, type, Node.Type.Primitive);
+public class PrimitiveTypeRenderer extends OutputRenderer {
+    public PrimitiveTypeRenderer(Node identity) {
+        super(identity, Node.Type.Primitive);
     }
 
     @Override
-    protected Output processValid() throws CompileException {
-        return type.apply(Attribute.Type.Name)
+    protected Output processValid() throws AttributeException {
+        return identity.apply(Attribute.Type.Name)
                 .asInput()
                 .toOutput()
                 .map(String::toLowerCase)
-                .appendSlice(" ")
-                .appendOutput(name.toOutput());
+                .appendSlice(" ");
     }
 }

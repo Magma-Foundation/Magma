@@ -53,19 +53,7 @@ public class MagmaLexer extends NodeStage {
 
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
-        try {
-            if (node.is(Node.Type.Input)) {
-                var input = node.apply(Attribute.Type.Value).asInput();
-                return streamTypeTransformers(input);
-            } else {
-                return Streams.empty();
-            }
-        } catch (AttributeException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    private Stream<Processor<Node>> streamTypeTransformers(Input input) {
+        var input = identity.apply(Attribute.Type.Value).asInput();
         return Streams.apply(new FunctionTypeLexer(input),
                 new ReferenceLexer(input),
                 new PrimitiveLexer(input),

@@ -7,16 +7,17 @@ import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.StringOutput;
 
-public class FunctionTypeRenderer extends AbstractTypeRenderer {
-    public FunctionTypeRenderer(Node type) {
-        super(name, type, Node.Type.Function);
+public class FunctionTypeRenderer extends OutputRenderer {
+    public FunctionTypeRenderer(Node identity) {
+        super(identity, Node.Type.Function);
     }
 
     @Override
     protected Output processValid() throws CompileException {
         try {
-            var returns = type.apply(Attribute.Type.Type).asOutput();
-            var parameters = type.apply(Attribute.Type.Parameters)
+            var name = identity.apply(Attribute.Type.Name).asInput();
+            var returns = identity.apply(Attribute.Type.Type).asOutput();
+            var parameters = identity.apply(Attribute.Type.Parameters)
                     .asStreamOfNodes()
                     .map(value -> value.apply(Attribute.Type.Value))
                     .map(Attribute::asOutput)

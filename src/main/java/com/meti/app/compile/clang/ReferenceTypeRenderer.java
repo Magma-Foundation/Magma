@@ -5,7 +5,7 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.OutputAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-public class ReferenceTypeRenderer extends AbstractTypeRenderer {
+public class ReferenceTypeRenderer extends NodeTypeRenderer {
     public ReferenceTypeRenderer(Node identity) {
         super(identity, Node.Type.Reference);
     }

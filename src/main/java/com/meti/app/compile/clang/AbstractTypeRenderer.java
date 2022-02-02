@@ -8,11 +8,11 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 
-public abstract class AbstractTypeRenderer implements Processor<Node> {
+public abstract class AbstractTypeRenderer<T> implements Processor<Node> {
     protected final Node identity;
-    private final Node.Type type;
+    protected final Node.Type type;
 
-    protected AbstractTypeRenderer(Node identity, Node.Type type) {
+    public AbstractTypeRenderer(Node identity, Node.Type type) {
         this.identity = identity;
         this.type = type;
     }
@@ -20,9 +20,11 @@ public abstract class AbstractTypeRenderer implements Processor<Node> {
     @Override
     public Option<Node> process() throws CompileException {
         return identity.apply(Attribute.Type.Type).asNode().is(type)
-                ? new Some<>(processValid())
+                ? new Some<>(toNode(processValid()))
                 : new None<>();
     }
 
-    protected abstract Node processValid() throws CompileException;
+    protected abstract Node toNode(T node) throws CompileException;
+
+    protected abstract T processValid() throws CompileException;
 }

@@ -6,9 +6,8 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
-import com.meti.app.compile.text.Input;
 
-public abstract class StreamStage<T> extends AbstractStage {
+public abstract class StreamStage extends AbstractStage {
     @Override
     protected Node transformDefinition(Node definition) throws CompileException {
         var newDefinition = beforeDefinitionTraversal(definition);
@@ -36,11 +35,11 @@ public abstract class StreamStage<T> extends AbstractStage {
     }
 
     @Override
-    protected Node transformType(Input name, Node type) throws CompileException {
-        return transformUsingStreams1(type, streamTypeTransformers(name));
+    protected Node transformType(Node identity) throws CompileException {
+        return transformUsingStreams(identity, streamTypeTransformers(identity));
     }
 
-    protected Node transformUsingStreams1(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+    protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
         try {
             return transformers.map(Processor::process)
                     .flatMap(Streams::optionally)
@@ -54,18 +53,4 @@ public abstract class StreamStage<T> extends AbstractStage {
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
         return Streams.empty();
     }
-
-    protected Node transformUsingStreams(Node node, Stream<Processor<T>> transformers) throws CompileException {
-        try {
-            return transformers.map(Processor::process)
-                    .flatMap(Streams::optionally)
-                    .first()
-                    .map(this::wrap)
-                    .orElse(node);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    protected abstract Node wrap(T t);
 }

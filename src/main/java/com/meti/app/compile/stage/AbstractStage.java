@@ -5,7 +5,6 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
-import com.meti.app.compile.text.Input;
 
 public abstract class AbstractStage implements Stage {
     protected Node transformDefinition(Node definition) throws CompileException {
@@ -113,12 +112,12 @@ public abstract class AbstractStage implements Stage {
         var name = oldIdentity.apply(Attribute.Type.Name).asInput();
         var oldType = oldIdentity.apply(Attribute.Type.Type).asNode();
 
-        var newType = transformType(name, oldType);
+        var newType = transformType(oldType);
         var newTypeAttribute = new NodeAttribute(newType);
         return oldIdentity.with(Attribute.Type.Type, newTypeAttribute);
     }
 
-    protected Node transformType(Input name, Node type) throws CompileException {
-        return type;
+    protected Node transformType(Node identity) throws CompileException {
+        return identity;
     }
 }

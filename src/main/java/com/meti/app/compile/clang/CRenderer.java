@@ -1,6 +1,7 @@
 package com.meti.app.compile.clang;
 
 import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.common.LineProcessor;
 import com.meti.app.compile.common.alternate.ElseProcessor;
@@ -19,9 +20,8 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.render.EmptyProcessor;
 import com.meti.app.compile.stage.AfterStreamStage;
 import com.meti.app.compile.stage.CompileException;
-import com.meti.app.compile.text.Output;
 
-public final class CRenderer extends AfterStreamStage<Output> {
+public final class CRenderer extends AfterStreamStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
         if (definition.is(Node.Type.Initialization)) {
@@ -69,12 +69,7 @@ public final class CRenderer extends AfterStreamStage<Output> {
     }
 
     @Override
-    protected Node wrap(Output output) {
-        return new OutputNode(output);
-    }
-
-    @Override
-    protected Stream<Processor<Output>> streamNodeTransformers(Node root) {
+    protected Stream<Processor<Node>> streamNodeTransformers(Node root) throws StreamException {
         return Streams.apply(
                 new BinaryProcessor(root),
                 new BlockProcessor(root),
@@ -92,6 +87,7 @@ public final class CRenderer extends AfterStreamStage<Output> {
                 new StringProcessor(root),
                 new StructureRenderer(root),
                 new UnaryProcessor(root),
-                new VariableProcessor(root));
+                new VariableProcessor(root))
+                .map(processor -> () -> processor.process().map(OutputNode::new));
     }
 }

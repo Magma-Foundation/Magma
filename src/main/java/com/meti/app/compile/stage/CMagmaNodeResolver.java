@@ -27,6 +27,6 @@ public class CMagmaNodeResolver extends AfterNodeStreamStage {
 
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) {
-        return Streams.apply(new BooleanResolver(node));
+        return Streams.apply(new BooleanResolver(identity));
     }
 }
