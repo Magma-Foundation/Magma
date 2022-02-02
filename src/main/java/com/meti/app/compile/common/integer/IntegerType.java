@@ -2,13 +2,21 @@ package com.meti.app.compile.common.integer;
 
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
-import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.BooleanAttribute;
 import com.meti.app.compile.node.attribute.IntegerAttribute;
 
-public record IntegerType(boolean signed, int bits) implements Node {
+public final class IntegerType extends AbstractNode {
+    private final boolean signed;
+    private final int bits;
+
+    public IntegerType(boolean signed, int bits) {
+        this.signed = signed;
+        this.bits = bits;
+    }
+
     @Override
     public boolean is(Type type) {
         return type == Type.Integer;

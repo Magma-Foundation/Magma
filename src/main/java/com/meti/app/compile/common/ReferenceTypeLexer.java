@@ -14,7 +14,7 @@ public record ReferenceTypeLexer(Input text) implements Processor<Node> {
         if (text.startsWithChar('&')) {
             var valueText = text.slice(1);
             var node = new InputNode(valueText);
-            return new Some<>(new Reference(node));
+            return new Some<>(new ReferenceType(node));
         } else {
             return new None<>();
         }

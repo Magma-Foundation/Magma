@@ -2,7 +2,7 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.common.Reference;
+import com.meti.app.compile.common.ReferenceType;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -25,7 +25,7 @@ public record MagmaResolver(Node root, Scope scope) {
         } else if (root.is(Node.Type.Boolean)) {
             return List.apply(Primitive.Bool);
         } else if (root.is(Node.Type.Integer)) {
-            var toReturn = List.<Node>apply(new Reference(Primitive.Void), new IntegerType(true, 16));
+            var toReturn = List.<Node>apply(new ReferenceType(Primitive.Void), new IntegerType(true, 16));
             var value = root.apply(Attribute.Type.Value).asInteger();
             if (value >= 0) {
                 return toReturn.add(new IntegerType(false, 16));
