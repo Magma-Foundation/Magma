@@ -4,7 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.parse.CMagmaModifier;
+import com.meti.app.compile.parse.CMagmaModificationStage;
 import com.meti.app.compile.parse.MagmaParser;
 import com.meti.app.source.Packaging;
 
@@ -30,7 +30,7 @@ public class CMagmaPipeline {
     public Stream<Node> pipe() throws CompileException {
         try {
             var parsed = new MagmaParser(input).visit();
-            var modified = new CMagmaModifier(parsed).visit();
+            var modified = new CMagmaModificationStage(parsed).visit();
 
             var resolved = perform(resolver, modified);
             var formatted = perform(formatter, resolved);

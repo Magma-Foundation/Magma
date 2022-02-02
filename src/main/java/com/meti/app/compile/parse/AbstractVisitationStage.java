@@ -11,10 +11,10 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-public abstract class AbstractVisitor implements Visitor {
+public abstract class AbstractVisitationStage implements VisitationStage {
     protected final List<? extends Node> input;
 
-    public AbstractVisitor(List<? extends Node> input) {
+    public AbstractVisitationStage(List<? extends Node> input) {
         this.input = input;
     }
 
@@ -23,7 +23,7 @@ public abstract class AbstractVisitor implements Visitor {
             var current = root.getCurrent();
             return current.apply(Attribute.Group.Definition).foldRight(root, (oldState, type) -> {
                 var previous = current.apply(type).asNode();
-                var newState = AbstractVisitor.parseField(oldState.apply(previous));
+                var newState = AbstractVisitationStage.parseField(oldState.apply(previous));
                 return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
             });
         } catch (StreamException e) {
@@ -38,7 +38,7 @@ public abstract class AbstractVisitor implements Visitor {
                     var current = oldState.getCurrent();
                     var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
                     var result = input.stream().foldRight(new StateBuffer(oldState),
-                            (buffer, next) -> buffer.append(state -> AbstractVisitor.parseField(state.apply(next))));
+                            (buffer, next) -> buffer.append(state -> AbstractVisitationStage.parseField(state.apply(next))));
                     var attribute = new NodesAttribute(result.list);
                     var newCurrent = current.with(type, attribute);
                     return result.state.apply(newCurrent);
@@ -99,8 +99,8 @@ public abstract class AbstractVisitor implements Visitor {
     protected State parseAST(State state) throws CompileException {
         var before = transformAST(state, Parser::onEnter);
         var parsed = parseImpl(before);
-        var withDefinitionAttributes = AbstractVisitor.parseDefinitionAttributes(parsed);
-        var withDefinitionsAttributes = AbstractVisitor.parseDefinitionsAttributes(withDefinitionAttributes);
+        var withDefinitionAttributes = AbstractVisitationStage.parseDefinitionAttributes(parsed);
+        var withDefinitionsAttributes = AbstractVisitationStage.parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = parseNodeAttributes(withNodesAttributes);
         return transformAST(withNodeAttributes, Parser::onExit);
@@ -130,7 +130,7 @@ public abstract class AbstractVisitor implements Visitor {
                     var current = oldState.getCurrent();
                     var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
                     var result = input.stream().foldRight(new StateBuffer(oldState),
-                            (buffer, next) -> buffer.append(state -> AbstractVisitor.this.parseAST(state.apply(next))));
+                            (buffer, next) -> buffer.append(state -> AbstractVisitationStage.this.parseAST(state.apply(next))));
                     var attribute = new NodesAttribute(result.list);
                     var newCurrent = current.with(type, attribute);
                     return result.state.apply(newCurrent);

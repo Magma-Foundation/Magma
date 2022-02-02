@@ -6,7 +6,7 @@ import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
 
-public final class MagmaParser extends AbstractParser implements MagmaVisitor {
+public final class MagmaParser extends AbstractParser implements MagmaVisitationStage {
     public MagmaParser(List<? extends Node> input) {
         super(input);
     }

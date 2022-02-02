@@ -6,7 +6,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.stage.CompileException;
 
-public interface Visitor {
+public interface VisitationStage {
     Stream<Parser> streamParsers(State state);
 
     List<Node> visit() throws StreamException, CompileException;
