@@ -11,7 +11,7 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-public abstract class AbstractVisitationStage implements VisitationStage {
+public abstract class AbstractVisitationStage<T extends Visitor> implements VisitationStage<T> {
     protected final List<? extends Node> input;
 
     public AbstractVisitationStage(List<? extends Node> input) {
@@ -97,13 +97,13 @@ public abstract class AbstractVisitationStage implements VisitationStage {
     }
 
     protected State parseAST(State state) throws CompileException {
-        var before = transformAST(state, Parser::onEnter);
+        var before = transformAST(state, Visitor::onEnter);
         var parsed = parseImpl(before);
         var withDefinitionAttributes = AbstractVisitationStage.parseDefinitionAttributes(parsed);
         var withDefinitionsAttributes = AbstractVisitationStage.parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = parseNodeAttributes(withNodesAttributes);
-        return transformAST(withNodeAttributes, Parser::onExit);
+        return transformAST(withNodeAttributes, Visitor::onExit);
     }
 
     protected State parseImpl(State state) throws CompileException {
@@ -143,9 +143,9 @@ public abstract class AbstractVisitationStage implements VisitationStage {
         }
     }
 
-    protected State transformAST(State state, F1<Parser, Option<State>, CompileException> mapper) throws CompileException {
+    protected State transformAST(State state, F1<T, Option<State>, CompileException> mapper) throws CompileException {
         try {
-            return streamParsers(state)
+            return streamVisitors(state)
                     .map(mapper)
                     .flatMap(Streams::optionally)
                     .first()

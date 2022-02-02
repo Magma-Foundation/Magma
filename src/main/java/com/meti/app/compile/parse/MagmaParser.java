@@ -1,22 +1,15 @@
 package com.meti.app.compile.parse;
 
-import com.meti.api.collect.java.List;
-import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.magma.FunctionType;
-import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
 
-public final class MagmaParser extends AbstractParser implements MagmaVisitationStage {
-    public MagmaParser(List<? extends Node> input) {
-        super(input);
-    }
-
+public interface MagmaParser extends VisitationStage<Parser> {
     @Override
-    protected State createInitialState() {
-        return new State().mapScope(scope -> {
-            // TODO: Do generic type here later
-            var type = new FunctionType(Primitive.Void);
-            return scope.define(new EmptyField("=", type));
-        });
+    default Stream<Parser> streamVisitors(State state) {
+        return Streams.apply(
+                new BlockVisitor(state),
+                new ImplementationVisitor(state),
+                new VariableVisitor(state)
+        );
     }
 }

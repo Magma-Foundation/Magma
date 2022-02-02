@@ -23,7 +23,7 @@ class MagmaParserTest {
         var definition = new Definition(identity);
 
         var input = List.apply(new Block(definition), definition);
-        var output = new MagmaParser(input).visit();
+        var output = new MagmaParsingStage(input).visit();
 
         var expected = JavaList.toNativeList(input);
         var actual = JavaList.toNativeList(output);
@@ -39,7 +39,7 @@ class MagmaParserTest {
         var definition = new Definition(identity);
 
         var input = List.apply(definition, new Block(definition));
-        var parser = new MagmaParser(input);
+        var parser = new MagmaParsingStage(input);
 
         assertThrows(CompileException.class, parser::visit);
     }

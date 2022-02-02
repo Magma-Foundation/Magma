@@ -2,8 +2,8 @@ package com.meti.app.compile.parse;
 
 import com.meti.app.compile.node.Node;
 
-public class BlockParser extends UnitedParser {
-    public BlockParser(State state) {
+public class BlockVisitor extends AbstractParser {
+    public BlockVisitor(State state) {
         super(state);
     }
 

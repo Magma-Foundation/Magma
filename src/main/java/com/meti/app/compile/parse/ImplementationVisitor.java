@@ -6,8 +6,8 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-public class ImplementationParser extends UnitedParser {
-    public ImplementationParser(State state) {
+public class ImplementationVisitor extends AbstractParser {
+    public ImplementationVisitor(State state) {
         super(state);
     }
 

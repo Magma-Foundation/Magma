@@ -4,8 +4,8 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.stage.CompileException;
 
-public class VariableParser extends UnitedParser {
-    protected VariableParser(State state) {
+public class VariableVisitor extends AbstractParser {
+    protected VariableVisitor(State state) {
         super(state);
     }
 
