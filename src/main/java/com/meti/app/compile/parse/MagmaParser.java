@@ -34,16 +34,16 @@ public record MagmaParser(List<? extends Node> input) {
             var identity = element.apply(Attribute.Type.Identity).asNode();
             var expectedType = identity.apply(Attribute.Type.Type).asNode();
             var value = element.apply(Attribute.Type.Value).asNode();
-            var actualType = resolveNode(value, state.scope);
+            var assignableTypes = resolveNodeToMultiple(value, state.scope);
 
             Node typeToSet;
             if (expectedType.is(Node.Type.Implicit)) {
-                typeToSet = actualType;
-            } else if (expectedType.equals(actualType)) {
+                typeToSet = assignableTypes.first().orElse(Primitive.Void);
+            } else if (assignableTypes.contains(expectedType)) {
                 typeToSet = expectedType;
             } else {
                 var format = "Expected function to return '%s', but was actually '%s'.";
-                var message = format.formatted(expectedType, actualType);
+                var message = format.formatted(expectedType, assignableTypes);
                 throw new CompileException(message);
             }
             var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
@@ -92,7 +92,8 @@ public record MagmaParser(List<? extends Node> input) {
         } else {
             if (oldIdentity.is(Node.Type.Initialization)) {
                 var value = oldIdentity.apply(Attribute.Type.Value).asNode();
-                var actualType = resolveNode(value, state.getScope());
+                var actualType = resolveNodeToSingle(value, state.getScope());
+
                 var expectedType = oldIdentity.apply(Attribute.Type.Type).asNode();
 
                 /*
@@ -147,39 +148,53 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
-    private Node resolveNode(Node value, Scope scope) throws CompileException {
-        if (value.is(Node.Type.Variable)) {
-            var variableName = value.apply(Attribute.Type.Value).asInput()
+    private List<Node> resolveNodeToMultiple(Node root, Scope scope) throws CompileException {
+        if (root.is(Node.Type.Variable)) {
+            var variableName = root.apply(Attribute.Type.Value).asInput()
                     .toOutput()
                     .compute();
-            return scope.lookup(variableName)
+            return List.apply(scope.lookup(variableName)
                     .map(node -> node.apply(Attribute.Type.Type).asNode())
                     .orElseThrow(() -> {
                         var format = "'%s' is not defined.";
                         var message = format.formatted(variableName);
                         return new CompileException(message);
-                    });
-        } else if (value.is(Node.Type.Boolean)) {
-            return Primitive.Bool;
-        } else if (value.is(Node.Type.Integer)) {
-            return new IntegerType(true, 16);
-        } else if (value.is(Node.Type.Return)) {
-            var innerValue = value.apply(Attribute.Type.Value).asNode();
-            return resolveNode(innerValue, scope);
-        } else if (value.is(Node.Type.Block)) {
+                    }));
+        } else if (root.is(Node.Type.Boolean)) {
+            return List.apply(Primitive.Bool);
+        } else if (root.is(Node.Type.Integer)) {
+            var toReturn = List.<Node>apply(new IntegerType(true, 16));
+            var value = root.apply(Attribute.Type.Value).asInteger();
+            if (value >= 0) {
+                return toReturn.add(new IntegerType(false, 16));
+            } else {
+                return toReturn;
+            }
+        } else if (root.is(Node.Type.Return)) {
+            var innerValue = root.apply(Attribute.Type.Value).asNode();
+            return resolveNodeToMultiple(innerValue, scope);
+        } else if (root.is(Node.Type.Block)) {
             try {
-                return value.apply(Attribute.Type.Children)
+                return root.apply(Attribute.Type.Children)
                         .asStreamOfNodes()
                         .foldRight(List.<Node>createList(), List::add)
                         .last()
-                        .map(last -> resolveNode(last, scope))
-                        .orElse(Primitive.Void);
+                        .map(last -> resolveNodeToMultiple(last, scope))
+                        .orElse(List.apply(Primitive.Void));
             } catch (StreamException e) {
                 throw new CompileException(e);
             }
         } else {
-            throw new CompileException("Cannot resolve type of node: " + value);
+            throw new CompileException("Cannot resolve type of node: " + root);
         }
+    }
+
+    private Node resolveNodeToSingle(Node value, Scope scope) throws CompileException {
+        return resolveNodeToMultiple(value, scope).first().orElseThrow(() -> {
+            var format = "No types exist for node:\n%s";
+            var message = format.formatted(value);
+            return new CompileException(message);
+        });
     }
 
     private static class State {
