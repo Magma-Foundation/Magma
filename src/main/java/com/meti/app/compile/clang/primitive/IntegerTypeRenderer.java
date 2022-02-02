@@ -1,5 +1,6 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.primitive;
 
+import com.meti.app.compile.clang.OutputRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.render.RenderException;
@@ -15,10 +16,6 @@ public class IntegerTypeRenderer extends OutputRenderer {
     protected Output processValid() throws CompileException {
         var name = identity.apply(Attribute.Type.Name).asInput();
         var type = identity.apply(Attribute.Type.Type).asNode();
-        var value = identity.apply(Attribute.Type.Value)
-                .asNode()
-                .apply(Attribute.Type.Value)
-                .asOutput();
 
         var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
         var bits = type.apply(Attribute.Type.Bits).asInteger();
@@ -29,11 +26,19 @@ public class IntegerTypeRenderer extends OutputRenderer {
         };
 
         var signedFlag = isSigned ? "" : "unsigned ";
-        return name.toTrimmedOutput()
+
+        var buffer = name.toTrimmedOutput()
                 .prepend(" ")
                 .prepend(prefix)
-                .prepend(signedFlag)
-                .appendSlice("=")
-                .appendOutput(value);
+                .prepend(signedFlag);
+        if (identity.is(Node.Type.Initialization)) {
+            var value = identity.apply(Attribute.Type.Value)
+                    .asNode()
+                    .apply(Attribute.Type.Value)
+                    .asOutput();
+            return buffer.appendSlice("=").appendOutput(value);
+        } else {
+            return buffer;
+        }
     }
 }
