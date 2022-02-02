@@ -14,5 +14,4 @@ public class KeywordTest {
     void external_operator() {
         assertSourceCompile("extern operator def !(state : Bool) : Bool;! false", "!0");
     }
-
 }
