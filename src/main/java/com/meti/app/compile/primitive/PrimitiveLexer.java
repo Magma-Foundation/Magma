@@ -1,9 +1,10 @@
-package com.meti.app.compile.node;
+package com.meti.app.compile.primitive;
 
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 

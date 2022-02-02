@@ -3,7 +3,7 @@ package com.meti.app.compile.common;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.text.RootText;
 
 public class Fields {

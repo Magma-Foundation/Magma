@@ -3,7 +3,7 @@ package com.meti.app.compile.common;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONFormatter;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 

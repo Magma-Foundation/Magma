@@ -1,9 +1,9 @@
 package com.meti.app.compile.parse;
 
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 
 public class ImplementationVisitor extends AbstractParser {

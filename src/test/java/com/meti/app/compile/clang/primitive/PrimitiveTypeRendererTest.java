@@ -1,8 +1,8 @@
 package com.meti.app.compile.clang.primitive;
 
 import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.primitive.Primitive;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -9,7 +9,7 @@ import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.common.returns.Return;
 import com.meti.app.compile.node.InputNode;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;

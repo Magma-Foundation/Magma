@@ -4,7 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.Primitive;
 
 public final class MagmaParsingStage extends AbstractParsingStage implements MagmaParsingStageMixin {
     public MagmaParsingStage(List<? extends Node> input) {

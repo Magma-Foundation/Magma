@@ -1,7 +1,8 @@
-package com.meti.app.compile.node;
+package com.meti.app.compile.primitive;
 
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.InputAttribute;

@@ -7,7 +7,7 @@ import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
