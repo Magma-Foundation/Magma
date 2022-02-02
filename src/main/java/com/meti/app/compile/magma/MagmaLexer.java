@@ -20,6 +20,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.PrimitiveLexer;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
@@ -53,12 +54,22 @@ public class MagmaLexer extends NodeStage {
 
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
-        if (identity.is(Node.Type.Input)) {
-            var input = identity.apply(Attribute.Type.Value).asInput();
-            return Streams.apply(new FunctionTypeLexer(input),
-                    new ReferenceLexer(input),
-                    new PrimitiveLexer(input),
-                    new IntegerTypeLexer(input));
+        if (identity.is(Node.Type.Declaration) || identity.is(Node.Type.Initialization)) {
+            var type = identity.apply(Attribute.Type.Type).asNode();
+            if (type.is(Node.Type.Input)) {
+                var input = type.apply(Attribute.Type.Value).asInput();
+                try {
+                    return Streams.apply(new FunctionTypeLexer(input),
+                                    new ReferenceLexer(input),
+                                    new PrimitiveLexer(input),
+                                    new IntegerTypeLexer(input))
+                            .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Type.Type, new NodeAttribute(result))));
+                } catch (StreamException e) {
+                    throw new CompileException(e);
+                }
+            } else {
+                return Streams.empty();
+            }
         } else {
             return Streams.empty();
         }
