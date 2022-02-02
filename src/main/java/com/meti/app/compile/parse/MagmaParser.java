@@ -11,8 +11,6 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.stage.CompileException;
 
-import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
-
 public record MagmaParser(List<? extends Node> input) {
     private State parseAST(State state) throws CompileException {
         var before = beforeAST(state);
@@ -70,17 +68,6 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
-    private State afterAST(State state) throws CompileException {
-        var root = state.current;
-        if (root.is(Node.Type.Block)) {
-            return state.mapScope(Scope::exit);
-        } else if (root.is(Node.Type.Implementation)) {
-            return parseDefinedImplementation(state, root);
-        } else {
-            return state;
-        }
-    }
-
     private State parseDefinedImplementation(State state, Node element) throws CompileException {
         var identity = element.apply(Attribute.Type.Identity).asNode();
         var expectedType = identity.apply(Attribute.Type.Type).asNode();
@@ -100,6 +87,17 @@ public record MagmaParser(List<? extends Node> input) {
         var newIdentity = identity.with(Attribute.Type.Type, new NodeAttribute(typeToSet));
         var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
         return state.apply(newElement);
+    }
+
+    private State afterAST(State state) throws CompileException {
+        var root = state.current;
+        if (root.is(Node.Type.Block)) {
+            return state.mapScope(Scope::exit);
+        } else if (root.is(Node.Type.Implementation)) {
+            return parseDefinedImplementation(state, root);
+        } else {
+            return state;
+        }
     }
 
     private State parseDefinitionsAttributes(State root) throws CompileException {
@@ -231,47 +229,6 @@ public record MagmaParser(List<? extends Node> input) {
             var message = format.formatted(value);
             return new CompileException(message);
         });
-    }
-
-    private static class State {
-        private final Node current;
-        private Scope scope;
-
-        public State() {
-            this(EmptyNode_);
-        }
-
-        public State(Node current) {
-            this(current, new Scope());
-        }
-
-        public State(Node current, Scope scope) {
-            this.current = current;
-            this.scope = scope;
-        }
-
-        public State apply(Node element) {
-            return new State(element, scope);
-        }
-
-        public <E extends Exception> State mapCurrent(F1<Node, Node, E> mapper) throws E {
-            return new State(mapper.apply(current), scope);
-        }
-
-        private <E extends Exception> State mapScope(F1<Scope, Scope, E> mapper) throws E {
-            var oldScope = getScope();
-            var newScope = mapper.apply(oldScope);
-            return setScope(newScope);
-        }
-
-        public Scope getScope() {
-            return scope;
-        }
-
-        public State setScope(Scope scope) {
-            this.scope = scope;
-            return this;
-        }
     }
 
     private static class StateBuffer {
