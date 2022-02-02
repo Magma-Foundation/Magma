@@ -7,6 +7,12 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class ClosureTest {
     @Test
+    void header() {
+        assertHeaderCompiles("def outer() => {def inner() => {}}",
+                "void inner();void outer();struct outer_{}");
+    }
+
+    @Test
     void in_block() {
         assertSourceCompile("{def test() => {}}", "void test(){}{}");
     }
@@ -17,9 +23,9 @@ public class ClosureTest {
     }
 
     @Test
-    void header() {
-        assertHeaderCompiles("def outer() => {def inner() => {}}",
-                "void inner();void outer();struct outer_{}");
+    void innerFunction() {
+        assertSourceCompile("def outer() => {def inner() => {}}",
+                "void inner(){}void outer(){}");
     }
 
     @Test
