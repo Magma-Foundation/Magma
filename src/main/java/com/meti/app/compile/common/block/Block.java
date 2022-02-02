@@ -14,19 +14,50 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 
+import java.util.Objects;
+
 public final class Block extends AbstractNode {
     private final List<Node> children;
-
-    public Block(List<Node> children) {
-        this.children = children;
-    }
 
     public Block() {
         this(List.createList());
     }
 
+    public Block(List<Node> children) {
+        this.children = children;
+    }
+
     public Block(Node... children) {
         this(List.apply(children));
+    }
+
+    @Override
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Nodes
+                ? Streams.apply(Attribute.Type.Children)
+                : Streams.empty();
+    }
+
+    @Override
+    public boolean is(Type type) {
+        return type == Type.Block;
+    }
+
+    @Override
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        if (type == Attribute.Type.Children) return new NodesAttribute(children);
+        throw new AttributeException(type);
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        try {
+            return attribute.asStreamOfNodes()
+                    .foldRight(new Builder(), Builder::add)
+                    .build();
+        } catch (StreamException e) {
+            throw new AttributeException(e);
+        }
     }
 
     @Override
@@ -43,32 +74,16 @@ public final class Block extends AbstractNode {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new NodesAttribute(children);
-        throw new AttributeException(type);
+    public int hashCode() {
+        return Objects.hash(children);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Nodes
-                ? Streams.apply(Attribute.Type.Children)
-                : Streams.empty();
-    }
-
-    @Override
-    public boolean is(Type type) {
-        return type == Type.Block;
-    }
-
-    @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        try {
-            return attribute.asStreamOfNodes()
-                    .foldRight(new Builder(), Builder::add)
-                    .build();
-        } catch (StreamException e) {
-            throw new AttributeException(e);
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Block)) return false;
+        Block block = (Block) o;
+        return Objects.equals(children, block.children);
     }
 
     public record Builder(List<Node> children) {

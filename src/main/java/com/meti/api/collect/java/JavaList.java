@@ -113,6 +113,12 @@ public class JavaList<T> implements List<T> {
     }
 
     @Override
+    public List<T> pop() {
+        if (!isEmpty()) value.remove(value.size() - 1);
+        return this;
+    }
+
+    @Override
     public int size() {
         return value.size();
     }

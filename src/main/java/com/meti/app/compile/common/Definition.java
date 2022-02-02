@@ -11,6 +11,8 @@ import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
+import java.util.Objects;
+
 public final class Definition extends AbstractNode {
     private final Node identity;
 
@@ -42,5 +44,18 @@ public final class Definition extends AbstractNode {
     @Override
     public JSONNode toJSON() throws JSONException {
         return new ObjectNode().addObject("identity", identity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(identity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Definition)) return false;
+        Definition that = (Definition) o;
+        return Objects.equals(identity, that.identity);
     }
 }
