@@ -45,8 +45,24 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
+    private State pareNodeAttributes(State withNodesAttributes) throws CompileException {
+        try {
+            var current = withNodesAttributes.current;
+            return current.apply(Attribute.Group.Node).foldRight(withNodesAttributes, (oldState, type) -> {
+                var previous = current.apply(type).asNode();
+                var newState = parseAST(oldState.apply(previous));
+                return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
+            });
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
     private State parseAST(State state) throws CompileException {
-        return afterAST(parseNodesAttribute(beforeAST(state)));
+        var before = beforeAST(state);
+        var withNodesAttributes = parseNodesAttribute(before);
+        var withNodeAttributes = pareNodeAttributes(withNodesAttributes);
+        return afterAST(withNodeAttributes);
     }
 
     private State parseDefinition(State state) throws CompileException {
@@ -152,6 +168,10 @@ public record MagmaParser(List<? extends Node> input) {
 
         public State apply(Node element) {
             return new State(element, scope);
+        }
+
+        public <E extends Exception> State mapCurrent(F1<Node, Node, E> mapper) throws E {
+            return new State(mapper.apply(current), scope);
         }
 
         private <E extends Exception> State mapScope(F1<Scope, Scope, E> mapper) throws E {
