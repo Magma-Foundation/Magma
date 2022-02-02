@@ -7,7 +7,7 @@ import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.common.integer.IntegerType;
-import com.meti.app.compile.common.returns.Return;
+import com.meti.app.compile.feature.function.Return;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;

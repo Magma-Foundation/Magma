@@ -3,7 +3,7 @@ package com.meti.app.compile.cache;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONFormatter;
 import com.meti.app.compile.common.integer.IntegerNode;
-import com.meti.app.compile.common.variable.Variable;
+import com.meti.app.compile.feature.scope.Variable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

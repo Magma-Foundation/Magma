@@ -7,7 +7,7 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.Field;
-import com.meti.app.compile.common.variable.Variable;
+import com.meti.app.compile.feature.scope.Variable;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;

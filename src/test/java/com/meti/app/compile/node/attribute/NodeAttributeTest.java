@@ -1,7 +1,7 @@
 package com.meti.app.compile.node.attribute;
 
-import com.meti.app.compile.common.returns.Return;
-import com.meti.app.compile.common.variable.Variable;
+import com.meti.app.compile.feature.function.Return;
+import com.meti.app.compile.feature.scope.Variable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

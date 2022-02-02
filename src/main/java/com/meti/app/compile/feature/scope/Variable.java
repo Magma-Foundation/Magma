@@ -1,4 +1,4 @@
-package com.meti.app.compile.common.variable;
+package com.meti.app.compile.feature.scope;
 
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
@@ -15,12 +15,12 @@ import java.util.Objects;
 public final class Variable extends AbstractNode {
     private final Input value;
 
-    public Variable(Input value) {
-        this.value = value;
-    }
-
     public Variable(String value) {
         this(new RootText(value));
+    }
+
+    public Variable(Input value) {
+        this.value = value;
     }
 
     @Override
@@ -29,17 +29,9 @@ public final class Variable extends AbstractNode {
         throw new AttributeException(type);
     }
 
-
     @Override
     public boolean is(Role role) {
         return role == Role.Variable;
-    }
-
-    @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new Variable(attribute.asInput())
-                : this;
     }
 
     @Override
@@ -48,6 +40,13 @@ public final class Variable extends AbstractNode {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (Variable) obj;
         return Objects.equals(this.value, that.value);
+    }
+
+    @Override
+    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+        return type == Attribute.Type.Value
+                ? new Variable(attribute.asInput())
+                : this;
     }
 
     @Override

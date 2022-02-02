@@ -1,4 +1,4 @@
-package com.meti.app.compile.common.returns;
+package com.meti.app.compile.feature.function;
 
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;

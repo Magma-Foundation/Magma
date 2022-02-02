@@ -1,6 +1,6 @@
 package com.meti.app.compile.clang;
 
-import com.meti.app.compile.common.variable.Variable;
+import com.meti.app.compile.feature.scope.Variable;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.stage.CompileException;
 import org.junit.jupiter.api.Test;

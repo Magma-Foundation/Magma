@@ -4,7 +4,7 @@ import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.common.variable.Variable;
+import com.meti.app.compile.feature.scope.Variable;
 import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
