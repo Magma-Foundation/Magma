@@ -12,6 +12,12 @@ public class FunctionTest {
     }
 
     @Test
+    void parameter_defined() {
+        assertSourceCompile("def wrapper(value : I16) => {return value;}",
+                "int wrapper(int value){return value;}");
+    }
+
+    @Test
     void parameter_multiple() {
         assertSourceCompile("def Point(x : I16, y : I16) : Void => {}", "void Point(int x,int y){}");
     }
