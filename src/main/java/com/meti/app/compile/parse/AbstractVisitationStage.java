@@ -112,11 +112,10 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
     private State parseNodeAttributes(State root) throws CompileException {
         try {
-            var current = root.getCurrent();
-            return current.apply(Attribute.Group.Node).foldRight(root, (oldState, type) -> {
-                var previous = current.apply(type).asNode();
+            return root.getCurrent().apply(Attribute.Group.Node).foldRight(root, (oldState, type) -> {
+                var previous = oldState.getCurrent().apply(type).asNode();
                 var newState = parseAST(oldState.apply(previous));
-                return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
+                return newState.mapCurrent(value -> oldState.getCurrent().with(type, new NodeAttribute(value)));
             });
         } catch (StreamException e) {
             throw new CompileException(e);
