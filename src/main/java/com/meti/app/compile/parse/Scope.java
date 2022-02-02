@@ -8,18 +8,18 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 
 public class Scope {
-    private final List<Node> frame;
+    private final List<List<Node>> frames;
 
     public Scope() {
         this(List.createList());
     }
 
-    public Scope(List<Node> frame) {
-        this.frame = frame;
+    public Scope(List<List<Node>> frames) {
+        this.frames = frames;
     }
 
     public Scope define(Node definition) {
-        return new Scope(frame.add(definition));
+        return new Scope(frames.ensure(List::createList).mapLast(last -> last.add(definition)));
     }
 
     boolean isDefined(String name) {
@@ -28,8 +28,11 @@ public class Scope {
 
     Option<Node> lookup(String name) {
         try {
-            return frame.stream()
-                    .filter(declaration -> declaration.apply(Attribute.Type.Name).asInput().equalsSlice(name))
+            return frames.stream()
+                    .flatMap(List::stream)
+                    .filter(declaration -> declaration.apply(Attribute.Type.Name)
+                            .asInput()
+                            .equalsSlice(name))
                     .headOptionally();
         } catch (StreamException e) {
             return new None<>();
