@@ -10,7 +10,7 @@ import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.RootText;
 
-public record ConditionProcessor(Node node) implements Processor<Output> {
+public record ConditionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Type.If)) {

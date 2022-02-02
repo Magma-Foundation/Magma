@@ -7,7 +7,7 @@ import com.meti.app.compile.common.LineProcessor;
 import com.meti.app.compile.common.alternate.ElseProcessor;
 import com.meti.app.compile.common.binary.BinaryProcessor;
 import com.meti.app.compile.common.block.BlockProcessor;
-import com.meti.app.compile.common.condition.ConditionProcessor;
+import com.meti.app.compile.common.condition.ConditionRenderer;
 import com.meti.app.compile.common.integer.IntegerProcessor;
 import com.meti.app.compile.common.invoke.InvocationProcessor;
 import com.meti.app.compile.common.returns.ReturnProcessor;
@@ -62,7 +62,7 @@ public final class CRenderer extends AfterStreamStage {
         return Streams.apply(
                 new BinaryProcessor(root),
                 new BlockProcessor(root),
-                new ConditionProcessor(root),
+                new ConditionRenderer(root),
                 new DefinitionRenderer(root),
                 new ElseProcessor(root),
                 new EmptyProcessor(root),
