@@ -1,20 +1,23 @@
 package com.meti.app.compile.common;
 
-import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public record Reference(Node value) implements Node {
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Type
-                ? Stream.of(Attribute.Type.Value)
-                : Stream.empty();
+    @Override
+    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Type ? Streams.apply(Attribute.Type.Value) : Streams.empty();
+    }
+
+    @Override
+    public boolean is(Type type) {
+        return type == Type.Reference;
     }
 
     @Override
@@ -24,24 +27,14 @@ public record Reference(Node value) implements Node {
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return List.createList(apply2(group).collect(Collectors.toList())).stream();
-    }
-
-    @Override
-    public boolean is(Type type) {
-        return type == Type.Reference;
-    }
-
-    @Override
-    public JSONNode toJSON() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return type == Attribute.Type.Value
                 ? new Reference(attribute.asNode())
                 : this;
+    }
+
+    @Override
+    public JSONNode toJSON() throws JSONException {
+        return new ObjectNode().addJSONable("refersTo", value);
     }
 }
