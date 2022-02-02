@@ -43,6 +43,8 @@ public interface List<T> {
 
     <E extends Exception> List<T> mapLast(F1<T, T, E> mapper) throws E;
 
+    List<T> pop();
+
     int size();
 
     Stream<T> stream();

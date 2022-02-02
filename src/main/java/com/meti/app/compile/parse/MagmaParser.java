@@ -3,7 +3,6 @@ package com.meti.app.compile.parse;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.core.F1;
-import com.meti.api.core.F2;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
@@ -15,6 +14,27 @@ import com.meti.app.compile.stage.CompileException;
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
 public record MagmaParser(List<? extends Node> input) {
+    private State afterAST(State state) {
+        if (state.current.is(Node.Type.Block)) {
+            return state.mapScope(Scope::exit);
+        } else {
+            return state;
+        }
+    }
+
+    private State beforeAST(State state) throws CompileException {
+        var element = state.current;
+        if (element.is(Node.Type.Declaration)) {
+            return parseDefinition(state);
+        } else if (element.is(Node.Type.Variable)) {
+            return parseVariable(state);
+        } else if (element.is(Node.Type.Block)) {
+            return state.mapScope(Scope::enter);
+        } else {
+            return state;
+        }
+    }
+
     public List<Node> parse() throws StreamException, CompileException {
         try {
             return input.stream()
@@ -25,19 +45,8 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
-    private State parse(State state) throws CompileException {
-        var element = state.current;
-        if (element.is(Node.Type.Declaration)) {
-            return parseDefinition(state);
-        } else if (element.is(Node.Type.Variable)) {
-            return parseVariable(state);
-        } else {
-            return state;
-        }
-    }
-
     private State parseAST(State state) throws CompileException {
-        return parse(state).mapCurrent(this::parseNodesAttribute);
+        return afterAST(parseNodesAttribute(beforeAST(state)));
     }
 
     private State parseDefinition(State state) throws CompileException {
@@ -73,9 +82,9 @@ public record MagmaParser(List<? extends Node> input) {
         }
     }
 
-    private State parseNodesAttribute(State root, Node node) throws CompileException {
+    private State parseNodesAttribute(State root) throws CompileException {
         try {
-            return node.apply(Attribute.Group.Nodes).foldRight(root, (oldState, type) -> {
+            return root.current.apply(Attribute.Group.Nodes).foldRight(root, (oldState, type) -> {
                 try {
                     var current = oldState.current;
                     var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
@@ -143,10 +152,6 @@ public record MagmaParser(List<? extends Node> input) {
 
         public State apply(Node element) {
             return new State(element, scope);
-        }
-
-        public <E extends Exception> State mapCurrent(F2<State, Node, State, E> mapper) throws E {
-            return mapper.apply(this, current);
         }
 
         private <E extends Exception> State mapScope(F1<Scope, Scope, E> mapper) throws E {

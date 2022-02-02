@@ -22,6 +22,14 @@ public class Scope {
         return new Scope(frames.ensure(List::createList).mapLast(last -> last.add(definition)));
     }
 
+    public Scope enter() {
+        return new Scope(frames.add(List.createList()));
+    }
+
+    public Scope exit() {
+        return new Scope(frames.pop());
+    }
+
     boolean isDefined(String name) {
         return lookup(name).isPresent();
     }
