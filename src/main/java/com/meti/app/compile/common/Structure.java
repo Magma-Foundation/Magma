@@ -8,7 +8,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.InputAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.text.Input;
 
 public record Structure(Input name, List<Node> fields) implements Node {
@@ -19,7 +19,7 @@ public record Structure(Input name, List<Node> fields) implements Node {
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
         if (type == Attribute.Type.Name) return new InputAttribute(name);
-        if (type == Attribute.Type.Fields) return new NodesAttribute1(fields);
+        if (type == Attribute.Type.Fields) return new NodesAttribute(fields);
         throw new AttributeException(type);
     }
 

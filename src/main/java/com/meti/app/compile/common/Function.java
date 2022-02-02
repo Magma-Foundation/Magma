@@ -12,7 +12,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ public abstract class Function extends AbstractNode {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Identity -> new NodeAttribute(identity);
-            case Parameters -> new NodesAttribute1(parameters);
+            case Parameters -> new NodesAttribute(parameters);
             default -> throw new AttributeException(type);
         };
     }

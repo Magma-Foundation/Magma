@@ -8,7 +8,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public class CFlattener extends AbstractStage {
     @Override
@@ -71,7 +71,7 @@ public class CFlattener extends AbstractStage {
     private CacheBuilder<Node> attachChildren(Node root, CacheBuilder<Node> previous, Attribute.Type type) throws CompileException {
         try {
             var builder = flattenChildren(root, type);
-            var other = builder.map(NodesAttribute1::new);
+            var other = builder.map(NodesAttribute::new);
             return previous.append(other, (current, children) -> current.with(type, children));
         } catch (StreamException | AttributeException e) {
             throw new CompileException(e);

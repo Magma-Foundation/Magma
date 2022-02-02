@@ -4,7 +4,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.text.Input;
 
 public abstract class AbstractStage implements Stage {
@@ -20,7 +20,7 @@ public abstract class AbstractStage implements Stage {
         try {
             return node1.with(type, node1.apply(type).asStreamOfNodes()
                     .map(this::transformDefinition)
-                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add)
                     .complete());
         } catch (StreamException e) {
             throw new CompileException(e);
@@ -93,7 +93,7 @@ public abstract class AbstractStage implements Stage {
             return current.with(type, current.apply(type)
                     .asStreamOfNodes()
                     .map(AbstractStage.this::transformNodeAST)
-                    .foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add)
+                    .foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add)
                     .complete());
         } catch (StreamException e) {
             throw new CompileException(e);

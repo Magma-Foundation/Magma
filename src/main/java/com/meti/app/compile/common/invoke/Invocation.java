@@ -13,7 +13,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 import java.util.Objects;
 
@@ -49,7 +49,7 @@ public final class Invocation extends AbstractNode {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Caller -> new NodeAttribute(caller);
-            case Arguments -> new NodesAttribute1(arguments);
+            case Arguments -> new NodesAttribute(arguments);
             default -> throw new AttributeException(type);
         };
     }

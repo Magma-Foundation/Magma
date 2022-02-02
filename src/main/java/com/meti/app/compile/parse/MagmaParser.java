@@ -9,7 +9,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 import com.meti.app.compile.stage.CompileException;
 
 public record MagmaParser(List<? extends Node> input) {
@@ -24,7 +24,7 @@ public record MagmaParser(List<? extends Node> input) {
         } else if (element.is(Node.Type.Variable)) {
             return parseVariable(state);
         } else {
-            return state.apply(element);
+            return state;
         }
     }
 
@@ -58,13 +58,9 @@ public record MagmaParser(List<? extends Node> input) {
                 var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
                 var withType = state.current.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
 
-                return state
-                        .mapScope(scope -> scope.define(newIdentity))
-                        .apply(withType);
+                return state.mapScope(scope -> scope.define(newIdentity)).apply(withType);
             } else {
-                return state
-                        .mapScope(scope -> scope.define(oldIdentity))
-                        .apply(state.current);
+                return state.mapScope(scope -> scope.define(oldIdentity));
             }
         }
     }
@@ -86,7 +82,7 @@ public record MagmaParser(List<? extends Node> input) {
                 try {
                     var input = node.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
                     var output = MagmaParser.this.parseNodeList(input);
-                    var attribute = new NodesAttribute1(output);
+                    var attribute = new NodesAttribute(output);
                     return current.apply(node.with(type, attribute));
                 } catch (StreamException e) {
                     throw new CompileException(e);

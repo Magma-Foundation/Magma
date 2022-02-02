@@ -11,7 +11,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public record BinaryOperation(Node operator, Node first, Node second) implements Node {
     @Override
@@ -32,7 +32,7 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Operator -> new NodeAttribute(operator);
-            case Arguments -> new NodesAttribute1(List.apply(first, second));
+            case Arguments -> new NodesAttribute(List.apply(first, second));
             default -> throw new AttributeException(type);
         };
     }

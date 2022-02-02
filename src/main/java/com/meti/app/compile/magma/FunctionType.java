@@ -8,7 +8,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public record FunctionType(Node returns, List<Node> parameters) implements Node {
     @Override
@@ -29,7 +29,7 @@ public record FunctionType(Node returns, List<Node> parameters) implements Node 
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Type -> new NodeAttribute(returns);
-            case Parameters -> new NodesAttribute1(parameters);
+            case Parameters -> new NodesAttribute(parameters);
             default -> throw new AttributeException(type);
         };
     }

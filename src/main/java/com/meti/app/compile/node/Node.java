@@ -9,7 +9,7 @@ import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public interface Node extends JSONable {
     default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
@@ -37,7 +37,7 @@ public interface Node extends JSONable {
     default <E extends Exception> Node mapAsNodeStream(Attribute.Type type, F1<com.meti.api.collect.stream.Stream<Node>, com.meti.api.collect.stream.Stream<? extends Node>, E> mapper) throws E, AttributeException {
         try {
             var input = apply(type).asStreamOfNodes();
-            var output = mapper.apply(input).foldRight(new NodesAttribute1.Builder(), NodesAttribute1.Builder::add).complete();
+            var output = mapper.apply(input).foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add).complete();
             return with(type, output);
         } catch (StreamException e) {
             throw new AttributeException(e);

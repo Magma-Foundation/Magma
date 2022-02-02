@@ -4,7 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
 
-public record NodesAttribute1(List<Node> values) implements Attribute {
+public record NodesAttribute(List<Node> values) implements Attribute {
 
     @Override
     public com.meti.api.collect.stream.Stream<Node> asStreamOfNodes() throws AttributeException {
@@ -26,7 +26,7 @@ public record NodesAttribute1(List<Node> values) implements Attribute {
         }
 
         public Attribute complete() {
-            return new NodesAttribute1(values);
+            return new NodesAttribute(values);
         }
     }
 }

@@ -10,7 +10,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public final class Cache extends AbstractNode {
     public Attribute apply(Attribute.Type type) throws AttributeException {
         return switch (type) {
             case Value -> new NodeAttribute(value);
-            case Children -> new NodesAttribute1(children);
+            case Children -> new NodesAttribute(children);
             default -> throw new AttributeException(type);
         };
     }

@@ -12,7 +12,7 @@ import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
-import com.meti.app.compile.node.attribute.NodesAttribute1;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public final class Block extends AbstractNode {
     private final List<Node> children;
@@ -44,7 +44,7 @@ public final class Block extends AbstractNode {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new NodesAttribute1(children);
+        if (type == Attribute.Type.Children) return new NodesAttribute(children);
         throw new AttributeException(type);
     }
 
