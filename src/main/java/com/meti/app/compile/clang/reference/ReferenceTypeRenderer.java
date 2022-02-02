@@ -18,7 +18,7 @@ public class ReferenceTypeRenderer extends NodeTypeRenderer {
                 .asInput()
                 .toOutput()
                 .prepend("*");
-        var innerType = identity.apply(Attribute.Type.Type).asNode()
+        var innerType = identity.apply(Attribute.Type.Type).asType()
                 .apply(Attribute.Type.Value).asNode();
         return identity.with(Attribute.Type.Name, new OutputAttribute(name))
                 .with(Attribute.Type.Type, new NodeAttribute(innerType));
