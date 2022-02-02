@@ -1,6 +1,7 @@
 package com.meti.app.compile.parse;
 
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.primitive.Primitive;
@@ -13,7 +14,7 @@ public class ImplementationVisitor extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Type.Implementation));
+        return state.queryCurrent(value -> value.is(Node.Role.Implementation));
     }
 
     @Override
@@ -31,9 +32,9 @@ public class ImplementationVisitor extends AbstractParser {
         return state.apply(newElement);
     }
 
-    private Node isAssignableTo(Node expectedType, com.meti.api.collect.java.List<Node> assignableTypes) throws CompileException {
+    private Node isAssignableTo(Node expectedType, com.meti.api.collect.java.List<Type> assignableTypes) throws CompileException {
         Node typeToSet;
-        if (expectedType.is(Node.Type.Implicit)) {
+        if (expectedType.is(Node.Role.Implicit)) {
             typeToSet = assignableTypes.first().orElse(Primitive.Void);
         } else if (assignableTypes.contains(expectedType)) {
             typeToSet = expectedType;

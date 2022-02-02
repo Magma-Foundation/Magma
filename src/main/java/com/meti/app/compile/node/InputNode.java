@@ -40,7 +40,7 @@ public final class InputNode extends AbstractNode {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Input;
+    public boolean is(Role role) {
+        return role == Role.Input;
     }
 }

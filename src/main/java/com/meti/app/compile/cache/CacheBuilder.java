@@ -14,7 +14,7 @@ public record CacheBuilder<T>(T value, List<Node> items) {
     }
 
     public static CacheBuilder<Node> apply(Node root) {
-        if (root.is(Node.Type.Cache)) {
+        if (root.is(Node.Role.Cache)) {
             try {
                 var value = root.apply(Attribute.Type.Value).asNode();
                 var children = root.apply(Attribute.Type.Children)

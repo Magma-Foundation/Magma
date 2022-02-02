@@ -14,7 +14,7 @@ public class Abstraction extends Function {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Abstraction;
+    public boolean is(Role role) {
+        return role == Role.Abstraction;
     }
 }

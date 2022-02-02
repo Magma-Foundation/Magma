@@ -28,7 +28,7 @@ import com.meti.app.compile.text.Input;
 public class MagmaLexer extends NodeStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
-        if (definition.is(Node.Type.Input)) {
+        if (definition.is(Node.Role.Input)) {
             var input = definition.apply(Attribute.Type.Value).asInput();
             return new FieldLexer(input).process().orElseThrow(() -> {
                 var format = "Invalid definition:\n-----\n%s\n-----\n";
@@ -54,9 +54,9 @@ public class MagmaLexer extends NodeStage {
 
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
-        if (identity.is(Node.Type.Declaration) || identity.is(Node.Type.Initialization)) {
+        if (identity.is(Node.Role.Declaration) || identity.is(Node.Role.Initialization)) {
             var type = identity.apply(Attribute.Type.Type).asNode();
-            if (type.is(Node.Type.Input)) {
+            if (type.is(Node.Role.Input)) {
                 var input = type.apply(Attribute.Type.Value).asInput();
                 try {
                     return Streams.apply(new FunctionTypeLexer(input),
@@ -78,7 +78,7 @@ public class MagmaLexer extends NodeStage {
     @Override
     protected Node beforeNodeTraversal(Node root) throws CompileException {
         try {
-            if (root.is(Node.Type.Input)) {
+            if (root.is(Node.Role.Input)) {
                 var input = root.apply(Attribute.Type.Value).asInput();
                 return transformUsingStreams(root, streamNodeLexers(input));
             } else {

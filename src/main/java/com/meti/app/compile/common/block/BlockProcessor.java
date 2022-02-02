@@ -14,7 +14,7 @@ import com.meti.app.compile.text.StringOutput;
 public record BlockProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Block)) {
+        if (node.is(Node.Role.Block)) {
             try {
                 var output = node.apply(Attribute.Type.Children)
                         .asStreamOfNodes()

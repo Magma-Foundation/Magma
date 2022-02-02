@@ -5,37 +5,38 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.common.ReferenceType;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 
 public record MagmaResolver(Node root, Scope scope) {
-    List<Node> resolveNodeToMultiple() throws CompileException {
-        if (root.is(Node.Type.Variable)) {
+    List<Type> resolveNodeToMultiple() throws CompileException {
+        if (root.is(Node.Role.Variable)) {
             var variableName = root.apply(Attribute.Type.Value).asInput()
                     .toOutput()
                     .compute();
             return List.apply(scope.lookup(variableName)
-                    .map(node -> node.apply(Attribute.Type.Type).asNode())
+                    .map(node -> node.apply(Attribute.Type.Type).asType())
                     .orElseThrow(() -> {
                         var format = "'%s' is not defined.";
                         var message = format.formatted(variableName);
                         return new CompileException(message);
                     }));
-        } else if (root.is(Node.Type.Boolean)) {
+        } else if (root.is(Node.Role.Boolean)) {
             return List.apply(Primitive.Bool);
-        } else if (root.is(Node.Type.Integer)) {
-            var toReturn = List.<Node>apply(new ReferenceType(Primitive.Void), new IntegerType(true, 16));
+        } else if (root.is(Node.Role.Integer)) {
+            var toReturn = List.<Type>apply(new ReferenceType(Primitive.Void), new IntegerType(true, 16));
             var value = root.apply(Attribute.Type.Value).asInteger();
             if (value >= 0) {
                 return toReturn.add(new IntegerType(false, 16));
             } else {
                 return toReturn;
             }
-        } else if (root.is(Node.Type.Return)) {
+        } else if (root.is(Node.Role.Return)) {
             var innerValue = root.apply(Attribute.Type.Value).asNode();
             return new MagmaResolver(innerValue, scope).resolveNodeToMultiple();
-        } else if (root.is(Node.Type.Block)) {
+        } else if (root.is(Node.Role.Block)) {
             try {
                 return root.apply(Attribute.Type.Children)
                         .asStreamOfNodes()
@@ -49,13 +50,5 @@ public record MagmaResolver(Node root, Scope scope) {
         } else {
             throw new CompileException("Cannot resolve type of node: " + root);
         }
-    }
-
-    Node resolveNodeToSingle(Node value) throws CompileException {
-        return resolveNodeToMultiple().first().orElseThrow(() -> {
-            var format = "No types exist for node:\n%s";
-            var message = format.formatted(value);
-            return new CompileException(message);
-        });
     }
 }

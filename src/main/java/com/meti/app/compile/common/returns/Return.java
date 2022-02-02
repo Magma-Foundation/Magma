@@ -19,8 +19,8 @@ public record Return(Node value) implements Node {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Node.Type.Return;
+    public boolean is(Role role) {
+        return role == Role.Return;
     }
 
     @Override

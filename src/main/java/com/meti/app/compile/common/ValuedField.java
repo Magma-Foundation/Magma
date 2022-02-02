@@ -49,7 +49,7 @@ public class ValuedField extends Field {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Initialization;
+    public boolean is(Role role) {
+        return role == Role.Initialization;
     }
 }

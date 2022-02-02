@@ -24,7 +24,7 @@ public class EmptyField extends Field {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Declaration;
+    public boolean is(Role role) {
+        return role == Role.Declaration;
     }
 }

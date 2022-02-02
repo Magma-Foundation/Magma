@@ -32,8 +32,8 @@ public record UnaryOperation(Node caller, Node callee) implements Node {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Unary;
+    public boolean is(Role role) {
+        return role == Role.Unary;
     }
 
     @Override

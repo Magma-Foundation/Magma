@@ -32,8 +32,8 @@ public record Structure(Input name, List<Node> fields) implements Node {
 
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Structure;
+    public boolean is(Role role) {
+        return role == Role.Structure;
     }
 
     @Override

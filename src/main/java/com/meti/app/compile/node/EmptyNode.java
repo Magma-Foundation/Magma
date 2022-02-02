@@ -15,7 +15,7 @@ public class EmptyNode extends AbstractNode {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Empty;
+    public boolean is(Role role) {
+        return role == Role.Empty;
     }
 }

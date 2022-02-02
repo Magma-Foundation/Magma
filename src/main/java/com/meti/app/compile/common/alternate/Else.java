@@ -29,8 +29,8 @@ public record Else(Node value) implements Node {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Else;
+    public boolean is(Role role) {
+        return role == Role.Else;
     }
 
     @Override

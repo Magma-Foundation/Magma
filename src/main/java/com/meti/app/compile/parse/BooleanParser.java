@@ -12,7 +12,7 @@ public class BooleanParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Type.Boolean));
+        return state.queryCurrent(value -> value.is(Node.Role.Boolean));
     }
 
     @Override

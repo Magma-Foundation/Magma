@@ -28,7 +28,7 @@ public record Extern(RootText root) implements Node {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Extern;
+    public boolean is(Role role) {
+        return role == Role.Extern;
     }
 }

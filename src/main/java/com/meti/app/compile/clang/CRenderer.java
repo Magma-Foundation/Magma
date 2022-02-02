@@ -27,9 +27,9 @@ import com.meti.app.compile.stage.CompileException;
 public final class CRenderer extends AfterStreamStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
-        if (definition.is(Node.Type.Initialization)) {
+        if (definition.is(Node.Role.Initialization)) {
             return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
-        } else if (definition.is(Node.Type.Declaration)) {
+        } else if (definition.is(Node.Role.Declaration)) {
             return definition;
         } else {
             var format = "Not a definition:\n-----\n%s\n-----\n";
@@ -40,7 +40,7 @@ public final class CRenderer extends AfterStreamStage {
 
     @Override
     protected Node afterDefinitionTraversal(Node transformed) throws CompileException {
-        if (transformed.is(Node.Type.Output)) {
+        if (transformed.is(Node.Role.Output)) {
             return transformed;
         } else {
             var type = transformed.apply(Attribute.Type.Type).asOutput();

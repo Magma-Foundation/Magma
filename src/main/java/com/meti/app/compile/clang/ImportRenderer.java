@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public record ImportRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Import)) {
+        if (node.is(Node.Role.Import)) {
             var packaging = node.apply(Attribute.Type.Value).asPackaging();
             var parent = packaging.streamParent().collect(Collectors.joining("/"));
             var name = packaging.computeName();

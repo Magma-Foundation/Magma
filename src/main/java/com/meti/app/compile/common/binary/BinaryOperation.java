@@ -24,8 +24,8 @@ public record BinaryOperation(Node operator, Node first, Node second) implements
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Binary;
+    public boolean is(Role role) {
+        return role == Role.Binary;
     }
 
     @Override

@@ -12,7 +12,7 @@ import com.meti.app.compile.text.Output;
 public record ReturnProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Return)) {
+        if (node.is(Node.Role.Return)) {
             var child = node.apply(Attribute.Type.Value).asNode();
             var renderedChild = child.apply(Attribute.Type.Value).asOutput();
             return new Some<>(renderedChild.prepend("return ").appendSlice(";"));

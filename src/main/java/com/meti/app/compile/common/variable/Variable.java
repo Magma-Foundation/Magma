@@ -31,8 +31,8 @@ public final class Variable extends AbstractNode {
 
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Variable;
+    public boolean is(Role role) {
+        return role == Role.Variable;
     }
 
     @Override

@@ -12,7 +12,7 @@ import com.meti.app.compile.text.Output;
 public record ElseProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Else)) {
+        if (node.is(Node.Role.Else)) {
             var value = node.apply(Attribute.Type.Value).asNode()
                     .apply(Attribute.Type.Value).asOutput();
             return new Some<>(value.prepend("else "));

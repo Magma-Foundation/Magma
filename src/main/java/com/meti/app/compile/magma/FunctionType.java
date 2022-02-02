@@ -25,8 +25,8 @@ public record FunctionType(Node returns, List<Node> parameters) implements Node 
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Function;
+    public boolean is(Role role) {
+        return role == Role.Function;
     }
 
     @Override

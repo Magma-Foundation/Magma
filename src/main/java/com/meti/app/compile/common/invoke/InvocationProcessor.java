@@ -14,7 +14,7 @@ import com.meti.app.compile.text.StringOutput;
 public record InvocationProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Invocation)) {
+        if (node.is(Node.Role.Invocation)) {
             try {
                 var caller = this.node.apply(Attribute.Type.Caller).asNode();
                 var renderedArguments = node.apply(Attribute.Type.Arguments)

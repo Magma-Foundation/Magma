@@ -23,6 +23,6 @@ public record ConditionLexer(Input text) implements Processor<Node> {
         var calleeText = text.slice(end + 1);
         var condition = new InputNode(callerText);
         var body = new InputNode(calleeText);
-        return new Condition(Node.Type.If, condition, body);
+        return new Condition(Node.Role.If, condition, body);
     }
 }

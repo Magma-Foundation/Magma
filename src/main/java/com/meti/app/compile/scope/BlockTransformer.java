@@ -18,7 +18,7 @@ import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
 public record BlockTransformer(Node root) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
-        if (root.is(Node.Type.Block)) {
+        if (root.is(Node.Role.Block)) {
             var output = transformBlock(root);
             return new Some<>(output);
         } else {
@@ -39,13 +39,13 @@ public record BlockTransformer(Node root) implements Processor<Node> {
     }
 
     private static Node transformInContext(Node oldChild) throws AttributeException {
-        if (oldChild.is(Node.Type.Implementation)) {
+        if (oldChild.is(Node.Role.Implementation)) {
             return new Cache(EmptyNode_, oldChild);
         }
-        if (oldChild.is(Node.Type.Binary) || oldChild.is(Node.Type.Invocation)) return new Line(oldChild);
-        if (oldChild.is(Node.Type.If)) {
+        if (oldChild.is(Node.Role.Binary) || oldChild.is(Node.Role.Invocation)) return new Line(oldChild);
+        if (oldChild.is(Node.Role.If)) {
             var value = oldChild.apply(Attribute.Type.Value).asNode();
-            if (value.is(Node.Type.Block)) {
+            if (value.is(Node.Role.Block)) {
                 return oldChild;
             } else {
                 return oldChild.with(Attribute.Type.Value, new NodeAttribute(new Line(value)));

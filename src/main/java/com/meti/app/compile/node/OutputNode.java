@@ -9,8 +9,8 @@ import com.meti.app.compile.text.Output;
 
 public record OutputNode(Output output) implements Node {
     @Override
-    public boolean is(Type type) {
-        return type == Type.Output;
+    public boolean is(Role role) {
+        return role == Role.Output;
     }
 
     @Override

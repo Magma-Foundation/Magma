@@ -6,6 +6,7 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.option.Option;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
@@ -16,6 +17,14 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
     public AbstractVisitationStage(List<? extends Node> input) {
         this.input = input;
+    }
+
+    private static boolean isAssignableToAny(List<Type> actualTypes, Type expectedType) {
+        try {
+            return actualTypes.stream().anyMatch(expectedType::isAssignableTo);
+        } catch (StreamException e) {
+            return false;
+        }
     }
 
     protected static State parseDefinitionAttributes(State root) throws CompileException {
@@ -56,18 +65,24 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
         var name = definition.apply(Attribute.Type.Name).asInput().toOutput().compute();
         if (state.getScope().isDefined(name)) {
             throw new CompileException("'" + name + "' is already defined.");
-        } else if (definition.is(Node.Type.Initialization)) {
+        } else if (definition.is(Node.Role.Initialization)) {
             var value = definition.apply(Attribute.Type.Value).asNode();
-            var actualType = new MagmaResolver(value, state.getScope()).resolveNodeToSingle(value);
+            var actualType = new MagmaResolver(value, state.getScope()).resolveNodeToMultiple();
 
-            var expectedType = definition.apply(Attribute.Type.Type).asNode();
+            var expectedType = definition.apply(Attribute.Type.Type).asType();
 
                 /*
                 Check for potential implicit conversions here...
                  */
             Node typeToDefine;
-            if (expectedType.is(Node.Type.Implicit) || actualType.equals(expectedType)) {
-                typeToDefine = actualType;
+            if (expectedType.is(Node.Role.Implicit)) {
+                typeToDefine = actualType.first().orElseThrow(() -> {
+                    var format = "No types could be assigned to:\n%s";
+                    var message = format.formatted(value);
+                    return new CompileException(message);
+                });
+            } else if (isAssignableToAny(actualType, expectedType)) {
+                typeToDefine = expectedType;
             } else {
                 var format = "Expected a type of '%s' but was actually '%s'.";
                 var message = format.formatted(expectedType, actualType);
@@ -83,18 +98,6 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
     }
 
     protected abstract State createInitialState();
-
-    @Override
-    public List<Node> visit() throws StreamException, CompileException {
-        try {
-            var initial = createInitialState();
-            return input.stream()
-                    .foldRight(new StateBuffer(initial), (current, next) -> current.append(state -> parseAST(state.apply(next))))
-                    .list;
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
 
     protected State parseAST(State state) throws CompileException {
         var before = transformAST(state, Visitor::onEnter);
@@ -149,6 +152,18 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                     .flatMap(Streams::optionally)
                     .first()
                     .orElse(state);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    @Override
+    public List<Node> visit() throws StreamException, CompileException {
+        try {
+            var initial = createInitialState();
+            return input.stream()
+                    .foldRight(new StateBuffer(initial), (current, next) -> current.append(state -> parseAST(state.apply(next))))
+                    .list;
         } catch (StreamException e) {
             throw new CompileException(e);
         }

@@ -37,8 +37,8 @@ public final class Cache extends AbstractNode {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Cache;
+    public boolean is(Role role) {
+        return role == Role.Cache;
     }
 
     @Override

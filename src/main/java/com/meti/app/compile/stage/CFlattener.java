@@ -14,14 +14,14 @@ public class CFlattener extends AbstractStage {
     @Override
     protected Node afterTraversal(Node root) throws CompileException {
         try {
-            if (root.is(Node.Type.Cache)) {
+            if (root.is(Node.Role.Cache)) {
                 var innerCache = root.apply(Attribute.Type.Value).asNode();
                 var withChildren = root.apply(Attribute.Type.Children)
                         .asStreamOfNodes()
                         .map(this::flattenCache)
                         .flatMap(List::stream)
                         .foldRight(List.<Node>createList(), List::add);
-                if (innerCache.is(Node.Type.Cache)) {
+                if (innerCache.is(Node.Role.Cache)) {
                     var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
                     var withSubChildren = innerCache.apply(Attribute.Type.Children)
                             .asStreamOfNodes()
@@ -42,7 +42,7 @@ public class CFlattener extends AbstractStage {
     }
 
     private List<Node> flattenCache(Node parent) throws AttributeException, StreamException {
-        if (parent.is(Node.Type.Cache)) {
+        if (parent.is(Node.Role.Cache)) {
             var value = parent.apply(Attribute.Type.Value).asNode();
             return parent.apply(Attribute.Type.Children)
                     .asStreamOfNodes()

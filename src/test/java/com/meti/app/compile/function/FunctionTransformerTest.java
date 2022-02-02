@@ -25,6 +25,6 @@ class FunctionTransformerTest {
         var inner = createFunction("inner", new Block());
         var outer = createFunction("outer", new Cache(new Block(), List.apply(inner)));
         var output = new FunctionTransformer(outer).process().orElse(EmptyNode.EmptyNode_);
-        assertTrue(output.is(Node.Type.Cache));
+        assertTrue(output.is(Node.Role.Cache));
     }
 }

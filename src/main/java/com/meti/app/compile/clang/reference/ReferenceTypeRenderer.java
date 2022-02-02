@@ -9,7 +9,7 @@ import com.meti.app.compile.stage.CompileException;
 
 public class ReferenceTypeRenderer extends NodeTypeRenderer {
     public ReferenceTypeRenderer(Node identity) {
-        super(identity, Node.Type.Reference);
+        super(identity, Node.Role.Reference);
     }
 
     @Override

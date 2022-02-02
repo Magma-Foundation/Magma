@@ -14,7 +14,7 @@ import com.meti.app.compile.text.Output;
 public record BinaryProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Binary)) {
+        if (node.is(Node.Role.Binary)) {
             try {
                 var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asOutput();
                 var arguments = node.apply(Attribute.Type.Arguments)

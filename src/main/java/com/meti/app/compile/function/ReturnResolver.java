@@ -11,7 +11,7 @@ import com.meti.app.compile.stage.CompileException;
 
 public record ReturnResolver(Node node, NodeStage parent) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
-        if (node.is(Node.Type.Return)) {
+        if (node.is(Node.Role.Return)) {
             var oldChild = node.apply(Attribute.Type.Value).asNode();
             var newChild = parent.transformNodeAST(oldChild);
             return new Some<>(newChild);

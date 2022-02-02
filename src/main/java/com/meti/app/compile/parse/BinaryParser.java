@@ -11,7 +11,7 @@ public class BinaryParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Type.Binary));
+        return state.queryCurrent(value -> value.is(Node.Role.Binary));
     }
 
     @Override

@@ -13,10 +13,10 @@ import com.meti.app.compile.stage.CompileException;
 public record ImplementationResolver(Node node) implements Processor<Node> {
     @Override
     public Option<Node> process() throws CompileException {
-        if (node.is(Node.Type.Implementation)) {
+        if (node.is(Node.Role.Implementation)) {
             var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
             var type = oldIdentity.apply(Attribute.Type.Type).asNode();
-            if (type.is(Node.Type.Implicit)) {
+            if (type.is(Node.Role.Implicit)) {
                 var value = node.apply(Attribute.Type.Value).asNode();
                 var newType = new MagmaTypeResolver().transformNodeAST(value);
                 var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(newType));

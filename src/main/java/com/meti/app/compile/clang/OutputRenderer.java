@@ -5,8 +5,8 @@ import com.meti.app.compile.node.OutputNode;
 import com.meti.app.compile.text.Output;
 
 public abstract class OutputRenderer extends AbstractTypeRenderer<Output> {
-    protected OutputRenderer(Node identity, Node.Type type) {
-        super(identity, type);
+    protected OutputRenderer(Node identity, Node.Role role) {
+        super(identity, role);
     }
 
     @Override

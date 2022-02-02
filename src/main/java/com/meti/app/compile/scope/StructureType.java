@@ -22,8 +22,8 @@ public final class StructureType extends AbstractNode {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Structure;
+    public boolean is(Role role) {
+        return role == Role.Structure;
     }
 
     @Override

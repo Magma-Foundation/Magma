@@ -9,7 +9,7 @@ import com.meti.app.compile.text.StringOutput;
 
 public class FunctionTypeRenderer extends OutputRenderer {
     public FunctionTypeRenderer(Node identity) {
-        super(identity, Node.Type.Function);
+        super(identity, Node.Role.Function);
     }
 
     @Override

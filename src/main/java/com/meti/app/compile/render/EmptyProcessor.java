@@ -12,7 +12,7 @@ import com.meti.app.compile.text.RootText;
 public record EmptyProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Empty)) {
+        if (node.is(Node.Role.Empty)) {
             return new Some<>(new RootText("").toOutput());
         } else {
             return new None<>();

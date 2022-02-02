@@ -7,11 +7,12 @@ import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
-public final class ReferenceType extends AbstractNode {
+public class ReferenceType extends AbstractNode implements Type {
     private final Node value;
 
     public ReferenceType(Node value) {
@@ -23,10 +24,9 @@ public final class ReferenceType extends AbstractNode {
         return group == Attribute.Group.Type ? Streams.apply(Attribute.Type.Value) : Streams.empty();
     }
 
-
     @Override
-    public boolean is(Type type) {
-        return type == Type.Reference;
+    public boolean is(Role role) {
+        return role == Role.Reference;
     }
 
     @Override

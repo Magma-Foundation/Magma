@@ -44,6 +44,6 @@ final class StructureRenderer extends AbstractProcessor<Node, Output> {
 
     @Override
     protected boolean validate() {
-        return input.is(Node.Type.Structure);
+        return input.is(Node.Role.Structure);
     }
 }
