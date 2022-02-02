@@ -11,6 +11,10 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public record FunctionType(Node returns, List<Node> parameters) implements Node {
+    public FunctionType(Node returns, Node... parameters) {
+        this(returns, List.apply(parameters));
+    }
+
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {

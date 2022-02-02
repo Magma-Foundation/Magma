@@ -6,7 +6,10 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.option.Option;
+import com.meti.app.compile.common.EmptyField;
+import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Primitive;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
@@ -112,8 +115,14 @@ public record MagmaParser(List<? extends Node> input) {
 
     public List<Node> parse() throws StreamException, CompileException {
         try {
+            var initial = new State()
+                    .mapScope(scope -> {
+                        // TODO: Do generic type here later
+                        var type = new FunctionType(Primitive.Void);
+                        return scope.define(new EmptyField("=", type));
+                    });
             return input.stream()
-                    .foldRight(new StateBuffer(), (current, next) -> current.append(state -> parseAST(state.apply(next))))
+                    .foldRight(new StateBuffer(initial), (current, next) -> current.append(state -> parseAST(state.apply(next))))
                     .list;
         } catch (StreamException e) {
             throw new CompileException(e);
@@ -153,17 +162,13 @@ public record MagmaParser(List<? extends Node> input) {
         private final List<Node> list;
         private final State state;
 
-        private StateBuffer() {
-            this(List.createList(), new State());
+        private StateBuffer(State initial) {
+            this(List.createList(), initial);
         }
 
         private StateBuffer(List<Node> list, State state) {
             this.list = list;
             this.state = state;
-        }
-
-        private StateBuffer(State state) {
-            this(List.createList(), state);
         }
 
         public <E extends Exception> StateBuffer append(F1<State, State, E> mapper) throws E {
