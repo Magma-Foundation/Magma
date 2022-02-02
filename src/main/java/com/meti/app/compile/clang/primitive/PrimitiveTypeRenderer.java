@@ -14,7 +14,7 @@ public class PrimitiveTypeRenderer extends OutputRenderer {
     @Override
     protected Output processImpl() throws AttributeException {
         var type = identity.apply(Attribute.Type.Type)
-                .asNode()
+                .asType()
                 .apply(Attribute.Type.Name)
                 .asOutput()
                 .map(String::toLowerCase);
