@@ -1,11 +1,17 @@
 package com.meti.app.compile.parse;
 
 import com.meti.api.core.F1;
+import com.meti.api.json.AbstractJSONable;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
+
+import java.util.Objects;
 
 import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
 
-public class State {
+public class State extends AbstractJSONable {
     private final Node current;
     private final Scope scope;
 
@@ -26,8 +32,25 @@ public class State {
         return new State(element, scope);
     }
 
+    public <T, E extends Exception> T applyToScope(F1<Scope, T, E> predicate) throws E {
+        return predicate.apply(scope);
+    }
+
     public Node getCurrent() {
         return current;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(current, scope);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof State state)) return false;
+        return Objects.equals(current, state.current) &&
+               Objects.equals(scope, state.scope);
     }
 
     public <E extends Exception> State mapCurrent(F1<Node, Node, E> mapper) throws E {
@@ -44,11 +67,14 @@ public class State {
         return scope;
     }
 
-    public <T, E extends Exception> T applyToScope(F1<Scope, T, E> predicate) throws E {
-        return predicate.apply(scope);
-    }
-
     public <E extends Exception> boolean queryCurrent(F1<Node, Boolean, E> predicate) throws E {
         return predicate.apply(current);
+    }
+
+    @Override
+    public JSONNode toJSON() throws JSONException {
+        return new ObjectNode()
+                .addJSONable("current", current)
+                .addJSONable("scope", scope);
     }
 }

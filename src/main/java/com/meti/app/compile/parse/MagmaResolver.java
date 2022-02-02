@@ -27,7 +27,7 @@ public record MagmaResolver(Node root, Scope scope) {
         } else if (root.is(Node.Role.Boolean)) {
             return Primitive.Bool;
         } else if (root.is(Node.Role.Integer)) {
-            var unformatted = List.<Type>apply(new ReferenceType(Primitive.Void), new IntegerType(true, 16));
+            var unformatted = List.<Type>apply(new IntegerType(true, 16));
             var value = root.apply(Attribute.Type.Value).asInteger();
 
             List<Type> formatted;
@@ -37,7 +37,7 @@ public record MagmaResolver(Node root, Scope scope) {
                 formatted = unformatted;
             }
 
-            return new Union(formatted);
+            return new Union(formatted.add(new ReferenceType(Primitive.Void)));
         } else if (root.is(Node.Role.Return)) {
             var innerValue = root.apply(Attribute.Type.Value).asNode();
             return new MagmaResolver(innerValue, scope).resolve();

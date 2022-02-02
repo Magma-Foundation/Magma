@@ -81,8 +81,7 @@ public final class Block extends AbstractNode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Block)) return false;
-        Block block = (Block) o;
+        if (!(o instanceof Block block)) return false;
         return Objects.equals(children, block.children);
     }
 

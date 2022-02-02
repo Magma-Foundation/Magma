@@ -10,9 +10,25 @@ import com.meti.app.compile.parse.State;
 import com.meti.app.compile.stage.CompileException;
 import org.junit.jupiter.api.Test;
 
+import static com.meti.app.compile.magma.ImplicitType.ImplicitType_;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ImplementationVisitorTest {
+    @Test
+    void implicit() throws CompileException {
+        var inputIdentity = new Declaration("main", ImplicitType_, Definition.Flag.Def);
+        var inputRoot = new Implementation(inputIdentity, new Block(new Return(new IntegerNode(0))));
+
+        var expectedIdentity = new Declaration("main", new IntegerType(true, 16), Definition.Flag.Def);
+        var expectedRoot = new Implementation(expectedIdentity, new Block(new Return(new IntegerNode(0))));
+
+        var input = new State(inputRoot);
+        var output = new State(expectedRoot);
+
+        var actual = new ImplementationVisitor(input).onParseImpl();
+        assertEquals(output, actual);
+    }
+
     @Test
     void nominal() throws CompileException {
         var identity = new Declaration("main", new IntegerType(true, 16), Definition.Flag.Def);

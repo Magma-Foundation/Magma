@@ -1,7 +1,5 @@
 package com.meti.api.json;
 
-import com.meti.api.collect.stream.StreamException;
-
 public class JSONException extends Exception {
     public JSONException(String message) {
         super(message);
@@ -11,7 +9,7 @@ public class JSONException extends Exception {
         super(message, cause);
     }
 
-    public JSONException(StreamException cause) {
+    public JSONException(Throwable cause) {
         super(cause);
     }
 }

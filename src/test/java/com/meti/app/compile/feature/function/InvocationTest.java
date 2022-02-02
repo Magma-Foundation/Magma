@@ -11,13 +11,13 @@ public class InvocationTest {
     }
 
     @Test
-    void one_parameter() {
-        assertSourceCompile("test(1)", "test(1)");
+    void nominal() {
+        assertSourceCompile("def test() = {}test()", "void test(){}test()");
     }
 
     @Test
-    void test() {
-        assertSourceCompile("test()", "test()");
+    void one_parameter() {
+        assertSourceCompile("test(1)", "test(1)");
     }
 
     @Test
