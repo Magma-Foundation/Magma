@@ -5,12 +5,19 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
-public record Return(Node value) implements Node {
+public final class Return extends AbstractNode {
+    private final Node value;
+
+    public Return(Node value) {
+        this.value = value;
+    }
+
     @Override
     public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
