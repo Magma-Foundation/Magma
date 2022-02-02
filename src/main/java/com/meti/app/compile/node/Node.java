@@ -1,7 +1,6 @@
 package com.meti.app.compile.node;
 
 import com.meti.api.collect.stream.Stream;
-import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.json.JSONException;
@@ -9,7 +8,6 @@ import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
-import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public interface Node extends JSONable {
     default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
@@ -34,16 +32,6 @@ public interface Node extends JSONable {
         throw new AttributeException("Node does not have attribute to replace of: " + type);
     }
 
-    default <E extends Exception> Node mapAsNodeStream(Attribute.Type type, F1<com.meti.api.collect.stream.Stream<Node>, com.meti.api.collect.stream.Stream<? extends Node>, E> mapper) throws E, AttributeException {
-        try {
-            var input = apply(type).asStreamOfNodes();
-            var output = mapper.apply(input).foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add).complete();
-            return with(type, output);
-        } catch (StreamException e) {
-            throw new AttributeException(e);
-        }
-    }
-
     @Override
     default JSONNode toJSON() throws JSONException {
         var format = "Instances of '%s' cannot be converted to JSON yet.";
@@ -52,6 +40,12 @@ public interface Node extends JSONable {
     }
 
     enum Type {
-        Input, Block, Implementation, Declaration, Integer, Structure, Primitive, Import, Extern, Variable, Boolean, Abstraction, Unary, Empty, If, String, Invocation, Line, Implicit, Reference, Initialization, Function, Else, Binary, Cache, Output, Return
+        Abstraction, Binary, Block, Boolean,
+        Cache, Declaration, Else, Empty,
+        Extern, Function, If, Implementation,
+        Implicit, Import, Initialization, Input,
+        Integer, Invocation, Line, Output,
+        Primitive, Reference, Return, String,
+        Structure, Unary, Variable
     }
 }
