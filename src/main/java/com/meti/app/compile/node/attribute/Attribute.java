@@ -14,8 +14,12 @@ public interface Attribute {
     }
 
     default Input asInput() throws AttributeException {
-        throw new AttributeException("Not output.");
+        var format = "Not input, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
+        var message = format.formatted(getClass(), toJSON());
+        throw new AttributeException(message);
     }
+
+    JSONNode toJSON();
 
     default int asInteger() throws AttributeException {
         throw new AttributeException("Not an integer.");
@@ -32,8 +36,6 @@ public interface Attribute {
         var message = format.formatted(getClass(), toJSON());
         throw new AttributeException(message);
     }
-
-    JSONNode toJSON();
 
     default Packaging asPackaging() throws AttributeException {
         throw new AttributeException("Not a package.");
