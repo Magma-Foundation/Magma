@@ -11,6 +11,7 @@ import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.common.Initialization;
 import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.node.InputType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
@@ -44,7 +45,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
         Option<Node> field;
         field = typeSeparatorOptional.<Option<Node>, RuntimeException>map(typeSeparator -> new Some<>(valueSeparator.<Node, RuntimeException>map(s -> {
             var typeText = input.slice(typeSeparator + 1, s);
-            var type = new InputNode(typeText);
+            var type = new InputType(typeText);
 
             var valueText = input.slice(s + 1);
             var value = new InputNode(valueText);
@@ -52,7 +53,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
             return new Initialization(nameText, type, value, flags);
         }).orElseGet(() -> {
             var typeText = input.slice(typeSeparator + 1);
-            var type = new InputNode(typeText);
+            var type = new InputType(typeText);
 
             return new Declaration(nameText, type, flags);
         }))).orElseGet(() -> valueSeparator.map(integer -> {

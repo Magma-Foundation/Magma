@@ -5,12 +5,13 @@ import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 
-public record FunctionType(Node returns, List<Node> parameters) implements Node {
+public record FunctionType(Node returns, List<Node> parameters) implements Type {
     public FunctionType(Node returns, Node... parameters) {
         this(returns, List.apply(parameters));
     }

@@ -2,13 +2,13 @@ package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.feature.scope.Declaration;
-import com.meti.app.compile.node.InputNode;
-import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.InputType;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.text.RootText;
 
 public class Fields {
-    public record Builder(RootText name, Node type, List<Definition.Flag> flags) {
+    public record Builder(RootText name, Type type, List<Definition.Flag> flags) {
         public Builder() {
             this(new RootText(""), Primitive.Void, List.createList());
         }
@@ -26,10 +26,10 @@ public class Fields {
         }
 
         public Builder withType(String type) {
-            return new Builder(name, new InputNode(new RootText(type)), flags);
+            return new Builder(name, new InputType(new RootText(type)), flags);
         }
 
-        public Builder withType(Node type) {
+        public Builder withType(Type type) {
             return new Builder(name, type, flags);
         }
     }

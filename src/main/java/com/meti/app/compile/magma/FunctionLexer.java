@@ -14,7 +14,9 @@ import com.meti.app.compile.common.Function;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.InputNode;
+import com.meti.app.compile.node.InputType;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
@@ -60,7 +62,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
         });
     }
 
-    private Node extractReturnType(int paramEnd, Option<Integer> valueSeparator) {
+    private Type extractReturnType(int paramEnd, Option<Integer> valueSeparator) {
         return text.firstIndexOfCharWithOffset(':', paramEnd)
                 .filter(value -> value < valueSeparator.orElse(text.size()))
                 .map(value -> sliceToContent(value + 1, valueSeparator))
@@ -109,10 +111,10 @@ public record FunctionLexer(Input text) implements Processor<Node> {
         }
     }
 
-    private Node sliceToContent(int start, Option<Integer> terminus) {
+    private Type sliceToContent(int start, Option<Integer> terminus) {
         var end = terminus.orElse(text.size());
         var slice = text.slice(start, end);
-        return new InputNode(slice);
+        return new InputType(slice);
     }
 
     private List<Node> splitParameters(Integer paramStart, int paramEnd) throws StreamException {

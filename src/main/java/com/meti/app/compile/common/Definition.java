@@ -8,6 +8,7 @@ import com.meti.api.json.JSONNode;
 import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.*;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
@@ -17,9 +18,9 @@ import java.util.Objects;
 public abstract class Definition extends AbstractNode {
     protected final List<Flag> flags;
     protected final Input name;
-    protected final Node type;
+    protected final Type type;
 
-    public Definition(List<Flag> flags, Input name, Node type) {
+    public Definition(List<Flag> flags, Input name, Type type) {
         this.flags = flags;
         this.name = name;
         this.type = type;
@@ -30,7 +31,7 @@ public abstract class Definition extends AbstractNode {
         return switch (type) {
             case Name -> new InputAttribute(name);
             case Flags -> new FlagsAttribute(flags);
-            case Type -> new NodeAttribute(this.type);
+            case Type -> new TypeAttribute(this.type);
             default -> throw new AttributeException(this, type);
         };
     }
@@ -49,7 +50,7 @@ public abstract class Definition extends AbstractNode {
             return complete(input, this.type);
         }
         if (type == Attribute.Type.Type) {
-            return complete(name, attribute.asNode());
+            return complete(name, attribute.asType());
         }
         return this;
     }
@@ -70,7 +71,7 @@ public abstract class Definition extends AbstractNode {
         }
     }
 
-    protected abstract Definition complete(Input name, Node type) throws AttributeException;
+    protected abstract Definition complete(Input name, Type type) throws AttributeException;
 
     @Override
     public boolean equals(Object o) {

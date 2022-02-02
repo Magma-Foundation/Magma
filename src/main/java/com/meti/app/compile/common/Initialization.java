@@ -4,6 +4,7 @@ import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
@@ -13,15 +14,15 @@ import com.meti.app.compile.text.RootText;
 public class Initialization extends Definition {
     private final Node value;
 
-    public Initialization(String name, Node type, Node value, Flag... flags) {
+    public Initialization(String name, Type type, Node value, Flag... flags) {
         this(new RootText(name), type, value, flags);
     }
 
-    public Initialization(Input name, Node type, Node value, Flag... flags) {
+    public Initialization(Input name, Type type, Node value, Flag... flags) {
         this(name, type, value, List.apply(flags));
     }
 
-    public Initialization(Input name, Node type, Node value, List<Flag> flags) {
+    public Initialization(Input name, Type type, Node value, List<Flag> flags) {
         super(flags, name, type);
         this.value = value;
     }
@@ -44,7 +45,7 @@ public class Initialization extends Definition {
     }
 
     @Override
-    protected Definition complete(Input name, Node type) {
+    protected Definition complete(Input name, Type type) {
         return new Initialization(this.name, type, value, flags);
     }
 
