@@ -13,6 +13,6 @@ public class AssignTest {
 
     @Test
     void nominal() {
-        assertSourceCompile("x = 69", "x = 69");
+        assertSourceCompile("let x = 420;x = 69;", "int x=420;x = 69;");
     }
 }
