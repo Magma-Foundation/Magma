@@ -6,7 +6,7 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 
 public class ReferenceTest {
     @Test
-    void type() {
-        assertSourceCompile("def test(value : &I16) => {}", "void test(int *value){}");
+    void nominal() {
+        assertSourceCompile("const x : &I16 = 0", "int *x=0;");
     }
 }

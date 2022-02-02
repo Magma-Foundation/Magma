@@ -3,7 +3,7 @@ package com.meti.app.compile.magma;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.common.ReferenceLexer;
+import com.meti.app.compile.common.ReferenceTypeLexer;
 import com.meti.app.compile.common.alternate.ElseLexer;
 import com.meti.app.compile.common.binary.BinaryLexer;
 import com.meti.app.compile.common.block.BlockLexer;
@@ -60,9 +60,9 @@ public class MagmaLexer extends NodeStage {
                 var input = type.apply(Attribute.Type.Value).asInput();
                 try {
                     return Streams.apply(new FunctionTypeLexer(input),
-                                    new ReferenceLexer(input),
-                                    new PrimitiveLexer(input),
-                                    new IntegerTypeLexer(input))
+                            new ReferenceTypeLexer(input),
+                            new PrimitiveLexer(input),
+                            new IntegerTypeLexer(input))
                             .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Type.Type, new NodeAttribute(result))));
                 } catch (StreamException e) {
                     throw new CompileException(e);

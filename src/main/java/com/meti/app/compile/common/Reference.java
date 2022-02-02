@@ -1,5 +1,6 @@
 package com.meti.app.compile.common;
 
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
@@ -11,7 +12,7 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 
 public record Reference(Node value) implements Node {
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Type ? Streams.apply(Attribute.Type.Value) : Streams.empty();
     }
 

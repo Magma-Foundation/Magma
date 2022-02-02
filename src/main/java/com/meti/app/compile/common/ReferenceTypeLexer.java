@@ -8,7 +8,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
-public record ReferenceLexer(Input text) implements Processor<Node> {
+public record ReferenceTypeLexer(Input text) implements Processor<Node> {
     @Override
     public Option<Node> process() {
         if (text.startsWithChar('&')) {
