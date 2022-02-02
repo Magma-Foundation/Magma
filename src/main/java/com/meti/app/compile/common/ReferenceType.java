@@ -13,10 +13,17 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
 public class ReferenceType extends AbstractNode implements Type {
-    private final Node value;
+    private final Type value;
 
-    public ReferenceType(Node value) {
+    public ReferenceType(Type value) {
         this.value = value;
+    }
+
+    @Override
+    public boolean isAssignableTo(Type other) throws AttributeException {
+        if (!other.is(Role.Reference)) return false;
+        var inner = other.apply(Attribute.Type.Value).asType();
+        return value.isAssignableTo(inner);
     }
 
     @Override
@@ -38,7 +45,7 @@ public class ReferenceType extends AbstractNode implements Type {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         return type == Attribute.Type.Value
-                ? new ReferenceType(attribute.asNode())
+                ? new ReferenceType(attribute.asType())
                 : this;
     }
 

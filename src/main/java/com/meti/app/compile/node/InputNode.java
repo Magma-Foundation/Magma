@@ -9,17 +9,11 @@ import com.meti.app.compile.text.Input;
 
 import java.util.Objects;
 
-public final class InputNode extends AbstractNode {
+public class InputNode extends AbstractNode {
     private final Input input;
 
     public InputNode(Input input) {
         this.input = input;
-    }
-
-    @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new InputAttribute(input);
-        throw new AttributeException(this, type);
     }
 
     @Override
@@ -35,12 +29,18 @@ public final class InputNode extends AbstractNode {
     }
 
     @Override
-    public JSONNode toJSON() {
-        return new ObjectNode().addString("input", input.toOutput().compute());
+    public boolean is(Role role) {
+        return role == Role.Input;
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Input;
+    public Attribute apply(Attribute.Type type) throws AttributeException {
+        if (type == Attribute.Type.Value) return new InputAttribute(input);
+        throw new AttributeException(this, type);
+    }
+
+    @Override
+    public JSONNode toJSON() {
+        return new ObjectNode().addString("input", input.toOutput().compute());
     }
 }

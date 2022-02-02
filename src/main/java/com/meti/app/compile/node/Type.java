@@ -3,7 +3,7 @@ package com.meti.app.compile.node;
 import com.meti.app.compile.node.attribute.AttributeException;
 
 public interface Type extends Node {
-    default boolean isAssignableTo(Type other) {
+    default boolean isAssignableTo(Type other) throws AttributeException {
         return other.is(Role.Primitive) || this.equals(other);
     }
 
