@@ -43,4 +43,8 @@ class State {
     public Scope getScope() {
         return scope;
     }
+
+    public <E extends Exception> boolean queryCurrent(F1<Node, Boolean, E> predicate) throws E {
+        return predicate.apply(current);
+    }
 }
