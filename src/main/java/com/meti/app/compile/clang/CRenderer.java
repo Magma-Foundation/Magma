@@ -5,6 +5,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.clang.primitive.IntegerTypeRenderer;
 import com.meti.app.compile.clang.primitive.PrimitiveTypeRenderer;
+import com.meti.app.compile.clang.reference.ReferenceTypeRenderer;
 import com.meti.app.compile.common.LineProcessor;
 import com.meti.app.compile.common.alternate.ElseProcessor;
 import com.meti.app.compile.common.binary.BinaryProcessor;

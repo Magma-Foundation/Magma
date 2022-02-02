@@ -10,6 +10,7 @@ import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.*;
 import com.meti.app.compile.text.Input;
+import com.meti.app.compile.text.RootText;
 
 import java.util.Objects;
 
@@ -37,7 +38,15 @@ public abstract class Field extends AbstractNode {
     @Override
     public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
         if (type == Attribute.Type.Name) {
-            return complete(attribute.asInput(), this.type);
+            Input input;
+            try {
+                input = attribute.asInput();
+            } catch (AttributeException e) {
+                // TODO: figure out a better conversion than this
+                input = new RootText(attribute.asOutput().compute());
+            }
+
+            return complete(input, this.type);
         }
         if (type == Attribute.Type.Type) {
             return complete(name, attribute.asNode());

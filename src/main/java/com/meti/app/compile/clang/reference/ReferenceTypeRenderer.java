@@ -1,7 +1,9 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.reference;
 
+import com.meti.app.compile.clang.NodeTypeRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.OutputAttribute;
 import com.meti.app.compile.stage.CompileException;
 
@@ -16,6 +18,9 @@ public class ReferenceTypeRenderer extends NodeTypeRenderer {
                 .asInput()
                 .toOutput()
                 .prepend("*");
-        return identity.with(Attribute.Type.Name, new OutputAttribute(name));
+        var innerType = identity.apply(Attribute.Type.Type).asNode()
+                .apply(Attribute.Type.Value).asNode();
+        return identity.with(Attribute.Type.Name, new OutputAttribute(name))
+                .with(Attribute.Type.Type, new NodeAttribute(innerType));
     }
 }
