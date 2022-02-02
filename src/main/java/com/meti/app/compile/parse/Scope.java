@@ -46,4 +46,8 @@ public class Scope {
             return new None<>();
         }
     }
+
+    public boolean isLevel() {
+        return frames.size() <= 1;
+    }
 }
