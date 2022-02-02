@@ -10,7 +10,7 @@ import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;
-import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.TypeAttribute;
 
 public class ReferenceType extends AbstractNode implements Type {
     private final Type value;
@@ -38,7 +38,7 @@ public class ReferenceType extends AbstractNode implements Type {
 
     @Override
     public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new NodeAttribute(value);
+        if (type == Attribute.Type.Value) return new TypeAttribute(value);
         throw new AttributeException(type);
     }
 

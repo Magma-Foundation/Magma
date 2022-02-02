@@ -3,8 +3,8 @@ package com.meti.app.compile.clang.reference;
 import com.meti.app.compile.clang.NodeTypeRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
-import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.OutputAttribute;
+import com.meti.app.compile.node.attribute.TypeAttribute;
 import com.meti.app.compile.stage.CompileException;
 
 public class ReferenceTypeRenderer extends NodeTypeRenderer {
@@ -18,9 +18,11 @@ public class ReferenceTypeRenderer extends NodeTypeRenderer {
                 .asInput()
                 .toOutput()
                 .prepend("*");
-        var innerType = identity.apply(Attribute.Type.Type).asType()
-                .apply(Attribute.Type.Value).asNode();
+        var innerType = identity
+                .apply(Attribute.Type.Type).asType()
+                .apply(Attribute.Type.Value).asType();
+
         return identity.with(Attribute.Type.Name, new OutputAttribute(name))
-                .with(Attribute.Type.Type, new NodeAttribute(innerType));
+                .with(Attribute.Type.Type, new TypeAttribute(innerType));
     }
 }
