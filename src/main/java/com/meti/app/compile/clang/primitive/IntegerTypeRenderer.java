@@ -15,7 +15,7 @@ public class IntegerTypeRenderer extends OutputRenderer {
     @Override
     protected Output processImpl() throws CompileException {
         var name = identity.apply(Attribute.Type.Name).asInput();
-        var type = identity.apply(Attribute.Type.Type).asNode();
+        var type = identity.apply(Attribute.Type.Type).asType();
 
         var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
         var bits = type.apply(Attribute.Type.Bits).asInteger();

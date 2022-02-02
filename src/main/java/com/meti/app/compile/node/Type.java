@@ -11,7 +11,7 @@ public interface Type extends Node {
         return this.equals(other);
     }
 
-    default Node reduce() throws AttributeException {
+    default Type reduce() throws AttributeException {
         return this;
     }
 }

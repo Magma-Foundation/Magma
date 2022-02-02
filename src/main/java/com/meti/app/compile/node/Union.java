@@ -54,7 +54,7 @@ public class Union extends AbstractNode implements Type {
     }
 
     @Override
-    public Node reduce() throws AttributeException {
+    public Type reduce() throws AttributeException {
         return options.first().orElseThrow(() -> new AttributeException("Union is empty."));
     }
 }
