@@ -1,11 +1,10 @@
-package com.meti.app.compile.scope;
+package com.meti.app.compile.function;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.cache.Cache;
 import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.function.FunctionTransformer;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Primitive;
