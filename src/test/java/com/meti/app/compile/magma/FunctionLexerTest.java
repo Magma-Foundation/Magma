@@ -1,10 +1,10 @@
 package com.meti.app.compile.magma;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.Field;
+import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.common.Fields;
 import com.meti.app.compile.common.Implementation;
+import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.stage.CompileException;
@@ -39,7 +39,7 @@ class FunctionLexerTest {
     void lambda() throws CompileException {
         var node = new FunctionLexer(new RootText("() => {}"))
                 .process();
-        var identity = new EmptyField(new RootText(""), ImplicitType.ImplicitType_, List.createList());
+        var identity = new Declaration(new RootText(""), ImplicitType.ImplicitType_, List.createList());
         var expected = new Implementation(identity, new InputNode(new RootText("{}")), List.createList());
         var actual = node.orElse(EmptyNode_);
         assertEquals(expected, actual);
@@ -50,7 +50,7 @@ class FunctionLexerTest {
         var identity = new Fields.Builder()
                 .withName("main")
                 .withType("I16")
-                .withFlag(Field.Flag.Def)
+                .withFlag(Definition.Flag.Def)
                 .build();
         var body = new InputNode(new RootText("{return 0;}"));
         var expected = new Implementation(identity, body);

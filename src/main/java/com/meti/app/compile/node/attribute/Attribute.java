@@ -3,7 +3,7 @@ package com.meti.app.compile.node.attribute;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
-import com.meti.app.compile.common.Field;
+import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
@@ -41,7 +41,7 @@ public interface Attribute {
         throw new AttributeException("Not a package.");
     }
 
-    default Stream<Field.Flag> asStreamOfFlags() throws AttributeException {
+    default Stream<Definition.Flag> asStreamOfFlags() throws AttributeException {
         throw new UnsupportedOperationException("Not a list of flags.");
     }
 

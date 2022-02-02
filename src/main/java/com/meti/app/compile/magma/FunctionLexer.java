@@ -8,7 +8,11 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.common.*;
+import com.meti.app.compile.common.Abstraction;
+import com.meti.app.compile.common.Definition;
+import com.meti.app.compile.common.Function;
+import com.meti.app.compile.common.Implementation;
+import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
@@ -19,7 +23,7 @@ import com.meti.app.compile.text.RootText;
 public record FunctionLexer(Input text) implements Processor<Node> {
     private Option<Node> extractWithSeparator(Integer paramStart, RootText keys, Integer space) throws CompileException {
         var flags = extractFlags(keys.slice(0, space));
-        if (flags.contains(Field.Flag.Def)) {
+        if (flags.contains(Definition.Flag.Def)) {
             var function = extractFunction(paramStart, flags, keys.slice(space + 1));
             return new Some<>(function);
         } else {
@@ -34,7 +38,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
                 .flatMap(this::extract);
     }
 
-    private List<Field.Flag> extractFlags(RootText flagString) throws CompileException {
+    private List<Definition.Flag> extractFlags(RootText flagString) throws CompileException {
         try {
             return Streams.apply(flagString
                     .toOutput()
@@ -49,7 +53,7 @@ public record FunctionLexer(Input text) implements Processor<Node> {
         }
     }
 
-    private Option<Function> attachValue(EmptyField identity, List<Node> parameters, Option<Integer> valueSeparator) {
+    private Option<Function> attachValue(Declaration identity, List<Node> parameters, Option<Integer> valueSeparator) {
         return valueSeparator.map(separator -> {
             var value = new InputNode(text.slice(separator + 2));
             return new Implementation(identity, value, parameters);
@@ -63,13 +67,13 @@ public record FunctionLexer(Input text) implements Processor<Node> {
                 .orElse(ImplicitType.ImplicitType_);
     }
 
-    private Function extractFunction(int paramStart, List<Field.Flag> flags, RootText name) throws CompileException {
+    private Function extractFunction(int paramStart, List<Definition.Flag> flags, RootText name) throws CompileException {
         try {
             int paramEnd = locateParameterEnd(paramStart);
             var parameters = splitParameters(paramStart, paramEnd);
             var valueSeparator = text.firstIndexOfSliceWithOffset("=>", paramEnd);
             var returnType = extractReturnType(paramEnd, valueSeparator);
-            var identity = new EmptyField(name, returnType, flags);
+            var identity = new Declaration(name, returnType, flags);
             var map = attachValue(identity, parameters, valueSeparator);
             return map.orElseGet(() -> new Abstraction(identity, parameters));
         } catch (StreamException e) {
@@ -122,8 +126,8 @@ public record FunctionLexer(Input text) implements Processor<Node> {
                 .foldRight(List.createList(), List::add);
     }
 
-    private Stream<Field.Flag> validateFlag(String flagString) {
-        return Streams.apply(Field.Flag.values())
+    private Stream<Definition.Flag> validateFlag(String flagString) {
+        return Streams.apply(Definition.Flag.values())
                 .filter(flag -> flag.name().equalsIgnoreCase(flagString));
     }
 }

@@ -3,8 +3,8 @@ package com.meti.app.compile.parse;
 import com.meti.api.collect.java.JavaList;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.common.Definition;
-import com.meti.app.compile.common.ValuedField;
+import com.meti.app.compile.common.DefinitionNode;
+import com.meti.app.compile.common.Initialization;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.common.integer.IntegerType;
@@ -19,8 +19,8 @@ class MagmaParserTest {
     void redefined_after_blocks() throws CompileException, StreamException {
         var type = new IntegerType(true, 16);
         var value = new IntegerNode(100);
-        var identity = new ValuedField("x", type, value);
-        var definition = new Definition(identity);
+        var identity = new Initialization("x", type, value);
+        var definition = new DefinitionNode(identity);
 
         var input = List.apply(new Block(definition), definition);
         var output = new MagmaParsingStage(input).visit();
@@ -35,8 +35,8 @@ class MagmaParserTest {
     void redefined_inside_blocks() {
         var type = new IntegerType(true, 16);
         var value = new IntegerNode(100);
-        var identity = new ValuedField("x", type, value);
-        var definition = new Definition(identity);
+        var identity = new Initialization("x", type, value);
+        var definition = new DefinitionNode(identity);
 
         var input = List.apply(definition, new Block(definition));
         var parser = new MagmaParsingStage(input);

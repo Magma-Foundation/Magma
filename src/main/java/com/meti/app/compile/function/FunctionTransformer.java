@@ -6,7 +6,7 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.app.compile.cache.Cache;
-import com.meti.app.compile.common.Field;
+import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.feature.scope.Variable;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
@@ -34,7 +34,7 @@ public record FunctionTransformer(Node oldNode) implements Processor<Node> {
                     .apply(Attribute.Type.Flags)
                     .asStreamOfFlags()
                     .foldRight(List.createList(), List::add)
-                    .contains(Field.Flag.Extern);
+                    .contains(Definition.Flag.Extern);
         } catch (StreamException | AttributeException e) {
             return false;
         }

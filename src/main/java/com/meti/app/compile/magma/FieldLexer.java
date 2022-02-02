@@ -7,9 +7,9 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.Field;
-import com.meti.app.compile.common.ValuedField;
+import com.meti.app.compile.common.Definition;
+import com.meti.app.compile.common.Initialization;
+import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.process.Processor;
@@ -33,7 +33,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
                     .anyMatch(value -> value > 1)) {
                 throw new CompileException("Duplicate flags are not allowed.");
             }
-            if (flags.contains(Field.Flag.Const) && flags.contains(Field.Flag.Let)) {
+            if (flags.contains(Definition.Flag.Const) && flags.contains(Definition.Flag.Let)) {
                 throw new CompileException("Definition cannot be mutable and immutable at the same time.");
             }
         } catch (StreamException e) {
@@ -49,17 +49,17 @@ public record FieldLexer(Input input) implements Processor<Node> {
             var valueText = input.slice(s + 1);
             var value = new InputNode(valueText);
 
-            return new ValuedField(nameText, type, value, flags);
+            return new Initialization(nameText, type, value, flags);
         }).orElseGet(() -> {
             var typeText = input.slice(typeSeparator + 1);
             var type = new InputNode(typeText);
 
-            return new EmptyField(nameText, type, flags);
+            return new Declaration(nameText, type, flags);
         }))).orElseGet(() -> valueSeparator.map(integer -> {
             var valueText = input.slice(integer + 1);
             var value = new InputNode(valueText);
 
-            return new ValuedField(nameText, ImplicitType_, value, flags);
+            return new Initialization(nameText, ImplicitType_, value, flags);
         }));
         return field;
     }
@@ -84,7 +84,7 @@ public record FieldLexer(Input input) implements Processor<Node> {
         }
     }
 
-    private static List<Field.Flag> lexFlags(Input keys, Option<Integer> separator) throws CompileException {
+    private static List<Definition.Flag> lexFlags(Input keys, Option<Integer> separator) throws CompileException {
         try {
             return separator.map(space -> Streams.apply(keys.slice(0, space)
                     .toOutput()
@@ -92,9 +92,9 @@ public record FieldLexer(Input input) implements Processor<Node> {
                     .split(" "))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
-                    .flatMap(value1 -> Streams.apply(Field.Flag.values())
+                    .flatMap(value1 -> Streams.apply(Definition.Flag.values())
                             .filter(value -> value.name().equalsIgnoreCase(value1)))
-                    .foldRight(List.<Field.Flag>createList(), List::add))
+                    .foldRight(List.<Definition.Flag>createList(), List::add))
                     .orElse(List.createList());
         } catch (StreamException e) {
             throw new CompileException(e);

@@ -2,9 +2,9 @@ package com.meti.app.compile.function;
 
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.cache.Cache;
-import com.meti.app.compile.common.EmptyField;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
+import com.meti.app.compile.feature.scope.Declaration;
 import com.meti.app.compile.node.EmptyNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.primitive.Primitive;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FunctionTransformerTest {
     private Implementation createFunction(String name, Node value) {
-        var identity = new EmptyField(new RootText(name), Primitive.Void, List.createList());
+        var identity = new Declaration(new RootText(name), Primitive.Void, List.createList());
         return new Implementation(identity, value, List.createList());
     }
 
