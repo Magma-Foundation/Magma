@@ -22,7 +22,9 @@ public interface Attribute {
     }
 
     default Node asNode() throws AttributeException {
-        throw new AttributeException("Not a node.");
+        var format = "Not a node, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
+        var message = format.formatted(getClass(), toJSON());
+        throw new AttributeException(message);
     }
 
     default Output asOutput() throws AttributeException {

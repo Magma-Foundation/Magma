@@ -37,23 +37,12 @@ public final class CRenderer extends AfterStreamStage {
 
     @Override
     protected Node afterDefinitionTraversal(Node transformed) throws CompileException {
-        if (!transformed.is(Node.Type.Declaration) && !transformed.is(Node.Type.Initialization)) {
-            var format = "Invalid field:\n-----\n%s\n-----\n";
-            var message = format.formatted(transformed);
-            throw new CompileException(message);
-        }
-
-        var innerType = transformed.apply(Attribute.Type.Type).asNode();
-        if (transformed.is(Node.Type.Declaration)) {
-            return innerType;
+        if (transformed.is(Node.Type.Output)) {
+            return transformed;
         } else {
-            var value = transformed.apply(Attribute.Type.Value).asNode()
-                    .apply(Attribute.Type.Value)
-                    .asOutput();
-            return new OutputNode(innerType.apply(Attribute.Type.Value)
-                    .asOutput()
-                    .appendSlice("=")
-                    .appendOutput(value));
+            var type = transformed.apply(Attribute.Type.Type).asOutput();
+            var value = transformed.apply(Attribute.Type.Value).asOutput();
+            return new OutputNode(type.appendSlice("=").appendOutput(value));
         }
     }
 

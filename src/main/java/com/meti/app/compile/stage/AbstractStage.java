@@ -7,8 +7,8 @@ import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public abstract class AbstractStage implements Stage {
-    protected Node transformDefinition(Node definition) throws CompileException {
-        return definition;
+    protected Node afterTraversal(Node root) throws CompileException {
+        return root;
     }
 
     protected Node beforeNodeTraversal(Node root) throws CompileException {
@@ -35,6 +35,26 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
+    protected Node transformDefinitionGroup(Node root) throws CompileException {
+        try {
+            return root.apply(Attribute.Group.Definition)
+                    .foldRight(root, this::transformDefinitionGroup);
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
+    }
+
+    protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
+        var oldIdentity = root.apply(type).asNode();
+        var newIdentity = transformDefinition(oldIdentity);
+        var newIdentityAttribute = new NodeAttribute(newIdentity);
+        return root.with(type, newIdentityAttribute);
+    }
+
+    protected Node transformDefinition(Node definition) throws CompileException {
+        return definition;
+    }
+
     @Override
     public Node transformNodeAST(Node node) throws CompileException {
         try {
@@ -49,26 +69,6 @@ public abstract class AbstractStage implements Stage {
             var message = format.formatted(node);
             throw new CompileException(message, e);
         }
-    }
-
-    protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
-        var oldIdentity = root.apply(type).asNode();
-        var newIdentity = transformDefinition(oldIdentity);
-        var newIdentityAttribute = new NodeAttribute(newIdentity);
-        return root.with(type, newIdentityAttribute);
-    }
-
-    protected Node transformDefinitionGroup(Node root) throws CompileException {
-        try {
-            return root.apply(Attribute.Group.Definition)
-                    .foldRight(root, this::transformDefinitionGroup);
-        } catch (StreamException e) {
-            throw new CompileException(e);
-        }
-    }
-
-    protected Node afterTraversal(Node root) throws CompileException {
-        return root;
     }
 
     protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
@@ -106,15 +106,6 @@ public abstract class AbstractStage implements Stage {
         } catch (StreamException e) {
             throw new TransformationException(e);
         }
-    }
-
-    protected Node transformTypeAttribute(Node oldIdentity) throws CompileException {
-        var name = oldIdentity.apply(Attribute.Type.Name).asInput();
-        var oldType = oldIdentity.apply(Attribute.Type.Type).asNode();
-
-        var newType = transformType(oldType);
-        var newTypeAttribute = new NodeAttribute(newType);
-        return oldIdentity.with(Attribute.Type.Type, newTypeAttribute);
     }
 
     protected Node transformType(Node identity) throws CompileException {
