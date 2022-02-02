@@ -23,6 +23,8 @@ public interface Stream<T> {
 
     <R> Stream<R> flatMap(F1<T, Stream<R>, ?> mapper) throws StreamException;
 
+    <R, E extends Exception> Option<R> foldRightWithInitializer(F1<T, R, E> mapper, F2<R, T, R, E> folder) throws StreamException, E;
+
     <E extends Exception> Option<T> foldRight(F2<T, T, T, E> folder) throws StreamException, E;
 
     default Option<T> headOptionally() throws StreamException {
