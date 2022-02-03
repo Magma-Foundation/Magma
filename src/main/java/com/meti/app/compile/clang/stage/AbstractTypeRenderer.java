@@ -1,4 +1,4 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.stage;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;

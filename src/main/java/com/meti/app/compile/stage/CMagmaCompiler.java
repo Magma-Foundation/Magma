@@ -4,7 +4,7 @@ import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.java.Map;
 import com.meti.app.compile.clang.CFormat;
-import com.meti.app.compile.clang.CRenderer;
+import com.meti.app.compile.clang.stage.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
 import com.meti.app.compile.magma.lex.MagmaLexer;
 import com.meti.app.compile.node.InputNode;

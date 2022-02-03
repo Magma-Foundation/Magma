@@ -1,8 +1,9 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.stage;
 
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.app.compile.clang.*;
 import com.meti.app.compile.clang.primitive.IntegerTypeRenderer;
 import com.meti.app.compile.clang.primitive.PrimitiveTypeRenderer;
 import com.meti.app.compile.clang.reference.ReferenceTypeRenderer;

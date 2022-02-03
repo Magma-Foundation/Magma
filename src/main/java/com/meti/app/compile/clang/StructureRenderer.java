@@ -8,7 +8,7 @@ import com.meti.app.compile.process.AbstractProcessor;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 
-final class StructureRenderer extends AbstractProcessor<Node, Output> {
+public final class StructureRenderer extends AbstractProcessor<Node, Output> {
     public StructureRenderer(Node node) {
         super(node);
     }

@@ -1,6 +1,7 @@
 package com.meti.app.compile.clang;
 
 import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.clang.stage.OutputRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.stage.CompileException;

@@ -1,6 +1,6 @@
 package com.meti.app.compile.clang.primitive;
 
-import com.meti.app.compile.clang.OutputRenderer;
+import com.meti.app.compile.clang.stage.OutputRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;

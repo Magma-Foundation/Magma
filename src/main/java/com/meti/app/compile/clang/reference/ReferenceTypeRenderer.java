@@ -1,6 +1,6 @@
 package com.meti.app.compile.clang.reference;
 
-import com.meti.app.compile.clang.NodeTypeRenderer;
+import com.meti.app.compile.clang.stage.NodeTypeRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.OutputAttribute;

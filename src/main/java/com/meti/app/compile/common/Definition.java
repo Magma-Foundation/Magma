@@ -18,12 +18,12 @@ import java.util.Objects;
 public abstract class Definition extends AbstractNode {
     protected final List<Flag> flags;
     protected final Input name;
-    protected final Type category;
+    protected final Type type;
 
-    public Definition(List<Flag> flags, Input name, Type category) {
+    public Definition(List<Flag> flags, Input name, Type type) {
         this.flags = flags;
         this.name = name;
-        this.category = category;
+        this.type = type;
     }
 
     @Override
@@ -31,7 +31,7 @@ public abstract class Definition extends AbstractNode {
         return switch (category) {
             case Name -> new InputAttribute(name);
             case Flags -> new FlagsAttribute(flags);
-            case Type -> new TypeAttribute(this.category);
+            case Type -> new TypeAttribute(this.type);
             default -> throw new AttributeException(this, category);
         };
     }
@@ -47,7 +47,7 @@ public abstract class Definition extends AbstractNode {
                 input = new RootText(attribute.asOutput().compute());
             }
 
-            return complete(input, this.category);
+            return complete(input, this.type);
         }
         if (category == Attribute.Category.Type) {
             return complete(name, attribute.asType());
@@ -64,7 +64,7 @@ public abstract class Definition extends AbstractNode {
                     .build();
             return new ObjectNode()
                     .addString("name", name.toOutput().compute())
-                    .addJSONable("category", category)
+                    .addJSONable("category", type)
                     .addObject("flags", flags);
         } catch (StreamException e) {
             return new ObjectNode();
@@ -77,7 +77,7 @@ public abstract class Definition extends AbstractNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Definition definition)) return false;
-        return Objects.equals(flags, definition.flags) && Objects.equals(name, definition.name) && Objects.equals(category, definition.category);
+        return Objects.equals(flags, definition.flags) && Objects.equals(name, definition.name) && Objects.equals(type, definition.type);
     }
 
     public enum Flag {
