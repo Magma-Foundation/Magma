@@ -38,7 +38,7 @@ public abstract class AbstractParser implements Modifier {
     }
 
     @Override
-    public Option<State> modifyAfterAST() throws CompileException {
+    public Option<State> modifyAfterAST() {
         return isValid() ? new Some<>(modifyAfterASTImpl()) : new None<>();
     }
 
