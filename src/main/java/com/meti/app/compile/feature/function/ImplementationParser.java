@@ -2,6 +2,8 @@ package com.meti.app.compile.feature.function;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Type;
@@ -23,8 +25,7 @@ public class ImplementationParser extends AbstractParser {
         return state.applyToCurrent(value -> value.is(Node.Category.Implementation));
     }
 
-    @Override
-    protected State modifyBeforeASTImpl() throws CompileException {
+    protected State modifyBeforeASTImpl2() throws CompileException {
         var element = state.getCurrent();
         var identity = element.apply(Attribute.Category.Identity).asNode();
         var expectedType = identity.apply(Attribute.Category.Type).asType();
@@ -67,5 +68,19 @@ public class ImplementationParser extends AbstractParser {
             var message = format.formatted(expectedType, actualType);
             throw new CompileException(message);
         }
+    }
+
+    @Override
+    protected Option<State> modifyAfterASTImpl() {
+        return new Some<>(modifyAfterASTImpl2());
+    }
+
+    private State modifyAfterASTImpl2() {
+        return state;
+    }
+
+    @Override
+    protected Option<State> modifyBeforeASTImpl() throws CompileException {
+        return new Some<>(modifyBeforeASTImpl2());
     }
 }

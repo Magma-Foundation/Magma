@@ -1,5 +1,7 @@
 package com.meti.app.compile.feature.function;
 
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.app.compile.feature.util.Line;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -13,8 +15,7 @@ public class InvocationParser extends AbstractParser {
         super(state);
     }
 
-    @Override
-    protected State modifyBeforeASTImpl() throws CompileException {
+    private State modifyBeforeASTImpl2() throws CompileException {
         var current = state.getCurrent();
         var caller = current.apply(Attribute.Category.Caller).asNode();
 
@@ -28,8 +29,7 @@ public class InvocationParser extends AbstractParser {
         return state;
     }
 
-    @Override
-    protected State modifyAfterASTImpl() {
+    private State modifyAfterASTImpl2() {
         var isInBlock = state.getScope()
                 .getParents()
                 .last()
@@ -46,5 +46,15 @@ public class InvocationParser extends AbstractParser {
     @Override
     protected boolean isValid() {
         return state.applyToCurrent(value -> value.is(Node.Category.Invocation));
+    }
+
+    @Override
+    protected Option<State> modifyAfterASTImpl() {
+        return new Some<>(modifyAfterASTImpl2());
+    }
+
+    @Override
+    protected Option<State> modifyBeforeASTImpl() throws CompileException {
+        return new Some<>(modifyBeforeASTImpl2());
     }
 }

@@ -34,19 +34,19 @@ public abstract class AbstractParser implements Modifier {
 
     @Override
     public Option<State> modifyBeforeAST() throws CompileException {
-        return isValid() ? new Some<>(modifyBeforeASTImpl()) : new None<>();
+        return isValid() ? new Some<>(modifyBeforeASTImpl().orElse(state)) : new None<>();
+    }
+
+    protected Option<State> modifyBeforeASTImpl() throws CompileException {
+        return new None<>();
     }
 
     @Override
     public Option<State> modifyAfterAST() {
-        return isValid() ? new Some<>(modifyAfterASTImpl()) : new None<>();
+        return isValid() ? new Some<>(modifyAfterASTImpl().orElse(state)) : new None<>();
     }
 
-    protected State modifyAfterASTImpl() {
-        return state;
-    }
-
-    protected State modifyBeforeASTImpl() throws CompileException {
-        return state;
+    protected Option<State> modifyAfterASTImpl() {
+        return new None<>();
     }
 }

@@ -51,7 +51,7 @@ public class Scope extends AbstractJSONable {
         return Objects.equals(frames, scope.frames);
     }
 
-    boolean isDefined(String name) {
+    public boolean isDefined(String name) {
         return lookup(name).isPresent();
     }
 

@@ -6,6 +6,7 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.app.compile.feature.function.ImplementationParser;
 import com.meti.app.compile.feature.function.InvocationParser;
 import com.meti.app.compile.feature.scope.Declaration;
+import com.meti.app.compile.feature.scope.VariableParser;
 import com.meti.app.compile.feature.util.LineParser;
 import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
@@ -34,6 +35,6 @@ public final class MagmaParsingStage extends AbstractModificationStage implement
                 new ImplementationParser(state),
                 new InvocationParser(state),
                 new LineParser(state),
-                new VariableVisitor(state));
+                new VariableParser(state));
     }
 }
