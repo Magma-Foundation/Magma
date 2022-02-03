@@ -5,6 +5,7 @@ import com.meti.api.json.JSONException;
 import com.meti.api.json.JSONNode;
 import com.meti.app.compile.common.Definition;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.Output;
 import com.meti.app.source.Packaging;
@@ -50,7 +51,7 @@ public interface Attribute {
         return fail("a sequence of nodes");
     }
 
-    default com.meti.app.compile.node.Type asType() throws AttributeException {
+    default Type asType() throws AttributeException {
         return fail("a type");
     }
 
