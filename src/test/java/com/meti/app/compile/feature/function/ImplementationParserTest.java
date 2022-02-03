@@ -6,6 +6,8 @@ import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.common.integer.IntegerNode;
 import com.meti.app.compile.common.integer.IntegerType;
 import com.meti.app.compile.feature.scope.Declaration;
+import com.meti.app.compile.magma.FunctionType;
+import com.meti.app.compile.parse.Scope;
 import com.meti.app.compile.parse.State;
 import com.meti.app.compile.stage.CompileException;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,18 @@ class ImplementationParserTest {
 
         var actual = new ImplementationParser(input).modifyBeforeASTImpl2();
         assertEquals(output, actual);
+    }
+
+    @Test
+    void defined() throws CompileException {
+        var returnType = new IntegerType(true, 16);
+        var identity = new Declaration("main", returnType, Definition.Flag.Def);
+        var root = new Implementation(identity, new Block(new Return(new IntegerNode(0))));
+        var scope = new Scope().define(new Declaration("main", new FunctionType(returnType), Definition.Flag.Def));
+
+        var expected = new State(root, scope);
+        var actual = new ImplementationParser(expected).onExitImpl();
+        assertEquals(expected, actual);
     }
 
     @Test
