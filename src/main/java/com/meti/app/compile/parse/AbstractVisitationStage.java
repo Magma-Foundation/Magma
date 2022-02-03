@@ -25,7 +25,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
             var current = root.getCurrent();
             return current.apply(Attribute.Group.Definition).foldRight(root, (oldState, type) -> {
                 var previous = current.apply(type).asNode();
-                var newState = AbstractVisitationStage.parseField(oldState.apply(previous));
+                var newState = parseField(oldState.apply(previous));
                 return newState.mapCurrent(value -> current.with(type, new NodeAttribute(value)));
             });
         } catch (StreamException e) {
@@ -40,7 +40,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                     var current = oldState.getCurrent();
                     var input = current.apply(type).asStreamOfNodes().foldRight(List.<Node>createList(), List::add);
                     var result = input.stream().foldRight(new StateBuffer(oldState),
-                            (buffer, next) -> buffer.append(state -> AbstractVisitationStage.parseField(state.apply(next))));
+                            (buffer, next) -> buffer.append(state -> parseField(state.apply(next))));
                     var attribute = new NodesAttribute(result.list);
                     var newCurrent = current.with(type, attribute);
                     return result.state.apply(newCurrent);
@@ -91,8 +91,8 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
     protected State parseAST(State state) throws CompileException {
         var before = transformAST(state, Visitor::onEnter);
         var parsed = modifyBeforeAST(before);
-        var withDefinitionAttributes = AbstractVisitationStage.parseDefinitionAttributes(parsed);
-        var withDefinitionsAttributes = AbstractVisitationStage.parseDefinitionsAttributes(withDefinitionAttributes);
+        var withDefinitionAttributes = parseDefinitionAttributes(parsed);
+        var withDefinitionsAttributes = parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = parseNodeAttributes(withNodesAttributes);
         var after = modifyAfterAST(withNodeAttributes);
