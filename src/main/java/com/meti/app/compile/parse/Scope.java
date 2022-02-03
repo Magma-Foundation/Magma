@@ -86,4 +86,8 @@ public class Scope extends AbstractJSONable {
             throw new JSONException(e);
         }
     }
+
+    public List<Node> getParents() {
+        return parents;
+    }
 }
