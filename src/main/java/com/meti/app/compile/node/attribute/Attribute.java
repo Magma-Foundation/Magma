@@ -11,50 +11,54 @@ import com.meti.app.source.Packaging;
 
 public interface Attribute {
     default boolean asBoolean() throws AttributeException {
-        throw new AttributeException("Not a boolean.");
+        return fail("a boolean");
     }
 
     default Input asInput() throws AttributeException {
-        return failDefault("Not input, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
-    }
-
-    private <T> T failDefault(String format) throws AttributeException {
-        var message = format.formatted(getClass(), toString());
-        throw new AttributeException(message);
+        return fail("input");
     }
 
     JSONNode toJSON() throws JSONException;
 
     default int asInteger() throws AttributeException {
-        throw new AttributeException("Not an integer.");
+        return fail("an integer");
     }
 
     default Node asNode() throws AttributeException {
-        return failDefault("Not a node, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
+        return fail("a node");
+    }
+
+    private <T> T fail(String group) throws AttributeException {
+        var format = "Not %s, but rather '%s'. Had content of:\n-----\n%s\n-----\n";
+        var message = format.formatted(group, getClass(), toString());
+        throw new AttributeException(message);
     }
 
     default Output asOutput() throws AttributeException {
-        return failDefault("Not output, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
+        return fail("output");
     }
 
     default Packaging asPackaging() throws AttributeException {
-        throw new AttributeException("Not a package.");
+        return fail("packaging");
     }
 
     default Stream<Definition.Flag> asStreamOfFlags() throws AttributeException {
-        throw new UnsupportedOperationException("Not a list of flags.");
+        return fail("a sequence of flags");
     }
 
     default Stream<Node> asStreamOfNodes() throws AttributeException {
-        throw new AttributeException("Not a stream of nodes.");
+        return fail("a sequence of nodes");
     }
 
     default com.meti.app.compile.node.Type asType() throws AttributeException {
-        return failDefault("Not a type, but rather '%s'. Had content of:\n-----\n%s\n-----\n");
+        return fail("a type");
     }
 
     enum Type {
-        Value, Identity, Type, Children, Sign, Bits, Fields, Parameters, Flags, Caller, Arguments, Operator, Name
+        Arguments, Bits, Caller, Children,
+        Fields, Flags, Identity, Name,
+        Operator, Parameters, Sign, Type,
+        Value
     }
 
     enum Group {

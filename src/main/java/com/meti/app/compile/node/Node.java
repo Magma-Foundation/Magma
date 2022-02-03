@@ -29,7 +29,9 @@ public interface Node extends JSONable {
     }
 
     default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        throw new AttributeException("Node does not have attribute to replace of: " + type);
+        var format = "Node does not have attribute to replace of: %s";
+        var message = format.formatted(type);
+        throw new AttributeException(message);
     }
 
     @Override
