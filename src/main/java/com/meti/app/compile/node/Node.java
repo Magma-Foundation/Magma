@@ -1,60 +1,53 @@
 package com.meti.app.compile.node;
 
-import com.meti.api.collect.stream.EmptyStream;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.core.F1;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
 
-import java.util.stream.Stream;
-
-public interface Node {
-    default Attribute apply(Attribute.Type type) throws AttributeException {
-        throw new AttributeException("Node had no attributes.");
+public interface Node extends JSONable {
+    default Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return Streams.empty();
     }
 
-    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
+    boolean is(Category category);
+
+    default <E extends Exception> Node mapAsNode(Attribute.Category category, F1<Node, Node, E> mapper) throws E, AttributeException {
+        var input = apply(category).asNode();
+        var output = mapper.apply(input);
+        return with(category, new NodeAttribute(output));
     }
 
-    default com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return new EmptyStream<>();
+    default Attribute apply(Attribute.Category category) throws AttributeException {
+        var format = "Node instance of '%s' has no attributes.";
+        var message = format.formatted(getClass());
+        throw new AttributeException(message);
     }
 
-    boolean is(Type type);
-
-    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        throw new AttributeException("Node does not have attribute to replace of: " + type);
+    default Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        var format = "Node does not have attribute to replace of: %s";
+        var message = format.formatted(category);
+        throw new AttributeException(message);
     }
 
-    enum Type {
-        Input,
-        Block,
-        Implementation,
-        Declaration,
-        Integer,
-        Structure,
-        Primitive,
-        Import,
-        Extern,
-        Variable,
-        Boolean,
-        Abstraction,
-        Unary, Empty,
-        If,
-        String,
-        Invocation,
-        Line,
-        Implicit,
-        Reference,
-        Initialization,
-        Function,
-        Else,
-        Binary, Cache,
-        Output, Return
+    @Override
+    default JSONNode toJSON() throws JSONException {
+        var format = "Instances of '%s' cannot be converted to JSON yet.";
+        var message = format.formatted(getClass());
+        throw new JSONException(message);
     }
 
-    interface Builder<T extends Builder<T>> {
-        Node build();
-
-        T merge(T other);
+    enum Category {
+        Abstraction, Binary, Block, Boolean,
+        Cache, Declaration, Else, Empty,
+        Extern, Function, If, Implementation,
+        Implicit, Import, Initialization, Input,
+        Integer, Invocation, Line, Output,
+        Primitive, Reference, Return, String,
+        Structure, Unary, Union, Variable
     }
 }

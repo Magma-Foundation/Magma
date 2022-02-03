@@ -1,35 +1,34 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.InputAttribute;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.InputAttribute;
+import com.meti.app.compile.text.RootText;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record Extern(Text root) implements Node {
+public record Extern(RootText root) implements Node {
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new InputAttribute(root);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new InputAttribute(root);
+        throw new AttributeException(category);
     }
 
-    @Override
     @Deprecated
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Category> apply2(Attribute.Group group) throws AttributeException {
         return Stream.empty();
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public com.meti.api.collect.stream.Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Extern;
+    public boolean is(Category category) {
+        return category == Node.Category.Extern;
     }
 }

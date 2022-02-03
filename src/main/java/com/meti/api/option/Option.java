@@ -2,6 +2,7 @@ package com.meti.api.option;
 
 import com.meti.api.core.C1;
 import com.meti.api.core.F1;
+import com.meti.api.core.Runnable;
 
 public interface Option<T> {
     <E extends Exception> Option<T> filter(F1<T, Boolean, E> predicate) throws E;
@@ -9,6 +10,8 @@ public interface Option<T> {
     <R, E extends Exception> Option<R> flatMap(F1<T, Option<R>, E> mapper) throws E;
 
     <E extends Exception> void ifPresent(C1<T, E> consumer) throws E;
+
+    <E extends Exception> void ifPresentOrElse(C1<T, E> consumer, Runnable<E> runnable) throws E;
 
     boolean isEmpty();
 

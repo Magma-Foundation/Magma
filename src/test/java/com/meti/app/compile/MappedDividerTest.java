@@ -4,6 +4,8 @@ import com.meti.api.collect.CollectionException;
 import com.meti.api.collect.java.List;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.common.integer.IntegerNode;
+import com.meti.app.compile.stage.CDivider;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.source.Packaging;
 import org.junit.jupiter.api.Test;
 

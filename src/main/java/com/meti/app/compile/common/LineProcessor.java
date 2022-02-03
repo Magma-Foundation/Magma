@@ -3,19 +3,19 @@ package com.meti.app.compile.common;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
 
 public record LineProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Line)) {
-            return new Some<>(node.apply(Attribute.Type.Value)
+        if (node.is(Node.Category.Line)) {
+            return new Some<>(node.apply(Attribute.Category.Value)
                     .asNode()
-                    .apply(Attribute.Type.Value)
+                    .apply(Attribute.Category.Value)
                     .asOutput()
                     .appendSlice(";"));
         } else {

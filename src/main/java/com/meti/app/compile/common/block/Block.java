@@ -1,21 +1,30 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
-import com.meti.api.collect.stream.EmptyStream;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodesAttribute1;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
-public record Block(List<Node> children) implements Node {
+public final class Block extends AbstractNode {
+    private final List<Node> children;
+
     public Block() {
         this(List.createList());
+    }
+
+    public Block(List<Node> children) {
+        this.children = children;
     }
 
     public Block(Node... children) {
@@ -23,34 +32,27 @@ public record Block(List<Node> children) implements Node {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new NodesAttribute1(children);
-        throw new AttributeException(type);
-    }
-
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
-                ? Stream.of(Attribute.Type.Children)
-                : Stream.empty();
+                ? Streams.apply(Attribute.Category.Children)
+                : Streams.empty();
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Nodes
-                ? Streams.apply(Attribute.Type.Children)
-                : new EmptyStream<>();
+    public boolean is(Category category) {
+        return category == Node.Category.Block;
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Block;
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Children) return new NodesAttribute(children);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return attribute.asStreamOfNodes1()
+            return attribute.asStreamOfNodes()
                     .foldRight(new Builder(), Builder::add)
                     .build();
         } catch (StreamException e) {
@@ -59,19 +61,31 @@ public record Block(List<Node> children) implements Node {
     }
 
     @Override
-    public String toString() {
+    public JSONNode toJSON() throws JSONException {
         try {
-            var childrenAsString = children.stream()
-                    .map(Objects::toString)
-                    .foldRight((current, next) -> current + "," + next)
-                    .orElse("");
-            return "{\"children\":[" + childrenAsString + "]}";
+            var jsonChildren = children.stream()
+                    .map(Node::toJSON)
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addObject)
+                    .build();
+            return new ObjectNode().addObject("children", jsonChildren);
         } catch (StreamException e) {
-            return "";
+            throw new JSONException("Failed to convert node to JSON.", e);
         }
     }
 
-    public record Builder(List<Node> children) implements Node.Builder<Builder> {
+    @Override
+    public int hashCode() {
+        return Objects.hash(children);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Block block)) return false;
+        return Objects.equals(children, block.children);
+    }
+
+    public record Builder(List<Node> children) {
         public Builder() {
             this(List.createList());
         }
@@ -80,14 +94,8 @@ public record Block(List<Node> children) implements Node {
             return new Builder(children.add(child));
         }
 
-        @Override
         public Node build() {
-            return new Block(children());
-        }
-
-        @Override
-        public Builder merge(Builder other) {
-            return new Builder(children.addAll(other.children));
+            return new Block(children);
         }
     }
 }

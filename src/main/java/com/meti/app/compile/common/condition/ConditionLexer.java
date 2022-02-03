@@ -2,14 +2,14 @@ package com.meti.app.compile.common.condition;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.app.compile.lex.Lexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Input;
 
-public record ConditionLexer(Input text) implements Lexer {
+public record ConditionLexer(Input text) implements Processor<Node> {
     @Override
-    public Option<Node> lex() {
+    public Option<Node> process() {
         if (text.startsWithSlice("if")) {
             return text.firstIndexOfChar('(')
                     .flatMap(start -> text.firstIndexOfChar(')')
@@ -23,6 +23,6 @@ public record ConditionLexer(Input text) implements Lexer {
         var calleeText = text.slice(end + 1);
         var condition = new InputNode(callerText);
         var body = new InputNode(calleeText);
-        return new Condition(Node.Type.If, condition, body);
+        return new Condition(Node.Category.If, condition, body);
     }
 }

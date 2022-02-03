@@ -1,13 +1,11 @@
 package com.meti.app.compile.stage;
 
-import com.meti.app.compile.CFlattener;
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.cache.Cache;
-import com.meti.app.compile.common.EmptyField;
+import com.meti.app.compile.feature.util.Cache;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.common.variable.Variable;
-import com.meti.app.compile.node.Primitive;
+import com.meti.app.compile.feature.scope.Declaration;
+import com.meti.app.compile.feature.scope.Variable;
+import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.text.RootText;
 import org.junit.jupiter.api.Test;
 
@@ -17,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CFlattenerTest {
     @Test
     void five() throws CompileException {
-        var innerIdentity = new EmptyField(new RootText("inner"), Primitive.Void);
+        var innerIdentity = new Declaration(new RootText("inner"), Primitive.Void);
         var innerBody = new Block();
         var inner = new Implementation(innerIdentity, innerBody);
 
-        var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void);
+        var outerIdentity = new Declaration(new RootText("outer"), Primitive.Void);
         var outerBody = new Block(new Cache(EmptyNode_, inner));
         var outer = new Implementation(outerIdentity, outerBody);
         var input = new Cache(EmptyNode_, outer);
@@ -35,11 +33,11 @@ class CFlattenerTest {
 
     @Test
     void four() throws CompileException {
-        var innerIdentity = new EmptyField(new RootText("inner"), Primitive.Void);
+        var innerIdentity = new Declaration(new RootText("inner"), Primitive.Void);
         var innerBody = new Block();
         var inner = new Implementation(innerIdentity, innerBody);
 
-        var outerIdentity = new EmptyField(new RootText("outer"), Primitive.Void);
+        var outerIdentity = new Declaration(new RootText("outer"), Primitive.Void);
         var outerBody = new Block(new Cache(EmptyNode_, inner));
         var outer = new Implementation(outerIdentity, outerBody);
 
@@ -73,7 +71,7 @@ class CFlattenerTest {
     @Test
     void three() throws CompileException {
         var body = new Block(new Variable("test"));
-        var identity = new EmptyField(new RootText("wrapper"), Primitive.Void);
+        var identity = new Declaration(new RootText("wrapper"), Primitive.Void);
         var cached = new Variable("cached");
         var impl = new Implementation(identity, body);
 
@@ -88,7 +86,7 @@ class CFlattenerTest {
     @Test
     void twice() throws CompileException {
         var body = new Block(new Variable("test"));
-        var identity = new EmptyField(new RootText("wrapper"), Primitive.Void);
+        var identity = new Declaration(new RootText("wrapper"), Primitive.Void);
         var cached = new Variable("cached");
 
         var input = new Implementation(identity, new Cache(body, cached));

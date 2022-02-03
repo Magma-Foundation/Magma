@@ -1,31 +1,49 @@
 package com.meti.app.compile.stage;
 
-import com.meti.app.compile.CMagmaPipeline;
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.cache.Cache;
-import com.meti.app.compile.common.EmptyField;
-import com.meti.app.compile.common.Field;
+import com.meti.api.collect.java.JavaList;
+import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.feature.util.Cache;
+import com.meti.app.compile.common.Fields;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
-import com.meti.app.compile.node.Primitive;
-import com.meti.app.compile.text.RootText;
-import com.meti.app.source.Packaging;
+import com.meti.app.compile.node.Node;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.app.compile.node.EmptyNode.EmptyNode_;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class CMagmaPipelineTest {
+    /*
+    def outer() => {
+        def inner() => {
+        }
+    }
 
+    struct outer_t {
+    }
+
+    void inner_outer(void* self) {
+        struct outer_t* this = self;
+    }
+
+    void outer() {
+        struct outer_t this;
+    }
+     */
     @Test
-    void perform() throws CompileException {
-        var identity = new EmptyField(new RootText("test"), Primitive.Void, Field.Flag.Def);
-        var impl = new Implementation(identity, new Block());
-        var root = new Block(impl);
+    void inner_function() throws CompileException, StreamException {
+        var identityBuilder = new Fields.Builder();
+        var innerIdentity = identityBuilder.withName("inner").build();
+        var outerIdentity = identityBuilder.withName("outer").build();
 
-        var expected = new Cache(new Block(EmptyNode_), impl);
-        var actual = new CMagmaPipeline(new Packaging("Index")).perform(root);
+        var inner = new Implementation(innerIdentity, new Block());
+        var outer = new Implementation(outerIdentity, new Block(inner));
 
-        assertEquals(expected, actual);
+        var first = new Implementation(outerIdentity, new Block());
+        var expected = java.util.List.of(new Cache(first), 3);
+        var actual = JavaList.toNativeList(new CMagmaPipeline(outer)
+                .pipe()
+                .foldRight(List.<Node>createList(), List::add));
+        assertIterableEquals(expected, actual);
     }
 }

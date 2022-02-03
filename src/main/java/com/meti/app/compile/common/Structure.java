@@ -1,43 +1,53 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodesAttribute;
-import com.meti.app.compile.attribute.InputAttribute;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONNode;
 import com.meti.app.compile.node.Node;
-import com.meti.app.compile.text.Text;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.InputAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute;
+import com.meti.app.compile.text.Input;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public record Structure(Text name, java.util.List fields) implements Node {
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+public record Structure(Input name, List<Node> fields) implements Node {
+    public Structure(Input name, Node... fields) {
+        this(name, List.apply(fields));
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return new Structure(name, attribute.asStreamOfNodes().collect(Collectors.toList()));
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Name) return new InputAttribute(name);
+        if (category == Attribute.Category.Fields) return new NodesAttribute(fields);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) {
-        return group == Attribute.Group.Declarations
-                ? Stream.of(Attribute.Type.Fields)
-                : Stream.empty();
+    public com.meti.api.collect.stream.Stream<Attribute.Category> apply(Attribute.Group group) {
+        return group == Attribute.Group.Definitions
+                ? Streams.apply(Attribute.Category.Fields)
+                : Streams.empty();
+    }
+
+
+    @Override
+    public boolean is(Category category) {
+        return category == Node.Category.Structure;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new InputAttribute(name);
-        if (type == Attribute.Type.Fields) return new NodesAttribute(fields);
-        throw new AttributeException(type);
+    public JSONNode toJSON() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Structure;
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        try {
+            return new Structure(name, attribute.asStreamOfNodes()
+                    .foldRight(List.createList(), List::add));
+        } catch (StreamException e) {
+            throw new AttributeException(e);
+        }
     }
 }

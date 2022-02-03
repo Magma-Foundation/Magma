@@ -1,2 +1,2 @@
 gradle run
-"./working/Application.lnk"
+"working/out/Debug/Application.exe"

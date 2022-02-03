@@ -1,34 +1,34 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.option.None;
-import com.meti.api.option.Option;
-import com.meti.api.option.Some;
-import com.meti.app.compile.lex.Lexer;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.process.AbstractProcessor;
+import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Input;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
+public final class BlockLexer extends AbstractProcessor<Input, Node> {
+    public BlockLexer(Input input) {
+        super(input);
+    }
 
-public record BlockLexer(Input text) implements Lexer {
     @Override
-    public Option<Node> lex() {
-        if (text.startsWithChar('{') && text.endsWithChar('}')) {
-            var body = text.slice(1, text.size() - 1);
+    protected boolean validate() {
+        return input.startsWithChar('{') && input.endsWithChar('}');
+    }
+
+    @Override
+    protected Node createNode() throws CompileException {
+        try {
+            var body = input.slice(1, input.size() - 1);
             var lines = new Splitter(body)
                     .split()
-                    .collect(Collectors.toList());
-
-            var values = new ArrayList<Node>();
-            for (var line : lines) {
-                if (!line.isEmpty()) {
-                    values.add(new InputNode(line));
-                }
-            }
-            return new Some<>(new Block(List.createList(values)));
+                    .map(InputNode::new)
+                    .foldRight(List.<Node>createList(), List::add);
+            return new Block(lines);
+        } catch (StreamException e) {
+            throw new CompileException(e);
         }
-        return new None<>();
     }
 }

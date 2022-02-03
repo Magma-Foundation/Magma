@@ -9,4 +9,9 @@ public class LambdaTest {
     void invoked() {
         assertSourceCompile("test(() => {})", "void __lambda0__(){}test(__lambda0__)");
     }
+
+    @Test
+    void lambda() {
+        assertSourceCompile("() => {}", "void __lambda0__(){}__lambda0__");
+    }
 }

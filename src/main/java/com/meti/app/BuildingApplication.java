@@ -1,11 +1,11 @@
 package com.meti.app;
 
+import com.meti.api.collect.stream.StreamException;
 import com.meti.app.module.Module;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 public final class BuildingApplication extends Application {
@@ -15,8 +15,16 @@ public final class BuildingApplication extends Application {
     }
 
     @Override
-    protected void build(Collection<String> targets) throws ApplicationException {
-        var targetString = String.join(" ", targets);
+    protected void build(com.meti.api.collect.java.List<String> targets) throws ApplicationException {
+        String targetString;
+        try {
+            targetString = targets.stream()
+                    .foldRight((current, next) -> current + " " + next)
+                    .orElse("");
+        } catch (StreamException e) {
+            throw new ApplicationException(e);
+        }
+
         try {
             Out.resolveChild("CMakeLists.txt").ensureAsFile()
                     .writeAsString("project (" +

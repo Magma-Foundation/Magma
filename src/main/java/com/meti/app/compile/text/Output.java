@@ -1,22 +1,27 @@
 package com.meti.app.compile.text;
 
-public interface Output {
-    Output appendSlice(String slice);
+import com.meti.api.core.F1;
 
+public interface Output {
     Output appendOutput(Output other);
 
+    Output appendSlice(String slice);
+
     /**
-     * Computes the value of this {@link Text} object as-is, with no trimming involved.
-     * @return The raw value.
+     * Computes the trimmed value of this text.
+     *
+     * @return The trimmed value.
      */
     String compute();
 
     /**
-     * Computes the trimmed value of this {@link Text} object.
-     * Equivalent to {@link #compute()} followed by {@link String#trim()}.
-     * @return The trimmed value.
+     * Computes the value of this {@link Output} object as-is, with no trimming involved.
+     *
+     * @return The raw value.
      */
-    String computeTrimmed();
+    String computeRaw();
 
-    Text prepend(String prefix);
+    <E extends Exception> Output map(F1<String, String, E> mapper) throws E;
+
+    Output prepend(String prefix);
 }

@@ -1,27 +1,32 @@
 package com.meti.app.compile.common.block;
 
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.process.Processor;
 import com.meti.app.compile.text.Output;
-import com.meti.app.compile.text.RootText;
-
-import java.util.stream.Collectors;
+import com.meti.app.compile.text.StringOutput;
 
 public record BlockProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Type.Block)) {
-            var builder = new StringBuilder().append("{");
-            var children = node.apply(Attribute.Type.Children).asStreamOfNodes().collect(Collectors.toList());
-            for (Node node1 : children) {
-                builder.append(node1.apply(Attribute.Type.Value).asOutput().computeTrimmed());
+        if (node.is(Node.Category.Block)) {
+            try {
+                var output = node.apply(Attribute.Category.Children)
+                        .asStreamOfNodes()
+                        .map(child -> child.apply(Attribute.Category.Value))
+                        .map(Attribute::asOutput)
+                        .foldRight(Output::appendOutput)
+                        .map(value -> value.prepend("{").appendSlice("}"))
+                        .orElse(new StringOutput("{}"));
+                return new Some<>(output);
+            } catch (StreamException e) {
+                return new None<>();
             }
-            return new Some<>(new RootText(builder.append("}").toString()));
         }
         return new None<>();
     }

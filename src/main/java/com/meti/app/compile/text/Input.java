@@ -8,20 +8,24 @@ public interface Input {
     char apply(int index) throws IndexException;
 
     /**
-     * Returns true if this character is contained within the trimmed value of this text,
+     * Returns true if this character is contained within the trimmed value of this input,
      * otherwise false.
+     *
      * @param c The character for which to search.
-     * @return Whether the character is contained within this text.
+     * @return Whether the character is contained within this input.
      */
     boolean containsChar(char c);
 
     /**
-     * Returns whether if this trimmed text by the given character.
-     * If the text is empty, then false is returned.
+     * Returns whether if this trimmed input by the given character.
+     * If the input is empty, then false is returned.
+     *
      * @param c The character.
-     * @return Whether the character ends this text.
+     * @return Whether the character ends this input.
      */
     boolean endsWithChar(char c);
+
+    boolean equalsInput(Input other);
 
     boolean equalsSlice(String slice);
 
@@ -41,13 +45,15 @@ public interface Input {
 
     int size();
 
-    Text slice(int start, int end);
+    RootText slice(int start, int end);
 
-    Text slice(int offset);
+    RootText slice(int offset);
 
     boolean startsWithChar(char c);
 
     boolean startsWithSlice(String slice);
 
     Output toOutput();
+
+    Output toTrimmedOutput();
 }

@@ -1,19 +1,23 @@
 package com.meti.app.compile.common.invoke;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.NodesAttribute1;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.ArrayNode;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public final class Invocation implements Node {
+public final class Invocation extends AbstractNode {
     private final Node caller;
     private final List<Node> arguments;
 
@@ -28,45 +32,53 @@ public final class Invocation implements Node {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
-            case Caller -> new NodeAttribute(caller);
-            case Arguments -> new NodesAttribute1(arguments);
-            default -> throw new AttributeException(type);
-        };
-    }
-
-    @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Stream.of(Attribute.Type.Caller);
-            case Nodes -> Stream.of(Attribute.Type.Arguments);
-            default -> Stream.empty();
+            case Node -> Streams.apply(Attribute.Category.Caller);
+            case Nodes -> Streams.apply(Attribute.Category.Arguments);
+            default -> Streams.empty();
         };
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public boolean is(Category category) {
+        return category == Node.Category.Invocation;
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Invocation;
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
+            case Caller -> new NodeAttribute(caller);
+            case Arguments -> new NodesAttribute(arguments);
+            default -> throw new AttributeException(category);
+        };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Caller -> new Invocation(attribute.asNode(), arguments);
                 case Arguments -> new Invocation(caller, attribute
-                        .asStreamOfNodes1()
+                        .asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
                 default -> this;
             };
         } catch (StreamException e) {
             throw new AttributeException(e);
+        }
+    }
+
+    @Override
+    public JSONNode toJSON() throws JSONException {
+        try {
+            var withCaller = new ObjectNode().addJSONable("caller", this.caller);
+            var withArguments = arguments.stream()
+                    .foldRight(new ArrayNode.Builder(), ArrayNode.Builder::addJSON)
+                    .build();
+            return withCaller.addObject("arguments", withArguments);
+        } catch (StreamException e) {
+            return new ObjectNode();
         }
     }
 
@@ -80,13 +92,5 @@ public final class Invocation implements Node {
         if (this == o) return true;
         if (!(o instanceof Invocation that)) return false;
         return Objects.equals(caller, that.caller) && Objects.equals(arguments, that.arguments);
-    }
-
-    @Override
-    public String toString() {
-        return "{" +
-               "\n\t\"caller\":" + caller +
-               ",\n\t\"arguments\":" + arguments +
-               '}';
     }
 }

@@ -1,17 +1,17 @@
 package com.meti.app;
 
-import com.meti.api.collect.java.JavaMap;
+import com.meti.api.collect.java.List;
+import com.meti.api.collect.map.Maps;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
 import com.meti.api.io.Path;
-import com.meti.app.compile.CMagmaCompiler;
-import com.meti.app.compile.Target;
-import com.meti.app.compile.clang.CFormat;
+import com.meti.app.compile.stage.CMagmaCompiler;
+import com.meti.app.compile.stage.Target;
 import com.meti.app.module.Module;
 import com.meti.app.source.Packaging;
 import com.meti.app.source.Source;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.meti.api.io.NIOPath.Root;
 
@@ -25,36 +25,30 @@ public class Application {
     }
 
     void run() throws ApplicationException {
-        var sources = listSources();
-        var inputMap = new HashMap<Packaging, String>();
-        for (var source : sources) {
-            try {
-                inputMap.put(source.computePackage(), source.read());
-            } catch (IOException e) {
-                throw new ApplicationException(e);
-            }
-        }
-        var outputMap = new CMagmaCompiler(new JavaMap<>(inputMap)).compile();
-        var targets = new HashSet<String>();
-        for (Packaging aPackaging : outputMap.keySet()) {
-            var output = compile(aPackaging, outputMap.get(aPackaging));
-            targets.addAll(output);
-        }
+        try {
+            var sources = streamSources()
+                    .foldRight(Maps.<Packaging, String>empty(), (packagingStringMap, source) -> packagingStringMap.put(source.computePackage(), source.read()));
 
-        build(targets);
+            var outputMap = new CMagmaCompiler(sources).compile();
+            var targets = outputMap.streamKeys()
+                    .flatMap(key -> compile(key, outputMap.apply(key)))
+                    .foldRight(List.<String>createList(), List::add);
+
+            build(targets);
+        } catch (StreamException | IOException e) {
+            throw new ApplicationException(e);
+        }
     }
 
-    private List<Source> listSources() throws ApplicationException {
-        List<Source> sources;
+    private Stream<Source> streamSources() throws ApplicationException {
         try {
-            sources = module.listSources();
+            return module.streamSources();
         } catch (IOException e) {
             throw new ApplicationException(e);
         }
-        return sources;
     }
 
-    private static Set<String> compile(Packaging packaging_, Target<String> output) throws ApplicationException {
+    private static Stream<String> compile(Packaging packaging_, Target<String> output) throws ApplicationException {
         try {
             Out.ensureAsDirectory();
 
@@ -62,23 +56,20 @@ public class Application {
                     .reduce(Out, Path::resolveChild, (previous, next) -> next);
             packagePath.ensureAsDirectory();
 
-            var targets = new HashSet<String>();
-            var formats = output.streamFormats().collect(Collectors.toList());
-            for (CFormat format : formats) {
+            return output.streamFormats().map(format -> {
                 var target = packagePath
                         .resolveChild(packaging_.computeName() + "." + format.getExtension())
                         .ensureAsFile()
                         .writeAsString(output.apply(format, ""));
-                targets.add(Out.relativize(target)
+                return Out.relativize(target)
                         .asString()
-                        .replace("\\", "//"));
-            }
-            return targets;
-        } catch (IOException e) {
+                        .replace("\\", "//");
+            });
+        } catch (IOException | StreamException e) {
             throw new ApplicationException(e);
         }
     }
 
-    protected void build(Collection<String> targets) throws ApplicationException {
+    protected void build(List<String> targets) throws ApplicationException {
     }
 }

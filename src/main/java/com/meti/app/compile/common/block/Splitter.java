@@ -1,18 +1,17 @@
 package com.meti.app.compile.common.block;
 
 import com.meti.api.collect.IndexException;
+import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.core.F1;
 import com.meti.app.compile.text.Input;
 import com.meti.app.compile.text.RootText;
-import com.meti.app.compile.text.Text;
 
-import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-public record Splitter(Text text) {
-    public Stream<Input> split() {
+public record Splitter(Input text) {
+    public com.meti.api.collect.stream.Stream<Input> split() {
         try {
-            var lines = new ArrayList<String>();
+            var lines = List.<String>createList();
             var buffer = new StringBuilder();
             var depth = 0;
             for (int i = 0; i < text.size(); i++) {
@@ -35,10 +34,10 @@ public record Splitter(Text text) {
 
             lines.add(buffer.toString());
             return lines.stream()
-                    .map((Function<String, Input>) RootText::new)
+                    .map((F1<String, Input, ?>) RootText::new)
                     .filter(input -> !input.isEmpty());
-        } catch (IndexException e) {
-            return Stream.empty();
+        } catch (StreamException | IndexException e) {
+            return Streams.empty();
         }
     }
 }

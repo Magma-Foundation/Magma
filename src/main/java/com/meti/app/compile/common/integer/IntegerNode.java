@@ -1,34 +1,26 @@
 package com.meti.app.compile.common.integer;
 
-import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.IntegerAttribute;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.IntegerAttribute;
 
 public record IntegerNode(int value) implements Node {
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new IntegerAttribute(value);
-        throw new AttributeException(type);
+    public boolean is(Category category) {
+        return category == Node.Category.Integer;
     }
 
     @Override
-    @Deprecated
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new IntegerAttribute(value);
+        throw new AttributeException(category);
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
-    }
-
-    @Override
-    public boolean is(Type type) {
-        return type == Type.Integer;
+    public JSONNode toJSON() {
+        return new ObjectNode().addObject("value", value);
     }
 }

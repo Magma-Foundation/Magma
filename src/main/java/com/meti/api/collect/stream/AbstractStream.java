@@ -8,6 +8,19 @@ import com.meti.api.option.Some;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     @Override
+    public <R, E extends Exception> Option<R> foldRightWithInitializer(F1<T, R, E> mapper, F2<R, T, R, E> folder) throws StreamException, E {
+        return headOptionally().map(mapper).map(first -> {
+            try {
+                return foldRight(first, folder);
+            } catch (StreamException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new StreamException(e);
+            }
+        });
+    }
+
+    @Override
     public Stream<T> filter(F1<T, Boolean, ?> predicate) {
         return new AbstractStream<>() {
             @Override
@@ -97,7 +110,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
             public R head() throws StreamException {
                 try {
                     return mapper.apply(AbstractStream.this.head());
-                } catch (EndOfStreamException e) {
+                } catch (StreamException e) {
                     throw e;
                 } catch (Exception e) {
                     throw new StreamException(e);

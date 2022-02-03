@@ -1,14 +1,16 @@
 package com.meti.app.compile.common;
 
 import com.meti.api.collect.java.List;
-import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodeAttribute;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public final class Implementation extends Function {
     private final Node body;
@@ -23,34 +25,24 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new NodeAttribute(body)
-                : super.apply(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return category == Attribute.Category.Value ? new NodeAttribute(body) : super.apply(category);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Value)
-                : super.apply(group);
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        if (group == Attribute.Group.Node) return Streams.apply(Attribute.Category.Value);
+        else return super.apply(group);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
-                ? new Implementation(identity, attribute.asNode(), parameters)
-                : super.with(type, attribute);
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value ? new Implementation(identity, attribute.asNode(), parameters) : super.with(category, attribute);
     }
 
     @Override
     protected Node complete(Node node, List<Node> parameters) {
         return new Implementation(node, body, parameters);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(body);
     }
 
     @Override
@@ -62,16 +54,12 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Implementation;
+    public ObjectNode toJSON() throws JSONException {
+        return super.toJSON().addObject("body", body.toJSON());
     }
 
     @Override
-    public String toString() {
-        return "{" +
-               "\n\t\"identity\":" + identity +
-               ",\n\t\"parameters\":" + parameters +
-               ",\n\t\"body\":" + body +
-               '}';
+    public boolean is(Category category) {
+        return category == Node.Category.Implementation;
     }
 }

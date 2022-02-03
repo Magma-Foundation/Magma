@@ -7,7 +7,7 @@ import com.meti.api.option.Some;
 
 import java.util.Objects;
 
-public final class RootText implements Text {
+public final class RootText implements Input {
     public final String trimmedValue;
     private final String value;
 
@@ -17,28 +17,8 @@ public final class RootText implements Text {
     }
 
     @Override
-    public Output appendSlice(String slice) {
-        return new RootText(trimmedValue + slice);
-    }
-
-    @Override
-    public Output appendOutput(Output other) {
-        return new RootText(trimmedValue + other.computeTrimmed());
-    }
-
-    @Override
     public char apply(int index) {
         return trimmedValue.charAt(index);
-    }
-
-    @Override
-    public String compute() {
-        return value;
-    }
-
-    @Override
-    public String computeTrimmed() {
-        return trimmedValue;
     }
 
     @Override
@@ -50,6 +30,11 @@ public final class RootText implements Text {
     public boolean endsWithChar(char c) {
         var trimmed = trimmedValue;
         return trimmed.length() != 0 && trimmed.charAt(trimmed.length() - 1) == c;
+    }
+
+    @Override
+    public boolean equalsInput(Input other) {
+        return other.equalsSlice(trimmedValue);
     }
 
     @Override
@@ -89,8 +74,7 @@ public final class RootText implements Text {
                 : new Some<>(index);
     }
 
-    @Override
-    public boolean hasContent() {
+    private boolean hasContent() {
         return trimmedValue.length() != 0;
     }
 
@@ -118,7 +102,12 @@ public final class RootText implements Text {
 
     @Override
     public Output toOutput() {
-        return this;
+        return new StringOutput(value);
+    }
+
+    @Override
+    public Output toTrimmedOutput() {
+        return new StringOutput(trimmedValue);
     }
 
     @Override
@@ -135,17 +124,12 @@ public final class RootText implements Text {
     }
 
     @Override
-    public RootText prepend(String prefix) {
-        return new RootText(prefix + trimmedValue);
-    }
-
-    @Override
     public int size() {
         return trimmedValue.length();
     }
 
     @Override
-    public Text slice(int start, int end) {
+    public RootText slice(int start, int end) {
         return new RootText(trimmedValue.substring(start, end));
     }
 

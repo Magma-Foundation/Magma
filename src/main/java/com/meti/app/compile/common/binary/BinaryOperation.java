@@ -1,53 +1,64 @@
 package com.meti.app.compile.common.binary;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.NodesAttribute;
+import com.meti.api.collect.stream.Stream;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.api.collect.stream.Streams;
+import com.meti.api.json.JSONException;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
 import com.meti.app.compile.node.Node;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.NodeAttribute;
+import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public record BinaryOperation(Node operator, Node first, Node second) implements Node {
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Stream.of(Attribute.Type.Operator);
-            case Nodes -> Stream.of(Attribute.Type.Arguments);
-            default -> Stream.empty();
+            case Node -> Streams.apply(Attribute.Category.Operator);
+            case Nodes -> Streams.apply(Attribute.Category.Arguments);
+            default -> Streams.empty();
         };
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public boolean is(Category category) {
+        return category == Node.Category.Binary;
+    }
+
+    @Override
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Operator -> new NodeAttribute(operator);
-            case Arguments -> new NodesAttribute(java.util.List.of(first, second));
-            default -> throw new AttributeException(type);
+            case Arguments -> new NodesAttribute(List.apply(first, second));
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        try {
+            return switch (category) {
+                case Operator -> new BinaryOperation(attribute.asNode(), first, second);
+                case Arguments -> {
+                    var arguments = attribute.asStreamOfNodes()
+                            .foldRight(List.<Node>createList(), List::add);
+                    yield new BinaryOperation(operator, arguments.apply(0), arguments.apply(1));
+                }
+                default -> this;
+            };
+        } catch (StreamException e) {
+            return this;
+        }
     }
 
     @Override
-    public boolean is(Type type) {
-        return type == Type.Binary;
-    }
-
-    @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return switch (type) {
-            case Operator -> new BinaryOperation(attribute.asNode(), first, second);
-            case Arguments -> {
-                var arguments = attribute.asStreamOfNodes().collect(Collectors.toList());
-                yield new BinaryOperation(operator, arguments.get(0), arguments.get(1));
-            }
-            default -> this;
-        };
+    public JSONNode toJSON() throws JSONException {
+        return new ObjectNode()
+                .addJSONable("operator", operator)
+                .addJSONable("first", first)
+                .addJSONable("second", second);
     }
 }

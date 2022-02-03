@@ -1,38 +1,55 @@
 package com.meti.app.compile.common.integer;
 
-import com.meti.api.collect.java.List;
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.AttributeException;
-import com.meti.app.compile.attribute.BooleanAttribute;
-import com.meti.app.compile.attribute.IntegerAttribute;
-import com.meti.app.compile.node.Node;
+import com.meti.api.json.JSONNode;
+import com.meti.api.json.ObjectNode;
+import com.meti.app.compile.node.AbstractNode;
+import com.meti.app.compile.node.Type;
+import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
+import com.meti.app.compile.node.attribute.BooleanAttribute;
+import com.meti.app.compile.node.attribute.IntegerAttribute;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
 
-public record IntegerType(boolean signed, int bits) implements Node {
+public final class IntegerType extends AbstractNode implements Type {
+    private final boolean signed;
+    private final int bits;
+
+    public IntegerType(boolean signed, int bits) {
+        this.signed = signed;
+        this.bits = bits;
+    }
+
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public int hashCode() {
+        return Objects.hash(signed, bits);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof IntegerType that)) return false;
+        return signed == that.signed && bits == that.bits;
+    }
+
+    @Override
+    public boolean is(Category category) {
+        return category == com.meti.app.compile.node.Node.Category.Integer;
+    }
+
+    @Override
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Sign -> new BooleanAttribute(signed);
             case Bits -> new IntegerAttribute(bits);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    @Deprecated
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return Stream.empty();
-    }
-
-    @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply1(Attribute.Group group) throws AttributeException {
-        return List.createList(apply(group).collect(Collectors.toList())).stream();
-    }
-
-    @Override
-    public boolean is(Type type) {
-        return type == Type.Integer;
+    public JSONNode toJSON() {
+        return new ObjectNode()
+                .addObject("signed", signed)
+                .addObject("bits", bits);
     }
 }
