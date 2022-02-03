@@ -67,8 +67,8 @@ public class State extends AbstractJSONable {
         return scope;
     }
 
-    public <E extends Exception> boolean queryCurrent(F1<Node, Boolean, E> predicate) throws E {
-        return predicate.apply(current);
+    public <T, E extends Exception> T applyToCurrent(F1<Node, T, E> mapper) throws E {
+        return mapper.apply(current);
     }
 
     @Override

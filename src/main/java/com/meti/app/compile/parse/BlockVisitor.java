@@ -9,7 +9,7 @@ public class BlockVisitor extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(current -> current.is(Node.Category.Block));
+        return state.applyToCurrent(current -> current.is(Node.Category.Block));
     }
 
     @Override

@@ -20,7 +20,7 @@ public class ImplementationParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Category.Implementation));
+        return state.applyToCurrent(value -> value.is(Node.Category.Implementation));
     }
 
     @Override
