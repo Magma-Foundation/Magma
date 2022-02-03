@@ -6,9 +6,11 @@ import com.meti.api.collect.stream.Streams;
 import com.meti.api.core.F1;
 import com.meti.api.option.Option;
 import com.meti.app.compile.node.Node;
+import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 import com.meti.app.compile.node.attribute.NodesAttribute;
+import com.meti.app.compile.node.attribute.TypeAttribute;
 import com.meti.app.compile.stage.CompileException;
 
 public abstract class AbstractVisitationStage<T extends Visitor> implements VisitationStage<T> {
@@ -65,10 +67,10 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                 /*
                 Check for potential implicit conversions here...
                  */
-            Node typeToDefine;
+            Type typeToDefine;
             if (expectedType.is(Node.Role.Implicit)) {
                 typeToDefine = actualType.reduce();
-            } else if (expectedType.isAssignableTo(actualType)) {
+            } else if (actualType.isAssignableTo(expectedType)) {
                 typeToDefine = expectedType;
             } else {
                 var format = "Expected a type of '%s' but was actually '%s'.";
@@ -76,7 +78,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                 throw new CompileException(message);
             }
 
-            var newIdentity = definition.with(Attribute.Type.Type, new NodeAttribute(typeToDefine));
+            var newIdentity = definition.with(Attribute.Type.Type, new TypeAttribute(typeToDefine));
 
             return state.mapScope(scope -> scope.define(newIdentity)).apply(newIdentity);
         } else {
