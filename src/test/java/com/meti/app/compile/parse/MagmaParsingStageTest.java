@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class MagmaParserTest {
+class MagmaParsingStageTest {
     @Test
     void redefined_after_blocks() throws CompileException, StreamException {
         var category = new IntegerType(true, 16);
@@ -23,7 +23,7 @@ class MagmaParserTest {
         var definition = new DefinitionNode(identity);
 
         var input = List.apply(new Block(definition), definition);
-        var output = new MagmaModificationStage(input).visit();
+        var output = new MagmaParsingStage(input).visit();
 
         var expected = JavaList.toNativeList(input);
         var actual = JavaList.toNativeList(output);
@@ -39,7 +39,7 @@ class MagmaParserTest {
         var definition = new DefinitionNode(identity);
 
         var input = List.apply(definition, new Block(definition));
-        var parser = new MagmaModificationStage(input);
+        var parser = new MagmaParsingStage(input);
 
         assertThrows(CompileException.class, parser::visit);
     }
