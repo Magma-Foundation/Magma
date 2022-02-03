@@ -26,7 +26,7 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node transformDeclarationsGroup(Node withDeclarationGroup) throws CompileException {
+    protected Node transformDefinitionsGroup(Node withDeclarationGroup) throws CompileException {
         try {
             return withDeclarationGroup.apply(Attribute.Group.Definitions)
                     .foldRight(withDeclarationGroup, this::transformDeclarationsGroup);
@@ -62,7 +62,7 @@ public abstract class AbstractStage implements Stage {
             var withNodeGroup = transformNodeGroup(before);
             var withNodesGroup = transformNodesGroup(withNodeGroup);
             var withDeclarationGroup = transformDefinitionGroup(withNodesGroup);
-            var withDeclarationsGroup = transformDeclarationsGroup(withDeclarationGroup);
+            var withDeclarationsGroup = transformDefinitionsGroup(withDeclarationGroup);
             return afterTraversal(withDeclarationsGroup);
         } catch (CompileException e) {
             var format = "Failed to transform node:\n-----\n%s\n-----\n";
