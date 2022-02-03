@@ -1,6 +1,6 @@
 package com.meti.app.compile.feature.function;
 
-import com.meti.app.compile.common.Line;
+import com.meti.app.compile.feature.util.Line;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.parse.AbstractParser;
@@ -19,7 +19,8 @@ public class InvocationParser extends AbstractParser {
         var caller = current.apply(Attribute.Type.Caller).asNode();
 
         var type = new MagmaResolver(caller, state.getScope()).resolve();
-        if (!type.is(Node.Role.Function)) {
+        if (!type.is(Node
+                .Role.Function)) {
             var format = "Caller type '%s' is not a function.";
             var message = format.formatted(type);
             throw new CompileException(message);

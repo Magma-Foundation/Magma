@@ -1,5 +1,8 @@
 package com.meti.app.compile.feature.function;
 
+import com.meti.api.collect.java.List;
+import com.meti.api.collect.stream.StreamException;
+import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.Type;
 import com.meti.app.compile.node.attribute.Attribute;
@@ -10,8 +13,8 @@ import com.meti.app.compile.parse.MagmaResolver;
 import com.meti.app.compile.parse.State;
 import com.meti.app.compile.stage.CompileException;
 
-public class ImplementationVisitor extends AbstractParser {
-    public ImplementationVisitor(State state) {
+public class ImplementationParser extends AbstractParser {
+    public ImplementationParser(State state) {
         super(state);
     }
 
@@ -33,6 +36,25 @@ public class ImplementationVisitor extends AbstractParser {
         var newIdentity = identity.with(Attribute.Type.Type, new TypeAttribute(typeToSet));
         var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
         return state.apply(newElement);
+    }
+
+    @Override
+    protected State onExitImpl() throws CompileException {
+        try {
+            var current = state.getCurrent();
+            var oldIdentity = current.apply(Attribute.Type.Identity).asNode();
+            var returnType = oldIdentity.apply(Attribute.Type.Type).asType();
+            var parameterTypes = current.apply(Attribute.Type.Parameters)
+                    .asStreamOfNodes()
+                    .map(parameter -> parameter.apply(Attribute.Type.Type))
+                    .map(Attribute::asType)
+                    .foldRight(List.<Node>createList(), List::add);
+            var type = new FunctionType(returnType, parameterTypes);
+            var newIdentity = oldIdentity.with(Attribute.Type.Type, new TypeAttribute(type));
+            return state.mapScope(scope -> scope.define(newIdentity));
+        } catch (StreamException e) {
+            throw new CompileException(e);
+        }
     }
 
     private Type isAssignableTo(Type expectedType, Type actualType) throws CompileException {

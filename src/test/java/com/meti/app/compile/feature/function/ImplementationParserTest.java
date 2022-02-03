@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import static com.meti.app.compile.magma.ImplicitType.ImplicitType_;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ImplementationVisitorTest {
+class ImplementationParserTest {
     @Test
     void implicit() throws CompileException {
         var inputIdentity = new Declaration("main", ImplicitType_, Definition.Flag.Def);
@@ -25,7 +25,7 @@ class ImplementationVisitorTest {
         var input = new State(inputRoot);
         var output = new State(expectedRoot);
 
-        var actual = new ImplementationVisitor(input).onParseImpl();
+        var actual = new ImplementationParser(input).onParseImpl();
         assertEquals(output, actual);
     }
 
@@ -34,7 +34,7 @@ class ImplementationVisitorTest {
         var identity = new Declaration("main", new IntegerType(true, 16), Definition.Flag.Def);
         var root = new Implementation(identity, new Block(new Return(new IntegerNode(0))));
         var expected = new State(root);
-        var actual = new ImplementationVisitor(expected).onParseImpl();
+        var actual = new ImplementationParser(expected).onParseImpl();
         assertEquals(expected, actual);
     }
 }

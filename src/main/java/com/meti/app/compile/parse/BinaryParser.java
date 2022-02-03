@@ -1,6 +1,6 @@
 package com.meti.app.compile.parse;
 
-import com.meti.app.compile.common.Line;
+import com.meti.app.compile.feature.util.Line;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.stage.CompileException;
 

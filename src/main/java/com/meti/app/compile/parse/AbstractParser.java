@@ -3,6 +3,7 @@ package com.meti.app.compile.parse;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.stage.CompileException;
 
 public abstract class AbstractParser implements Parser {
@@ -24,11 +25,11 @@ public abstract class AbstractParser implements Parser {
     }
 
     @Override
-    public Option<State> onExit() {
+    public Option<State> onExit() throws CompileException {
         return isValid() ? new Some<>(onExitImpl()) : new None<>();
     }
 
-    protected State onExitImpl() {
+    protected State onExitImpl() throws CompileException {
         return state;
     }
 

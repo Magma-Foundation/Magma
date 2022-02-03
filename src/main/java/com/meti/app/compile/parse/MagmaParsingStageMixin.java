@@ -2,8 +2,9 @@ package com.meti.app.compile.parse;
 
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.Streams;
-import com.meti.app.compile.feature.function.ImplementationVisitor;
+import com.meti.app.compile.feature.function.ImplementationParser;
 import com.meti.app.compile.feature.function.InvocationParser;
+import com.meti.app.compile.feature.util.LineParser;
 
 public interface MagmaParsingStageMixin extends VisitationStage<Parser> {
     @Override
@@ -12,8 +13,9 @@ public interface MagmaParsingStageMixin extends VisitationStage<Parser> {
                 new BinaryParser(state),
                 new BlockVisitor(state),
                 new BooleanParser(state),
-                new ImplementationVisitor(state),
+                new ImplementationParser(state),
                 new InvocationParser(state),
+                new LineParser(state),
                 new VariableVisitor(state));
     }
 }

@@ -77,4 +77,12 @@ public class State extends AbstractJSONable {
                 .addJSONable("current", current)
                 .addJSONable("scope", scope);
     }
+
+    public State enter() {
+        return new State(current, scope.enter(current));
+    }
+
+    public State exit() {
+        return new State(current, scope.exit());
+    }
 }
