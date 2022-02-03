@@ -95,7 +95,8 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
         var withDefinitionsAttributes = AbstractVisitationStage.parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = parseNodeAttributes(withNodesAttributes);
-        return transformAST(modifyAfterAST(withNodeAttributes), Visitor::onExit);
+        var after = modifyAfterAST(withNodeAttributes);
+        return transformAST(after, Visitor::onExit);
     }
 
     protected State modifyAfterAST(State state) throws CompileException {
