@@ -14,7 +14,7 @@ public class Abstraction extends Function {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Abstraction;
+    public boolean is(Category category) {
+        return category == Category.Abstraction;
     }
 }

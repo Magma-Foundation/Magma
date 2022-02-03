@@ -3,8 +3,8 @@ package com.meti.app.compile.clang;
 import com.meti.app.compile.node.Node;
 
 public abstract class NodeTypeRenderer extends AbstractTypeRenderer<Node> {
-    public NodeTypeRenderer(Node identity, Node.Role role) {
-        super(identity, role);
+    public NodeTypeRenderer(Node identity, Node.Category category) {
+        super(identity, category);
     }
 
     @Override

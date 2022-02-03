@@ -21,7 +21,7 @@ class LambdaFormatter implements Processor<Node> {
 
     @Override
     public Option<Node> process() throws CompileException {
-        if (node.is(Node.Role.Abstraction) || node.is(Node.Role.Implementation)) {
+        if (node.is(Node.Category.Abstraction) || node.is(Node.Category.Implementation)) {
             var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
             var oldName = oldIdentity.apply(Attribute.Type.Name).asInput();
             Input newName;

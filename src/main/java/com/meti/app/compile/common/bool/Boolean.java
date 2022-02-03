@@ -38,8 +38,8 @@ public enum Boolean implements Node {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Boolean;
+    public boolean is(Category category) {
+        return category == Category.Boolean;
     }
 
     @Override

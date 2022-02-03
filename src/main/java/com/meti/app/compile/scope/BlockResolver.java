@@ -14,11 +14,11 @@ import com.meti.app.compile.stage.StreamStage;
 
 public record BlockResolver(Node node, StreamStage parent) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
-        if (node.is(Node.Role.Block)) {
+        if (node.is(Node.Category.Block)) {
             try {
                 var children = node.apply(Attribute.Type.Children)
                         .asStreamOfNodes()
-                        .filter(value -> value.is(Node.Role.Return))
+                        .filter(value -> value.is(Node.Category.Return))
                         .foldRight(List.<Node>createList(), List::add);
                 return new Some<>(children
                         .last()

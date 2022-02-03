@@ -29,8 +29,8 @@ public class InputNode extends AbstractNode {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Input;
+    public boolean is(Category category) {
+        return category == Category.Input;
     }
 
     @Override

@@ -17,10 +17,10 @@ import com.meti.app.compile.stage.CompileException;
 
 public record FunctionTransformer(Node oldNode) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
-        if (oldNode.is(Node.Role.Abstraction)) {
+        if (oldNode.is(Node.Category.Abstraction)) {
             return new Some<>(isExternal() ? EmptyNode.EmptyNode_ : oldNode);
         }
-        if (oldNode.is(Node.Role.Implementation)) {
+        if (oldNode.is(Node.Category.Implementation)) {
             var function = transformFunction();
             return new Some<>(function);
         }

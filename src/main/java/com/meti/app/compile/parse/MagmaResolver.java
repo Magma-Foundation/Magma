@@ -13,7 +13,7 @@ import com.meti.app.compile.stage.CompileException;
 
 public record MagmaResolver(Node root, Scope scope) {
     public Type resolve() throws CompileException {
-        if (root.is(Node.Role.Variable)) {
+        if (root.is(Node.Category.Variable)) {
             var variableName = root.apply(Attribute.Type.Value).asInput()
                     .toOutput()
                     .compute();
@@ -24,9 +24,9 @@ public record MagmaResolver(Node root, Scope scope) {
                         var message = format.formatted(variableName);
                         return new CompileException(message);
                     });
-        } else if (root.is(Node.Role.Boolean)) {
+        } else if (root.is(Node.Category.Boolean)) {
             return Primitive.Bool;
-        } else if (root.is(Node.Role.Integer)) {
+        } else if (root.is(Node.Category.Integer)) {
             var unformatted = List.<Type>apply(new IntegerType(true, 16));
             var value = root.apply(Attribute.Type.Value).asInteger();
 
@@ -38,10 +38,10 @@ public record MagmaResolver(Node root, Scope scope) {
             }
 
             return new Union(formatted.add(new ReferenceType(Primitive.Void)));
-        } else if (root.is(Node.Role.Return)) {
+        } else if (root.is(Node.Category.Return)) {
             var innerValue = root.apply(Attribute.Type.Value).asNode();
             return new MagmaResolver(innerValue, scope).resolve();
-        } else if (root.is(Node.Role.Block)) {
+        } else if (root.is(Node.Category.Block)) {
             try {
                 return root.apply(Attribute.Type.Children)
                         .asStreamOfNodes()

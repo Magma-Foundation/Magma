@@ -7,7 +7,7 @@ import com.meti.app.compile.text.Output;
 
 class StructureTypeRenderer extends OutputRenderer {
     StructureTypeRenderer(Node identity) {
-        super(identity, Node.Role.Structure);
+        super(identity, Node.Category.Structure);
     }
 
     @Override

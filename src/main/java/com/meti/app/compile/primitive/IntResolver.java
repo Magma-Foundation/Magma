@@ -9,7 +9,7 @@ import com.meti.app.compile.process.Processor;
 
 public record IntResolver(Node node) implements Processor<Node> {
     public Option<Node> process() {
-        if (node.is(Node.Role.Integer)) {
+        if (node.is(Node.Category.Integer)) {
             return new Some<>(new IntegerType(true, 16));
         } else {
             return new None<>();

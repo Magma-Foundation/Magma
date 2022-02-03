@@ -21,10 +21,10 @@ public abstract class StreamStage extends AbstractStage {
     }
 
     private Node transformDefinitionImpl(Node newDefinition) throws CompileException {
-        if (newDefinition.is(Node.Role.Initialization)) {
+        if (newDefinition.is(Node.Category.Initialization)) {
             var withValue = transformNodeAttribute(newDefinition, Attribute.Type.Value);
             return transformType(withValue);
-        } else if (newDefinition.is(Node.Role.Declaration)) {
+        } else if (newDefinition.is(Node.Category.Declaration)) {
             return transformType(newDefinition);
         } else {
             return newDefinition;

@@ -12,7 +12,7 @@ import com.meti.app.compile.stage.TransformationException;
 
 public record BooleanTransformer(Node node) implements Processor<Node> {
     public Option<Node> process() throws TransformationException {
-        if (node.is(Node.Role.Boolean)) {
+        if (node.is(Node.Category.Boolean)) {
             try {
                 var value = node.apply(Attribute.Type.Value);
                 var state = value.asBoolean();

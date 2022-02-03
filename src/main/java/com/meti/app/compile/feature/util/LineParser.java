@@ -11,7 +11,7 @@ public class LineParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(current -> current.is(Node.Role.Line));
+        return state.queryCurrent(current -> current.is(Node.Category.Line));
     }
 
     @Override

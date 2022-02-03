@@ -22,8 +22,8 @@ public class Union extends AbstractNode implements Type {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Union;
+    public boolean is(Category category) {
+        return category == Category.Union;
     }
 
     @Override

@@ -10,6 +10,6 @@ public class InputType extends InputNode implements Type {
 
     @Override
     public boolean isAssignableTo(Type other) throws AttributeException {
-        return other.is(Role.Input);
+        return other.is(Category.Input);
     }
 }

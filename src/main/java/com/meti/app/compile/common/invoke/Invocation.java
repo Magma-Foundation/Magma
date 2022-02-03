@@ -41,8 +41,8 @@ public final class Invocation extends AbstractNode {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Invocation;
+    public boolean is(Category category) {
+        return category == Category.Invocation;
     }
 
     @Override

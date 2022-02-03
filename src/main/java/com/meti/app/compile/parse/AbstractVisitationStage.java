@@ -58,7 +58,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
         var name = definition.apply(Attribute.Type.Name).asInput().toOutput().compute();
         if (state.getScope().isDefined(name)) {
             throw new CompileException("'" + name + "' is already defined.");
-        } else if (definition.is(Node.Role.Initialization)) {
+        } else if (definition.is(Node.Category.Initialization)) {
             var value = definition.apply(Attribute.Type.Value).asNode();
             var actualType = new MagmaResolver(value, state.getScope()).resolve();
 
@@ -68,7 +68,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                 Check for potential implicit conversions here...
                  */
             Type typeToDefine;
-            if (expectedType.is(Node.Role.Implicit)) {
+            if (expectedType.is(Node.Category.Implicit)) {
                 typeToDefine = actualType.reduce();
             } else if (actualType.isAssignableTo(expectedType)) {
                 typeToDefine = expectedType;

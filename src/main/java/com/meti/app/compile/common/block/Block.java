@@ -39,8 +39,8 @@ public final class Block extends AbstractNode {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Block;
+    public boolean is(Category category) {
+        return category == Category.Block;
     }
 
     @Override

@@ -14,7 +14,7 @@ public interface Node extends JSONable {
         return Streams.empty();
     }
 
-    boolean is(Role role);
+    boolean is(Category category);
 
     default <E extends Exception> Node mapAsNode(Attribute.Type type, F1<Node, Node, E> mapper) throws E, AttributeException {
         var input = apply(type).asNode();
@@ -39,7 +39,7 @@ public interface Node extends JSONable {
         throw new JSONException(message);
     }
 
-    enum Role {
+    enum Category {
         Abstraction, Binary, Block, Boolean,
         Cache, Declaration, Else, Empty,
         Extern, Function, If, Implementation,

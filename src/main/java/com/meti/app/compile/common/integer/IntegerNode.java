@@ -9,8 +9,8 @@ import com.meti.app.compile.node.attribute.IntegerAttribute;
 
 public record IntegerNode(int value) implements Node {
     @Override
-    public boolean is(Role role) {
-        return role == Role.Integer;
+    public boolean is(Category category) {
+        return category == Category.Integer;
     }
 
     @Override

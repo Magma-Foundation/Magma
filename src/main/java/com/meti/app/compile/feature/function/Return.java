@@ -28,8 +28,8 @@ public final class Return extends AbstractNode {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Return;
+    public boolean is(Category category) {
+        return category == Category.Return;
     }
 
     @Override

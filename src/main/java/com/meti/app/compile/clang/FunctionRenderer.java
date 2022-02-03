@@ -15,7 +15,7 @@ import com.meti.app.compile.text.StringOutput;
 public record FunctionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws CompileException {
-        if (node.is(Node.Role.Abstraction) || node.is(Node.Role.Implementation)) {
+        if (node.is(Node.Category.Abstraction) || node.is(Node.Category.Implementation)) {
             var identity = node.apply(Attribute.Type.Identity).asNode();
             var renderedIdentity = identity.apply(Attribute.Type.Value).asOutput();
 
@@ -40,7 +40,7 @@ public record FunctionRenderer(Node node) implements Processor<Output> {
     }
 
     private Output attachValue(Output withIdentity) throws AttributeException {
-        if (node.is(Node.Role.Implementation)) {
+        if (node.is(Node.Category.Implementation)) {
             var value = node.apply(Attribute.Type.Value).asNode();
             var renderedValue = value.apply(Attribute.Type.Value).asOutput();
             return withIdentity.appendOutput(renderedValue);

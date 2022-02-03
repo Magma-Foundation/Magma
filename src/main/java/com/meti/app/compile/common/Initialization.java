@@ -50,7 +50,7 @@ public class Initialization extends Definition {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Initialization;
+    public boolean is(Category category) {
+        return category == Category.Initialization;
     }
 }

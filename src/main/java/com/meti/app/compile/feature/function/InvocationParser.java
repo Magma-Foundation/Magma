@@ -19,8 +19,7 @@ public class InvocationParser extends AbstractParser {
         var caller = current.apply(Attribute.Type.Caller).asNode();
 
         var type = new MagmaResolver(caller, state.getScope()).resolve();
-        if (!type.is(Node
-                .Role.Function)) {
+        if (!type.is(Node.Category.Function)) {
             var format = "Caller type '%s' is not a function.";
             var message = format.formatted(type);
             throw new CompileException(message);
@@ -34,7 +33,7 @@ public class InvocationParser extends AbstractParser {
         var isInBlock = state.getScope()
                 .getParents()
                 .last()
-                .map(parent -> parent.is(Node.Role.Block))
+                .map(parent -> parent.is(Node.Category.Block))
                 .orElse(false);
 
         if (isInBlock) {
@@ -46,6 +45,6 @@ public class InvocationParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Role.Invocation));
+        return state.queryCurrent(value -> value.is(Node.Category.Invocation));
     }
 }

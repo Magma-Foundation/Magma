@@ -37,10 +37,10 @@ public class CDivider extends MappedDivider {
 
     @Override
     protected Option<List<Node>> decompose(Node node) throws CompileException {
-        if (node.is(Node.Role.Implementation)) {
+        if (node.is(Node.Category.Implementation)) {
             return new Some<>(decomposeImplementation(node));
         }
-        if (node.is(Node.Role.Cache)) {
+        if (node.is(Node.Category.Cache)) {
             return new Some<>(decomposeCache(node));
         }
         return new None<>();
@@ -48,10 +48,10 @@ public class CDivider extends MappedDivider {
 
     @Override
     protected CFormat apply(Node node) {
-        return node.is(Node.Role.Import)
-               || node.is(Node.Role.Extern)
-               || node.is(Node.Role.Structure)
-               || node.is(Node.Role.Abstraction)
+        return node.is(Node.Category.Import)
+               || node.is(Node.Category.Extern)
+               || node.is(Node.Category.Structure)
+               || node.is(Node.Category.Abstraction)
                 ? Header
                 : Source;
     }

@@ -11,8 +11,8 @@ public class ImplicitType implements Type {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Implicit;
+    public boolean is(Category category) {
+        return category == Category.Implicit;
     }
 
     @Override

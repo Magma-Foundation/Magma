@@ -13,7 +13,7 @@ public final class VariableProcessor extends AbstractProcessor<Node, Output> {
 
     @Override
     protected boolean validate() {
-        return input.is(Node.Role.Variable);
+        return input.is(Node.Category.Variable);
     }
 
     @Override

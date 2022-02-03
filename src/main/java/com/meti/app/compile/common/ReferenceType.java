@@ -21,7 +21,7 @@ public class ReferenceType extends AbstractNode implements Type {
 
     @Override
     public boolean isAssignableTo(Type other) throws AttributeException {
-        if (!other.is(Role.Reference)) return false;
+        if (!other.is(Category.Reference)) return false;
         var inner = other.apply(Attribute.Type.Value).asType();
         return value.isAssignableTo(inner);
     }
@@ -32,8 +32,8 @@ public class ReferenceType extends AbstractNode implements Type {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Reference;
+    public boolean is(Category category) {
+        return category == Category.Reference;
     }
 
     @Override

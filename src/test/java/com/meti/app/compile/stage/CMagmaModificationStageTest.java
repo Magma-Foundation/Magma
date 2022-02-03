@@ -24,7 +24,7 @@ class CMagmaModificationStageTest {
     void boolean_child() {
         assertTransforms(new Return(Boolean.False), (F1<Node, java.lang.Boolean, ?>) node -> node.apply(Attribute.Type.Value)
                 .asNode()
-                .is(Node.Role.Integer));
+                .is(Node.Category.Integer));
     }
 
     private void assertTransforms(Node input, F1<Node, java.lang.Boolean, ?> predicate) {
@@ -47,8 +47,8 @@ class CMagmaModificationStageTest {
             var list = value.apply(Attribute.Type.Children)
                     .asStreamOfNodes()
                     .foldRight(List.<Node>createList(), List::add);
-            return list.first().filter(first -> first.is(Node.Role.Integer)).isPresent() &&
-                   list.last().filter(last -> last.is(Node.Role.Integer)).isPresent();
+            return list.first().filter(first -> first.is(Node.Category.Integer)).isPresent() &&
+                   list.last().filter(last -> last.is(Node.Category.Integer)).isPresent();
         });
     }
 
@@ -58,12 +58,12 @@ class CMagmaModificationStageTest {
         assertTransforms(new DefinitionNode(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
                 .apply(Attribute.Type.Identity).asNode()
                 .apply(Attribute.Type.Value).asNode()
-                .is(Node.Role.Integer));
+                .is(Node.Category.Integer));
     }
 
     @Test
     void booleans() {
-        assertTransforms(Boolean.True, (F1<Node, java.lang.Boolean, ?>) value -> value.is(Node.Role.Integer));
+        assertTransforms(Boolean.True, (F1<Node, java.lang.Boolean, ?>) value -> value.is(Node.Category.Integer));
     }
 
     @Test
@@ -72,7 +72,7 @@ class CMagmaModificationStageTest {
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
                 .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Type.Children).asStreamOfNodes()
                 .first()
-                .filter(child -> child.is(Node.Role.Line))
+                .filter(child -> child.is(Node.Category.Line))
                 .isPresent());
     }
 }

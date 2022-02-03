@@ -59,7 +59,7 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Implementation;
+    public boolean is(Category category) {
+        return category == Category.Implementation;
     }
 }

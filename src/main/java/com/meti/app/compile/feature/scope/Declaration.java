@@ -25,7 +25,7 @@ public class Declaration extends Definition {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Declaration;
+    public boolean is(Category category) {
+        return category == Category.Declaration;
     }
 }

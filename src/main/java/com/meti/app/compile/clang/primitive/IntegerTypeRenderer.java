@@ -9,7 +9,7 @@ import com.meti.app.compile.text.Output;
 
 public class IntegerTypeRenderer extends OutputRenderer {
     public IntegerTypeRenderer(Node identity) {
-        super(identity, Node.Role.Integer);
+        super(identity, Node.Category.Integer);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class IntegerTypeRenderer extends OutputRenderer {
                 .prepend(" ")
                 .prepend(prefix)
                 .prepend(signedFlag);
-        if (identity.is(Node.Role.Initialization)) {
+        if (identity.is(Node.Category.Initialization)) {
             var value = identity.apply(Attribute.Type.Value)
                     .asNode()
                     .apply(Attribute.Type.Value)

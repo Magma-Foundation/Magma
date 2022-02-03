@@ -13,8 +13,8 @@ public enum Primitive implements Type {
     Void;
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Primitive;
+    public boolean is(Category category) {
+        return category == Category.Primitive;
     }
 
     @Override

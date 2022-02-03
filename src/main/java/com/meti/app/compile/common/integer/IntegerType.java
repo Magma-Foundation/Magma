@@ -33,8 +33,8 @@ public final class IntegerType extends AbstractNode implements Type {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Integer;
+    public boolean is(Category category) {
+        return category == Category.Integer;
     }
 
     @Override

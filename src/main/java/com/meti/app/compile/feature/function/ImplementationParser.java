@@ -20,7 +20,7 @@ public class ImplementationParser extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Role.Implementation));
+        return state.queryCurrent(value -> value.is(Node.Category.Implementation));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ImplementationParser extends AbstractParser {
     }
 
     private Type isAssignableTo(Type expectedType, Type actualType) throws CompileException {
-        if (expectedType.is(Node.Role.Implicit)) {
+        if (expectedType.is(Node.Category.Implicit)) {
             return actualType.reduce();
         } else if (actualType.isAssignableTo(expectedType)) {
             return expectedType;

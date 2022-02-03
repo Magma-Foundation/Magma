@@ -8,7 +8,7 @@ import com.meti.app.compile.text.Output;
 
 public class PrimitiveTypeRenderer extends OutputRenderer {
     public PrimitiveTypeRenderer(Node identity) {
-        super(identity, Node.Role.Primitive);
+        super(identity, Node.Category.Primitive);
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.meti.app.compile.text.RootText;
 public record ConditionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Role.If)) {
+        if (node.is(Node.Category.If)) {
             var arguments = node.apply(Attribute.Type.Arguments).asNode()
                     .apply(Attribute.Type.Value).asOutput();
             var value = this.node.apply(Attribute.Type.Value).asNode()

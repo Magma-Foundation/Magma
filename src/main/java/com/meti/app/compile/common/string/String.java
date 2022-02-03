@@ -29,8 +29,8 @@ public record String(Input value) implements Node {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.String;
+    public boolean is(Category category) {
+        return category == Category.String;
     }
 
     @Override

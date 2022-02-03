@@ -17,14 +17,14 @@ public class DefinitionResolver extends AbstractProcessor<Node, Node> {
 
     @Override
     protected boolean validate() {
-        return node.is(Node.Role.Declaration);
+        return node.is(Node.Category.Declaration);
     }
 
     @Override
     protected Node createNode() throws CompileException {
         var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
         var type = oldIdentity.apply(Attribute.Type.Type).asNode();
-        if (type.is(Node.Role.Implicit)) {
+        if (type.is(Node.Category.Implicit)) {
             var value = oldIdentity.apply(Attribute.Type.Value).asNode();
             var valueType = new MagmaTypeResolver().transformNodeAST(value);
             var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(valueType));

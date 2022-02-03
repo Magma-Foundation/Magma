@@ -28,8 +28,8 @@ public record Import(Packaging packaging_) implements Node {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Import;
+    public boolean is(Category category) {
+        return category == Category.Import;
     }
 
     @Override

@@ -11,7 +11,7 @@ public class VariableVisitor extends AbstractParser {
 
     @Override
     protected boolean isValid() {
-        return state.queryCurrent(value -> value.is(Node.Role.Variable));
+        return state.queryCurrent(value -> value.is(Node.Category.Variable));
     }
 
     @Override

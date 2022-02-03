@@ -10,16 +10,16 @@ import com.meti.app.compile.stage.CompileException;
 
 public abstract class AbstractTypeRenderer<T> implements Processor<Node> {
     protected final Node identity;
-    protected final Node.Role role;
+    protected final Node.Category category;
 
-    public AbstractTypeRenderer(Node identity, Node.Role role) {
+    public AbstractTypeRenderer(Node identity, Node.Category category) {
         this.identity = identity;
-        this.role = role;
+        this.category = category;
     }
 
     @Override
     public Option<Node> process() throws CompileException {
-        return identity.apply(Attribute.Type.Type).asType().is(role)
+        return identity.apply(Attribute.Type.Type).asType().is(category)
                 ? new Some<>(toNode(processImpl()))
                 : new None<>();
     }

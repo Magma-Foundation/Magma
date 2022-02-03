@@ -40,7 +40,7 @@ public final class Line extends AbstractNode {
     }
 
     @Override
-    public boolean is(Role role) {
-        return role == Role.Line;
+    public boolean is(Category category) {
+        return category == Category.Line;
     }
 }

@@ -12,7 +12,7 @@ import com.meti.app.compile.text.Output;
 public record StringProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Role.String)) {
+        if (node.is(Node.Category.String)) {
             return new Some<>(node
                     .apply(Attribute.Type.Value)
                     .asInput()

@@ -13,7 +13,7 @@ import com.meti.app.compile.text.RootText;
 public record ExternRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Role.Extern)) {
+        if (node.is(Node.Category.Extern)) {
             return new Some<>(new RootText("#include <" + node.apply(Attribute.Type.Value)
                     .asInput()
                     .toOutput()

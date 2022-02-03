@@ -12,7 +12,7 @@ import com.meti.app.compile.text.Output;
 public record DefinitionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
-        if (node.is(Node.Role.Declaration)) {
+        if (node.is(Node.Category.Declaration)) {
             var text = node.apply(Attribute.Type.Identity)
                     .asNode()
                     .apply(Attribute.Type.Value)
