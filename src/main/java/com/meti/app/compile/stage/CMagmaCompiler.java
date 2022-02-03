@@ -6,7 +6,7 @@ import com.meti.api.collect.java.Map;
 import com.meti.app.compile.clang.CFormat;
 import com.meti.app.compile.clang.CRenderer;
 import com.meti.app.compile.common.block.Splitter;
-import com.meti.app.compile.magma.MagmaLexer;
+import com.meti.app.compile.magma.lex.MagmaLexer;
 import com.meti.app.compile.node.InputNode;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;

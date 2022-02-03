@@ -39,14 +39,16 @@ public final class CRenderer extends AfterStreamStage {
     }
 
     @Override
-    protected Node afterDefinitionTraversal(Node transformed) throws CompileException {
-        if (transformed.is(Node.Role.Output)) {
-            return transformed;
-        } else {
-            var type = transformed.apply(Attribute.Type.Type).asOutput();
-            var value = transformed.apply(Attribute.Type.Value).asOutput();
-            return new OutputNode(type.appendSlice("=").appendOutput(value));
-        }
+    protected Node transformType(Node identity) throws CompileException {
+        Node current = identity;
+        do {
+            current = transformUsingStreamsOptionally(current, streamTypeTransformers(current)).orElseThrow(() -> {
+                var format = "Failed to render definition: '%s'";
+                var message = format.formatted(identity);
+                return new CompileException(message);
+            });
+        } while (!current.is(Node.Role.Output));
+        return current;
     }
 
     @Override
@@ -63,23 +65,23 @@ public final class CRenderer extends AfterStreamStage {
     @Override
     protected Stream<Processor<Node>> streamNodeTransformers(Node root) throws StreamException {
         return Streams.apply(
-                new BinaryProcessor(root),
-                new BlockProcessor(root),
-                new ConditionRenderer(root),
-                new DefinitionRenderer(root),
-                new ElseProcessor(root),
-                new EmptyProcessor(root),
-                new ExternRenderer(root),
-                new FunctionRenderer(root),
-                new ImportRenderer(root),
-                new IntegerProcessor(root),
-                new InvocationProcessor(root),
-                new LineProcessor(root),
-                new ReturnProcessor(root),
-                new StringProcessor(root),
-                new StructureRenderer(root),
-                new UnaryProcessor(root),
-                new VariableProcessor(root))
+                        new BinaryProcessor(root),
+                        new BlockProcessor(root),
+                        new ConditionRenderer(root),
+                        new DefinitionRenderer(root),
+                        new ElseProcessor(root),
+                        new EmptyProcessor(root),
+                        new ExternRenderer(root),
+                        new FunctionRenderer(root),
+                        new ImportRenderer(root),
+                        new IntegerProcessor(root),
+                        new InvocationProcessor(root),
+                        new LineProcessor(root),
+                        new ReturnProcessor(root),
+                        new StringProcessor(root),
+                        new StructureRenderer(root),
+                        new UnaryProcessor(root),
+                        new VariableProcessor(root))
                 .map(processor -> () -> processor.process().map(OutputNode::new));
     }
 }

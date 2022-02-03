@@ -1,4 +1,4 @@
-package com.meti.app.compile.magma;
+package com.meti.app.compile.magma.lex;
 
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
@@ -16,6 +16,7 @@ import com.meti.app.compile.common.returns.ReturnLexer;
 import com.meti.app.compile.common.string.StringLexer;
 import com.meti.app.compile.common.variable.VariableLexer;
 import com.meti.app.compile.lex.LexException;
+import com.meti.app.compile.magma.*;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;

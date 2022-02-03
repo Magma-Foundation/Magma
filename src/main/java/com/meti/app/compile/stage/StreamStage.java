@@ -3,6 +3,7 @@ package com.meti.app.compile.stage;
 import com.meti.api.collect.stream.Stream;
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.collect.stream.Streams;
+import com.meti.api.option.Option;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.process.Processor;
@@ -40,11 +41,14 @@ public abstract class StreamStage extends AbstractStage {
     }
 
     protected Node transformUsingStreams(Node node, Stream<Processor<Node>> transformers) throws CompileException {
+        return transformUsingStreamsOptionally(node, transformers).orElse(node);
+    }
+
+    protected Option<Node> transformUsingStreamsOptionally(Node node, Stream<Processor<Node>> transformers) throws CompileException {
         try {
             return transformers.map(Processor::process)
                     .flatMap(Streams::optionally)
-                    .first()
-                    .orElse(node);
+                    .first();
         } catch (StreamException e) {
             throw new CompileException(e);
         }
