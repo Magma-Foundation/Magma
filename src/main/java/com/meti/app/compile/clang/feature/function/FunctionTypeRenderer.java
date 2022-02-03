@@ -4,6 +4,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.app.compile.clang.stage.OutputRenderer;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
+import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.stage.CompileException;
 import com.meti.app.compile.text.Output;
 import com.meti.app.compile.text.StringOutput;
@@ -18,13 +19,7 @@ public class FunctionTypeRenderer extends OutputRenderer {
         try {
             var name = identity.apply(Attribute.Category.Name).asInput();
             var returns = identity.apply(Attribute.Category.Type).asOutput();
-            var parameters = identity.apply(Attribute.Category.Parameters)
-                    .asStreamOfNodes()
-                    .map(value -> value.apply(Attribute.Category.Value))
-                    .map(Attribute::asOutput)
-                    .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))
-                    .map(value -> value.prepend("(").appendSlice(")"))
-                    .orElse(new StringOutput("()"));
+            var parameters = renderParameters();
             return returns.appendSlice(" (*")
                     .appendOutput(name.toOutput())
                     .appendSlice(")")
@@ -32,5 +27,15 @@ public class FunctionTypeRenderer extends OutputRenderer {
         } catch (StreamException e) {
             throw new CompileException(e);
         }
+    }
+
+    private Output renderParameters() throws StreamException, AttributeException {
+        return identity.apply(Attribute.Category.Parameters)
+                .asStreamOfNodes()
+                .map(value -> value.apply(Attribute.Category.Value))
+                .map(Attribute::asOutput)
+                .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))
+                .map(value -> value.prepend("(").appendSlice(")"))
+                .orElse(new StringOutput("()"));
     }
 }
