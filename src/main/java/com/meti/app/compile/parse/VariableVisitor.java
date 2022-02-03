@@ -19,9 +19,11 @@ public class VariableVisitor extends AbstractParser {
         var value = state.getCurrent().apply(Attribute.Category.Value).asInput();
         var format = value.toOutput().compute();
         if (!state.getScope().isDefined(format)) {
-            throw new CompileException("'%s' is not defined.".formatted(format));
-        } else {
-            return state.apply(state.getCurrent());
+            var message = "'%s' is not defined.";
+            var scope = message.formatted(format);
+            throw new CompileException(scope);
         }
+
+        return state;
     }
 }
