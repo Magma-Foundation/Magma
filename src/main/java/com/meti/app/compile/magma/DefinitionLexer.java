@@ -23,7 +23,7 @@ public record DefinitionLexer(Input input) implements Processor<Node> {
 
     private boolean hasFlags(Node field) {
         try {
-            var list = field.apply(Attribute.Type.Flags).asStreamOfFlags()
+            var list = field.apply(Attribute.Category.Flags).asStreamOfFlags()
                     .foldRight(List.<Definition.Flag>createList(), List::add);
             return list.contains(Definition.Flag.Let) || list.contains(Definition.Flag.Const);
         } catch (StreamException | RuntimeException | AttributeException e) {

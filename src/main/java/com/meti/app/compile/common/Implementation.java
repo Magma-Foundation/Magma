@@ -25,19 +25,19 @@ public final class Implementation extends Function {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return type == Attribute.Type.Value ? new NodeAttribute(body) : super.apply(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return category == Attribute.Category.Value ? new NodeAttribute(body) : super.apply(category);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        if (group == Attribute.Group.Node) return Streams.apply(Attribute.Type.Value);
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        if (group == Attribute.Group.Node) return Streams.apply(Attribute.Category.Value);
         else return super.apply(group);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value ? new Implementation(identity, attribute.asNode(), parameters) : super.with(type, attribute);
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value ? new Implementation(identity, attribute.asNode(), parameters) : super.with(category, attribute);
     }
 
     @Override
@@ -60,6 +60,6 @@ public final class Implementation extends Function {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Implementation;
+        return category == Node.Category.Implementation;
     }
 }

@@ -13,8 +13,8 @@ public record UnaryProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Unary)) {
-            var caller = node.apply(Attribute.Type.Caller).asNode().apply(Attribute.Type.Value).asOutput();
-            var callee = node.apply(Attribute.Type.Arguments).asNode().apply(Attribute.Type.Value).asOutput();
+            var caller = node.apply(Attribute.Category.Caller).asNode().apply(Attribute.Category.Value).asOutput();
+            var callee = node.apply(Attribute.Category.Arguments).asNode().apply(Attribute.Category.Value).asOutput();
             return new Some<>(caller.appendSlice(" ").appendOutput(callee));
         } else {
             return new None<>();

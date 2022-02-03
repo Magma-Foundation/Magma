@@ -16,7 +16,7 @@ public class InvocationParser extends AbstractParser {
     @Override
     protected State modifyBeforeASTImpl() throws CompileException {
         var current = state.getCurrent();
-        var caller = current.apply(Attribute.Type.Caller).asNode();
+        var caller = current.apply(Attribute.Category.Caller).asNode();
 
         var type = new MagmaResolver(caller, state.getScope()).resolve();
         if (!type.is(Node.Category.Function)) {

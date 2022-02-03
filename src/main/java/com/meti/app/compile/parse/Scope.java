@@ -59,7 +59,7 @@ public class Scope extends AbstractJSONable {
         try {
             return frames.stream()
                     .flatMap(List::stream)
-                    .filter(declaration -> declaration.apply(Attribute.Type.Name)
+                    .filter(declaration -> declaration.apply(Attribute.Category.Name)
                             .asInput()
                             .equalsSlice(name))
                     .headOptionally();

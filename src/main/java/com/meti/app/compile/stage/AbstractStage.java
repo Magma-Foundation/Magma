@@ -15,9 +15,9 @@ public abstract class AbstractStage implements Stage {
         return root;
     }
 
-    protected Node transformDeclarationsGroup(Node node1, Attribute.Type type) throws CompileException {
+    protected Node transformDeclarationsGroup(Node node1, Attribute.Category category) throws CompileException {
         try {
-            return node1.with(type, node1.apply(type).asStreamOfNodes()
+            return node1.with(category, node1.apply(category).asStreamOfNodes()
                     .map(this::transformDefinition)
                     .foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add)
                     .complete());
@@ -44,11 +44,11 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node transformDefinitionGroup(Node root, Attribute.Type type) throws CompileException {
-        var oldIdentity = root.apply(type).asNode();
+    protected Node transformDefinitionGroup(Node root, Attribute.Category category) throws CompileException {
+        var oldIdentity = root.apply(category).asNode();
         var newIdentity = transformDefinition(oldIdentity);
         var newIdentityAttribute = new NodeAttribute(newIdentity);
-        return root.with(type, newIdentityAttribute);
+        return root.with(category, newIdentityAttribute);
     }
 
     protected Node transformDefinition(Node definition) throws CompileException {
@@ -71,12 +71,12 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node transformNodeAttribute(Node current, Attribute.Type type) throws CompileException {
-        var previousAttribute = current.apply(type);
+    protected Node transformNodeAttribute(Node current, Attribute.Category category) throws CompileException {
+        var previousAttribute = current.apply(category);
         var previous = previousAttribute.asNode();
         var next = transformNodeAST(previous);
         var nextAttribute = new NodeAttribute(next);
-        return current.with(type, nextAttribute);
+        return current.with(category, nextAttribute);
     }
 
     protected Node transformNodeGroup(Node node) throws CompileException {
@@ -87,9 +87,9 @@ public abstract class AbstractStage implements Stage {
         }
     }
 
-    protected Node transformNodesAttribute(Node current, Attribute.Type type) throws CompileException {
+    protected Node transformNodesAttribute(Node current, Attribute.Category category) throws CompileException {
         try {
-            return current.with(type, current.apply(type)
+            return current.with(category, current.apply(category)
                     .asStreamOfNodes()
                     .map(AbstractStage.this::transformNodeAST)
                     .foldRight(new NodesAttribute.Builder(), NodesAttribute.Builder::add)

@@ -16,15 +16,15 @@ public record InvocationProcessor(Node node) implements Processor<Output> {
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Invocation)) {
             try {
-                var caller = this.node.apply(Attribute.Type.Caller).asNode();
-                var renderedArguments = node.apply(Attribute.Type.Arguments)
+                var caller = this.node.apply(Attribute.Category.Caller).asNode();
+                var renderedArguments = node.apply(Attribute.Category.Arguments)
                         .asStreamOfNodes()
-                        .map(value -> value.apply(Attribute.Type.Value))
+                        .map(value -> value.apply(Attribute.Category.Value))
                         .map(Attribute::asOutput)
                         .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))
                         .map(value -> value.prepend("(").appendSlice(")"))
                         .orElse(new StringOutput("()"));
-                var output = caller.apply(Attribute.Type.Value).asOutput().appendOutput(renderedArguments);
+                var output = caller.apply(Attribute.Category.Value).asOutput().appendOutput(renderedArguments);
                 return new Some<>(output);
             } catch (StreamException e) {
                 return new None<>();

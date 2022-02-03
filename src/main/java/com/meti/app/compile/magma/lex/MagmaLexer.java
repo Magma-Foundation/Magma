@@ -30,7 +30,7 @@ public class MagmaLexer extends NodeStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
         if (definition.is(Node.Category.Input)) {
-            var input = definition.apply(Attribute.Type.Value).asInput();
+            var input = definition.apply(Attribute.Category.Value).asInput();
             return new FieldLexer(input).process().orElseThrow(() -> {
                 var format = "Invalid definition:\n-----\n%s\n-----\n";
                 var message = format.formatted(definition);
@@ -56,15 +56,15 @@ public class MagmaLexer extends NodeStage {
     @Override
     protected Stream<Processor<Node>> streamTypeTransformers(Node identity) throws CompileException {
         if (identity.is(Node.Category.Declaration) || identity.is(Node.Category.Initialization)) {
-            var type = identity.apply(Attribute.Type.Type).asType();
+            var type = identity.apply(Attribute.Category.Type).asType();
             if (type.is(Node.Category.Input)) {
-                var input = type.apply(Attribute.Type.Value).asInput();
+                var input = type.apply(Attribute.Category.Value).asInput();
                 try {
                     return Streams.apply(new FunctionTypeLexer(input),
                             new ReferenceTypeLexer(input),
                             new PrimitiveLexer(input),
                             new IntegerTypeLexer(input))
-                            .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Type.Type, new TypeAttribute(result))));
+                            .map(lexer -> () -> lexer.process().map(result -> identity.with(Attribute.Category.Type, new TypeAttribute(result))));
                 } catch (StreamException e) {
                     throw new CompileException(e);
                 }
@@ -80,7 +80,7 @@ public class MagmaLexer extends NodeStage {
     protected Node beforeNodeTraversal(Node root) throws CompileException {
         try {
             if (root.is(Node.Category.Input)) {
-                var input = root.apply(Attribute.Type.Value).asInput();
+                var input = root.apply(Attribute.Category.Value).asInput();
                 return transformUsingStreams(root, streamNodeLexers(input));
             } else {
                 return root;

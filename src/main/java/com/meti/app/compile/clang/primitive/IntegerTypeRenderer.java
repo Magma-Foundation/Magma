@@ -14,11 +14,11 @@ public class IntegerTypeRenderer extends OutputRenderer {
 
     @Override
     protected Output processImpl() throws CompileException {
-        var name = identity.apply(Attribute.Type.Name).asInput();
-        var type = identity.apply(Attribute.Type.Type).asType();
+        var name = identity.apply(Attribute.Category.Name).asInput();
+        var type = identity.apply(Attribute.Category.Type).asType();
 
-        var isSigned = type.apply(Attribute.Type.Sign).asBoolean();
-        var bits = type.apply(Attribute.Type.Bits).asInteger();
+        var isSigned = type.apply(Attribute.Category.Sign).asBoolean();
+        var bits = type.apply(Attribute.Category.Bits).asInteger();
         var prefix = switch (bits) {
             case 8 -> "char";
             case 16 -> "int";
@@ -32,9 +32,9 @@ public class IntegerTypeRenderer extends OutputRenderer {
                 .prepend(prefix)
                 .prepend(signedFlag);
         if (identity.is(Node.Category.Initialization)) {
-            var value = identity.apply(Attribute.Type.Value)
+            var value = identity.apply(Attribute.Category.Value)
                     .asNode()
-                    .apply(Attribute.Type.Value)
+                    .apply(Attribute.Category.Value)
                     .asOutput();
             return buffer.appendSlice("=").appendOutput(value);
         } else {

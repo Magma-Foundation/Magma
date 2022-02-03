@@ -12,9 +12,9 @@ import com.meti.app.source.Packaging;
 record PackageFormatter(Packaging thisPackage, Node node) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Category.Import)) {
-            var thatPackage = node.apply(Attribute.Type.Value).asPackaging();
+            var thatPackage = node.apply(Attribute.Category.Value).asPackaging();
             var newPackage = thisPackage.relativize(thatPackage);
-            return new Some<>(node.with(Attribute.Type.Value, new PackageAttribute(newPackage)));
+            return new Some<>(node.with(Attribute.Category.Value, new PackageAttribute(newPackage)));
         } else {
             return new None<>();
         }

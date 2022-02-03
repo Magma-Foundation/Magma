@@ -16,13 +16,13 @@ public record BinaryProcessor(Node node) implements Processor<Output> {
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Binary)) {
             try {
-                var operator = node.apply(Attribute.Type.Operator).asNode().apply(Attribute.Type.Value).asOutput();
-                var arguments = node.apply(Attribute.Type.Arguments)
+                var operator = node.apply(Attribute.Category.Operator).asNode().apply(Attribute.Category.Value).asOutput();
+                var arguments = node.apply(Attribute.Category.Arguments)
                         .asStreamOfNodes()
                         .foldRight(List.<Node>createList(), List::add);
 
-                var first = arguments.apply(0).apply(Attribute.Type.Value).asOutput();
-                var second = arguments.apply(1).apply(Attribute.Type.Value).asOutput();
+                var first = arguments.apply(0).apply(Attribute.Category.Value).asOutput();
+                var second = arguments.apply(1).apply(Attribute.Category.Value).asOutput();
 
                 var appendOutput = first.appendSlice(" ").appendOutput(operator);
                 return new Some<>(appendOutput.appendSlice(" ").appendOutput(second));

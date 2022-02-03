@@ -21,24 +21,24 @@ public final class DefinitionNode extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Definition ? Streams.apply(Attribute.Type.Identity) : Streams.empty();
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Definition ? Streams.apply(Attribute.Category.Identity) : Streams.empty();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Declaration;
+        return category == Node.Category.Declaration;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Identity) return new NodeAttribute(identity);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Identity) return new NodeAttribute(identity);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Identity ? new DefinitionNode(attribute.asNode()) : this;
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Identity ? new DefinitionNode(attribute.asNode()) : this;
     }
 
     @Override

@@ -18,27 +18,27 @@ import java.util.Objects;
 public abstract class Definition extends AbstractNode {
     protected final List<Flag> flags;
     protected final Input name;
-    protected final Type type;
+    protected final Type category;
 
-    public Definition(List<Flag> flags, Input name, Type type) {
+    public Definition(List<Flag> flags, Input name, Type category) {
         this.flags = flags;
         this.name = name;
-        this.type = type;
+        this.category = category;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Name -> new InputAttribute(name);
             case Flags -> new FlagsAttribute(flags);
-            case Type -> new TypeAttribute(this.type);
-            default -> throw new AttributeException(this, type);
+            case Type -> new TypeAttribute(this.category);
+            default -> throw new AttributeException(this, category);
         };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        if (type == Attribute.Type.Name) {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        if (category == Attribute.Category.Name) {
             Input input;
             try {
                 input = attribute.asInput();
@@ -47,9 +47,9 @@ public abstract class Definition extends AbstractNode {
                 input = new RootText(attribute.asOutput().compute());
             }
 
-            return complete(input, this.type);
+            return complete(input, this.category);
         }
-        if (type == Attribute.Type.Type) {
+        if (category == Attribute.Category.Type) {
             return complete(name, attribute.asType());
         }
         return this;
@@ -64,20 +64,20 @@ public abstract class Definition extends AbstractNode {
                     .build();
             return new ObjectNode()
                     .addString("name", name.toOutput().compute())
-                    .addJSONable("type", type)
+                    .addJSONable("category", category)
                     .addObject("flags", flags);
         } catch (StreamException e) {
             return new ObjectNode();
         }
     }
 
-    protected abstract Definition complete(Input name, Type type) throws AttributeException;
+    protected abstract Definition complete(Input name, Type category) throws AttributeException;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Definition definition)) return false;
-        return Objects.equals(flags, definition.flags) && Objects.equals(name, definition.name) && Objects.equals(type, definition.type);
+        return Objects.equals(flags, definition.flags) && Objects.equals(name, definition.name) && Objects.equals(category, definition.category);
     }
 
     public enum Flag {

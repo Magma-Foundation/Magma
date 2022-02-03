@@ -54,7 +54,7 @@ public interface Attribute {
         return fail("a type");
     }
 
-    enum Type {
+    enum Category {
         Arguments, Bits, Caller, Children,
         Fields, Flags, Identity, Name,
         Operator, Parameters, Sign, Type,

@@ -54,7 +54,7 @@ public final class CMagmaCompiler {
         var cRenderer = new CRenderer();
         return divider.apply(format)
                 .map(cRenderer::transformNodeAST)
-                .map(value -> value.apply(Attribute.Type.Value))
+                .map(value -> value.apply(Attribute.Category.Value))
                 .map(Attribute::asOutput)
                 .map(Output::computeRaw)
                 .foldRight(new StringBuilder(), StringBuilder::append)

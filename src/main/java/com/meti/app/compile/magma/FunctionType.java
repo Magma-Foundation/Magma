@@ -17,36 +17,36 @@ public record FunctionType(Node returns, List<Node> parameters) implements Type 
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Type -> Streams.apply(Attribute.Type.Type);
-            case Types -> Streams.apply(Attribute.Type.Parameters);
+            case Type -> Streams.apply(Attribute.Category.Type);
+            case Types -> Streams.apply(Attribute.Category.Parameters);
             default -> Streams.empty();
         };
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Function;
+        return category == Node.Category.Function;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Type -> new NodeAttribute(returns);
             case Parameters -> new NodesAttribute(parameters);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Type -> new FunctionType(attribute.asNode(), parameters);
                 case Parameters -> new FunctionType(returns, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
-                default -> throw new AttributeException(type);
+                default -> throw new AttributeException(category);
             };
         } catch (StreamException e) {
             return this;

@@ -15,7 +15,7 @@ class DeclarationTest {
         var expected = """
                 {
                 \t"name" : "test",
-                \t"type" : {
+                \t"category" : {
                 \t\t"bits" : 16,
                 \t\t"signed" : true
                 \t},

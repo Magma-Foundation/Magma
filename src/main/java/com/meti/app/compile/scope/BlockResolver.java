@@ -16,7 +16,7 @@ public record BlockResolver(Node node, StreamStage parent) implements Processor<
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Category.Block)) {
             try {
-                var children = node.apply(Attribute.Type.Children)
+                var children = node.apply(Attribute.Category.Children)
                         .asStreamOfNodes()
                         .filter(value -> value.is(Node.Category.Return))
                         .foldRight(List.<Node>createList(), List::add);

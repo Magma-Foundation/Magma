@@ -15,11 +15,11 @@ public class FunctionTypeRenderer extends OutputRenderer {
     @Override
     protected Output processImpl() throws CompileException {
         try {
-            var name = identity.apply(Attribute.Type.Name).asInput();
-            var returns = identity.apply(Attribute.Type.Type).asOutput();
-            var parameters = identity.apply(Attribute.Type.Parameters)
+            var name = identity.apply(Attribute.Category.Name).asInput();
+            var returns = identity.apply(Attribute.Category.Type).asOutput();
+            var parameters = identity.apply(Attribute.Category.Parameters)
                     .asStreamOfNodes()
-                    .map(value -> value.apply(Attribute.Type.Value))
+                    .map(value -> value.apply(Attribute.Category.Value))
                     .map(Attribute::asOutput)
                     .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))
                     .map(value -> value.prepend("(").appendSlice(")"))

@@ -13,13 +13,13 @@ public class PrimitiveTypeRenderer extends OutputRenderer {
 
     @Override
     protected Output processImpl() throws AttributeException {
-        var type = identity.apply(Attribute.Type.Type)
+        var type = identity.apply(Attribute.Category.Type)
                 .asType()
-                .apply(Attribute.Type.Name)
+                .apply(Attribute.Category.Name)
                 .asOutput()
                 .map(String::toLowerCase);
 
-        var name = identity.apply(Attribute.Type.Name).asInput().toOutput();
+        var name = identity.apply(Attribute.Category.Name).asInput().toOutput();
         return type.appendSlice(" ").appendOutput(name);
     }
 }

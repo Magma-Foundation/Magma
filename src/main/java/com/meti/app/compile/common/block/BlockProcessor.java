@@ -16,9 +16,9 @@ public record BlockProcessor(Node node) implements Processor<Output> {
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Block)) {
             try {
-                var output = node.apply(Attribute.Type.Children)
+                var output = node.apply(Attribute.Category.Children)
                         .asStreamOfNodes()
-                        .map(child -> child.apply(Attribute.Type.Value))
+                        .map(child -> child.apply(Attribute.Category.Value))
                         .map(Attribute::asOutput)
                         .foldRight(Output::appendOutput)
                         .map(value -> value.prepend("{").appendSlice("}"))

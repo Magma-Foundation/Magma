@@ -16,8 +16,8 @@ public record CacheBuilder<T>(T value, List<Node> items) {
     public static CacheBuilder<Node> apply(Node root) {
         if (root.is(Node.Category.Cache)) {
             try {
-                var value = root.apply(Attribute.Type.Value).asNode();
-                var children = root.apply(Attribute.Type.Children)
+                var value = root.apply(Attribute.Category.Value).asNode();
+                var children = root.apply(Attribute.Category.Children)
                         .asStreamOfNodes()
                         .foldRight(List.<Node>createList(), List::add);
                 return new CacheBuilder<>(value, children);

@@ -32,25 +32,25 @@ public final class Block extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Nodes
-                ? Streams.apply(Attribute.Type.Children)
+                ? Streams.apply(Attribute.Category.Children)
                 : Streams.empty();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Block;
+        return category == Node.Category.Block;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new NodesAttribute(children);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Children) return new NodesAttribute(children);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
             return attribute.asStreamOfNodes()
                     .foldRight(new Builder(), Builder::add)

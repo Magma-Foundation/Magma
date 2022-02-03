@@ -22,8 +22,8 @@ class LambdaFormatter implements Processor<Node> {
     @Override
     public Option<Node> process() throws CompileException {
         if (node.is(Node.Category.Abstraction) || node.is(Node.Category.Implementation)) {
-            var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
-            var oldName = oldIdentity.apply(Attribute.Type.Name).asInput();
+            var oldIdentity = node.apply(Attribute.Category.Identity).asNode();
+            var oldName = oldIdentity.apply(Attribute.Category.Name).asInput();
             Input newName;
             if (oldName.isEmpty()) {
                 counter++;
@@ -31,8 +31,8 @@ class LambdaFormatter implements Processor<Node> {
             } else {
                 newName = oldName;
             }
-            var newIdentity = oldIdentity.with(Attribute.Type.Name, new InputAttribute(newName));
-            return new Some<>(node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity)));
+            var newIdentity = oldIdentity.with(Attribute.Category.Name, new InputAttribute(newName));
+            return new Some<>(node.with(Attribute.Category.Identity, new NodeAttribute(newIdentity)));
         } else {
             return new None<>();
         }

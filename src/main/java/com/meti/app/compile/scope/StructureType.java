@@ -16,14 +16,14 @@ public final class StructureType extends AbstractNode {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new InputAttribute(name);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Name) return new InputAttribute(name);
+        throw new AttributeException(category);
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Structure;
+        return category == com.meti.app.compile.node.Node.Category.Structure;
     }
 
     @Override

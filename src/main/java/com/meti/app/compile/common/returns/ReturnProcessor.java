@@ -13,8 +13,8 @@ public record ReturnProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Return)) {
-            var child = node.apply(Attribute.Type.Value).asNode();
-            var renderedChild = child.apply(Attribute.Type.Value).asOutput();
+            var child = node.apply(Attribute.Category.Value).asNode();
+            var renderedChild = child.apply(Attribute.Category.Value).asOutput();
             return new Some<>(renderedChild.prepend("return ").appendSlice(";"));
         }
         return new None<>();

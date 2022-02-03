@@ -28,7 +28,7 @@ public record BlockTransformer(Node root) implements Processor<Node> {
 
     private static Node transformBlock(Node root) throws CompileException {
         try {
-            return root.apply(Attribute.Type.Children)
+            return root.apply(Attribute.Category.Children)
                     .asStreamOfNodes()
                     .map(BlockTransformer::transformInContext)
                     .foldRight(new Block.Builder(), Block.Builder::add)
@@ -44,11 +44,11 @@ public record BlockTransformer(Node root) implements Processor<Node> {
         }
         if (oldChild.is(Node.Category.Binary) || oldChild.is(Node.Category.Invocation)) return new Line(oldChild);
         if (oldChild.is(Node.Category.If)) {
-            var value = oldChild.apply(Attribute.Type.Value).asNode();
+            var value = oldChild.apply(Attribute.Category.Value).asNode();
             if (value.is(Node.Category.Block)) {
                 return oldChild;
             } else {
-                return oldChild.with(Attribute.Type.Value, new NodeAttribute(new Line(value)));
+                return oldChild.with(Attribute.Category.Value, new NodeAttribute(new Line(value)));
             }
         }
         return oldChild;

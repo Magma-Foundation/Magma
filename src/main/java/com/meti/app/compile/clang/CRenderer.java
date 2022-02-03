@@ -28,7 +28,7 @@ public final class CRenderer extends AfterStreamStage {
     @Override
     protected Node beforeDefinitionTraversal(Node definition) throws CompileException {
         if (definition.is(Node.Category.Initialization)) {
-            return definition.mapAsNode(Attribute.Type.Value, this::transformNodeAST);
+            return definition.mapAsNode(Attribute.Category.Value, this::transformNodeAST);
         } else if (definition.is(Node.Category.Declaration)) {
             return definition;
         } else {

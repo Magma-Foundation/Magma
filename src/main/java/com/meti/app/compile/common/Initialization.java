@@ -28,20 +28,20 @@ public class Initialization extends Definition {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return type == Attribute.Type.Value ? new NodeAttribute(value) : super.apply(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return category == Attribute.Category.Value ? new NodeAttribute(value) : super.apply(category);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : Streams.empty();
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Node ? Streams.apply(Attribute.Category.Value) : Streams.empty();
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value
                 ? new Initialization(name, this.type, attribute.asNode(), flags)
-                : super.with(type, attribute);
+                : super.with(category, attribute);
     }
 
     @Override
@@ -51,6 +51,6 @@ public class Initialization extends Definition {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Initialization;
+        return category == Node.Category.Initialization;
     }
 }

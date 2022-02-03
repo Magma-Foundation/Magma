@@ -11,7 +11,7 @@ import com.meti.app.compile.stage.CompileException;
 
 public record BooleanResolver(Node node) implements Processor<Node> {
     public Option<Node> process() throws CompileException {
-        if (node.is(Node.Category.Primitive) && node.apply(Attribute.Type.Name)
+        if (node.is(Node.Category.Primitive) && node.apply(Attribute.Category.Name)
                 .asInput()
                 .toOutput()
                 .compute()

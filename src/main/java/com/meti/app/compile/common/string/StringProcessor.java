@@ -14,7 +14,7 @@ public record StringProcessor(Node node) implements Processor<Output> {
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.String)) {
             return new Some<>(node
-                    .apply(Attribute.Type.Value)
+                    .apply(Attribute.Category.Value)
                     .asInput()
                     .toOutput());
         } else {

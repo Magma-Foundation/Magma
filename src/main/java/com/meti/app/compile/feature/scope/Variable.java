@@ -24,14 +24,14 @@ public final class Variable extends AbstractNode {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new InputAttribute(value);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new InputAttribute(value);
+        throw new AttributeException(category);
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Variable;
+        return category == Node.Category.Variable;
     }
 
     @Override
@@ -43,8 +43,8 @@ public final class Variable extends AbstractNode {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value
                 ? new Variable(attribute.asInput())
                 : this;
     }

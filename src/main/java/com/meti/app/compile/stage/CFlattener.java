@@ -15,15 +15,15 @@ public class CFlattener extends AbstractStage {
     protected Node afterTraversal(Node root) throws CompileException {
         try {
             if (root.is(Node.Category.Cache)) {
-                var innerCache = root.apply(Attribute.Type.Value).asNode();
-                var withChildren = root.apply(Attribute.Type.Children)
+                var innerCache = root.apply(Attribute.Category.Value).asNode();
+                var withChildren = root.apply(Attribute.Category.Children)
                         .asStreamOfNodes()
                         .map(this::flattenCache)
                         .flatMap(List::stream)
                         .foldRight(List.<Node>createList(), List::add);
                 if (innerCache.is(Node.Category.Cache)) {
-                    var innerValue = innerCache.apply(Attribute.Type.Value).asNode();
-                    var withSubChildren = innerCache.apply(Attribute.Type.Children)
+                    var innerValue = innerCache.apply(Attribute.Category.Value).asNode();
+                    var withSubChildren = innerCache.apply(Attribute.Category.Children)
                             .asStreamOfNodes()
                             .foldRight(withChildren, List::add);
                     return new Cache(innerValue, withSubChildren);
@@ -43,8 +43,8 @@ public class CFlattener extends AbstractStage {
 
     private List<Node> flattenCache(Node parent) throws AttributeException, StreamException {
         if (parent.is(Node.Category.Cache)) {
-            var value = parent.apply(Attribute.Type.Value).asNode();
-            return parent.apply(Attribute.Type.Children)
+            var value = parent.apply(Attribute.Category.Value).asNode();
+            return parent.apply(Attribute.Category.Children)
                     .asStreamOfNodes()
                     .foldRight(List.apply(value), List::add);
         } else {
@@ -68,18 +68,18 @@ public class CFlattener extends AbstractStage {
         }
     }
 
-    private CacheBuilder<Node> attachChildren(Node root, CacheBuilder<Node> previous, Attribute.Type type) throws CompileException {
+    private CacheBuilder<Node> attachChildren(Node root, CacheBuilder<Node> previous, Attribute.Category category) throws CompileException {
         try {
-            var builder = flattenChildren(root, type);
+            var builder = flattenChildren(root, category);
             var other = builder.map(NodesAttribute::new);
-            return previous.append(other, (current, children) -> current.with(type, children));
+            return previous.append(other, (current, children) -> current.with(category, children));
         } catch (StreamException | AttributeException e) {
             throw new CompileException(e);
         }
     }
 
-    private CacheBuilder<List<Node>> flattenChildren(Node root, Attribute.Type type) throws StreamException, AttributeException {
-        return root.apply(type)
+    private CacheBuilder<List<Node>> flattenChildren(Node root, Attribute.Category category) throws StreamException, AttributeException {
+        return root.apply(category)
                 .asStreamOfNodes()
                 .map(CacheBuilder::apply)
                 .foldRight(new CacheBuilder<>(List.createList()),

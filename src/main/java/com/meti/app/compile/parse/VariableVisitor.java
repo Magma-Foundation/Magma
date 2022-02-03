@@ -16,7 +16,7 @@ public class VariableVisitor extends AbstractParser {
 
     @Override
     protected State modifyBeforeASTImpl() throws CompileException {
-        var value = state.getCurrent().apply(Attribute.Type.Value).asInput();
+        var value = state.getCurrent().apply(Attribute.Category.Value).asInput();
         var format = value.toOutput().compute();
         if (!state.getScope().isDefined(format)) {
             throw new CompileException("'%s' is not defined.".formatted(format));

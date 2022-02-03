@@ -26,15 +26,15 @@ public class ImplementationParser extends AbstractParser {
     @Override
     protected State modifyBeforeASTImpl() throws CompileException {
         var element = state.getCurrent();
-        var identity = element.apply(Attribute.Type.Identity).asNode();
-        var expectedType = identity.apply(Attribute.Type.Type).asType();
-        var value = element.apply(Attribute.Type.Value).asNode();
+        var identity = element.apply(Attribute.Category.Identity).asNode();
+        var expectedType = identity.apply(Attribute.Category.Type).asType();
+        var value = element.apply(Attribute.Category.Value).asNode();
 
         var assignableTypes = new MagmaResolver(value, state.getScope()).resolve();
         var typeToSet = isAssignableTo(expectedType, assignableTypes);
 
-        var newIdentity = identity.with(Attribute.Type.Type, new TypeAttribute(typeToSet));
-        var newElement = element.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+        var newIdentity = identity.with(Attribute.Category.Type, new TypeAttribute(typeToSet));
+        var newElement = element.with(Attribute.Category.Identity, new NodeAttribute(newIdentity));
         return state.apply(newElement);
     }
 
@@ -42,15 +42,15 @@ public class ImplementationParser extends AbstractParser {
     protected State onExitImpl() throws CompileException {
         try {
             var current = state.getCurrent();
-            var oldIdentity = current.apply(Attribute.Type.Identity).asNode();
-            var returnType = oldIdentity.apply(Attribute.Type.Type).asType();
-            var parameterTypes = current.apply(Attribute.Type.Parameters)
+            var oldIdentity = current.apply(Attribute.Category.Identity).asNode();
+            var returnType = oldIdentity.apply(Attribute.Category.Type).asType();
+            var parameterTypes = current.apply(Attribute.Category.Parameters)
                     .asStreamOfNodes()
-                    .map(parameter -> parameter.apply(Attribute.Type.Type))
+                    .map(parameter -> parameter.apply(Attribute.Category.Type))
                     .map(Attribute::asType)
                     .foldRight(List.<Node>createList(), List::add);
             var type = new FunctionType(returnType, parameterTypes);
-            var newIdentity = oldIdentity.with(Attribute.Type.Type, new TypeAttribute(type));
+            var newIdentity = oldIdentity.with(Attribute.Category.Type, new TypeAttribute(type));
             return state.mapScope(scope -> scope.define(newIdentity));
         } catch (StreamException e) {
             throw new CompileException(e);

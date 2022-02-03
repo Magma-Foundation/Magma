@@ -24,7 +24,7 @@ class FunctionLexerTest {
                 .process()
                 .orElse(EmptyNode_);
         var expected = new InputNode(new RootText("{return 0;}"));
-        var actual = output.apply(Attribute.Type.Value).asNode();
+        var actual = output.apply(Attribute.Category.Value).asNode();
         assertEquals(expected, actual);
     }
 

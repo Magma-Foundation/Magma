@@ -14,9 +14,9 @@ final class StructureRenderer extends AbstractProcessor<Node, Output> {
     }
 
     private String renderFields() throws StreamException, AttributeException {
-        return input.apply(Attribute.Type.Fields)
+        return input.apply(Attribute.Category.Fields)
                 .asStreamOfNodes()
-                .map(value -> value.apply(Attribute.Type.Value))
+                .map(value -> value.apply(Attribute.Category.Value))
                 .map(Attribute::asOutput)
                 .map(Output::compute)
                 .map(value -> value + ";")
@@ -37,7 +37,7 @@ final class StructureRenderer extends AbstractProcessor<Node, Output> {
     }
 
     private Output renderName() throws AttributeException {
-        return input.apply(Attribute.Type.Name)
+        return input.apply(Attribute.Category.Name)
                 .asInput()
                 .toOutput();
     }

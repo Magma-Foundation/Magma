@@ -24,23 +24,23 @@ public final class Line extends AbstractNode {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value ? new Line(attribute.asNode()) : this;
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value ? new Line(attribute.asNode()) : this;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new NodeAttribute(node);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new NodeAttribute(node);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Node ? Streams.apply(Attribute.Type.Value) : Streams.empty();
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Node ? Streams.apply(Attribute.Category.Value) : Streams.empty();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Line;
+        return category == Node.Category.Line;
     }
 }

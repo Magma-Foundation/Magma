@@ -21,25 +21,25 @@ public final class Return extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
-                ? Streams.apply(Attribute.Type.Value)
+                ? Streams.apply(Attribute.Category.Value)
                 : Streams.empty();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Return;
+        return category == Node.Category.Return;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new NodeAttribute(value);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new NodeAttribute(value);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         return new Return(attribute.asNode());
     }
 

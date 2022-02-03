@@ -34,15 +34,15 @@ public final class IntegerType extends AbstractNode implements Type {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Integer;
+        return category == com.meti.app.compile.node.Node.Category.Integer;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Sign -> new BooleanAttribute(signed);
             case Bits -> new IntegerAttribute(bits);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 

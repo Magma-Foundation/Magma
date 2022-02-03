@@ -23,13 +23,13 @@ public class Union extends AbstractNode implements Type {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Union;
+        return category == Node.Category.Union;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Children) return new TypesAttribute(options);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Children) return new TypesAttribute(options);
+        throw new AttributeException(category);
     }
 
     @Override

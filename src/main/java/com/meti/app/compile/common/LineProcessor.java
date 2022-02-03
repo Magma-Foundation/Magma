@@ -13,9 +13,9 @@ public record LineProcessor(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Line)) {
-            return new Some<>(node.apply(Attribute.Type.Value)
+            return new Some<>(node.apply(Attribute.Category.Value)
                     .asNode()
-                    .apply(Attribute.Type.Value)
+                    .apply(Attribute.Category.Value)
                     .asOutput()
                     .appendSlice(";"));
         } else {

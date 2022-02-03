@@ -28,32 +28,32 @@ public final class Cache extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Streams.apply(Attribute.Type.Value);
-            case Nodes -> Streams.apply(Attribute.Type.Children);
+            case Node -> Streams.apply(Attribute.Category.Value);
+            case Nodes -> Streams.apply(Attribute.Category.Children);
             default -> Streams.empty();
         };
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Cache;
+        return category == Node.Category.Cache;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Value -> new NodeAttribute(value);
             case Children -> new NodesAttribute(children);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Value -> new Cache(attribute.asNode(), children);
                 case Children -> new Cache(value, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));

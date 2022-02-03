@@ -26,19 +26,19 @@ public abstract class Function extends AbstractNode {
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Identity -> new NodeAttribute(identity);
             case Parameters -> new NodesAttribute(parameters);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Definitions -> Streams.apply(Attribute.Type.Parameters);
-            case Definition -> Streams.apply(Attribute.Type.Identity);
+            case Definitions -> Streams.apply(Attribute.Category.Parameters);
+            case Definition -> Streams.apply(Attribute.Category.Identity);
             default -> Streams.empty();
         };
     }
@@ -62,13 +62,13 @@ public abstract class Function extends AbstractNode {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Identity -> complete(attribute.asNode(), parameters);
                 case Parameters -> complete(identity, attribute.asStreamOfNodes()
                         .foldRight(List.createList(), List::add));
-                default -> throw new AttributeException(type);
+                default -> throw new AttributeException(category);
             };
         } catch (StreamException e) {
             throw new AttributeException(e);

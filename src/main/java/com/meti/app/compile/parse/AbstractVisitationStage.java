@@ -55,14 +55,14 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
     protected static State parseField(State state) throws CompileException {
         var definition = state.getCurrent();
-        var name = definition.apply(Attribute.Type.Name).asInput().toOutput().compute();
+        var name = definition.apply(Attribute.Category.Name).asInput().toOutput().compute();
         if (state.getScope().isDefined(name)) {
             throw new CompileException("'" + name + "' is already defined.");
         } else if (definition.is(Node.Category.Initialization)) {
-            var value = definition.apply(Attribute.Type.Value).asNode();
+            var value = definition.apply(Attribute.Category.Value).asNode();
             var actualType = new MagmaResolver(value, state.getScope()).resolve();
 
-            var expectedType = definition.apply(Attribute.Type.Type).asType();
+            var expectedType = definition.apply(Attribute.Category.Type).asType();
 
                 /*
                 Check for potential implicit conversions here...
@@ -78,7 +78,7 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
                 throw new CompileException(message);
             }
 
-            var newIdentity = definition.with(Attribute.Type.Type, new TypeAttribute(typeToDefine));
+            var newIdentity = definition.with(Attribute.Category.Type, new TypeAttribute(typeToDefine));
 
             return state.apply(newIdentity);
         } else {

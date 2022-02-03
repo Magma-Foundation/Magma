@@ -14,13 +14,13 @@ public enum Primitive implements Type {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Primitive;
+        return category == com.meti.app.compile.node.Node.Category.Primitive;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Name) return new InputAttribute(new RootText(name()));
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Name) return new InputAttribute(new RootText(name()));
+        throw new AttributeException(category);
     }
 
     @Override

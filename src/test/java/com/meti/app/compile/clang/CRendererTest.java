@@ -11,7 +11,7 @@ class CRendererTest {
     @Test
     void variable() throws CompileException {
         var output = new CRenderer().transformNodeAST(new Variable("test"))
-                .apply(Attribute.Type.Value)
+                .apply(Attribute.Category.Value)
                 .asOutput()
                 .compute();
         assertEquals("test", output);

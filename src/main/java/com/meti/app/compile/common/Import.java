@@ -12,28 +12,28 @@ import java.util.stream.Stream;
 
 public record Import(Packaging packaging_) implements Node {
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new PackageAttribute(packaging_);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new PackageAttribute(packaging_);
+        throw new AttributeException(category);
     }
 
     @Deprecated
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Category> apply2(Attribute.Group group) throws AttributeException {
         return Stream.empty();
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Import;
+        return category == Node.Category.Import;
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         return new Import(attribute.asPackaging());
     }
 }

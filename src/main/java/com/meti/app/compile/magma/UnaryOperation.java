@@ -11,29 +11,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record UnaryOperation(Node caller, Node callee) implements Node {
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Category> apply2(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Caller, Attribute.Type.Arguments)
+                ? Stream.of(Attribute.Category.Caller, Attribute.Category.Arguments)
                 : Stream.empty();
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Caller -> new NodeAttribute(caller);
             case Arguments -> new NodeAttribute(callee);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Unary;
+        return category == Node.Category.Unary;
     }
 
     @Override
@@ -42,8 +42,8 @@ public record UnaryOperation(Node caller, Node callee) implements Node {
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return switch (type) {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return switch (category) {
             case Caller -> new UnaryOperation(attribute.asNode(), callee);
             case Arguments -> new UnaryOperation(caller, attribute.asNode());
             default -> this;

@@ -18,7 +18,7 @@ public final class VariableProcessor extends AbstractProcessor<Node, Output> {
 
     @Override
     protected Output createNode() throws AttributeException {
-        return input.apply(Attribute.Type.Value)
+        return input.apply(Attribute.Category.Value)
                 .asInput()
                 .toOutput();
     }

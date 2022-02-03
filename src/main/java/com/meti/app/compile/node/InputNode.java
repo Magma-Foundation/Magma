@@ -30,13 +30,13 @@ public class InputNode extends AbstractNode {
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Input;
+        return category == Node.Category.Input;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new InputAttribute(input);
-        throw new AttributeException(this, type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new InputAttribute(input);
+        throw new AttributeException(this, category);
     }
 
     @Override

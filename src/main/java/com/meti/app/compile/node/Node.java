@@ -10,27 +10,27 @@ import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.node.attribute.NodeAttribute;
 
 public interface Node extends JSONable {
-    default Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    default Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return Streams.empty();
     }
 
     boolean is(Category category);
 
-    default <E extends Exception> Node mapAsNode(Attribute.Type type, F1<Node, Node, E> mapper) throws E, AttributeException {
-        var input = apply(type).asNode();
+    default <E extends Exception> Node mapAsNode(Attribute.Category category, F1<Node, Node, E> mapper) throws E, AttributeException {
+        var input = apply(category).asNode();
         var output = mapper.apply(input);
-        return with(type, new NodeAttribute(output));
+        return with(category, new NodeAttribute(output));
     }
 
-    default Attribute apply(Attribute.Type type) throws AttributeException {
+    default Attribute apply(Attribute.Category category) throws AttributeException {
         var format = "Node instance of '%s' has no attributes.";
         var message = format.formatted(getClass());
         throw new AttributeException(message);
     }
 
-    default Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    default Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         var format = "Node does not have attribute to replace of: %s";
-        var message = format.formatted(type);
+        var message = format.formatted(category);
         throw new AttributeException(message);
     }
 

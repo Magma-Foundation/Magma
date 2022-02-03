@@ -29,9 +29,9 @@ public record FunctionTransformer(Node oldNode) implements Processor<Node> {
 
     private boolean isExternal() {
         try {
-            return oldNode.apply(Attribute.Type.Identity)
+            return oldNode.apply(Attribute.Category.Identity)
                     .asNode()
-                    .apply(Attribute.Type.Flags)
+                    .apply(Attribute.Category.Flags)
                     .asStreamOfFlags()
                     .foldRight(List.createList(), List::add)
                     .contains(Definition.Flag.Extern);
@@ -42,12 +42,12 @@ public record FunctionTransformer(Node oldNode) implements Processor<Node> {
 
     private Node transformFunction() throws CompileException {
         try {
-            var identity = oldNode.apply(Attribute.Type.Identity).asNode();
+            var identity = oldNode.apply(Attribute.Category.Identity).asNode();
             Node function;
-            if (identity.apply(Attribute.Type.Flags)
+            if (identity.apply(Attribute.Category.Flags)
                         .asStreamOfFlags()
                         .count() == 0) {
-                var name = identity.apply(Attribute.Type.Name).asInput();
+                var name = identity.apply(Attribute.Category.Name).asInput();
                 function = new Cache(new Variable(name), oldNode);
             } else {
                 function = oldNode;

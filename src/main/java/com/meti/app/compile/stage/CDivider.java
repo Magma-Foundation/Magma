@@ -83,8 +83,8 @@ public class CDivider extends MappedDivider {
 
     private List<Node> decomposeCache(Node node) throws CompileException {
         try {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            return node.apply(Attribute.Type.Children)
+            var value = node.apply(Attribute.Category.Value).asNode();
+            return node.apply(Attribute.Category.Children)
                     .asStreamOfNodes()
                     .map(this::decompose)
                     .map(option -> option.orElse(List.createList()))
@@ -97,8 +97,8 @@ public class CDivider extends MappedDivider {
 
     private List<Node> decomposeImplementation(Node node) throws CompileException {
         try {
-            var identity = node.apply(Attribute.Type.Identity).asNode();
-            var parameters = node.apply(Attribute.Type.Parameters)
+            var identity = node.apply(Attribute.Category.Identity).asNode();
+            var parameters = node.apply(Attribute.Category.Parameters)
                     .asStreamOfNodes()
                     .foldRight(List.<Node>createList(), List::add);
             var abstraction = new Abstraction(identity, parameters);

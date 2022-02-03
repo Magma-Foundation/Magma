@@ -19,7 +19,7 @@ public abstract class AbstractTypeRenderer<T> implements Processor<Node> {
 
     @Override
     public Option<Node> process() throws CompileException {
-        return identity.apply(Attribute.Type.Type).asType().is(category)
+        return identity.apply(Attribute.Category.Type).asType().is(category)
                 ? new Some<>(toNode(processImpl()))
                 : new None<>();
     }

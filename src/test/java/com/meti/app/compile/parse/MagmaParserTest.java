@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MagmaParserTest {
     @Test
     void redefined_after_blocks() throws CompileException, StreamException {
-        var type = new IntegerType(true, 16);
+        var category = new IntegerType(true, 16);
         var value = new IntegerNode(100);
-        var identity = new Initialization("x", type, value);
+        var identity = new Initialization("x", category, value);
         var definition = new DefinitionNode(identity);
 
         var input = List.apply(new Block(definition), definition);
@@ -33,9 +33,9 @@ class MagmaParserTest {
 
     @Test
     void redefined_inside_blocks() {
-        var type = new IntegerType(true, 16);
+        var category = new IntegerType(true, 16);
         var value = new IntegerNode(100);
-        var identity = new Initialization("x", type, value);
+        var identity = new Initialization("x", category, value);
         var definition = new DefinitionNode(identity);
 
         var input = List.apply(definition, new Block(definition));

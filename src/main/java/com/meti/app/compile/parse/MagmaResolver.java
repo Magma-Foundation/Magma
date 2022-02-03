@@ -14,11 +14,11 @@ import com.meti.app.compile.stage.CompileException;
 public record MagmaResolver(Node root, Scope scope) {
     public Type resolve() throws CompileException {
         if (root.is(Node.Category.Variable)) {
-            var variableName = root.apply(Attribute.Type.Value).asInput()
+            var variableName = root.apply(Attribute.Category.Value).asInput()
                     .toOutput()
                     .compute();
             return scope.lookup(variableName)
-                    .map(node -> node.apply(Attribute.Type.Type).asType())
+                    .map(node -> node.apply(Attribute.Category.Type).asType())
                     .orElseThrow(() -> {
                         var format = "'%s' is not defined.";
                         var message = format.formatted(variableName);
@@ -28,7 +28,7 @@ public record MagmaResolver(Node root, Scope scope) {
             return Primitive.Bool;
         } else if (root.is(Node.Category.Integer)) {
             var unformatted = List.<Type>apply(new IntegerType(true, 16));
-            var value = root.apply(Attribute.Type.Value).asInteger();
+            var value = root.apply(Attribute.Category.Value).asInteger();
 
             List<Type> formatted;
             if (value >= 0) {
@@ -39,11 +39,11 @@ public record MagmaResolver(Node root, Scope scope) {
 
             return new Union(formatted.add(new ReferenceType(Primitive.Void)));
         } else if (root.is(Node.Category.Return)) {
-            var innerValue = root.apply(Attribute.Type.Value).asNode();
+            var innerValue = root.apply(Attribute.Category.Value).asNode();
             return new MagmaResolver(innerValue, scope).resolve();
         } else if (root.is(Node.Category.Block)) {
             try {
-                return root.apply(Attribute.Type.Children)
+                return root.apply(Attribute.Category.Children)
                         .asStreamOfNodes()
                         .foldRight(List.<Node>createList(), List::add)
                         .last()
@@ -53,7 +53,7 @@ public record MagmaResolver(Node root, Scope scope) {
                 throw new CompileException(e);
             }
         } else {
-            throw new CompileException("Cannot resolve type of node: " + root);
+            throw new CompileException("Cannot resolve category of node: " + root);
         }
     }
 }

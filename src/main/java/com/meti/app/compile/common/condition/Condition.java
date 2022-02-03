@@ -11,23 +11,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Condition(Category category, Node state, Node body) implements Node {
-    private Stream<Attribute.Type> apply2(Attribute.Group group) throws AttributeException {
+    private Stream<Attribute.Category> apply2(Attribute.Group group) throws AttributeException {
         return group == Attribute.Group.Node
-                ? Stream.of(Attribute.Type.Arguments, Attribute.Type.Value)
+                ? Stream.of(Attribute.Category.Arguments, Attribute.Category.Value)
                 : Stream.empty();
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Arguments -> new NodeAttribute(state);
             case Value -> new NodeAttribute(body);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public com.meti.api.collect.stream.Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public com.meti.api.collect.stream.Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return List.createList(apply2(group).collect(Collectors.toList())).stream();
     }
 
@@ -42,8 +42,8 @@ public record Condition(Category category, Node state, Node body) implements Nod
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return switch (type) {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return switch (category) {
             case Arguments -> new Condition(this.category, attribute.asNode(), body);
             case Value -> new Condition(this.category, state, attribute.asNode());
             default -> this;

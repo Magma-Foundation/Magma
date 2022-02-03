@@ -16,13 +16,13 @@ public record FunctionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws CompileException {
         if (node.is(Node.Category.Abstraction) || node.is(Node.Category.Implementation)) {
-            var identity = node.apply(Attribute.Type.Identity).asNode();
-            var renderedIdentity = identity.apply(Attribute.Type.Value).asOutput();
+            var identity = node.apply(Attribute.Category.Identity).asNode();
+            var renderedIdentity = identity.apply(Attribute.Category.Value).asOutput();
 
             try {
-                var parameters = node.apply(Attribute.Type.Parameters)
+                var parameters = node.apply(Attribute.Category.Parameters)
                         .asStreamOfNodes()
-                        .map(value -> value.apply(Attribute.Type.Value))
+                        .map(value -> value.apply(Attribute.Category.Value))
                         .map(Attribute::asOutput)
                         .foldRight((current, next) -> current.appendSlice(",").appendOutput(next))
                         .map(value -> value.prepend("(").appendSlice(")"))
@@ -41,8 +41,8 @@ public record FunctionRenderer(Node node) implements Processor<Output> {
 
     private Output attachValue(Output withIdentity) throws AttributeException {
         if (node.is(Node.Category.Implementation)) {
-            var value = node.apply(Attribute.Type.Value).asNode();
-            var renderedValue = value.apply(Attribute.Type.Value).asOutput();
+            var value = node.apply(Attribute.Category.Value).asNode();
+            var renderedValue = value.apply(Attribute.Category.Value).asOutput();
             return withIdentity.appendOutput(renderedValue);
         } else {
             return withIdentity.appendSlice(";");

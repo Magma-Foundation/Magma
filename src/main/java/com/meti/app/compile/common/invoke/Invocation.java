@@ -32,32 +32,32 @@ public final class Invocation extends AbstractNode {
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Streams.apply(Attribute.Type.Caller);
-            case Nodes -> Streams.apply(Attribute.Type.Arguments);
+            case Node -> Streams.apply(Attribute.Category.Caller);
+            case Nodes -> Streams.apply(Attribute.Category.Arguments);
             default -> Streams.empty();
         };
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Invocation;
+        return category == Node.Category.Invocation;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Caller -> new NodeAttribute(caller);
             case Arguments -> new NodesAttribute(arguments);
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Caller -> new Invocation(attribute.asNode(), arguments);
                 case Arguments -> new Invocation(caller, attribute
                         .asStreamOfNodes()

@@ -21,30 +21,30 @@ public class ReferenceType extends AbstractNode implements Type {
 
     @Override
     public boolean isAssignableTo(Type other) throws AttributeException {
-        if (!other.is(Category.Reference)) return false;
-        var inner = other.apply(Attribute.Type.Value).asType();
+        if (!other.is(Node.Category.Reference)) return false;
+        var inner = other.apply(Attribute.Category.Value).asType();
         return value.isAssignableTo(inner);
     }
 
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
-        return group == Attribute.Group.Type ? Streams.apply(Attribute.Type.Value) : Streams.empty();
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
+        return group == Attribute.Group.Type ? Streams.apply(Attribute.Category.Value) : Streams.empty();
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Reference;
+        return category == Node.Category.Reference;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new TypeAttribute(value);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new TypeAttribute(value);
+        throw new AttributeException(category);
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
-        return type == Attribute.Type.Value
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
+        return category == Attribute.Category.Value
                 ? new ReferenceType(attribute.asType())
                 : this;
     }

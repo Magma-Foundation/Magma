@@ -13,9 +13,9 @@ public record DefinitionRenderer(Node node) implements Processor<Output> {
     @Override
     public Option<Output> process() throws AttributeException {
         if (node.is(Node.Category.Declaration)) {
-            var text = node.apply(Attribute.Type.Identity)
+            var text = node.apply(Attribute.Category.Identity)
                     .asNode()
-                    .apply(Attribute.Type.Value)
+                    .apply(Attribute.Category.Value)
                     .asOutput();
             return new Some<>(text.appendSlice(";"));
         } else {

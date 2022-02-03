@@ -22,13 +22,13 @@ public class DefinitionResolver extends AbstractProcessor<Node, Node> {
 
     @Override
     protected Node createNode() throws CompileException {
-        var oldIdentity = node.apply(Attribute.Type.Identity).asNode();
-        var type = oldIdentity.apply(Attribute.Type.Type).asNode();
+        var oldIdentity = node.apply(Attribute.Category.Identity).asNode();
+        var type = oldIdentity.apply(Attribute.Category.Type).asNode();
         if (type.is(Node.Category.Implicit)) {
-            var value = oldIdentity.apply(Attribute.Type.Value).asNode();
+            var value = oldIdentity.apply(Attribute.Category.Value).asNode();
             var valueType = new MagmaTypeResolver().transformNodeAST(value);
-            var newIdentity = oldIdentity.with(Attribute.Type.Type, new NodeAttribute(valueType));
-            return node.with(Attribute.Type.Identity, new NodeAttribute(newIdentity));
+            var newIdentity = oldIdentity.with(Attribute.Category.Type, new NodeAttribute(valueType));
+            return node.with(Attribute.Category.Identity, new NodeAttribute(newIdentity));
         }
         return node;
     }

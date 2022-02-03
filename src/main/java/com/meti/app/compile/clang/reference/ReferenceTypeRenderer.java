@@ -14,15 +14,15 @@ public class ReferenceTypeRenderer extends NodeTypeRenderer {
 
     @Override
     protected Node processImpl() throws CompileException {
-        var name = identity.apply(Attribute.Type.Name)
+        var name = identity.apply(Attribute.Category.Name)
                 .asInput()
                 .toOutput()
                 .prepend("*");
         var innerType = identity
-                .apply(Attribute.Type.Type).asType()
-                .apply(Attribute.Type.Value).asType();
+                .apply(Attribute.Category.Type).asType()
+                .apply(Attribute.Category.Value).asType();
 
-        return identity.with(Attribute.Type.Name, new OutputAttribute(name))
-                .with(Attribute.Type.Type, new TypeAttribute(innerType));
+        return identity.with(Attribute.Category.Name, new OutputAttribute(name))
+                .with(Attribute.Category.Type, new TypeAttribute(innerType));
     }
 }

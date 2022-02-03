@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class CMagmaModificationStageTest {
     @Test
     void boolean_child() {
-        assertTransforms(new Return(Boolean.False), (F1<Node, java.lang.Boolean, ?>) node -> node.apply(Attribute.Type.Value)
+        assertTransforms(new Return(Boolean.False), (F1<Node, java.lang.Boolean, ?>) node -> node.apply(Attribute.Category.Value)
                 .asNode()
                 .is(Node.Category.Integer));
     }
@@ -44,7 +44,7 @@ class CMagmaModificationStageTest {
                 .add(Boolean.False)
                 .build();
         assertTransforms(input, (F1<Node, java.lang.Boolean, ?>) value -> {
-            var list = value.apply(Attribute.Type.Children)
+            var list = value.apply(Attribute.Category.Children)
                     .asStreamOfNodes()
                     .foldRight(List.<Node>createList(), List::add);
             return list.first().filter(first -> first.is(Node.Category.Integer)).isPresent() &&
@@ -56,8 +56,8 @@ class CMagmaModificationStageTest {
     void boolean_declared() {
         var oldIdentity = new Initialization(new RootText("test"), Primitive.Bool, Boolean.True, List.createList());
         assertTransforms(new DefinitionNode(oldIdentity), (F1<Node, java.lang.Boolean, ?>) newIdentity -> newIdentity
-                .apply(Attribute.Type.Identity).asNode()
-                .apply(Attribute.Type.Value).asNode()
+                .apply(Attribute.Category.Identity).asNode()
+                .apply(Attribute.Category.Value).asNode()
                 .is(Node.Category.Integer));
     }
 
@@ -70,7 +70,7 @@ class CMagmaModificationStageTest {
     void line() {
         assertTransforms(new Block.Builder()
                 .add(new BinaryOperation(new Variable("="), new IntegerNode(10), new IntegerNode(20)))
-                .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Type.Children).asStreamOfNodes()
+                .build(), (F1<Node, java.lang.Boolean, ?>) value -> value.apply(Attribute.Category.Children).asStreamOfNodes()
                 .first()
                 .filter(child -> child.is(Node.Category.Line))
                 .isPresent());

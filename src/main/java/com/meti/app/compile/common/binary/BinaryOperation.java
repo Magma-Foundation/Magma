@@ -15,32 +15,32 @@ import com.meti.app.compile.node.attribute.NodesAttribute;
 
 public record BinaryOperation(Node operator, Node first, Node second) implements Node {
     @Override
-    public Stream<Attribute.Type> apply(Attribute.Group group) throws AttributeException {
+    public Stream<Attribute.Category> apply(Attribute.Group group) throws AttributeException {
         return switch (group) {
-            case Node -> Streams.apply(Attribute.Type.Operator);
-            case Nodes -> Streams.apply(Attribute.Type.Arguments);
+            case Node -> Streams.apply(Attribute.Category.Operator);
+            case Nodes -> Streams.apply(Attribute.Category.Arguments);
             default -> Streams.empty();
         };
     }
 
     @Override
     public boolean is(Category category) {
-        return category == Category.Binary;
+        return category == Node.Category.Binary;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        return switch (type) {
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        return switch (category) {
             case Operator -> new NodeAttribute(operator);
             case Arguments -> new NodesAttribute(List.apply(first, second));
-            default -> throw new AttributeException(type);
+            default -> throw new AttributeException(category);
         };
     }
 
     @Override
-    public Node with(Attribute.Type type, Attribute attribute) throws AttributeException {
+    public Node with(Attribute.Category category, Attribute attribute) throws AttributeException {
         try {
-            return switch (type) {
+            return switch (category) {
                 case Operator -> new BinaryOperation(attribute.asNode(), first, second);
                 case Arguments -> {
                     var arguments = attribute.asStreamOfNodes()

@@ -10,13 +10,13 @@ import com.meti.app.compile.text.Output;
 public record OutputNode(Output output) implements Node {
     @Override
     public boolean is(Category category) {
-        return category == Category.Output;
+        return category == Node.Category.Output;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new OutputAttribute(output);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new OutputAttribute(output);
+        throw new AttributeException(category);
     }
 
     @Override

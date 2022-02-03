@@ -14,7 +14,7 @@ public record BooleanTransformer(Node node) implements Processor<Node> {
     public Option<Node> process() throws TransformationException {
         if (node.is(Node.Category.Boolean)) {
             try {
-                var value = node.apply(Attribute.Type.Value);
+                var value = node.apply(Attribute.Category.Value);
                 var state = value.asBoolean();
                 return new Some<>(new IntegerNode(state ? 1 : 0));
             } catch (AttributeException e) {

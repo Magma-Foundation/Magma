@@ -10,13 +10,13 @@ import com.meti.app.compile.node.attribute.IntegerAttribute;
 public record IntegerNode(int value) implements Node {
     @Override
     public boolean is(Category category) {
-        return category == Category.Integer;
+        return category == Node.Category.Integer;
     }
 
     @Override
-    public Attribute apply(Attribute.Type type) throws AttributeException {
-        if (type == Attribute.Type.Value) return new IntegerAttribute(value);
-        throw new AttributeException(type);
+    public Attribute apply(Attribute.Category category) throws AttributeException {
+        if (category == Attribute.Category.Value) return new IntegerAttribute(value);
+        throw new AttributeException(category);
     }
 
     @Override
