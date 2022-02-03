@@ -30,7 +30,7 @@ public final class MagmaParsingStage extends AbstractModificationStage implement
     public Stream<Modifier> streamVisitors(State state) {
         return Streams.apply(
                 new BinaryParser(state),
-                new BlockVisitor(state),
+                new BlockParser(state),
                 new BooleanParser(state),
                 new ImplementationParser(state),
                 new InvocationParser(state),
