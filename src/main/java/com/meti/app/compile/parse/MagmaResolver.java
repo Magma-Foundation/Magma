@@ -12,6 +12,10 @@ import com.meti.app.compile.primitive.Primitive;
 import com.meti.app.compile.stage.CompileException;
 
 public record MagmaResolver(Node root, Scope scope) {
+    public MagmaResolver(State state) {
+        this(state.getCurrent(), state.getScope());
+    }
+
     public Type resolve() throws CompileException {
         if (root.is(Node.Category.Variable)) {
             var variableName = root.apply(Attribute.Category.Value).asInput()
