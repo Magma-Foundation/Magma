@@ -80,9 +80,9 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
             var newIdentity = definition.with(Attribute.Type.Type, new TypeAttribute(typeToDefine));
 
-            return state.mapScope(scope -> scope.define(newIdentity)).apply(newIdentity);
+            return state.apply(newIdentity);
         } else {
-            return state.mapScope(scope -> scope.define(definition));
+            return state;
         }
     }
 
