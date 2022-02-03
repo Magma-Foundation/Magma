@@ -1,4 +1,4 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.feature.struct;
 
 import com.meti.app.compile.clang.stage.OutputRenderer;
 import com.meti.app.compile.node.Node;

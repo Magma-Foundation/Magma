@@ -1,4 +1,4 @@
-package com.meti.app.compile.clang;
+package com.meti.app.compile.clang.feature.function;
 
 import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
