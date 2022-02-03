@@ -4,7 +4,7 @@ import com.meti.api.collect.stream.StreamException;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.cache.Cache;
+import com.meti.app.compile.feature.util.Cache;
 import com.meti.app.compile.feature.util.Line;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.node.Node;

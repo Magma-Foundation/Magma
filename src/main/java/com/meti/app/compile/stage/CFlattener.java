@@ -2,8 +2,8 @@ package com.meti.app.compile.stage;
 
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.cache.Cache;
-import com.meti.app.compile.cache.CacheBuilder;
+import com.meti.app.compile.feature.util.Cache;
+import com.meti.app.compile.feature.util.CacheBuilder;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.node.attribute.Attribute;
 import com.meti.app.compile.node.attribute.AttributeException;

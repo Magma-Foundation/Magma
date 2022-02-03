@@ -3,7 +3,7 @@ package com.meti.app.compile.stage;
 import com.meti.api.collect.java.JavaList;
 import com.meti.api.collect.java.List;
 import com.meti.api.collect.stream.StreamException;
-import com.meti.app.compile.cache.Cache;
+import com.meti.app.compile.feature.util.Cache;
 import com.meti.app.compile.common.Fields;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;

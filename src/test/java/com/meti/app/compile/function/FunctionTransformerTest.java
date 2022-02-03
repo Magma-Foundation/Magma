@@ -1,7 +1,7 @@
 package com.meti.app.compile.function;
 
 import com.meti.api.collect.java.List;
-import com.meti.app.compile.cache.Cache;
+import com.meti.app.compile.feature.util.Cache;
 import com.meti.app.compile.common.Implementation;
 import com.meti.app.compile.common.block.Block;
 import com.meti.app.compile.feature.scope.Declaration;
