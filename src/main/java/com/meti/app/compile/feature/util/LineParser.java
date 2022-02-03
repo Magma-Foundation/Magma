@@ -3,7 +3,6 @@ package com.meti.app.compile.feature.util;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.parse.AbstractParser;
 import com.meti.app.compile.parse.State;
-import com.meti.app.compile.stage.CompileException;
 
 public class LineParser extends AbstractParser {
     public LineParser(State state) {
