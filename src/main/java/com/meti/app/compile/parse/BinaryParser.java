@@ -24,7 +24,7 @@ public class BinaryParser extends AbstractParser {
     }
 
     @Override
-    protected State onParseImpl() throws CompileException {
-        return super.onParseImpl();
+    protected State modifyBeforeASTImpl() throws CompileException {
+        return super.modifyBeforeASTImpl();
     }
 }

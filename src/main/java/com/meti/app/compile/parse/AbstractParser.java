@@ -3,10 +3,9 @@ package com.meti.app.compile.parse;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.app.compile.node.attribute.AttributeException;
 import com.meti.app.compile.stage.CompileException;
 
-public abstract class AbstractParser implements Parser {
+public abstract class AbstractParser implements Modifier {
     protected final State state;
 
     protected AbstractParser(State state) {
@@ -34,11 +33,20 @@ public abstract class AbstractParser implements Parser {
     }
 
     @Override
-    public Option<State> onParse() throws CompileException {
-        return isValid() ? new Some<>(onParseImpl()) : new None<>();
+    public Option<State> modifyBeforeAST() throws CompileException {
+        return isValid() ? new Some<>(modifyBeforeASTImpl()) : new None<>();
     }
 
-    protected State onParseImpl() throws CompileException {
+    @Override
+    public Option<State> modifyAfterAST() throws CompileException {
+        return isValid() ? new Some<>(modifyAfterASTImpl()) : new None<>();
+    }
+
+    protected State modifyAfterASTImpl() {
+        return state;
+    }
+
+    protected State modifyBeforeASTImpl() throws CompileException {
         return state;
     }
 }

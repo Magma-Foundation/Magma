@@ -25,7 +25,7 @@ class ImplementationParserTest {
         var input = new State(inputRoot);
         var output = new State(expectedRoot);
 
-        var actual = new ImplementationParser(input).onParseImpl();
+        var actual = new ImplementationParser(input).modifyBeforeASTImpl();
         assertEquals(output, actual);
     }
 
@@ -34,7 +34,7 @@ class ImplementationParserTest {
         var identity = new Declaration("main", new IntegerType(true, 16), Definition.Flag.Def);
         var root = new Implementation(identity, new Block(new Return(new IntegerNode(0))));
         var expected = new State(root);
-        var actual = new ImplementationParser(expected).onParseImpl();
+        var actual = new ImplementationParser(expected).modifyBeforeASTImpl();
         assertEquals(expected, actual);
     }
 }

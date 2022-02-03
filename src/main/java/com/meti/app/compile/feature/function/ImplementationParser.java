@@ -24,7 +24,7 @@ public class ImplementationParser extends AbstractParser {
     }
 
     @Override
-    protected State onParseImpl() throws CompileException {
+    protected State modifyBeforeASTImpl() throws CompileException {
         var element = state.getCurrent();
         var identity = element.apply(Attribute.Type.Identity).asNode();
         var expectedType = identity.apply(Attribute.Type.Type).asType();

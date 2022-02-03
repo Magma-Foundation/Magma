@@ -14,7 +14,7 @@ public class InvocationParser extends AbstractParser {
     }
 
     @Override
-    protected State onParseImpl() throws CompileException {
+    protected State modifyBeforeASTImpl() throws CompileException {
         var current = state.getCurrent();
         var caller = current.apply(Attribute.Type.Caller).asNode();
 
@@ -26,6 +26,11 @@ public class InvocationParser extends AbstractParser {
             throw new CompileException(message);
         }
 
+        return state;
+    }
+
+    @Override
+    protected State modifyAfterASTImpl() {
         var isInBlock = state.getScope()
                 .getParents()
                 .last()

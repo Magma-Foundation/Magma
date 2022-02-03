@@ -15,7 +15,7 @@ public class VariableVisitor extends AbstractParser {
     }
 
     @Override
-    protected State onParseImpl() throws CompileException {
+    protected State modifyBeforeASTImpl() throws CompileException {
         var value = state.getCurrent().apply(Attribute.Type.Value).asInput();
         var format = value.toOutput().compute();
         if (!state.getScope().isDefined(format)) {

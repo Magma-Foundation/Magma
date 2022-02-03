@@ -6,8 +6,8 @@ import com.meti.app.compile.magma.FunctionType;
 import com.meti.app.compile.node.Node;
 import com.meti.app.compile.primitive.Primitive;
 
-public final class MagmaParsingStage extends AbstractParsingStage implements MagmaParsingStageMixin {
-    public MagmaParsingStage(List<? extends Node> input) {
+public final class MagmaModificationStage extends AbstractModificationStage implements MagmaParsingStageMixin {
+    public MagmaModificationStage(List<? extends Node> input) {
         super(input);
     }
 

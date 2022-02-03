@@ -6,9 +6,9 @@ import com.meti.app.compile.feature.function.ImplementationParser;
 import com.meti.app.compile.feature.function.InvocationParser;
 import com.meti.app.compile.feature.util.LineParser;
 
-public interface MagmaParsingStageMixin extends VisitationStage<Parser> {
+public interface MagmaParsingStageMixin extends VisitationStage<Modifier> {
     @Override
-    default Stream<Parser> streamVisitors(State state) {
+    default Stream<Modifier> streamVisitors(State state) {
         return Streams.apply(
                 new BinaryParser(state),
                 new BlockVisitor(state),

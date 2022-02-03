@@ -16,7 +16,7 @@ public class BooleanParser extends AbstractParser {
     }
 
     @Override
-    protected State onParseImpl() throws CompileException {
+    protected State modifyBeforeASTImpl() throws CompileException {
         return state.mapCurrent(value -> {
             var state = value.apply(Attribute.Type.Value).asBoolean();
             return state ? new IntegerNode(1) : new IntegerNode(0);

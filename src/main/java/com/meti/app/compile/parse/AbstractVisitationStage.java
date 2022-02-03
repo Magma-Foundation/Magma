@@ -90,15 +90,19 @@ public abstract class AbstractVisitationStage<T extends Visitor> implements Visi
 
     protected State parseAST(State state) throws CompileException {
         var before = transformAST(state, Visitor::onEnter);
-        var parsed = parseImpl(before);
+        var parsed = modifyBeforeAST(before);
         var withDefinitionAttributes = AbstractVisitationStage.parseDefinitionAttributes(parsed);
         var withDefinitionsAttributes = AbstractVisitationStage.parseDefinitionsAttributes(withDefinitionAttributes);
         var withNodesAttributes = parseNodesAttribute(withDefinitionsAttributes);
         var withNodeAttributes = parseNodeAttributes(withNodesAttributes);
-        return transformAST(withNodeAttributes, Visitor::onExit);
+        return transformAST(modifyAfterAST(withNodeAttributes), Visitor::onExit);
     }
 
-    protected State parseImpl(State state) throws CompileException {
+    protected State modifyAfterAST(State state) throws CompileException {
+        return state;
+    }
+
+    protected State modifyBeforeAST(State state) throws CompileException {
         return state;
     }
 
