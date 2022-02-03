@@ -15,25 +15,28 @@ import java.util.Objects;
 
 public class Scope extends AbstractJSONable {
     private final List<List<Node>> frames;
+    private final List<Node> parents;
 
     public Scope() {
-        this(List.createList());
+        this(List.createList(), List.createList());
     }
 
-    public Scope(List<List<Node>> frames) {
+    public Scope(List<List<Node>> frames, List<Node> parents) {
         this.frames = frames;
+        this.parents = parents;
     }
 
     public Scope define(Node definition) {
-        return new Scope(frames.ensure(List::createList).mapLast(last -> last.add(definition)));
+        return new Scope(frames.ensure(List::createList).mapLast(last -> last.add(definition)), List.createList());
     }
 
-    public Scope enter() {
-        return new Scope(frames.add(List.createList()));
+    public Scope enter(Node node) {
+        var newParents = parents.add(node);
+        return new Scope(frames.add(List.createList()), newParents);
     }
 
     public Scope exit() {
-        return new Scope(frames.pop());
+        return new Scope(frames.pop(), List.createList());
     }
 
     @Override

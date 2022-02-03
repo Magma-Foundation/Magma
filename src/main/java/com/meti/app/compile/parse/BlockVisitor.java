@@ -14,7 +14,7 @@ public class BlockVisitor extends AbstractParser {
 
     @Override
     protected State onEnterImpl() {
-        return state.mapScope(Scope::enter);
+        return state.mapScope(scope -> scope.enter(state.getCurrent()));
     }
 
     @Override
