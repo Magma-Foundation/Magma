@@ -7,26 +7,27 @@ import static com.meti.app.compile.CompiledTest.assertSourceCompile;
 public class InvocationTest {
     @Test
     void block() {
-        assertSourceCompile("{test(1);}", "{test(1);}");
+        assertSourceCompile("def test(value : I16) => {}{test(1);}", "void test(int value){}{test(1);}");
     }
 
     @Test
     void nominal() {
-        assertSourceCompile("def test() = {}test()", "void test(){}test()");
+        assertSourceCompile("def test() => {}test()", "void test(){}test()");
     }
 
     @Test
     void one_parameter() {
-        assertSourceCompile("test(1)", "test(1)");
+        assertSourceCompile("def test(value : I16) => {}test(1)", "void test(int value){}test(1)");
     }
 
     @Test
     void two_parameters() {
-        assertSourceCompile("test(1, 2)", "test(1,2)");
+        assertSourceCompile("def test(first : I16, second : I16) => {}test(1, 2)", "void test(int first, int second){}test(1,2)");
     }
 
     @Test
     void valuesInStrings() {
-        assertSourceCompile("test(\"val:ue\")", "test(\"val:ue\")");
+        assertSourceCompile("def test(value : &I8) => {}test(\"val:ue\")",
+                "void test(char *value){}test(\"val:ue\")");
     }
 }
