@@ -22,7 +22,7 @@ public class InvocationTest {
 
     @Test
     void two_parameters() {
-        assertSourceCompile("def test(first : I16, second : I16) => {}test(1, 2)", "void test(int first, int second){}test(1,2)");
+        assertSourceCompile("def test(first : I16, second : I16) => {}test(1, 2)", "void test(int first,int second){}test(1,2)");
     }
 
     @Test
