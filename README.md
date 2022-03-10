@@ -4,3 +4,7 @@
 
 - `/generated` - The generated source files
 - `/source` - The **actual** source files
+
+## Builds
+
+Builds are created using the command `gradle build`.
