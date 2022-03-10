@@ -4,11 +4,9 @@ plugins {
 }
 
 application {
-    mainClass.set('com.meti.app.Main')
-    tasks.run.setWorkingDir(new File("./working"))
 }
 
-group 'com.meti'
+group 'magma'
 version '1.0'
 
 repositories {
