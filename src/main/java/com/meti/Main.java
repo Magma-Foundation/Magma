@@ -57,7 +57,8 @@ public class Main {
 
                 nodes.add(new Import(args));
             } else if (line.contains("class")) {
-                nodes.add(new ClassNode());
+                var name = line.substring(line.indexOf("class") + "class".length(), line.indexOf('{')).strip();
+                nodes.add(new ClassNode(name));
             } else {
                 throw new CompilationException("Unknown input: " + line);
             }
@@ -70,8 +71,10 @@ public class Main {
                 cache.addImport(node.apply(Import.Key.Values)
                         .flatMap(Attribute::asTextList)
                         .orElseThrow());
-            } else if(node.is(ClassNode.Key.Id)) {
-                others.add(new Struct());
+            } else if (node.is(ClassNode.Key.Id)) {
+                others.add(new Struct(node.apply(ClassNode.Key.Name)
+                        .flatMap(Attribute::asText)
+                        .orElseThrow()));
             }
         }
 
@@ -81,9 +84,12 @@ public class Main {
             var name = renderImport(child, 0);
             output.append("import ").append(name).append(";\n");
         }
+
         for (Node other : others) {
-            if(other.is(Struct.Key.Id)) {
-                output.append("struct Test {}");
+            if (other.is(Struct.Key.Id)) {
+                output.append("struct ").append(other.apply(Struct.Key.Name)
+                        .flatMap(Attribute::asText)
+                        .orElseThrow()).append(" {}");
             }
         }
 

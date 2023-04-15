@@ -7,4 +7,8 @@ public interface Attribute {
     default Optional<List<String>> asTextList() {
         return Optional.empty();
     }
+
+    default Optional<String> asText() {
+        return Optional.empty();
+    }
 }
