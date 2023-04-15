@@ -85,7 +85,9 @@ public class Main {
 
         if (value.children().size() == 1) {
             var anyChild = value.children().stream().findFirst().orElseThrow();
-            return renderImport(anyChild, depth) + "." + name;
+            var newName = name + "." + anyChild.name();
+            var newImport = new ImportCache.Import(newName, anyChild.children());
+            return renderImport(newImport, depth);
         }
 
         var outerOffset = "\t".repeat(depth);
