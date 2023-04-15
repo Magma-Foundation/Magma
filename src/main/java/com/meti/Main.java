@@ -5,7 +5,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,28 +47,20 @@ public class Main {
                 .filter(value -> !value.isEmpty())
                 .toList();
 
-        var imports = new HashMap<String, List<String>>();
-        var output = new StringBuilder();
+        var imports = new ArrayList<List<String>>();
         for (String line : lines) {
             if (line.startsWith("import ")) {
                 var importSlice = line.substring("import ".length());
-                var separator = importSlice.indexOf(".");
-                var importParent = importSlice.substring(0, separator);
-
-                List<String> children;
-                if (imports.containsKey(importParent)) {
-                    children = imports.get(importParent);
-                } else {
-                    children = new ArrayList<>();
-                }
-
-                children.add(importSlice.substring(separator + 1));
-                imports.put(importParent, children);
+                var args = Arrays.asList(importSlice.split("\\."));
+                imports.add(args);
             }
         }
 
-        for (String s : imports.keySet()) {
-            var joinedChildren = imports.get(s)
+        var cache = parse(imports);
+
+        var output = new StringBuilder();
+        cache.imports().keySet().forEach(s -> {
+            var joinedChildren = cache.imports().get(s)
                     .stream()
                     .map(value -> "\t" + value)
                     .collect(Collectors.joining(",\n"));
@@ -79,7 +70,7 @@ public class Main {
                     .append("\n} from ")
                     .append(s)
                     .append(";");
-        }
+        });
 
         var actualParent = leaf.getParent();
         if (!Files.exists(actualParent)) {
@@ -87,6 +78,15 @@ public class Main {
         }
 
         Files.writeString(leaf, output.toString());
+    }
+
+    private static ImportCache parse(List<List<String>> imports) {
+        var cache = new ImportCache();
+        for (var anImport : imports) {
+            cache.addImport(anImport);
+        }
+
+        return cache;
     }
 
     private static String computeFileName(Path relativeOriginal) {
