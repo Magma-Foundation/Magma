@@ -3,17 +3,17 @@ package com.meti;
 import java.util.*;
 
 public final class ImportCache {
-    private final Import root;
+    private final CachedImport root;
 
     public ImportCache() {
         this(Collections.emptySet());
     }
 
-    public ImportCache(Set<Import> root) {
-        this.root = new Import("", new HashSet<>(root));
+    public ImportCache(Set<CachedImport> root) {
+        this.root = new CachedImport("", new HashSet<>(root));
     }
 
-    Set<Import> collectChildren() {
+    Set<CachedImport> collectChildren() {
         return root.children();
     }
 

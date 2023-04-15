@@ -38,24 +38,20 @@ public class Main {
             leafDirectory = target.resolve(parent);
         }
 
-        var leaf = leafDirectory
-                .resolve(fileNameWithoutExtension + ".mgs");
+        var leaf = leafDirectory.resolve(fileNameWithoutExtension + ".mgs");
 
         var input = Files.readString(file);
-        var lines = Arrays.stream(input.split(";"))
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .toList();
+        var lines = split(input);
 
-        var imports = new ArrayList<List<String>>();
-        for (String line : lines) {
+        var imports = new ArrayList<Import>();
+        for (var line : lines) {
             if (line.startsWith("import ")) {
                 var importSlice = line.substring("import ".length());
                 var args = Arrays.stream(importSlice.split("\\."))
                         .map(String::strip)
                         .collect(Collectors.toList());
 
-                imports.add(args);
+                imports.add(new Import(args));
             }
         }
 
@@ -76,7 +72,35 @@ public class Main {
         Files.writeString(leaf, output.toString());
     }
 
-    private static String renderImport(Import value, int depth) {
+    private static List<String> split(String input) {
+        var builder = new StringBuilder();
+        var lines = new ArrayList<String>();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                depth--;
+                builder.append(c);
+
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+        lines.removeIf(String::isEmpty);
+
+        return lines;
+    }
+
+    private static String renderImport(CachedImport value, int depth) {
         var name = value.computeName();
         if (value.isLeaf()) {
             return name;
@@ -85,7 +109,7 @@ public class Main {
         if (value.children().size() == 1) {
             var anyChild = value.children().stream().findFirst().orElseThrow();
             var newName = name + "." + anyChild.computeName();
-            var newImport = new Import(newName, anyChild.children());
+            var newImport = new CachedImport(newName, anyChild.children());
             return renderImport(newImport, depth);
         }
 
@@ -96,7 +120,7 @@ public class Main {
                 .map(value1 -> renderImport(value1, depth + 1))
                 .collect(Collectors.joining(",\n" + innerOffset));
 
-        var isParentToLeaves = value.children().stream().allMatch(Import::isLeaf);
+        var isParentToLeaves = value.children().stream().allMatch(CachedImport::isLeaf);
 
         String beforeChildren;
         if (isParentToLeaves) {
@@ -122,10 +146,10 @@ public class Main {
         return "{" + beforeChildren + renderedChildren + afterChildren + "}" + afterChildrenClose + " from " + name;
     }
 
-    private static ImportCache parse(List<List<String>> imports) {
+    private static ImportCache parse(List<Import> imports) {
         var cache = new ImportCache();
         for (var anImport : imports) {
-            cache.addImport(anImport);
+            cache.addImport(anImport.args());
         }
 
         return cache;
