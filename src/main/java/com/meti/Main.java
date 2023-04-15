@@ -3,9 +3,7 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -74,7 +72,7 @@ public class Main {
             } else if (node.is(ClassNode.Key.Id)) {
                 others.add(new FunctionNode(node.apply(ClassNode.Key.Name)
                         .flatMap(Attribute::asText)
-                        .orElseThrow()));
+                        .orElseThrow(), Set.of(FunctionNode.Flag.Class)));
             }
         }
 
@@ -87,6 +85,12 @@ public class Main {
 
         for (Node other : others) {
             if (other.is(FunctionNode.Key.Id)) {
+                if(other.apply(FunctionNode.Key.Flags)
+                        .map(value -> value.contains(FunctionNode.Flag.Class))
+                        .orElse(false)) {
+                    output.append("class ");
+                }
+
                 output.append("def ").append(other.apply(FunctionNode.Key.Name)
                         .flatMap(Attribute::asText)
                         .orElseThrow()).append("() => {}");

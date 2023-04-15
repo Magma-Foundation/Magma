@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Attribute {
+    default boolean contains(Object o) {
+        return false;
+    }
+
     default Optional<List<String>> asTextList() {
         return Optional.empty();
     }
