@@ -51,7 +51,10 @@ public class Main {
         for (String line : lines) {
             if (line.startsWith("import ")) {
                 var importSlice = line.substring("import ".length());
-                var args = Arrays.asList(importSlice.split("\\."));
+                var args = Arrays.stream(importSlice.split("\\."))
+                        .map(String::strip)
+                        .collect(Collectors.toList());
+
                 imports.add(args);
             }
         }
@@ -59,18 +62,12 @@ public class Main {
         var cache = parse(imports);
 
         var output = new StringBuilder();
-        cache.imports().keySet().forEach(s -> {
-            var joinedChildren = cache.imports().get(s)
-                    .stream()
-                    .map(value -> "\t" + value)
-                    .collect(Collectors.joining(",\n"));
-
-            output.append("import {\n")
-                    .append(joinedChildren)
-                    .append("\n} from ")
-                    .append(s)
-                    .append(";");
-        });
+        var root = cache.getRoot();
+        var children = root.children();
+        for (var child : children) {
+            var name = renderImport(child, 0);
+            output.append("import " + name + ";");
+        }
 
         var actualParent = leaf.getParent();
         if (!Files.exists(actualParent)) {
@@ -78,6 +75,50 @@ public class Main {
         }
 
         Files.writeString(leaf, output.toString());
+    }
+
+    private static String renderImport(ImportCache.Import value, int depth) {
+        var name = value.computeName();
+        if (value.isLeaf()) {
+            return name;
+        }
+
+        if (value.children().size() == 1) {
+            var anyChild = value.children().stream().findFirst().orElseThrow();
+            return renderImport(anyChild, depth) + "." + name;
+        }
+
+        var outerOffset = "\t".repeat(depth);
+        var innerOffset = "\t".repeat(depth + 1);
+        var renderedChildren = value.children()
+                .stream()
+                .map(value1 -> renderImport(value1, depth + 1))
+                .collect(Collectors.joining(",\n" + innerOffset));
+
+        var isParentToLeaves = value.children().stream().allMatch(ImportCache.Import::isLeaf);
+
+        String beforeChildren;
+        if (isParentToLeaves) {
+            beforeChildren = "";
+        } else {
+            beforeChildren = "\n" + innerOffset;
+        }
+
+        String afterChildren;
+        if (isParentToLeaves) {
+            afterChildren = " ";
+        } else {
+            afterChildren = "\n" + outerOffset;
+        }
+
+        String afterChildrenClose;
+        if (isParentToLeaves) {
+            afterChildrenClose = "";
+        } else {
+            afterChildrenClose = "";
+        }
+
+        return "{" + beforeChildren + renderedChildren + afterChildren + "}" + afterChildrenClose + " from " + name;
     }
 
     private static ImportCache parse(List<List<String>> imports) {

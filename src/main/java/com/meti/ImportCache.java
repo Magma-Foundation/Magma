@@ -3,29 +3,66 @@ package com.meti;
 import java.util.*;
 
 public final class ImportCache {
-    private final Map<String, List<String>> imports;
+    private final Import root;
 
     public ImportCache() {
-        this(Collections.emptyMap());
+        this(Collections.emptySet());
     }
 
-    public ImportCache(Map<String, List<String>> imports) {
-        this.imports = new HashMap<>(imports);
+    public ImportCache(Set<Import> root) {
+        this.root = new Import("", new HashSet<>(root));
     }
 
-    ImportCache addImport(List<String> anImport) {
-        List<String> children;
-        if (imports().containsKey(anImport.get(0))) {
-            children = imports().get(anImport.get(0));
-        } else {
-            children = new ArrayList<>();
+    void addImport(List<String> child) {
+        root.addChild(child);
+    }
+
+    public Import getRoot() {
+        return root;
+    }
+
+    public record Import(String name, Set<Import> children) {
+
+        public Import(String name) {
+            this(name, new HashSet<>());
         }
 
-        imports().put(anImport.get(0), children);
-        return this;
-    }
+        boolean isLeaf() {
+            return children.isEmpty();
+        }
 
-    public Map<String, List<String>> imports() {
-        return imports;
+        Optional<Import> findChild(String name) {
+            return children.stream()
+                    .filter(child -> child.hasNameOf(name))
+                    .findAny();
+        }
+
+        private boolean hasNameOf(String name) {
+            return this.name.equals(name);
+        }
+
+        Import addChild(List<String> names) {
+            var child = names.get(0);
+            var grandChildren = names.subList(1, names.size());
+
+            var childOptional = findChild(child);
+            Import childValue;
+            if (childOptional.isPresent()) {
+                childValue = childOptional.get();
+            } else {
+                childValue = new Import(child);
+                children.add(childValue);
+            }
+
+            if (!grandChildren.isEmpty()) {
+                childValue.addChild(grandChildren);
+            }
+
+            return this;
+        }
+
+        public String computeName() {
+            return name;
+        }
     }
 }
