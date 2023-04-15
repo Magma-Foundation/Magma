@@ -62,11 +62,10 @@ public class Main {
         var cache = parse(imports);
 
         var output = new StringBuilder();
-        var root = cache.getRoot();
-        var children = root.children();
+        var children = cache.collectChildren();
         for (var child : children) {
             var name = renderImport(child, 0);
-            output.append("import " + name + ";");
+            output.append("import ").append(name).append(";");
         }
 
         var actualParent = leaf.getParent();
@@ -77,7 +76,7 @@ public class Main {
         Files.writeString(leaf, output.toString());
     }
 
-    private static String renderImport(ImportCache.Import value, int depth) {
+    private static String renderImport(Import value, int depth) {
         var name = value.computeName();
         if (value.isLeaf()) {
             return name;
@@ -85,8 +84,8 @@ public class Main {
 
         if (value.children().size() == 1) {
             var anyChild = value.children().stream().findFirst().orElseThrow();
-            var newName = name + "." + anyChild.name();
-            var newImport = new ImportCache.Import(newName, anyChild.children());
+            var newName = name + "." + anyChild.computeName();
+            var newImport = new Import(newName, anyChild.children());
             return renderImport(newImport, depth);
         }
 
@@ -97,7 +96,7 @@ public class Main {
                 .map(value1 -> renderImport(value1, depth + 1))
                 .collect(Collectors.joining(",\n" + innerOffset));
 
-        var isParentToLeaves = value.children().stream().allMatch(ImportCache.Import::isLeaf);
+        var isParentToLeaves = value.children().stream().allMatch(Import::isLeaf);
 
         String beforeChildren;
         if (isParentToLeaves) {
