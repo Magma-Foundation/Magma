@@ -72,9 +72,7 @@ public class Main {
                         .flatMap(Attribute::asTextList)
                         .orElseThrow());
             } else if (node.is(ClassNode.Key.Id)) {
-                others.add(new Struct(node.apply(ClassNode.Key.Name)
-                        .flatMap(Attribute::asText)
-                        .orElseThrow()));
+                others.add(new FunctionNode());
             }
         }
 
@@ -86,10 +84,8 @@ public class Main {
         }
 
         for (Node other : others) {
-            if (other.is(Struct.Key.Id)) {
-                output.append("struct ").append(other.apply(Struct.Key.Name)
-                        .flatMap(Attribute::asText)
-                        .orElseThrow()).append(" {}");
+            if (other.is(FunctionNode.Key.Id)) {
+                output.append("def test() => {}");
             }
         }
 
