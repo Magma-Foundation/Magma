@@ -1,2 +1,4 @@
 /.gradle
 /.idea
+/.run
+/build
