@@ -72,7 +72,9 @@ public class Main {
                         .flatMap(Attribute::asTextList)
                         .orElseThrow());
             } else if (node.is(ClassNode.Key.Id)) {
-                others.add(new FunctionNode());
+                others.add(new FunctionNode(node.apply(ClassNode.Key.Name)
+                        .flatMap(Attribute::asText)
+                        .orElseThrow()));
             }
         }
 
@@ -85,7 +87,9 @@ public class Main {
 
         for (Node other : others) {
             if (other.is(FunctionNode.Key.Id)) {
-                output.append("def test() => {}");
+                output.append("def ").append(other.apply(FunctionNode.Key.Name)
+                        .flatMap(Attribute::asText)
+                        .orElseThrow()).append("() => {}");
             }
         }
 
