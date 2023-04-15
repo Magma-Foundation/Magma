@@ -43,7 +43,7 @@ public class Main {
         var input = Files.readString(file);
         var lines = split(input);
 
-        var imports = new ArrayList<Import>();
+        var nodes = new ArrayList<Node>();
         for (var line : lines) {
             if (line.startsWith("import ")) {
                 var importSlice = line.substring("import ".length());
@@ -51,17 +51,34 @@ public class Main {
                         .map(String::strip)
                         .collect(Collectors.toList());
 
-                imports.add(new Import(args));
+                nodes.add(new Import(args));
+            } else if (line.contains("class")) {
+                nodes.add(new ClassNode());
             }
         }
 
-        var cache = parse(imports);
+        var cache = new ImportCache();
+        var others = new ArrayList<Node>();
+        for (var node : nodes) {
+            if (node.is(Import.Key.Id)) {
+                cache.addImport(node.apply(Import.Key.Values)
+                        .flatMap(Attribute::asTextList)
+                        .orElseThrow());
+            } else if(node.is(ClassNode.Key.Id)) {
+                others.add(new Struct());
+            }
+        }
 
         var output = new StringBuilder();
         var children = cache.collectChildren();
         for (var child : children) {
             var name = renderImport(child, 0);
             output.append("import ").append(name).append(";");
+        }
+        for (Node other : others) {
+            if(other.is(Struct.Key.Id)) {
+                output.append("struct Test {}");
+            }
         }
 
         var actualParent = leaf.getParent();
@@ -144,15 +161,6 @@ public class Main {
         }
 
         return "{" + beforeChildren + renderedChildren + afterChildren + "}" + afterChildrenClose + " from " + name;
-    }
-
-    private static ImportCache parse(List<Import> imports) {
-        var cache = new ImportCache();
-        for (var anImport : imports) {
-            cache.addImport(anImport.args());
-        }
-
-        return cache;
     }
 
     private static String computeFileName(Path relativeOriginal) {
