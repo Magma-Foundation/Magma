@@ -22,11 +22,15 @@ public class Main {
 
         var target = Paths.get(".", "target");
         for (var file : files) {
-            compile(sourceDirectory, target, file);
+            try {
+                compile(sourceDirectory, target, file);
+            } catch (CompilationException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private static void compile(Path sourceDirectory, Path target, Path file) throws IOException {
+    private static void compile(Path sourceDirectory, Path target, Path file) throws IOException, CompilationException {
         var relativeOriginal = sourceDirectory.relativize(file);
         var fileNameWithoutExtension = computeFileName(relativeOriginal);
 
@@ -54,6 +58,8 @@ public class Main {
                 nodes.add(new Import(args));
             } else if (line.contains("class")) {
                 nodes.add(new ClassNode());
+            } else {
+                throw new CompilationException("Unknown input: " + line);
             }
         }
 
@@ -73,7 +79,7 @@ public class Main {
         var children = cache.collectChildren();
         for (var child : children) {
             var name = renderImport(child, 0);
-            output.append("import ").append(name).append(";");
+            output.append("import ").append(name).append(";\n");
         }
         for (Node other : others) {
             if(other.is(Struct.Key.Id)) {
@@ -96,13 +102,13 @@ public class Main {
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == ';' && depth == 0) {
-                lines.add(builder.toString());
+                lines.add(builder.toString().strip());
                 builder = new StringBuilder();
             } else if (c == '}' && depth == 1) {
                 depth--;
                 builder.append(c);
 
-                lines.add(builder.toString());
+                lines.add(builder.toString().strip());
                 builder = new StringBuilder();
             } else {
                 if (c == '{') depth++;
@@ -111,7 +117,7 @@ public class Main {
             }
         }
 
-        lines.add(builder.toString());
+        lines.add(builder.toString().strip());
         lines.removeIf(String::isEmpty);
 
         return lines;
