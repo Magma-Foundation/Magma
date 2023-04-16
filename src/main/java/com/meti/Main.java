@@ -3,7 +3,10 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -47,45 +50,35 @@ public class Main {
 
         var nodes = new ArrayList<Node>();
         for (var line : lines) {
-            if (line.startsWith("import ")) {
-                var importSlice = line.substring("import ".length());
-                var args = Arrays.stream(importSlice.split("\\."))
-                        .map(String::strip)
-                        .collect(Collectors.toList());
-
-                nodes.add(new Import(args));
-            } else if (line.contains("class")) {
-                var name = line.substring(line.indexOf("class") + "class".length(), line.indexOf('{')).strip();
-                nodes.add(new ClassNode(name));
-            } else {
-                throw new CompilationException("Unknown input: " + line);
-            }
+            nodes.add(lex(line));
         }
 
-        var cache = new ImportCache();
-        var others = new ArrayList<Node>();
+        var state = new State();
         for (var node : nodes) {
-            if (node.is(Import.Key.Id)) {
-                cache.addImport(node.apply(Import.Key.Values)
-                        .flatMap(Attribute::asTextList)
-                        .orElseThrow());
-            } else if (node.is(ClassNode.Key.Id)) {
-                others.add(new FunctionNode(node.apply(ClassNode.Key.Name)
-                        .flatMap(Attribute::asText)
-                        .orElseThrow(), Set.of(FunctionNode.Flag.Class)));
-            }
+            state = parse(state, node);
         }
 
+        var output = render(state);
+
+        var actualParent = leaf.getParent();
+        if (!Files.exists(actualParent)) {
+            Files.createDirectories(actualParent);
+        }
+
+        Files.writeString(leaf, output);
+    }
+
+    private static String render(State state) {
         var output = new StringBuilder();
-        var children = cache.collectChildren();
+        var children = state.cache().collectChildren();
         for (var child : children) {
             var name = renderImport(child, 0);
             output.append("import ").append(name).append(";\n");
         }
 
-        for (Node other : others) {
+        for (Node other : state.others()) {
             if (other.is(FunctionNode.Key.Id)) {
-                if(other.apply(FunctionNode.Key.Flags)
+                if (other.apply(FunctionNode.Key.Flags)
                         .map(value -> value.contains(FunctionNode.Flag.Class))
                         .orElse(false)) {
                     output.append("class ");
@@ -96,13 +89,38 @@ public class Main {
                         .orElseThrow()).append("() => {}");
             }
         }
+        return output.toString();
+    }
 
-        var actualParent = leaf.getParent();
-        if (!Files.exists(actualParent)) {
-            Files.createDirectories(actualParent);
+    private static State parse(State state, Node node) {
+        if (node.is(Import.Key.Id)) {
+            state.cache().addImport(node.apply(Import.Key.Values)
+                    .flatMap(Attribute::asTextList)
+                    .orElseThrow());
+        } else if (node.is(ClassNode.Key.Id)) {
+            state.others().add(new FunctionNode(node.apply(ClassNode.Key.Name)
+                    .flatMap(Attribute::asText)
+                    .orElseThrow(), Set.of(FunctionNode.Flag.Class)));
         }
+        return state;
+    }
 
-        Files.writeString(leaf, output.toString());
+    private static Node lex(String line) throws CompilationException {
+        Node token;
+        if (line.startsWith("import ")) {
+            var importSlice = line.substring("import ".length());
+            var args = Arrays.stream(importSlice.split("\\."))
+                    .map(String::strip)
+                    .collect(Collectors.toList());
+
+            token = new Import(args);
+        } else if (line.contains("class")) {
+            var name = line.substring(line.indexOf("class") + "class".length(), line.indexOf('{')).strip();
+            token = new ClassNode(name);
+        } else {
+            throw new CompilationException("Unknown input: " + line);
+        }
+        return token;
     }
 
     private static List<String> split(String input) {
