@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -55,7 +56,7 @@ public class Main {
 
         var state = new State();
         for (var node : nodes) {
-            state = parse(state, node);
+            state = alter(state, node);
         }
 
         var output = render(state);
@@ -92,7 +93,7 @@ public class Main {
         return output.toString();
     }
 
-    private static State parse(State state, Node node) {
+    private static State alter(State state, Node node) {
         if (node.is(Import.Key.Id)) {
             state.cache().addImport(node.apply(Import.Key.Values)
                     .flatMap(Attribute::asTextList)
@@ -106,21 +107,12 @@ public class Main {
     }
 
     private static Node lex(String line) throws CompilationException {
-        Node token;
-        if (line.startsWith("import ")) {
-            var importSlice = line.substring("import ".length());
-            var args = Arrays.stream(importSlice.split("\\."))
-                    .map(String::strip)
-                    .collect(Collectors.toList());
-
-            token = new Import(args);
-        } else if (line.contains("class")) {
-            var name = line.substring(line.indexOf("class") + "class".length(), line.indexOf('{')).strip();
-            token = new ClassNode(name);
-        } else {
-            throw new CompilationException("Unknown input: " + line);
-        }
-        return token;
+        return Stream.of(new ImportLexer(line),
+                        new ClassLexer(line))
+                .map(Lexer::lex)
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow(() -> new CompilationException("Unknown input: " + line));
     }
 
     private static List<String> split(String input) {
