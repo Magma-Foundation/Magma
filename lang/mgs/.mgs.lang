@@ -1,10 +1,23 @@
-<declaration> = "let"
+<number_type> = "U8" | "I16";
+<type> = <number_type>;
+
+<character> = "'" <char> "'";
+<number> = [ digit ]("" | <number_type>);
+
+<value> = <character> | <number>;
+
+<declaration> : {
+    <flags> = "let" | "const",
+    <name> = text,
+    <provided_type> = "" | (":" <whitespace> <type>)
+} = flags
     <whitespace> <name>
-    <whitespace> ":"
-    <whitespace> <type>
+    <whitespace> <provided_type>
     <whitespace> "="
     <whitespace> <value>
-    <whitespace> ";"
+    <whitespace> ";";
 
-statement = declaration
-program = [ statement ]
+
+
+<statement> = <declaration>;
+program = [ <statement> ];
