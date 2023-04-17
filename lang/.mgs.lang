@@ -1,0 +1,7 @@
+import : {
+    segment = "{" + "from"
+    segments = "" | segment | (segment "," segments)
+} = "import" + whitespace + segment + ";"
+
+statement = import | function
+program = [ statement ]

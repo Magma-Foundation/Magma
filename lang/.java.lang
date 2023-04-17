@@ -1,6 +1,7 @@
 import : {
     segment = text
-} = "import" whitespace [ segment / "." ] ";"
+    segments = "" | segment | segments
+} = "import" whitespace segments ";"
 
 statement = import | class
 program = [ statement ]
