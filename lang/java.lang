@@ -1,0 +1,6 @@
+import : {
+    segment = text
+} = "import" whitespace [ segment / "." ] ";"
+
+statement = import | class
+program = [ statement ]
