@@ -1,7 +1,0 @@
-import : {
-    segment = text
-    segments = "" | segment | segments
-} = "import" whitespace segments ";"
-
-statement = import | class
-program = [ statement ]
