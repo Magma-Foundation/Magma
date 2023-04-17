@@ -1,7 +1,12 @@
 import : {
-    segment = "{" + "from"
+    name = text
+    segment = "{" segments "}" "from" name
     segments = "" | segment | (segment "," segments)
-} = "import" + whitespace + segment + ";"
+} = "import" whitespace segment ";"
+
+function : {
+    name = text;
+} = "def" whitespace name "(){}"
 
 statement = import | function
 program = [ statement ]
