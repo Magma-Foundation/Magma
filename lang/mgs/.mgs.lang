@@ -1,0 +1,10 @@
+<declaration> = "let"
+    <whitespace> <name>
+    <whitespace> ":"
+    <whitespace> <type>
+    <whitespace> "="
+    <whitespace> <value>
+    <whitespace> ";"
+
+statement = declaration
+program = [ statement ]
