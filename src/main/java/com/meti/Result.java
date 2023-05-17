@@ -1,10 +1,11 @@
 package com.meti;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
-public interface Result<T> {
-    void match(Consumer<T> onOk, Consumer<IOException> onErr);
+public interface Result<T, E> {
+    void match(Consumer<T> onOk, Consumer<E> onErr);
 
-    Option<IOException> asErr();
+    Option<E> asErr();
+
+    Option<T> asOk();
 }

@@ -3,7 +3,7 @@ package com.meti;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public class EmptyOk implements Result<Void> {
+public class EmptyOk implements Result<Void, IOException> {
     @Override
     public void match(Consumer<Void> onOk, Consumer<IOException> onErr) {
         onOk.accept(null);
@@ -11,6 +11,11 @@ public class EmptyOk implements Result<Void> {
 
     @Override
     public Option<IOException> asErr() {
-        return new None();
+        return new None<>();
+    }
+
+    @Override
+    public Option<Void> asOk() {
+        return new None<>();
     }
 }

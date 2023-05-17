@@ -1,22 +1,26 @@
 package com.meti;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
-public class ValueOk implements Result<String> {
-    private final String value;
+public class ValueOk<T, E> implements Result<T, E> {
+    private final T value;
 
-    public ValueOk(String value) {
+    public ValueOk(T value) {
         this.value = value;
     }
 
     @Override
-    public void match(Consumer<String> onOk, Consumer<IOException> onErr) {
+    public void match(Consumer<T> onOk, Consumer<E> onErr) {
         onOk.accept(value);
     }
 
     @Override
-    public Option<IOException> asErr() {
-        return new None();
+    public Option<E> asErr() {
+        return new None<E>();
+    }
+
+    @Override
+    public Option<T> asOk() {
+        return new Some<>(value);
     }
 }

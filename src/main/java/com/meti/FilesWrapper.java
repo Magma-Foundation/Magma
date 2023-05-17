@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FilesWrapper {
-    static Result<Void> writeImpl(Path output, String s) {
+    static Result<Void, IOException> writeImpl(Path output, String s) {
         try {
             Files.writeString(output, s);
             return new EmptyOk();
@@ -14,9 +14,9 @@ public class FilesWrapper {
         }
     }
 
-    static Result<String> readImpl(Path input) {
+    static Result<String, IOException> readImpl(Path input) {
         try {
-            return new ValueOk(Files.readString(input));
+            return new ValueOk<String, IOException>(Files.readString(input));
         } catch (IOException e) {
             return new ErrorResult<>(e);
         }
