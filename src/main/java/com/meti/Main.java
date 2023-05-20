@@ -10,8 +10,24 @@ public class Main {
     public static void main(String[] args) {
         var path = Paths.get(".", "Main.java");
         readString(path).match(value -> {
+            var sb = new StringBuilder();
+            for (String s : value.split(";")) {
+                var line = s.strip();
+                if (!line.isEmpty()) {
+                    if (!line.startsWith("package")) {
+                        var substring = line.substring("public ".length(), line.length());
+                        var s1 = "object Main" + substring.substring("class Main".length());
+                        var start = s1.indexOf('{');
+                        var slice = s1.substring(0, start) + "{\n\tdef main => {\n\t}\n}";
+
+                        sb.append(slice);
+                    }
+                }
+            }
+            var output = sb.toString();
+
             var target = Paths.get(".", "Main.mgs");
-            writeString(value, target).match(() -> {
+            writeString(output, target).match(() -> {
                 System.out.println("File compiled.");
             }, error -> {
                 System.err.println("Failed to write target.");
