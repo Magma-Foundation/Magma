@@ -11,7 +11,7 @@ public class Main {
         var source = Paths.get(".", "Main.mgs");
         readImpl(source).match(s -> {
             var target = Paths.get(".", "Main.c");
-            var output = "#include <stdio.h>\nint main(){\n\tprintf(\"%s\",\"Hello World!\");\n}";
+            var output = "#include <stdio.h>\nint main(){\n\tprintf(\"%s\",\"Hello World!\");\n\treturn 0;\n}";
             writeImpl(target, output).match(() -> System.out.println("Compiled successfully."), e -> {
                 System.err.println("Failed to write target.");
                 e.printStackTrace();
