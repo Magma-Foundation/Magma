@@ -29,6 +29,12 @@ public class ApplicationTest {
         target = Application.resolveFile("Main", "mgs");
     }
 
+    @Test
+    void compilesPackage() throws IOException {
+        Files.writeString(source, "package com.meti;");
+        assertTrue(Files.readString(run(source).orElseThrow()).isEmpty());
+    }
+
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(source);
