@@ -18,8 +18,9 @@ public record Application(Set<Path> sources) {
             if (Files.exists(path)) {
                 String output;
                 var input = Files.readString(path);
-                if (input.equals("import simple;")) {
-                    output = "import simple from '*';";
+                if (input.startsWith("import ") && input.endsWith(";")) {
+                    var name = input.substring("import ".length(), input.indexOf(";"));
+                    output = "import " + name + " from '*';";
                 } else {
                     output = "";
                 }

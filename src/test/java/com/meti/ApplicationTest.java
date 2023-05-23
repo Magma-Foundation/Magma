@@ -55,6 +55,13 @@ public class ApplicationTest {
         assertEquals("import simple from '*';", actual);
     }
 
+    @Test
+    void importAnotherSimple() {
+        var actual = runWithSource("import test;");
+        assertEquals("import test from '*';", actual);
+    }
+
+
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(source);
