@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
 
 public record Application(Set<Path> sources) {
     static Path resolveFile(String name, String extension) {
@@ -16,27 +15,45 @@ public record Application(Set<Path> sources) {
         var list = new ArrayList<Path>();
         for (var path : sources) {
             if (Files.exists(path)) {
-                String output;
                 var input = Files.readString(path);
 
-                var imports = new ArrayList<String>();
+                var imports = new HashMap<String, List<String>>();
                 var lines = input.split(";");
                 for (String line : lines) {
-                    if (line.startsWith("import ")) {
-                        var name = line.substring("import ".length());
-                        imports.add(name);
+                    var trimmed = line.strip();
+                    if (trimmed.startsWith("import ")) {
+                        var name = trimmed.substring("import ".length());
+
+                        var args = Arrays.asList(name.split("\\."));
+                        String parent;
+                        String child;
+                        if (args.size() == 1) {
+                            parent = "*";
+                            child = args.get(0);
+                        } else {
+                            parent = String.join(".", args.subList(0, args.size() - 1));
+                            child = args.get(args.size() - 1);
+                        }
+
+                        if (!imports.containsKey(parent)) {
+                            imports.put(parent, new ArrayList<>());
+                        }
+                        imports.get(parent).add(child);
                     }
                 }
 
+                String output = "";
                 if (!imports.isEmpty()) {
-                    String values;
-                    if (imports.size() == 1) {
-                        values = imports.get(0);
-                    } else {
-                        values = "{ " + String.join(", ", imports) + " }";
-                    }
+                    for (Map.Entry<String, List<String>> stringListEntry : imports.entrySet()) {
+                        String values;
+                        if (stringListEntry.getValue().size() == 1) {
+                            values = stringListEntry.getValue().get(0);
+                        } else {
+                            values = "{ " + String.join(", ", stringListEntry.getValue()) + " }";
+                        }
 
-                    output = "import " + values + " from '*';";
+                        output = "import " + values + " from " + stringListEntry.getKey() + ";";
+                    }
                 } else {
                     output = "";
                 }

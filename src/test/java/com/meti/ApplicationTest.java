@@ -38,6 +38,11 @@ public class ApplicationTest {
         }
     }
 
+    private static void assertCompiles(String input, String output) {
+        var actual = runWithSource(input);
+        assertEquals(output, actual);
+    }
+
     @BeforeEach
     void setUp() {
         source = Application.resolveFile("Main", "java");
@@ -51,20 +56,27 @@ public class ApplicationTest {
 
     @Test
     void importSingle() {
-        var actual = runWithSource("import simple;");
-        assertEquals("import simple from '*';", actual);
+        assertCompiles("import simple;", "import simple from *;");
+    }
+
+    @Test
+    void importSubNamespace() {
+        assertCompiles("import com.meti.Main;", "import Main from com.meti;");
     }
 
     @Test
     void importMultiple() {
-        var actual = runWithSource("import first;import second;");
-        assertEquals("import { first, second } from '*';", actual);
+        assertCompiles("import first;import second;", "import { first, second } from *;");
+    }
+
+    @Test
+    void importNamespace() {
+        assertCompiles("import foo.bar;", "import bar from foo;");
     }
 
     @Test
     void importAnotherSingle() {
-        var actual = runWithSource("import test;");
-        assertEquals("import test from '*';", actual);
+        assertCompiles("import test;", "import test from *;");
     }
 
 
