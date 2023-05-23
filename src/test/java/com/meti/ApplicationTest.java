@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,9 +22,12 @@ public class ApplicationTest {
         return Paths.get(".", "Main." + extension);
     }
 
-    private static void run() throws IOException {
+    private static Optional<Path> run(Path source) throws IOException {
         if (Files.exists(source)) {
             Files.createFile(target);
+            return Optional.of(target);
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -42,13 +46,20 @@ public class ApplicationTest {
     @Test
     void generates_target() throws IOException {
         Files.createFile(source);
-        run();
+        run(source);
         assertTrue(Files.exists(target));
     }
 
     @Test
+    void generates_proper_target() throws IOException {
+        Files.createFile(source);
+        var result = run(source);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
     void generates_nothing() throws IOException {
-        run();
+        run(source);
         assertFalse(Files.exists(target));
     }
 }
