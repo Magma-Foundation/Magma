@@ -10,17 +10,32 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     private static Path source;
     private static Path target;
 
-    private static Optional<Path> run(Path source) throws IOException {
-        var sources = Set.of(source);
-        var list = new Application(sources).run();
-        return list.stream().findAny();
+    private static Optional<Path> run(Path source) {
+        try {
+            var sources = Set.of(source);
+            var list = new Application(sources).run();
+            return list.stream().findAny();
+        } catch (IOException e) {
+            fail(e);
+            return Optional.empty();
+        }
+    }
+
+    private static String runWithSource(String input) {
+        try {
+            Files.writeString(source, input);
+            var output = run(source).orElseThrow();
+            return Files.readString(output);
+        } catch (IOException e) {
+            fail(e);
+            return "";
+        }
     }
 
     @BeforeEach
@@ -30,9 +45,14 @@ public class ApplicationTest {
     }
 
     @Test
-    void compilesPackage() throws IOException {
-        Files.writeString(source, "package com.meti;");
-        assertTrue(Files.readString(run(source).orElseThrow()).isEmpty());
+    void compilesPackage() {
+        assertTrue(runWithSource("package com.meti;").isEmpty());
+    }
+
+    @Test
+    void importSimple() {
+        var actual = runWithSource("import simple;");
+        assertEquals("import simple from '*';", actual);
     }
 
     @AfterEach

@@ -16,12 +16,20 @@ public record Application(Set<Path> sources) {
         var list = new ArrayList<Path>();
         for (var path : sources) {
             if (Files.exists(path)) {
+                String output;
+                var input = Files.readString(path);
+                if (input.equals("import simple;")) {
+                    output = "import simple from '*';";
+                } else {
+                    output = "";
+                }
+
                 var fileName = path.getFileName().toString();
                 var separator = fileName.indexOf(".");
                 var fileNameWithoutExtension = fileName.substring(0, separator);
 
                 var target = resolveFile(fileNameWithoutExtension, "mgs");
-                Files.createFile(target);
+                Files.writeString(target, output);
                 list.add(target);
             }
         }
