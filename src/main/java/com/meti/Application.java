@@ -18,9 +18,25 @@ public record Application(Set<Path> sources) {
             if (Files.exists(path)) {
                 String output;
                 var input = Files.readString(path);
-                if (input.startsWith("import ") && input.endsWith(";")) {
-                    var name = input.substring("import ".length(), input.indexOf(";"));
-                    output = "import " + name + " from '*';";
+
+                var imports = new ArrayList<String>();
+                var lines = input.split(";");
+                for (String line : lines) {
+                    if (line.startsWith("import ")) {
+                        var name = line.substring("import ".length());
+                        imports.add(name);
+                    }
+                }
+
+                if (!imports.isEmpty()) {
+                    String values;
+                    if (imports.size() == 1) {
+                        values = imports.get(0);
+                    } else {
+                        values = "{ " + String.join(", ", imports) + " }";
+                    }
+
+                    output = "import " + values + " from '*';";
                 } else {
                     output = "";
                 }

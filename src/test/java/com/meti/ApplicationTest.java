@@ -50,13 +50,19 @@ public class ApplicationTest {
     }
 
     @Test
-    void importSimple() {
+    void importSingle() {
         var actual = runWithSource("import simple;");
         assertEquals("import simple from '*';", actual);
     }
 
     @Test
-    void importAnotherSimple() {
+    void importMultiple() {
+        var actual = runWithSource("import first;import second;");
+        assertEquals("import { first, second } from '*';", actual);
+    }
+
+    @Test
+    void importAnotherSingle() {
         var actual = runWithSource("import test;");
         assertEquals("import test from '*';", actual);
     }
