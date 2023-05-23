@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public record Application(Set<Path> sources) {
     static Path resolveFile(String name, String extension) {
@@ -17,7 +18,7 @@ public record Application(Set<Path> sources) {
             if (Files.exists(path)) {
                 var input = Files.readString(path);
 
-                var imports = new HashMap<String, List<String>>();
+                var root = new CompoundImport();
                 var lines = input.split(";");
                 for (String line : lines) {
                     var trimmed = line.strip();
@@ -25,35 +26,19 @@ public record Application(Set<Path> sources) {
                         var name = trimmed.substring("import ".length());
 
                         var args = Arrays.asList(name.split("\\."));
-                        String parent;
-                        String child;
-                        if (args.size() == 1) {
-                            parent = "*";
-                            child = args.get(0);
-                        } else {
-                            parent = String.join(".", args.subList(0, args.size() - 1));
-                            child = args.get(args.size() - 1);
-                        }
+                        var argsCopy = new ArrayList<String>();
+                        if (args.size() == 1) argsCopy.add("*");
+                        argsCopy.addAll(args);
 
-                        if (!imports.containsKey(parent)) {
-                            imports.put(parent, new ArrayList<>());
-                        }
-                        imports.get(parent).add(child);
+                        root = root.merge(CompoundImport.from(argsCopy));
                     }
                 }
 
-                String output = "";
-                if (!imports.isEmpty()) {
-                    for (Map.Entry<String, List<String>> stringListEntry : imports.entrySet()) {
-                        String values;
-                        if (stringListEntry.getValue().size() == 1) {
-                            values = stringListEntry.getValue().get(0);
-                        } else {
-                            values = "{ " + String.join(", ", stringListEntry.getValue()) + " }";
-                        }
-
-                        output = "import " + values + " from " + stringListEntry.getKey() + ";";
-                    }
+                String output;
+                if (!root.isEmpty()) {
+                    var rendered = root.render(0);
+                    var formatted = rendered.substring(1, rendered.length() - 1).strip();
+                    output = "import " + formatted + ";";
                 } else {
                     output = "";
                 }
@@ -69,5 +54,120 @@ public record Application(Set<Path> sources) {
         }
 
         return list;
+    }
+
+    interface Import {
+
+        Collection<String> collectKeys();
+
+        Optional<List<Import>> apply(String s);
+
+        String render(int depth);
+    }
+
+    record SingleImport(String value) implements Import {
+        @Override
+        public Collection<String> collectKeys() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public Optional<List<Import>> apply(String s) {
+            return Optional.empty();
+        }
+
+        @Override
+        public String render(int depth) {
+            return value;
+        }
+    }
+
+    record CompoundImport(Map<String, List<Import>> values) implements Import {
+        public CompoundImport() {
+            this(new HashMap<>());
+        }
+
+        public static Import from(List<String> args) {
+            if (args.isEmpty()) {
+                throw new IllegalArgumentException("Args cannot be empty.");
+            }
+
+            var first = args.get(0);
+            if (args.size() == 1) {
+                return new SingleImport(first);
+            }
+
+            var subList = args.subList(1, args.size());
+            var child = from(subList);
+            return new CompoundImport(Map.of(first, Collections.singletonList(child)));
+        }
+
+        public CompoundImport merge(Import other) {
+            var set = new HashSet<>(values.keySet());
+            set.addAll(other.collectKeys());
+
+            var map = new HashMap<String, List<Import>>();
+            for (String s : set) {
+                var thisList = values.getOrDefault(s, new ArrayList<>());
+                var otherList = other.apply(s).orElse(new ArrayList<>());
+                var copy = new ArrayList<>(thisList);
+                copy.addAll(otherList);
+
+                var allKeys = copy.stream().map(Import::collectKeys).flatMap(Collection::stream).collect(Collectors.toSet());
+                var list = allKeys.stream().collect(Collectors.toMap(s12 -> s12, s1 -> copy.stream().map(entry -> {
+                            return entry.apply(s1);
+                        })
+                        .flatMap(Optional::stream)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList())));
+
+                copy.removeIf(item -> item instanceof CompoundImport);
+                copy.add(new CompoundImport(list));
+
+                map.put(s, copy);
+            }
+
+            return new CompoundImport(map);
+        }
+
+        @Override
+        public Collection<String> collectKeys() {
+            return values.keySet();
+        }
+
+        @Override
+        public Optional<List<Import>> apply(String s) {
+            if (values.containsKey(s)) {
+                return Optional.of(values.get(s));
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        @Override
+        public String render(int depth) {
+            return values.entrySet().stream()
+                    .map(entry -> {
+                        var list = entry.getValue();
+                        if (list.isEmpty()) {
+                            return entry.getKey();
+                        } else {
+                            String collect;
+                            if (list.size() == 1) {
+                                collect = list.get(0).render(depth + 1);
+                            } else {
+                                collect = entry.getValue().stream().map(anImport -> anImport.render(depth + 1))
+                                        .collect(Collectors.joining(",", "{", "}"));
+                            }
+                            return collect + " from " + entry.getKey();
+                        }
+                    })
+                    .map(value -> value)
+                    .collect(Collectors.joining(",", "{", " }"));
+        }
+
+        public boolean isEmpty() {
+            return values.isEmpty();
+        }
     }
 }
