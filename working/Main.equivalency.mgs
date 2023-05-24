@@ -1,0 +1,41 @@
+import {
+    IOException from io,
+    Paths from nio.file,
+} from java
+
+enum Result[T, E] {
+    class def Ok(value : T) => {}
+    class def Err(error : E) => {}
+}
+
+extern mod nio.file {
+    trait Path {}
+    object Paths {
+        get : (NativeString, NativeVariadic[NativeString]) : Path
+    }
+}
+
+extern def VolatileSingleSource(Path)
+extern def Application(VolatileSingleSource) {
+    def runExceptionally() : Result[(), IOException]
+}
+
+trait PrintWriter {
+    def println(NativeString)
+}
+
+extern mod System {
+    out : PrintWriter,
+    err : PrintWriter
+}
+
+let sourcePath = Paths.get(".", "Main.java")
+let source = VolatileSingleSource(sourcePath)
+
+match Application(source).runExceptionally() {
+    Ok(value) => System.out.println("Compiled successfully."),
+    Err(e : IOException) => {
+        System.err.println("Compile failed.")
+        e.printStackTrace()
+    }
+}
