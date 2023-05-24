@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,32 +18,11 @@ public class ApplicationTest {
 
     private static Optional<Path> run() {
         try {
-            return runExceptionally(new VolatileSingleSource(source));
+            return new Application(new VolatileSingleSource(source)).runExceptionally();
         } catch (IOException e) {
             fail(e);
             return Optional.empty();
         }
-    }
-
-    private static Optional<Path> runExceptionally(VolatileSingleSource source) throws IOException {
-        var sources = source.collectSources();
-        var targets = new HashSet<Path>();
-
-        for (var o : sources) {
-            var target = run(o);
-            targets.add(target);
-        }
-
-        return targets.stream().findAny();
-    }
-
-    private static Path run(Path source) throws IOException {
-        var fileName = source.getFileName().toString();
-        var separator = fileName.indexOf('.');
-        var fileNameWithoutExtension = fileName.substring(0, separator);
-        var target = source.resolveSibling(fileNameWithoutExtension + ".mgs");
-        Files.createFile(target);
-        return target;
     }
 
     private static Optional<Path> runWithSource() {
