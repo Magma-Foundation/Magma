@@ -1,4 +1,4 @@
-package com.meti.com.meti;
+package com.meti;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
