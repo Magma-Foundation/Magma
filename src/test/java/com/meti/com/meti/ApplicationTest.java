@@ -1,5 +1,6 @@
 package com.meti.com.meti;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,12 @@ public class ApplicationTest {
         if (Files.exists(source)) {
             Files.createFile(target);
         }
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(source);
+        Files.deleteIfExists(target);
     }
 
     @BeforeEach
