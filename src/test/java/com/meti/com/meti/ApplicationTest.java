@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,17 +16,31 @@ public class ApplicationTest {
     private static Path source;
     private static Path target;
 
-    private static void run() {
+    private static Optional<Path> run() {
         try {
-            runExceptionally();
+            return runExceptionally();
         } catch (IOException e) {
             fail(e);
+            return Optional.empty();
         }
     }
 
-    private static void runExceptionally() throws IOException {
+    private static Optional<Path> runExceptionally() throws IOException {
         if (Files.exists(source)) {
             Files.createFile(target);
+            return Optional.of(target);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<Path> runWithSource() {
+        try {
+            Files.createFile(source);
+            return run();
+        } catch (IOException e) {
+            fail(e);
+            return Optional.empty();
         }
     }
 
@@ -42,15 +57,19 @@ public class ApplicationTest {
     }
 
     @Test
-    void generates_target() throws IOException {
-        Files.createFile(source);
-        run();
+    void generatesTarget() {
+        runWithSource();
         assertTrue(Files.exists(target));
     }
 
     @Test
-    void generates_nothing() {
+    void generatesNothing() {
         run();
         assertFalse(Files.exists(target));
+    }
+
+    @Test
+    void generatesProperTarget() {
+        assertEquals(target, runWithSource().orElseThrow());
     }
 }
