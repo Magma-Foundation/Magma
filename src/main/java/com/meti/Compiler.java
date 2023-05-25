@@ -39,7 +39,7 @@ public record Compiler(String input) {
                     var bodyStart = line.indexOf('{');
 
                     var name = line.substring(prefixIndex + JavaClass.ClassKeyword.length(), bodyStart).strip();
-                    output.append(new Function(name, keywordString.contains("public")).render());
+                    output.append(new Abstraction(name, keywordString.contains("public")).render());
                 }
             }
         }

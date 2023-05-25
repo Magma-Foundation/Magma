@@ -8,7 +8,7 @@ class FunctionTest {
 
     @Test
     void render() {
-        var actual = new Function("test", true).render();
+        var actual = new Abstraction("test", true).render();
         assertEquals("public class def test()", actual);
     }
 }

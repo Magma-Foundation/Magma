@@ -1,12 +1,8 @@
 package com.meti;
 
 public class Function implements Node {
-    private final String name;
-    private final boolean isPublic;
-
-    public Function(String name) {
-        this(name, false);
-    }
+    protected final String name;
+    protected final boolean isPublic;
 
     public Function(String name, boolean isPublic) {
         this.name = name;
