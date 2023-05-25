@@ -1,11 +1,17 @@
 package com.meti;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Method extends Definition {
-    public Method(String name, Set<Flag> flags) {
+    public Method(String name, List<Flag> flags) {
         super(name, flags);
+    }
+
+    public Method(String name) {
+        super(name, Collections.emptyList());
     }
 
     @Override

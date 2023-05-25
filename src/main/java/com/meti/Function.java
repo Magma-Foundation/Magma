@@ -1,16 +1,25 @@
 package com.meti;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Function extends Definition {
 
-    public Function(String name, boolean isPublic) {
-        super(name, isPublic ? Collections.singleton(Flag.Public) : Collections.emptySet());
+    public Function(String name, List<Flag> flags) {
+        super(name, flags);
     }
 
     @Override
     public String render() {
-        var prefix = isPublic() ? "public " : "";
-        return prefix + "class def " + name + "()";
+        var collect = (flags.isEmpty()) ? "" : (joinFlags() + " ");
+        return collect + "def " + name + "()";
+    }
+
+    private String joinFlags() {
+        return flags.stream()
+                .map(Flag::name)
+                .map(String::toLowerCase)
+                .collect(Collectors.joining(" "));
     }
 }

@@ -1,37 +1,33 @@
 package com.meti;
 
-public final class JavaClass implements Node {
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public final class JavaClass extends Definition {
     public static final String ClassKeyword = "class ";
-    private final boolean isPublic;
-    private final String name;
     private final Node body;
 
-    public JavaClass(String name, Block body) {
-        this(name, false, body);
+    public JavaClass(String name, Block body, Flag... flags) {
+        this(name, body, List.of(flags));
     }
 
-    public JavaClass(String name, boolean isPublic, Node body) {
-        this.name = name;
-        this.isPublic = isPublic;
+    public JavaClass(String name, Node body, List<Flag> flags) {
+        super(name, flags);
         this.body = body;
     }
 
     @Override
     public String render() {
-        String publicString;
-        if (isPublic) {
-            publicString = "public";
-        } else {
-            publicString = "";
-        }
+        var collect = flags.isEmpty() ? "" : (renderFlags() + " ");
+        return collect + ClassKeyword + name + " " + body.render();
+    }
 
-        String keywordString;
-        if (!publicString.isEmpty()) {
-            keywordString = publicString + " ";
-        } else {
-            keywordString = "";
-        }
-        return keywordString + ClassKeyword + name + " " + body.render();
+    private String renderFlags() {
+        return flags.stream()
+                .map(Flag::name)
+                .map(String::toLowerCase)
+                .collect(Collectors.joining(" "));
     }
 
 }

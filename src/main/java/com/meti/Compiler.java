@@ -1,7 +1,9 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public record Compiler(String input) {
     private static String formatImport(String value, int separator) {
@@ -41,9 +43,9 @@ public record Compiler(String input) {
 
                     Node aPublic;
                     if (bodyStart == -1) {
-                        aPublic = new Abstraction(name, keywordString.contains("public"));
+                        aPublic = new Abstraction(name, Collections.emptyList());
                     } else {
-                        aPublic = new Implementation(name, keywordString.contains("public"), new Block());
+                        aPublic = new Implementation(name, new Block(nodes), Definition.Flag.Class);
                     }
                     nodes.add(aPublic);
                 }

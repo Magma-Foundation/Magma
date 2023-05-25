@@ -1,22 +1,20 @@
 package com.meti;
 
+import java.util.List;
 import java.util.Set;
 
 public abstract class Definition implements Node {
     protected final String name;
-    protected final Set<Flag> flags;
+    public final List<Flag> flags;
 
-    public Definition(String name, Set<Flag> flags) {
+    public Definition(String name, List<Flag> flags) {
         this.name = name;
         this.flags = flags;
     }
 
-    public boolean isPublic() {
-        return flags.contains(Flag.Public);
-    }
-
     public enum Flag {
         Public,
-        Static
+        Static,
+        Class
     }
 }
