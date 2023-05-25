@@ -4,14 +4,16 @@ public final class JavaClass implements Node {
     public static final String ClassKeyword = "class ";
     private final boolean isPublic;
     private final String name;
+    private final Node body;
 
-    public JavaClass(String name) {
-        this(name, false);
+    public JavaClass(String name, Block body) {
+        this(name, false, body);
     }
 
-    public JavaClass(String name, boolean isPublic) {
+    public JavaClass(String name, boolean isPublic, Node body) {
         this.name = name;
         this.isPublic = isPublic;
+        this.body = body;
     }
 
     @Override
@@ -29,7 +31,7 @@ public final class JavaClass implements Node {
         } else {
             keywordString = "";
         }
-        return keywordString + ClassKeyword + name + " {}";
+        return keywordString + ClassKeyword + name + " " + body.render();
     }
 
 }

@@ -1,5 +1,8 @@
 package com.meti;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public record Compiler(String input) {
     private static String formatImport(String value, int separator) {
         String importValue;
@@ -19,7 +22,7 @@ public record Compiler(String input) {
         }
 
         var lines = input.split(";");
-        var output = new StringBuilder();
+        var nodes = new ArrayList<Node>();
 
         for (int i = 0; i < lines.length; i++) {
             var line = lines[i].strip();
@@ -28,21 +31,25 @@ public record Compiler(String input) {
                     var value = line.substring(Import.Prefix.length());
                     var separator = value.indexOf('.');
                     var importValue = formatImport(value, separator);
-                    output.append(new Import(importValue).render());
-
-                    if (i != lines.length - 1) {
-                        output.append("\n");
-                    }
-                } else if(line.contains(JavaClass.ClassKeyword)){
+                    nodes.add(new Import(importValue));
+                } else if (line.contains(JavaClass.ClassKeyword)) {
                     var prefixIndex = line.indexOf(JavaClass.ClassKeyword);
                     var keywordString = line.substring(0, prefixIndex);
                     var bodyStart = line.indexOf('{');
 
                     var name = line.substring(prefixIndex + JavaClass.ClassKeyword.length(), bodyStart).strip();
-                    output.append(new Abstraction(name, keywordString.contains("public")).render());
+
+                    Node aPublic;
+                    if (bodyStart == -1) {
+                        aPublic = new Abstraction(name, keywordString.contains("public"));
+                    } else {
+                        aPublic = new Implementation(name, keywordString.contains("public"), new Block());
+                    }
+                    nodes.add(aPublic);
                 }
             }
         }
-        return output.toString();
+
+        return nodes.stream().map(Node::render).collect(Collectors.joining());
     }
 }

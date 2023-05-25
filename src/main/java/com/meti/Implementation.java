@@ -14,6 +14,6 @@ public class Implementation extends Function {
 
     @Override
     public String render() {
-        return super.render() + body.render();
+        return super.render() + " => " + body.render();
     }
 }

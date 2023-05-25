@@ -8,7 +8,7 @@ class JavaClassTest {
 
     @Test
     void render() {
-        var node = new JavaClass("Test", true);
+        var node = new JavaClass("Test", true, new Block());
         assertEquals("public class Test {}", node.render());
     }
 }
