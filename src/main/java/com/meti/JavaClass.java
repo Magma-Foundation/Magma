@@ -1,7 +1,7 @@
 package com.meti;
 
 public final class JavaClass implements Node {
-    public static final String PREFIX = "class ";
+    public static final String ClassKeyword = "class ";
     private final boolean isPublic;
     private final String name;
 
@@ -29,7 +29,7 @@ public final class JavaClass implements Node {
         } else {
             keywordString = "";
         }
-        return keywordString + PREFIX + name + " {}";
+        return keywordString + ClassKeyword + name + " {}";
     }
 
 }

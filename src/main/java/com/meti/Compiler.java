@@ -33,12 +33,12 @@ public record Compiler(String input) {
                     if (i != lines.length - 1) {
                         output.append("\n");
                     }
-                } else {
-                    var prefixIndex = line.indexOf(JavaClass.PREFIX);
+                } else if(line.contains(JavaClass.ClassKeyword)){
+                    var prefixIndex = line.indexOf(JavaClass.ClassKeyword);
                     var keywordString = line.substring(0, prefixIndex);
                     var bodyStart = line.indexOf('{');
 
-                    var name = line.substring(prefixIndex + JavaClass.PREFIX.length(), bodyStart).strip();
+                    var name = line.substring(prefixIndex + JavaClass.ClassKeyword.length(), bodyStart).strip();
                     output.append(new Function(name, keywordString.contains("public")).render());
                 }
             }
