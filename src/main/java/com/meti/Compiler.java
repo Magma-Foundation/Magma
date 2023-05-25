@@ -18,11 +18,11 @@ public record Compiler(String input) {
             return "";
         }
 
-        var lines = input.split("\n");
+        var lines = input.split(";");
         var output = new StringBuilder();
 
         for (int i = 0; i < lines.length; i++) {
-            var line = lines[i];
+            var line = lines[i].strip();
             if (!line.isBlank() && !line.startsWith("package ")) {
                 if (line.startsWith("import ")) {
                     var value = line.substring(Import.Prefix.length());
