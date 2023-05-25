@@ -4,15 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CompilerTest {
-    private static void assertCompile(String input, String expected) {
-        var output = new Compiler(input).compile();
-        assertEquals(expected, output);
-    }
-
-    private static void assertCompile(Node input, Node output) {
-        assertCompile(input.render(), output.render());
-    }
+class ImportTest extends CompiledTest {
 
     @Test
     void importAnother() {
