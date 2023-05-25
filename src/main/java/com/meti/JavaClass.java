@@ -1,11 +1,35 @@
 package com.meti;
 
-public record JavaClass(String name) implements Node {
-
+public final class JavaClass implements Node {
     public static final String PREFIX = "class ";
+    private final boolean isPublic;
+    private final String name;
+
+    public JavaClass(String name) {
+        this(name, false);
+    }
+
+    public JavaClass(String name, boolean isPublic) {
+        this.name = name;
+        this.isPublic = isPublic;
+    }
 
     @Override
     public String render() {
-        return PREFIX + name() + " {}";
+        String publicString;
+        if (isPublic) {
+            publicString = "public";
+        } else {
+            publicString = "";
+        }
+
+        String keywordString;
+        if (!publicString.isEmpty()) {
+            keywordString = publicString + " ";
+        } else {
+            keywordString = "";
+        }
+        return keywordString + PREFIX + name + " {}";
     }
+
 }

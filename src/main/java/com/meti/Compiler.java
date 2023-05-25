@@ -29,12 +29,16 @@ public record Compiler(String input) {
                 var importValue = formatImport(value, separator);
                 output.append(new Import(importValue).render());
 
-                if(i != lines.length - 1) {
+                if (i != lines.length - 1) {
                     output.append("\n");
                 }
             } else {
-                var name = line.substring(JavaClass.PREFIX.length(), line.indexOf('{')).strip();
-                output.append(new Function(name).render());
+                var prefixIndex = line.indexOf(JavaClass.PREFIX);
+                var keywordString = line.substring(0, prefixIndex);
+                var bodyStart = line.indexOf('{');
+
+                var name = line.substring(prefixIndex + JavaClass.PREFIX.length(), bodyStart).strip();
+                output.append(new Function(name, keywordString.contains("public")).render());
             }
         }
         return output.toString();
