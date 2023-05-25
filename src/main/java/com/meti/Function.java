@@ -1,12 +1,9 @@
 package com.meti;
 
-public class Function implements Node {
-    protected final String name;
-    protected final boolean isPublic;
+public class Function extends Definition {
 
     public Function(String name, boolean isPublic) {
-        this.name = name;
-        this.isPublic = isPublic;
+        super(name, isPublic);
     }
 
     @Override

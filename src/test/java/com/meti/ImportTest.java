@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ImportTest extends CompiledTest {
+class ImportTest extends FeatureTest {
 
     @Test
     void importAnother() {

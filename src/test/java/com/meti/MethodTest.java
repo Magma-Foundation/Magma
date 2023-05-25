@@ -2,10 +2,12 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-public class MethodTest extends CompiledTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class MethodTest {
     @Test
     void test() {
-        assertCompile(new JavaClass("Test", new Block()),
-                new Implementation("Test", new Block()));
+        var actual = new Method("test", true).render();
+        assertEquals("public void test(){}", actual);
     }
 }
