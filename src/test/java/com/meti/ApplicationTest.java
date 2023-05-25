@@ -26,8 +26,12 @@ public class ApplicationTest {
     }
 
     private static Optional<Path> runWithSource() {
+        return runWithSource("");
+    }
+
+    private static Optional<Path> runWithSource(String runWithSource) {
         try {
-            Files.createFile(source);
+            Files.writeString(source, runWithSource);
             return run();
         } catch (IOException e) {
             fail(e);
@@ -45,6 +49,18 @@ public class ApplicationTest {
     void setUp() {
         source = Paths.get(".", "Main.java");
         target = Paths.get(".", "Main.mgs");
+    }
+
+    @Test
+    void generatesEmpty() throws IOException {
+        runWithSource();
+        assertTrue(Files.readString(target).isEmpty());
+    }
+
+    @Test
+    void compilesImport() throws IOException {
+        runWithSource(new Import().render());
+        assertEquals(new Import().render(), Files.readString(target));
     }
 
     @Test

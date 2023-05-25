@@ -8,11 +8,14 @@ import java.util.Optional;
 
 public record Application(VolatileSingleSource source) {
     static Path run(Path source) throws IOException {
+        var input = Files.readString(source);
+        var output = new Compiler(input).compile();
+
         var fileName = source.getFileName().toString();
         var separator = fileName.indexOf('.');
         var fileNameWithoutExtension = fileName.substring(0, separator);
         var target = source.resolveSibling(fileNameWithoutExtension + ".mgs");
-        Files.createFile(target);
+        Files.writeString(target, output);
         return target;
     }
 
