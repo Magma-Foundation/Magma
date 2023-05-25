@@ -59,8 +59,8 @@ public class ApplicationTest {
 
     @Test
     void compilesImport() throws IOException {
-        runWithSource(new Import().render());
-        assertEquals(new Import().render(), Files.readString(target));
+        runWithSource(new Import("test").render());
+        assertEquals(new Import("test").render(), Files.readString(target));
     }
 
     @Test
