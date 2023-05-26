@@ -1,8 +1,6 @@
-package com.meti;
+package com.meti.node;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class Abstraction extends Function {
 

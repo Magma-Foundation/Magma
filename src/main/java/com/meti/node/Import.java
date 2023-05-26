@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 public class Import implements Node {
     public static final String Prefix = "import ";

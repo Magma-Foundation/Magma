@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.Node;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FeatureTest {

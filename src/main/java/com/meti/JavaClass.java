@@ -1,7 +1,10 @@
 package com.meti;
 
+import com.meti.node.Block;
+import com.meti.node.Definition;
+import com.meti.node.Node;
+
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class JavaClass extends Definition {

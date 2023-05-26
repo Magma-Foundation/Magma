@@ -1,7 +1,6 @@
-package com.meti;
+package com.meti.node;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Function extends Definition {

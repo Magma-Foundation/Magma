@@ -1,8 +1,10 @@
 package com.meti;
 
+import com.meti.node.Block;
+import com.meti.node.Definition;
+import com.meti.node.Implementation;
+import com.meti.node.Method;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 public class MethodFeatureTest extends FeatureTest {
     @Test

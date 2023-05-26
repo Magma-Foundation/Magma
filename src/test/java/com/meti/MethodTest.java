@@ -1,11 +1,11 @@
 package com.meti;
 
-import com.meti.Definition.Flag;
+import com.meti.node.Definition.Flag;
+import com.meti.node.Method;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

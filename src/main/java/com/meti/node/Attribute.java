@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 public interface Attribute {
     public interface Converter<T> {

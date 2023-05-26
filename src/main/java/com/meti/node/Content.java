@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.node;
 
 public class Content implements Node {
     private final String value;

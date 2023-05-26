@@ -1,8 +1,8 @@
 package com.meti;
 
+import com.meti.node.Block;
+import com.meti.node.Definition;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 

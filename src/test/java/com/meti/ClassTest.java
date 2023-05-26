@@ -1,9 +1,11 @@
 package com.meti;
 
+import com.meti.node.Block;
+import com.meti.node.Definition;
+import com.meti.node.Implementation;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 public class ClassTest extends FeatureTest {
     @Test

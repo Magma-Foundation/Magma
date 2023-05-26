@@ -1,7 +1,6 @@
-package com.meti;
+package com.meti.node;
 
 import java.util.List;
-import java.util.Set;
 
 public abstract class Definition implements Node {
     protected final String name;
