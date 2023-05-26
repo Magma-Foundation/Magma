@@ -24,5 +24,6 @@ public interface Node {
         });
     }
 
+    @Deprecated
     String render();
 }
