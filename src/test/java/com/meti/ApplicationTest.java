@@ -1,6 +1,8 @@
 package com.meti;
 
-import com.meti.node.Import;
+import com.meti.node.MapNode;
+import com.meti.node.Node;
+import com.meti.node.StringAttribute;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,7 +63,9 @@ public class ApplicationTest {
 
     @Test
     void compilesImport() throws IOException {
-        var value = new Import("test");
+        var value = (Node) new MapNode("import", Map.of(
+                "value", new StringAttribute("test")
+        ));
         runWithSource(value.render());
         assertEquals(value.render(), Files.readString(target));
     }
