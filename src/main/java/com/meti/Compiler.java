@@ -31,7 +31,7 @@ public record Compiler(String input) {
         return Stream.of(
                 new BlockLexer(input),
                 new ImportLexer(input),
-                new ImplementationLexer(input),
+                new ClassLexer(input),
                 new MethodLexer(input)
         );
     }

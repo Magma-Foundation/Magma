@@ -12,6 +12,14 @@ public interface Node {
         return Optional.empty();
     }
 
+    default Attribute applyUnsafe(Object key) {
+        return apply(key).orElseThrow(() -> {
+            var format = "'%s' is not a valid property for types of '%s'.";
+            var message = format.formatted(key, getClass());
+            throw new IllegalArgumentException(message);
+        });
+    }
+
     default Optional<Node> with(Object key, Attribute value) {
         return Optional.empty();
     }

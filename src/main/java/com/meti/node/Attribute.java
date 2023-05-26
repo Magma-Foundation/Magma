@@ -12,12 +12,24 @@ public interface Attribute {
         return Optional.empty();
     }
 
+    default Node asNodeUnsafe() {
+        return asNode().orElseThrow(() -> {
+            return new IllegalStateException("Not a node.");
+        });
+    }
+
     default Optional<String> asString() {
         return Optional.empty();
     }
 
     default Optional<List<Node>> asNodeList() {
         return Optional.empty();
+    }
+
+    default String asStringUnsafe() {
+        return asString().orElseThrow(() -> {
+            return new IllegalStateException("Not a string.");
+        });
     }
 
     public interface Converter<T> {

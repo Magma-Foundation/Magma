@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record ImplementationLexer(String input) implements Lexer {
+public record ClassLexer(String input) implements Lexer {
     public static final String ClassKeyword = "class ";
 
     @Override

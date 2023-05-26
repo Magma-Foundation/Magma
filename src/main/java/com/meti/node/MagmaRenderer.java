@@ -1,5 +1,7 @@
 package com.meti.node;
 
+import com.meti.node.function.ImplementationRenderer;
+
 import java.util.stream.Stream;
 
 public final class MagmaRenderer extends CompoundRenderer {
@@ -10,7 +12,9 @@ public final class MagmaRenderer extends CompoundRenderer {
 
     @Override
     protected Stream<Renderer> streamRenderers(Node node) {
-        return Stream.of(new BlockRenderer(node),
+        return Stream.of(
+                new ImplementationRenderer(node),
+                new BlockRenderer(node),
                 new ImportRenderer(node));
     }
 }
