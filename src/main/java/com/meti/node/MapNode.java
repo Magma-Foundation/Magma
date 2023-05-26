@@ -8,6 +8,7 @@ public class MapNode implements Node {
     private final String identifier;
     private final Map<String, Attribute> attributes;
     private final Map<Group, List<Object>> groups;
+
     public MapNode(String identifier, Map<String, Attribute> attributes) {
         this(identifier, attributes, Collections.emptyMap());
     }
@@ -20,6 +21,14 @@ public class MapNode implements Node {
 
     public MapNode(String identifier) {
         this(identifier, Collections.emptyMap(), new HashMap<>());
+    }
+
+    @Override
+    public String toString() {
+        return "MapNode{" +
+               "identifier='" + identifier + '\'' +
+               ", attributes=" + attributes +
+               '}';
     }
 
     @Override

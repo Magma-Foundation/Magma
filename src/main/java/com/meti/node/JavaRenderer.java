@@ -9,6 +9,8 @@ public class JavaRenderer extends CompoundRenderer {
 
     @Override
     protected Stream<Renderer> streamRenderers(Node node) {
-        return Stream.of(new JavaClassRenderer(node));
+        return Stream.of(
+                new BlockRenderer(node),
+                new JavaClassRenderer(node));
     }
 }

@@ -10,7 +10,7 @@ public final class MagmaRenderer extends CompoundRenderer {
 
     @Override
     protected Stream<Renderer> streamRenderers(Node node) {
-        return Stream.of(new ImportRenderer(node));
+        return Stream.of(new BlockRenderer(node),
+                new ImportRenderer(node));
     }
-
 }

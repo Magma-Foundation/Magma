@@ -1,6 +1,7 @@
 package com.meti;
 
-import com.meti.node.JavaRenderer;
+import com.meti.node.JavaRenderStage;
+import com.meti.node.MagmaRenderStage;
 import com.meti.node.MagmaRenderer;
 import com.meti.node.Node;
 
@@ -14,7 +15,7 @@ public class FeatureTest {
 
     protected static void assertCompile(Node input, Node output) {
         FeatureTest.assertCompile(
-                new JavaRenderer(input).render().orElseThrow(),
-                new MagmaRenderer(output).render().orElseThrow());
+                new JavaRenderStage(input).render().orElseThrow(),
+                new MagmaRenderStage(output).render().orElseThrow());
     }
 }

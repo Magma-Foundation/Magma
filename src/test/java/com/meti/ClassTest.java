@@ -13,13 +13,17 @@ public class ClassTest extends FeatureTest {
         var input = new MapNode("class", Map.of(
                 "name", new StringAttribute("Test"),
                 "body", new NodeAttribute(new MapNode("block", Map.of("children", new NodeListAttribute()))),
-                "flags", new ObjectListAttribute(List.of(new Flag[]{}))
+                "flags", new ObjectListAttribute()
+        ), Map.of(
+                Node.Group.Node, List.of("body")
         ));
 
         var output = new MapNode("implementation", Map.of(
                 "name", new StringAttribute("Test"),
                 "body", new NodeAttribute(new MapNode("block", Map.of("children", new NodeListAttribute()))),
                 "flags", new ObjectListAttribute(List.of(Flag.Class))
+        ),Map.of(
+                Node.Group.Node, List.of("body")
         ));
 
         assertCompile(input, output);

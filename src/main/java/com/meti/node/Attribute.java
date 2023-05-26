@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Attribute {
+    default Optional<List<?>> asListOfObjects() {
+        return Optional.empty();
+    }
+
     default Optional<Node> asNode() {
         return Optional.empty();
     }

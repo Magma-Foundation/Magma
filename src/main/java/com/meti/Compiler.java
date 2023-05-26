@@ -11,11 +11,11 @@ public record Compiler(String input) {
     private static Optional<Node> compileNodeTree(String input) {
         return compileNode(input).map(parent -> {
             var withNode = parent.stream(Node.Group.Node).reduce(parent,
-                    (node, key) -> node.map(key, new NodeConverter()).orElse(node),
+                    (node, key) -> node.map(key, new LexingNodeConverter()).orElse(node),
                     (previous, next) -> next);
 
             return withNode.stream(Node.Group.NodeList).reduce(withNode,
-                    (node, key) -> node.map(key, new NodeListConverter()).orElse(node),
+                    (node, key) -> node.map(key, new LexingNodeListConverter()).orElse(withNode),
                     (previous, next) -> next);
         });
     }
@@ -36,7 +36,7 @@ public record Compiler(String input) {
         );
     }
 
-    private static Node compileContent(Node value) {
+    private static Node lexContent(Node value) {
         if (!value.is(Content.Key.Id)) return value;
         return value.apply(Content.Key.Value)
                 .flatMap(Attribute::asString)
@@ -59,45 +59,26 @@ public record Compiler(String input) {
 
 
         return nodes.stream()
-                .map(MagmaRenderer::new)
-                .map(Renderer::render)
+                .map(parent -> new MagmaRenderStage(parent).render())
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining());
     }
 
-    private static class NodeListConverter implements Attribute.Converter<List<Node>> {
-        @Override
-        public Attribute fromValue(List<Node> value) {
-            return new NodeListAttribute(value);
-        }
-
-        @Override
-        public Optional<List<Node>> fromAttribute(Attribute value) {
-            return value.asNodeList();
-        }
+    private static class LexingNodeListConverter extends NodeListConverter {
 
         @Override
         public List<Node> apply(List<Node> value) {
             return value.stream()
-                    .map(Compiler::compileContent)
+                    .map(Compiler::lexContent)
                     .collect(Collectors.toList());
         }
     }
 
-    private static class NodeConverter implements Attribute.Converter<Node> {
-        @Override
-        public Attribute fromValue(Node value) {
-            return new NodeAttribute(value);
-        }
-
-        @Override
-        public Optional<Node> fromAttribute(Attribute value) {
-            return value.asNode();
-        }
+    private static class LexingNodeConverter extends NodeConverter {
 
         @Override
         public Node apply(Node value) {
-            return compileContent(value);
+            return lexContent(value);
         }
     }
 }

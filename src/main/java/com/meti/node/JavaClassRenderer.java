@@ -19,7 +19,7 @@ public class JavaClassRenderer implements Renderer {
 
         var body = node.apply("body")
                 .flatMap(Attribute::asNode)
-                .flatMap(node -> node.apply("value"))
+                .flatMap(node -> node.apply(Content.Key.Value))
                 .flatMap(Attribute::asString)
                 .orElseThrow();
 

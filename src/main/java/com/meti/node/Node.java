@@ -20,7 +20,7 @@ public interface Node {
         return apply(key).flatMap(previous -> converter.fromAttribute(previous).flatMap(unwrapped -> {
             var result = converter.apply(unwrapped);
             var next = converter.fromValue(result);
-            return with(unwrapped, next);
+            return with(key, next);
         }));
     }
 
