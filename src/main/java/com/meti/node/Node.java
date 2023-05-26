@@ -1,6 +1,7 @@
 package com.meti.node;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface Node {
     default boolean is(Object key) {
@@ -16,14 +17,22 @@ public interface Node {
     }
 
     default <T> Optional<Node> map(Object key, Attribute.Converter<T> converter) {
-        return apply(key).flatMap(previous -> {
-            var value = converter.fromAttribute(previous);
-            var result = converter.apply(value);
+        return apply(key).flatMap(previous -> converter.fromAttribute(previous).flatMap(unwrapped -> {
+            var result = converter.apply(unwrapped);
             var next = converter.fromValue(result);
-            return with(key, next);
-        });
+            return with(unwrapped, next);
+        }));
     }
 
     @Deprecated
     String render();
+
+    default Stream<Object> stream(Group group) {
+        return Stream.empty();
+    }
+
+    public enum Group {
+        Node,
+        NodeList
+    }
 }

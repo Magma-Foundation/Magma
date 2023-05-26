@@ -11,4 +11,6 @@ public class Content implements Node {
     public String render() {
         return value;
     }
+
+    public enum Key {Value, Id}
 }
