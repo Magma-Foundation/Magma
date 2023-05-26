@@ -21,16 +21,19 @@ public record Compiler(String input) {
     }
 
     private static Optional<Node> compileNode(String input) {
-        var lexers = Stream.of(
+        return streamLexers(input)
+                .map(Lexer::lex)
+                .flatMap(Optional::stream)
+                .findFirst();
+    }
+
+    private static Stream<Lexer> streamLexers(String input) {
+        return Stream.of(
                 new BlockLexer(input),
                 new ImportLexer(input),
                 new ImplementationLexer(input),
                 new MethodLexer(input)
         );
-
-        return lexers.map(Lexer::lex)
-                .flatMap(Optional::stream)
-                .findFirst();
     }
 
     private static Node compileContent(Node value) {
@@ -54,8 +57,11 @@ public record Compiler(String input) {
                 .flatMap(Optional::stream)
                 .toList();
 
+
         return nodes.stream()
-                .map(Node::render)
+                .map(MagmaRenderer::new)
+                .map(Renderer::render)
+                .flatMap(Optional::stream)
                 .collect(Collectors.joining());
     }
 

@@ -20,10 +20,5 @@ public class Content implements Node {
         return Optional.empty();
     }
 
-    @Override
-    public String render() {
-        return value;
-    }
-
     public enum Key {Value, Id}
 }

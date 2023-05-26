@@ -24,9 +24,6 @@ public interface Node {
         }));
     }
 
-    @Deprecated
-    String render();
-
     default Stream<Object> stream(Group group) {
         return Stream.empty();
     }

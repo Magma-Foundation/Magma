@@ -4,11 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Attribute {
-    Optional<Node> asNode();
+    default Optional<Node> asNode() {
+        return Optional.empty();
+    }
 
-    Optional<String> asString();
+    default Optional<String> asString() {
+        return Optional.empty();
+    }
 
-    Optional<List<Node>> asNodeList();
+    default Optional<List<Node>> asNodeList() {
+        return Optional.empty();
+    }
 
     public interface Converter<T> {
         Attribute fromValue(T value);

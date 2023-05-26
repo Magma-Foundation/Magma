@@ -1,5 +1,7 @@
 package com.meti.node;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,7 +28,7 @@ public record ImportLexer(String input) implements Lexer {
             var importValue = formatImport(value, separator);
             return Optional.of(new MapNode("import", Map.of(
                     "value", new StringAttribute(importValue)
-            )));
+            ), new HashMap<Node.Group, List<Object>>()));
         }
         return Optional.empty();
     }

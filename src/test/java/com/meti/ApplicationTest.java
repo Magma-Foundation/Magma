@@ -1,7 +1,7 @@
 package com.meti;
 
+import com.meti.node.MagmaRenderer;
 import com.meti.node.MapNode;
-import com.meti.node.Node;
 import com.meti.node.StringAttribute;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,11 +63,12 @@ public class ApplicationTest {
 
     @Test
     void compilesImport() throws IOException {
-        var value = (Node) new MapNode("import", Map.of(
+        var value = new MapNode("import", Map.of(
                 "value", new StringAttribute("test")
         ));
-        runWithSource(value.render());
-        assertEquals(value.render(), Files.readString(target));
+
+        runWithSource(new MagmaRenderer(value).render().orElseThrow());
+        assertEquals(new MagmaRenderer(value).render().orElseThrow(), Files.readString(target));
     }
 
     @Test

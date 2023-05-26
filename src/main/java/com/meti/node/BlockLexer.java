@@ -1,5 +1,6 @@
 package com.meti.node;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,8 +16,9 @@ public record BlockLexer(String input) implements Lexer {
                     .toList();
 
             var attribute = new NodeListAttribute(children);
-            var node = new MapNode("block", Map.of("children", attribute));
-            return Optional.of(node);
+            return Optional.of(new MapNode("block",
+                    Map.of("children", attribute),
+                    Map.of(Node.Group.NodeList, List.of("children"))));
         }
         return Optional.empty();
     }

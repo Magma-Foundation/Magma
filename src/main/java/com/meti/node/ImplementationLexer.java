@@ -21,6 +21,8 @@ public record ImplementationLexer(String input) implements Lexer {
                     "name", new StringAttribute(name),
                     "body", new NodeAttribute(body),
                     "flags", new ObjectListAttribute(List.of(Flag.Class))
+            ), Map.of(
+                    Node.Group.Node, List.of("body")
             )));
         }
         return Optional.empty();
