@@ -2,6 +2,7 @@ package com.meti;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
@@ -18,6 +19,53 @@ public record Compiler(String input) {
     }
 
     private static Node compileNode(String input) {
+        var children = lexBlock(input);
+        if (children.isPresent()) return children.get();
+
+        var importValue = lexImport(input);
+        if (importValue.isPresent()) return importValue.get();
+
+        var name = lexImplementation(input);
+        if (name.isPresent()) return name.get();
+
+        var empty = lexMethod(input);
+        if (empty.isPresent()) return empty.get();
+
+        throw new UnsupportedOperationException("Unknown input: '" + input + "'.");
+    }
+
+    private static Optional<Node> lexMethod(String input) {
+        if (input.equals("void empty(){}")) {
+            return Optional.of(new Implementation("empty", new Block()));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Node> lexImplementation(String input) {
+        if (input.contains(JavaClass.ClassKeyword)) {
+            var prefixIndex = input.indexOf(JavaClass.ClassKeyword);
+            var bodyStart = input.indexOf('{');
+            var bodyEnd = input.lastIndexOf('}');
+            var bodyString = input.substring(bodyStart, bodyEnd + 1);
+            var body = compileNode(bodyString);
+            var name = input.substring(prefixIndex + JavaClass.ClassKeyword.length(), bodyStart).strip();
+
+            return Optional.of(new Implementation(name, body, Definition.Flag.Class));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Node> lexImport(String input) {
+        if (input.startsWith("import ")) {
+            var value = input.substring(Import.Prefix.length());
+            var separator = value.indexOf('.');
+            var importValue = formatImport(value, separator);
+            return Optional.of(new Import(importValue));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Node> lexBlock(String input) {
         if (input.startsWith("{") && input.endsWith("}")) {
             var content = input.substring(1, input.length() - 1);
             var lines = split(content);
@@ -28,32 +76,9 @@ public record Compiler(String input) {
                 }
             }
 
-            return new Block(children);
+            return Optional.of(new Block(children));
         }
-
-        if (input.startsWith("import ")) {
-            var value = input.substring(Import.Prefix.length());
-            var separator = value.indexOf('.');
-            var importValue = formatImport(value, separator);
-            return new Import(importValue);
-        }
-
-        if (input.contains(JavaClass.ClassKeyword)) {
-            var prefixIndex = input.indexOf(JavaClass.ClassKeyword);
-            var bodyStart = input.indexOf('{');
-            var bodyEnd = input.lastIndexOf('}');
-            var bodyString = input.substring(bodyStart, bodyEnd + 1);
-            var body = compileNode(bodyString);
-            var name = input.substring(prefixIndex + JavaClass.ClassKeyword.length(), bodyStart).strip();
-
-            return new Implementation(name, body, Definition.Flag.Class);
-        }
-
-        if (input.equals("void empty(){}")) {
-            return new Implementation("empty", new Block());
-        }
-
-        throw new UnsupportedOperationException("Unknown input: '" + input + "'.");
+        return Optional.empty();
     }
 
     private static List<String> split(String content) {
