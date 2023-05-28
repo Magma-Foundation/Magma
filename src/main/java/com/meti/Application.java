@@ -14,17 +14,17 @@ public final class Application {
     }
 
     Optional<Path> run() throws IOException {
-        var sources = gateway.collectSources();
+        var sources = new HashSet<>(gateway.collectSources());
         var targets = new HashSet<Path>();
         for (var source : sources) {
-            var fileName = source.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var fileNameWithoutExtension = fileName.substring(0, separator);
-            var target = source.resolveSibling(fileNameWithoutExtension + ".mgs");
+            var thisPackage = source.createPackage();
+            var target = gateway.resolveTarget(thisPackage);
+
             Files.createFile(target);
             targets.add(target);
         }
 
         return targets.stream().findFirst();
     }
+
 }
