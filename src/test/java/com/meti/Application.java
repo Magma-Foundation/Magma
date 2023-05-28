@@ -3,18 +3,28 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Optional;
 
-public record Application(Path source) {
+public final class Application {
+    private final Gateway gateway;
+
+    public Application(Gateway gateway) {
+        this.gateway = gateway;
+    }
+
     Optional<Path> run() throws IOException {
-        if (Files.exists(source())) {
-            var fileName = source().getFileName().toString();
+        var sources = gateway.collectSources();
+        var targets = new HashSet<Path>();
+        for (var source : sources) {
+            var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var fileNameWithoutExtension = fileName.substring(0, separator);
-            var target = source().resolveSibling(fileNameWithoutExtension + ".mgs");
+            var target = source.resolveSibling(fileNameWithoutExtension + ".mgs");
             Files.createFile(target);
-            return Optional.of(target);
+            targets.add(target);
         }
-        return Optional.empty();
+
+        return targets.stream().findFirst();
     }
 }
