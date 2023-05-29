@@ -37,7 +37,7 @@ public class ApplicationTest {
 
     private Optional<Path> run() {
         try {
-            var sourceGateway = new SingleGateway(source);
+            var sourceGateway = new SingleGateway(Paths.get("."), source);
             return new Application(sourceGateway, sourceGateway).run();
         } catch (IOException e) {
             throw new RuntimeException(e);

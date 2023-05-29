@@ -13,10 +13,10 @@ public class DirectoryGateway extends PathGateway {
 
     @Override
     public Set<PathSource> collectSources() throws IOException {
-        try (var stream = Files.walk(path)) {
+        try (var stream = Files.walk(directory)) {
             return stream
                     .filter(file -> file.getFileName().toString().endsWith(".java"))
-                    .map(value -> new PathSource(path, value))
+                    .map(value -> new PathSource(directory, value))
                     .collect(Collectors.toSet());
         }
     }
