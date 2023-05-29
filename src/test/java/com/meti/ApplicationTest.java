@@ -46,7 +46,7 @@ public class ApplicationTest {
 
     @Test
     void generatesWithImport() {
-        assertCompilesIntegrably(Compiler.renderJavaImport(), Compiler.renderMagmaImport());
+        assertCompilesIntegrably(Compiler.renderJavaImport("IOException"), Compiler.renderMagmaImport("IOException"));
     }
 
     @Test

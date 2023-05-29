@@ -1,18 +1,23 @@
 package com.meti;
 
 public record Compiler(String input) {
-    static String renderMagmaImport() {
-        return "import { IOException } from java.io;";
+    static String renderMagmaImport(String name) {
+        return "import { " + name + " } from java.io;";
     }
 
-    static String renderJavaImport() {
-        return "import java.io.IOException;";
+    static String renderJavaImport(String name) {
+        return resolvePrefix() + name + ";";
+    }
+
+    private static String resolvePrefix() {
+        return "import java.io.";
     }
 
     String compile() {
         String output;
-        if(input.equals(renderJavaImport())) {
-            output = renderMagmaImport();
+        if(input.startsWith(resolvePrefix())) {
+            var name = input.substring(resolvePrefix().length(), input.indexOf(';'));
+            output = renderMagmaImport(name);
         } else {
             output = "";
         }
