@@ -47,7 +47,7 @@ public class ApplicationTest {
 
     @Test
     void generatesWithImport() {
-        assertCompilesIntegrably(Compiler.renderJavaImport(List.of("java.io".split("\\.")), "IOException"), new MagmaImport(new MagmaImportSegment(List.of("java.io".split("\\.")), "IOException")).render());
+        assertCompilesIntegrably(Compiler.renderJavaImport(List.of("java.io".split("\\.")), "IOException"), new MagmaImport(MagmaImportSegment.fromChildren(List.of("java.io".split("\\.")), List.of("IOException".split(", ")))).render());
     }
 
     @Test
