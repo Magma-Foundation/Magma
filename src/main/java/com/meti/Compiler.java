@@ -9,11 +9,6 @@ public record Compiler(String input) {
 
     public static final String PREFIX = "import ";
 
-    static String renderMagmaImport(List<String> namespace, String name) {
-        var joinedNamespace = String.join(".", namespace);
-        return "import { " + name + " } from " + joinedNamespace + ";";
-    }
-
     static String renderJavaImport(List<String> namespace, String name) {
         var joinedNamespace = String.join(".", namespace);
         return (PREFIX + joinedNamespace + ".") + name + ";";
@@ -22,8 +17,6 @@ public record Compiler(String input) {
     String compile() {
         var lines = input.split(";");
         var cache = new HashMap<String, List<String>>();
-
-        var builder = new StringBuilder();
         for (String line : lines) {
             compileLine(line, cache);
         }
@@ -33,12 +26,15 @@ public record Compiler(String input) {
                 .sorted()
                 .toList();
 
+        var builder = new StringBuilder();
         for (int i = 0; i < namespaces.size(); i++) {
             var namespace = namespaces.get(i);
             var joinedNames = String.join(", ", cache.get(namespace));
             var joinedNamespace = namespace.split("\\.");
 
-            builder.append(renderMagmaImport(List.of(joinedNamespace), joinedNames));
+            var segment = new MagmaImportSegment(List.of(joinedNamespace), joinedNames);
+            var import1 = new MagmaImport(segment);
+            builder.append(import1.render());
 
             if (namespaces.size() > 1 && i == namespaces.size() - 2) {
                 builder.append("\n");

@@ -14,8 +14,20 @@ class CompilerTest {
         var compiler = new Compiler(Compiler.renderJavaImport(List.of("parent".split("\\.")), "Child") +
                                     Compiler.renderJavaImport(List.of("pibling".split("\\.")), "Cousin"));
 
-        var expected = Compiler.renderMagmaImport(List.of("parent".split("\\.")), "Child") + "\n" +
-                       Compiler.renderMagmaImport(List.of("pibling".split("\\.")), "Cousin");
+        var expected = new MagmaImport(new MagmaImportSegment(List.of("parent".split("\\.")), "Child")).render() + "\n" +
+                       new MagmaImport(new MagmaImportSegment(List.of("pibling".split("\\.")), "Cousin")).render();
+
+        var actual = compiler.compile();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void mergePiblings() {
+        var compiler = new Compiler(Compiler.renderJavaImport(List.of("parent"), "Child") +
+                                    Compiler.renderJavaImport(List.of("parent", "sibling"), "Nibling"));
+
+        var name = "Child, " + new MagmaImportSegment(List.of("sibling"), "Nibling").render();
+        var expected = new MagmaImport(new MagmaImportSegment(List.of("parent"), name)).render();
 
         var actual = compiler.compile();
         assertEquals(expected, actual);
@@ -27,7 +39,7 @@ class CompilerTest {
         var compiler = new Compiler(Compiler.renderJavaImport(namespace, "Child") +
                                     Compiler.renderJavaImport(namespace, "Sibling"));
 
-        var expected = Compiler.renderMagmaImport(namespace, "Child, Sibling");
+        var expected = new MagmaImport(new MagmaImportSegment(namespace, "Child, Sibling")).render();
         var actual = compiler.compile();
         assertEquals(expected, actual);
     }
@@ -38,7 +50,7 @@ class CompilerTest {
         var compiler = new Compiler(Compiler.renderJavaImport(List.of(parent.split("\\.")), "Child") +
                                     Compiler.renderJavaImport(List.of(parent.split("\\.")), "Sibling"));
 
-        var expected = Compiler.renderMagmaImport(List.of(parent.split("\\.")), "Child, Sibling");
+        var expected = new MagmaImport(new MagmaImportSegment(List.of(parent.split("\\.")), "Child, Sibling")).render();
         var actual = compiler.compile();
         assertEquals(expected, actual);
     }
@@ -48,7 +60,7 @@ class CompilerTest {
     void importName(String name) {
         var namespace = "java.io";
         var actual = new Compiler(Compiler.renderJavaImport(List.of(namespace.split("\\.")), name)).compile();
-        assertEquals(Compiler.renderMagmaImport(List.of(namespace.split("\\.")), name), actual);
+        assertEquals(new MagmaImport(new MagmaImportSegment(List.of(namespace.split("\\.")), name)).render(), actual);
     }
 
     @ParameterizedTest
@@ -56,6 +68,6 @@ class CompilerTest {
     void importNamespace(String namespace) {
         var name = "Test";
         var actual = new Compiler(Compiler.renderJavaImport(List.of(namespace.split("\\.")), name)).compile();
-        assertEquals(Compiler.renderMagmaImport(List.of(namespace.split("\\.")), name), actual);
+        assertEquals(new MagmaImport(new MagmaImportSegment(List.of(namespace.split("\\.")), name)).render(), actual);
     }
 }
