@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public interface Gateway {
-    Path resolveTarget(String package_);
+    Set<PathSource> collectSources() throws IOException;
 
-    Set<Source> collectSources() throws IOException;
+    Path resolvePackage(Package package_);
 }

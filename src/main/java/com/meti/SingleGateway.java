@@ -5,16 +5,15 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 
-public record SingleGateway(Path path) implements Gateway {
-    @Override
-    public Path resolveTarget(String package_) {
-        return path.resolveSibling(package_ + ".mgs");
+public final class SingleGateway extends PathGateway {
+    public SingleGateway(Path path) {
+        super(path);
     }
 
     @Override
-    public Set<Source> collectSources() {
+    public Set<PathSource> collectSources() {
         return Files.exists(path)
-                ? Collections.singleton(new Source(path))
+                ? Collections.singleton(new PathSource(path))
                 : Collections.emptySet();
     }
 }
