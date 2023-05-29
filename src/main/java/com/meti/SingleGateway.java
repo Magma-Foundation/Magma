@@ -13,7 +13,7 @@ public final class SingleGateway extends PathGateway {
     @Override
     public Set<PathSource> collectSources() {
         return Files.exists(path)
-                ? Collections.singleton(new PathSource(path))
+                ? Collections.singleton(new PathSource(null, path))
                 : Collections.emptySet();
     }
 }

@@ -16,7 +16,7 @@ public class DirectoryGateway extends PathGateway {
         try (var stream = Files.walk(path)) {
             return stream
                     .filter(file -> file.endsWith(".java"))
-                    .map(PathSource::new)
+                    .map(value -> new PathSource(path, value))
                     .collect(Collectors.toSet());
         }
     }
