@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public record Compiler(String input) {
 
     public static final String PREFIX = "import ";
 
-    static String renderMagmaImport(String namespace, String name) {
-        return "import { " + name + " } from " + namespace + ";";
+    static String renderMagmaImport(List<String> namespace, String name) {
+        var joinedNamespace = String.join(".", namespace);
+        return "import { " + name + " } from " + joinedNamespace + ";";
     }
 
-    static String renderJavaImport(String namespace, String name) {
-        return (PREFIX + namespace + ".") + name + ";";
+    static String renderJavaImport(List<String> namespace, String name) {
+        var joinedNamespace = String.join(".", namespace);
+        return (PREFIX + joinedNamespace + ".") + name + ";";
     }
 
     String compile() {
@@ -35,7 +36,9 @@ public record Compiler(String input) {
         for (int i = 0; i < namespaces.size(); i++) {
             var namespace = namespaces.get(i);
             var joinedNames = String.join(", ", cache.get(namespace));
-            builder.append(renderMagmaImport1(joinedNames, List.of(namespace.split("\\."))));
+            var joinedNamespace = namespace.split("\\.");
+
+            builder.append(renderMagmaImport(List.of(joinedNamespace), joinedNames));
 
             if (namespaces.size() > 1 && i == namespaces.size() - 2) {
                 builder.append("\n");
@@ -61,10 +64,5 @@ public record Compiler(String input) {
         } else {
             throw new IllegalArgumentException(line);
         }
-    }
-
-    private static String renderMagmaImport1(String name, List<String> namespace) {
-        var renderedNamespace = String.join(".", namespace);
-        return renderMagmaImport(renderedNamespace, name);
     }
 }

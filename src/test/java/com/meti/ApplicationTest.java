@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +47,7 @@ public class ApplicationTest {
 
     @Test
     void generatesWithImport() {
-        assertCompilesIntegrably(Compiler.renderJavaImport("java.io", "IOException"), Compiler.renderMagmaImport("java.io", "IOException"));
+        assertCompilesIntegrably(Compiler.renderJavaImport(List.of("java.io".split("\\.")), "IOException"), Compiler.renderMagmaImport(List.of("java.io".split("\\.")), "IOException"));
     }
 
     @Test
