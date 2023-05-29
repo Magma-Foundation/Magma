@@ -45,11 +45,20 @@ public class ApplicationTest {
     }
 
     @Test
+    void generatesWithImport() {
+        assertCompilesIntegrably("import java.io.IOException;", "import { IOException } from java.io;");
+    }
+
+    @Test
     void generatesWithPackage(){
+        assertCompilesIntegrably("package com.meti;", "");
+    }
+
+    private void assertCompilesIntegrably(String input, String output) {
         try {
-            var target = runWithSource("package com.meti;");
+            var target = runWithSource(input);
             var path = Files.readString(target);
-            assertEquals("", path);
+            assertEquals(output, path);
         } catch (IOException e) {
             fail(e);
         }

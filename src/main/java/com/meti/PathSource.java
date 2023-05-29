@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,5 +19,9 @@ public record PathSource(Path root, Path value) {
         var fileName = value().getFileName().toString();
         var separator = fileName.indexOf('.');
         return new ListPackage(namespace, fileName.substring(0, separator));
+    }
+
+    public String readString() throws IOException {
+        return Files.readString(value);
     }
 }

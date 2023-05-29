@@ -19,6 +19,9 @@ public final class Application {
         var sources = new HashSet<>(sourceGateway.collectSources());
         var targets = new HashSet<Path>();
         for (var source : sources) {
+            var input = source.readString();
+            var output = new Compiler(input).compile();
+
             var package_ = source.findPackage();
             var target = targetGateway.resolvePackage(package_);
 
@@ -27,7 +30,7 @@ public final class Application {
                 Files.createDirectories(parent);
             }
 
-            Files.createFile(target);
+            Files.writeString(target, output);
             targets.add(target);
         }
 
