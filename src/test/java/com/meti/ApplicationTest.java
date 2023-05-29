@@ -45,17 +45,31 @@ public class ApplicationTest {
     }
 
     @Test
+    void generatesWithPackage(){
+        try {
+            var target = runWithSource("package com.meti;");
+            var path = Files.readString(target);
+            assertEquals("", path);
+        } catch (IOException e) {
+            fail(e);
+        }
+    }
+
+    @Test
     void generatesProperTarget() {
         assertEquals(target, runWithSource());
     }
 
     private Path runWithSource() {
+        return runWithSource("");
+    }
+
+    private Path runWithSource(String csq) {
         try {
-            Files.createFile(source);
+            Files.writeString(source, csq);
             return run().orElseThrow();
         } catch (IOException e) {
-            fail(e);
-            return null;
+            return fail(e);
         }
     }
 
