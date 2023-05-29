@@ -22,6 +22,11 @@ public final class Application {
             var package_ = source.findPackage();
             var target = targetGateway.resolvePackage(package_);
 
+            var parent = target.getParent();
+            if(!Files.exists(parent)) {
+                Files.createDirectories(parent);
+            }
+
             Files.createFile(target);
             targets.add(target);
         }
