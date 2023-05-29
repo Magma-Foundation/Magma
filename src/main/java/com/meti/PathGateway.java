@@ -11,10 +11,10 @@ public abstract class PathGateway implements Gateway {
 
     @Override
     public Path resolvePackage(Package package_) {
-        var parent = path.getParent();
+        var parent = path;
         var namespace = package_.computeNamespace();
         for (String s : namespace) {
-            parent = path.resolve(s);
+            parent = parent.resolve(s);
         }
 
         var fileName = package_.computeName() + ".mgs";

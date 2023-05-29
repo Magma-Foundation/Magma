@@ -15,7 +15,7 @@ public class DirectoryGateway extends PathGateway {
     public Set<PathSource> collectSources() throws IOException {
         try (var stream = Files.walk(path)) {
             return stream
-                    .filter(file -> file.endsWith(".java"))
+                    .filter(file -> file.getFileName().toString().endsWith(".java"))
                     .map(value -> new PathSource(path, value))
                     .collect(Collectors.toSet());
         }
