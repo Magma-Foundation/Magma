@@ -1,7 +1,6 @@
 package com.meti;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record Compiler(String input) {
 
@@ -11,8 +10,8 @@ public record Compiler(String input) {
         return "import { " + name + " } from " + namespace + ";";
     }
 
-    static String renderJavaImport(String name) {
-        return (PREFIX + "java.io" + ".") + name + ";";
+    static String renderJavaImport(String name, String namespace) {
+        return (PREFIX + namespace + ".") + name + ";";
     }
 
     String compile() {

@@ -9,7 +9,16 @@ class CompilerTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importName(String name) {
-        var actual = new Compiler(Compiler.renderJavaImport(name)).compile();
-        assertEquals(Compiler.renderMagmaImport(name, "java.io"), actual);
+        var namespace = "java.io";
+        var actual = new Compiler(Compiler.renderJavaImport(name, namespace)).compile();
+        assertEquals(Compiler.renderMagmaImport(name, namespace), actual);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"java.io", "java.nio"})
+    void importNamespace(String namespace) {
+        var name = "Test";
+        var actual = new Compiler(Compiler.renderJavaImport(name, namespace)).compile();
+        assertEquals(Compiler.renderMagmaImport(name, namespace), actual);
     }
 }
