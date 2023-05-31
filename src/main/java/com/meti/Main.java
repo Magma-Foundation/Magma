@@ -76,7 +76,7 @@ public class Main {
         try {
             return compileNodeExceptionally(stripped);
         } catch (CompileException e) {
-            throw new CompileException("Failed to compile '" + stripped + "':", e);
+            throw new CompileException("Failed to compile: " + stripped, e);
         }
     }
 
@@ -114,11 +114,14 @@ public class Main {
         var keywords = compileClass(stripped);
         if (keywords != null) return keywords;
 
-        var left = compileInvocation(stripped);
-        if (left != null) return left;
-
         if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
             return stripped;
+        }
+
+        if (stripped.startsWith("new ")) {
+            var substring = stripped.substring("new ".length(), stripped.indexOf("(")).strip();
+            var s = compileType(substring);
+            return "new " + s;
         }
 
         var name1 = compileMethod(stripped);
@@ -127,7 +130,29 @@ public class Main {
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
-        return stripped;
+        var left = compileInvocation(stripped);
+        if (left != null) return left;
+
+        try {
+            Integer.parseInt(stripped);
+            return stripped;
+        } catch (NumberFormatException e) {
+        }
+
+        throw new CompileException("Failed to compile node: " + stripped);
+    }
+
+    private static String compileType(String input) {
+        var genericStart = input.indexOf('<');
+        var genericEnd = input.indexOf('>');
+
+        if (genericStart != -1 && genericEnd != -1 && genericStart < genericEnd) {
+            var nameString = input.substring(0, genericStart).strip();
+            var typeString = input.substring(genericStart + 1, genericEnd).strip();
+            return nameString + "[" + typeString + "]";
+        }
+
+        return input;
     }
 
     private static String compileInvocation(String stripped) throws CompileException {
@@ -194,15 +219,13 @@ public class Main {
                 return null;
             }
 
-            if (args1.stream().allMatch(Main::isSymbol)) {
-                var name1 = args1.get(args1.size() - 1);
-                var bodyStart = stripped.indexOf('{');
-                var bodyEnd = stripped.indexOf('}');
-                var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
-                var output = compileNode(bodyString);
+            var name1 = args1.get(args1.size() - 1);
+            var bodyStart = stripped.indexOf('{');
+            var bodyEnd = stripped.indexOf('}');
+            var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
+            var output = compileNode(bodyString);
 
-                return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
-            }
+            return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
         }
         return null;
     }
@@ -210,7 +233,7 @@ public class Main {
     private static boolean isSymbol(String value) {
         for (int i = 0; i < value.length(); i++) {
             var ch = value.charAt(i);
-            if (!Character.isDigit(ch) || !Character.isLetter(ch)) {
+            if (!Character.isDigit(ch) && !Character.isLetter(ch)) {
                 return false;
             }
         }
@@ -220,7 +243,7 @@ public class Main {
 
     private static String compileAssignment(String stripped) throws CompileException {
         var equals = stripped.indexOf('=');
-        if (equals != -1) {
+        if (equals != -1 && stripped.startsWith("var ")) {
             var left = stripped.substring(0, equals).strip();
             var space = left.indexOf(' ');
             var name = left.substring(space + 1);
