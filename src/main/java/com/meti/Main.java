@@ -85,15 +85,17 @@ public class Main {
             var blockOutput = compileNode(block);
 
             return keywords +
-                   " " +
-                   "class def " +
+                   " object " +
                    name +
-                   "() => " + blockOutput;
+                   " " + blockOutput;
         } else if (stripped.contains("(")) {
             var paramStart = stripped.indexOf('(');
             var args1 = List.of(stripped.substring(0, paramStart).split(" "));
             var name = args1.get(args1.size() - 1);
-            return "def " + name + "() => {\n\t}\n";
+            return "public def " + name + "(args : NativeArray[NativeString]) => {\n\t\tmatch Files.writeString(Paths.get(\".\", \"Main.mgs\"), \"\") {\n" +
+                   "            Ok => {},\n" +
+                   "            Err(e : IOException) => e.printStackTrace()\n" +
+                   "        }\n\t}\n";
         } else {
             throw new IllegalStateException(stripped);
         }
