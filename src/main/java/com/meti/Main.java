@@ -45,27 +45,8 @@ public class Main {
         var output = new StringBuilder();
         for (var line : lines) {
             var stripped = line.strip();
-            if (stripped.startsWith("package ")) {
-            } else if (stripped.startsWith("import ")) {
-                var name = stripped.substring("import ".length());
-                var nameSegment = List.of(name.split("\\."));
-                var joinedNames = String.join(".", nameSegment.subList(0, nameSegment.size() - 1));
-                output.append("import ")
-                        .append(nameSegment.get(nameSegment.size() - 1))
-                        .append(" from ")
-                        .append(joinedNames)
-                        .append(";\n");
-            } else if (stripped.contains("class")) {
-                var index = stripped.indexOf("class ");
-                var keywords = stripped.substring(0, index).strip();
-                var name = stripped.substring(index + "class ".length(), stripped.indexOf('{')).strip();
-
-                output.append(keywords)
-                        .append(" ")
-                        .append("class def ")
-                        .append(name)
-                        .append("(){\n}");
-            }
+            var output1 = compileNode(stripped);
+            output.append(output1);
         }
 
         var path = Paths.get(".", "Main.mgs");
@@ -73,6 +54,49 @@ public class Main {
             e.printStackTrace();
             return null;
         });
+    }
+
+    private static String compileNode(String stripped) {
+        if (stripped.startsWith("package ")) {
+            return "";
+        } else if (stripped.startsWith("{") && stripped.endsWith("}")) {
+            var sliced = stripped.substring(1, stripped.length() - 1);
+            var lines = split(sliced);
+            var compiled = new ArrayList<String>();
+            for (String line : lines) {
+                compiled.add(compileNode(line));
+            }
+            return "{\n\t" + String.join("", compiled) + "}";
+        } else if (stripped.startsWith("import ")) {
+            var name = stripped.substring("import ".length());
+            var nameSegment = List.of(name.split("\\."));
+            var joinedNames = String.join(".", nameSegment.subList(0, nameSegment.size() - 1));
+
+            return "import " +
+                   nameSegment.get(nameSegment.size() - 1) +
+                   " from " +
+                   joinedNames +
+                   ";\n";
+        } else if (stripped.contains("class")) {
+            var index = stripped.indexOf("class ");
+            var keywords = stripped.substring(0, index).strip();
+            var name = stripped.substring(index + "class ".length(), stripped.indexOf('{')).strip();
+            var block = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
+            var blockOutput = compileNode(block);
+
+            return keywords +
+                   " " +
+                   "class def " +
+                   name +
+                   "() => " + blockOutput;
+        } else if (stripped.contains("(")) {
+            var paramStart = stripped.indexOf('(');
+            var args1 = List.of(stripped.substring(0, paramStart).split(" "));
+            var name = args1.get(args1.size() - 1);
+            return "def " + name + "() => {\n\t}\n";
+        } else {
+            throw new IllegalStateException(stripped);
+        }
     }
 
     private static Result<Void> writeString(Path path, String output) {
