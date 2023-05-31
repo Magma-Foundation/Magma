@@ -91,6 +91,17 @@ public class Main {
             return compileImport(stripped);
         }
 
+        if (stripped.startsWith("for") && stripped.endsWith("}")) {
+            var condStart = stripped.indexOf('(');
+            var condEnd = stripped.indexOf(')');
+            var condSlice = stripped.substring(condStart + 1, condEnd);
+            var bodyStart = stripped.indexOf('{');
+            var bodyEnd = stripped.lastIndexOf('}');
+            var bodyString = stripped.substring(bodyStart, bodyEnd + 1);
+            var body = compileNode(bodyString);
+            return "for(" + condSlice + ")" + body;
+        }
+
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
