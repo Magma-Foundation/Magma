@@ -45,7 +45,14 @@ public class Main {
         var output = new StringBuilder();
         for (var line : lines) {
             var stripped = line.strip();
-            var output1 = compileNode(stripped);
+
+            String output1;
+            try {
+                output1 = compileNode(stripped);
+            } catch (CompileException e) {
+                throw new RuntimeException(e);
+            }
+
             output.append(output1);
         }
 
@@ -56,7 +63,15 @@ public class Main {
         });
     }
 
-    private static String compileNode(String stripped) {
+    private static String compileNode(String stripped) throws CompileException {
+        try {
+            return compileNodeExceptionally(stripped);
+        } catch (CompileException e) {
+            throw new CompileException("Failed to compile '" + stripped + "':", e);
+        }
+    }
+
+    private static String compileNodeExceptionally(String stripped) throws CompileException {
         if (stripped.startsWith("package ")) {
             return "";
         }
@@ -91,7 +106,7 @@ public class Main {
             return left + "(" + right + ")";
         }
 
-        if(stripped.startsWith("\"") && stripped.startsWith("\"")) {
+        if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
             return stripped;
         }
 
@@ -99,14 +114,23 @@ public class Main {
             return compileClass(stripped);
         }
 
-        if (stripped.contains("(")) {
-            return compileMethod(stripped);
+        var paramStart = stripped.indexOf('(');
+        var paramEnd = stripped.indexOf(')');
+        if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
+            var args1 = List.of(slice(stripped, paramStart).split(" "));
+            var name1 = args1.get(args1.size() - 1);
+            var bodyStart = stripped.indexOf('{');
+            var bodyEnd = stripped.indexOf('}');
+            var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
+            var output = compileNode(bodyString);
+
+            return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
         }
 
         return stripped;
     }
 
-    private static String compileAssignment(String stripped) {
+    private static String compileAssignment(String stripped) throws CompileException {
         var equals = stripped.indexOf('=');
         if (equals != -1) {
             var left = stripped.substring(0, equals).strip();
@@ -120,7 +144,7 @@ public class Main {
         return null;
     }
 
-    private static String compileIf(String stripped) {
+    private static String compileIf(String stripped) throws CompileException {
         var start = stripped.indexOf('(');
         var end = stripped.indexOf(')');
         if (stripped.startsWith("if") && start != -1 && end != -1) {
@@ -135,25 +159,15 @@ public class Main {
         return null;
     }
 
-    private static String slice(String stripped, int start, int end) {
+    private static String slice(String stripped, int start, int end) throws CompileException {
         try {
             return stripped.substring(start, end);
         } catch (Exception e) {
-            throw new RuntimeException(start + " " + end + ": " + stripped);
+            throw new CompileException(start + " " + end + ": " + stripped);
         }
     }
 
-    private static String compileMethod(String stripped) {
-        var paramStart = stripped.indexOf('(');
-        var args1 = List.of(slice(stripped, paramStart).split(" "));
-        var name = args1.get(args1.size() - 1);
-        return "public def " + name + "(args : NativeArray[NativeString]) => {\n\t\tmatch Files.writeString(Paths.get(\".\", \"Main.mgs\"), \"\") {\n" +
-               "            Ok => {},\n" +
-               "            Err(e : IOException) => e.printStackTrace()\n" +
-               "        }\n\t}\n";
-    }
-
-    private static String compileClass(String stripped) {
+    private static String compileClass(String stripped) throws CompileException {
         var index = stripped.indexOf("class ");
         var keywords = slice(stripped, index).strip();
         var nameStart = index + "class ".length();
@@ -197,7 +211,7 @@ public class Main {
                ";\n";
     }
 
-    private static String compileBlock(String stripped) {
+    private static String compileBlock(String stripped) throws CompileException {
         var sliced = slice(stripped, 1, stripped.length() - 1);
         var lines = split(sliced);
         var compiled = new ArrayList<String>();
@@ -207,7 +221,7 @@ public class Main {
         return "{\n\t" + String.join("", compiled) + "}";
     }
 
-    private static String compileElse(String stripped) {
+    private static String compileElse(String stripped) throws CompileException {
         var withoutElse = stripped.substring("else ".length());
         var withoutElseRendered = compileNode(withoutElse);
         return "else " + withoutElseRendered;
@@ -258,6 +272,16 @@ public class Main {
             public T match(Function<T, T> onOk, Function<IOException, T> onErr) {
                 return onOk.apply(value);
             }
+        }
+    }
+
+    static class CompileException extends Exception {
+        public CompileException(String message) {
+            super(message);
+        }
+
+        public CompileException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }
