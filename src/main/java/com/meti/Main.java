@@ -138,13 +138,24 @@ public class Main {
         var paramEnd = stripped.indexOf(')');
         if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
-            var name1 = args1.get(args1.size() - 1);
-            var bodyStart = stripped.indexOf('{');
-            var bodyEnd = stripped.indexOf('}');
-            var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
-            var output = compileNode(bodyString);
+            if (args1.stream().allMatch(value -> {
+                for (int i = 0; i < value.length(); i++) {
+                    var ch = value.charAt(i);
+                    if (!Character.isDigit(ch) || !Character.isLetter(ch)) {
+                        return false;
+                    }
+                }
 
-            return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
+                return true;
+            })) {
+                var name1 = args1.get(args1.size() - 1);
+                var bodyStart = stripped.indexOf('{');
+                var bodyEnd = stripped.indexOf('}');
+                var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
+                var output = compileNode(bodyString);
+
+                return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
+            }
         }
 
         return stripped;
