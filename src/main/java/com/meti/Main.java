@@ -498,7 +498,7 @@ public class Main {
                         throw new RuntimeException(e);
                     }
                 })
-                .collect(Collectors.joining()) + "}";
+                .collect(Collectors.joining()) + "\t".repeat(depth) + "}";
         return s;
     }
 
