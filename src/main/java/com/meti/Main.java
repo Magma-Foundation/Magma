@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
     public static List<String> split(String line) {
@@ -27,8 +28,8 @@ public class Main {
                 builder = new StringBuilder();
             } else {
                 if (!isWithinString) {
-                    if (c == '{') depth++;
-                    if (c == '}') depth--;
+                    if (c == '{' || c == '(') depth++;
+                    if (c == '}' || c == ')') depth--;
                 }
                 if (c == '\'' || c == '\"') {
                     isWithinString = !isWithinString;
@@ -39,8 +40,12 @@ public class Main {
         }
 
         lines.add(builder.toString());
-        lines.removeIf(String::isBlank);
-        return lines;
+
+        var output = lines.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
+        return output;
     }
 
     public static void main(String[] args) {
@@ -100,16 +105,8 @@ public class Main {
             return compileImport(stripped);
         }
 
-        if (stripped.startsWith("for") && stripped.endsWith("}")) {
-            var condStart = stripped.indexOf('(');
-            var condEnd = stripped.indexOf(')');
-            var condSlice = stripped.substring(condStart + 1, condEnd);
-            var bodyStart = stripped.indexOf('{');
-            var bodyEnd = stripped.lastIndexOf('}');
-            var bodyString = stripped.substring(bodyStart, bodyEnd + 1);
-            var body = compileNode(bodyString);
-            return "for(" + condSlice + ")" + body;
-        }
+        var condSlice = compileFor(stripped);
+        if (condSlice != null) return condSlice;
 
         var keywords = compileClass(stripped);
         if (keywords != null) return keywords;
@@ -130,8 +127,16 @@ public class Main {
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
-        var left = compileInvocation(stripped);
-        if (left != null) return left;
+        var value = compileInvocation(stripped);
+        if (value != null) return value;
+
+        var separator = stripped.indexOf('.');
+        if (separator != -1) {
+            var leftString = stripped.substring(0, separator);
+            var left = compileNode(leftString);
+            var right = stripped.substring(separator + 1);
+            return left + "." + right;
+        }
 
         try {
             Integer.parseInt(stripped);
@@ -139,7 +144,27 @@ public class Main {
         } catch (NumberFormatException e) {
         }
 
-        throw new CompileException("Failed to compile node: " + stripped);
+        for (int i = 0; i < stripped.length(); i++) {
+            if(!Character.isLetter(stripped.charAt(i))) {
+                throw new CompileException("Failed to compile node: " + stripped);
+            }
+        }
+
+        return stripped;
+    }
+
+    private static String compileFor(String stripped) throws CompileException {
+        if (stripped.startsWith("for") && stripped.endsWith("}")) {
+            var condStart = stripped.indexOf('(');
+            var condEnd = stripped.indexOf(')');
+            var condSlice = stripped.substring(condStart + 1, condEnd);
+            var bodyStart = stripped.indexOf('{');
+            var bodyEnd = stripped.lastIndexOf('}');
+            var bodyString = stripped.substring(bodyStart, bodyEnd + 1);
+            var body = compileNode(bodyString);
+            return "for(" + condSlice + ")" + body;
+        }
+        return null;
     }
 
     private static String compileType(String input) {
@@ -221,7 +246,7 @@ public class Main {
 
             var name1 = args1.get(args1.size() - 1);
             var bodyStart = stripped.indexOf('{');
-            var bodyEnd = stripped.indexOf('}');
+            var bodyEnd = stripped.lastIndexOf('}');
             var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
             var output = compileNode(bodyString);
 
