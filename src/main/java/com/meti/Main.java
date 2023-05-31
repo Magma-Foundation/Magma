@@ -114,9 +114,23 @@ public class Main {
         var keywords = compileClass(stripped);
         if (keywords != null) return keywords;
 
+        var left = compileInvocation(stripped);
+        if (left != null) return left;
+
+        if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
+            return stripped;
+        }
+
+        var name1 = compileMethod(stripped);
+        if (name1 != null) return name1;
+
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
+        return stripped;
+    }
+
+    private static String compileInvocation(String stripped) throws CompileException {
         var argStart = stripped.indexOf('(');
         var argEnd = stripped.indexOf(')');
         if (argStart != -1 && argEnd != -1 && stripped.endsWith(")")) {
@@ -128,15 +142,7 @@ public class Main {
 
             return left + "(" + right + ")";
         }
-
-        if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
-            return stripped;
-        }
-
-        String name1 = compileMethod(stripped);
-        if (name1 != null) return name1;
-
-        return stripped;
+        return null;
     }
 
     private static String compileClass(String stripped) throws CompileException {
@@ -144,7 +150,7 @@ public class Main {
         if (classIndicator != -1) {
             var keywords = slice(stripped, classIndicator).strip();
             for (int i = 0; i < keywords.length(); i++) {
-                if(!Character.isLetterOrDigit(keywords.charAt(i))) {
+                if (!Character.isLetterOrDigit(keywords.charAt(i))) {
                     return null;
                 }
             }
@@ -178,16 +184,17 @@ public class Main {
         var paramEnd = stripped.indexOf(')');
         if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
-            if (args1.stream().allMatch(value -> {
-                for (int i = 0; i < value.length(); i++) {
-                    var ch = value.charAt(i);
-                    if (!Character.isDigit(ch) || !Character.isLetter(ch)) {
-                        return false;
-                    }
+            if (args1.size() >= 2) {
+                if (!args1.subList(0, args1.size() - 2).stream().allMatch(Main::isSymbol)) {
+                    return null;
                 }
+            }
 
-                return true;
-            })) {
+            if (!isSymbol(args1.get(args1.size() - 1))) {
+                return null;
+            }
+
+            if (args1.stream().allMatch(Main::isSymbol)) {
                 var name1 = args1.get(args1.size() - 1);
                 var bodyStart = stripped.indexOf('{');
                 var bodyEnd = stripped.indexOf('}');
@@ -198,6 +205,17 @@ public class Main {
             }
         }
         return null;
+    }
+
+    private static boolean isSymbol(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            var ch = value.charAt(i);
+            if (!Character.isDigit(ch) || !Character.isLetter(ch)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static String compileAssignment(String stripped) throws CompileException {
