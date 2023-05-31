@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -184,7 +185,7 @@ public class Main {
 
     private static String compileMethodReference(String stripped) {
         var methodReference = stripped.indexOf("::");
-        if(methodReference != -1) {
+        if (methodReference != -1) {
             var typeString = stripped.substring(0, methodReference).strip();
             var type = compileType(typeString);
             var nameString1 = stripped.substring(methodReference + "::".length()).strip();
@@ -230,6 +231,12 @@ public class Main {
             var leftString = stripped.substring(0, separator).strip();
             var left = compileNode(leftString);
             var right = stripped.substring(separator + 1).strip();
+            for (int i = 0; i < right.length(); i++) {
+                var c = right.charAt(i);
+                if (!Character.isLetter(c)) {
+                    return null;
+                }
+            }
             return left + "." + right;
         }
         return null;
@@ -326,15 +333,40 @@ public class Main {
 
     private static String compileInvocation(String stripped) throws CompileException {
         var argStart = stripped.indexOf('(');
-        var argEnd = stripped.indexOf(')');
+        var depth = 0;
+        var argEnd = -1;
+        var sliced = stripped.substring(argStart + 1);
+        for (int i = 0; i < sliced.length(); i++) {
+            var c = sliced.charAt(i);
+            if (c == '(') depth++;
+            else if (c == ')') {
+                if (depth == 0) {
+                    argEnd = i;
+                    break;
+                } else {
+                    depth--;
+                }
+            }
+        }
+
+        argEnd += argStart + 1;
+
         if (argStart != -1 && argEnd != -1 && stripped.endsWith(")")) {
             var leftSlice = stripped.substring(0, argStart);
             var left = compileNode(leftSlice);
 
-            var rightString = slice(stripped, argStart + 1, argEnd);
-            var right = compileNode(rightString);
+            var rightString = slice(stripped, argStart + 1, argEnd).strip();
+            var arguments = Arrays.stream(rightString.split(","))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .toList();
 
-            return left + "(" + right + ")";
+            var compiledArguments = new ArrayList<String>();
+            for (String argument : arguments) {
+                compiledArguments.add(compileNode(argument));
+            }
+
+            return left + "(" + String.join(", ", compiledArguments) + ")";
         }
         return null;
     }
@@ -427,7 +459,7 @@ public class Main {
 
     private static String compileDeclaration(String stripped) throws CompileException {
         var equals = stripped.indexOf('=');
-        if (equals != -1)
+        if (equals != -1) {
             if (stripped.startsWith("var ")) {
                 var left = stripped.substring(0, equals).strip();
                 var space = left.indexOf(' ');
@@ -438,17 +470,38 @@ public class Main {
                 return "let " + name + " = " + right + ";";
             } else {
                 var leftString = stripped.substring(0, equals).strip();
+                for (int i = 0; i < leftString.length(); i++) {
+                    var c = leftString.charAt(i);
+                    if (!Character.isLetter(c)) {
+                        return null;
+                    }
+                }
+
                 var left = compileNode(leftString);
                 var rightString = stripped.substring(equals + 1).strip();
                 var right = compileNode(rightString);
                 return left + " = " + right + ";";
             }
+        }
         return null;
     }
 
     private static String compileIf(String stripped) throws CompileException {
         var condStart = stripped.indexOf('(');
-        var condEnd = stripped.indexOf(')');
+        var condEnd = -1;
+        var depth = 0;
+        for (int i = condStart + 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+                if (depth == 0) {
+                    condEnd = i;
+                    break;
+                }
+            }
+        }
 
         var braceStart = stripped.indexOf('{');
         var braceEnd = stripped.lastIndexOf('}');
@@ -528,7 +581,7 @@ public class Main {
     }
 
     private static String compileElse(String stripped) throws CompileException {
-        var withoutElse = slice(stripped, "else ".length(), stripped.length());
+        var withoutElse = slice(stripped, "else ".length(), stripped.length()).strip();
         var withoutElseRendered = compileNode(withoutElse);
         return "else " + withoutElseRendered;
     }
