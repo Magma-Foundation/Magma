@@ -59,46 +59,100 @@ public class Main {
     private static String compileNode(String stripped) {
         if (stripped.startsWith("package ")) {
             return "";
+        } else if (stripped.startsWith("else ")) {
+            return compileElse(stripped);
+        } else if (stripped.startsWith("if")) {
+            var start = stripped.indexOf('(');
+            var end = stripped.indexOf(')');
+
+            var conditionString = stripped.substring(start + 1, end);
+            var condition = compileNode(conditionString);
+
+            var bodyString = stripped.substring(stripped.indexOf('{'), stripped.indexOf("}") + 1);
+            var body = compileNode(bodyString);
+
+            return "if " + condition + " " + body;
         } else if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            var sliced = stripped.substring(1, stripped.length() - 1);
-            var lines = split(sliced);
-            var compiled = new ArrayList<String>();
-            for (String line : lines) {
-                compiled.add(compileNode(line));
-            }
-            return "{\n\t" + String.join("", compiled) + "}";
+            return compileBlock(stripped);
         } else if (stripped.startsWith("import ")) {
-            var name = stripped.substring("import ".length());
-            var nameSegment = List.of(name.split("\\."));
-            var joinedNames = String.join(".", nameSegment.subList(0, nameSegment.size() - 1));
-
-            return "import " +
-                   nameSegment.get(nameSegment.size() - 1) +
-                   " from " +
-                   joinedNames +
-                   ";\n";
-        } else if (stripped.contains("class")) {
-            var index = stripped.indexOf("class ");
-            var keywords = stripped.substring(0, index).strip();
-            var name = stripped.substring(index + "class ".length(), stripped.indexOf('{')).strip();
-            var block = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
-            var blockOutput = compileNode(block);
-
-            return keywords +
-                   " object " +
-                   name +
-                   " " + blockOutput;
+            return compileImport(stripped);
+        } else if (stripped.contains("class ")) {
+            return compileClass(stripped);
         } else if (stripped.contains("(")) {
-            var paramStart = stripped.indexOf('(');
-            var args1 = List.of(stripped.substring(0, paramStart).split(" "));
-            var name = args1.get(args1.size() - 1);
-            return "public def " + name + "(args : NativeArray[NativeString]) => {\n\t\tmatch Files.writeString(Paths.get(\".\", \"Main.mgs\"), \"\") {\n" +
-                   "            Ok => {},\n" +
-                   "            Err(e : IOException) => e.printStackTrace()\n" +
-                   "        }\n\t}\n";
+            return compileMethod(stripped);
         } else {
-            throw new IllegalStateException(stripped);
+            return stripped;
         }
+    }
+
+    private static String compileMethod(String stripped) {
+        var paramStart = stripped.indexOf('(');
+        var args1 = List.of(slice(stripped, paramStart).split(" "));
+        var name = args1.get(args1.size() - 1);
+        return "public def " + name + "(args : NativeArray[NativeString]) => {\n\t\tmatch Files.writeString(Paths.get(\".\", \"Main.mgs\"), \"\") {\n" +
+               "            Ok => {},\n" +
+               "            Err(e : IOException) => e.printStackTrace()\n" +
+               "        }\n\t}\n";
+    }
+
+    private static String compileClass(String stripped) {
+        var index = stripped.indexOf("class ");
+        var keywords = slice(stripped, index).strip();
+        var nameStart = index + "class ".length();
+        var nameEnd = stripped.indexOf('{');
+
+        String name;
+        try {
+            name = stripped.substring(nameStart, nameEnd).strip();
+        } catch (Exception e) {
+            var format = "%d %d: '%s'";
+            var message = format.formatted(nameStart, nameEnd, stripped);
+            throw new IndexOutOfBoundsException(message);
+        }
+
+        var block = stripped.substring(nameEnd, stripped.lastIndexOf('}') + 1);
+        var blockOutput = compileNode(block);
+
+        return keywords +
+               " object " +
+               name +
+               " " + blockOutput;
+    }
+
+    private static String slice(String stripped, int index) {
+        try {
+            return stripped.substring(0, index);
+        } catch (Exception e) {
+            throw new IndexOutOfBoundsException(index + ": " + stripped);
+        }
+    }
+
+    private static String compileImport(String stripped) {
+        var name = stripped.substring("import ".length());
+        var nameSegment = List.of(name.split("\\."));
+        var joinedNames = String.join(".", nameSegment.subList(0, nameSegment.size() - 1));
+
+        return "import " +
+               nameSegment.get(nameSegment.size() - 1) +
+               " from " +
+               joinedNames +
+               ";\n";
+    }
+
+    private static String compileBlock(String stripped) {
+        var sliced = stripped.substring(1, stripped.length() - 1);
+        var lines = split(sliced);
+        var compiled = new ArrayList<String>();
+        for (String line : lines) {
+            compiled.add(compileNode(line));
+        }
+        return "{\n\t" + String.join("", compiled) + "}";
+    }
+
+    private static String compileElse(String stripped) {
+        var withoutElse = stripped.substring("else ".length());
+        var withoutElseRendered = compileNode(withoutElse);
+        return "else " + withoutElseRendered;
     }
 
     private static Result<Void> writeString(Path path, String output) {
