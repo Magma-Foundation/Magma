@@ -59,8 +59,6 @@ public class Main {
         var output = new StringBuilder();
         for (var line : lines) {
             var stripped = line.strip();
-            System.out.println("LINE:" + stripped);
-
             String output1;
             try {
                 output1 = compileNode(stripped);
@@ -87,10 +85,6 @@ public class Main {
     }
 
     private static String compileNodeExceptionally(String stripped) throws CompileException {
-        if (stripped.contains("try")) {
-            System.out.println("blah");
-        }
-
         if (stripped.startsWith("package ")) {
             return "";
         }
@@ -112,6 +106,19 @@ public class Main {
 
         if (stripped.startsWith("import ")) {
             return compileImport(stripped);
+        }
+
+        var nameString = compileInterface(stripped);
+        if (nameString != null) return nameString;
+
+        var index = stripped.indexOf("record");
+        var paramStart = stripped.indexOf('(');
+        var braceStart = stripped.indexOf('{');
+        if (index != -1 && index < paramStart && paramStart < braceStart) {
+            var name = stripped.substring(index + "record".length(), paramStart).strip();
+            var bodyString = stripped.substring(braceStart).strip();
+            var s = compileNode(bodyString);
+            return "class def " + name + "()" + s;
         }
 
         var valueString = compileReturn(stripped);
@@ -163,7 +170,22 @@ public class Main {
         var operandString = compileUnaryOperator(stripped);
         if (operandString != null) return operandString;
 
+        if(stripped.startsWith("@")) {
+            return stripped;
+        }
+
         throw new CompileException("Unknown node: " + stripped);
+    }
+
+    private static String compileInterface(String stripped) throws CompileException {
+        var keywordIndex = stripped.indexOf("interface ");
+        var braceStart = stripped.indexOf('{');
+        if (keywordIndex != -1 && braceStart != -1 && keywordIndex < braceStart) {
+            var nameString = stripped.substring(keywordIndex + "interface ".length(), braceStart).strip();
+            var bodyString = stripped.substring(braceStart).strip();
+            return "trait " + nameString + compileNode(bodyString);
+        }
+        return null;
     }
 
     private static String compileReturn(String stripped) throws CompileException {
@@ -342,11 +364,14 @@ public class Main {
         var bodyStart = stripped.indexOf('{');
         var bodyEnd = stripped.lastIndexOf('}');
 
-        if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd &&
-            bodyStart != -1 && bodyEnd != -1 && bodyStart < bodyEnd) {
+        if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
             if (args1.size() >= 2) {
-                if (!args1.subList(0, args1.size() - 2).stream().allMatch(Main::isSymbol)) {
+                if (!args1.subList(0, args1.size() - 2).stream()
+                        .map(String::strip)
+                        .filter(value -> !value.isEmpty())
+                        .filter(value -> !value.startsWith("<") && !value.endsWith(">"))
+                        .allMatch(Main::isSymbol)) {
                     return null;
                 }
             }
@@ -356,10 +381,15 @@ public class Main {
             }
 
             var name1 = args1.get(args1.size() - 1);
-            var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
-            var output = compileNode(bodyString);
+            String body;
+            if (bodyStart != -1 && bodyEnd != -1 && bodyStart < bodyEnd) {
+                var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
+                body = " => " + compileNode(bodyString);
+            } else {
+                body = ";";
+            }
 
-            return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
+            return "public def " + name1 + "(args : NativeArray[NativeString])" + body;
         }
         return null;
     }
