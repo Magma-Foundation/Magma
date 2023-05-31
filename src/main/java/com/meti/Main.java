@@ -135,11 +135,12 @@ public class Main {
         var s = compileConstructor(stripped);
         if (s != null) return s;
 
+        var name = compileAssignment(stripped);
+        if (name != null) return name;
+
         var name1 = compileMethod(stripped);
         if (name1 != null) return name1;
 
-        var name = compileAssignment(stripped);
-        if (name != null) return name;
 
         if (stripped.startsWith("try")) {
             var valueString2 = stripped.substring("try".length()).strip();
@@ -368,7 +369,11 @@ public class Main {
 
         if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
-            if (args1.size() >= 2) {
+            if(args1.size() < 2) {
+                return null;
+            }
+
+            if (args1.size() > 2) {
                 if (!args1.subList(0, args1.size() - 2).stream()
                         .map(String::strip)
                         .filter(value -> !value.isEmpty())
