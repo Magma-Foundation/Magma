@@ -13,19 +13,27 @@ public class Main {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
+        var isWithinString = false;
+
         for (int i = 0; i < line.length(); i++) {
             var c = line.charAt(i);
-            if (c == '}' && depth == 1) {
+            if (c == '}' && depth == 1 && !isWithinString) {
                 builder.append("}");
                 depth = 0;
                 lines.add(builder.toString());
                 builder = new StringBuilder();
-            } else if (c == ';' && depth == 0) {
+            } else if (c == ';' && depth == 0 && !isWithinString) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (!isWithinString) {
+                    if (c == '{') depth++;
+                    if (c == '}') depth--;
+                }
+                if (c == '\'' || c == '\"') {
+                    isWithinString = !isWithinString;
+                }
+
                 builder.append(c);
             }
         }
@@ -45,6 +53,7 @@ public class Main {
         var output = new StringBuilder();
         for (var line : lines) {
             var stripped = line.strip();
+            System.out.println("LINE:" + stripped);
 
             String output1;
             try {
