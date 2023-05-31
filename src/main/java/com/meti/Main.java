@@ -116,34 +116,17 @@ public class Main {
             return stripped;
         }
 
-        if (stripped.startsWith("new ")) {
-            var substring = stripped.substring("new ".length(), stripped.indexOf("(")).strip();
-            var s = compileType(substring);
-            return "new " + s;
-        }
-
         var name1 = compileMethod(stripped);
         if (name1 != null) return name1;
 
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
-        var value = compileInvocation(stripped);
-        if (value != null) return value;
+        var left1 = compileField(stripped);
+        if (left1 != null) return left1;
 
-        var separator = stripped.indexOf('.');
-        if (separator != -1) {
-            var leftString = stripped.substring(0, separator);
-            var left = compileNode(leftString);
-            var right = stripped.substring(separator + 1);
-            return left + "." + right;
-        }
-
-        try {
-            Integer.parseInt(stripped);
-            return stripped;
-        } catch (NumberFormatException e) {
-        }
+        var stripped1 = compileInteger(stripped);
+        if (stripped1 != null) return stripped1;
 
         var variable = compileVariable(stripped);
         if (variable != null) return stripped;
@@ -151,10 +134,50 @@ public class Main {
         var left = compileOperator(stripped);
         if (left != null) return left;
 
+        var s = compileConstructor(stripped);
+        if (s != null) return s;
+
+        var value = compileInvocation(stripped);
+        if (value != null) return value;
+
         var inner = compileChar(stripped);
         if (inner != null) return inner;
 
         throw new CompileException("Unknown node: " + stripped);
+    }
+
+    private static String compileField(String stripped) throws CompileException {
+        var separator = stripped.indexOf('.');
+        if (separator != -1) {
+            var leftString = stripped.substring(0, separator);
+            var left = compileNode(leftString);
+            var right = stripped.substring(separator + 1);
+            return left + "." + right;
+        }
+        return null;
+    }
+
+    private static String compileInteger(String stripped) {
+        try {
+            Integer.parseInt(stripped);
+            return stripped;
+        } catch (NumberFormatException e) {
+        }
+        return null;
+    }
+
+    private static String compileConstructor(String stripped) throws CompileException {
+        if (stripped.startsWith("new ")) {
+            var endIndex = stripped.indexOf("(");
+            if (endIndex == -1) {
+                throw new CompileException("Not a constructor: " + stripped);
+            }
+
+            var substring = stripped.substring("new ".length(), endIndex).strip();
+            var s = compileType(substring);
+            return "new " + s;
+        }
+        return null;
     }
 
     private static String compileChar(String stripped) {
@@ -166,7 +189,7 @@ public class Main {
     }
 
     private static String compileOperator(String stripped) throws CompileException {
-        var operators = Set.of("&&", "==");
+        var operators = Set.of("&&", "==", "=");
         for (String operator : operators) {
             var operatorIndex = stripped.indexOf(operator);
             if (operatorIndex != -1) {
@@ -192,7 +215,11 @@ public class Main {
     }
 
     private static String compileFor(String stripped) throws CompileException {
-        if (stripped.startsWith("for") && stripped.endsWith("}")) {
+        if (stripped.startsWith("for")) {
+            if (!stripped.endsWith("}")) {
+                throw new CompileException("Malformed for loop: " + stripped);
+            }
+
             var condStart = stripped.indexOf('(');
             var condEnd = stripped.indexOf(')');
             var condSlice = stripped.substring(condStart + 1, condEnd);
@@ -270,7 +297,12 @@ public class Main {
     private static String compileMethod(String stripped) throws CompileException {
         var paramStart = stripped.indexOf('(');
         var paramEnd = stripped.indexOf(')');
-        if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
+
+        var bodyStart = stripped.indexOf('{');
+        var bodyEnd = stripped.lastIndexOf('}');
+
+        if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd &&
+            bodyStart != -1 && bodyEnd != -1 && bodyStart < bodyEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
             if (args1.size() >= 2) {
                 if (!args1.subList(0, args1.size() - 2).stream().allMatch(Main::isSymbol)) {
@@ -283,8 +315,6 @@ public class Main {
             }
 
             var name1 = args1.get(args1.size() - 1);
-            var bodyStart = stripped.indexOf('{');
-            var bodyEnd = stripped.lastIndexOf('}');
             var bodyString = slice(stripped, bodyStart, bodyEnd + 1).strip();
             var output = compileNode(bodyString);
 
@@ -319,13 +349,29 @@ public class Main {
     }
 
     private static String compileIf(String stripped) throws CompileException {
-        var start = stripped.indexOf('(');
-        var end = stripped.indexOf(')');
-        if (stripped.startsWith("if") && start != -1 && end != -1) {
-            var conditionString = slice(stripped, start + 1, end);
+        var condStart = stripped.indexOf('(');
+        var condEnd = stripped.indexOf(')');
+
+        var braceStart = stripped.indexOf('{');
+        var braceEnd = stripped.lastIndexOf('}');
+
+        var hasBraceStart = braceStart != -1 && condEnd < braceStart;
+        var hasBraceEnd = braceEnd != -1;
+        var validWrapper = (hasBraceStart && hasBraceEnd) || (!hasBraceStart && !hasBraceEnd);
+
+        if (stripped.startsWith("if")
+            && condStart != -1 && condEnd != -1
+            && validWrapper) {
+            var conditionString = slice(stripped, condStart + 1, condEnd);
             var condition = compileNode(conditionString);
 
-            var bodyString = slice(stripped, stripped.indexOf('{'), stripped.indexOf("}") + 1);
+            var i = stripped.lastIndexOf("}");
+            String bodyString;
+            if (braceEnd == -1) {
+                bodyString = slice(stripped, condEnd + 1, stripped.length()).strip();
+            } else {
+                bodyString = slice(stripped, braceStart, i + 1).strip();
+            }
             var body = compileNode(bodyString);
 
             return "if " + condition + " " + body;
