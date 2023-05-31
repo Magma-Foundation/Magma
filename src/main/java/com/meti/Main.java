@@ -135,17 +135,19 @@ public class Main {
         var s = compileConstructor(stripped);
         if (s != null) return s;
 
-        var name = compileAssignment(stripped);
-        if (name != null) return name;
-
         var name1 = compileMethod(stripped);
         if (name1 != null) return name1;
 
+        var name = compileDeclaration(stripped);
+        if (name != null) return name;
 
         if (stripped.startsWith("try")) {
             var valueString2 = stripped.substring("try".length()).strip();
             return "try" + compileNode(valueString2);
         }
+
+        var value = compileInvocation(stripped);
+        if (value != null) return value;
 
         var left1 = compileField(stripped);
         if (left1 != null) return left1;
@@ -164,9 +166,6 @@ public class Main {
             return "throw " + compileNode(valueString1) + ";";
         }
 
-        var value = compileInvocation(stripped);
-        if (value != null) return value;
-
         var inner = compileChar(stripped);
         if (inner != null) return inner;
 
@@ -177,7 +176,21 @@ public class Main {
             return stripped;
         }
 
+        var type = compileMethodReference(stripped);
+        if (type != null) return type;
+
         throw new CompileException("Unknown node: " + stripped);
+    }
+
+    private static String compileMethodReference(String stripped) {
+        var methodReference = stripped.indexOf("::");
+        if(methodReference != -1) {
+            var typeString = stripped.substring(0, methodReference).strip();
+            var type = compileType(typeString);
+            var nameString1 = stripped.substring(methodReference + "::".length()).strip();
+            return type + "::" + nameString1;
+        }
+        return null;
     }
 
     private static String compileInterface(String stripped) throws CompileException {
@@ -369,7 +382,7 @@ public class Main {
 
         if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
             var args1 = List.of(slice(stripped, paramStart).split(" "));
-            if(args1.size() < 2) {
+            if (args1.size() < 2) {
                 return null;
             }
 
@@ -412,17 +425,24 @@ public class Main {
         return true;
     }
 
-    private static String compileAssignment(String stripped) throws CompileException {
+    private static String compileDeclaration(String stripped) throws CompileException {
         var equals = stripped.indexOf('=');
-        if (equals != -1 && stripped.startsWith("var ")) {
-            var left = stripped.substring(0, equals).strip();
-            var space = left.indexOf(' ');
-            var name = left.substring(space + 1);
+        if (equals != -1)
+            if (stripped.startsWith("var ")) {
+                var left = stripped.substring(0, equals).strip();
+                var space = left.indexOf(' ');
+                var name = left.substring(space + 1);
 
-            var rightString = stripped.substring(equals + 1).strip();
-            var right = compileNode(rightString);
-            return "let " + name + " = " + right + ";";
-        }
+                var rightString = stripped.substring(equals + 1).strip();
+                var right = compileNode(rightString);
+                return "let " + name + " = " + right + ";";
+            } else {
+                var leftString = stripped.substring(0, equals).strip();
+                var left = compileNode(leftString);
+                var rightString = stripped.substring(equals + 1).strip();
+                var right = compileNode(rightString);
+                return left + " = " + right + ";";
+            }
         return null;
     }
 
@@ -508,7 +528,7 @@ public class Main {
     }
 
     private static String compileElse(String stripped) throws CompileException {
-        var withoutElse = stripped.substring("else ".length());
+        var withoutElse = slice(stripped, "else ".length(), stripped.length());
         var withoutElseRendered = compileNode(withoutElse);
         return "else " + withoutElseRendered;
     }
