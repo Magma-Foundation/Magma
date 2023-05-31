@@ -111,6 +111,9 @@ public class Main {
             return "for(" + condSlice + ")" + body;
         }
 
+        var keywords = compileClass(stripped);
+        if (keywords != null) return keywords;
+
         var name = compileAssignment(stripped);
         if (name != null) return name;
 
@@ -130,10 +133,47 @@ public class Main {
             return stripped;
         }
 
-        if (stripped.contains("class ")) {
-            return compileClass(stripped);
-        }
+        String name1 = compileMethod(stripped);
+        if (name1 != null) return name1;
 
+        return stripped;
+    }
+
+    private static String compileClass(String stripped) throws CompileException {
+        var classIndicator = stripped.indexOf("class ");
+        if (classIndicator != -1) {
+            var keywords = slice(stripped, classIndicator).strip();
+            for (int i = 0; i < keywords.length(); i++) {
+                if(!Character.isLetterOrDigit(keywords.charAt(i))) {
+                    return null;
+                }
+            }
+
+            var nameStart = classIndicator + "class ".length();
+
+            var nameEnd = stripped.indexOf('{');
+
+            String name;
+            try {
+                name = slice(stripped, nameStart, nameEnd).strip();
+            } catch (Exception e) {
+                var format = "%d %d: '%s'";
+                var message = format.formatted(nameStart, nameEnd, stripped);
+                throw new IndexOutOfBoundsException(message);
+            }
+
+            var block = slice(stripped, nameEnd, stripped.lastIndexOf('}') + 1);
+            var blockOutput = compileNode(block);
+
+            return keywords +
+                   " object " +
+                   name +
+                   " " + blockOutput;
+        }
+        return null;
+    }
+
+    private static String compileMethod(String stripped) throws CompileException {
         var paramStart = stripped.indexOf('(');
         var paramEnd = stripped.indexOf(')');
         if (paramStart != -1 && paramEnd != -1 && paramStart < paramEnd) {
@@ -157,8 +197,7 @@ public class Main {
                 return "public def " + name1 + "(args : NativeArray[NativeString]) => " + output;
             }
         }
-
-        return stripped;
+        return null;
     }
 
     private static String compileAssignment(String stripped) throws CompileException {
@@ -196,30 +235,6 @@ public class Main {
         } catch (Exception e) {
             throw new CompileException(start + " " + end + ": " + stripped);
         }
-    }
-
-    private static String compileClass(String stripped) throws CompileException {
-        var index = stripped.indexOf("class ");
-        var keywords = slice(stripped, index).strip();
-        var nameStart = index + "class ".length();
-        var nameEnd = stripped.indexOf('{');
-
-        String name;
-        try {
-            name = slice(stripped, nameStart, nameEnd).strip();
-        } catch (Exception e) {
-            var format = "%d %d: '%s'";
-            var message = format.formatted(nameStart, nameEnd, stripped);
-            throw new IndexOutOfBoundsException(message);
-        }
-
-        var block = slice(stripped, nameEnd, stripped.lastIndexOf('}') + 1);
-        var blockOutput = compileNode(block);
-
-        return keywords +
-               " object " +
-               name +
-               " " + blockOutput;
     }
 
     private static String slice(String stripped, int index) {
