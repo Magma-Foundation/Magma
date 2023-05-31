@@ -4,17 +4,44 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
 public class Main {
+    public static List<String> split(String line) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < line.length(); i++) {
+            var c = line.charAt(i);
+            if (c == '}' && depth == 1) {
+                builder.append("}");
+                depth = 0;
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+        lines.removeIf(String::isBlank);
+        return lines;
+    }
+
     public static void main(String[] args) {
         var input = readStringImpl(Paths.get(".", "Main.java")).match(value -> value, err -> {
             err.printStackTrace();
             return "";
         });
 
-        var lines = input.split(";");
+        var lines = split(input);
         var output = new StringBuilder();
         for (var line : lines) {
             var stripped = line.strip();
@@ -28,6 +55,16 @@ public class Main {
                         .append(" from ")
                         .append(joinedNames)
                         .append(";\n");
+            } else if (stripped.contains("class")) {
+                var index = stripped.indexOf("class ");
+                var keywords = stripped.substring(0, index).strip();
+                var name = stripped.substring(index + "class ".length(), stripped.indexOf('{')).strip();
+
+                output.append(keywords)
+                        .append(" ")
+                        .append("class def ")
+                        .append(name)
+                        .append("(){\n}");
             }
         }
 
