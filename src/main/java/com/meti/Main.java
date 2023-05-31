@@ -59,29 +59,87 @@ public class Main {
     private static String compileNode(String stripped) {
         if (stripped.startsWith("package ")) {
             return "";
-        } else if (stripped.startsWith("else ")) {
-            return compileElse(stripped);
-        } else if (stripped.startsWith("if")) {
-            var start = stripped.indexOf('(');
-            var end = stripped.indexOf(')');
+        }
 
-            var conditionString = stripped.substring(start + 1, end);
+        if (stripped.startsWith("else ")) {
+            return compileElse(stripped);
+        }
+
+        var condition = compileIf(stripped);
+        if (condition != null) return condition;
+
+        if (stripped.startsWith("{") && stripped.endsWith("}")) {
+            return compileBlock(stripped);
+        }
+
+        if (stripped.startsWith("import ")) {
+            return compileImport(stripped);
+        }
+
+        var name = compileAssignment(stripped);
+        if (name != null) return name;
+
+        var argStart = stripped.indexOf('(');
+        var argEnd = stripped.indexOf(')');
+        if (argStart != -1 && argEnd != -1 && stripped.endsWith(")")) {
+            var leftSlice = stripped.substring(0, argStart);
+            var left = compileNode(leftSlice);
+
+            var rightString = slice(stripped, argStart + 1, argEnd);
+            var right = compileNode(rightString);
+
+            return left + "(" + right + ")";
+        }
+
+        if(stripped.startsWith("\"") && stripped.startsWith("\"")) {
+            return stripped;
+        }
+
+        if (stripped.contains("class ")) {
+            return compileClass(stripped);
+        }
+
+        if (stripped.contains("(")) {
+            return compileMethod(stripped);
+        }
+
+        return stripped;
+    }
+
+    private static String compileAssignment(String stripped) {
+        var equals = stripped.indexOf('=');
+        if (equals != -1) {
+            var left = stripped.substring(0, equals).strip();
+            var space = left.indexOf(' ');
+            var name = left.substring(space + 1);
+
+            var rightString = stripped.substring(equals + 1).strip();
+            var right = compileNode(rightString);
+            return "let " + name + "=" + right;
+        }
+        return null;
+    }
+
+    private static String compileIf(String stripped) {
+        var start = stripped.indexOf('(');
+        var end = stripped.indexOf(')');
+        if (stripped.startsWith("if") && start != -1 && end != -1) {
+            var conditionString = slice(stripped, start + 1, end);
             var condition = compileNode(conditionString);
 
-            var bodyString = stripped.substring(stripped.indexOf('{'), stripped.indexOf("}") + 1);
+            var bodyString = slice(stripped, stripped.indexOf('{'), stripped.indexOf("}") + 1);
             var body = compileNode(bodyString);
 
             return "if " + condition + " " + body;
-        } else if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            return compileBlock(stripped);
-        } else if (stripped.startsWith("import ")) {
-            return compileImport(stripped);
-        } else if (stripped.contains("class ")) {
-            return compileClass(stripped);
-        } else if (stripped.contains("(")) {
-            return compileMethod(stripped);
-        } else {
-            return stripped;
+        }
+        return null;
+    }
+
+    private static String slice(String stripped, int start, int end) {
+        try {
+            return stripped.substring(start, end);
+        } catch (Exception e) {
+            throw new RuntimeException(start + " " + end + ": " + stripped);
         }
     }
 
@@ -103,14 +161,14 @@ public class Main {
 
         String name;
         try {
-            name = stripped.substring(nameStart, nameEnd).strip();
+            name = slice(stripped, nameStart, nameEnd).strip();
         } catch (Exception e) {
             var format = "%d %d: '%s'";
             var message = format.formatted(nameStart, nameEnd, stripped);
             throw new IndexOutOfBoundsException(message);
         }
 
-        var block = stripped.substring(nameEnd, stripped.lastIndexOf('}') + 1);
+        var block = slice(stripped, nameEnd, stripped.lastIndexOf('}') + 1);
         var blockOutput = compileNode(block);
 
         return keywords +
@@ -121,7 +179,7 @@ public class Main {
 
     private static String slice(String stripped, int index) {
         try {
-            return stripped.substring(0, index);
+            return slice(stripped, 0, index);
         } catch (Exception e) {
             throw new IndexOutOfBoundsException(index + ": " + stripped);
         }
@@ -140,11 +198,11 @@ public class Main {
     }
 
     private static String compileBlock(String stripped) {
-        var sliced = stripped.substring(1, stripped.length() - 1);
+        var sliced = slice(stripped, 1, stripped.length() - 1);
         var lines = split(sliced);
         var compiled = new ArrayList<String>();
         for (String line : lines) {
-            compiled.add(compileNode(line));
+            compiled.add(compileNode(line.strip()));
         }
         return "{\n\t" + String.join("", compiled) + "}";
     }
