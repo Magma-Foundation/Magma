@@ -87,8 +87,16 @@ public class Main {
     }
 
     private static String compileNodeExceptionally(String stripped) throws CompileException {
+        if (stripped.contains("try")) {
+            System.out.println("blah");
+        }
+
         if (stripped.startsWith("package ")) {
             return "";
+        }
+
+        if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
+            return stripped;
         }
 
         if (stripped.startsWith("else ")) {
@@ -106,21 +114,25 @@ public class Main {
             return compileImport(stripped);
         }
 
+        var valueString = compileReturn(stripped);
+        if (valueString != null) return valueString;
+
         var condSlice = compileFor(stripped);
         if (condSlice != null) return condSlice;
 
         var keywords = compileClass(stripped);
         if (keywords != null) return keywords;
 
-        if (stripped.startsWith("\"") && stripped.startsWith("\"")) {
-            return stripped;
-        }
-
         var name1 = compileMethod(stripped);
         if (name1 != null) return name1;
 
         var name = compileAssignment(stripped);
         if (name != null) return name;
+
+        if (stripped.startsWith("try")) {
+            var valueString2 = stripped.substring("try".length()).strip();
+            return "try" + compileNode(valueString2);
+        }
 
         var left1 = compileField(stripped);
         if (left1 != null) return left1;
@@ -137,21 +149,49 @@ public class Main {
         var s = compileConstructor(stripped);
         if (s != null) return s;
 
+        if (stripped.startsWith("throw ")) {
+            var valueString1 = stripped.substring("throw ".length()).strip();
+            return "throw " + compileNode(valueString1) + ";";
+        }
+
         var value = compileInvocation(stripped);
         if (value != null) return value;
 
         var inner = compileChar(stripped);
         if (inner != null) return inner;
 
+        var operandString = compileUnaryOperator(stripped);
+        if (operandString != null) return operandString;
+
         throw new CompileException("Unknown node: " + stripped);
+    }
+
+    private static String compileReturn(String stripped) throws CompileException {
+        if (stripped.startsWith("return ")) {
+            var valueString = stripped.substring("return ".length());
+            var value = compileNode(valueString);
+            return "return " + value + ";";
+        }
+        return null;
+    }
+
+    private static String compileUnaryOperator(String stripped) throws CompileException {
+        var operators = Set.of("++", "--");
+        for (var operator : operators) {
+            if (stripped.endsWith(operator)) {
+                var operandString = stripped.substring(0, stripped.length() - operator.length());
+                return compileNode(operandString) + operator;
+            }
+        }
+        return null;
     }
 
     private static String compileField(String stripped) throws CompileException {
         var separator = stripped.indexOf('.');
         if (separator != -1) {
-            var leftString = stripped.substring(0, separator);
+            var leftString = stripped.substring(0, separator).strip();
             var left = compileNode(leftString);
-            var right = stripped.substring(separator + 1);
+            var right = stripped.substring(separator + 1).strip();
             return left + "." + right;
         }
         return null;
@@ -189,7 +229,7 @@ public class Main {
     }
 
     private static String compileOperator(String stripped) throws CompileException {
-        var operators = Set.of("&&", "==", "=");
+        var operators = Set.of("&&", "==", "=", "+");
         for (String operator : operators) {
             var operatorIndex = stripped.indexOf(operator);
             if (operatorIndex != -1) {
@@ -207,7 +247,8 @@ public class Main {
 
     private static String compileVariable(String stripped) {
         for (int i = 0; i < stripped.length(); i++) {
-            if (!Character.isLetter(stripped.charAt(i))) {
+            var ch = stripped.charAt(i);
+            if (!Character.isLetter(ch) && (i == 0 || !Character.isDigit(ch))) {
                 return null;
             }
         }
@@ -356,8 +397,10 @@ public class Main {
         var braceEnd = stripped.lastIndexOf('}');
 
         var hasBraceStart = braceStart != -1 && condEnd < braceStart;
-        var hasBraceEnd = braceEnd != -1;
-        var validWrapper = (hasBraceStart && hasBraceEnd) || (!hasBraceStart && !hasBraceEnd);
+        var hasBraceEnd = braceEnd != -1 && condEnd < braceEnd;
+        var hasBraces = hasBraceStart && hasBraceEnd;
+        var hasNoBraces = !hasBraceStart && !hasBraceEnd;
+        var validWrapper = hasBraces || hasNoBraces;
 
         if (stripped.startsWith("if")
             && condStart != -1 && condEnd != -1
@@ -367,10 +410,10 @@ public class Main {
 
             var i = stripped.lastIndexOf("}");
             String bodyString;
-            if (braceEnd == -1) {
-                bodyString = slice(stripped, condEnd + 1, stripped.length()).strip();
-            } else {
+            if (hasBraces) {
                 bodyString = slice(stripped, braceStart, i + 1).strip();
+            } else {
+                bodyString = slice(stripped, condEnd + 1, stripped.length()).strip();
             }
             var body = compileNode(bodyString);
 
