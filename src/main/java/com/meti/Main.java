@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -144,12 +145,49 @@ public class Main {
         } catch (NumberFormatException e) {
         }
 
-        for (int i = 0; i < stripped.length(); i++) {
-            if(!Character.isLetter(stripped.charAt(i))) {
-                throw new CompileException("Failed to compile node: " + stripped);
+        var variable = compileVariable(stripped);
+        if (variable != null) return stripped;
+
+        var left = compileOperator(stripped);
+        if (left != null) return left;
+
+        var inner = compileChar(stripped);
+        if (inner != null) return inner;
+
+        throw new CompileException("Unknown node: " + stripped);
+    }
+
+    private static String compileChar(String stripped) {
+        if (stripped.startsWith("'") && stripped.endsWith("'")) {
+            var inner = stripped.substring(1, stripped.length() - 1);
+            return "'" + inner + "'";
+        }
+        return null;
+    }
+
+    private static String compileOperator(String stripped) throws CompileException {
+        var operators = Set.of("&&", "==");
+        for (String operator : operators) {
+            var operatorIndex = stripped.indexOf(operator);
+            if (operatorIndex != -1) {
+                var leftString = stripped.substring(0, operatorIndex).strip();
+                var left = compileNode(leftString);
+
+                var rightString = stripped.substring(operatorIndex + operator.length()).strip();
+                var right = compileNode(rightString);
+
+                return left + operator + right;
             }
         }
+        return null;
+    }
 
+    private static String compileVariable(String stripped) {
+        for (int i = 0; i < stripped.length(); i++) {
+            if (!Character.isLetter(stripped.charAt(i))) {
+                return null;
+            }
+        }
         return stripped;
     }
 
