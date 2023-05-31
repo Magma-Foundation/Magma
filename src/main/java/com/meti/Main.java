@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Main {
+    private static int depth = 0;
+
     public static List<String> split(String line) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
@@ -130,6 +132,9 @@ public class Main {
         var keywords = compileClass(stripped);
         if (keywords != null) return keywords;
 
+        var s = compileConstructor(stripped);
+        if (s != null) return s;
+
         var name1 = compileMethod(stripped);
         if (name1 != null) return name1;
 
@@ -153,9 +158,6 @@ public class Main {
         var left = compileOperator(stripped);
         if (left != null) return left;
 
-        var s = compileConstructor(stripped);
-        if (s != null) return s;
-
         if (stripped.startsWith("throw ")) {
             var valueString1 = stripped.substring("throw ".length()).strip();
             return "throw " + compileNode(valueString1) + ";";
@@ -170,7 +172,7 @@ public class Main {
         var operandString = compileUnaryOperator(stripped);
         if (operandString != null) return operandString;
 
-        if(stripped.startsWith("@")) {
+        if (stripped.startsWith("@")) {
             return stripped;
         }
 
@@ -261,7 +263,7 @@ public class Main {
                 var rightString = stripped.substring(operatorIndex + operator.length()).strip();
                 var right = compileNode(rightString);
 
-                return left + operator + right;
+                return left + " " + operator + " " + right;
             }
         }
         return null;
@@ -389,7 +391,7 @@ public class Main {
                 body = ";";
             }
 
-            return "public def " + name1 + "(args : NativeArray[NativeString])" + body;
+            return "public def " + name1 + "()" + body;
         }
         return null;
     }
@@ -414,7 +416,7 @@ public class Main {
 
             var rightString = stripped.substring(equals + 1).strip();
             var right = compileNode(rightString);
-            return "let " + name + "=" + right;
+            return "let " + name + " = " + right + ";";
         }
         return null;
     }
@@ -483,11 +485,21 @@ public class Main {
     private static String compileBlock(String stripped) throws CompileException {
         var sliced = slice(stripped, 1, stripped.length() - 1);
         var lines = split(sliced);
-        var compiled = new ArrayList<String>();
-        for (String line : lines) {
-            compiled.add(compileNode(line.strip()));
-        }
-        return "{\n\t" + String.join("", compiled) + "}";
+        var s = "{\n" + lines
+                .stream()
+                .map(String::strip)
+                .map(line -> {
+                    try {
+                        depth += 1;
+                        var s1 = "\t".repeat(depth) + compileNode(line) + "\n";
+                        depth -= 1;
+                        return s1;
+                    } catch (CompileException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.joining()) + "}";
+        return s;
     }
 
     private static String compileElse(String stripped) throws CompileException {
