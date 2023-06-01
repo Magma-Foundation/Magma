@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.meti.Option.Some;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
@@ -26,28 +25,34 @@ public class ApplicationTest {
     @Test
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        var actual = run(source);
+        var actual = new Application(source).run();
         assertEquals(target, actual.unwrap());
     }
 
     @Test
     void generatesTarget() throws IOException {
-        Files.createFile(source);
-        run(source);
+        runWithSource();
         assertTrue(Files.exists(target));
     }
 
-    private Option<Path> run(Path source) throws IOException {
-        if (Files.exists(source)) {
-            var name = source.getFileName().toString();
-            var separator = name.indexOf('.');
-            var nameWithoutExtension = name.substring(0, separator);
-            var target = source.resolveSibling(nameWithoutExtension + ".mgs");
-            Files.createFile(target);
-            return Some(target);
-        } else {
-            return Option.None();
-        }
+    @Test
+    void generatesEmpty() throws IOException {
+        assertTrue(Files.readString(runWithSource().unwrap()).isEmpty());
+    }
+
+    @Test
+    void generatesImport() throws IOException {
+        var target = runWithSource("import java.io.IOException;").unwrap();
+        assertEquals("import { IOException} from java.io;", Files.readString(target));
+    }
+
+    private Option<Path> runWithSource() throws IOException {
+        return runWithSource("");
+    }
+
+    private Option<Path> runWithSource(String csq) throws IOException {
+        Files.writeString(source, csq);
+        return new Application(source).run();
     }
 
     @AfterEach
