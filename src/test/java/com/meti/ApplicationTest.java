@@ -43,7 +43,7 @@ public class ApplicationTest {
     @Test
     void generatesImport() throws IOException {
         var target = runWithSource("import java.io.IOException;").unwrap();
-        assertEquals("import { IOException} from java.io;", Files.readString(target));
+        assertEquals("import { IOException } from java.io;", Files.readString(target));
     }
 
     private Option<Path> runWithSource() throws IOException {
