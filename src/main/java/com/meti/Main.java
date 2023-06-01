@@ -9,7 +9,6 @@ public class Main {
         var path = Paths.get(".", "Main.java");
         var s = Files.readString(path);
 
-
         var path1 = Paths.get(".", "Main.mgs");
         Files.writeString(path1, s);
     }
