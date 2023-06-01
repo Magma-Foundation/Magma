@@ -9,8 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.meti.Option.Some;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -24,12 +24,26 @@ public class ApplicationTest {
     }
 
     @Test
+    void generatesProperTarget() throws IOException {
+        Files.createFile(source);
+        var actual = run();
+        assertEquals(target, actual.unwrap());
+    }
+
+    @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
+        run();
+        assertTrue(Files.exists(target));
+    }
+
+    private Option<Path> run() throws IOException {
         if (Files.exists(source)) {
             Files.createFile(target);
+            return Some(target);
+        } else {
+            return Option.None();
         }
-        assertTrue(Files.exists(target));
     }
 
     @AfterEach
