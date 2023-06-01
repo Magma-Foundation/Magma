@@ -26,19 +26,23 @@ public class ApplicationTest {
     @Test
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        var actual = run();
+        var actual = run(source);
         assertEquals(target, actual.unwrap());
     }
 
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
-        run();
+        run(source);
         assertTrue(Files.exists(target));
     }
 
-    private Option<Path> run() throws IOException {
+    private Option<Path> run(Path source) throws IOException {
         if (Files.exists(source)) {
+            var name = source.getFileName().toString();
+            var separator = name.indexOf('.');
+            var nameWithoutExtension = name.substring(0, separator);
+            var target = source.resolveSibling(nameWithoutExtension + ".mgs");
             Files.createFile(target);
             return Some(target);
         } else {
