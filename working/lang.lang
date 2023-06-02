@@ -6,7 +6,7 @@ mod whitespace {
     optional = '' | required;
 }
 
-name = text
+name = text;
 
 expression : {
     string = '\'' text '\'';
@@ -23,6 +23,8 @@ expression : {
 
     quantity = '(' whitespace.optional expression whitespace.optional ')';
 
+    optional = expression "?";
+
     list = '['
         whitespace.optional expression;
         whitespace.optional ('' | '/' whitespace.optional expression);
@@ -30,9 +32,9 @@ expression : {
 
     field = name '.' name;
 } = and | field | list
-    | name | or
-    | quantity | range
-    | string;
+    | name | optional
+    | or | quantity
+    | range | string;
 
 rule : {
     properties = '' | (':' statement-blocks)
