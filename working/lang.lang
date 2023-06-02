@@ -14,6 +14,6 @@ expression-or = expression whitespace-optional "|" whitespace-optional expressio
 expression-and = expression whitespace-required expression
 expression = range | expression-or | expression-and
 rule = name whitespace-optional "=" whitespace-optional expression
-joinedRules = rule "\n" rules
+joinedRules = rule whitespace-required rules
 rules = "" | rule | joinedRules
 _ = rules
