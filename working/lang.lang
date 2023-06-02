@@ -28,24 +28,24 @@ expression : {
         whitespace.optional ('' | '/' whitespace.optional expression);
         whitespace.optional ']';
 
-    field = name '.' name
+    field = name '.' name;
 } = and | field | list
     | name | or
     | quantity | range
-    | string
+    | string;
 
 rule : {
     properties = '' | (':' statement-blocks)
 } = name whitespace.optional properties
     whitespace.optional '='
     whitespace.optional expression
-    whitespace.optional ';'
+    whitespace.optional ';';
 
 module = 'mod'
     whitespace.required name
-    whitespace.optional statement-blocks
+    whitespace.optional statement-blocks;
 
-statement = rule | module
-statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional
-statement-blocks = '{' statements '}'
-_ = statements
+statement = rule | module;
+statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional;
+statement-blocks = '{' statements '}';
+_ = statements;
