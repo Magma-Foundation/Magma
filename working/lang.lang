@@ -1,12 +1,10 @@
 text = [ ( a..z | A..Z) ]
 
 mod whitespace {
-
+    char = '\t' | '\n' | ' '
+    required = [ char ]
+    whitespace.optional = '' | whitespace.required
 }
-
-whitespace-char = '\t' | '\n' | ' '
-whitespace-required = [ whitespace-char ]
-whitespace-optional = '' | whitespace-required
 
 name = text
 
@@ -17,15 +15,17 @@ range-start = text
 range-end = text
 expression-range = range-start '..' range-end
 
-expression-or = expression whitespace-optional '|' whitespace-optional expression
-expression-and = expression whitespace-required expression
+expression-or = expression whitespace.optional '|' whitespace.optional expression
+expression-and = expression whitespace.required expression
 
-expression-quantity = '(' whitespace-optional expression whitespace-optional ')'
+expression-quantity = '(' whitespace.optional expression whitespace.optional ')'
 
 expression-list = '['
-    whitespace-optional expression
-    whitespace-optional ('' | '/' whitespace-optional expression)
-    whitespace-optional ']'
+    whitespace.optional expression
+    whitespace.optional ('' | '/' whitespace.optional expression)
+    whitespace.optional ']'
+
+expression-field = name '.' name
 
 expression = expression-value
     | expression-string
@@ -34,10 +34,11 @@ expression = expression-value
     | expression-quantity
     | expression-range
     | expression-list
+    | expression-field
 
-rule = name whitespace-optional '=' whitespace-optional expression
-module = 'mod' whitespace-required name whitespace-optional '{' statements '}'
+rule = name whitespace.optional '=' whitespace.optional expression
+module = 'mod' whitespace.required name whitespace.optional '{' statements '}'
 
 statement = rule | module
-statements = whitespace-optional [ statement / whitespace-required ] whitespace-optional
+statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional
 _ = statements
