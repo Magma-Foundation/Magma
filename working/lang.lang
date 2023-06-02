@@ -8,14 +8,18 @@ whitespace-optional = '' | whitespace-required
 
 name = text
 
+expression-value = name
 expression-string = '\'' text '\''
 range-start = text
 range-end = text
 expression-range = range-start '..' range-end
 expression-or = expression whitespace-optional '|' whitespace-optional expression
 expression-and = expression whitespace-required expression
-expression-list = '[' whitespace-optional ']'
-expression = expression-string
+
+expression-list-delimiter = '' | '/' whitespace-optional expression-string
+expression-list = '[' whitespace-optional expression whitespace-optional expression-list-delimiter whitespace-optional ']'
+expression = expression-value
+    | expression-string
     | expression-range
     | expression-or
     | expression-and
