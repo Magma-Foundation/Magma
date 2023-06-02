@@ -1,5 +1,4 @@
-text-char = a..z | A..Z
-text = [ text-char ]
+text = [ ( a..z | A..Z) ]
 
 whitespace-char = '\t' | '\n' | ' '
 whitespace-required = [ whitespace-char ]
@@ -9,16 +8,21 @@ name = text
 
 expression-value = name
 expression-string = '\'' text '\''
+
 range-start = text
 range-end = text
 expression-range = range-start '..' range-end
+
 expression-or = expression whitespace-optional '|' whitespace-optional expression
 expression-and = expression whitespace-required expression
 
 expression-quantity = '(' whitespace-optional expression whitespace-optional ')'
 
-expression-list-delimiter = '' | '/' whitespace-optional expression
-expression-list = '[' whitespace-optional expression whitespace-optional expression-list-delimiter whitespace-optional ']'
+expression-list = '['
+    whitespace-optional expression
+    whitespace-optional ('' | '/' whitespace-optional expression)
+    whitespace-optional ']'
+
 expression = expression-value
     | expression-string
     | expression-and
