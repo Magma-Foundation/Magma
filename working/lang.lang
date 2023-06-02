@@ -1,10 +1,8 @@
 text = [ ( a..z | A..Z) ]
 
-mod whitespace {
+whitespace : {
     char = '\t' | '\n' | ' ';
-    required = [ char ];
-    optional = '' | required;
-}
+} = [ char ];
 
 name = text;
 
@@ -16,19 +14,21 @@ expression : {
     } = start '..' end;
 
     or = expression
-        whitespace.optional '|'
-        whitespace.optional expression;
+        whitespace? '|'
+        whitespace? expression;
 
-    and = expression whitespace.required expression;
+    and = expression whitespace expression;
 
-    quantity = '(' whitespace.optional expression whitespace.optional ')';
+    quantity = '(' whitespace? expression whitespace? ')';
 
     optional = expression "?";
 
-    list = '['
-        whitespace.optional expression;
-        whitespace.optional ('' | '/' whitespace.optional expression);
-        whitespace.optional ']';
+    list : {
+        delimiter = '/' whitespace? expression
+    }= '['
+        whitespace? expression
+        (whitespace delimiter)?
+        whitespace? ']';
 
     field = name '.' name;
 } = and | field | list
@@ -37,17 +37,18 @@ expression : {
     | range | string;
 
 rule : {
-    properties = '' | (':' statement-blocks)
-} = name whitespace.optional properties
-    whitespace.optional '='
-    whitespace.optional expression
-    whitespace.optional ';';
+    properties = ':' statement-blocks
+} = name
+    (whitespace properties)?
+    whitespace? '='
+    whitespace? expression
+    whitespace? ';';
 
 module = 'mod'
-    whitespace.required name
-    whitespace.optional statement-blocks;
+    whitespace name
+    whitespace? statement-blocks;
 
 statement = rule | module;
-statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional;
+statements = whitespace? [ statement / whitespace ] whitespace?;
 statement-blocks = '{' statements '}';
 _ = statements;
