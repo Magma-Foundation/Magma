@@ -2,8 +2,7 @@ text-char = a..z | A..Z
 text = [ text-char ]
 
 whitespace-char = '\t' | '\n' | ' '
-whitespace-joined = whitespace-char whitespace-required
-whitespace-required = whitespace-char | whitespace-joined
+whitespace-required = [ whitespace-char ]
 whitespace-optional = '' | whitespace-required
 
 name = text
@@ -16,7 +15,7 @@ expression-range = range-start '..' range-end
 expression-or = expression whitespace-optional '|' whitespace-optional expression
 expression-and = expression whitespace-required expression
 
-expression-list-delimiter = '' | '/' whitespace-optional expression-string
+expression-list-delimiter = '' | '/' whitespace-optional expression
 expression-list = '[' whitespace-optional expression whitespace-optional expression-list-delimiter whitespace-optional ']'
 expression = expression-value
     | expression-string
@@ -26,6 +25,5 @@ expression = expression-value
     | expression-list
 
 rule = name whitespace-optional '=' whitespace-optional expression
-joinedRules = rule whitespace-required rules
-rules = '' | rule | joinedRules
+rules = [ rule / whitespace-required ]
 _ = rules
