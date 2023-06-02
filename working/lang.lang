@@ -1,46 +1,49 @@
 text = [ ( a..z | A..Z) ]
 
 mod whitespace {
-    char = '\t' | '\n' | ' '
-    required = [ char ]
-    optional = '' | required
+    char = '\t' | '\n' | ' ';
+    required = [ char ];
+    optional = '' | required;
 }
 
 name = text
 
-expression-string = '\'' text '\''
+expression : {
+    string = '\'' text '\'';
+    range : {
+        start = text;
+        end = text;
+    } = start '..' end;
 
-range-start = text
-range-end = text
-expression-range = range-start '..' range-end
+    or = expression
+        whitespace.optional '|'
+        whitespace.optional expression;
 
-expression-or = expression whitespace.optional '|' whitespace.optional expression
-expression-and = expression whitespace.required expression
+    and = expression whitespace.required expression;
 
-expression-quantity = '(' whitespace.optional expression whitespace.optional ')'
+    quantity = '(' whitespace.optional expression whitespace.optional ')';
 
-expression-list = '['
-    whitespace.optional expression
-    whitespace.optional ('' | '/' whitespace.optional expression)
-    whitespace.optional ']'
+    list = '['
+        whitespace.optional expression;
+        whitespace.optional ('' | '/' whitespace.optional expression);
+        whitespace.optional ']';
 
-expression-field = name '.' name
+    field = name '.' name
+} = and | field | list
+    | name | or
+    | quantity | range
+    | string
 
-expression = name
-    | expression-string
-    | expression-and
-    | expression-or
-    | expression-quantity
-    | expression-range
-    | expression-list
-    | expression-field
-
-properties = '' | (':' statement-blocks)
-rule = name
-    whitespace.optional properties
+rule : {
+    properties = '' | (':' statement-blocks)
+} = name whitespace.optional properties
     whitespace.optional '='
     whitespace.optional expression
-module = 'mod' whitespace.required name whitespace.optional statement-blocks
+    whitespace.optional ';'
+
+module = 'mod'
+    whitespace.required name
+    whitespace.optional statement-blocks
 
 statement = rule | module
 statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional
