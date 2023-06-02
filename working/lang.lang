@@ -6,13 +6,20 @@ whitespace-char = '\t' | '\n' | ' '
 whitespace-joined = whitespace-char whitespace-required
 whitespace-required = whitespace-char | whitespace-joined
 whitespace-optional = '' | whitespace-required
+
 name = text
+
 range-start = text
 range-end = text
-range = range-start ".." range-end
+expression-range = range-start ".." range-end
 expression-or = expression whitespace-optional "|" whitespace-optional expression
 expression-and = expression whitespace-required expression
-expression = range | expression-or | expression-and
+expression-list = "[" whitespace-optional "]"
+expression = expression-range
+    | expression-or
+    | expression-and
+    | expression-list
+
 rule = name whitespace-optional "=" whitespace-optional expression
 joinedRules = rule whitespace-required rules
 rules = "" | rule | joinedRules
