@@ -1,8 +1,5 @@
 text = [ ( a..z | A..Z) ]
-
-whitespace : {
-    char = '\t' | '\n' | ' ';
-} = [ char ];
+whitespace = [ '\t' | '\n' | ' ' ];
 
 name = text;
 
