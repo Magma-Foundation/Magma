@@ -1,6 +1,5 @@
 text-char = a..z | A..Z
-text-joined = text-char text
-text = text-char | text-joined
+text = [ text-char ]
 
 whitespace-char = '\t' | '\n' | ' '
 whitespace-joined = whitespace-char whitespace-required
@@ -9,18 +8,20 @@ whitespace-optional = '' | whitespace-required
 
 name = text
 
+expression-string = '\'' text '\''
 range-start = text
 range-end = text
-expression-range = range-start ".." range-end
-expression-or = expression whitespace-optional "|" whitespace-optional expression
+expression-range = range-start '..' range-end
+expression-or = expression whitespace-optional '|' whitespace-optional expression
 expression-and = expression whitespace-required expression
-expression-list = "[" whitespace-optional "]"
-expression = expression-range
+expression-list = '[' whitespace-optional ']'
+expression = expression-string
+    | expression-range
     | expression-or
     | expression-and
     | expression-list
 
-rule = name whitespace-optional "=" whitespace-optional expression
+rule = name whitespace-optional '=' whitespace-optional expression
 joinedRules = rule whitespace-required rules
-rules = "" | rule | joinedRules
+rules = '' | rule | joinedRules
 _ = rules
