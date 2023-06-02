@@ -1,5 +1,9 @@
 text = [ ( a..z | A..Z) ]
 
+mod whitespace {
+
+}
+
 whitespace-char = '\t' | '\n' | ' '
 whitespace-required = [ whitespace-char ]
 whitespace-optional = '' | whitespace-required
@@ -32,5 +36,8 @@ expression = expression-value
     | expression-list
 
 rule = name whitespace-optional '=' whitespace-optional expression
-rules = [ rule / whitespace-required ]
-_ = rules
+module = 'mod' whitespace-required name whitespace-optional '{' statements '}'
+
+statement = rule | module
+statements = whitespace-optional [ statement / whitespace-required ] whitespace-optional
+_ = statements
