@@ -1,0 +1,19 @@
+text-char = a..z | A..Z
+text-joined = text-char text
+text = text-char | text-joined
+
+whitespace-char = '\t' | '\n' | ' '
+whitespace-joined = whitespace-char whitespace-required
+whitespace-required = whitespace-char | whitespace-joined
+whitespace-optional = '' | whitespace-required
+name = text
+range-start = text
+range-end = text
+range = range-start ".." range-end
+expression-or = expression whitespace-optional "|" whitespace-optional expression
+expression-and = expression whitespace-required expression
+expression = range | expression-or | expression-and
+rule = name whitespace-optional "=" whitespace-optional expression
+joinedRules = rule "\n" rules
+rules = "" | rule | joinedRules
+_ = rules
