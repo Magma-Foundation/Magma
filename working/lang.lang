@@ -3,12 +3,11 @@ text = [ ( a..z | A..Z) ]
 mod whitespace {
     char = '\t' | '\n' | ' '
     required = [ char ]
-    whitespace.optional = '' | whitespace.required
+    optional = '' | required
 }
 
 name = text
 
-expression-value = name
 expression-string = '\'' text '\''
 
 range-start = text
@@ -27,7 +26,7 @@ expression-list = '['
 
 expression-field = name '.' name
 
-expression = expression-value
+expression = name
     | expression-string
     | expression-and
     | expression-or
@@ -36,9 +35,14 @@ expression = expression-value
     | expression-list
     | expression-field
 
-rule = name whitespace.optional '=' whitespace.optional expression
-module = 'mod' whitespace.required name whitespace.optional '{' statements '}'
+properties = '' | (':' statement-blocks)
+rule = name
+    whitespace.optional properties
+    whitespace.optional '='
+    whitespace.optional expression
+module = 'mod' whitespace.required name whitespace.optional statement-blocks
 
 statement = rule | module
 statements = whitespace.optional [ statement / whitespace.required ] whitespace.optional
+statement-blocks = '{' statements '}'
 _ = statements
