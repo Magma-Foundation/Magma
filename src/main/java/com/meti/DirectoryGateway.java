@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 public class DirectoryGateway implements PathGateway {
@@ -15,7 +17,10 @@ public class DirectoryGateway implements PathGateway {
 
     @Override
     public Path resolveChild(Source source) {
-        return root.resolve(source.computeName() + ".java");
+        var reduce = source.computeNamespace()
+                .stream()
+                .reduce(root, Path::resolve, (path, path2) -> path2);
+        return reduce.resolve(source.computeName() + ".java");
     }
 
     @Override

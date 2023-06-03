@@ -24,7 +24,7 @@ public final class Application {
         var targets = new HashSet<Path>();
         for (var source : sources) {
             var result = compile(source);
-            if(result.isOk()) {
+            if (result.isOk()) {
                 targets.add(result.unwrapValue());
             } else {
                 return Result.err(result.unwrapErr());
@@ -37,6 +37,10 @@ public final class Application {
     private Result<Path> compile(Source source) {
         try {
             var target = targetGateway.resolveChild(source);
+            if (!Files.exists(target.getParent())) {
+                Files.createDirectories(target.getParent());
+            }
+
             if (!Files.exists(target)) {
                 Files.createFile(target);
             }
