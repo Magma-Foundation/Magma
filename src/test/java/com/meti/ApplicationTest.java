@@ -25,27 +25,14 @@ public class ApplicationTest {
     @Test
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        assertEquals(target, run(source));
+        assertEquals(target, new Application(source).run());
     }
 
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
-        run(source);
+        new Application(source).run();
         assertTrue(Files.exists(target));
-    }
-
-    private Path run(Path source) throws IOException {
-        if (Files.exists(source)) {
-            var fileName = source.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var fileNameWithoutExtension = fileName.substring(0, separator);
-            var target = source.resolveSibling(fileNameWithoutExtension + ".java");
-            Files.createFile(target);
-            return this.target;
-        } else {
-            return null;
-        }
     }
 
     @AfterEach
@@ -56,7 +43,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        run(source);
+        new Application(source).run();
         assertFalse(Files.exists(target));
     }
 }
