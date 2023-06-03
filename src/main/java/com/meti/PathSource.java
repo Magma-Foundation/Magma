@@ -19,6 +19,10 @@ public record PathSource(Path parent, Path child) implements Source {
     public String computeName() {
         var fileName = child.getFileName().toString();
         var separator = fileName.indexOf('.');
-        return fileName.substring(0, separator);
+        if (separator == -1) {
+            return fileName;
+        } else {
+            return fileName.substring(0, separator);
+        }
     }
 }
