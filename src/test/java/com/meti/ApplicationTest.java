@@ -25,13 +25,13 @@ public class ApplicationTest {
     @Test
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        assertEquals(target, new Application(source).run());
+        assertEquals(target, new Application(new VolatileFileGateway(source)).run().orElseThrow());
     }
 
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
-        new Application(source).run();
+        new Application(new VolatileFileGateway(source)).run().orElseThrow();
         assertTrue(Files.exists(target));
     }
 
@@ -43,7 +43,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(source).run();
+        assertTrue(new Application(new VolatileFileGateway(source)).run().isEmpty());
         assertFalse(Files.exists(target));
     }
 }
