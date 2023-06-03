@@ -1,0 +1,91 @@
+let a_char : U8 = 'a';
+let a_number : I16 = 420;
+const another_value = 100I32;
+
+// We follow PEMDAS.
+const add_values = 3 + 4;
+const subtract_values = 5 - 2;
+const multiply_values = 5 * 10;
+const divide_values = 2 / 1;
+
+// Parentheses are optional.
+if true {
+    // Do something
+} else {
+    // Otherwise
+}
+
+while true {
+    // Do something
+}
+
+do {
+    // Initial stuff
+} while(false);
+
+// Parameter parentheses if no parameters present are optional.
+def get_value => 100;
+
+def add_values_with_return(first : U32, second : U32) : U32 => {
+    return first + second;
+}
+
+def add_values_block(first : U32, second : U32) => {
+    return first + second;
+}
+
+def add_values_without_block(first : U32, second : U32) => first + second;
+
+// The 'Self' type is also implicit here.
+class def Vector(x : I32, y : I32) => Self {
+    def magnitude => {
+        // Stub here.
+        return 0;
+    }
+}
+
+{
+    {
+        let x = 10101;
+    }
+    {
+        // We can't access x here.
+    }
+}
+
+type MyImmutableClosure = () => Void;
+type MyMutableClosure = let () => Void;
+type MyMovedClosure = move () => Void;
+
+trait Result[T] {
+    // Abstract methods here
+}
+
+class Ok[T](value : T) {
+    // Ok-specific methods here
+}
+
+impl Result[T] for Ok[T] {
+    // Methods of Result here
+}
+
+
+const myError = Ok("test");
+match myError {
+    Ok(value) => {
+        // stuff
+    }
+    Err(e) => {
+        // other stuff
+    }
+}
+
+/*
+Here, MX would be injected using a language extension,
+and would not be available using the base language.
+*/
+<div>
+    <p>
+
+    </p>
+</div>
