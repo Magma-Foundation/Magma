@@ -13,24 +13,19 @@ public class DirectoryGateway implements PathGateway {
         this.root = root;
     }
 
-    private Result<Set<Path>> collectSources1() {
-        try (var stream = Files.list(root)) {
-            var children = stream.collect(Collectors.toSet());
-            return Result.ok(children);
-        } catch (IOException e) {
-            return Result.err(e);
-        }
-    }
-
     @Override
-    public Path resolveChild(Source aSource) {
-        return root.resolve(aSource.computeName() + ".java");
+    public Path resolveChild(Source source) {
+        return root.resolve(source.computeName() + ".java");
     }
 
     @Override
     public Result<Set<Source>> collectSources() {
-        return collectSources1().mapValue(sources1 -> sources1.stream()
-                .map(PathGateway::createSourceFromPath)
-                .collect(Collectors.toSet()));
+        try (var stream = Files.walk(root)) {
+            return Result.ok(stream
+                    .map(child -> new PathSource(root, child))
+                    .collect(Collectors.toSet()));
+        } catch (IOException e) {
+            return Result.err(e);
+        }
     }
 }

@@ -1,4 +1,9 @@
 package com.meti;
 
-public record Source(String computeName) {
+import java.util.List;
+
+public interface Source {
+    List<String> computeNamespace();
+
+    String computeName();
 }
