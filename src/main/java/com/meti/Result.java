@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface Result<T> {
@@ -15,6 +16,12 @@ public interface Result<T> {
     T unwrapValue();
 
     <R> Result<R> mapValue(Function<T, R> mapper);
+
+    boolean isOk();
+
+    IOException unwrapErr();
+
+    Optional<IOException> asErr();
 
     class Ok<T> implements Result<T> {
         private final T value;
@@ -32,6 +39,21 @@ public interface Result<T> {
         public <R> Result<R> mapValue(Function<T, R> mapper) {
             return new Ok<>(mapper.apply(value));
         }
+
+        @Override
+        public boolean isOk() {
+            return true;
+        }
+
+        @Override
+        public IOException unwrapErr() {
+            throw new UnsupportedOperationException("No exception.");
+        }
+
+        @Override
+        public Optional<IOException> asErr() {
+            return Optional.empty();
+        }
     }
 
     record Err<T>(IOException e) implements Result<T> {
@@ -43,6 +65,21 @@ public interface Result<T> {
         @Override
         public <R> Result<R> mapValue(Function<T, R> mapper) {
             return new Err<>(e);
+        }
+
+        @Override
+        public boolean isOk() {
+            return false;
+        }
+
+        @Override
+        public IOException unwrapErr() {
+            return e;
+        }
+
+        @Override
+        public Optional<IOException> asErr() {
+            return Optional.of(e);
         }
     }
 }

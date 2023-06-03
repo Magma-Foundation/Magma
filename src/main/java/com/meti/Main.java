@@ -1,6 +1,5 @@
 package com.meti;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 
 public class Main {
@@ -8,10 +7,7 @@ public class Main {
         var src = new DirectoryGateway(Paths.get(".", "src"));
         var target = new DirectoryGateway(Paths.get(".", "target"));
 
-        try {
-            new Application(src, target).run();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        var err = new Application(src, target).run().asErr();
+        err.ifPresent(Throwable::printStackTrace);
     }
 }

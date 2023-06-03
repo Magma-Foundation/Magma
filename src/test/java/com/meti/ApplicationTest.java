@@ -26,14 +26,14 @@ public class ApplicationTest {
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
         final VolatileFileGateway sourceGateway = new VolatileFileGateway(source);
-        assertEquals(target, new Application(sourceGateway, sourceGateway).run().orElseThrow());
+        assertEquals(target, new Application(sourceGateway, sourceGateway).run().unwrapValue().orElseThrow());
     }
 
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
         final VolatileFileGateway sourceGateway = new VolatileFileGateway(source);
-        new Application(sourceGateway, sourceGateway).run().orElseThrow();
+        new Application(sourceGateway, sourceGateway).run().unwrapValue().orElseThrow();
         assertTrue(Files.exists(target));
     }
 
@@ -46,7 +46,7 @@ public class ApplicationTest {
     @Test
     void generatesNothing() throws IOException {
         final VolatileFileGateway sourceGateway = new VolatileFileGateway(source);
-        assertTrue(new Application(sourceGateway, sourceGateway).run().isEmpty());
+        assertTrue(new Application(sourceGateway, sourceGateway).run().unwrapValue().isEmpty());
         assertFalse(Files.exists(target));
     }
 }

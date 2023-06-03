@@ -15,19 +15,32 @@ public final class Application {
         this.targetGateway = targetGateway;
     }
 
-    Optional<Path> run() throws IOException {
+    Result<Optional<Path>> run() {
         var sources = sourceGateway.collectSources().unwrapValue();
+
+        /*
+        TODO: simplify using map-reduce
+         */
         var targets = new HashSet<Path>();
         for (var source : sources) {
-            targets.add(compile(source));
+            var result = compile(source);
+            if(result.isOk()) {
+                targets.add(result.unwrapValue());
+            } else {
+                return Result.err(result.unwrapErr());
+            }
         }
 
-        return targets.stream().findFirst();
+        return Result.ok(targets.stream().findFirst());
     }
 
-    private Path compile(Source source) throws IOException {
-        var target = targetGateway.resolveChild(source);
-        Files.createFile(target);
-        return target;
+    private Result<Path> compile(Source source) {
+        try {
+            var target = targetGateway.resolveChild(source);
+            Files.createFile(target);
+            return Result.ok(target);
+        } catch (IOException e) {
+            return Result.err(e);
+        }
     }
 }
