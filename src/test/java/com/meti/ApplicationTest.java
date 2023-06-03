@@ -9,8 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -19,20 +18,33 @@ public class ApplicationTest {
 
     @BeforeEach
     void setUp() {
-        target = Paths.get(".", "Main.java");
         source = Paths.get(".", "Main.mgs");
+        target = Paths.get(".", "Main.java");
     }
 
     @Test
-    void generates_target() throws IOException {
+    void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        run();
+        assertEquals(target, run(source));
+    }
+
+    @Test
+    void generatesTarget() throws IOException {
+        Files.createFile(source);
+        run(source);
         assertTrue(Files.exists(target));
     }
 
-    private void run() throws IOException {
+    private Path run(Path source) throws IOException {
         if (Files.exists(source)) {
+            var fileName = source.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var fileNameWithoutExtension = fileName.substring(0, separator);
+            var target = source.resolveSibling(fileNameWithoutExtension + ".java");
             Files.createFile(target);
+            return this.target;
+        } else {
+            return null;
         }
     }
 
@@ -43,8 +55,8 @@ public class ApplicationTest {
     }
 
     @Test
-    void generates_nothing() throws IOException {
-        run();
+    void generatesNothing() throws IOException {
+        run(source);
         assertFalse(Files.exists(target));
     }
 }
