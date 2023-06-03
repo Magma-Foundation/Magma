@@ -1,37 +1,48 @@
 package com.meti;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Set;
+import java.util.function.Function;
 
-public interface Result {
-    static Result ok(Set<Path> values) {
-        return new Ok(values);
+public interface Result<T> {
+    static <T> Result<T> ok(T values) {
+        return new Ok<>(values);
     }
 
-    static Result err(IOException e) {
-        return new Err(e);
+    static <T> Result<T> err(IOException e) {
+        return new Err<>(e);
     }
 
-    Set<Path> unwrapValue();
+    T unwrapValue();
 
-    class Ok implements Result {
-        private final Set<Path> values;
+    <R> Result<R> mapValue(Function<T, R> mapper);
 
-        public Ok(Set<Path> values) {
-            this.values = values;
+    class Ok<T> implements Result<T> {
+        private final T value;
+
+        public Ok(T value) {
+            this.value = value;
         }
 
         @Override
-        public Set<Path> unwrapValue() {
-            return values;
+        public T unwrapValue() {
+            return value;
+        }
+
+        @Override
+        public <R> Result<R> mapValue(Function<T, R> mapper) {
+            return new Ok<>(mapper.apply(value));
         }
     }
 
-    record Err(IOException e) implements Result {
+    record Err<T>(IOException e) implements Result<T> {
         @Override
-        public Set<Path> unwrapValue() {
+        public T unwrapValue() {
             throw new RuntimeException(e);
+        }
+
+        @Override
+        public <R> Result<R> mapValue(Function<T, R> mapper) {
+            return new Err<>(e);
         }
     }
 }

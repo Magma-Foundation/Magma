@@ -23,11 +23,8 @@ public final class Application {
         return targets.stream().findFirst();
     }
 
-    private Path compile(Path source) throws IOException {
-        var fileName = source.getFileName().toString();
-        var separator = fileName.indexOf('.');
-        var fileNameWithoutExtension = fileName.substring(0, separator);
-        var target = source.resolveSibling(fileNameWithoutExtension + ".java");
+    private Path compile(Source source) throws IOException {
+        var target = sourceGateway.resolveChild(source);
         Files.createFile(target);
         return target;
     }
