@@ -8,9 +8,11 @@ import java.util.Optional;
 
 public final class Application {
     private final PathGateway sourceGateway;
+    private final PathGateway targetGateway;
 
-    public Application(PathGateway sourceGateway) {
+    public Application(PathGateway sourceGateway, PathGateway targetGateway) {
         this.sourceGateway = sourceGateway;
+        this.targetGateway = targetGateway;
     }
 
     Optional<Path> run() throws IOException {
@@ -24,7 +26,7 @@ public final class Application {
     }
 
     private Path compile(Source source) throws IOException {
-        var target = sourceGateway.resolveChild(source);
+        var target = targetGateway.resolveChild(source);
         Files.createFile(target);
         return target;
     }
