@@ -37,7 +37,9 @@ public final class Application {
     private Result<Path> compile(Source source) {
         try {
             var target = targetGateway.resolveChild(source);
-            Files.createFile(target);
+            if (!Files.exists(target)) {
+                Files.createFile(target);
+            }
             return Result.ok(target);
         } catch (IOException e) {
             return Result.err(e);

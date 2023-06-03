@@ -22,6 +22,7 @@ public class DirectoryGateway implements PathGateway {
     public Result<Set<Source>> collectSources() {
         try (var stream = Files.walk(root)) {
             return Result.ok(stream
+                    .filter(Files::isRegularFile)
                     .map(child -> new PathSource(root, child))
                     .collect(Collectors.toSet()));
         } catch (IOException e) {
