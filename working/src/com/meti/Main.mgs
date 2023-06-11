@@ -1,0 +1,43 @@
+import {
+    { Files, Path, Paths } from nio.file,
+    { IOException } from io
+} from java;
+
+extern trait enum Result<T, E> {
+    class def Ok(value : T) => {
+    },
+    class def Err(e : E) => {
+
+    }
+}
+
+extern trait Result<T, E> {
+}
+
+trait Path {
+}
+
+extern object Paths {
+    def get(first : NativeString, more : NativeVariadic<String>) : Path;
+}
+
+extern object Files {
+    def createDirectories(directory : Path) : Result<(), IOException>;
+    def exists(path : Path) => Bool;
+}
+
+def create(directory : NativeString) => {
+    let source = Paths.get(".", directory);
+    if (!Files.exists(source)) Files.createDirectories(source)?;
+    return Result.Ok(source);
+}
+
+let source = create("src").unwrap();
+let target = create("target").unwrap();
+
+let sourceGateway = DirectoryGateway(source);
+let targetGateway = DirectoryGateway(target);
+
+Application(sourceGateway, targetGateway)
+    .run().asErr()
+    .ifPresent(Throwable::printStackTrace);
