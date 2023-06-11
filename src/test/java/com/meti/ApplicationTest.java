@@ -43,7 +43,7 @@ public class ApplicationTest {
         Files.createFile(source);
         return new Application(new NativePath(source)).run()
                 .unwrap()
-                .map(NativePath::value)
+                .map(NativePath::unwrap)
                 .unwrap();
     }
 

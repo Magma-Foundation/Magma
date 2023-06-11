@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public record NativePath(Path value) {
+public record NativePath(Path unwrap) {
     Result<NativePath, IOException> createIfNotExists() {
         if (!exists()) {
             try {
-                Files.createFile(value);
+                Files.createFile(unwrap);
             } catch (IOException e) {
                 return Results.Err(e);
             }
@@ -18,23 +18,22 @@ public record NativePath(Path value) {
     }
 
     NativePath resolveSibling(NativeString name) {
-        return new NativePath(value.resolveSibling(NativeString.toNative(name)));
+        return new NativePath(unwrap.resolveSibling(NativeString.toNative(name)));
     }
 
-    public Path value() {
-        return value;
+    public Path unwrap() {
+        return unwrap;
     }
 
     NativeString asString() {
-        return NativeString.fromNative(this.value().toString());
+        return NativeString.fromNative(this.unwrap.toString());
     }
 
     NativePath getFileName() {
-        return new NativePath(value().getFileName());
+        return new NativePath(unwrap.getFileName());
     }
 
     boolean exists() {
-        return Files.exists(value());
+        return Files.exists(unwrap);
     }
-
 }
