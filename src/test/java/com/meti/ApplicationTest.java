@@ -41,25 +41,16 @@ public class ApplicationTest {
 
     private Path runWithSource() throws IOException {
         Files.createFile(source);
-        return run();
-    }
-
-    private Path run() throws IOException {
-        if (Files.exists(source)) {
-            var fileName = source.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var fileNameWithoutExtension = fileName.substring(0, separator);
-            var target = source.resolveSibling(fileNameWithoutExtension + ".mgs");
-            Files.createFile(target);
-            return target;
-        } else {
-            return null;
-        }
+        return new Application(new NativePath(source)).run()
+                .unwrap()
+                .map(NativePath::value)
+                .unwrap();
     }
 
     @Test
     void generatesNothing() throws IOException {
-        run();
+        new Application(new NativePath(source)).run().unwrap();
         assertFalse(Files.exists(target));
     }
+
 }
