@@ -41,7 +41,8 @@ public class ApplicationTest {
 
     private Path runWithSource() throws IOException {
         Files.createFile(source);
-        return new Application(new NativePath(source)).run()
+        final NativePath source1 = new NativePath(source);
+        return new Application(new SourceGateway(source1)).runOnce()
                 .unwrapOrPanic()
                 .map(NativePath::unwrap)
                 .unwrap();
@@ -49,7 +50,8 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(new NativePath(source)).run().unwrapOrPanic();
+        final NativePath source1 = new NativePath(source);
+        new Application(new SourceGateway(source1)).runOnce().unwrapOrPanic();
         assertFalse(Files.exists(target));
     }
 

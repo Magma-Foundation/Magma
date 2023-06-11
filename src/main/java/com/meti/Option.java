@@ -8,4 +8,8 @@ interface Option<T> {
     T unwrap();
 
     T unwrapOrElse(T other);
+
+    boolean isPresent();
+
+    T unwrapOrPanic();
 }

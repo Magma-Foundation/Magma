@@ -1,32 +1,33 @@
 package com.meti;
 
 import java.io.IOException;
-import java.util.HashSet;
 
 public final class Application {
-    private final NativePath source;
+    private final SourceGateway sourceGateway;
 
-    public Application(NativePath source) {
-        this.source = source;
+    public Application(SourceGateway sourceGateway) {
+        this.sourceGateway = sourceGateway;
     }
 
-    Result<Option<NativePath>, IOException> run() {
-        var targets = new HashSet<Result<NativePath, IOException>>();
+    private static Result<NativePath, IOException> compile(NativePath source1) {
+        var sourceName = source1.getFileName().asString();
+        var targetName = sourceName.indexOf('.')
+                .map(separator -> sourceName.slice(0, separator))
+                .unwrapOrElse(sourceName)
+                .concat(NativeString.fromNative(".mgs"));
 
-        if (source.exists()) {
-            var sourceName = source.getFileName().asString();
-            var targetName = sourceName.indexOf('.')
-                    .map(separator -> sourceName.slice(0, separator))
-                    .unwrapOrElse(sourceName)
-                    .concat(NativeString.fromNative(".mgs"));
+        return source1.resolveSibling(targetName).createIfNotExists();
+    }
 
-            var ifNotExists = source.resolveSibling(targetName).createIfNotExists();
-            targets.add(ifNotExists);
-        }
-
-        return new NativeSet<>(targets)
-                .iter()
+    Result<Option<NativePath>, IOException> runOnce() {
+        return run().iter()
                 .foldLeft(Results.<NativeSet<NativePath>, IOException>Ok(NativeSet.empty()), (resultSet, resultElement) -> resultSet.merge(resultElement, NativeSet::add))
                 .mapValue(NativeSet::any);
+    }
+
+    NativeSet<Result<NativePath, IOException>> run() {
+        return sourceGateway.collectSources().iter()
+                .map(Application::compile)
+                .collect(Iterables.toSet());
     }
 }

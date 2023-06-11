@@ -2,10 +2,13 @@ package com.meti;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 public class NativeSet<T> {
     private final Set<T> values;
+
+    public NativeSet() {
+        this(new HashSet<>());
+    }
 
     public NativeSet(Set<T> values) {
         this.values = values;
@@ -23,17 +26,7 @@ public class NativeSet<T> {
     }
 
     public Iterable<T> iter() {
-        return new Iterable<>() {
-            @Override
-            public <R> R foldLeft(R initial, BiFunction<R, T, R> folder) {
-                var current = initial;
-                for (T value : values) {
-                    current = folder.apply(current, value);
-                }
-
-                return current;
-            }
-        };
+        return new ArrayIterable<>(this.values.toArray());
     }
 
     public NativeSet<T> add(T value) {
