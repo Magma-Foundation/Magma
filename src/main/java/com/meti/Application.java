@@ -1,11 +1,18 @@
 package com.meti;
 
 import java.io.IOException;
+import java.util.HashSet;
 
-import static com.meti.Options.None;
+public final class Application {
+    private final NativePath source;
 
-public record Application(NativePath source) {
+    public Application(NativePath source) {
+        this.source = source;
+    }
+
     Result<Option<NativePath>, IOException> run() {
+        var targets = new HashSet<Result<NativePath, IOException>>();
+
         if (source.exists()) {
             var sourceName = source.getFileName().asString();
             var targetName = sourceName.indexOf('.')
@@ -13,9 +20,13 @@ public record Application(NativePath source) {
                     .unwrapOrElse(sourceName)
                     .concat(NativeString.fromNative(".mgs"));
 
-            return source.resolveSibling(targetName).createIfNotExists().mapValue(Options::Some);
-        } else {
-            return Results.Ok(None());
+            var ifNotExists = source.resolveSibling(targetName).createIfNotExists();
+            targets.add(ifNotExists);
         }
+
+        return new NativeSet<>(targets)
+                .iter()
+                .foldLeft(Results.<NativeSet<NativePath>, IOException>Ok(NativeSet.empty()), (resultSet, resultElement) -> resultSet.merge(resultElement, NativeSet::add))
+                .mapValue(NativeSet::any);
     }
 }

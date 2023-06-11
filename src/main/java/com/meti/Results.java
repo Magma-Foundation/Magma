@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class Results {
@@ -11,8 +12,13 @@ class Results {
             }
 
             @Override
-            public T unwrap() {
+            public T unwrapOrPanic() {
                 return value;
+            }
+
+            @Override
+            public <R, S> Result<S, E> merge(Result<R, E> other, BiFunction<T, R, S> merger) {
+                return other.mapValue(otherValue -> merger.apply(value, otherValue));
             }
         };
     }
@@ -25,8 +31,13 @@ class Results {
             }
 
             @Override
-            public T unwrap() throws E {
+            public T unwrapOrPanic() throws E {
                 throw e;
+            }
+
+            @Override
+            public <R, S> Result<S, E> merge(Result<R, E> other, BiFunction<T, R, S> merger) {
+                return Err(e);
             }
         };
     }

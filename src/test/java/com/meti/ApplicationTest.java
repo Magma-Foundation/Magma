@@ -42,14 +42,14 @@ public class ApplicationTest {
     private Path runWithSource() throws IOException {
         Files.createFile(source);
         return new Application(new NativePath(source)).run()
-                .unwrap()
+                .unwrapOrPanic()
                 .map(NativePath::unwrap)
                 .unwrap();
     }
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(new NativePath(source)).run().unwrap();
+        new Application(new NativePath(source)).run().unwrapOrPanic();
         assertFalse(Files.exists(target));
     }
 
