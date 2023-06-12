@@ -4,13 +4,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class AbstractIterable<T> implements Iterable<T> {
-    protected abstract Option<T> head();
 
     @Override
     public <R> Iterable<R> map(Function<T, R> mapper) {
         return new AbstractIterable<>() {
             @Override
-            protected Option<R> head() {
+            public Option<R> head() {
                 return AbstractIterable.this.head().map(mapper);
             }
         };

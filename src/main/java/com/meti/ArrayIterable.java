@@ -9,7 +9,7 @@ public class ArrayIterable<T> extends AbstractIterable<T> {
     }
 
     @Override
-    protected Option<T> head() {
+    public Option<T> head() {
         if (counter < elements.length) {
             var value = elements[counter];
             counter++;

@@ -34,4 +34,8 @@ public class NativeSet<T> {
         copy.add(value);
         return new NativeSet<>(copy);
     }
+
+    public int size() {
+        return this.values.size();
+    }
 }

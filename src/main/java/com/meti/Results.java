@@ -1,11 +1,22 @@
 package com.meti;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 class Results {
     static <T, E extends Exception> Result<T, E> Ok(T value) {
         return new Result<>() {
+            @Override
+            public <R> R match(Function<T, R> onOk, Function<E, R> onErr) {
+                return onOk.apply(value);
+            }
+
+            @Override
+            public void consume(Consumer<T> onOk, Consumer<E> onErr) {
+                onOk.accept(value);
+            }
+
             @Override
             public <R> Result<R, E> mapValue(Function<T, R> mapper) {
                 return Ok(mapper.apply(value));
@@ -25,6 +36,16 @@ class Results {
 
     static <T, E extends Exception> Result<T, E> Err(E e) {
         return new Result<>() {
+            @Override
+            public <R> R match(Function<T, R> onOk, Function<E, R> onErr) {
+                return onErr.apply(e);
+            }
+
+            @Override
+            public void consume(Consumer<T> onOk, Consumer<E> onErr) {
+                onErr.accept(e);
+            }
+
             @Override
             public <R> Result<R, E> mapValue(Function<T, R> mapper) {
                 return Err(e);

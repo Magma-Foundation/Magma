@@ -11,12 +11,17 @@ class Options {
             }
 
             @Override
-            public T unwrap() {
+            public T unwrapOrElse(T other) {
                 return value;
             }
 
             @Override
-            public T unwrapOrElse(T other) {
+            public boolean isPresent() {
+                return true;
+            }
+
+            @Override
+            public T unwrapOrPanic() {
                 return value;
             }
         };
@@ -30,13 +35,18 @@ class Options {
             }
 
             @Override
-            public T unwrap() {
-                throw new UnsupportedOperationException("No values present.");
+            public T unwrapOrElse(T other) {
+                return other;
             }
 
             @Override
-            public T unwrapOrElse(T other) {
-                return other;
+            public boolean isPresent() {
+                return false;
+            }
+
+            @Override
+            public T unwrapOrPanic() {
+                throw new UnsupportedOperationException("No values present.");
             }
         };
     }

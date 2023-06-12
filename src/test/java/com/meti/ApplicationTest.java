@@ -44,8 +44,7 @@ public class ApplicationTest {
         final NativePath source1 = new NativePath(source);
         return new Application(new VolatileFileGateway(source1)).runOnce()
                 .unwrapOrPanic()
-                .map(NativePath::unwrap)
-                .unwrap();
+                .map(NativePath::unwrap).unwrapOrPanic();
     }
 
     @Test
