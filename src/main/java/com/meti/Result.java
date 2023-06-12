@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 interface Result<T, E extends Exception> {
+    <R> R match(Function<T, R> onOk, Function<E, R> onErr);
 
     <R> Result<R, E> mapValue(Function<T, R> mapper);
 

@@ -3,31 +3,31 @@ package com.meti;
 import java.io.IOException;
 
 public final class Application {
-    private final SourceGateway sourceGateway;
+    private final Gateway gateway;
 
-    public Application(SourceGateway sourceGateway) {
-        this.sourceGateway = sourceGateway;
+    public Application(Gateway gateway) {
+        this.gateway = gateway;
     }
 
-    private static Result<NativePath, IOException> compile(NativePath source1) {
-        var sourceName = source1.getFileName().asString();
+    private static Result<NativePath, IOException> compile(NativePath source) {
+        var sourceName = source.getFileName().asString();
         var targetName = sourceName.indexOf('.')
                 .map(separator -> sourceName.slice(0, separator))
                 .unwrapOrElse(sourceName)
                 .concat(NativeString.fromNative(".mgs"));
 
-        return source1.resolveSibling(targetName).createIfNotExists();
+        return source.resolveSibling(targetName).createIfNotExists();
     }
 
     Result<Option<NativePath>, IOException> runOnce() {
-        return run().iter()
-                .foldLeft(Results.<NativeSet<NativePath>, IOException>Ok(NativeSet.empty()), (resultSet, resultElement) -> resultSet.merge(resultElement, NativeSet::add))
-                .mapValue(NativeSet::any);
+        return run().match(value -> IterableResults.apply(value.iter())
+                .foldLeftByValue(NativeSet.<NativePath>empty(), NativeSet::add)
+                .mapValue(NativeSet::any), Results::Err);
     }
 
-    NativeSet<Result<NativePath, IOException>> run() {
-        return sourceGateway.collectSources().iter()
+    Result<NativeSet<Result<NativePath, IOException>>, IOException> run() {
+        return gateway.collectSources().mapValue(sources -> sources.iter()
                 .map(Application::compile)
-                .collect(Iterables.toSet());
+                .collect(Iterables.toSet()));
     }
 }
