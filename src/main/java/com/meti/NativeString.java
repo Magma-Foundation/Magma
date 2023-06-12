@@ -47,4 +47,27 @@ record NativeString(char[] values) {
         if (index >= length()) return Options.None();
         return Some(values[index]);
     }
+
+    public boolean endsWith(NativeString other) {
+        return Iterables.range(0, other.length()).match(
+                integerIterable -> this.iter().take(other.length() - this.length()).match(
+                        sliced -> sliced.zip(other.iter()).allMatch(
+                                tuple -> tuple.value0().equals(tuple.value1())),
+                        () -> false),
+                () -> false);
+    }
+
+    private Iterable<Character> iter() {
+        return new IndexedIterable<>() {
+            @Override
+            protected int size() {
+                return values.length;
+            }
+
+            @Override
+            protected Character getElement(int index) {
+                return values[index];
+            }
+        };
+    }
 }

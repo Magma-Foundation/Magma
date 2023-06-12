@@ -1,21 +1,20 @@
 package com.meti;
 
-public class ArrayIterable<T> extends AbstractIterable<T> {
+public class ArrayIterable<T> extends IndexedIterable<T> {
     private final Object[] elements;
-    private int counter = 0;
 
     public ArrayIterable(Object[] elements) {
         this.elements = elements;
     }
 
     @Override
-    public Option<T> head() {
-        if (counter < elements.length) {
-            var value = elements[counter];
-            counter++;
-            return Options.Some((T) value);
-        }
+    protected int size() {
+        return elements.length;
+    }
 
-        return Options.None();
+    @Override
+    protected T getElement(int index) {
+        //noinspection unchecked
+        return (T) elements[index];
     }
 }
