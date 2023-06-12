@@ -21,10 +21,14 @@ record NativeString(char[] values) {
         return Options.None();
     }
 
-    public NativeString slice(int from, int to) {
-        var copy = new char[to - from];
-        if (to - from >= 0) System.arraycopy(this.values, from, copy, from, to - from);
-        return new NativeString(copy);
+    public Option<NativeString> slice(int from, int to) {
+        return Iterables.range(from, to)
+                .map(iterable -> iterable
+                        .map(index -> values[index])
+                        .collect(Iterables.toArray())
+                        .toArray(Character[]::new))
+                .map(NativeArrays::unbox)
+                .map(NativeString::new);
     }
 
     public int length() {
@@ -49,12 +53,15 @@ record NativeString(char[] values) {
     }
 
     public boolean endsWith(NativeString other) {
-        return Iterables.range(0, other.length()).match(
-                integerIterable -> this.iter().take(other.length() - this.length()).match(
-                        sliced -> sliced.zip(other.iter()).allMatch(
-                                tuple -> tuple.value0().equals(tuple.value1())),
-                        () -> false),
-                () -> false);
+        var start = this.length() - other.length();
+        var end = this.length();
+        return slice(start, end)
+                .map(slice -> slice.equalsTo(other))
+                .unwrapOrElse(false);
+    }
+
+    private boolean equalsTo(NativeString other) {
+        return iter().zip(other.iter()).allMatch(values -> values.value0() == values.value1());
     }
 
     private Iterable<Character> iter() {

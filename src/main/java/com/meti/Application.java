@@ -12,7 +12,7 @@ public final class Application {
     private static Result<NativePath, IOException> compile(NativePath source) {
         var sourceName = source.getFileName().asString();
         var targetName = sourceName.indexOf('.')
-                .map(separator -> sourceName.slice(0, separator))
+                .flatMap(separator -> sourceName.slice(0, separator))
                 .unwrapOrElse(sourceName)
                 .concat(NativeString.fromNative(".mgs"));
 

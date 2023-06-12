@@ -2,7 +2,7 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NativeStringTest {
     @Test
@@ -22,7 +22,23 @@ class NativeStringTest {
 
     @Test
     void slice() {
-        var actual = NativeString.toNative(NativeString.fromNative("test").slice(1, 3));
+        var actual = NativeString.toNative(NativeString.fromNative("test").slice(1, 3).unwrapOrPanic());
         assertEquals("es", actual);
+    }
+
+    @Test
+    void concat() {
+        var actual = NativeString.toNative(NativeString.fromNative("test").concat(NativeString.fromNative("ing")));
+        assertEquals("testing", actual);
+    }
+
+    @Test
+    void endsWithValid() {
+        assertTrue(NativeString.fromNative("test").endsWith(NativeString.fromNative("est")));
+    }
+
+    @Test
+    void endsWithInvalid() {
+        assertFalse(NativeString.fromNative("test").endsWith(NativeString.fromNative("a")));
     }
 }

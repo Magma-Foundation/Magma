@@ -67,4 +67,18 @@ public class Iterables {
             }
         };
     }
+
+    public static <T> Iterable.Collector<NativeList<T>, T> toArray() {
+        return new Iterable.Collector<>() {
+            @Override
+            public NativeList<T> initial() {
+                return NativeList.empty();
+            }
+
+            @Override
+            public NativeList<T> fold(NativeList<T> current, T element) {
+                return current.add(element);
+            }
+        };
+    }
 }
