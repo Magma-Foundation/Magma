@@ -38,4 +38,8 @@ public class NativeSet<T> {
     public int size() {
         return this.values.size();
     }
+
+    public Set<T> unwrap() {
+        return this.values;
+    }
 }

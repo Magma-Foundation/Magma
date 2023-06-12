@@ -53,4 +53,18 @@ public class Iterables {
     public static <T> Iterable<T> of(T... values) {
         return new ArrayIterable<>(values);
     }
+
+    public static Iterable.Collector<Integer, Integer> toIntSum() {
+        return new Iterable.Collector<>() {
+            @Override
+            public Integer initial() {
+                return 0;
+            }
+
+            @Override
+            public Integer fold(Integer current, Integer element) {
+                return current + element;
+            }
+        };
+    }
 }
