@@ -7,16 +7,14 @@ public record Interpreter(String input) {
 
     private static State interpretStatement(PresentState state) {
         var value1 = state.value;
-        var declarations = state.declarations;
         if (value1.startsWith("let ")) {
             var name = value1.substring("let ".length(), value1.indexOf('=')).strip();
             var value = value1.substring(value1.indexOf('=') + 1).strip();
-            declarations.put(name, value);
-            return new State(declarations);
-        } else if (declarations.containsKey(value1)) {
-            return new PresentState(declarations.get(value1), declarations);
+            return state.define(name, value);
+        } else if (state.declarations.containsKey(value1)) {
+            return state.mapValue(state.declarations::get);
         } else {
-            return new PresentState(interpretValue(state.value), declarations);
+            return state.mapValue(Interpreter::interpretValue);
         }
     }
 
@@ -35,11 +33,14 @@ public record Interpreter(String input) {
                 .toList();
 
         var declarations = new HashMap<String, String>();
+        var state = new State();
         for (int i = 0; i < lines.size(); i++) {
             var line = lines.get(i);
-            var result = interpretStatement(new PresentState(line, declarations));
+            var withValue = state.withValue(line);
+            var interpreted = interpretStatement(withValue);
             if (i == lines.size() - 1) {
-                var option = result.findValue();
+                state = interpreted;
+                var option = interpreted.findValue();
                 if (option.isPresent()) {
                     return option.unwrapOrPanic();
                 }
