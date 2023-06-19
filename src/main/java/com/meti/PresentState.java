@@ -11,6 +11,11 @@ final class PresentState extends State {
         this.value = value;
     }
 
+    @Override
+    public PresentState withValue(String value) {
+        return new PresentState(value, declarations);
+    }
+
     PresentState mapValue(Function<String, String> mapper) {
         return new PresentState(mapper.apply(this.value), this.declarations);
     }
@@ -22,6 +27,6 @@ final class PresentState extends State {
 
     @Override
     public Option<String> findValue() {
-        return new Some(value);
+        return new Some<>(value);
     }
 }

@@ -1,24 +1,15 @@
 package com.meti;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class State {
+public abstract class State {
     final Map<String, String> declarations;
 
     public State(Map<String, String> declarations) {
         this.declarations = declarations;
     }
 
-    public State() {
-        this(new HashMap<>());
-    }
+    public abstract Option<String> findValue();
 
-    public Option<String> findValue() {
-        return new None<>();
-    }
-
-    public PresentState withValue(String value) {
-        return new PresentState(value, declarations);
-    }
+    public abstract PresentState withValue(String value);
 }

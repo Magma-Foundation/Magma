@@ -32,7 +32,7 @@ public record Interpreter(String input) {
                 .toList();
 
         return lines.stream()
-                .reduce(new State(), (previous, line) -> interpretStatement(previous.withValue(line)), (previous, next) -> next)
+                .reduce(EmptyState.create(), (previous, line) -> interpretStatement(previous.withValue(line)), (previous, next) -> next)
                 .findValue()
                 .unwrapOrElse("");
     }
