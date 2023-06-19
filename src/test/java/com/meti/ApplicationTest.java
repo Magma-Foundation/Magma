@@ -9,11 +9,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ApplicationTest {
     private static String compile(String input) {
         try {
-            Integer.parseInt(input);
-            return input;
+            return String.valueOf(Integer.parseInt(input.strip()));
         } catch (NumberFormatException e) {
             return "";
         }
+    }
+
+    private static void assertInterpret(String input, String output) {
+        assertEquals(output, compile(input));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void padIntegerRight(String padding) {
+        assertInterpret("0" + padding, "0");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\t", "\n"})
+    void padIntegerLeft(String padding) {
+        assertInterpret(padding + "0", "0");
     }
 
     @ParameterizedTest
@@ -26,10 +41,6 @@ public class ApplicationTest {
     @ValueSource(strings = {" ", "\t", "\n"})
     void whitespace(String input) {
         assertInterpret(input, "");
-    }
-
-    private static void assertInterpret(String input, String output) {
-        assertEquals(output, compile(input));
     }
 
     @Test
