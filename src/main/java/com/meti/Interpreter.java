@@ -11,7 +11,7 @@ public final class Interpreter {
 
     private static Result<State, InterpretationError> interpretStatement(PresentState state) {
         var value1 = state.value;
-        if (value1.startsWith(new NativeString("let "))) {
+        if (value1.startsWith(NativeString.from("let "))) {
             var name = value1.firstIndexOfChar('=')
                     .flatMap(index -> value1.slice("let ".length(), index))
                     .map(NativeString::strip);
@@ -33,9 +33,9 @@ public final class Interpreter {
 
     private static NativeString interpretValue(NativeString input) {
         try {
-            return new NativeString(String.valueOf(Integer.parseInt(input.strip().unwrap())));
+            return NativeString.from(String.valueOf(Integer.parseInt(input.strip().unwrap())));
         } catch (NumberFormatException e) {
-            return new NativeString("");
+            return NativeString.from("");
         }
     }
 
@@ -48,6 +48,6 @@ public final class Interpreter {
 
         return NativeIterators.fromList(lines)
                 .foldLeftResult(EmptyState.create(), (previous, line) -> interpretStatement(previous.withValue(line)))
-                .mapValue(internal -> internal.findValue().unwrapOrElse(new NativeString("")));
+                .mapValue(internal -> internal.findValue().unwrapOrElse(NativeString.from("")));
     }
 }

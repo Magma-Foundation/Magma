@@ -1,6 +1,10 @@
 package com.meti;
 
 record NativeString(String unwrap) {
+    static NativeString from(String unwrap) {
+        return new NativeString(unwrap);
+    }
+
     public String unwrap() {
         return unwrap;
     }
@@ -12,14 +16,14 @@ record NativeString(String unwrap) {
 
     public Option<NativeString> slice(int start, int end) {
         if (start >= 0 && end >= start) {
-            return new Some<>(new NativeString(unwrap.substring(start, end)));
+            return new Some<>(from(unwrap.substring(start, end)));
         } else {
             return new None<>();
         }
     }
 
     public NativeString strip() {
-        return new NativeString(unwrap.strip());
+        return from(unwrap.strip());
     }
 
     public int length() {

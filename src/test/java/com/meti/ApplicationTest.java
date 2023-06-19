@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ApplicationTest {
 
     private static void assertInterpret(String input, String output) {
-        Interpreter interpreter = new Interpreter(new NativeString(input));
+        Interpreter interpreter = new Interpreter(NativeString.from(input));
         try {
             assertEquals(output, interpreter.interpret1().unwrap().unwrap());
         } catch (InterpretationError e) {
