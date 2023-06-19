@@ -4,17 +4,42 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
     private static String interpret(String input) {
-        if (input.startsWith("let ")) {
-            var name = input.substring("let ".length(), input.indexOf('=')).strip();
-            var value = input.substring(input.indexOf('=') + 1, input.indexOf(';'));
-            return value;
+        var lines = Arrays.stream(input.split(";"))
+                .map(String::strip)
+                .filter(line -> !line.isEmpty())
+                .toList();
+
+        var declarations = new HashMap<String, String>();
+        for (int i = 0; i < lines.size(); i++) {
+            var line = lines.get(i);
+            var result = interpretStatement(line, declarations);
+            if (i == lines.size() - 1) {
+                return result;
+            }
         }
 
-        return interpretValue(input);
+        return "";
+    }
+
+    private static String interpretStatement(String input, Map<String, String> declarations) {
+        if (input.startsWith("let ")) {
+            var name = input.substring("let ".length(), input.indexOf('=')).strip();
+            var value = input.substring(input.indexOf('=') + 1).strip();
+            declarations.put(name, value);
+            return null;
+        } else if (declarations.containsKey(input)) {
+            return declarations.get(input);
+        } else {
+            return interpretValue(input);
+        }
     }
 
     private static String interpretValue(String input) {
@@ -27,6 +52,11 @@ public class ApplicationTest {
 
     private static void assertInterpret(String input, String output) {
         assertEquals(output, interpret(input));
+    }
+
+    @Test
+    void multipleDefinitions() {
+        assertInterpret("let x=10;let y=20;y", "20");
     }
 
     @ParameterizedTest
