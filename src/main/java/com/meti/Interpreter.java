@@ -2,13 +2,18 @@ package com.meti;
 
 import java.util.Arrays;
 
-public record Interpreter(String input) {
+public final class Interpreter {
+    private final NativeString input;
+
+    public Interpreter(NativeString input) {
+        this.input = input;
+    }
 
     private static State interpretStatement(PresentState state) {
         var value1 = state.value;
-        if (value1.startsWith("let ")) {
-            var name = value1.substring("let ".length(), value1.indexOf('=')).strip();
-            var value = value1.substring(value1.indexOf('=') + 1).strip();
+        if (value1.startsWith(new NativeString("let "))) {
+            var name = value1.slice("let ".length(), value1.firstIndexOfChar('=').unwrapOrElse(-1)).strip();
+            var value = value1.slice(value1.firstIndexOfChar('=').unwrapOrElse(-1) + 1, value1.length()).strip();
             return state.define(name, value);
         } else if (state.declarations.containsKey(value1)) {
             return state.mapValue(state.declarations::get);
@@ -17,23 +22,24 @@ public record Interpreter(String input) {
         }
     }
 
-    private static String interpretValue(String input) {
+    private static NativeString interpretValue(NativeString input) {
         try {
-            return String.valueOf(Integer.parseInt(input.strip()));
+            return new NativeString(String.valueOf(Integer.parseInt(input.strip().unwrap())));
         } catch (NumberFormatException e) {
-            return "";
+            return new NativeString("");
         }
     }
 
-    String interpret() {
-        var lines = Arrays.stream(input().split(";"))
+    NativeString interpret1() {
+        var lines = Arrays.stream(input.unwrap().split(";"))
                 .map(String::strip)
                 .filter(line -> !line.isEmpty())
+                .map(NativeString::new)
                 .toList();
 
         return lines.stream()
                 .reduce(EmptyState.create(), (previous, line) -> interpretStatement(previous.withValue(line)), (previous, next) -> next)
                 .findValue()
-                .unwrapOrElse("");
+                .unwrapOrElse(new NativeString(""));
     }
 }

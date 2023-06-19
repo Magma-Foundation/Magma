@@ -4,29 +4,24 @@ import java.util.Map;
 import java.util.function.Function;
 
 final class PresentState extends State {
-    final String value;
+    final NativeString value;
 
-    PresentState(String value, Map<String, String> declarations) {
+    PresentState(NativeString value, Map<NativeString, NativeString> declarations) {
         super(declarations);
         this.value = value;
     }
 
     @Override
-    public PresentState withValue(String value) {
+    public PresentState withValue(NativeString value) {
         return new PresentState(value, declarations);
     }
 
-    PresentState mapValue(Function<String, String> mapper) {
+    PresentState mapValue(Function<NativeString, NativeString> mapper) {
         return new PresentState(mapper.apply(this.value), this.declarations);
     }
 
-    PresentState define(String name, String value) {
-        this.declarations.put(name, value);
-        return this;
-    }
-
     @Override
-    public Option<String> findValue() {
+    public Option<NativeString> findValue() {
         return new Some<>(value);
     }
 }

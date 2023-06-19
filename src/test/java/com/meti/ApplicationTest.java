@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ApplicationTest {
 
     private static void assertInterpret(String input, String output) {
-        assertEquals(output, new Interpreter(input).interpret());
+        Interpreter interpreter = new Interpreter(new NativeString(input));
+        assertEquals(output, interpreter.interpret1().unwrap());
     }
 
     @Test

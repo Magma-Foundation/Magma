@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class EmptyState extends State {
 
-    public EmptyState(Map<String, String> declarations) {
+    public EmptyState(Map<NativeString, NativeString> declarations) {
         super(declarations);
     }
 
@@ -18,12 +18,12 @@ public class EmptyState extends State {
     }
 
     @Override
-    public Option<String> findValue() {
+    public Option<NativeString> findValue() {
         return new None<>();
     }
 
     @Override
-    public PresentState withValue(String value) {
+    public PresentState withValue(NativeString value) {
         return new PresentState(value, declarations);
     }
 }
