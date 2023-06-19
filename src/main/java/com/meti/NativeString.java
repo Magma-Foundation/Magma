@@ -7,8 +7,7 @@ record NativeString(String unwrap) {
 
     public Option<Integer> firstIndexOfChar(char c) {
         var index = unwrap.indexOf(c);
-        if (index == -1) return new Some<>(index);
-        else return new None<>();
+        return index == -1 ? new None<>() : new Some<>(index);
     }
 
     public Option<NativeString> slice(int start, int end) {

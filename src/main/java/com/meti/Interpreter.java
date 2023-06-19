@@ -12,10 +12,12 @@ public final class Interpreter {
     private static Result<State, InterpretationError> interpretStatement(PresentState state) {
         var value1 = state.value;
         if (value1.startsWith(new NativeString("let "))) {
-            var name = value1.slice("let ".length(), value1.firstIndexOfChar('=').unwrapOrElse(-1))
+            var name = value1.firstIndexOfChar('=')
+                    .flatMap(index -> value1.slice("let ".length(), index))
                     .map(NativeString::strip);
 
-            var value = value1.slice(value1.firstIndexOfChar('=').unwrapOrElse(-1) + 1, value1.length())
+            var value = value1.firstIndexOfChar('=')
+                    .flatMap(index -> value1.slice(index + 1, value1.length()))
                     .map(NativeString::strip);
 
             return name.and(value)
