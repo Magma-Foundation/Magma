@@ -9,7 +9,7 @@ public class NativeIterators {
 
             @Override
             public Option<T> head() {
-                if (counter <= lines.size()) {
+                if (counter < lines.size()) {
                     var value = lines.get(counter);
                     counter++;
                     return new Some<>(value);
