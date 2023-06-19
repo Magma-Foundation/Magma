@@ -21,7 +21,7 @@ final class PresentState extends State {
     }
 
     @Override
-    public Option findValue() {
+    public Option<String> findValue() {
         return new Some(value);
     }
 }

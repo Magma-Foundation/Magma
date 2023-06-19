@@ -1,7 +1,13 @@
 package com.meti;
 
-interface Option {
+import java.util.function.Function;
+
+interface Option<T> {
+    <R> Option<R> map(Function<T, R> mapper);
+
     boolean isPresent();
 
-    String unwrapOrPanic();
+    T unwrapOrPanic();
+
+    T unwrapOrElse(T other);
 }

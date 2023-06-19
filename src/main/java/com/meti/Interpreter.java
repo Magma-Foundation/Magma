@@ -1,7 +1,6 @@
 package com.meti;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public record Interpreter(String input) {
 
@@ -32,21 +31,9 @@ public record Interpreter(String input) {
                 .filter(line -> !line.isEmpty())
                 .toList();
 
-        var declarations = new HashMap<String, String>();
-        var state = new State();
-        for (int i = 0; i < lines.size(); i++) {
-            var line = lines.get(i);
-            var withValue = state.withValue(line);
-            var interpreted = interpretStatement(withValue);
-            if (i == lines.size() - 1) {
-                state = interpreted;
-                var option = interpreted.findValue();
-                if (option.isPresent()) {
-                    return option.unwrapOrPanic();
-                }
-            }
-        }
-
-        return "";
+        return lines.stream()
+                .reduce(new State(), (previous, line) -> interpretStatement(previous.withValue(line)), (previous, next) -> next)
+                .findValue()
+                .unwrapOrElse("");
     }
 }

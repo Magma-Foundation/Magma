@@ -14,8 +14,8 @@ public class State {
         this(new HashMap<>());
     }
 
-    public Option findValue() {
-        return new None();
+    public Option<String> findValue() {
+        return new None<>();
     }
 
     public PresentState withValue(String value) {
