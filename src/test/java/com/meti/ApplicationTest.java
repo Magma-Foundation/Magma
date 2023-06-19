@@ -30,8 +30,14 @@ public class ApplicationTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"0", "1", "2"})
+    void definitionValue(String value) {
+        assertInterpret("let test=" + value + ";test", value);
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"x", "y", "z"})
-    void definition(String name) {
+    void definitionName(String name) {
         assertInterpret("let " + name + "=0;" + name, "0");
     }
 
