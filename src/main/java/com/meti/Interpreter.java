@@ -9,16 +9,23 @@ public final class Interpreter {
         this.input = input;
     }
 
-    private static State interpretStatement(PresentState state) {
+    private static Result<State, InterpretationError> interpretStatement(PresentState state) {
         var value1 = state.value;
         if (value1.startsWith(new NativeString("let "))) {
-            var name = value1.slice("let ".length(), value1.firstIndexOfChar('=').unwrapOrElse(-1)).strip();
-            var value = value1.slice(value1.firstIndexOfChar('=').unwrapOrElse(-1) + 1, value1.length()).strip();
-            return state.define(name, value);
+            var name = value1.slice("let ".length(), value1.firstIndexOfChar('=').unwrapOrElse(-1))
+                    .map(NativeString::strip);
+
+            var value = value1.slice(value1.firstIndexOfChar('=').unwrapOrElse(-1) + 1, value1.length())
+                    .map(NativeString::strip);
+
+            return name.and(value)
+                    .map(tuple -> state.define(tuple.a(), tuple.b()))
+                    .unwrapOrThrow(() -> new InterpretationError("Failed to parse name or value."));
+
         } else if (state.declarations.containsKey(value1)) {
-            return state.mapValue(state.declarations::get);
+            return Ok.of(state.mapValue(state.declarations::get));
         } else {
-            return state.mapValue(Interpreter::interpretValue);
+            return Ok.of(state.mapValue(Interpreter::interpretValue));
         }
     }
 
@@ -30,16 +37,15 @@ public final class Interpreter {
         }
     }
 
-    NativeString interpret1() {
+    Result<NativeString, InterpretationError> interpret1() {
         var lines = Arrays.stream(input.unwrap().split(";"))
                 .map(String::strip)
                 .filter(line -> !line.isEmpty())
                 .map(NativeString::new)
                 .toList();
 
-        return lines.stream()
-                .reduce(EmptyState.create(), (previous, line) -> interpretStatement(previous.withValue(line)), (previous, next) -> next)
-                .findValue()
-                .unwrapOrElse(new NativeString(""));
+        return NativeIterators.fromList(lines)
+                .foldLeftResult(EmptyState.create(), (previous, line) -> interpretStatement(previous.withValue(line)))
+                .mapValue(internal -> internal.findValue().unwrapOrElse(new NativeString("")));
     }
 }

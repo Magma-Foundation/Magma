@@ -5,12 +5,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ApplicationTest {
 
     private static void assertInterpret(String input, String output) {
         Interpreter interpreter = new Interpreter(new NativeString(input));
-        assertEquals(output, interpreter.interpret1().unwrap());
+        try {
+            assertEquals(output, interpreter.interpret1().unwrap().unwrap());
+        } catch (InterpretationError e) {
+            fail(e);
+        }
     }
 
     @Test

@@ -9,9 +9,9 @@ public abstract class State {
         this.declarations = declarations;
     }
 
-    PresentState define(NativeString name, NativeString value) {
+    State define(NativeString name, NativeString value) {
         this.declarations.put(name, value);
-        return new PresentState(name, this.declarations);
+        return this;
     }
 
     public abstract Option<NativeString> findValue();

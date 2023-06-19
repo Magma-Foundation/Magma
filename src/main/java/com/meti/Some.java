@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 record Some<T>(T value) implements Option<T> {
     @Override
@@ -16,6 +17,21 @@ record Some<T>(T value) implements Option<T> {
     @Override
     public T unwrapOrElse(T other) {
         return value;
+    }
+
+    @Override
+    public <R> Option<Tuple2<T, R>> and(Option<R> other) {
+        return other.map(otherValue -> new Tuple2<>(value, otherValue));
+    }
+
+    @Override
+    public <E extends Throwable> Result<T, E> unwrapOrThrow(Supplier<E> supplier) {
+        return Ok.of(value);
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
     }
 
     @Override

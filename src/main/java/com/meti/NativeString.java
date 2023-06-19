@@ -11,8 +11,12 @@ record NativeString(String unwrap) {
         else return new None<>();
     }
 
-    public NativeString slice(int start, int end) {
-        return new NativeString(unwrap.substring(start, end));
+    public Option<NativeString> slice(int start, int end) {
+        if (start >= 0 && end >= start) {
+            return new Some<>(new NativeString(unwrap.substring(start, end)));
+        } else {
+            return new None<>();
+        }
     }
 
     public NativeString strip() {
