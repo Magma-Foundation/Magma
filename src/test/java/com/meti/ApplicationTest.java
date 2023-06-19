@@ -7,7 +7,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
-    private static String compile(String input) {
+    private static String interpret(String input) {
+        if (input.startsWith("let ")) {
+            var name = input.substring("let ".length(), input.indexOf('=')).strip();
+            var value = input.substring(input.indexOf('=') + 1, input.indexOf(';'));
+            return value;
+        }
+
+        return interpretValue(input);
+    }
+
+    private static String interpretValue(String input) {
         try {
             return String.valueOf(Integer.parseInt(input.strip()));
         } catch (NumberFormatException e) {
@@ -16,7 +26,13 @@ public class ApplicationTest {
     }
 
     private static void assertInterpret(String input, String output) {
-        assertEquals(output, compile(input));
+        assertEquals(output, interpret(input));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"x", "y", "z"})
+    void definition(String name) {
+        assertInterpret("let " + name + "=0;" + name, "0");
     }
 
     @ParameterizedTest
