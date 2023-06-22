@@ -9,8 +9,8 @@ public abstract class State {
         this.declarations = declarations;
     }
 
-    State define(NativeString name, NativeString value) {
-        this.declarations.put(name, value);
+    State define(Definition definition) {
+        this.declarations.put(definition.name(), definition.value());
         return this;
     }
 
