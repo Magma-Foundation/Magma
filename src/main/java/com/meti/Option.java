@@ -17,4 +17,8 @@ interface Option<T> {
     <E extends Throwable> Result<T, E> unwrapOrThrow(Supplier<E> supplier);
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+    <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty);
+
+    boolean isEmpty();
 }

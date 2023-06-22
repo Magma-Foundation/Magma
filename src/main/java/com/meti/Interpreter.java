@@ -33,14 +33,25 @@ public final class Interpreter {
 
     private static Result<NativeString, InterpretationError> interpretValue(NativeString input) {
         try {
-            return Ok.of(NativeString.from(String.valueOf(Integer.parseInt(input.strip().unwrap()))));
+            var withoutSuffix = Iterators.fromRange(0, input.length()).zip(input.iter())
+                    .map(tuple -> {
+                        if (Character.isLetter(tuple.b())) {
+                            return new Some<>(tuple.a());
+                        } else {
+                            return new None<Integer>();
+                        }
+                    })
+                    .flatMap(Iterators::fromOption)
+                    .head()
+                    .match(index -> input.slice(0, index).unwrapOrElse(input), () -> input);;
+            return Ok.of(NativeString.from(String.valueOf(Integer.parseInt(withoutSuffix.strip().internalValue()))));
         } catch (NumberFormatException e) {
-            return new Err<>(new InterpretationError("Unknown value: " + input.unwrap()));
+            return new Err<>(new InterpretationError("Unknown value: " + input.internalValue()));
         }
     }
 
     Result<NativeString, InterpretationError> interpret1() {
-        var lines = Arrays.stream(input.unwrap().split(";"))
+        var lines = Arrays.stream(input.internalValue().split(";"))
                 .map(String::strip)
                 .filter(line -> !line.isEmpty())
                 .map(NativeString::new)

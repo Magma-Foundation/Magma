@@ -1,36 +1,50 @@
 package com.meti;
 
-record NativeString(String unwrap) {
+record NativeString(String internalValue) {
     static NativeString from(String unwrap) {
         return new NativeString(unwrap);
     }
 
-    public String unwrap() {
-        return unwrap;
+    public String internalValue() {
+        return internalValue;
     }
 
     public Option<Integer> firstIndexOfChar(char c) {
-        var index = unwrap.indexOf(c);
+        var index = internalValue.indexOf(c);
         return index == -1 ? new None<>() : new Some<>(index);
     }
 
     public Option<NativeString> slice(int start, int end) {
         if (start >= 0 && end >= start) {
-            return new Some<>(from(unwrap.substring(start, end)));
+            return new Some<>(from(internalValue.substring(start, end)));
         } else {
             return new None<>();
         }
     }
 
     public NativeString strip() {
-        return from(unwrap.strip());
+        return from(internalValue.strip());
     }
 
     public int length() {
-        return unwrap.length();
+        return internalValue.length();
     }
 
     public boolean startsWith(NativeString other) {
-        return unwrap.startsWith(other.unwrap);
+        return internalValue.startsWith(other.internalValue);
+    }
+
+    public Iterator<Character> iter() {
+        return new IndexedIterator<>() {
+            @Override
+            protected int size() {
+                return internalValue.length();
+            }
+
+            @Override
+            protected Option<Character> apply(int counter) {
+                return new Some<>(internalValue.charAt(counter));
+            }
+        };
     }
 }

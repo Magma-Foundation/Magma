@@ -35,6 +35,16 @@ record None<T>() implements Option<T> {
     }
 
     @Override
+    public <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty) {
+        return ifEmpty.get();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
     public <R> Option<R> map(Function<T, R> mapper) {
         return new None<>();
     }

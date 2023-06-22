@@ -12,7 +12,7 @@ public class ApplicationTest {
     private static void assertInterpret(String input, String output) {
         Interpreter interpreter = new Interpreter(NativeString.from(input));
         try {
-            assertEquals(output, interpreter.interpret1().unwrap().unwrap());
+            assertEquals(output, interpreter.interpret1().unwrap().internalValue());
         } catch (InterpretationError e) {
             fail(e);
         }

@@ -10,6 +10,11 @@ record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
     public T unwrapOrPanic() {
         return value;
     }
@@ -32,6 +37,11 @@ record Some<T>(T value) implements Option<T> {
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return mapper.apply(value);
+    }
+
+    @Override
+    public <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty) {
+        return ifPresent.apply(value);
     }
 
     @Override
