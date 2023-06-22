@@ -23,6 +23,11 @@ public class ApplicationTest {
         return new Interpreter(NativeString.from(input)).interpret();
     }
 
+    @Test
+    void invalidTypes() {
+        assertInterpretError("let value : i8 = 10u32");
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64"})
     void explicitNumber(String suffix) {
