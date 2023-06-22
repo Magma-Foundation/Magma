@@ -20,6 +20,10 @@ final class PresentState extends State {
         return new PresentState(mapper.apply(this.value), this.declarations);
     }
 
+    Result<State, InterpretationError> mapValueToResult(Function<NativeString, Result<NativeString, InterpretationError>> mapper) {
+        return mapper.apply(this.value).mapValue(apply1 -> new PresentState(apply1, this.declarations));
+    }
+
     @Override
     public Option<NativeString> findValue() {
         return new Some<>(value);

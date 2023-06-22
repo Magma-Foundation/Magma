@@ -27,15 +27,15 @@ public final class Interpreter {
         } else if (state.declarations.containsKey(value1)) {
             return Ok.of(state.mapValue(state.declarations::get));
         } else {
-            return Ok.of(state.mapValue(Interpreter::interpretValue));
+            return state.mapValueToResult(Interpreter::interpretValue);
         }
     }
 
-    private static NativeString interpretValue(NativeString input) {
+    private static Result<NativeString, InterpretationError> interpretValue(NativeString input) {
         try {
-            return NativeString.from(String.valueOf(Integer.parseInt(input.strip().unwrap())));
+            return Ok.of(NativeString.from(String.valueOf(Integer.parseInt(input.strip().unwrap()))));
         } catch (NumberFormatException e) {
-            return NativeString.from("");
+            return new Err<>(new InterpretationError("Unknown value: " + input.unwrap()));
         }
     }
 

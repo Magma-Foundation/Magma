@@ -18,6 +18,12 @@ public class ApplicationTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64"})
+    void explicitNumber(String suffix) {
+        assertInterpret("20" + suffix, "20");
+    }
+
     @Test
     void multipleDefinitions() {
         assertInterpret("let x=10;let y=20;y", "20");
