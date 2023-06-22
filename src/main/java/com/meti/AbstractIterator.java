@@ -2,8 +2,19 @@ package com.meti;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
+    @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        return filter(predicate.negate()).head().isEmpty();
+    }
+
+    @Override
+    public Iterator<T> filter(Predicate<T> predicate) {
+        return flatMap(value -> Iterators.fromOption(new Some<>(value).filter(predicate)));
+    }
+
     @Override
     public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
         return new AbstractIterator<R>() {

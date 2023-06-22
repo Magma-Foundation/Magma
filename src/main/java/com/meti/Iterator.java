@@ -2,6 +2,7 @@ package com.meti;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface Iterator<T> {
     Option<T> head();
@@ -15,4 +16,8 @@ public interface Iterator<T> {
     <R> Iterator<Tuple2<T, R>> zip(Iterator<R> other);
 
     <R> Iterator<R> map(Function<T, R> mapper);
+
+    Iterator<T> filter(Predicate<T> predicate);
+
+    boolean allMatch(Predicate<T> predicate);
 }

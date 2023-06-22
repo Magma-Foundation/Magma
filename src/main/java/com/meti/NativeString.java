@@ -47,4 +47,9 @@ record NativeString(String internalValue) {
             }
         };
     }
+
+    public boolean equalsTo(NativeString other) {
+        return length() == other.length() &&
+               iter().zip(other.iter()).allMatch(tuple -> tuple.a() == tuple.b());
+    }
 }

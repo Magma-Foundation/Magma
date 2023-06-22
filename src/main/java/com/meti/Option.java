@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 interface Option<T> {
@@ -21,4 +22,6 @@ interface Option<T> {
     <R> R match(Function<T, R> ifPresent, Supplier<R> ifEmpty);
 
     boolean isEmpty();
+
+    Option<T> filter(Predicate<T> predicate);
 }

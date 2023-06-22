@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record Err<T, E extends Throwable>(E e) implements Result<T, E> {
@@ -16,5 +17,15 @@ public record Err<T, E extends Throwable>(E e) implements Result<T, E> {
     @Override
     public T unwrap() throws E {
         throw e;
+    }
+
+    @Override
+    public boolean isErr() {
+        return true;
+    }
+
+    @Override
+    public void match(Consumer<T> onOk, Consumer<E> onErr) {
+        onErr.accept(e);
     }
 }

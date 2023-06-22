@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 record None<T>() implements Option<T> {
@@ -42,6 +43,11 @@ record None<T>() implements Option<T> {
     @Override
     public boolean isEmpty() {
         return true;
+    }
+
+    @Override
+    public Option<T> filter(Predicate<T> predicate) {
+        return new None<>();
     }
 
     @Override

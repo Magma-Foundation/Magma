@@ -50,7 +50,7 @@ public final class Interpreter {
         }
     }
 
-    Result<NativeString, InterpretationError> interpret1() {
+    Result<NativeString, InterpretationError> interpret() {
         var lines = Arrays.stream(input.internalValue().split(";"))
                 .map(String::strip)
                 .filter(line -> !line.isEmpty())

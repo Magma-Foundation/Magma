@@ -1,21 +1,26 @@
 package com.meti;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
 
     private static void assertInterpret(String input, String output) {
-        Interpreter interpreter = new Interpreter(NativeString.from(input));
-        try {
-            assertEquals(output, interpreter.interpret1().unwrap().internalValue());
-        } catch (InterpretationError e) {
-            fail(e);
-        }
+        interpretImpl(input).match(
+                actual -> assertTrue(NativeString.from(output).equalsTo(actual)),
+                Assertions::fail);
+    }
+
+    private static void assertInterpretError(String input) {
+        assertTrue(interpretImpl(input).isErr());
+    }
+
+    private static Result<NativeString, InterpretationError> interpretImpl(String input) {
+        return new Interpreter(NativeString.from(input)).interpret();
     }
 
     @ParameterizedTest

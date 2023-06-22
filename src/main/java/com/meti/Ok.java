@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Ok<T, E extends Throwable> implements Result<T, E> {
@@ -26,5 +27,15 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     @Override
     public T unwrap() throws E {
         return value;
+    }
+
+    @Override
+    public boolean isErr() {
+        return false;
+    }
+
+    @Override
+    public void match(Consumer<T> onOk, Consumer<E> onErr) {
+        onOk.accept(value);
     }
 }
