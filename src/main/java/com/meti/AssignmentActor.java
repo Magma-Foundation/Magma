@@ -4,7 +4,7 @@ public record AssignmentActor(State state, NativeString input) implements Actor 
     @Override
     public Option<Result<State, InterpretationError>> act() {
         return input.firstIndexOfChar('=').map(equals -> {
-            var split = input.split(equals);
+            var split = input.splitExcludingAt(equals);
             var name = split.left();
             var value = split.right();
             return state.mapStack(stack -> stack.mapDefinition(name, definition -> {

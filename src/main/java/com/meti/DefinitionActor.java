@@ -9,28 +9,23 @@ public record DefinitionActor(State state, NativeString input) implements Actor 
                 .flatMap(range -> {
                     // x : u64 = 10
                     return range.firstIndexOfChar('=').map(valueSeparator -> {
-                        var split = range.split(valueSeparator);
-                        var definition = split.left();
-                        var value = split.right();
+                        var split = range.splitExcludingAt(valueSeparator);
+                        var definition = split.left().strip();
+                        var value = split.right().strip();
+                        var expectedType = new Resolver(value).resolve();
 
-                        return definition.firstIndexOfChar(':')
-                                .map(definition::split)
-                                .map(tuple -> {
-                                    var name = tuple.left();
-                                    var type = tuple.right();
+                        return definition.firstIndexOfChar(':').map(definition::splitExcludingAt).map(tuple -> {
+                            var name = tuple.left().strip();
+                            var actualType = tuple.right().strip();
 
-                                    return new Definition(name, type, value);
-                                }).unwrapOrElseGet(() -> {
-                                    var type = new Resolver(value).resolve();
-                                    return new Definition(definition, type, value);
-                                });
+                            if (expectedType.equalsTo(actualType)) {
+                                return Ok.<Definition, InterpretationError>apply(new Definition(name, actualType, value));
+                            } else {
+                                return new Err<Definition, InterpretationError>(new InterpretationError("Type mismatch."));
+                            }
+                        }).unwrapOrElseGet(() -> Ok.apply(new Definition(definition, expectedType, value)));
                     });
                 })
-                .map(definition -> {
-                    return state.mapStack(stack -> Ok.apply(stack.define(definition)));
-                })
-                .map(value -> {
-                    return value;
-                });
+                .map(result -> state.mapStack(stack -> result.mapValue(stack::define)));
     }
 }

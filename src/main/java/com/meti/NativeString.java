@@ -65,19 +65,15 @@ record NativeString(String internalValue) {
         return new NativeString(internalValue.substring(0, index.value));
     }
 
-    public Tuple2<NativeString, NativeString> split(Index index) {
+    public Tuple2<NativeString, NativeString> splitExcludingAt(Index index) {
         var left = internalValue.substring(0, index.value);
-        var right = internalValue.substring(index.value);
+        var right = internalValue.substring(index.value + 1);
         return new Tuple2<>(new NativeString(left), new NativeString(right));
     }
 
     public Option<Index> firstIndexAfterSlice(NativeString value) {
         var index = internalValue.indexOf(value.internalValue);
-        if (index == -1) {
-            return new Some<>(new Index(index + value.length()));
-        } else {
-            return new None<>();
-        }
+        return index == -1 ? new None<>() : new Some<>(new Index(index + value.length()));
     }
 
     public NativeString sliceFrom(Index index) {
