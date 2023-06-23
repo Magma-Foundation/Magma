@@ -4,6 +4,6 @@ public record Resolver(NativeString input) {
     NativeString resolve() {
         return this.input
                 .firstIndexOfCharByPredicate(Character::isLetter)
-                .match(input::sliceTo, () -> input);
+                .match(input::sliceFrom, () -> NativeString.from("i16"));
     }
 }
