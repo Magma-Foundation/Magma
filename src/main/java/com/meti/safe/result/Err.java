@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.safe.result;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

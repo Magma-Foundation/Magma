@@ -1,13 +1,20 @@
-package com.meti;
+package com.meti.safe;
+
+import com.meti.safe.iter.IndexedIterator;
+import com.meti.safe.iter.Iterator;
+import com.meti.safe.iter.Iterators;
+import com.meti.safe.option.None;
+import com.meti.safe.option.Option;
+import com.meti.safe.option.Some;
 
 import java.util.function.Predicate;
 
-record NativeString(String internalValue) {
-    static NativeString from(String unwrap) {
+public record NativeString(String internalValue) {
+    public static NativeString from(String unwrap) {
         return new NativeString(unwrap);
     }
 
-    Option<Index> firstIndexOfCharByPredicate(Predicate<Character> predicate) {
+    public Option<Index> firstIndexOfCharByPredicate(Predicate<Character> predicate) {
         return Iterators.fromRange(0, length()).zip(iter())
                 .map(tuple -> predicate.test(tuple.right()) ? new Some<>(tuple.left()) : new None<Integer>())
                 .flatMap(Iterators::fromOption)
@@ -80,10 +87,10 @@ record NativeString(String internalValue) {
         return new NativeString(internalValue.substring(index.value));
     }
 
-    record Range(int start, int end) {
+    public record Range(int start, int end) {
     }
 
-    final class Index {
+    public class Index {
         private final int value;
 
         Index(int value) {

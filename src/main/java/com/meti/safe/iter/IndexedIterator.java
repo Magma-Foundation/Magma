@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.safe.iter;
+
+import com.meti.safe.option.None;
+import com.meti.safe.option.Option;
 
 public abstract class IndexedIterator<T> extends AbstractIterator<T> {
     protected int counter;

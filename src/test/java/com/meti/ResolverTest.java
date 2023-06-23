@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.safe.NativeString;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

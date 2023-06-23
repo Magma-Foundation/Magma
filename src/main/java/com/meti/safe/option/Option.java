@@ -1,10 +1,13 @@
-package com.meti;
+package com.meti.safe.option;
+
+import com.meti.safe.result.Result;
+import com.meti.safe.Tuple2;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-interface Option<T> {
+public interface Option<T> {
     <R> Option<R> map(Function<T, R> mapper);
 
     boolean isPresent();

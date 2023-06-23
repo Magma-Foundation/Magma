@@ -1,9 +1,13 @@
-package com.meti;
+package com.meti.state;
+
+import com.meti.safe.NativeString;
+import com.meti.safe.option.Option;
+import com.meti.safe.option.Some;
 
 import java.util.function.Function;
 
-final class PresentState extends State {
-    final NativeString value;
+public final class PresentState extends State {
+    public final NativeString value;
 
     PresentState(NativeString value, Stack stack) {
         super(stack);

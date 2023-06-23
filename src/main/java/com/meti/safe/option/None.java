@@ -1,10 +1,14 @@
-package com.meti;
+package com.meti.safe.option;
+
+import com.meti.safe.result.Err;
+import com.meti.safe.result.Result;
+import com.meti.safe.Tuple2;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-record None<T>() implements Option<T> {
+public record None<T>() implements Option<T> {
     @Override
     public boolean isPresent() {
         return false;

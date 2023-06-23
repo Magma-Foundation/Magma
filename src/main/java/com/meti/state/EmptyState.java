@@ -1,6 +1,10 @@
-package com.meti;
+package com.meti.state;
 
-import java.util.HashMap;
+import com.meti.safe.NativeString;
+import com.meti.safe.SafeMap;
+import com.meti.safe.option.None;
+import com.meti.safe.option.Option;
+
 import java.util.function.Function;
 
 public class EmptyState extends State {

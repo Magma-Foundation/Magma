@@ -1,4 +1,8 @@
-package com.meti;
+package com.meti.safe.iter;
+
+import com.meti.safe.option.Option;
+import com.meti.safe.result.Result;
+import com.meti.safe.Tuple2;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

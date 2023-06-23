@@ -1,4 +1,12 @@
-package com.meti;
+package com.meti.feature;
+
+import com.meti.InterpretationError;
+import com.meti.safe.NativeString;
+import com.meti.safe.option.Option;
+import com.meti.safe.result.Ok;
+import com.meti.safe.result.Result;
+import com.meti.state.Definition;
+import com.meti.state.State;
 
 public record VariableActor(State state, NativeString input) implements Actor {
     @Override

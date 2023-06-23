@@ -1,10 +1,14 @@
-package com.meti;
+package com.meti.safe.option;
+
+import com.meti.safe.result.Ok;
+import com.meti.safe.result.Result;
+import com.meti.safe.Tuple2;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-record Some<T>(T value) implements Option<T> {
+public record Some<T>(T value) implements Option<T> {
     @Override
     public boolean isPresent() {
         return true;

@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.safe.result;
 
 public class NativeResults {
     public static <T, E extends Throwable> Result<T, E> $throwResult(ValueAction<Result<T, E>, E> action) {

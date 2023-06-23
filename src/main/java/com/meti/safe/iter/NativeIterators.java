@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.safe.iter;
+
+import com.meti.safe.option.Option;
+import com.meti.safe.option.Some;
 
 import java.util.List;
 

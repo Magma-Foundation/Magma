@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.safe;
+
+import com.meti.state.Definition;
+import com.meti.safe.option.None;
+import com.meti.safe.option.Option;
+import com.meti.safe.option.Some;
 
 import java.util.Map;
 
@@ -8,7 +13,7 @@ public record SafeMap(Map<NativeString, Definition> unwrap) {
         return unwrap;
     }
 
-    SafeMap with(NativeString key, Definition value) {
+    public SafeMap with(NativeString key, Definition value) {
         unwrap.put(key, value);
         return this;
     }
