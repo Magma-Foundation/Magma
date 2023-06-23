@@ -86,6 +86,6 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
 
     @Override
     public <R, E extends Throwable> Result<R, E> foldLeftResult(R state, BiFunction<R, T, Result<R, E>> folder) {
-        return foldLeft(Ok.of(state), (accumulated, t) -> accumulated.mapValueToResult(r -> folder.apply(r, t)));
+        return foldLeft(Ok.apply(state), (accumulated, t) -> accumulated.mapValueToResult(r -> folder.apply(r, t)));
     }
 }

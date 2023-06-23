@@ -24,4 +24,6 @@ interface Option<T> {
     boolean isEmpty();
 
     Option<T> filter(Predicate<T> predicate);
+
+    T unwrapOrElseGet(Supplier<T> other);
 }

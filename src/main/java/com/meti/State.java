@@ -1,19 +1,19 @@
 package com.meti;
 
-import java.util.Map;
 import java.util.function.Function;
 
 public abstract class State {
-    final Map<NativeString, NativeString> declarations;
+    public final Stack stack;
 
-    public State(Map<NativeString, NativeString> declarations) {
-        this.declarations = declarations;
+    public State(Stack stack) {
+        this.stack = stack;
     }
 
-    State define(Definition definition) {
-        this.declarations.put(definition.name(), definition.value());
-        return this;
+    public Result<State, InterpretationError> mapStack(Function<Stack, Result<Stack, InterpretationError>> mapper) {
+        return mapper.apply(stack).mapValue(this::copy);
     }
+
+    protected abstract State copy(Stack stack);
 
     abstract PresentState mapValue(Function<NativeString, NativeString> mapper);
 

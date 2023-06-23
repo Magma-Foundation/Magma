@@ -3,8 +3,8 @@ package com.meti;
 public record VariableActor(State state, NativeString input) implements Actor {
     @Override
     public Option<Result<State, InterpretationError>> act() {
-        if (state.declarations.containsKey(input())) {
-            return new Some<>(Ok.of(state.mapValue(state.declarations::get)));
+        if (state.stack.definitions().unwrap().containsKey(input())) {
+            return new Some<>(Ok.apply(state.mapValue(state.stack.definitions().unwrap()::get)));
         }
         return new None<>();
     }

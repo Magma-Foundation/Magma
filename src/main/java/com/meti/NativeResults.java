@@ -11,7 +11,7 @@ public class NativeResults {
 
     public static <T, E extends Throwable> Result<T, E> $throw(ValueAction<T, E> action) {
         try {
-            return Ok.of(action.run());
+            return Ok.apply(action.run());
         } catch (Throwable e) {
             return new Err<>((E) e);
         }

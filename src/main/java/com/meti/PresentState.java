@@ -1,28 +1,28 @@
 package com.meti;
 
-import java.util.Map;
 import java.util.function.Function;
 
 final class PresentState extends State {
     final NativeString value;
 
-    PresentState(NativeString value, Map<NativeString, NativeString> declarations) {
-        super(declarations);
+    PresentState(NativeString value, Stack stack) {
+        super(stack);
         this.value = value;
     }
 
     @Override
     public PresentState withValue(NativeString value) {
-        return new PresentState(value, declarations);
+        return new PresentState(value, stack);
+    }
+
+    @Override
+    protected State copy(Stack stack) {
+        return new PresentState(value, stack);
     }
 
     @Override
     PresentState mapValue(Function<NativeString, NativeString> mapper) {
-        return new PresentState(mapper.apply(this.value), this.declarations);
-    }
-
-    Result<State, InterpretationError> mapValueToResult(Function<NativeString, Result<NativeString, InterpretationError>> mapper) {
-        return mapper.apply(this.value).mapValue(apply1 -> new PresentState(apply1, this.declarations));
+        return new PresentState(mapper.apply(this.value), stack);
     }
 
     @Override

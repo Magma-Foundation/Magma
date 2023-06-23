@@ -1,4 +1,4 @@
 package com.meti;
 
-public record Tuple2<A, B>(A a, B b) {
+public record Tuple2<A, B>(A left, B right) {
 }

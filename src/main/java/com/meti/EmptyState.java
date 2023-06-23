@@ -6,7 +6,7 @@ import java.util.Map;
 public class EmptyState extends State {
 
     public EmptyState(Map<NativeString, NativeString> declarations) {
-        super(declarations);
+        super(new Stack(new SafeMap(declarations)));
     }
 
     private EmptyState() {
@@ -24,6 +24,6 @@ public class EmptyState extends State {
 
     @Override
     public PresentState withValue(NativeString value) {
-        return new PresentState(value, declarations);
+        return new PresentState(value, new Stack(new SafeMap(stack.definitions().unwrap())));
     }
 }

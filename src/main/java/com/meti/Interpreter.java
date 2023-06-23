@@ -12,6 +12,7 @@ public final class Interpreter {
     private static Result<State, InterpretationError> interpretStatement(PresentState state) {
         var input = state.value;
         return Iterators.of(new DefinitionActor(state, input),
+                        new AssignmentActor(state, input),
                         new VariableActor(state, input),
                         new NumberActor(state, input))
                 .map(Actor::act)

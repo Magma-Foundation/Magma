@@ -37,7 +37,7 @@ record Some<T>(T value) implements Option<T> {
 
     @Override
     public <E extends Throwable> Result<T, E> unwrapOrThrow(Supplier<E> supplier) {
-        return Ok.of(value);
+        return Ok.apply(value);
     }
 
     @Override
