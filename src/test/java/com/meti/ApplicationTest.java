@@ -24,6 +24,11 @@ public class ApplicationTest {
     }
 
     @Test
+    void assignment() {
+        assertInterpret("let x = 10;x=20;x", "20");
+    }
+
+    @Test
     void invalidTypes() {
         assertInterpretError("let value : i8 = 10u32");
     }

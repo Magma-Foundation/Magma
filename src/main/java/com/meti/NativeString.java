@@ -1,8 +1,17 @@
 package com.meti;
 
+import java.util.function.Predicate;
+
 record NativeString(String internalValue) {
     static NativeString from(String unwrap) {
         return new NativeString(unwrap);
+    }
+
+    Option<Integer> firstIndexOfCharByPredicate(Predicate<Character> predicate) {
+        return Iterators.fromRange(0, length()).zip(iter())
+                .map(tuple -> predicate.test(tuple.b()) ? new Some<>(tuple.a()) : new None<Integer>())
+                .flatMap(Iterators::fromOption)
+                .head();
     }
 
     public String internalValue() {
