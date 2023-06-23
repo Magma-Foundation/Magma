@@ -2,6 +2,8 @@ package com.meti;
 
 import java.util.Arrays;
 
+import static com.meti.NativeResults.*;
+
 public final class Interpreter {
     private final NativeString input;
 
@@ -10,36 +12,36 @@ public final class Interpreter {
     }
 
     private static Result<State, InterpretationError> interpretStatement(PresentState state) {
-        var value1 = state.value;
-        if (value1.startsWith(NativeString.from("let "))) {
-            return value1.firstIndexOfChar('=').match(equalsSeparator -> {
-                return value1.firstIndexOfChar(':')
-                        .<Result<Definition, InterpretationError>>match(typeSeparator -> {
-                            var name = value1.slice("let ".length(), typeSeparator);
-                            var type = value1.slice(typeSeparator + 1, equalsSeparator);
-                            var value = value1.slice(equalsSeparator + 1, value1.length()).map(NativeString::strip);
-                            return name.and(type)
-                                    .and(value)
-                                    .map(tuple -> new Definition(tuple.a().a(), tuple.a().b(), tuple.b()))
-                                    .unwrapOrThrow(() -> new InterpretationError("Failed to parse name or value."));
-                        }, () -> {
-                            var name = value1.slice("let ".length(), equalsSeparator);
-                            var value = value1.slice(equalsSeparator + 1, value1.length()).map(NativeString::strip);
-                            return value.match(
-                                            nativeString -> Ok.<NativeString, InterpretationError>of(resolveType(nativeString)),
-                                            () -> new Err<NativeString, InterpretationError>(new InterpretationError("No value present.")))
-
-                                    .mapValueToResult(nativeString -> name.and(value)
-                                            .map(tuple -> new Definition(tuple.a(), nativeString, tuple.b()))
-                                            .unwrapOrThrow(() -> new InterpretationError("Failed to parse name or value.")));
-                        })
-                        .mapValue(state::define);
-            }, () -> new Err<>(new InterpretationError("No equals statement present.")));
-        } else if (state.declarations.containsKey(value1)) {
+        var input = state.value;
+        if (input.startsWith(NativeString.from("let "))) {
+            return input.firstIndexOfChar('=').match(
+                            equalsSeparator -> interpretDefinition(input, equalsSeparator),
+                            () -> new Err<Definition, InterpretationError>(new InterpretationError("No equals sign present.")))
+                    .mapValue(state::define);
+        } else if (state.declarations.containsKey(input)) {
             return Ok.of(state.mapValue(state.declarations::get));
         } else {
             return state.mapValueToResult(Interpreter::interpretValue);
         }
+    }
+
+    private static Result<Definition, InterpretationError> interpretDefinition(NativeString input, int equalsSeparator) {
+        return input.firstIndexOfChar(':').match(typeSeparator -> $throwResult(() -> {
+            var name = $(input.slice("let ".length(), typeSeparator).unwrapOrThrow(() -> new InterpretationError("No name present.")));
+            var expectedType = $(input.slice(typeSeparator + 1, equalsSeparator).unwrapOrThrow(() -> new InterpretationError("No type present.")));
+            var value = $(input.slice(equalsSeparator + 1, input.length()).unwrapOrThrow(() -> new InterpretationError("No value present.")));
+            var actualType = resolveType(value);
+            if (expectedType.equalsTo(actualType)) {
+                return Ok.of(new Definition(name, expectedType, value));
+            } else {
+                return new Err<>(new InterpretationError("Invalid type: " + actualType.internalValue()));
+            }
+        }), () -> $throw(() -> {
+            var name = $(input.slice("let ".length(), equalsSeparator).unwrapOrThrow(() -> new InterpretationError("No name present."))).strip();
+            var value = $(input.slice(equalsSeparator + 1, input.length()).unwrapOrThrow(() -> new InterpretationError("No value present."))).strip();
+            var type = resolveType(value);
+            return new Definition(name, type, value);
+        }));
     }
 
     private static NativeString resolveType(NativeString input) {
