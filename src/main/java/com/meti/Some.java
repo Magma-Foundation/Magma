@@ -21,6 +21,11 @@ record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public T unwrapOrElseGet(Supplier<T> other) {
+        return value;
+    }
+
+    @Override
     public T unwrapOrPanic() {
         return value;
     }

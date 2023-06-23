@@ -51,6 +51,11 @@ record None<T>() implements Option<T> {
     }
 
     @Override
+    public T unwrapOrElseGet(Supplier<T> other) {
+        return other.get();
+    }
+
+    @Override
     public <R> Option<R> map(Function<T, R> mapper) {
         return new None<>();
     }

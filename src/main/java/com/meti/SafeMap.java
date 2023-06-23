@@ -20,4 +20,8 @@ public record SafeMap(Map<NativeString, Definition> unwrap) {
             return new None<>();
         }
     }
+
+    public boolean containsKey(NativeString name) {
+        return unwrap.containsKey(name);
+    }
 }

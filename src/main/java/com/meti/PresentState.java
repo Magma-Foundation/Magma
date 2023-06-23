@@ -21,7 +21,7 @@ final class PresentState extends State {
     }
 
     @Override
-    PresentState mapValue(Function<NativeString, NativeString> mapper) {
+    public State mapValue(Function<NativeString, NativeString> mapper) {
         return new PresentState(mapper.apply(this.value), stack);
     }
 

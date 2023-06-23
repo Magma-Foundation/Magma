@@ -15,7 +15,7 @@ public abstract class State {
 
     protected abstract State copy(Stack stack);
 
-    abstract PresentState mapValue(Function<NativeString, NativeString> mapper);
+    public abstract State mapValue(Function<NativeString, NativeString> mapper);
 
     public abstract Option<NativeString> findValue();
 
