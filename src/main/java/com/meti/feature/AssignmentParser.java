@@ -25,7 +25,7 @@ public record AssignmentParser(State state, Node node) implements Parser {
                     } else {
                         var format = "Type mismatch of '%s'. Expected '%s' but was actually '%s'.";
                         var message = format.formatted(this.node().nameAsString().unwrapOrPanic(), definition.type().internalValue(), actualType.internalValue());
-                        return new Err<>(new InterpretationError(message));
+                        return Err.apply(new InterpretationError(message));
                     }
                 });
             }));

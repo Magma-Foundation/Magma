@@ -5,7 +5,7 @@ public class NativeResults {
         try {
             return action.run();
         } catch (Throwable e) {
-            return new Err<>((E) e);
+            return Err.apply((E) e);
         }
     }
 
@@ -13,7 +13,7 @@ public class NativeResults {
         try {
             return Ok.apply(action.run());
         } catch (Throwable e) {
-            return new Err<>((E) e);
+            return Err.apply((E) e);
         }
     }
 

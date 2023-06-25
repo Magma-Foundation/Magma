@@ -35,7 +35,7 @@ public record None<T>() implements Option<T> {
 
     @Override
     public <E extends Throwable> Result<T, E> unwrapOrThrow(Supplier<E> supplier) {
-        return new Err<>(supplier.get());
+        return Err.apply(supplier.get());
     }
 
     @Override

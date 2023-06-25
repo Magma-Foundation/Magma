@@ -13,4 +13,6 @@ public interface Result<T, E extends Throwable> {
     boolean isErr();
 
     void match(Consumer<T> onOk, Consumer<E> onErr);
+
+    <R> R matchWithValue(Function<T, R> onOk, Function<E, R> onErr);
 }

@@ -18,4 +18,8 @@ public interface Node {
     default Option<NativeString> valueAsString() {
         return None.apply();
     }
+
+    default Option<NativeString> typeAsString() {
+        return None.apply();
+    }
 }

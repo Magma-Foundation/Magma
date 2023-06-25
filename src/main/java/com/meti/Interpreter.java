@@ -2,18 +2,13 @@ package com.meti;
 
 import com.meti.feature.*;
 import com.meti.safe.NativeString;
-import com.meti.safe.iter.Collectors;
 import com.meti.safe.iter.Iterators;
-import com.meti.safe.iter.NativeIterators;
 import com.meti.safe.result.Err;
 import com.meti.safe.result.Result;
 import com.meti.split.Splitter;
 import com.meti.state.EmptyState;
 import com.meti.state.PresentState;
 import com.meti.state.State;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public final class Interpreter {
     private final NativeString input;
@@ -33,7 +28,7 @@ public final class Interpreter {
                 .map(Actor::act)
                 .flatMap(Iterators::fromOption)
                 .head()
-                .unwrapOrElse(new Err<>(new InterpretationError("Unknown value: " + input.internalValue())));
+                .unwrapOrElse(Err.apply(new InterpretationError("Unknown value: " + input.internalValue())));
     }
 
     public Result<NativeString, InterpretationError> interpret() {

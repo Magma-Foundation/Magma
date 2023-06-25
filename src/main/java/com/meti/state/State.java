@@ -1,9 +1,7 @@
 package com.meti.state;
 
-import com.meti.InterpretationError;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
-import com.meti.safe.result.Result;
 
 import java.util.function.Function;
 
@@ -14,8 +12,8 @@ public abstract class State {
         this.stack = stack;
     }
 
-    public Result<State, InterpretationError> mapStack(Function<Stack, Result<Stack, InterpretationError>> mapper) {
-        return mapper.apply(stack).mapValue(this::copy);
+    public State mapStack(Function<Stack, Stack> mapper) {
+        return copy(mapper.apply(stack));
     }
 
     protected abstract State copy(Stack stack);

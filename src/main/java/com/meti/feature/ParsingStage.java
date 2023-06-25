@@ -13,7 +13,7 @@ public record ParsingStage(State state, Node node) {
                 .map(Parser::parse)
                 .flatMap(Iterators::fromOption)
                 .head()
-                .unwrapOrElse(new Err<>(new InterpretationError("Failed to parse node.")));
+                .unwrapOrElse(Err.apply(new InterpretationError("Failed to parse node.")));
     }
 
     private Iterator<Parser> collectParsers() {
