@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
-
     private static void assertInterpret(String input, String output) {
         interpretImpl(input).match(
                 actual -> assertTrue(NativeString.from(output).equalsTo(actual)),
@@ -23,6 +22,11 @@ public class ApplicationTest {
 
     private static Result<NativeString, InterpretationError> interpretImpl(String input) {
         return new Interpreter(NativeString.from(input)).interpret();
+    }
+
+    @Test
+    void blocks() {
+        assertInterpret("{}", "");
     }
 
     @Test

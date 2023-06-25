@@ -1,0 +1,28 @@
+package com.meti.feature;
+
+import com.meti.InterpretationError;
+import com.meti.Interpreter;
+import com.meti.safe.NativeString;
+import com.meti.safe.option.Option;
+import com.meti.safe.result.Result;
+import com.meti.state.State;
+
+import java.util.function.BiFunction;
+
+public record BlockActor(State state, NativeString input) implements Actor {
+    @Override
+    public Option<Result<State, InterpretationError>> act() {
+        return input.firstIndexOfChar('{')
+                .flatMap(index -> input.lastIndexOfChar('}').flatMap(index::to))
+                .map(input::slice)
+                .map(slice -> {
+                    return slice.splitExcludingAtAll(";")
+                            .foldLeftResult(state, new BiFunction<State, NativeString, Result<State, InterpretationError>>() {
+                                @Override
+                                public Result<State, InterpretationError> apply(State state, NativeString nativeString) {
+                                    return Interpreter.interpretStatement(state.withValue(nativeString));
+                                }
+                            });
+                });
+    }
+}

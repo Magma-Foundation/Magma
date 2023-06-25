@@ -3,11 +3,14 @@ package com.meti.safe;
 import com.meti.safe.iter.IndexedIterator;
 import com.meti.safe.iter.Iterator;
 import com.meti.safe.iter.Iterators;
+import com.meti.safe.iter.NativeIterators;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public record NativeString(String internalValue) {
     public static NativeString from(String unwrap) {
@@ -85,6 +88,19 @@ public record NativeString(String internalValue) {
 
     public NativeString sliceFrom(Index index) {
         return new NativeString(internalValue.substring(index.value));
+    }
+
+    public Option<Index> lastIndexOfChar(char c) {
+        var value = internalValue.lastIndexOf(c);
+        return value == -1
+                ? new None<>()
+                : new Some<>(new Index(value));
+    }
+
+    public Iterator<NativeString> splitExcludingAtAll(String delimiter) {
+        return NativeIterators.fromList(Arrays.stream(internalValue.split(delimiter))
+                .map(NativeString::new)
+                .collect(Collectors.toList()));
     }
 
     public record Range(int start, int end) {
