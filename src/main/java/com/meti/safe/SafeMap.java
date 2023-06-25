@@ -1,13 +1,21 @@
 package com.meti.safe;
 
-import com.meti.state.Definition;
+import com.meti.InterpretationError;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
+import com.meti.safe.result.Result;
+import com.meti.state.Definition;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public record SafeMap(Map<NativeString, Definition> unwrap) {
+    public static SafeMap empty() {
+        return new SafeMap(new HashMap<>());
+    }
+
     @Deprecated
     public Map<NativeString, Definition> unwrap() {
         return unwrap;
@@ -28,5 +36,11 @@ public record SafeMap(Map<NativeString, Definition> unwrap) {
 
     public boolean containsKey(NativeString name) {
         return unwrap.containsKey(name);
+    }
+
+    public Option<Result<SafeMap, InterpretationError>> updateDefinition(NativeString key, Function<Definition, Result<Definition, InterpretationError>> mapper) {
+        return apply(key)
+                .map(mapper)
+                .map(result -> result.mapValue(value -> with(key, value)));
     }
 }

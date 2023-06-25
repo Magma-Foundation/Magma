@@ -26,4 +26,8 @@ public interface Iterator<T> {
     boolean allMatch(Predicate<T> predicate);
 
     <R> R collect(Collector<R, T> collector);
+
+    <R, E extends Throwable> ResultIter<R, E> mapToResult(Function<T, Result<R, E>> mapper);
+
+    <R, E extends Throwable> ResultIter<R, E> flatMapToResult(Function<T, Iterator<Result<R, E>>> mapper);
 }

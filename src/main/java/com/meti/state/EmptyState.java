@@ -38,6 +38,6 @@ public class EmptyState extends State {
 
     @Override
     public PresentState withValue(NativeString value) {
-        return new PresentState(value, new Stack(new SafeMap(stack.definitions().unwrap())));
+        return new PresentState(value, stack);
     }
 }

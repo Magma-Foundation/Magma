@@ -13,6 +13,16 @@ import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
+    public <R, E extends Throwable> ResultIter<R, E> mapToResult(Function<T, Result<R, E>> mapper) {
+        return new ResultIter<>(map(mapper));
+    }
+
+    @Override
+    public <R, E extends Throwable> ResultIter<R, E> flatMapToResult(Function<T, Iterator<Result<R, E>>> mapper) {
+        return new ResultIter<>(flatMap(mapper));
+    }
+
+    @Override
     public <R> R collect(Collector<R, T> collector) {
         return foldLeft(collector.initial(), collector::folder);
     }

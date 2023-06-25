@@ -29,4 +29,12 @@ public abstract class State {
     public State empty() {
         return new EmptyState(stack);
     }
+
+    public State enter() {
+        return copy(stack.enter());
+    }
+
+    public State exit() {
+        return copy(stack.exit());
+    }
 }
