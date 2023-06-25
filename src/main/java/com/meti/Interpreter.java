@@ -2,14 +2,17 @@ package com.meti;
 
 import com.meti.feature.*;
 import com.meti.safe.NativeString;
+import com.meti.safe.iter.Collectors;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.iter.NativeIterators;
 import com.meti.safe.result.Err;
 import com.meti.safe.result.Result;
+import com.meti.split.Splitter;
 import com.meti.state.EmptyState;
 import com.meti.state.PresentState;
 import com.meti.state.State;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public final class Interpreter {
@@ -38,13 +41,9 @@ public final class Interpreter {
     }
 
     public Result<NativeString, InterpretationError> interpret(State state) {
-        var lines = Arrays.stream(input.internalValue().split(";"))
-                .map(String::strip)
-                .filter(line -> !line.isEmpty())
-                .map(NativeString::new)
-                .toList();
-
-        return NativeIterators.fromList(lines)
+        return new Splitter(input)
+                .split()
+                .iter()
                 .foldLeftResult(state, (previous, line) -> interpretStatement(previous.withValue(line)))
                 .mapValue(internal -> internal.findValue().unwrapOrElse(NativeString.from("")));
     }

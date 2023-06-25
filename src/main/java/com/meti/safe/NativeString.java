@@ -17,6 +17,10 @@ public record NativeString(String internalValue) {
         return new NativeString(unwrap);
     }
 
+    public static NativeString empty() {
+        return new NativeString("");
+    }
+
     public Option<Index> firstIndexOfCharByPredicate(Predicate<Character> predicate) {
         return Iterators.fromRange(0, length()).zip(iter())
                 .map(tuple -> predicate.test(tuple.right()) ? new Some<>(tuple.left()) : new None<Integer>())
@@ -105,6 +109,10 @@ public record NativeString(String internalValue) {
 
     public boolean isNonEmpty() {
         return !internalValue.isEmpty();
+    }
+
+    public NativeString concat(char value) {
+        return new NativeString(this.internalValue + value);
     }
 
     public record Range(int start, int end) {

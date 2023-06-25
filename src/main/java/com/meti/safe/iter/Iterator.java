@@ -1,8 +1,8 @@
 package com.meti.safe.iter;
 
+import com.meti.safe.Tuple2;
 import com.meti.safe.option.Option;
 import com.meti.safe.result.Result;
-import com.meti.safe.Tuple2;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -24,4 +24,6 @@ public interface Iterator<T> {
     Iterator<T> filter(Predicate<T> predicate);
 
     boolean allMatch(Predicate<T> predicate);
+
+    <R> R collect(Collector<R, T> collector);
 }

@@ -13,6 +13,11 @@ import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
+    public <R> R collect(Collector<R, T> collector) {
+        return foldLeft(collector.initial(), collector::folder);
+    }
+
+    @Override
     public boolean allMatch(Predicate<T> predicate) {
         return filter(predicate.negate()).head().isEmpty();
     }

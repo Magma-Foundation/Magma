@@ -25,7 +25,17 @@ public class ApplicationTest {
     }
 
     @Test
-    void blocks() {
+    void insideBlock() {
+        assertInterpret("let x = 100;{x}", "100");
+    }
+
+    @Test
+    void outsideBlock() {
+        assertInterpretError("{let x = 100;}x");
+    }
+
+    @Test
+    void emptyBlock() {
         assertInterpret("{}", "");
     }
 
