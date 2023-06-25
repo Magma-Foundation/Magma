@@ -12,6 +12,11 @@ public record Definition(NativeString name, NativeString type, NativeString valu
     }
 
     @Override
+    public Option<NativeString> typeAsString() {
+        return Some.apply(type);
+    }
+
+    @Override
     public Option<NativeString> nameAsString() {
         return Some.apply(name);
     }

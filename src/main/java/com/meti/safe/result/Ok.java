@@ -38,4 +38,9 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     public void match(Consumer<T> onOk, Consumer<E> onErr) {
         onOk.accept(value);
     }
+
+    @Override
+    public <R> R matchWithValue(Function<T, R> onOk, Function<E, R> onErr) {
+        return onOk.apply(value);
+    }
 }
