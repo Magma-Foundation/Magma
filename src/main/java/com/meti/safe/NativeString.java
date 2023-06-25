@@ -103,6 +103,10 @@ public record NativeString(String internalValue) {
                 .collect(Collectors.toList()));
     }
 
+    public boolean isNonEmpty() {
+        return !internalValue.isEmpty();
+    }
+
     public record Range(int start, int end) {
     }
 
@@ -123,6 +127,14 @@ public record NativeString(String internalValue) {
 
         public Option<Range> rangeBetweenFirstChar(char c) {
             return firstIndexOfChar(c).map(value -> new Range(this.value, value.value));
+        }
+
+        public Option<Index> next() {
+            if (this.value == length() - 1) {
+                return new None<>();
+            } else {
+                return new Some<>(new Index(this.value + 1));
+            }
         }
     }
 }

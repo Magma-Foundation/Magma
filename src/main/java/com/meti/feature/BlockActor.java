@@ -13,16 +13,14 @@ public record BlockActor(State state, NativeString input) implements Actor {
     @Override
     public Option<Result<State, InterpretationError>> act() {
         return input.firstIndexOfChar('{')
+                .flatMap(NativeString.Index::next)
                 .flatMap(index -> input.lastIndexOfChar('}').flatMap(index::to))
                 .map(input::slice)
                 .map(slice -> {
                     return slice.splitExcludingAtAll(";")
-                            .foldLeftResult(state, new BiFunction<State, NativeString, Result<State, InterpretationError>>() {
-                                @Override
-                                public Result<State, InterpretationError> apply(State state, NativeString nativeString) {
-                                    return Interpreter.interpretStatement(state.withValue(nativeString));
-                                }
-                            });
+                            .map(NativeString::strip)
+                            .filter(NativeString::isNonEmpty)
+                            .foldLeftResult(state.empty(), (state, nativeString) -> Interpreter.interpretStatement(state.withValue(nativeString)));
                 });
     }
 }

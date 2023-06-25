@@ -25,4 +25,8 @@ public abstract class State {
     public abstract Option<NativeString> findValue();
 
     public abstract PresentState withValue(NativeString value);
+
+    public State empty() {
+        return new EmptyState(stack);
+    }
 }
