@@ -7,7 +7,7 @@ import com.meti.safe.option.Some;
 public class Iterators {
     @SafeVarargs
     public static <T> Iterator<T> of(T... values) {
-        return new IndexedIterator<T>() {
+        return new IndexedIterator<>() {
             @Override
             protected int size() {
                 return values.length;
@@ -15,7 +15,7 @@ public class Iterators {
 
             @Override
             protected Option<T> apply(int counter) {
-                return new Some<>(values[counter]);
+                return Some.apply(values[counter]);
             }
         };
     }
@@ -29,7 +29,7 @@ public class Iterators {
 
             @Override
             protected Option<Integer> apply(int counter) {
-                return new Some<>(start + counter);
+                return Some.apply(start + counter);
             }
         };
     }
@@ -39,10 +39,10 @@ public class Iterators {
     }
 
     private static <T> Iterator<T> empty() {
-        return new AbstractIterator<T>() {
+        return new AbstractIterator<>() {
             @Override
             public Option<T> head() {
-                return new None<>();
+                return None.apply();
             }
         };
     }

@@ -1,14 +1,18 @@
 package com.meti.safe.option;
 
+import com.meti.safe.Tuple2;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
-import com.meti.safe.Tuple2;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
+    public static <T> Some<T> apply(T value) {
+        return new Some<>(value);
+    }
+
     @Override
     public boolean isPresent() {
         return true;
@@ -21,7 +25,7 @@ public record Some<T>(T value) implements Option<T> {
 
     @Override
     public Option<T> filter(Predicate<T> predicate) {
-        return predicate.test(value) ? this : new None<>();
+        return predicate.test(value) ? this : None.apply();
     }
 
     @Override
@@ -61,6 +65,6 @@ public record Some<T>(T value) implements Option<T> {
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return new Some<>(mapper.apply(value));
+        return apply(mapper.apply(value));
     }
 }

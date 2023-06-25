@@ -31,6 +31,6 @@ public final class PresentState extends State {
 
     @Override
     public Option<NativeString> findValue() {
-        return new Some<>(value);
+        return Some.apply(value);
     }
 }

@@ -28,14 +28,10 @@ public record SafeMap(Map<NativeString, Definition> unwrap) {
 
     public Option<Definition> apply(NativeString key) {
         if (unwrap.containsKey(key)) {
-            return new Some<>(unwrap.get(key));
+            return Some.apply(unwrap.get(key));
         } else {
-            return new None<>();
+            return None.apply();
         }
-    }
-
-    public boolean containsKey(NativeString name) {
-        return unwrap.containsKey(name);
     }
 
     public Option<Result<SafeMap, InterpretationError>> updateDefinition(NativeString key, Function<Definition, Result<Definition, InterpretationError>> mapper) {

@@ -19,17 +19,17 @@ public class Index {
 
     public Option<Range> to(Index other) {
         if ((other.value - value) >= 0) {
-            return new Some<>(new Range(value, other.value));
+            return Some.apply(new Range(value, other.value));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 
     public Option<Index> next() {
         if (this.value + 1 < length) {
-            return new Some<>(new Index(this.value + 1, length));
+            return Some.apply(new Index(this.value + 1, length));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 

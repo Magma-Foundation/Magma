@@ -17,7 +17,7 @@ public abstract class IndexedIterator<T> extends AbstractIterator<T> {
             counter++;
             return value;
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 

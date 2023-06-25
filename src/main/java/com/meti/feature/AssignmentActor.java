@@ -13,7 +13,7 @@ public record AssignmentActor(State state, NativeString input) implements Actor 
             var split = input.splitExcludingAt(equals);
             var name = split.left();
             var value = split.right();
-            return new Parser(state, new Assignment(name, value)).parse();
+            return new ParsingStage(state, new Assignment(name, value)).parse();
         });
     }
 }

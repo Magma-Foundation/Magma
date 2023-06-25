@@ -25,7 +25,7 @@ public class NativeIterators {
 
         @Override
         protected Option<T> apply(int counter) {
-            return new Some<>(lines.get(counter));
+            return Some.apply(lines.get(counter));
         }
     }
 }

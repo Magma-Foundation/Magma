@@ -23,7 +23,7 @@ public record NativeString(String internalValue) {
 
     public Option<Index> firstIndexOfCharByPredicate(Predicate<Character> predicate) {
         return Iterators.fromRange(0, length()).zip(iter())
-                .map(tuple -> predicate.test(tuple.right()) ? new Some<>(tuple.left()) : new None<Integer>())
+                .map(tuple -> predicate.test(tuple.right()) ? Some.apply(tuple.left()) : None.<Integer>apply())
                 .flatMap(Iterators::fromOption)
                 .head()
                 .map((Integer index) -> new Index(index, internalValue.length()));
@@ -36,8 +36,8 @@ public record NativeString(String internalValue) {
     public Option<Index> firstIndexOfChar(char c) {
         var value = internalValue.indexOf(c);
         return value == -1
-                ? new None<>()
-                : new Some<>(new Index(value, this.length()));
+                ? None.apply()
+                : Some.apply(new Index(value, this.length()));
     }
 
     public NativeString slice(Range range) {
@@ -52,10 +52,6 @@ public record NativeString(String internalValue) {
         return internalValue.length();
     }
 
-    public boolean startsWith(NativeString other) {
-        return internalValue.startsWith(other.internalValue);
-    }
-
     public Iterator<Character> iter() {
         return new IndexedIterator<>() {
             @Override
@@ -65,7 +61,7 @@ public record NativeString(String internalValue) {
 
             @Override
             protected Option<Character> apply(int counter) {
-                return new Some<>(internalValue.charAt(counter));
+                return Some.apply(internalValue.charAt(counter));
             }
         };
     }
@@ -87,7 +83,7 @@ public record NativeString(String internalValue) {
 
     public Option<Index> firstIndexAfterSlice(NativeString value) {
         var index = internalValue.indexOf(value.internalValue);
-        return index == -1 ? new None<>() : new Some<>(new Index(index + value.length(), this.length()));
+        return index == -1 ? None.apply() : Some.apply(new Index(index + value.length(), this.length()));
     }
 
     public NativeString sliceFrom(Index index) {
@@ -97,8 +93,8 @@ public record NativeString(String internalValue) {
     public Option<Index> lastIndexOfChar(char c) {
         var value = internalValue.lastIndexOf(c);
         return value == -1
-                ? new None<>()
-                : new Some<>(new Index(value, this.length()));
+                ? None.apply()
+                : Some.apply(new Index(value, this.length()));
     }
 
     public Iterator<NativeString> splitExcludingAtAll(String delimiter) {

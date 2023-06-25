@@ -18,7 +18,7 @@ public class SafeList<T> {
     }
 
     public static <T> SafeList<T> empty() {
-        return new SafeList<T>(new ArrayList<>());
+        return new SafeList<>(new ArrayList<>());
     }
 
     public SafeList<T> add(T other) {
@@ -27,7 +27,7 @@ public class SafeList<T> {
     }
 
     public Iterator<T> iter() {
-        return new IndexedIterator<T>() {
+        return new IndexedIterator<>() {
             @Override
             protected int size() {
                 return list.size();
@@ -35,16 +35,16 @@ public class SafeList<T> {
 
             @Override
             protected Option<T> apply(int counter) {
-                return new Some<>(list.get(counter));
+                return Some.apply(list.get(counter));
             }
         };
     }
 
     public Option<Index> last() {
         if (list.isEmpty()) {
-            return new None<>();
+            return None.apply();
         } else {
-            return new Some<>(new Index(list.size() - 1, list.size()));
+            return Some.apply(new Index(list.size() - 1, list.size()));
         }
     }
 

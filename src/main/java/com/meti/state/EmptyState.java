@@ -1,7 +1,6 @@
 package com.meti.state;
 
 import com.meti.safe.NativeString;
-import com.meti.safe.SafeMap;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 
@@ -33,7 +32,7 @@ public class EmptyState extends State {
 
     @Override
     public Option<NativeString> findValue() {
-        return new None<>();
+        return None.apply();
     }
 
     @Override

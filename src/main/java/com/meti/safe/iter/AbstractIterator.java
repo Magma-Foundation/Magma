@@ -34,12 +34,12 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
 
     @Override
     public Iterator<T> filter(Predicate<T> predicate) {
-        return flatMap(value -> Iterators.fromOption(new Some<>(value).filter(predicate)));
+        return flatMap(value -> Iterators.fromOption(Some.apply(value).filter(predicate)));
     }
 
     @Override
     public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
-        return new AbstractIterator<R>() {
+        return new AbstractIterator<>() {
             private Iterator<R> current;
 
             @Override
@@ -52,7 +52,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                     if (map.isPresent()) {
                         current = map.unwrapOrPanic();
                     } else {
-                        return new None<>();
+                        return None.apply();
                     }
                 }
 
@@ -63,7 +63,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                         if (map.isPresent()) {
                             current = map.unwrapOrPanic();
                         } else {
-                            return new None<>();
+                            return None.apply();
                         }
                     } else {
                         return head;
@@ -85,7 +85,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
 
     @Override
     public <R> Iterator<R> map(Function<T, R> mapper) {
-        return new AbstractIterator<R>() {
+        return new AbstractIterator<>() {
             @Override
             public Option<R> head() {
                 return AbstractIterator.this.head().map(mapper);
