@@ -7,7 +7,6 @@ import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
-import com.meti.state.Definition;
 import com.meti.state.State;
 
 public record DefinitionParser(State state1, Node result) implements Parser {

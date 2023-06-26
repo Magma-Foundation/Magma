@@ -1,6 +1,7 @@
 package com.meti.state;
 
 import com.meti.InterpretationError;
+import com.meti.feature.definition.Definition;
 import com.meti.safe.NativeString;
 import com.meti.safe.SafeList;
 import com.meti.safe.SafeMap;

@@ -9,7 +9,6 @@ import com.meti.safe.result.Err;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
 import com.meti.safe.result.Results;
-import com.meti.state.Definition;
 import com.meti.state.State;
 
 public record DefinitionActor(State state, NativeString input) implements Actor {

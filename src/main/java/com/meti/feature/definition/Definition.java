@@ -1,4 +1,4 @@
-package com.meti.state;
+package com.meti.feature.definition;
 
 import com.meti.feature.Node;
 import com.meti.safe.NativeString;

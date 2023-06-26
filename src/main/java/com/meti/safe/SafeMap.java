@@ -5,7 +5,7 @@ import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
 import com.meti.safe.result.Result;
-import com.meti.state.Definition;
+import com.meti.feature.definition.Definition;
 
 import java.util.HashMap;
 import java.util.Map;

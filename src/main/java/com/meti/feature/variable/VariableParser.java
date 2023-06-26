@@ -7,7 +7,7 @@ import com.meti.feature.Parser;
 import com.meti.safe.option.Option;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
-import com.meti.state.Definition;
+import com.meti.feature.definition.Definition;
 import com.meti.state.State;
 
 public record VariableParser(State state, Node variable) implements Parser {
