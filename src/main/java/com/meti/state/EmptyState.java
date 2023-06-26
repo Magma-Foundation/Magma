@@ -29,10 +29,6 @@ public class EmptyState extends State {
         return None.apply();
     }
 
-    private PresentState withValue2(NativeString value) {
-        return new PresentState(value, stack);
-    }
-
     @Override
     public Option<Node> findValue1() {
         return findValue().map(Content::new);
@@ -40,6 +36,6 @@ public class EmptyState extends State {
 
     @Override
     public PresentState withValue(Node value) {
-        return withValue2(value.valueAsString().unwrapOrPanic());
+        return new PresentState(value, stack);
     }
 }

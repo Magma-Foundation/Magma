@@ -1,14 +1,21 @@
 package com.meti;
 
-import com.meti.feature.*;
-import com.meti.feature.assign.AssignmentActor;
-import com.meti.feature.block.BlockActor;
-import com.meti.feature.definition.DefinitionActor;
-import com.meti.feature.integer.NumberActor;
-import com.meti.feature.variable.VariableActor;
+import com.meti.feature.Lexer;
+import com.meti.feature.Node;
+import com.meti.feature.Parser;
+import com.meti.feature.assign.AssignmentLexer;
+import com.meti.feature.assign.AssignmentParser;
+import com.meti.feature.block.BlockLexer;
+import com.meti.feature.block.BlockParser;
+import com.meti.feature.definition.DefinitionLexer;
+import com.meti.feature.definition.DefinitionParser;
+import com.meti.feature.integer.NumberLexer;
+import com.meti.feature.integer.NumberParser;
+import com.meti.feature.variable.VariableLexer;
+import com.meti.feature.variable.VariableParser;
 import com.meti.safe.NativeString;
 import com.meti.safe.iter.Iterators;
-import com.meti.safe.result.Err;
+import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
 import com.meti.split.Splitter;
 import com.meti.state.EmptyState;
@@ -23,17 +30,30 @@ public final class Interpreter {
     }
 
     public static Result<State, InterpretationError> interpretStatement(PresentState state) {
-        var input = state.value;
+        var input = state.findValue1().unwrapOrPanic();
+
         return Iterators.of(
-                        new BlockActor(state, input),
-                        new DefinitionActor(state, input),
-                        new AssignmentActor(state, input),
-                        new VariableActor(state, input),
-                        new NumberActor(state, input))
-                .map(Actor::act)
+                        new BlockParser(state, input),
+                        new DefinitionParser(state, input),
+                        new AssignmentParser(state, input),
+                        new VariableParser(state, input),
+                        new NumberParser(state, input))
+                .map(Parser::parse)
                 .flatMap(Iterators::fromOption)
                 .head()
-                .unwrapOrElse(Err.apply(new InterpretationError("Unknown value: " + input.internalValue())));
+                .unwrapOrElse(Ok.apply(state));
+    }
+
+    private static Result<Node, InterpretationError> lex(NativeString line) {
+        return Iterators.<Lexer>of(new AssignmentLexer(line),
+                        new BlockLexer(line),
+                        new DefinitionLexer(line),
+                        new NumberLexer(line),
+                        new VariableLexer(line))
+                .map(Lexer::lex)
+                .flatMap(Iterators::fromOption)
+                .head()
+                .unwrapOrThrow(() -> new InterpretationError("Unknown input: " + line));
     }
 
     public Result<NativeString, InterpretationError> interpret() {
@@ -44,7 +64,10 @@ public final class Interpreter {
         return new Splitter(input)
                 .split()
                 .iter()
-                .foldLeftResult(state, (previous, line) -> interpretStatement(previous.withValue(new Content(line))))
-                .mapValue(internal -> internal.findValue1().flatMap(Node::valueAsString).unwrapOrElse(NativeString.from("")));
+                .mapToResult(Interpreter::lex)
+                .foldLeftResult(state, (previous, line) -> line.mapValueToResult(s -> interpretStatement(state.withValue(s))))
+                .mapValue(internal -> internal.findValue1()
+                        .flatMap(Node::valueAsString)
+                        .unwrapOrElse(NativeString.from("")));
     }
 }

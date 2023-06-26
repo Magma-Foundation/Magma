@@ -12,7 +12,7 @@ import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
 import com.meti.state.State;
 
-public record IntParser(State state, Node root) implements Parser {
+public record NumberParser(State state, Node root) implements Parser {
     @Override
     public Option<Result<State, InterpretationError>> parse() {
         if (root.is(IntNode.Key.Id)) {

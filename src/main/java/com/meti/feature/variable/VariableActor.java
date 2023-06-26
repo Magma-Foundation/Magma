@@ -10,6 +10,7 @@ import com.meti.state.State;
 public record VariableActor(State state, NativeString input) implements Actor {
     @Override
     public Option<Result<State, InterpretationError>> act() {
-        return new VariableParser(state, new Variable(input)).parse();
+        return new VariableParser(state, new VariableLexer(input).lex().unwrapOrPanic()).parse();
     }
+
 }

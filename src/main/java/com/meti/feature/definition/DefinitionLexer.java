@@ -1,10 +1,11 @@
 package com.meti.feature.definition;
 
+import com.meti.feature.Lexer;
 import com.meti.feature.Node;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
 
-public record DefinitionLexer(NativeString input) {
+public record DefinitionLexer(NativeString input) implements Lexer {
     static Option<Node> lexHelper(NativeString range) {
         return range.firstIndexOfChar('=').map(valueSeparator -> {
             var split = range.splitExcludingAt(valueSeparator);
@@ -19,7 +20,8 @@ public record DefinitionLexer(NativeString input) {
         });
     }
 
-    Option<Node> lex() {
+    @Override
+    public Option<Node> lex() {
         return input().firstIndexAfterSlice(NativeString.from("let"))
                 .map(input()::sliceFrom)
                 .flatMap(DefinitionLexer::lexHelper);
