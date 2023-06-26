@@ -4,6 +4,7 @@ import com.meti.InterpretationError;
 import com.meti.Interpreter;
 import com.meti.feature.Node;
 import com.meti.feature.Parser;
+import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
 import com.meti.safe.result.Result;
@@ -20,10 +21,14 @@ public final class BlockParser implements Parser {
 
     @Override
     public Option<Result<State, InterpretationError>> parse() {
-        return Some.apply(node.lines()
-                .unwrapOrPanic()
-                .iter()
-                .foldLeftResult(state1.empty().enter(), (state, line) -> Interpreter.interpretStatement(state.withValue(line)))
-                .mapValue(State::exit));
+        if (node.is(Block.Key.Id)) {
+            return Some.apply(node.lines()
+                    .unwrapOrPanic()
+                    .iter()
+                    .foldLeftResult(state1.empty().enter(), (state, line) -> Interpreter.interpretStatement(state.withValue(line)))
+                    .mapValue(State::exit));
+        } else {
+            return None.apply();
+        }
     }
 }
