@@ -2,6 +2,7 @@ package com.meti.feature.block;
 
 import com.meti.InterpretationError;
 import com.meti.Interpreter;
+import com.meti.feature.Node;
 import com.meti.feature.Parser;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
@@ -10,9 +11,9 @@ import com.meti.state.State;
 
 public final class BlockParser implements Parser {
     private final State state1;
-    private final Block node;
+    private final Node node;
 
-    public BlockParser(State state1, Block node) {
+    public BlockParser(State state1, Node node) {
         this.state1 = state1;
         this.node = node;
     }
