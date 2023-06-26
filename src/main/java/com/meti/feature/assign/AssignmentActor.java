@@ -1,6 +1,8 @@
-package com.meti.feature;
+package com.meti.feature.assign;
 
 import com.meti.InterpretationError;
+import com.meti.feature.Actor;
+import com.meti.feature.ParsingStage;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
 import com.meti.safe.result.Result;

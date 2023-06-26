@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.feature.*;
+import com.meti.feature.assign.AssignmentActor;
 import com.meti.safe.NativeString;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.result.Err;

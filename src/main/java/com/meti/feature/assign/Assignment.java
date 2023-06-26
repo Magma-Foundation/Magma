@@ -1,5 +1,6 @@
-package com.meti.feature;
+package com.meti.feature.assign;
 
+import com.meti.feature.Node;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;

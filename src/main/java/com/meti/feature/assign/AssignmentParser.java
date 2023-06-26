@@ -1,7 +1,9 @@
-package com.meti.feature;
+package com.meti.feature.assign;
 
 import com.meti.InterpretationError;
 import com.meti.Resolver;
+import com.meti.feature.Node;
+import com.meti.feature.Parser;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
