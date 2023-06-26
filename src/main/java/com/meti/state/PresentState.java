@@ -1,10 +1,10 @@
 package com.meti.state;
 
+import com.meti.feature.Content;
+import com.meti.feature.Node;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
-
-import java.util.function.Function;
 
 public final class PresentState extends State {
     public final NativeString value;
@@ -14,8 +14,7 @@ public final class PresentState extends State {
         this.value = value;
     }
 
-    @Override
-    public PresentState withValue(NativeString value) {
+    private PresentState withValue2(NativeString value) {
         return new PresentState(value, stack);
     }
 
@@ -24,13 +23,17 @@ public final class PresentState extends State {
         return new PresentState(value, stack);
     }
 
-    @Override
-    public State mapValue(Function<NativeString, NativeString> mapper) {
-        return new PresentState(mapper.apply(this.value), stack);
+    private Option<NativeString> findValue() {
+        return Some.apply(value);
     }
 
     @Override
-    public Option<NativeString> findValue() {
-        return Some.apply(value);
+    public Option<Node> findValue1() {
+        return findValue().map(Content::new);
+    }
+
+    @Override
+    public PresentState withValue(Node value) {
+        return withValue2(value.valueAsString().unwrapOrPanic());
     }
 }

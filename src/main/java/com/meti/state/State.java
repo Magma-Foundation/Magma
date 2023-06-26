@@ -1,7 +1,7 @@
 package com.meti.state;
 
 import com.meti.InterpretationError;
-import com.meti.safe.NativeString;
+import com.meti.feature.Node;
 import com.meti.safe.option.Option;
 import com.meti.safe.result.Result;
 
@@ -20,11 +20,9 @@ public abstract class State {
 
     protected abstract State copy(Stack stack);
 
-    public abstract State mapValue(Function<NativeString, NativeString> mapper);
+    public abstract Option<Node> findValue1();
 
-    public abstract Option<NativeString> findValue();
-
-    public abstract PresentState withValue(NativeString value);
+    public abstract PresentState withValue(Node value);
 
     public State empty() {
         return new EmptyState(stack);

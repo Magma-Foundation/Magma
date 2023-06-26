@@ -2,6 +2,10 @@ package com.meti;
 
 import com.meti.feature.*;
 import com.meti.feature.assign.AssignmentActor;
+import com.meti.feature.block.BlockActor;
+import com.meti.feature.definition.DefinitionActor;
+import com.meti.feature.integer.NumberActor;
+import com.meti.feature.variable.VariableActor;
 import com.meti.safe.NativeString;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.result.Err;
@@ -40,7 +44,7 @@ public final class Interpreter {
         return new Splitter(input)
                 .split()
                 .iter()
-                .foldLeftResult(state, (previous, line) -> interpretStatement(previous.withValue(line)))
-                .mapValue(internal -> internal.findValue().unwrapOrElse(NativeString.from("")));
+                .foldLeftResult(state, (previous, line) -> interpretStatement(previous.withValue(new Content(line))))
+                .mapValue(internal -> internal.findValue1().flatMap(Node::valueAsString).unwrapOrElse(NativeString.from("")));
     }
 }

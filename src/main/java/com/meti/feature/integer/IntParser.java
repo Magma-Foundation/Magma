@@ -1,6 +1,9 @@
-package com.meti.feature;
+package com.meti.feature.integer;
 
 import com.meti.InterpretationError;
+import com.meti.feature.Content;
+import com.meti.feature.Node;
+import com.meti.feature.Parser;
 import com.meti.safe.NativeString;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
@@ -15,7 +18,7 @@ public record IntParser(State state, Node root) implements Parser {
         if (root.is(IntNode.Key.Id)) {
             var integer = root.valueAsInt().unwrapOrPanic();
             var from = NativeString.from(String.valueOf(integer));
-            return Some.apply(Ok.apply(state.withValue(from)));
+            return Some.apply(Ok.apply(state.withValue(new Content(from))));
         } else {
             return None.apply();
         }
