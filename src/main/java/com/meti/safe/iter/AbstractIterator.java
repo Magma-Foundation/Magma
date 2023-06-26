@@ -23,6 +23,11 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     }
 
     @Override
+    public boolean anyMatch(Predicate<T> predicate) {
+        return filter(predicate).head().isPresent();
+    }
+
+    @Override
     public <R> R collect(Collector<R, T> collector) {
         return foldLeft(collector.initial(), collector::folder);
     }

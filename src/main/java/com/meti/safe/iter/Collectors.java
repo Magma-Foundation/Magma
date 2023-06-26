@@ -6,7 +6,7 @@ import com.meti.safe.Tuple2;
 
 public class Collectors {
     public static <A, B> Collector<SafeMap<A, B>, Tuple2<A, B>> toMap() {
-        return new Collector<SafeMap<A, B>, Tuple2<A, B>>() {
+        return new Collector<>() {
             @Override
             public SafeMap<A, B> initial() {
                 return SafeMap.empty();
@@ -14,7 +14,7 @@ public class Collectors {
 
             @Override
             public SafeMap<A, B> folder(SafeMap<A, B> previous, Tuple2<A, B> next) {
-                return null;
+                return previous.with(next.left(), next.right());
             }
         };
     }
