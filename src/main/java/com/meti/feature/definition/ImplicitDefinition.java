@@ -5,15 +5,19 @@ import com.meti.safe.NativeString;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
 
-public record Definition(NativeString name, NativeString type, NativeString value) implements Node {
-    @Override
-    public boolean is(Object key) {
-        return key == Key.Id;
+public class ImplicitDefinition implements Node {
+    protected final NativeString name;
+    protected final NativeString value;
+
+
+    public ImplicitDefinition(NativeString name, NativeString value) {
+        this.name = name;
+        this.value = value;
     }
 
     @Override
-    public Option<NativeString> typeAsString() {
-        return Some.apply(type);
+    public boolean is(Object key) {
+        return key == Key.Id;
     }
 
     @Override
@@ -26,8 +30,8 @@ public record Definition(NativeString name, NativeString type, NativeString valu
         return Some.apply(value);
     }
 
-    public Definition withValue(NativeString value) {
-        return new Definition(name, type, value);
+    public ImplicitDefinition withValue(NativeString value) {
+        return new ImplicitDefinition(name, value);
     }
 
     enum Key {

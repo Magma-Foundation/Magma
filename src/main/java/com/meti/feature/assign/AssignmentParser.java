@@ -22,11 +22,11 @@ public record AssignmentParser(State state, Node node) implements Parser {
 
                 return stack.mapDefinition(name, definition -> {
                     var actualType = new Resolver(value).resolve();
-                    if (definition.type().equalsTo(actualType)) {
+                    if (definition.typeAsString().unwrapOrPanic().equalsTo(actualType)) {
                         return Ok.apply(definition.withValue(value));
                     } else {
                         var format = "Type mismatch of '%s'. Expected '%s' but was actually '%s'.";
-                        var message = format.formatted(this.node().nameAsString().unwrapOrPanic(), definition.type().internalValue(), actualType.internalValue());
+                        var message = format.formatted(this.node().nameAsString().unwrapOrPanic(), definition.typeAsString().unwrapOrPanic().internalValue(), actualType.internalValue());
                         return Err.apply(new InterpretationError(message));
                     }
                 });

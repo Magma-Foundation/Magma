@@ -1,7 +1,8 @@
 package com.meti.state;
 
 import com.meti.InterpretationError;
-import com.meti.feature.definition.Definition;
+import com.meti.feature.definition.ExplicitDefinition;
+import com.meti.feature.definition.ImplicitDefinition;
 import com.meti.safe.NativeString;
 import com.meti.safe.SafeList;
 import com.meti.safe.SafeMap;
@@ -19,7 +20,7 @@ public record Stack(SafeList<SafeMap> frames) {
 
     public Result<Stack, InterpretationError> mapDefinition(
             NativeString name,
-            Function<Definition, Result<Definition, InterpretationError>> mapper) {
+            Function<ImplicitDefinition, Result<ImplicitDefinition, InterpretationError>> mapper) {
 
         return frames.iter()
                 .flatMapToResult(frame -> Iterators.fromOption(frame.updateDefinition(name, mapper)))
@@ -27,9 +28,9 @@ public record Stack(SafeList<SafeMap> frames) {
                 .mapValue(Stack::new);
     }
 
-    public Stack define(Definition definition) {
+    public Stack define(ExplicitDefinition explicitDefinition) {
         return frames.last()
-                .map(index -> frames.map(index, frame -> frame.with(definition.name(), definition)))
+                .map(index -> frames.map(index, frame -> frame.with(explicitDefinition.nameAsString().unwrapOrPanic(), explicitDefinition)))
                 .map(Stack::new)
                 .unwrapOrElse(this);
     }
@@ -38,7 +39,7 @@ public record Stack(SafeList<SafeMap> frames) {
         return apply(name).isPresent();
     }
 
-    public Option<Definition> apply(NativeString name) {
+    public Option<ImplicitDefinition> apply(NativeString name) {
         return frames.iter()
                 .flatMap(frame -> Iterators.fromOption(frame.apply(name)))
                 .head();
