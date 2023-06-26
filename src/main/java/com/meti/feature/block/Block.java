@@ -11,13 +11,11 @@ public record Block(SafeList<? extends Node> lines1) implements Node {
         return key == Key.Id;
     }
 
-    @Override
     public Option<SafeList<? extends Node>> lines() {
         return Some.apply(lines1);
     }
 
-    @Override
-    public Node withLines(SafeList<? extends Node> lines) {
+    public Option<Node> withLines(SafeList<? extends Node> lines) {
         return new Block(lines);
     }
 

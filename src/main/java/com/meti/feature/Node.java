@@ -1,17 +1,16 @@
 package com.meti.feature;
 
 import com.meti.safe.NativeString;
-import com.meti.safe.SafeList;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 
 public interface Node {
-    default Option<SafeList<? extends Node>> lines() {
+    default Option<Attribute> apply(NativeString name) {
         return None.apply();
     }
 
-    default Node withLines(SafeList<? extends Node> lines) {
-        return this;
+    default Option<Node> withAttribute(NativeString name, Attribute attribute) {
+        return None.apply();
     }
 
     default Option<Integer> valueAsInt() {

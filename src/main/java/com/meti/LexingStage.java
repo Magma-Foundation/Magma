@@ -1,7 +1,9 @@
 package com.meti;
 
+import com.meti.feature.Attribute;
 import com.meti.feature.Lexer;
 import com.meti.feature.Node;
+import com.meti.feature.NodeListAttribute;
 import com.meti.feature.assign.AssignmentLexer;
 import com.meti.feature.block.BlockLexer;
 import com.meti.feature.definition.DefinitionLexer;
@@ -24,8 +26,8 @@ public record LexingStage(NativeString line) {
     }
 
     private Result<Node, InterpretationError> lexBlock(Node value) {
-        return value.lines()
-                .map(list -> lexContentList(list).mapValue(value::withLines))
+        return value.apply(NativeString.from("lines")).flatMap(Attribute::asListOfNodes)
+                .map(list -> lexContentList(list).mapValue(lines -> value.withAttribute(NativeString.from("lines"), new NodeListAttribute(lines))))
                 .unwrapOrElse(Ok.apply(value));
     }
 
