@@ -18,7 +18,7 @@ public final class ExplicitDefinition extends ImplicitDefinition {
     }
 
     @Override
-    public ImplicitDefinition withValue(NativeString value) {
+    public ExplicitDefinition withValue(NativeString value) {
         return new ExplicitDefinition(name, type, value);
     }
 }

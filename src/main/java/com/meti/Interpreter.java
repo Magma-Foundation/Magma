@@ -14,6 +14,7 @@ import com.meti.feature.integer.NumberParser;
 import com.meti.feature.variable.VariableLexer;
 import com.meti.feature.variable.VariableParser;
 import com.meti.safe.NativeString;
+import com.meti.safe.iter.Collectors;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
@@ -61,13 +62,16 @@ public final class Interpreter {
     }
 
     public Result<NativeString, InterpretationError> interpret(State state) {
-        return new Splitter(input)
+        var statementsResult = new Splitter(input)
                 .split()
                 .iter()
                 .mapToResult(Interpreter::lex)
-                .foldLeftResult(state, (previous, line) -> line.mapValueToResult(s -> interpretStatement(state.withValue(s))))
-                .mapValue(internal -> internal.findValue1()
-                        .flatMap(Node::valueAsString)
-                        .unwrapOrElse(NativeString.from("")));
+                .collectToResult(Collectors.toList());
+        return statementsResult.mapValueToResult(statements -> {
+            return statements.iter().foldLeftResult(state, (previous, line) -> interpretStatement(state.withValue(line)))
+                    .mapValue(internal -> internal.findValue1()
+                            .flatMap(Node::valueAsString)
+                            .unwrapOrElse(NativeString.from("")));
+        });
     }
 }

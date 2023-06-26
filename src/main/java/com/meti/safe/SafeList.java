@@ -2,6 +2,7 @@ package com.meti.safe;
 
 import com.meti.safe.iter.IndexedIterator;
 import com.meti.safe.iter.Iterator;
+import com.meti.safe.iter.Iterators;
 import com.meti.safe.option.None;
 import com.meti.safe.option.Option;
 import com.meti.safe.option.Some;
@@ -55,6 +56,19 @@ public class SafeList<T> {
 
     public SafeList<T> removeLast() {
         list.remove(list.size() - 1);
+        return this;
+    }
+
+    public int size() {
+        return list.size();
+    }
+
+    public Iterator<Index> indices() {
+        return Iterators.fromRange(0, list.size()).map(i -> new Index(i, list.size()));
+    }
+
+    public SafeList<T> set(Index index, T element) {
+        list.set(index.value(), element);
         return this;
     }
 }

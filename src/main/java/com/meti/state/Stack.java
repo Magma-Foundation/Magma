@@ -2,30 +2,49 @@ package com.meti.state;
 
 import com.meti.InterpretationError;
 import com.meti.feature.definition.ExplicitDefinition;
-import com.meti.feature.definition.ImplicitDefinition;
 import com.meti.safe.NativeString;
 import com.meti.safe.SafeList;
 import com.meti.safe.SafeMap;
+import com.meti.safe.Tuple2;
 import com.meti.safe.iter.Collectors;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.option.Option;
+import com.meti.safe.result.Err;
+import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
 
 import java.util.function.Function;
 
-public record Stack(SafeList<SafeMap> frames) {
+public record Stack(SafeList<SafeMap<NativeString, ExplicitDefinition>> frames) {
     public Stack() {
-        this(SafeList.<SafeMap>empty().add(SafeMap.empty()));
+        this(SafeList.<SafeMap<NativeString, ExplicitDefinition>>empty().add(SafeMap.empty()));
     }
 
     public Result<Stack, InterpretationError> mapDefinition(
             NativeString name,
-            Function<ImplicitDefinition, Result<ImplicitDefinition, InterpretationError>> mapper) {
+            Function<ExplicitDefinition, Result<ExplicitDefinition, InterpretationError>> mapper) {
 
-        return frames.iter()
-                .flatMapToResult(frame -> Iterators.fromOption(frame.updateDefinition(name, mapper)))
-                .collectToResult(Collectors.toList())
-                .mapValue(Stack::new);
+        return frames.indices()
+                .zip(frames.iter())
+                .map(tuple -> tuple.mapRightOptionally(value -> value.mapValueWithResult(name, mapper)))
+                .flatMap(Iterators::fromOption)
+                .mapToResult(Tuple2::unwrapRight)
+                .collectToResult(Collectors.toMap())
+                .mapValueToResult(s ->
+                {
+                    if (s.isEmpty()) {
+                        var format = "'%s' is undefined.";
+                        var message = format.formatted(name.internalValue());
+                        return Err.apply(new InterpretationError(message));
+                    } else if (s.size() > 1) {
+                        return Err.apply(new InterpretationError(name.internalValue() + " was defined in multiple frames?"));
+                    } else {
+                        var first = s.iter().head().unwrapOrPanic();
+                        var index = first.left();
+                        var frame = first.right();
+                        return Ok.apply(frames.set(index, frame));
+                    }
+                }).mapValue(Stack::new);
     }
 
     public Stack define(ExplicitDefinition explicitDefinition) {
@@ -35,11 +54,7 @@ public record Stack(SafeList<SafeMap> frames) {
                 .unwrapOrElse(this);
     }
 
-    public boolean isDefined(NativeString name) {
-        return apply(name).isPresent();
-    }
-
-    public Option<ImplicitDefinition> apply(NativeString name) {
+    public Option<ExplicitDefinition> apply(NativeString name) {
         return frames.iter()
                 .flatMap(frame -> Iterators.fromOption(frame.apply(name)))
                 .head();
