@@ -7,12 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
     private static void assertInterpret(String input, String output) {
         interpretImpl(input).match(
-                actual -> assertTrue(NativeString.from(output).equalsTo(actual)),
+                actual -> assertEquals(output, actual.internalValue()),
                 Assertions::fail);
     }
 

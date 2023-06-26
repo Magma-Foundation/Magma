@@ -18,6 +18,7 @@ import com.meti.safe.iter.Collectors;
 import com.meti.safe.iter.Iterators;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
+import com.meti.safe.result.Results;
 import com.meti.split.Splitter;
 import com.meti.state.EmptyState;
 import com.meti.state.PresentState;
@@ -33,7 +34,7 @@ public final class Interpreter {
     public static Result<State, InterpretationError> interpretStatement(PresentState state) {
         var input = state.findValue1().unwrapOrPanic();
 
-        return Iterators.of(
+        return Results.flatten(Iterators.of(
                         new BlockParser(state, input),
                         new DefinitionParser(state, input),
                         new AssignmentParser(state, input),
@@ -42,7 +43,9 @@ public final class Interpreter {
                 .map(Parser::parse)
                 .flatMap(Iterators::fromOption)
                 .head()
-                .unwrapOrElse(Ok.apply(state));
+                .unwrapOrThrow(() -> {
+                    return new InterpretationError("Failed to parse: " + input);
+                }));
     }
 
     private static Result<Node, InterpretationError> lex(NativeString line) {
