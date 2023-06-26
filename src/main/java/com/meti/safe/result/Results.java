@@ -9,6 +9,6 @@ public class Results {
     }
 
     public static <T, E extends Throwable> Result<T, E> flatten(Result<Result<T, E>, E> value) {
-        return value.mapValueToResult(value1 -> value1);
+        return value.flatMapValue(value1 -> value1);
     }
 }

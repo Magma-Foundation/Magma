@@ -20,7 +20,7 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
-    public <R> Result<R, E> mapValueToResult(Function<T, Result<R, E>> mapper) {
+    public <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper) {
         return mapper.apply(value);
     }
 

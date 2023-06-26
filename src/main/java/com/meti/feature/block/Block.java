@@ -16,6 +16,11 @@ public record Block(SafeList<? extends Node> lines1) implements Node {
         return Some.apply(lines1);
     }
 
+    @Override
+    public Node withLines(SafeList<? extends Node> lines) {
+        return new Block(lines);
+    }
+
     enum Key {
         Id
     }

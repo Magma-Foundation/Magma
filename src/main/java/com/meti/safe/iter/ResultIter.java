@@ -1,12 +1,8 @@
 package com.meti.safe.iter;
 
-import com.meti.safe.SafeList;
 import com.meti.safe.option.Option;
 import com.meti.safe.result.Ok;
 import com.meti.safe.result.Result;
-import com.meti.state.Stack;
-
-import java.util.function.BiFunction;
 
 public class ResultIter<T, E extends Throwable> extends AbstractIterator<Result<T, E>> {
     private final Iterator<Result<T, E>> iter;
@@ -22,7 +18,7 @@ public class ResultIter<T, E extends Throwable> extends AbstractIterator<Result<
 
     public <R> Result<R, E> collectToResult(Collector<R, T> collector) {
         return foldLeft(Ok.apply(collector.initial()),
-                (reResult, teResult) -> reResult.mapValueToResult(
+                (reResult, teResult) -> reResult.flatMapValue(
                         accumulated -> teResult.mapValue(
                                 value -> collector.folder(accumulated, value))));
     }

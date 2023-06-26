@@ -12,6 +12,13 @@ public class Content implements Node {
     }
 
     @Override
+    public String toString() {
+        return "Content{" +
+               "value=" + value +
+               '}';
+    }
+
+    @Override
     public Option<NativeString> valueAsString() {
         return Some.apply(value);
     }
@@ -21,7 +28,7 @@ public class Content implements Node {
         return key.equals(Key.Id);
     }
 
-    enum Key {
+    public enum Key {
         Id
     }
 }

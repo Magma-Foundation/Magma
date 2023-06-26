@@ -30,7 +30,7 @@ public record Stack(SafeList<SafeMap<NativeString, ExplicitDefinition>> frames) 
                 .flatMap(Iterators::fromOption)
                 .mapToResult(Tuple2::unwrapRight)
                 .collectToResult(Collectors.toMap())
-                .mapValueToResult(s ->
+                .flatMapValue(s ->
                 {
                     if (s.isEmpty()) {
                         var format = "'%s' is undefined.";

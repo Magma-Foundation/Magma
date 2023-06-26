@@ -10,7 +10,15 @@ public interface Node {
         return None.apply();
     }
 
+    default Node withLines(SafeList<? extends Node> lines) {
+        return this;
+    }
+
     default Option<Integer> valueAsInt() {
+        return None.apply();
+    }
+
+    default Option<Node> valueAsNode() {
         return None.apply();
     }
 
