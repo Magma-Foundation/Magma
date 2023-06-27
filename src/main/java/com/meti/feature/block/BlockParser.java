@@ -2,7 +2,7 @@ package com.meti.feature.block;
 
 import com.meti.InterpretationError;
 import com.meti.Interpreter;
-import com.meti.feature.Attribute;
+import com.meti.feature.attribute.Attribute;
 import com.meti.feature.Node;
 import com.meti.feature.Parser;
 import com.meti.safe.NativeString;

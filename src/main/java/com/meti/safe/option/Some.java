@@ -14,6 +14,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public Option<T> orElseGet(Supplier<Option<T>> other) {
+        return this;
+    }
+
+    @Override
     public boolean isPresent() {
         return true;
     }

@@ -29,4 +29,6 @@ public interface Option<T> {
     Option<T> filter(Predicate<T> predicate);
 
     T unwrapOrElseGet(Supplier<T> other);
+
+    Option<T> orElseGet(Supplier<Option<T>> other);
 }

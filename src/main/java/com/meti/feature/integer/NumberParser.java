@@ -1,6 +1,7 @@
 package com.meti.feature.integer;
 
 import com.meti.InterpretationError;
+import com.meti.feature.attribute.Attribute;
 import com.meti.feature.Content;
 import com.meti.feature.Node;
 import com.meti.feature.Parser;
@@ -16,7 +17,7 @@ public record NumberParser(State state, Node root) implements Parser {
     @Override
     public Option<Result<State, InterpretationError>> parse() {
         if (root.is(IntNode.Key.Id)) {
-            var integer = root.valueAsInt().unwrapOrPanic();
+            var integer = root.apply(NativeString.from("value")).flatMap(Attribute::asInteger).unwrapOrPanic();
             var from = NativeString.from(String.valueOf(integer));
             return Some.apply(Ok.apply(state.withValue(new Content(from))));
         } else {

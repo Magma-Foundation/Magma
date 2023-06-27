@@ -1,8 +1,8 @@
 package com.meti;
 
-import com.meti.feature.Node;
 import com.meti.feature.Parser;
 import com.meti.feature.assign.AssignmentParser;
+import com.meti.feature.attribute.Attribute;
 import com.meti.feature.block.BlockParser;
 import com.meti.feature.definition.DefinitionParser;
 import com.meti.feature.integer.NumberParser;
@@ -36,9 +36,7 @@ public final class Interpreter {
                 .map(Parser::parse)
                 .flatMap(Iterators::fromOption)
                 .head()
-                .unwrapOrThrow(() -> {
-                    return new InterpretationError("Failed to parse: " + input);
-                }));
+                .unwrapOrThrow(() -> new InterpretationError("Failed to parse: " + input)));
     }
 
     public Result<NativeString, InterpretationError> interpret() {
@@ -54,7 +52,7 @@ public final class Interpreter {
         return statementsResult.flatMapValue(statements -> {
             return statements.iter().foldLeftResult(state, (previous, line) -> interpretStatement(state.withValue(line)))
                     .mapValue(internal -> internal.findValue1()
-                            .flatMap(Node::valueAsString)
+                            .flatMap(node -> node.apply(NativeString.from("value")).flatMap(Attribute::asString))
                             .unwrapOrElse(NativeString.from("")));
         });
     }

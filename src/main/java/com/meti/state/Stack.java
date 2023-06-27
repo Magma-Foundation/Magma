@@ -1,6 +1,7 @@
 package com.meti.state;
 
 import com.meti.InterpretationError;
+import com.meti.feature.attribute.Attribute;
 import com.meti.feature.definition.ExplicitDefinition;
 import com.meti.safe.NativeString;
 import com.meti.safe.SafeList;
@@ -49,7 +50,7 @@ public record Stack(SafeList<SafeMap<NativeString, ExplicitDefinition>> frames) 
 
     public Stack define(ExplicitDefinition explicitDefinition) {
         return frames.last()
-                .map(index -> frames.map(index, frame -> frame.with(explicitDefinition.nameAsString().unwrapOrPanic(), explicitDefinition)))
+                .map(index -> frames.map(index, frame -> frame.with(explicitDefinition.apply(NativeString.from("name")).flatMap(Attribute::asString).unwrapOrPanic(), explicitDefinition)))
                 .map(Stack::new)
                 .unwrapOrElse(this);
     }
