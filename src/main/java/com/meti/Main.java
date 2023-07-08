@@ -37,15 +37,25 @@ public class Main {
 
     private static String compile(String input) {
         var lines = input.split(";");
+        var builder = new StringBuilder();
         for (String line : lines) {
             var stripped = line.strip();
-            if(stripped.isEmpty()) {
-                continue;
-            } else if(stripped.startsWith("package ")) {
-                continue;
+            if (!stripped.isEmpty() && !stripped.startsWith("package ")) {
+                if (stripped.startsWith("import ")) {
+                    var slice = stripped.substring("import ".length());
+                    var separator = slice.lastIndexOf(".");
+                    var parent = slice.substring(0, separator);
+                    var child = slice.substring(separator + 1);
+                    builder.append("import { ")
+                            .append(child)
+                            .append(" } from ")
+                            .append(parent);
+
+                } else {
+                    throw new RuntimeException("Cannot compile: " + stripped);
+                }
             }
-            throw new RuntimeException("Cannot compile: " + stripped);
         }
-        return "";
+        return builder.toString();
     }
 }
