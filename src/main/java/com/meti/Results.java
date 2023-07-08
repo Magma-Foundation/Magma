@@ -19,7 +19,7 @@ class Results {
 
         if (value.isPresent()) return value.unwrapOrPanic();
         if (err.isPresent()) throw err.unwrapOrPanic();
-        throw new RuntimeException("Neither the value or err is present.");
+        throw new RuntimeException("Neither the unwrap or err is present.");
     }
 
     interface Action<E extends Exception> {
