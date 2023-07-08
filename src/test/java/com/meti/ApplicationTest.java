@@ -29,7 +29,7 @@ public class ApplicationTest {
 
     private Path runWithSource() throws IOException {
         Files.createFile(source);
-        return run();
+        return new Application(source).run();
     }
 
     @Test
@@ -37,22 +37,9 @@ public class ApplicationTest {
         assertEquals(target, runWithSource());
     }
 
-    private Path run() throws IOException {
-        if (Files.exists(source)) {
-            var fileName = source.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var fileNameWithoutSeparator = fileName.substring(0, separator);
-            var target = source.resolveSibling(fileNameWithoutSeparator + ".mgs");
-            Files.createFile(target);
-            return target;
-        } else {
-            return null;
-        }
-    }
-
     @Test
     void generatesNothing() throws IOException {
-        run();
+        new Application(source).run();
         assertFalse(Files.exists(target));
     }
 }
