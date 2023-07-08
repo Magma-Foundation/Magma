@@ -3,8 +3,6 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,16 +37,29 @@ public class Main {
     }
 
     private static String compile(String input) {
-        var lines = split(input);
+        var lines = new Splitter(input).split();
         var builder = new StringBuilder();
-        for (String line : lines) {
+        for (var line : lines) {
             var stripped = line.strip();
             if (!stripped.isEmpty() && !stripped.startsWith("package ")) {
-                var str = compileImport(stripped).orElseThrow(() -> new RuntimeException("Cannot compile: " + stripped));
+                var str = compileImport(stripped)
+                        .or(() -> compileClass(stripped))
+                        .orElseThrow(() -> new RuntimeException("Cannot compile: " + stripped));
                 builder.append(str);
             }
         }
         return builder.toString();
+    }
+
+    private static Optional<String> compileClass(String input) {
+        var index = input.indexOf(" class ");
+        var bodyStart = input.indexOf('{');
+        if (index == -1 || bodyStart == -1) {
+            return Optional.empty();
+        }
+
+        var name = input.substring(index + " class ".length(), bodyStart).strip();
+        return Optional.of("class def " + name + "() => {}");
     }
 
     private static Optional<String> compileImport(String stripped) {
@@ -65,31 +76,4 @@ public class Main {
         }
     }
 
-    private static List<String> split(String input) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (c == '}' && depth == 1) {
-                builder.append('}');
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-                depth = 0;
-            } else if (c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                builder.append(c);
-            }
-        }
-        lines.add(builder.toString());
-        return lines
-                .stream()
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .collect(Collectors.toList());
-    }
 }
