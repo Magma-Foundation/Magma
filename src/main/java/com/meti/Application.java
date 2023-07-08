@@ -4,16 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public record Application(Path source) {
-    Result<Option<Path>, IOException> run1() {
-        if (Files.exists(source)) {
-            var fileName = new JavaString(source.getFileName().toString());
+public final class Application {
+    private final NIOPath source;
 
+    public Application(NIOPath source) {
+        this.source = source;
+    }
+
+    Result<Option<Path>, IOException> run() {
+        if (source.isExists()) {
+            var fileName = source.computeFileNameAsString();
             var other = fileName.firstIndexOfChar('.')
                     .map(fileName::sliceToEnd)
                     .unwrapOrElse(fileName)
-                    .concat(".mgs")
-                    .unwrap();
+                    .concat(".mgs");
 
             var target = source.resolveSibling(other);
             return Results.asOption(() -> Files.createFile(target))
@@ -23,4 +27,5 @@ public record Application(Path source) {
             return new Ok<>(new None<>());
         }
     }
+
 }
