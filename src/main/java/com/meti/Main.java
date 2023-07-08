@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        var sourceDirectory = Paths.get(".", "src");
+        var sourceDirectory = Paths.get(".", "src", "main", "java");
         var targetDirectory = Paths.get(".", "target");
 
         try (var sourcesStream = Files.walk(sourceDirectory)) {
