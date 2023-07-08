@@ -8,8 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -24,14 +23,30 @@ public class ApplicationTest {
 
     @Test
     void generatesTarget() throws IOException {
-        Files.createFile(source);
-        run();
+        runWithSource();
         assertTrue(Files.exists(target));
     }
 
-    private void run() throws IOException {
+    private Path runWithSource() throws IOException {
+        Files.createFile(source);
+        return run();
+    }
+
+    @Test
+    void generatesProperTarget() throws IOException {
+        assertEquals(target, runWithSource());
+    }
+
+    private Path run() throws IOException {
         if (Files.exists(source)) {
+            var fileName = source.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var fileNameWithoutSeparator = fileName.substring(0, separator);
+            var target = source.resolveSibling(fileNameWithoutSeparator + ".mgs");
             Files.createFile(target);
+            return target;
+        } else {
+            return null;
         }
     }
 
