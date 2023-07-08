@@ -3,17 +3,19 @@ package com.meti;
 import java.io.IOException;
 
 public final class Application {
-    private final NIOPath source;
+    private final SingleVolatileGateway sourceGateway;
 
-    public Application(NIOPath source) {
-        this.source = source;
+    public Application(SingleVolatileGateway sourceGateway) {
+        this.sourceGateway = sourceGateway;
     }
 
     Result<Option<NIOFile>, IOException> compileAll() {
-        return source.existsAsFile()
+        return sourceGateway.collectSources()
+                .iter()
                 .map(this::compile)
-                .map(f -> f.mapValue(Some::apply))
-                .unwrapOrElse(new Ok<>(new None<>()));
+                .into(ResultIterator::new)
+                .collectToResult(JavaSet.asSet())
+                .mapValue(set -> set.iter().head());
     }
 
     private Result<NIOFile, IOException> compile(NIOLocation source) {

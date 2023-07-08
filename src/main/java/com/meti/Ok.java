@@ -17,4 +17,9 @@ record Ok<T, E>(T inner) implements Result<T, E> {
     public <R> Result<R, E> mapValue(Function<T, R> mapper) {
         return new Ok<>(mapper.apply(inner));
     }
+
+    @Override
+    public <R> Result<R, E> mapValueToResult(Function<T, Result<R, E>> mapper) {
+        return mapper.apply(inner);
+    }
 }

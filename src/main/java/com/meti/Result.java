@@ -8,4 +8,6 @@ interface Result<T, E> {
     Option<E> err();
 
     <R> Result<R, E> mapValue(Function<T, R> mapper);
+
+    <R> Result<R, E> mapValueToResult(Function<T, Result<R, E>> mapper);
 }

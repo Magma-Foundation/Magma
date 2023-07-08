@@ -35,7 +35,8 @@ public class ApplicationTest {
 
     private Path runWithSource() throws IOException {
         Files.createFile(source);
-        Application application = new Application(new NIOPath(source));
+        final NIOPath source1 = new NIOPath(source);
+        Application application = new Application(new SingleVolatileGateway(source1));
         return Results.unwrap(runImpl(application)).unwrapOrPanic();
     }
 
@@ -46,7 +47,8 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        Application application = new Application(new NIOPath(source));
+        final NIOPath source1 = new NIOPath(source);
+        Application application = new Application(new SingleVolatileGateway(source1));
         Results.unwrap(runImpl(application));
         assertFalse(Files.exists(target));
     }
