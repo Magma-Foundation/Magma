@@ -29,7 +29,8 @@ public class ApplicationTest {
 
     private Path runWithSource() throws IOException {
         Files.createFile(source);
-        return new Application(source).run().unwrapOrPanic();
+        Application application = new Application(source);
+        return Results.unwrap(application.run1()).unwrapOrPanic();
     }
 
     @Test
@@ -39,7 +40,8 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(source).run();
+        Application application = new Application(source);
+        Results.unwrap(application.run1());
         assertFalse(Files.exists(target));
     }
 }

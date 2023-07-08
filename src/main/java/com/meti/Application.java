@@ -6,16 +6,20 @@ import java.nio.file.Path;
 
 public record Application(Path source) {
 
-    Option<Path> run() throws IOException {
+    Result<Option<Path>, IOException> run1() {
         if (Files.exists(source)) {
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var fileNameWithoutSeparator = fileName.substring(0, separator);
             var target = source().resolveSibling(fileNameWithoutSeparator + ".mgs");
-            Files.createFile(target);
-            return new Some<>(target);
+            try {
+                Files.createFile(target);
+                return new Ok<>(new Some<>(target));
+            } catch (IOException e) {
+                return new Err<>(e);
+            }
         } else {
-            return new None<>();
+            return new Ok<>(new None<>());
         }
     }
 }
