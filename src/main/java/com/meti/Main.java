@@ -25,7 +25,7 @@ public class Main {
                     if (!Files.exists(parent)) {
                         Files.createDirectories(parent);
                     }
-                    Files.writeString(target, input);
+                    Files.writeString(target, compile(input));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -33,5 +33,19 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String compile(String input) {
+        var lines = input.split(";");
+        for (String line : lines) {
+            var stripped = line.strip();
+            if(stripped.isEmpty()) {
+                continue;
+            } else if(stripped.startsWith("package ")) {
+                continue;
+            }
+            throw new RuntimeException("Cannot compile: " + stripped);
+        }
+        return "";
     }
 }
