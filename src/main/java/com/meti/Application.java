@@ -11,13 +11,10 @@ public record Application(Path source) {
             var fileName = source.getFileName().toString();
             var separator = fileName.indexOf('.');
             var fileNameWithoutSeparator = fileName.substring(0, separator);
-            var target = source().resolveSibling(fileNameWithoutSeparator + ".mgs");
-            try {
-                Files.createFile(target);
-                return new Ok<>(new Some<>(target));
-            } catch (IOException e) {
-                return new Err<>(e);
-            }
+            var target = source.resolveSibling(fileNameWithoutSeparator + ".mgs");
+            return Results.asOption(() -> Files.createFile(target))
+                    .map(Err::<Option<Path>, IOException>from)
+                    .unwrapOrElse(new Ok<>(new Some<>(target)));
         } else {
             return new Ok<>(new None<>());
         }
