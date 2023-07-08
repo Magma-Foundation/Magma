@@ -3,6 +3,8 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -36,7 +38,7 @@ public class Main {
     }
 
     private static String compile(String input) {
-        var lines = input.split(";");
+        var lines = split(input);
         var builder = new StringBuilder();
         for (String line : lines) {
             var stripped = line.strip();
@@ -57,5 +59,33 @@ public class Main {
             }
         }
         return builder.toString();
+    }
+
+    private static List<String> split(String input) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == '}' && depth == 1) {
+                builder.append('}');
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+                depth = 0;
+            } else if(c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if(c == '{') depth++;
+                if(c == '}') depth--;
+                builder.append(c);
+            }
+        }
+        lines.add(builder.toString());
+        return lines
+                .stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
     }
 }
