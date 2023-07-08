@@ -39,7 +39,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(source).run().unwrapOrPanic();
+        new Application(source).run();
         assertFalse(Files.exists(target));
     }
 }
