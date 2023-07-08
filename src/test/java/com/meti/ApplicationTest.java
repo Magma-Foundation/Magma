@@ -15,6 +15,12 @@ public class ApplicationTest {
     private final Path source = Paths.get(".", "Main.java");
     private final Path target = Paths.get(".", "Main.mgs");
 
+    static Result<Option<Path>, IOException> runImpl(Application application) {
+        return application.getOptionIOExceptionResult()
+                .mapValue(s -> s.map(NIOPath::from))
+                .mapValue(s -> s.map(NIOPath::location));
+    }
+
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(source);
@@ -30,7 +36,7 @@ public class ApplicationTest {
     private Path runWithSource() throws IOException {
         Files.createFile(source);
         Application application = new Application(new NIOPath(source));
-        return Results.unwrap(application.run()).unwrapOrPanic();
+        return Results.unwrap(runImpl(application)).unwrapOrPanic();
     }
 
     @Test
@@ -41,7 +47,7 @@ public class ApplicationTest {
     @Test
     void generatesNothing() throws IOException {
         Application application = new Application(new NIOPath(source));
-        Results.unwrap(application.run());
+        Results.unwrap(runImpl(application));
         assertFalse(Files.exists(target));
     }
 }

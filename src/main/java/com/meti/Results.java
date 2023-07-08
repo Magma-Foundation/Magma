@@ -22,6 +22,19 @@ class Results {
         throw new RuntimeException("Neither the unwrap or err is present.");
     }
 
+    public static <T, E extends Exception> Result<T, E> asResult(Generator<T, E> generator) {
+        try {
+            return new Ok<>(generator.generate());
+        } catch (Exception e) {
+            //noinspection unchecked
+            return new Err<>((E) e);
+        }
+    }
+
+    interface Generator<T, E extends Exception> {
+        T generate() throws E;
+    }
+
     interface Action<E extends Exception> {
         void perform() throws E;
     }

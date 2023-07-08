@@ -1,8 +1,6 @@
 package com.meti;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public final class Application {
     private final NIOPath source;
@@ -11,7 +9,7 @@ public final class Application {
         this.source = source;
     }
 
-    Result<Option<Path>, IOException> run() {
+    Result<Option<NIOFile>, IOException> getOptionIOExceptionResult() {
         if (source.isExists()) {
             var fileName = source.computeFileNameAsString();
             var other = fileName.firstIndexOfChar('.')
@@ -20,12 +18,9 @@ public final class Application {
                     .concat(".mgs");
 
             var target = source.resolveSibling(other);
-            return Results.asOption(() -> Files.createFile(target))
-                    .map(Err::<Option<Path>, IOException>from)
-                    .unwrapOrElse(new Ok<>(new Some<>(target)));
+            return target.ensureAsFile().mapValue(Some::new);
         } else {
             return new Ok<>(new None<>());
         }
     }
-
 }
