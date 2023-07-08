@@ -6,7 +6,7 @@ record JavaString(String value) {
         var index = this.value.indexOf(c);
         return index == -1
                 ? new None<>()
-                : new Some<>(new Index(index));
+                : Some.apply(new Index(index));
     }
 
     public JavaString sliceToEnd(Index index) {

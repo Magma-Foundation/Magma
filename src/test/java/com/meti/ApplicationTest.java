@@ -16,9 +16,9 @@ public class ApplicationTest {
     private final Path target = Paths.get(".", "Main.mgs");
 
     static Result<Option<Path>, IOException> runImpl(Application application) {
-        return application.getOptionIOExceptionResult()
+        return application.compileAll()
                 .mapValue(s -> s.map(NIOPath::from))
-                .mapValue(s -> s.map(NIOPath::location));
+                .mapValue(s -> s.map(NIOLocation::unwrap));
     }
 
     @AfterEach

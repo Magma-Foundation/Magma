@@ -3,6 +3,10 @@ package com.meti;
 import java.util.function.Function;
 
 record Some<T>(T value) implements Option<T> {
+    static <T> Option<T> apply(T value) {
+        return new Some<T>(value);
+    }
+
     @Override
     public T unwrapOrPanic() {
         return value;
@@ -15,7 +19,7 @@ record Some<T>(T value) implements Option<T> {
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return new Some<>(mapper.apply(value));
+        return apply(mapper.apply(value));
     }
 
     @Override

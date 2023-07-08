@@ -2,14 +2,8 @@ package com.meti;
 
 import java.nio.file.Path;
 
-public class NIOFile {
-    private final Path location;
-
+public class NIOFile extends AbstractNIOLocation {
     public NIOFile(Path location) {
-        this.location = location;
-    }
-
-    public Path unwrap() {
-        return location;
+        super(location);
     }
 }

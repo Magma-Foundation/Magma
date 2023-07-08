@@ -9,7 +9,7 @@ class Results {
             return new None<>();
         } catch (Exception e) {
             //noinspection unchecked
-            return new Some<>((E) e);
+            return Some.apply((E) e);
         }
     }
 

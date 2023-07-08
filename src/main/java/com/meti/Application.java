@@ -9,18 +9,21 @@ public final class Application {
         this.source = source;
     }
 
-    Result<Option<NIOFile>, IOException> getOptionIOExceptionResult() {
-        if (source.isExists()) {
-            var fileName = source.computeFileNameAsString();
-            var other = fileName.firstIndexOfChar('.')
-                    .map(fileName::sliceToEnd)
-                    .unwrapOrElse(fileName)
-                    .concat(".mgs");
+    Result<Option<NIOFile>, IOException> compileAll() {
+        return source.existsAsFile()
+                .map(this::compile)
+                .map(f -> f.mapValue(Some::apply))
+                .unwrapOrElse(new Ok<>(new None<>()));
+    }
 
-            var target = source.resolveSibling(other);
-            return target.ensureAsFile().mapValue(Some::new);
-        } else {
-            return new Ok<>(new None<>());
-        }
+    private Result<NIOFile, IOException> compile(NIOLocation source) {
+        var fileName = source.computeFileNameAsString();
+        var other = fileName.firstIndexOfChar('.')
+                .map(fileName::sliceToEnd)
+                .unwrapOrElse(fileName)
+                .concat(".mgs");
+
+        var target = source.resolveSibling(other);
+        return target.ensureAsFile();
     }
 }

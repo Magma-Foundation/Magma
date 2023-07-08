@@ -4,8 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public record NIOPath(Path location) {
-    public static NIOPath from(NIOFile value) {
+public final class NIOPath extends AbstractNIOLocation {
+
+    public NIOPath(Path location) {
+        super(location);
+    }
+
+    public static NIOLocation from(NIOFile value) {
         return new NIOPath(value.unwrap());
     }
 
@@ -13,20 +18,20 @@ public record NIOPath(Path location) {
         return Files.exists(location);
     }
 
-    JavaString computeFileNameAsString() {
-        return new JavaString(location.getFileName().toString());
-    }
-
-    NIOPath resolveSibling(JavaString other) {
-        return new NIOPath(location.resolveSibling(other.unwrap()));
-    }
-
     public Result<NIOFile, IOException> ensureAsFile() {
         return Results.asResult(() -> {
-            if (isExists()) {
+            if (!isExists()) {
                 Files.createFile(location);
             }
             return new NIOFile(location);
         });
+    }
+
+    public Option<NIOFile> existsAsFile() {
+        if (Files.exists(location)) {
+            return Some.apply(new NIOFile(location));
+        } else {
+            return new None<>();
+        }
     }
 }
