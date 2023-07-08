@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -43,22 +44,25 @@ public class Main {
         for (String line : lines) {
             var stripped = line.strip();
             if (!stripped.isEmpty() && !stripped.startsWith("package ")) {
-                if (stripped.startsWith("import ")) {
-                    var slice = stripped.substring("import ".length());
-                    var separator = slice.lastIndexOf(".");
-                    var parent = slice.substring(0, separator);
-                    var child = slice.substring(separator + 1);
-                    builder.append("import { ")
-                            .append(child)
-                            .append(" } from ")
-                            .append(parent);
-
-                } else {
-                    throw new RuntimeException("Cannot compile: " + stripped);
-                }
+                var str = compileImport(stripped).orElseThrow(() -> new RuntimeException("Cannot compile: " + stripped));
+                builder.append(str);
             }
         }
         return builder.toString();
+    }
+
+    private static Optional<String> compileImport(String stripped) {
+        if (stripped.startsWith("import ")) {
+            var slice = stripped.substring("import ".length());
+            var separator = slice.lastIndexOf(".");
+            var parent = slice.substring(0, separator);
+            var child = slice.substring(separator + 1);
+            var format = "import { %s } from %s";
+            var message = format.formatted(child, parent);
+            return Optional.of(message);
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static List<String> split(String input) {
@@ -72,12 +76,12 @@ public class Main {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
                 depth = 0;
-            } else if(c == ';' && depth == 0) {
+            } else if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
+                if (c == '{') depth++;
+                if (c == '}') depth--;
                 builder.append(c);
             }
         }
