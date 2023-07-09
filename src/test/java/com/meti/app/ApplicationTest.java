@@ -22,7 +22,7 @@ public class ApplicationTest {
 
     static Result<Option<Path>, IOException> runImpl(Application application) {
         return application.compileAll().mapValue(set -> set.iter().head())
-                .mapValue(s -> s.map(NIOPath::from))
+                .mapValue(s -> s.map((NIOTarget value) -> NIOPath.from(value.path())))
                 .mapValue(s -> s.map(NIOLocation::unwrap));
     }
 
@@ -41,7 +41,8 @@ public class ApplicationTest {
     private Path runWithSource() throws IOException {
         Files.createFile(source);
         final NIOPath source1 = new NIOPath(source);
-        Application application = new Application(new SingleVolatileGateway(source1));
+        var gateway = new SingleVolatileGateway(source1);
+        var application = new Application(gateway, gateway);
         return Results.unwrap(runImpl(application)).unwrapOrPanic();
     }
 
@@ -52,8 +53,9 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        final NIOPath source1 = new NIOPath(source);
-        Application application = new Application(new SingleVolatileGateway(source1));
+        var source1 = new NIOPath(source);
+        var gateway = new SingleVolatileGateway(source1);
+        var application = new Application(gateway, gateway);
         Results.unwrap(runImpl(application));
         assertFalse(Files.exists(target));
     }

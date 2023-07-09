@@ -6,10 +6,15 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        var path = Paths.get(".", "src", "main", "java");
-        var root = new NIODirectory(path);
-        var sourceGateway = new DirectoryGateway(root);
-        new Application(sourceGateway).compileAll().consume(nioFileJavaSet -> System.out.println("Compiled " + nioFileJavaSet.size().value() + " files."), e -> {
+        var sourcePath = Paths.get(".", "src", "main", "java");
+        var sourceRoot = new NIODirectory(sourcePath);
+        var sourceGateway = new DirectorySources(sourceRoot);
+
+        var targetPath = Paths.get(".", "target", "");
+        var targetRoot = new NIODirectory(targetPath);
+        var targetGateway = new DirectoryTargets(targetRoot);
+
+        new Application(sourceGateway, targetGateway).compileAll().consume(nioFileJavaSet -> System.out.println("Compiled " + nioFileJavaSet.size().value() + " files."), e -> {
             System.err.println("Failed to compile.");
             e.printStackTrace();
         });

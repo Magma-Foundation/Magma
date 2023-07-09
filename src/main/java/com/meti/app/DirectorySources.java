@@ -9,13 +9,14 @@ import com.meti.nio.NIOPath;
 
 import java.io.IOException;
 
-public record DirectoryGateway(NIODirectory directory) implements Gateway {
+public record DirectorySources(NIODirectory directory) implements Sources {
     @Override
-    public Result<JavaSet<NIOFile>, IOException> collectSources() {
+    public Result<JavaSet<NIOSource>, IOException> collect() {
         return directory.walk().mapValue(set -> set.iter()
                 .filter(path -> path.isExtendedBy("java"))
                 .map(NIOPath::existsAsFile)
                 .flatMap(Iterators::fromOption)
+                .map((NIOFile parent) -> new NIOSource(directory, parent))
                 .collect(JavaSet.asSet()));
     }
 }

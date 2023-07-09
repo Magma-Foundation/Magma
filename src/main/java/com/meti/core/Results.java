@@ -17,7 +17,7 @@ public class Results {
             return new Ok<>(generator.generate());
         } catch (Exception e) {
             //noinspection unchecked
-            return new Err<>((E) e);
+            return Err.apply((E) e);
         }
     }
 

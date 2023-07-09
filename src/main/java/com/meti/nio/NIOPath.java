@@ -12,7 +12,7 @@ public final class NIOPath extends AbstractNIOLocation {
         super(location);
     }
 
-    public static NIOLocation from(NIOFile value) {
+    public static NIOPath from(NIOLocation value) {
         return new NIOPath(value.unwrap());
     }
 

@@ -7,6 +7,10 @@ import com.meti.core.Some;
 
 public record JavaString(String value) {
 
+    public static JavaString empty() {
+        return new JavaString("");
+    }
+
     public Option<Index> firstIndexOfChar(char c) {
         var index = this.value.indexOf(c);
         return index == -1

@@ -4,6 +4,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record Err<T, E>(E inner) implements Result<T, E> {
+    public static <T, E> Result<T, E> apply(E inner) {
+        return new Err<>(inner);
+    }
 
     @Override
     public Option<T> value() {
@@ -17,12 +20,12 @@ public record Err<T, E>(E inner) implements Result<T, E> {
 
     @Override
     public <R> Result<R, E> mapValue(Function<T, R> mapper) {
-        return new Err<>(inner);
+        return apply(inner);
     }
 
     @Override
     public <R> Result<R, E> mapValueToResult(Function<T, Result<R, E>> mapper) {
-        return new Err<>(inner);
+        return apply(inner);
     }
 
     @Override

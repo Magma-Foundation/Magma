@@ -23,7 +23,7 @@ public class NIODirectory extends AbstractNIOLocation {
 
             return new Ok<>(new JavaSet<>(set));
         } catch (IOException e) {
-            return new Err<>(e);
+            return Err.apply(e);
         }
     }
 }
