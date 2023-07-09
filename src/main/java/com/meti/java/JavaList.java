@@ -33,6 +33,10 @@ public class JavaList<T> {
         };
     }
 
+    public static <T> JavaList<T> empty() {
+        return new JavaList<>(new ArrayList<>());
+    }
+
     private JavaList<T> add(T element) {
         this.values.add(element);
         return this;
@@ -47,7 +51,7 @@ public class JavaList<T> {
 
             @Override
             protected Index length() {
-                return new Index(values.size());
+                return new Index(values.size(), values.size());
             }
         };
     }
@@ -56,7 +60,7 @@ public class JavaList<T> {
         if (values.isEmpty()) {
             return new None<>();
         } else {
-            return Some.apply(new Index(values.size() - 1));
+            return Some.apply(new Index(values.size() - 1, values.size()));
         }
     }
 

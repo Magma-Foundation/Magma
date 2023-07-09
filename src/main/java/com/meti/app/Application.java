@@ -21,26 +21,28 @@ public final class Application {
 
     private static Result<Option<JavaString>, CompileException> compile(JavaString line) {
         if (line.startsWith("package ")) return Ok.apply(new None<>());
-        return line.firstIndexOfSlice("import ").map(s -> line.sliceFrom(s)
-                .split("\\.")
-                .collect(JavaList.asList())
-                .into(NonEmptyJavaList::from)
-                .map(names -> $Result(() -> {
-                    var last = names.lastIndex();
-                    var before = names.sliceTo(last);
-                    var after = names.sliceFrom(last)
-                            .into(NonEmptyJavaList::from)
-                            .map(NonEmptyJavaList::first)
-                            .map(Ok::<JavaString, CompileException>apply)
-                            .unwrapOrElse(new Err<>(new CompileException("No name present in import.")))
-                            .into(ThrowableResult::new)
-                            .$();
+        return line.firstIndexOfSlice("import ").map(index -> {
+            var collect = index.nextExclusive("import ".length()).map(s -> line.sliceFrom(s)
+                    .split("\\.")
+                    .collect(JavaList.asList())).unwrapOrElse(JavaList.empty());
 
-                    return before.iter().collect(JavaString.joining(new JavaString("."))).map(parent -> parent.prepend("import { ")
-                            .prependOwned(after)
-                            .prepend(" } from "));
-                }))
-                .unwrapOrElse(new Err<>(new CompileException("Insufficient values.")))).unwrapOrElse(Ok.apply(new Some<>(line)));
+            return collect.into(NonEmptyJavaList::from).map(names -> $Result(() -> {
+                var last = names.lastIndex();
+                var before = names.sliceTo(last);
+                var after = names.sliceFrom(last)
+                        .into(NonEmptyJavaList::from)
+                        .map(NonEmptyJavaList::first)
+                        .map(Ok::<JavaString, CompileException>apply)
+                        .unwrapOrElse(new Err<>(new CompileException("No name present in import.")))
+                        .into(ThrowableResult::new)
+                        .$();
+
+                return before.iter().collect(JavaString.joining(new JavaString("."))).map(parent -> parent
+                        .prepend(" } from ")
+                        .prependOwned(after)
+                        .prepend("import { "));
+            })).unwrapOrElse(new Err<>(new CompileException("Insufficient values.")));
+        }).unwrapOrElse(Ok.apply(new Some<>(line)));
     }
 
     Result<JavaSet<NIOTarget>, CompileException> compileAll() {
@@ -64,7 +66,7 @@ public final class Application {
                     .map(Application::compile)
                     .into(ResultIterator::new)
                     .flatMapInner(Iterators::fromOption)
-                    .collectToResult(JavaString.joining(new JavaString(";")))
+                    .collectToResult(JavaString.joining(new JavaString(";\n")))
                     .into(ThrowableResult::new).$()
                     .unwrapOrElse(JavaString.empty());
 

@@ -41,7 +41,7 @@ public final class JavaString {
         var index = this.value.indexOf(c);
         return index == -1
                 ? new None<>()
-                : Some.apply(new Index(index));
+                : Some.apply(new Index(index, this.value.length()));
     }
 
     public JavaString sliceToEnd(Index index) {
@@ -78,11 +78,11 @@ public final class JavaString {
     public Option<Index> firstIndexOfSlice(String value) {
         var index = this.value.indexOf(value);
         if (index == -1) return new None<>();
-        else return new Some<>(new Index(index));
+        else return new Some<>(new Index(index, this.value.length()));
     }
 
     public JavaString sliceFrom(Index extent) {
-        return new JavaString(this.value.substring(0, extent.value()));
+        return new JavaString(this.value.substring(extent.value()));
     }
 
     public JavaString prepend(String slice) {

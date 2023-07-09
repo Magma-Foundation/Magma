@@ -19,7 +19,7 @@ public class NonEmptyJavaList<T> extends JavaList<T> {
     }
 
     public Index lastIndex() {
-        return new Index(this.values.size() - 1);
+        return new Index(this.values.size() - 1, this.values.size());
     }
 
     public T first() {

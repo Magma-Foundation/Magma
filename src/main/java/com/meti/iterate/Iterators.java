@@ -19,7 +19,7 @@ public class Iterators {
 
             @Override
             protected Index length() {
-                return new Index(values.length);
+                return new Index(values.length, values.length);
             }
         };
     }

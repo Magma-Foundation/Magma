@@ -6,14 +6,16 @@ import com.meti.core.Option;
 import com.meti.core.Some;
 
 public abstract class IndexIterator<T> extends AbstractIterator<T> {
-    private Index counter = new Index(0);
+    private final Index initial = new Index(0, length().unwrap());
+    private Index counter = initial;
 
     @Override
     public Option<T> head() {
-        if (counter.unwrap() < length().unwrap()) {
-            var apply = apply(counter);
-            counter = counter.next();
-            return Some.apply(apply);
+        var next = counter.nextExclusive().toTuple(initial);
+        if (next.a()) {
+            var value = apply(counter);
+            counter = next.b();
+            return new Some<>(value);
         }
 
         return new None<>();

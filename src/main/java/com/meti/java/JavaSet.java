@@ -48,12 +48,12 @@ public record JavaSet<T>(Set<T> value) {
 
             @Override
             protected Index length() {
-                return new Index(list.size());
+                return new Index(list.size(), list.size());
             }
         };
     }
 
     public Index size() {
-        return new Index(this.value.size());
+        return new Index(this.value.size(), this.value.size());
     }
 }
