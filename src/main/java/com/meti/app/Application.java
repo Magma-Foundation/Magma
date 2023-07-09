@@ -10,9 +10,9 @@ import com.meti.nio.NIOLocation;
 import java.io.IOException;
 
 public final class Application {
-    private final SingleVolatileGateway sourceGateway;
+    private final Gateway sourceGateway;
 
-    public Application(SingleVolatileGateway sourceGateway) {
+    public Application(Gateway sourceGateway) {
         this.sourceGateway = sourceGateway;
     }
 
