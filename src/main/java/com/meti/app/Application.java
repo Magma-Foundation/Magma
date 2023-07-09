@@ -1,10 +1,10 @@
 package com.meti.app;
 
-import com.meti.core.Err;
-import com.meti.core.Ok;
-import com.meti.core.Result;
+import com.meti.core.*;
+import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.JavaSet;
+import com.meti.java.JavaString;
 
 import java.io.IOException;
 
@@ -27,8 +27,16 @@ public final class Application {
     private Result<NIOTarget, IOException> compile(NIOSource source) {
         var package_ = source.computePackage();
         var other = source.computeName().concat(".mgs");
-        return source.read().mapValueToResult(input -> targetSources.resolve(package_, other).mapValueToResult(target -> target.write(input)
-                .map(Err::<NIOTarget, IOException>apply)
-                .unwrapOrElse(new Ok<>(target))));
+        return source.read().mapValueToResult(input -> {
+            var output = input.split(";")
+                    .map(line -> line.startsWith("package ") ? new None<JavaString>() : new Some<>(line))
+                    .flatMap(Iterators::fromOption)
+                    .collect(JavaString.joining(new JavaString(";")))
+                    .unwrapOrElse(JavaString.empty());
+
+            return targetSources.resolve(package_, other).mapValueToResult(target -> target.write(output)
+                    .map(Err::<NIOTarget, IOException>apply)
+                    .unwrapOrElse(new Ok<>(target)));
+        });
     }
 }
