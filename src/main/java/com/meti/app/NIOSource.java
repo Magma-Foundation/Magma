@@ -6,10 +6,14 @@ import com.meti.nio.Location;
 
 public record NIOSource(Location parent, Location source) {
     JavaList<JavaString> computePackage() {
-        return parent.relativize(source)
+        var list = parent.relativize(source)
                 .iter()
                 .map(Location::asString)
                 .collect(JavaList.asList());
+
+        return list.lastIndex()
+                .map(list::sliceTo)
+                .unwrapOrElse(list);
     }
 
     JavaString computeName() {

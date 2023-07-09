@@ -2,6 +2,9 @@ package com.meti.java;
 
 import com.meti.collect.Collector;
 import com.meti.collect.Index;
+import com.meti.core.None;
+import com.meti.core.Option;
+import com.meti.core.Some;
 import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 
@@ -46,5 +49,17 @@ public class JavaList<T> {
                 return new Index(values.size());
             }
         };
+    }
+
+    public Option<Index> lastIndex() {
+        if (values.isEmpty()) {
+            return new None<>();
+        } else {
+            return Some.apply(new Index(values.size() - 1));
+        }
+    }
+
+    public JavaList<T> sliceTo(Index extent) {
+        return new JavaList<>(values.subList(0, extent.value()));
     }
 }

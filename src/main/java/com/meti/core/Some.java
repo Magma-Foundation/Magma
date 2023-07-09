@@ -1,6 +1,7 @@
 package com.meti.core;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
     public static <T> Option<T> apply(T value) {
@@ -10,6 +11,16 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public Tuple<Boolean, T> toTuple(T other) {
         return new Tuple<>(true, value);
+    }
+
+    @Override
+    public T unwrapOrElseGet(Supplier<T> supplier) {
+        return value;
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
     }
 
     @Override

@@ -17,23 +17,33 @@ public final class NIOPath extends NIOLocation {
     }
 
     boolean isExists() {
-        return Files.exists(location);
+        return Files.exists(value);
     }
 
     public Result<NIOFile, IOException> ensureAsFile() {
         return Results.asResult(() -> {
             if (!isExists()) {
-                Files.createFile(location);
+                Files.createFile(value);
             }
-            return new NIOFile(location);
+            return new NIOFile(value);
         });
     }
 
     public Option<NIOFile> existsAsFile() {
-        if (Files.exists(location)) {
-            return Some.apply(new NIOFile(location));
+        if (Files.exists(value)) {
+            return Some.apply(new NIOFile(value));
         } else {
             return new None<>();
         }
+    }
+
+    public Result<NIODirectory, IOException> ensureAsDirectory() {
+        return Results.asResult(() -> {
+            if (!Files.exists(value)) {
+                Files.createDirectories(value);
+            }
+
+            return new NIODirectory(value);
+        });
     }
 }

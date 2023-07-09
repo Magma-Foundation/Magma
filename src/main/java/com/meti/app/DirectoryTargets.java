@@ -1,5 +1,6 @@
 package com.meti.app;
 
+import com.meti.core.Err;
 import com.meti.core.Result;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
@@ -11,11 +12,15 @@ import java.io.IOException;
 public record DirectoryTargets(Location root) implements Targets {
     @Override
     public Result<NIOTarget, IOException> resolve(JavaList<JavaString> package_, JavaString name) {
-        var resolve = package_.iter()
+        var targetPath = package_.iter()
                 .foldLeft(root, Location::resolve)
                 .resolve(name)
                 .into(NIOPath::from);
 
-        return resolve.ensureAsFile().mapValue(NIOTarget::new);
+        return targetPath.parent()
+                .map(NIOPath::from)
+                .flatMap(parent -> parent.ensureAsDirectory().err())
+                .map(Err::<NIOTarget, IOException>apply)
+                .unwrapOrElseGet(() -> targetPath.ensureAsFile().mapValue(NIOTarget::new));
     }
 }

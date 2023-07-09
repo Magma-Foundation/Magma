@@ -16,7 +16,7 @@ public class NIODirectory extends NIOLocation {
     }
 
     public Result<JavaSet<NIOPath>, IOException> walk() {
-        try (var stream = Files.walk(location)) {
+        try (var stream = Files.walk(value)) {
             var set = stream
                     .map(NIOPath::new)
                     .collect(Collectors.toSet());

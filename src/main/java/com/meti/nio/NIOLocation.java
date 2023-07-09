@@ -12,30 +12,30 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 public class NIOLocation implements Location {
-    protected final Path location;
+    protected final Path value;
 
-    public NIOLocation(Path location) {
-        this.location = location;
+    public NIOLocation(Path value) {
+        this.value = value;
     }
 
     @Override
     public JavaString asString() {
-        return new JavaString(location.getFileName().toString());
+        return new JavaString(value.getFileName().toString());
     }
 
     @Override
     public Location resolveSibling(JavaString other) {
-        return new NIOLocation(location.resolveSibling(other.unwrap()));
+        return new NIOLocation(value.resolveSibling(other.unwrap()));
     }
 
     @Override
     public Path unwrap() {
-        return location;
+        return value;
     }
 
     @Override
     public boolean isExtendedBy(String extension) {
-        return location.toString().endsWith("." + extension);
+        return value.toString().endsWith("." + extension);
     }
 
     @Override
@@ -43,37 +43,37 @@ public class NIOLocation implements Location {
         return new IndexIterator<>() {
             @Override
             protected Location apply(Index index) {
-                return new NIOLocation(location.getName(index.value()));
+                return new NIOLocation(value.getName(index.value()));
             }
 
             @Override
             protected Index length() {
-                return new Index(location.getNameCount());
+                return new Index(value.getNameCount());
             }
         };
     }
 
     @Override
     public Option<Location> last() {
-        var length = location.getNameCount();
+        var length = value.getNameCount();
         return length == 0
                 ? new None<>()
-                : new Some<>(new NIOLocation(location.getName(length - 1)));
+                : new Some<>(new NIOLocation(value.getName(length - 1)));
     }
 
     @Override
     public Location relativize(Location child) {
-        return new NIOLocation(location.relativize(child.unwrap()));
+        return new NIOLocation(value.relativize(child.unwrap()));
     }
 
     @Override
     public Location resolve(JavaString child) {
-        return new NIOLocation(location.resolve(child.unwrap()));
+        return new NIOLocation(value.resolve(child.unwrap()));
     }
 
     @Override
     public Option<Location> parent() {
-        var parent = location.getParent();
+        var parent = value.getParent();
         if (parent == null) return new None<>();
         else return Some.apply(new NIOLocation(parent));
     }
