@@ -22,4 +22,9 @@ public class None<T> implements Option<T> {
     public T unwrapOrElse(T other) {
         return other;
     }
+
+    @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(false, other);
+    }
 }

@@ -5,6 +5,7 @@ import com.meti.core.Option;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface Iterator<T> {
     <C> C foldLeft(C initial, BiFunction<C, T, C> folder);
@@ -16,4 +17,9 @@ public interface Iterator<T> {
     Option<T> head();
 
     <C> C collect(Collector<T, C> collector);
+
+    <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+    Iterator<T> filter(Predicate<T> predicate);
 }
+

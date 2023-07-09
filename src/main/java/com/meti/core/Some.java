@@ -8,6 +8,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(true, value);
+    }
+
+    @Override
     public T unwrapOrPanic() {
         return value;
     }

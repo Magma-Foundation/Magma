@@ -10,4 +10,6 @@ public interface NIOLocation {
     NIOPath resolveSibling(JavaString other);
 
     Path unwrap();
+
+    boolean isExtendedBy(String extension);
 }

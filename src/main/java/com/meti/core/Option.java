@@ -10,4 +10,6 @@ public interface Option<T> {
     <R> Option<R> map(Function<T, R> mapper);
 
     T unwrapOrElse(T other);
+
+    Tuple<Boolean, T> toTuple(T other);
 }

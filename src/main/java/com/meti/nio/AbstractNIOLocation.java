@@ -25,4 +25,9 @@ public class AbstractNIOLocation implements NIOLocation {
     public Path unwrap() {
         return location;
     }
+
+    @Override
+    public boolean isExtendedBy(String extension) {
+        return location.toString().endsWith("." + extension);
+    }
 }

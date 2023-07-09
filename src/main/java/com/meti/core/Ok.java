@@ -1,5 +1,6 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record Ok<T, E>(T inner) implements Result<T, E> {
@@ -21,5 +22,10 @@ public record Ok<T, E>(T inner) implements Result<T, E> {
     @Override
     public <R> Result<R, E> mapValueToResult(Function<T, Result<R, E>> mapper) {
         return mapper.apply(inner);
+    }
+
+    @Override
+    public void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer) {
+        valueConsumer.accept(inner);
     }
 }
