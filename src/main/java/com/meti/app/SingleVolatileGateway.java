@@ -13,7 +13,7 @@ import java.io.IOException;
 public record SingleVolatileGateway(NIOPath source) implements Sources, Targets {
     @Override
     public Result<JavaSet<NIOSource>, IOException> collect() {
-        return new Ok<>(source.existsAsFile()
+        return Ok.apply(source.existsAsFile()
                 .map((NIOFile asFile) -> new NIOSource(source.parent().unwrapOrElse(asFile), asFile))
                 .map(JavaSet::of)
                 .unwrapOrElse(JavaSet.empty()));

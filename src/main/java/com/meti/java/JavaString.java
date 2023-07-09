@@ -10,7 +10,12 @@ import com.meti.iterate.Iterator;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public record JavaString(String value) {
+public final class JavaString {
+    private final String value;
+
+    public JavaString(String value) {
+        this.value = value;
+    }
 
     public static JavaString empty() {
         return new JavaString("");
@@ -68,5 +73,23 @@ public record JavaString(String value) {
         }
 
         return true;
+    }
+
+    public Option<Index> firstIndexOfSlice(String value) {
+        var index = this.value.indexOf(value);
+        if (index == -1) return new None<>();
+        else return new Some<>(new Index(index));
+    }
+
+    public JavaString sliceFrom(Index extent) {
+        return new JavaString(this.value.substring(0, extent.value()));
+    }
+
+    public JavaString prepend(String slice) {
+        return new JavaString(slice + this.value);
+    }
+
+    public JavaString prependOwned(JavaString slice) {
+        return prepend(slice.value);
     }
 }

@@ -21,7 +21,7 @@ public final class NIOPath extends NIOLocation {
     }
 
     public Result<NIOFile, IOException> ensureAsFile() {
-        return Results.asResult(() -> {
+        return Results.$Result(() -> {
             if (!isExists()) {
                 Files.createFile(value);
             }
@@ -38,7 +38,7 @@ public final class NIOPath extends NIOLocation {
     }
 
     public Result<NIODirectory, IOException> ensureAsDirectory() {
-        return Results.asResult(() -> {
+        return Results.$Result(() -> {
             if (!Files.exists(value)) {
                 Files.createDirectories(value);
             }

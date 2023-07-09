@@ -16,7 +16,7 @@ public record NIOSource(Location parent, Location location) {
                 .map(Location::asString)
                 .collect(JavaList.asList());
 
-        return list.lastIndex()
+        return list.lastIndexOptionally()
                 .map(list::sliceTo)
                 .unwrapOrElse(list);
     }
@@ -32,6 +32,6 @@ public record NIOSource(Location parent, Location location) {
     }
 
     public Result<JavaString, IOException> read() {
-        return Results.asResult(() -> new JavaString(Files.readString(this.location.unwrap())));
+        return Results.$Result(() -> new JavaString(Files.readString(this.location.unwrap())));
     }
 }

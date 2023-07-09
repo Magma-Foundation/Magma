@@ -10,9 +10,10 @@ import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class JavaList<T> {
-    private final List<T> values;
+    protected final List<T> values;
 
     public JavaList(List<T> values) {
         this.values = values;
@@ -51,7 +52,7 @@ public class JavaList<T> {
         };
     }
 
-    public Option<Index> lastIndex() {
+    public Option<Index> lastIndexOptionally() {
         if (values.isEmpty()) {
             return new None<>();
         } else {
@@ -61,5 +62,21 @@ public class JavaList<T> {
 
     public JavaList<T> sliceTo(Index extent) {
         return new JavaList<>(values.subList(0, extent.value()));
+    }
+
+    public boolean isEmpty() {
+        return this.values.isEmpty();
+    }
+
+    public <R> R into(Function<JavaList<T>, R> mapper) {
+        return mapper.apply(this);
+    }
+
+    protected List<T> unwrap() {
+        return this.values;
+    }
+
+    public JavaList<T> sliceFrom(Index index) {
+        return new JavaList<>(this.values.subList(index.unwrap(), this.values.size()));
     }
 }

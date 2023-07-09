@@ -5,6 +5,8 @@ import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
 
+import java.util.function.Function;
+
 public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
     private final Iterator<Result<T, E>> parent;
 
@@ -16,7 +18,7 @@ public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
         return parent.collect(new Collector<>() {
             @Override
             public Result<C, E> initial() {
-                return new Ok<>(collector.initial());
+                return Ok.apply(collector.initial());
             }
 
             @Override
@@ -31,5 +33,11 @@ public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
     @Override
     public Option<Result<T, E>> head() {
         return parent.head();
+    }
+
+    public <R> ResultIterator<R, E> flatMapInner(Function<T, Iterator<R>> fromOption) {
+        return new ResultIterator<>(parent.flatMap(result -> result.mapValue(fromOption).match(
+                value -> value.map(Ok::<R, E>apply),
+                error -> Iterators.empty())));
     }
 }

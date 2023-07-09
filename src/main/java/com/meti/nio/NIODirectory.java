@@ -21,7 +21,7 @@ public class NIODirectory extends NIOLocation {
                     .map(NIOPath::new)
                     .collect(Collectors.toSet());
 
-            return new Ok<>(new JavaSet<>(set));
+            return Ok.apply(new JavaSet<>(set));
         } catch (IOException e) {
             return Err.apply(e);
         }
