@@ -22,6 +22,7 @@ public record SingleVolatileGateway(NIOPath source) implements Sources, Targets 
     @Override
     public Result<NIOTarget, IOException> resolve(JavaList<JavaString> package_, JavaString name) {
         return source.resolveSibling(name)
+                .into(NIOPath::from)
                 .ensureAsFile()
                 .mapValue(NIOTarget::new);
     }

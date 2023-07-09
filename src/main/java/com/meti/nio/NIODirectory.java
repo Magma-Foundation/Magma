@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 
-public class NIODirectory extends AbstractNIOLocation {
+public class NIODirectory extends NIOLocation {
     public NIODirectory(Path location) {
         super(location);
     }

@@ -1,30 +1,85 @@
 package com.meti.nio;
 
+import com.meti.collect.Index;
+import com.meti.core.None;
 import com.meti.core.Option;
+import com.meti.core.Some;
+import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 import com.meti.java.JavaString;
 
 import java.nio.file.Path;
 import java.util.function.Function;
 
-public interface NIOLocation {
-    JavaString asString();
+public class NIOLocation implements Location {
+    protected final Path location;
 
-    NIOPath resolveSibling(JavaString other);
+    public NIOLocation(Path location) {
+        this.location = location;
+    }
 
-    Path unwrap();
+    @Override
+    public JavaString asString() {
+        return new JavaString(location.getFileName().toString());
+    }
 
-    boolean isExtendedBy(String extension);
+    @Override
+    public Location resolveSibling(JavaString other) {
+        return new NIOLocation(location.resolveSibling(other.unwrap()));
+    }
 
-    Iterator<NIOLocation> iter();
+    @Override
+    public Path unwrap() {
+        return location;
+    }
 
-    Option<NIOLocation> last();
+    @Override
+    public boolean isExtendedBy(String extension) {
+        return location.toString().endsWith("." + extension);
+    }
 
-    NIOPath relativize(NIOLocation child);
+    @Override
+    public Iterator<Location> iter() {
+        return new IndexIterator<>() {
+            @Override
+            protected Location apply(Index index) {
+                return new NIOLocation(location.getName(index.value()));
+            }
 
-    NIOLocation resolve(JavaString child);
+            @Override
+            protected Index length() {
+                return new Index(location.getNameCount());
+            }
+        };
+    }
 
-    Option<NIOLocation> parent();
+    @Override
+    public Option<Location> last() {
+        var length = location.getNameCount();
+        return length == 0
+                ? new None<>()
+                : new Some<>(new NIOLocation(location.getName(length - 1)));
+    }
 
-    <R> R into(Function<NIOLocation, R> mapper);
+    @Override
+    public Location relativize(Location child) {
+        return new NIOLocation(location.relativize(child.unwrap()));
+    }
+
+    @Override
+    public Location resolve(JavaString child) {
+        return new NIOLocation(location.resolve(child.unwrap()));
+    }
+
+    @Override
+    public Option<Location> parent() {
+        var parent = location.getParent();
+        if (parent == null) return new None<>();
+        else return Some.apply(new NIOLocation(parent));
+    }
+
+    @Override
+    public <R> R into(Function<Location, R> mapper) {
+        return mapper.apply(this);
+    }
 }

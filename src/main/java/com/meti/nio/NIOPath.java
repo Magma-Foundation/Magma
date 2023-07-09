@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class NIOPath extends AbstractNIOLocation {
+public final class NIOPath extends NIOLocation {
 
     public NIOPath(Path location) {
         super(location);
     }
 
-    public static NIOPath from(NIOLocation value) {
+    public static NIOPath from(Location value) {
         return new NIOPath(value.unwrap());
     }
 

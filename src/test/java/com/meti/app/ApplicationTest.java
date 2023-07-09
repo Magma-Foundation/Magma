@@ -3,7 +3,7 @@ package com.meti.app;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.core.Results;
-import com.meti.nio.NIOLocation;
+import com.meti.nio.Location;
 import com.meti.nio.NIOPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class ApplicationTest {
     static Result<Option<Path>, IOException> runImpl(Application application) {
         return application.compileAll().mapValue(set -> set.iter().head())
                 .mapValue(s -> s.map((NIOTarget value) -> NIOPath.from(value.path())))
-                .mapValue(s -> s.map(NIOLocation::unwrap));
+                .mapValue(s -> s.map(Location::unwrap));
     }
 
     @AfterEach
