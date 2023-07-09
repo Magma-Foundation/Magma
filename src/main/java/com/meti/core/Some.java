@@ -1,10 +1,10 @@
-package com.meti;
+package com.meti.core;
 
 import java.util.function.Function;
 
-record Some<T>(T value) implements Option<T> {
-    static <T> Option<T> apply(T value) {
-        return new Some<T>(value);
+public record Some<T>(T value) implements Option<T> {
+    public static <T> Option<T> apply(T value) {
+        return new Some<>(value);
     }
 
     @Override

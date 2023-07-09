@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.iterate;
+
+import com.meti.collect.Index;
+import com.meti.core.None;
+import com.meti.core.Option;
+import com.meti.core.Some;
 
 public abstract class IndexIterator<T> extends AbstractIterator<T> {
     private Index counter = new Index(0);

@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.iterate;
+
+import com.meti.collect.Collector;
+import com.meti.core.Option;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

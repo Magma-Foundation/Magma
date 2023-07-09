@@ -1,8 +1,8 @@
-package com.meti;
+package com.meti.core;
 
 import java.util.function.Function;
 
-interface Option<T> {
+public interface Option<T> {
     T unwrapOrPanic();
 
     boolean isPresent();

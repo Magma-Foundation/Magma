@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.nio;
 
 import java.nio.file.Path;
 

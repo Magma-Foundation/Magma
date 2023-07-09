@@ -1,8 +1,8 @@
-package com.meti;
+package com.meti.core;
 
 import java.util.function.Function;
 
-class None<T> implements Option<T> {
+public class None<T> implements Option<T> {
     @Override
     public T unwrapOrPanic() {
         throw new RuntimeException("No unwrap present.");

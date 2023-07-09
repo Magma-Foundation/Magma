@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.collect;
 
 public record Index(int value) {
     public int unwrap() {

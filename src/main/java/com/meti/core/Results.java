@@ -1,17 +1,7 @@
-package com.meti;
+package com.meti.core;
 
-class Results {
+public class Results {
 
-
-    public static <E extends Exception> Option<E> asOption(Action<E> action) {
-        try {
-            action.perform();
-            return new None<>();
-        } catch (Exception e) {
-            //noinspection unchecked
-            return Some.apply((E) e);
-        }
-    }
 
     public static <T, E extends Exception> T unwrap(Result<T, E> result) throws E {
         var value = result.value();
@@ -31,11 +21,7 @@ class Results {
         }
     }
 
-    interface Generator<T, E extends Exception> {
+    public interface Generator<T, E extends Exception> {
         T generate() throws E;
-    }
-
-    interface Action<E extends Exception> {
-        void perform() throws E;
     }
 }

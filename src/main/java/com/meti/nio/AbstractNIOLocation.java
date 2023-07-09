@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.nio;
+
+import com.meti.java.JavaString;
 
 import java.nio.file.Path;
 

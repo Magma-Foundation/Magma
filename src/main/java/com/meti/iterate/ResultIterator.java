@@ -1,4 +1,9 @@
-package com.meti;
+package com.meti.iterate;
+
+import com.meti.collect.Collector;
+import com.meti.core.Ok;
+import com.meti.core.Option;
+import com.meti.core.Result;
 
 public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
     private final Iterator<Result<T, E>> parent;

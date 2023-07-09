@@ -1,6 +1,11 @@
-package com.meti;
+package com.meti.java;
 
-record JavaString(String value) {
+import com.meti.collect.Index;
+import com.meti.core.None;
+import com.meti.core.Option;
+import com.meti.core.Some;
+
+public record JavaString(String value) {
 
     public Option<Index> firstIndexOfChar(char c) {
         var index = this.value.indexOf(c);

@@ -1,10 +1,15 @@
-package com.meti;
+package com.meti.java;
+
+import com.meti.collect.Collector;
+import com.meti.collect.Index;
+import com.meti.iterate.IndexIterator;
+import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-record JavaSet<T>(Set<T> value) {
+public record JavaSet<T>(Set<T> value) {
     public static <T> Collector<T, JavaSet<T>> asSet() {
         return new Collector<>() {
             @Override

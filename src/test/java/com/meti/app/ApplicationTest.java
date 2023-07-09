@@ -1,5 +1,10 @@
-package com.meti;
+package com.meti.app;
 
+import com.meti.core.Option;
+import com.meti.core.Result;
+import com.meti.core.Results;
+import com.meti.nio.NIOLocation;
+import com.meti.nio.NIOPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
-package com.meti;
+package com.meti.core;
 
 import java.util.function.Function;
 
-interface Result<T, E> {
+public interface Result<T, E> {
     Option<T> value();
 
     Option<E> err();
