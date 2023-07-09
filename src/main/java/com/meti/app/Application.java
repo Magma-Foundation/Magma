@@ -5,7 +5,6 @@ import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.JavaSet;
-import com.meti.java.JavaString;
 
 import java.io.IOException;
 
@@ -28,8 +27,8 @@ public final class Application {
     private Result<NIOTarget, IOException> compile(NIOSource source) {
         var package_ = source.computePackage();
         var other = source.computeName().concat(".mgs");
-        return targetSources.resolve(package_, other).mapValueToResult(target -> target.write(JavaString.empty())
+        return source.read().mapValueToResult(input -> targetSources.resolve(package_, other).mapValueToResult(target -> target.write(input)
                 .map(Err::<NIOTarget, IOException>apply)
-                .unwrapOrElse(new Ok<>(target)));
+                .unwrapOrElse(new Ok<>(target))));
     }
 }
