@@ -40,6 +40,12 @@ class CompilerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
+    void importWithGrandParent(String parent) {
+        assertCompile("import " + parent + ".foo.test", "import { test } from " + parent + ".foo");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
     void importWithParent(String parent) {
         assertCompile("import " + parent + ".test", "import { test } from " + parent);
     }

@@ -18,7 +18,7 @@ public record Compiler(JavaString input) {
                     .firstIndexOfSlice("import ").$()
                     .nextExclusive("import ".length()).$();
 
-            return Ok.apply(input.firstIndexOfChar('.').map(separator -> {
+            return Ok.apply(input.lastIndexOfChar('.').map(separator -> {
                 var parent = input.sliceBetween(importIndex, separator);
                 var child = input.sliceFrom(separator.nextExclusive().$());
 

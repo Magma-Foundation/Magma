@@ -60,4 +60,11 @@ public final class JavaString {
     public JavaString sliceBetween(Index start, Index end) {
         return new JavaString(this.value.substring(start.value(), end.value()));
     }
+
+    public Option<Index> lastIndexOfChar(char c) {
+        var index = this.value.lastIndexOf(c);
+        return index == -1
+                ? new None<>()
+                : Some.apply(createIndex(index));
+    }
 }
