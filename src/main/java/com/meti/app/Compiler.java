@@ -29,16 +29,11 @@ public record Compiler(JavaString input) {
     }
 
     Result<JavaString, CompileException> compile() {
-        return compileLine();
-    }
-
-    private Result<JavaString, CompileException> compileLine() {
         return input.split(";")
                 .map(Compiler::compileImport)
                 .flatMap(Iterators::fromOption)
                 .into(ResultIterator::new)
                 .collectToResult(JavaString.joining(";\n"))
                 .mapValue(value -> value.unwrapOrElse(JavaString.empty()));
-
     }
 }
