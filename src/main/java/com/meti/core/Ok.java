@@ -3,6 +3,13 @@ package com.meti.core;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Represents a non-error value.
+ *
+ * @param inner The value of this result.
+ * @param <T>   The value type of this result.
+ * @param <E>   The error type of this result.
+ */
 public record Ok<T, E>(T inner) implements Result<T, E> {
     public static <T, E> Result<T, E> apply(T inner) {
         return new Ok<>(inner);
@@ -46,5 +53,11 @@ public record Ok<T, E>(T inner) implements Result<T, E> {
     @Override
     public <R> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Ok<>(inner);
+    }
+
+    @Override
+    public Result<T, E> peekValue(Consumer<T> consumer) {
+        consumer.accept(inner);
+        return this;
     }
 }

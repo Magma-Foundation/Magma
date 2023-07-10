@@ -3,6 +3,9 @@ package com.meti.core;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Represents an error value.
+ */
 public record Err<T, E>(E inner) implements Result<T, E> {
     public static <T, E> Result<T, E> apply(E inner) {
         return new Err<>(inner);
@@ -46,5 +49,10 @@ public record Err<T, E>(E inner) implements Result<T, E> {
     @Override
     public <R> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Err<>(mapper.apply(inner));
+    }
+
+    @Override
+    public Result<T, E> peekValue(Consumer<T> consumer) {
+        return this;
     }
 }

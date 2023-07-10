@@ -44,6 +44,7 @@ public final class Application {
 
     Result<JavaSet<NIOTarget>, CompileException> compileAll() {
         return sources.collect()
+                .peekValue(value -> System.out.printf("Found '%s' sources.%n", value.size().value()))
                 .mapErr(CompileException::new)
                 .mapValueToResult(nioSourceJavaSet -> nioSourceJavaSet.iter()
                         .map(this::compile)
