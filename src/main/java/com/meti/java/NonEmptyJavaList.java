@@ -7,21 +7,23 @@ import com.meti.core.Some;
 
 import java.util.List;
 
-public class NonEmptyJavaList<T> extends JavaList<T> {
+public class NonEmptyJavaList<T> extends JavaList<T> implements NonEmptyList<T> {
     public NonEmptyJavaList(List<T> values) {
         super(values);
     }
 
-    public static <T> Option<NonEmptyJavaList<T>> from(com.meti.java.List<T> list) {
+    public static <T> Option<NonEmptyList<T>> from(com.meti.java.List<T> list) {
         return list.isEmpty()
                 ? new None<>()
                 : new Some<>(new NonEmptyJavaList<>(list.unwrap()));
     }
 
+    @Override
     public Index lastIndex() {
         return new Index(this.values.size() - 1, this.values.size());
     }
 
+    @Override
     public T first() {
         return values.get(0);
     }

@@ -3,10 +3,7 @@ package com.meti.app;
 import com.meti.core.*;
 import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
-import com.meti.java.JavaList;
-import com.meti.java.JavaSet;
-import com.meti.java.JavaString;
-import com.meti.java.NonEmptyJavaList;
+import com.meti.java.*;
 
 import static com.meti.core.Results.$Result;
 
@@ -31,7 +28,7 @@ public final class Application {
                 var before = names.sliceTo(last);
                 var after = names.sliceFrom(last)
                         .into(NonEmptyJavaList::from)
-                        .map(NonEmptyJavaList::first)
+                        .map(NonEmptyList::first)
                         .map(Ok::<JavaString, CompileException>apply)
                         .unwrapOrElse(new Err<>(new CompileException("No name present in import.")))
                         .into(ThrowableResult::new)
