@@ -40,7 +40,7 @@ To compile and run your program, use the following commands:
 # Compilation and execution steps will be provided here
 ```
 
-For more information on how to use Magma and its features, please refer to the official documentation.
+For more information on how to balls use Magma and its features, please refer to the official documentation.
 
 ## Documentation
 The official Magma documentation provides comprehensive information about the language's syntax, semantics, features, and standard library. You can access the documentation here: Magma Documentation
