@@ -43,7 +43,7 @@ public record JavaSet<T>(Set<T> value) {
         return new IndexIterator<>() {
             @Override
             protected T apply(Index index) {
-                return list.get(index.unwrap());
+                return list.get(index.value());
             }
 
             @Override

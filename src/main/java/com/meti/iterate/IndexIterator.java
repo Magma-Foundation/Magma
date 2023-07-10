@@ -11,6 +11,10 @@ public abstract class IndexIterator<T> extends AbstractIterator<T> {
 
     @Override
     public Option<T> head() {
+        if (length().unwrap() == 0) {
+            return new None<>();
+        }
+
         if (counter.isEmpty()) {
             counter = new Some<>(initial);
             return new Some<>(apply(initial));

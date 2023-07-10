@@ -16,6 +16,12 @@ class IndexTest {
     }
 
     @Test
+    void nextExclusiveEqual() {
+        var index = new Index(0, 0);
+        assertTrue(index.nextExclusive().isEmpty());
+    }
+
+    @Test
     void nextExclusiveInvalid() {
         var index = new Index(0, 1);
         assertTrue(index.nextExclusive().isEmpty());

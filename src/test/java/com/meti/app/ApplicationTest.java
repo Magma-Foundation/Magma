@@ -6,6 +6,7 @@ import com.meti.core.Results;
 import com.meti.nio.Location;
 import com.meti.nio.NIOPath;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -44,7 +45,8 @@ public class ApplicationTest {
             final NIOPath source1 = new NIOPath(source);
             var gateway = new SingleVolatileGateway(source1);
             var application = new Application(gateway, gateway);
-            return Results.unwrap(runImpl(application)).unwrapOrElse(fail());
+            var unwrap = Results.unwrap(runImpl(application));
+            return unwrap.unwrapOrElseGet(Assertions::fail);
         } catch (CompileException e) {
             return fail(e);
         }
