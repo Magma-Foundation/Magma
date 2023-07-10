@@ -38,6 +38,17 @@ class CompilerTest {
         }
     }
 
+    @Test
+    void importSameParent() {
+        assertCompile("import parent.Child;import parent.Sibling",
+                "import { Child, Sibling } from parent");
+    }
+
+    @Test
+    void multiple() {
+        assertCompile("import first;import second", "import first;import second");
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void importWithGrandParent(String parent) {

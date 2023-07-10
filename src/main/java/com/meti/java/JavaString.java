@@ -1,9 +1,14 @@
 package com.meti.java;
 
+import com.meti.collect.Collector;
 import com.meti.collect.Index;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.iterate.Iterator;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public final class JavaString {
     private final String value;
@@ -14,6 +19,22 @@ public final class JavaString {
 
     public static JavaString empty() {
         return new JavaString("");
+    }
+
+    public static Collector<JavaString, Option<JavaString>> joining(final String delimiter) {
+        return new Collector<>() {
+            @Override
+            public Option<JavaString> initial() {
+                return new None<>();
+            }
+
+            @Override
+            public Option<JavaString> foldLeft(Option<JavaString> accumulated, JavaString element) {
+                return new Some<>(accumulated.map(value -> value
+                        .append(delimiter)
+                        .appendOwned(element)).unwrapOrElse(element));
+            }
+        };
     }
 
     public Option<Index> firstIndexOfChar(char c) {
@@ -66,5 +87,12 @@ public final class JavaString {
         return index == -1
                 ? new None<>()
                 : Some.apply(createIndex(index));
+    }
+
+    public Iterator<JavaString> split(String regex) {
+        return new JavaList<>(Arrays.stream(this.value.split(regex))
+                .map(JavaString::new)
+                .collect(Collectors.toList()))
+                .iter();
     }
 }

@@ -24,5 +24,4 @@ public class Results {
             throw option.unwrap();
         }
     }
-
 }

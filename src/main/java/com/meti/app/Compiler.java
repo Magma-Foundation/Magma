@@ -3,16 +3,14 @@ package com.meti.app;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.iterate.Iterators;
+import com.meti.iterate.ResultIterator;
 import com.meti.java.JavaString;
 
 import static com.meti.core.Options.$Option;
 
 public record Compiler(JavaString input) {
-    Result<JavaString, CompileException> compile() {
-        return compileImport().unwrapOrElseGet(() -> Ok.apply(JavaString.empty()));
-    }
-
-    private Option<Result<JavaString, CompileException>> compileImport() {
+    private static Option<Result<JavaString, CompileException>> compileImport(JavaString input) {
         return $Option(() -> {
             var importIndex = input
                     .firstIndexOfSlice("import ").$()
@@ -28,5 +26,19 @@ public record Compiler(JavaString input) {
                         .appendOwned(parent));
             }).unwrapOrElseGet(() -> input));
         });
+    }
+
+    Result<JavaString, CompileException> compile() {
+        return compileLine();
+    }
+
+    private Result<JavaString, CompileException> compileLine() {
+        return input.split(";")
+                .map(Compiler::compileImport)
+                .flatMap(Iterators::fromOption)
+                .into(ResultIterator::new)
+                .collectToResult(JavaString.joining(";\n"))
+                .mapValue(value -> value.unwrapOrElse(JavaString.empty()));
+
     }
 }
