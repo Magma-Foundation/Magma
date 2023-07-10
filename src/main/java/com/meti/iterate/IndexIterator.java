@@ -7,18 +7,24 @@ import com.meti.core.Some;
 
 public abstract class IndexIterator<T> extends AbstractIterator<T> {
     private final Index initial = new Index(0, length().unwrap());
-    private Index counter = initial;
+    private Option<Index> counter = new None<>();
 
     @Override
     public Option<T> head() {
-        var next = counter.nextExclusive().toTuple(initial);
-        if (next.a()) {
-            var value = apply(counter);
-            counter = next.b();
-            return new Some<>(value);
-        }
+        if (counter.isEmpty()) {
+            counter = new Some<>(initial);
+            return new Some<>(apply(initial));
+        } else {
+            var unwrapped = counter.unwrap();
+            var next = unwrapped.nextExclusive().toTuple(unwrapped);
+            if (next.a()) {
+                var value = apply(next.b());
+                counter = new Some<>(next.b());
+                return new Some<>(value);
+            }
 
-        return new None<>();
+            return new None<>();
+        }
     }
 
     protected abstract T apply(Index index);

@@ -9,6 +9,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
     public Tuple<Boolean, T> toTuple(T other) {
         return new Tuple<>(true, value);
     }

@@ -50,11 +50,6 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
             private Iterator<R> current = first;
 
             @Override
-            public void forEach(Consumer<R> consumer) {
-
-            }
-
-            @Override
             public Option<R> head() {
                 while (true) {
                     var head = current.head();

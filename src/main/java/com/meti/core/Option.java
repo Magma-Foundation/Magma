@@ -17,4 +17,6 @@ public interface Option<T> {
     T unwrapOrElseGet(Supplier<T> supplier);
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+    boolean isEmpty();
 }
