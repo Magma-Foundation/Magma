@@ -4,13 +4,14 @@ import com.meti.core.Result;
 import com.meti.core.Results;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
+import com.meti.java.List;
 import com.meti.nio.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
 public record NIOSource(Location parent, Location location) {
-    JavaList<JavaString> computePackage() {
+    List<JavaString> computePackage() {
         var list = parent.relativize(location)
                 .iter()
                 .map(Location::asString)

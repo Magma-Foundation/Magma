@@ -44,7 +44,7 @@ public class ApplicationTest {
             final NIOPath source1 = new NIOPath(source);
             var gateway = new SingleVolatileGateway(source1);
             var application = new Application(gateway, gateway);
-            return Results.unwrap(runImpl(application)).unwrapOrPanic();
+            return Results.unwrap(runImpl(application)).unwrapOrElse(fail());
         } catch (CompileException e) {
             return fail(e);
         }

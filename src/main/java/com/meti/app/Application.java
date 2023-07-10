@@ -11,12 +11,12 @@ import com.meti.java.NonEmptyJavaList;
 import static com.meti.core.Results.$Result;
 
 public final class Application {
-    private final Sources sourceSources;
-    private final Targets targetSources;
+    private final Sources sources;
+    private final Targets targets;
 
-    public Application(Sources sourceSources, Targets targetSources) {
-        this.sourceSources = sourceSources;
-        this.targetSources = targetSources;
+    public Application(Sources sources, Targets targets) {
+        this.sources = sources;
+        this.targets = targets;
     }
 
     private static Result<Option<JavaString>, CompileException> compile(JavaString line) {
@@ -46,7 +46,7 @@ public final class Application {
     }
 
     Result<JavaSet<NIOTarget>, CompileException> compileAll() {
-        return sourceSources.collect()
+        return sources.collect()
                 .mapErr(CompileException::new)
                 .mapValueToResult(nioSourceJavaSet -> nioSourceJavaSet.iter()
                         .map(this::compile)
@@ -70,7 +70,7 @@ public final class Application {
                     .into(ThrowableResult::new).$()
                     .unwrapOrElse(JavaString.empty());
 
-            var target = targetSources.resolve(package_, other)
+            var target = targets.resolve(package_, other)
                     .mapErr(CompileException::new)
                     .into(ThrowableResult::new)
                     .$();

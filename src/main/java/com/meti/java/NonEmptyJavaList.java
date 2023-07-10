@@ -12,7 +12,7 @@ public class NonEmptyJavaList<T> extends JavaList<T> {
         super(values);
     }
 
-    public static <T> Option<NonEmptyJavaList<T>> from(JavaList<T> list) {
+    public static <T> Option<NonEmptyJavaList<T>> from(com.meti.java.List<T> list) {
         return list.isEmpty()
                 ? new None<>()
                 : new Some<>(new NonEmptyJavaList<>(list.unwrap()));

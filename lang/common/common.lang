@@ -1,3 +1,0 @@
-whitespace : {
-    character = " " | "\t" | "\n"
-} = character | whitespace
