@@ -38,4 +38,16 @@ public final class JavaString {
     public boolean isEmpty() {
         return this.value.length() == 0;
     }
+
+    public boolean startsWith(String slice) {
+        if (slice.length() <= this.value.length()) {
+            for (int i = 0; i < slice.length(); i++) {
+                if (slice.charAt(i) != this.value.charAt(i)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

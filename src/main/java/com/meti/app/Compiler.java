@@ -6,6 +6,9 @@ import com.meti.java.JavaString;
 
 public record Compiler(JavaString input) {
     Result<JavaString, CompileException> compile() {
+        if (input.startsWith("import ")) {
+            return Ok.apply(input);
+        }
         return Ok.apply(JavaString.empty());
     }
 }
