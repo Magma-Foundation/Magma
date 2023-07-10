@@ -14,7 +14,7 @@ public record NIOSource(Location parent, Location location) {
     List<JavaString> computePackage() {
         var list = parent.relativize(location)
                 .iter()
-                .map(Location::asString)
+                .map(Location::findFileNameAsString)
                 .collect(JavaList.asList());
 
         return list.lastIndexOptionally()
@@ -24,7 +24,7 @@ public record NIOSource(Location parent, Location location) {
 
     JavaString computeName() {
         var fileName = location.last()
-                .map(Location::asString)
+                .map(Location::findFileNameAsString)
                 .unwrapOrElse(JavaString.empty());
 
         return fileName.firstIndexOfChar('.')

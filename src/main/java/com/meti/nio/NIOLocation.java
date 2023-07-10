@@ -20,6 +20,11 @@ public class NIOLocation implements Location {
 
     @Override
     public JavaString asString() {
+        return new JavaString(value.toString());
+    }
+
+    @Override
+    public JavaString findFileNameAsString() {
         return new JavaString(value.getFileName().toString());
     }
 

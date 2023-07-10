@@ -10,6 +10,8 @@ import java.util.function.Function;
 public interface Location {
     JavaString asString();
 
+    JavaString findFileNameAsString();
+
     Location resolveSibling(JavaString other);
 
     Path unwrap();
