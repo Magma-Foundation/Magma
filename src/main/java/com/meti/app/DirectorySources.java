@@ -12,11 +12,15 @@ import java.io.IOException;
 public record DirectorySources(NIODirectory directory) implements Sources {
     @Override
     public Result<JavaSet<NIOSource>, IOException> collect() {
-        return directory.walk().mapValue(set -> set.iter()
-                .filter(path -> path.isExtendedBy("java"))
-                .map(NIOPath::existsAsFile)
-                .flatMap(Iterators::fromOption)
-                .map((NIOFile parent) -> new NIOSource(directory, parent))
-                .collect(JavaSet.asSet()));
+        return directory.walk().mapValue(set -> {
+            System.out.printf("Located '%d' sources overall.%n", set.size().value());
+
+            return set.iter()
+                    .filter(path -> path.isExtendedBy("java"))
+                    .map(NIOPath::existsAsFile)
+                    .flatMap(Iterators::fromOption)
+                    .map((NIOFile parent) -> new NIOSource(directory, parent))
+                    .collect(JavaSet.asSet());
+        });
     }
 }
