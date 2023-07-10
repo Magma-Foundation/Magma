@@ -11,8 +11,8 @@ public class ThrowableResult<T, E extends Exception> {
         var value = parent.value();
         var err = parent.err();
 
-        if (value.isPresent()) return value.unwrapOrPanic();
-        if (err.isPresent()) throw err.unwrapOrPanic();
+        if (value.isPresent()) return value.unwrap();
+        if (err.isPresent()) throw err.unwrap();
         throw new RuntimeException("No value or error present?");
     }
 }

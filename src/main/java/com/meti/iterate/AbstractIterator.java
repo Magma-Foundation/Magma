@@ -55,7 +55,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
         while (true) {
             var head = head();
             if (head.isPresent()) {
-                current = folder.apply(current, head.unwrapOrPanic());
+                current = folder.apply(current, head.unwrap());
             } else {
                 break;
             }

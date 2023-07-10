@@ -5,8 +5,8 @@ public class Results {
         var value = result.value();
         var err = result.err();
 
-        if (value.isPresent()) return value.unwrapOrPanic();
-        if (err.isPresent()) throw err.unwrapOrPanic();
+        if (value.isPresent()) return value.unwrap();
+        if (err.isPresent()) throw err.unwrap();
         throw new RuntimeException("Neither the unwrap or err is present.");
     }
 
@@ -21,7 +21,7 @@ public class Results {
 
     public static <E extends Exception> void throwOption(Option<E> option) throws E {
         if (option.isPresent()) {
-            throw option.unwrapOrPanic();
+            throw option.unwrap();
         }
     }
 

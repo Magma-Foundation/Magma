@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
     @Override
-    public T unwrapOrPanic() {
+    public T unwrap() {
         throw new RuntimeException("No unwrap present.");
     }
 
