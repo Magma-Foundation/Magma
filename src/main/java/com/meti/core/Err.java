@@ -30,6 +30,21 @@ public record Err<T, E>(E inner) implements Result<T, E> {
 
     @Override
     public void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer) {
-         errorConsumer.accept(inner);
+        errorConsumer.accept(inner);
+    }
+
+    @Override
+    public <R> R into(Function<Result<T, E>, R> mapper) {
+        return mapper.apply(this);
+    }
+
+    @Override
+    public <R> R match(Function<T, R> onOk, Function<E, R> onErr) {
+        return onErr.apply(inner);
+    }
+
+    @Override
+    public <R> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Err<>(mapper.apply(inner));
     }
 }

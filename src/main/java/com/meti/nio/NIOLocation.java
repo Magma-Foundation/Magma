@@ -48,7 +48,7 @@ public class NIOLocation implements Location {
 
             @Override
             protected Index length() {
-                return new Index(value.getNameCount());
+                return new Index(value.getNameCount(), value.getNameCount());
             }
         };
     }

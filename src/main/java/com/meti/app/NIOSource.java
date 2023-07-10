@@ -4,19 +4,20 @@ import com.meti.core.Result;
 import com.meti.core.Results;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
+import com.meti.java.List;
 import com.meti.nio.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
 public record NIOSource(Location parent, Location location) {
-    JavaList<JavaString> computePackage() {
+    List<JavaString> computePackage() {
         var list = parent.relativize(location)
                 .iter()
                 .map(Location::asString)
                 .collect(JavaList.asList());
 
-        return list.lastIndex()
+        return list.lastIndexOptionally()
                 .map(list::sliceTo)
                 .unwrapOrElse(list);
     }
@@ -32,6 +33,6 @@ public record NIOSource(Location parent, Location location) {
     }
 
     public Result<JavaString, IOException> read() {
-        return Results.asResult(() -> new JavaString(Files.readString(this.location.unwrap())));
+        return Results.$Result(() -> new JavaString(Files.readString(this.location.unwrap())));
     }
 }

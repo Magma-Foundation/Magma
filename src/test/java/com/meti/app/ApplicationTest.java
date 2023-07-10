@@ -20,7 +20,7 @@ public class ApplicationTest {
     private final Path source = Paths.get(".", "Main.java");
     private final Path target = Paths.get(".", "Main.mgs");
 
-    static Result<Option<Path>, IOException> runImpl(Application application) {
+    static Result<Option<Path>, CompileException> runImpl(Application application) {
         return application.compileAll().mapValue(set -> set.iter().head())
                 .mapValue(s -> s.map((NIOTarget value) -> NIOPath.from(value.path())))
                 .mapValue(s -> s.map(Location::unwrap));
@@ -39,11 +39,15 @@ public class ApplicationTest {
     }
 
     private Path runWithSource() throws IOException {
-        Files.createFile(source);
-        final NIOPath source1 = new NIOPath(source);
-        var gateway = new SingleVolatileGateway(source1);
-        var application = new Application(gateway, gateway);
-        return Results.unwrap(runImpl(application)).unwrapOrPanic();
+        try {
+            Files.createFile(source);
+            final NIOPath source1 = new NIOPath(source);
+            var gateway = new SingleVolatileGateway(source1);
+            var application = new Application(gateway, gateway);
+            return Results.unwrap(runImpl(application)).unwrapOrElse(fail());
+        } catch (CompileException e) {
+            return fail(e);
+        }
     }
 
     @Test
@@ -52,7 +56,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void generatesNothing() throws IOException {
+    void generatesNothing() throws CompileException {
         var source1 = new NIOPath(source);
         var gateway = new SingleVolatileGateway(source1);
         var application = new Application(gateway, gateway);

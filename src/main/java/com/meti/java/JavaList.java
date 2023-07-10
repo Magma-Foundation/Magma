@@ -10,33 +10,34 @@ import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
-public class JavaList<T> {
-    private final List<T> values;
+public class JavaList<T> implements com.meti.java.List<T> {
+    protected final List<T> values;
 
     public JavaList(List<T> values) {
         this.values = values;
     }
 
-    public static <T> Collector<T, JavaList<T>> asList() {
+    public static <T> Collector<T, com.meti.java.List<T>> asList() {
         return new Collector<>() {
             @Override
-            public JavaList<T> initial() {
+            public com.meti.java.List<T> initial() {
                 return new JavaList<>(new ArrayList<>());
             }
 
             @Override
-            public JavaList<T> foldLeft(JavaList<T> accumulated, T element) {
+            public com.meti.java.List<T> foldLeft(com.meti.java.List<T> accumulated, T element) {
                 return accumulated.add(element);
             }
         };
     }
 
-    private JavaList<T> add(T element) {
-        this.values.add(element);
-        return this;
+    public static <T> com.meti.java.List<T> empty() {
+        return new JavaList<>(new ArrayList<>());
     }
 
+    @Override
     public Iterator<T> iter() {
         return new IndexIterator<>() {
             @Override
@@ -46,20 +47,48 @@ public class JavaList<T> {
 
             @Override
             protected Index length() {
-                return new Index(values.size());
+                return new Index(values.size(), values.size());
             }
         };
     }
 
-    public Option<Index> lastIndex() {
+    @Override
+    public Option<Index> lastIndexOptionally() {
         if (values.isEmpty()) {
             return new None<>();
         } else {
-            return Some.apply(new Index(values.size() - 1));
+            return Some.apply(new Index(values.size() - 1, values.size()));
         }
     }
 
-    public JavaList<T> sliceTo(Index extent) {
+    @Override
+    public com.meti.java.List<T> sliceTo(Index extent) {
         return new JavaList<>(values.subList(0, extent.value()));
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.values.isEmpty();
+    }
+
+    @Override
+    public <R> R into(Function<com.meti.java.List<T>, R> mapper) {
+        return mapper.apply(this);
+    }
+
+    @Override
+    public List<T> unwrap() {
+        return this.values;
+    }
+
+    @Override
+    public JavaList<T> sliceFrom(Index index) {
+        return new JavaList<>(this.values.subList(index.unwrap(), this.values.size()));
+    }
+
+    @Override
+    public com.meti.java.List<T> add(T element) {
+        this.values.add(element);
+        return this;
     }
 }

@@ -4,7 +4,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface Option<T> {
-    T unwrapOrPanic();
+    T unwrap();
 
     boolean isPresent();
 

@@ -24,7 +24,7 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
-    public T unwrapOrPanic() {
+    public T unwrap() {
         return value;
     }
 

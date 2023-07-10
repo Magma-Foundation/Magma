@@ -2,8 +2,8 @@ package com.meti.app;
 
 import com.meti.core.Err;
 import com.meti.core.Result;
-import com.meti.java.JavaList;
 import com.meti.java.JavaString;
+import com.meti.java.List;
 import com.meti.nio.Location;
 import com.meti.nio.NIOPath;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public record DirectoryTargets(Location root) implements Targets {
     @Override
-    public Result<NIOTarget, IOException> resolve(JavaList<JavaString> package_, JavaString name) {
+    public Result<NIOTarget, IOException> resolve(List<JavaString> package_, JavaString name) {
         var targetPath = package_.iter()
                 .foldLeft(root, Location::resolve)
                 .resolve(name)
