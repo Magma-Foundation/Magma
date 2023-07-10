@@ -4,6 +4,7 @@ import com.meti.collect.Collector;
 import com.meti.core.Option;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -21,5 +22,9 @@ public interface Iterator<T> {
     <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
 
     Iterator<T> filter(Predicate<T> predicate);
+
+    Iterator<T> take(int count);
+
+    void forEach(Consumer<T> consumer);
 }
 

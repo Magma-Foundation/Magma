@@ -5,6 +5,7 @@ import com.meti.core.None;
 import com.meti.core.Option;
 
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -15,9 +16,43 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     }
 
     @Override
+    public void forEach(Consumer<T> consumer) {
+        while (true) {
+            var head = head();
+            if (head.isPresent()) {
+                consumer.accept(head.unwrap());
+            } else {
+                break;
+            }
+        }
+    }
+
+    @Override
+    public Iterator<T> take(int count) {
+        return new AbstractIterator<>() {
+            private int counter = 0;
+
+            @Override
+            public Option<T> head() {
+                if (counter < count) {
+                    counter++;
+                    return AbstractIterator.this.head();
+                } else {
+                    return new None<>();
+                }
+            }
+        };
+    }
+
+    @Override
     public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
         return head().map(mapper).<Iterator<R>>map(first -> new AbstractIterator<>() {
             private Iterator<R> current = first;
+
+            @Override
+            public void forEach(Consumer<R> consumer) {
+
+            }
 
             @Override
             public Option<R> head() {

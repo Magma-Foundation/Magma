@@ -14,6 +14,7 @@ public record DirectorySources(NIODirectory directory) implements Sources {
     public Result<JavaSet<NIOSource>, IOException> collect() {
         return directory.walk().mapValue(set -> {
             System.out.printf("Located '%d' sources overall.%n", set.size().value());
+            set.iter().take(5).forEach(path -> System.out.println(" - " + path.asString().unwrap()));
 
             return set.iter()
                     .filter(path -> path.isExtendedBy("java"))
