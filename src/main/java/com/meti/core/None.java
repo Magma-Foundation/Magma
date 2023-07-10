@@ -5,6 +5,11 @@ import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
     @Override
+    public T $() throws IntentionalException {
+        throw new IntentionalException();
+    }
+
+    @Override
     public T unwrap() {
         throw new RuntimeException("No unwrap present.");
     }

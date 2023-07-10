@@ -26,12 +26,22 @@ class CompilerTest {
     }
 
     private static void assertCompile(String value) {
+        assertCompile(value, value);
+    }
+
+    private static void assertCompile(String input, String output) {
         try {
-            var importTest = compileImpl(new JavaString(value)).unwrap();
-            assertEquals(value, importTest);
+            var actual = compileImpl(new JavaString(input)).unwrap();
+            assertEquals(output, actual);
         } catch (CompileException e) {
             fail(e);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void importWithParent(String parent) {
+        assertCompile("import " + parent + ".test", "import { test } from " + parent);
     }
 
     @ParameterizedTest

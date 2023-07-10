@@ -4,6 +4,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface Option<T> {
+    //This should eventually be an extension method
+    T $();
+
     T unwrap();
 
     boolean isPresent();

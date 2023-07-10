@@ -25,7 +25,4 @@ public class Results {
         }
     }
 
-    public interface Generator<T, E extends Exception> {
-        T generate() throws E;
-    }
 }

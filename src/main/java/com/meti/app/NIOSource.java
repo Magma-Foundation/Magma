@@ -28,7 +28,7 @@ public record NIOSource(Location parent, Location location) {
                 .unwrapOrElse(JavaString.empty());
 
         return fileName.firstIndexOfChar('.')
-                .map(fileName::sliceToEnd)
+                .map(fileName::sliceTo)
                 .unwrapOrElse(fileName);
     }
 

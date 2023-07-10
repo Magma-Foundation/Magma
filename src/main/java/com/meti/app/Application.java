@@ -28,7 +28,7 @@ public final class Application {
     private Result<NIOTarget, CompileException> compile(NIOSource source) {
         return Results.$Result(() -> {
             var package_ = source.computePackage();
-            var other = source.computeName().concat(".mgs");
+            var other = source.computeName().append(".mgs");
             var input = source.read()
                     .mapErr(CompileException::new)
                     .into(ThrowableResult::new).$();

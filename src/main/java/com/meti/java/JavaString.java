@@ -20,14 +20,14 @@ public final class JavaString {
         var index = this.value.indexOf(c);
         return index == -1
                 ? new None<>()
-                : Some.apply(new Index(index, this.value.length()));
+                : Some.apply(createIndex(index));
     }
 
-    public JavaString sliceToEnd(Index index) {
-        return new JavaString(value.substring(0, index.unwrap()));
+    public JavaString sliceFrom(Index index) {
+        return new JavaString(value.substring(index.unwrap()));
     }
 
-    public JavaString concat(String value) {
+    public JavaString append(String value) {
         return new JavaString(this.value + value);
     }
 
@@ -39,15 +39,25 @@ public final class JavaString {
         return this.value.length() == 0;
     }
 
-    public boolean startsWith(String slice) {
-        if (slice.length() <= this.value.length()) {
-            for (int i = 0; i < slice.length(); i++) {
-                if (slice.charAt(i) != this.value.charAt(i)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
+    public JavaString sliceTo(Index index) {
+        return new JavaString(this.value.substring(0, index.value()));
+    }
+
+    public JavaString appendOwned(JavaString child) {
+        return append(child.value);
+    }
+
+    public Option<Index> firstIndexOfSlice(String slice) {
+        var index = this.value.indexOf(slice);
+        if (index == -1) return new None<>();
+        return Some.apply(createIndex(index));
+    }
+
+    private Index createIndex(int index) {
+        return new Index(index, this.value.length());
+    }
+
+    public JavaString sliceBetween(Index start, Index end) {
+        return new JavaString(this.value.substring(start.value(), end.value()));
     }
 }

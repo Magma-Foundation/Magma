@@ -29,6 +29,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public T $() throws IntentionalException {
+        return value;
+    }
+
+    @Override
     public T unwrap() {
         return value;
     }
