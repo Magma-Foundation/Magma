@@ -5,32 +5,30 @@ import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.core.Tuple;
 import com.meti.iterate.ResultIterator;
-import com.meti.java.JavaList;
-import com.meti.java.JavaMap;
 import com.meti.java.JavaString;
 import com.meti.java.List;
 
 import static com.meti.core.Options.$Option;
 
 public record Compiler(JavaString input) {
-    private static Result<JavaMap<JavaString, List<JavaString>>, CompileException> compileImport(
-            JavaMap<JavaString, List<JavaString>> state, JavaString input) {
+    private static Result<State, CompileException> compileImport(
+            State state1, JavaString input) {
         return $Option(() -> {
             var importIndex = input
                     .firstIndexOfSlice("import ").$()
                     .nextExclusive("import ".length()).$();
 
-            return Ok.<JavaMap<JavaString, List<JavaString>>, CompileException>apply(input.lastIndexOfChar('.').map(separator -> {
+            return Ok.<State, CompileException>apply(input.lastIndexOfChar('.').map(separator -> {
                 var parent = input.sliceBetween(importIndex, separator);
                 var child = input.sliceFrom(separator.nextExclusive().$());
 
-                return state.insertOrMap(parent, list -> list.add(child), () -> JavaList.of(child));
-            }).unwrapOrElseGet(() -> state));
-        }).unwrapOrElse(new Ok<>(state));
+                return state1.define(parent, child);
+            }).unwrapOrElseGet(() -> state1));
+        }).unwrapOrElse(new Ok<>(state1));
     }
 
-    private static Result<JavaString, CompileException> renderState(JavaMap<JavaString, List<JavaString>> state) {
-        return state.iter()
+    private static Result<JavaString, CompileException> renderState(State state) {
+        return state.imports().iter()
                 .map(Compiler::renderImport)
                 .into(ResultIterator::new)
                 .collectToResult(JavaString.joining(";\n"))
@@ -59,7 +57,7 @@ public record Compiler(JavaString input) {
 
     Result<JavaString, CompileException> compile() {
         return input.split(";")
-                .foldLeftToResult(new JavaMap<>(), Compiler::compileImport)
+                .foldLeftToResult(new State(), Compiler::compileImport)
                 .mapValueToResult(Compiler::renderState);
     }
 }
