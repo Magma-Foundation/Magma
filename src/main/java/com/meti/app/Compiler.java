@@ -4,9 +4,10 @@ import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.core.Tuple;
-import com.meti.iterate.ResultIterator;
+import com.meti.java.JavaList;
 import com.meti.java.JavaString;
 import com.meti.java.List;
+import com.meti.java.NonEmptyJavaList;
 
 import static com.meti.core.Options.$Option;
 
@@ -18,21 +19,18 @@ public record Compiler(JavaString input) {
                     .firstIndexOfSlice("import ").$()
                     .nextExclusive("import ".length()).$();
 
-            return Ok.<State, CompileException>apply(input.lastIndexOfChar('.').map(separator -> {
-                var parent = input.sliceBetween(importIndex, separator);
-                var child = input.sliceFrom(separator.nextExclusive().$());
-
-                return state1.define(parent, child);
-            }).unwrapOrElseGet(() -> state1));
+            return input.sliceFrom(importIndex)
+                    .split("\\.")
+                    .collect(JavaList.asList())
+                    .into(NonEmptyJavaList::from)
+                    .map(state1::define)
+                    .map(Ok::<State, CompileException>apply)
+                    .unwrapOrElseGet(() -> Err.apply(new CompileException("Parent cannot be empty.")));
         }).unwrapOrElse(new Ok<>(state1));
     }
 
     private static Result<JavaString, CompileException> renderState(State state) {
-        return state.imports().iter()
-                .map(Compiler::renderImport)
-                .into(ResultIterator::new)
-                .collectToResult(JavaString.joining(";\n"))
-                .mapValue(value -> value.unwrapOrElse(JavaString.empty()));
+        return Ok.apply(JavaString.empty());
     }
 
     private static Result<JavaString, CompileException> renderImport(Tuple<JavaString, List<JavaString>> key) {

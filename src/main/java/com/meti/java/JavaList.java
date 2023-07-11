@@ -33,8 +33,15 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
-    public static <T> JavaList<T> of(T child) {
+    @SafeVarargs
+    public static <T> JavaList<T> of(T... child) {
         return new JavaList<>(List.of(child));
+    }
+
+    @Override
+    public com.meti.java.List<T> addAll(JavaList<T> others) {
+        values.addAll(others.values);
+        return this;
     }
 
     @Override

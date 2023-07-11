@@ -56,4 +56,8 @@ public record JavaSet<T>(Set<T> value) {
     public Index size() {
         return new Index(this.value.size(), this.value.size());
     }
+
+    public boolean isEmpty() {
+        return this.value.isEmpty();
+    }
 }

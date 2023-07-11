@@ -6,4 +6,6 @@ public interface NonEmptyList<T> extends List<T> {
     Index lastIndex();
 
     T first();
+
+    List<T> sliceWithoutFirst();
 }

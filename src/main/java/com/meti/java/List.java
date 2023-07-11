@@ -22,4 +22,6 @@ public interface List<T> {
     java.util.List<T> unwrap();
 
     Index size();
+
+    List<T> addAll(JavaList<T> others);
 }

@@ -1,16 +1,15 @@
 package com.meti.app;
 
-import com.meti.java.JavaList;
-import com.meti.java.JavaMap;
 import com.meti.java.JavaString;
-import com.meti.java.List;
+import com.meti.java.NonEmptyList;
 
-public record State(JavaMap<JavaString, List<JavaString>> imports) {
+public record State(Import root) {
     public State() {
-        this(new JavaMap<>());
+        this(new Import());
     }
 
-    State define(JavaString parent, JavaString child) {
-        return new State(imports().insertOrMap(parent, list -> list.add(child), () -> JavaList.of(child)));
+    State define(NonEmptyList<JavaString> segments) {
+        return new State(root.define(segments));
     }
+
 }
