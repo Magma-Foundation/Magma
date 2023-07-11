@@ -8,6 +8,7 @@ import com.meti.core.Some;
 import com.meti.iterate.Iterator;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class JavaString {
@@ -35,6 +36,19 @@ public final class JavaString {
                         .appendOwned(element)).unwrapOrElse(element));
             }
         };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JavaString that = (JavaString) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     public Option<Index> firstIndexOfChar(char c) {

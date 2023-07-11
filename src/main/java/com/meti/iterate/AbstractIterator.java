@@ -2,7 +2,9 @@ package com.meti.iterate;
 
 import com.meti.collect.Collector;
 import com.meti.core.None;
+import com.meti.core.Ok;
 import com.meti.core.Option;
+import com.meti.core.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -13,6 +15,11 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
     public <C> C collect(Collector<T, C> collector) {
         return foldLeft(collector.initial(), collector::foldLeft);
+    }
+
+    @Override
+    public <C, E> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder) {
+        return foldLeft(Ok.apply(initial), (result, t) -> result.mapValueToResult(s -> folder.apply(s, t)));
     }
 
     @Override

@@ -16,7 +16,7 @@ public class JavaList<T> implements com.meti.java.List<T> {
     protected final List<T> values;
 
     public JavaList(List<T> values) {
-        this.values = values;
+        this.values = new ArrayList<>(values);
     }
 
     public static <T> Collector<T, com.meti.java.List<T>> asList() {
@@ -33,8 +33,8 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
-    public static <T> com.meti.java.List<T> empty() {
-        return new JavaList<>(new ArrayList<>());
+    public static <T> JavaList<T> of(T child) {
+        return new JavaList<>(List.of(child));
     }
 
     @Override
@@ -82,8 +82,8 @@ public class JavaList<T> implements com.meti.java.List<T> {
     }
 
     @Override
-    public JavaList<T> sliceFrom(Index index) {
-        return new JavaList<>(this.values.subList(index.unwrap(), this.values.size()));
+    public Index size() {
+        return new Index(this.values.size(), this.values.size());
     }
 
     @Override

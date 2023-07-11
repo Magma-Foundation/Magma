@@ -2,6 +2,7 @@ package com.meti.iterate;
 
 import com.meti.collect.Collector;
 import com.meti.core.Option;
+import com.meti.core.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -9,6 +10,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Iterator<T> {
+    <C, E> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder);
+
     <C> C foldLeft(C initial, BiFunction<C, T, C> folder);
 
     <R> Iterator<R> map(Function<T, R> mapper);

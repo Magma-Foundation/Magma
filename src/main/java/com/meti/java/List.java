@@ -21,5 +21,5 @@ public interface List<T> {
 
     java.util.List<T> unwrap();
 
-    JavaList<T> sliceFrom(Index index);
+    Index size();
 }
