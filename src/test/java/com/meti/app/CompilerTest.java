@@ -40,7 +40,7 @@ class CompilerTest {
 
     @Test
     void importCousins() {
-        assertCompile("import parent.Child;import grand.pibling.Cousin",
+        assertCompile("import grand.parent.Child;import grand.pibling.Cousin",
                 "import {{ Child } from parent, { Cousin } from pibling } from grand");
     }
 
