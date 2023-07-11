@@ -59,4 +59,9 @@ public class JavaMap<K, V> {
             return new None<V>();
         }
     }
+
+    public JavaMap<K, V> insert(K key, V value) {
+        this.map.put(key, value);
+        return this;
+    }
 }

@@ -11,6 +11,6 @@ record Import(JavaMap<JavaString, JavaSet<Import>> children) {
     }
 
     public Import define(NonEmptyList<JavaString> segments) {
-        return this;
+        return new Import(children.insert(segments.first(), JavaSet.empty()));
     }
 }

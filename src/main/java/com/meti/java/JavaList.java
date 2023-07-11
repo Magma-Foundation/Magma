@@ -38,6 +38,10 @@ public class JavaList<T> implements com.meti.java.List<T> {
         return new JavaList<>(List.of(child));
     }
 
+    public static <T> com.meti.java.List<T> empty() {
+        return new JavaList<>(new ArrayList<>());
+    }
+
     @Override
     public com.meti.java.List<T> addAll(JavaList<T> others) {
         values.addAll(others.values);

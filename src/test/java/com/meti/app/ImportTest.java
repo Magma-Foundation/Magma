@@ -11,7 +11,8 @@ class ImportTest {
     @Test
     void define() {
         var key = new JavaString("test");
-        var children = new Import().define(NonEmptyJavaList.ofNonEmpty(key))
+        var children = new Import()
+                .define(NonEmptyJavaList.ofNonEmpty(key))
                 .children();
 
         assertTrue(children.apply(key).unwrap().isEmpty());
