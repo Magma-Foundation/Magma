@@ -39,6 +39,12 @@ class CompilerTest {
     }
 
     @Test
+    void importCousins() {
+        assertCompile("import parent.Child;import grand.pibling.Cousin",
+                "import {{ Child } from parent, { Cousin } from pibling } from grand");
+    }
+
+    @Test
     void importSameGrandParent() {
         assertCompile("import parent.Child;import grand.parent.Sibling",
                 "import { Child, Sibling } from grand.parent");
