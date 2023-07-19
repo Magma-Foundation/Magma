@@ -10,14 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ImportTest {
     private static void assertRender(String output, Function<Import, Import> mapper) {
-        var root = new Import(from("parent"));
-        var parent = mapper.apply(root).render();
-        assertEquals(output, parent.unwrap());
+        assertRender("parent", output, mapper);
+    }
+
+    private static void assertRender(String parent, String output, Function<Import, Import> mapper) {
+        var root = new Import(from(parent));
+        var rendered = mapper.apply(root).render();
+        assertEquals(output, rendered.unwrap());
     }
 
     @Test
     void value() {
-        assertRender("parent", import_ -> import_);
+        assertRender("value", "value", import_ -> import_);
     }
 
     @Test
@@ -30,5 +34,12 @@ class ImportTest {
         assertRender("{ Child, Sibling } from parent", import_ -> import_
                 .addPath(ofList(from("Child")))
                 .addPath(ofList(from("Sibling"))));
+    }
+
+    @Test
+    void duplicateSiblings() {
+        assertRender("{ Child } from parent", import_ -> import_
+                .addPath(ofList(from("Child")))
+                .addPath(ofList(from("Child"))));
     }
 }
