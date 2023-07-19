@@ -1,7 +1,6 @@
 package com.meti.app;
 
 import com.meti.core.Result;
-import com.meti.core.Results;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
 import com.meti.java.List;
@@ -10,6 +9,8 @@ import com.meti.nio.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;
+
+import static com.meti.core.Results.$Result;
 
 /*
 import {
@@ -39,7 +40,7 @@ public record NIOSource(Location parent, Location location) {
     String_ computeName() {
         var fileName = location.last()
                 .map(Location::findFileNameAsString)
-                .unwrapOrElse(JavaString.empty());
+                .unwrapOrElse(JavaString.Empty);
 
         return fileName.firstIndexOfChar('.')
                 .map(fileName::sliceTo)
@@ -47,6 +48,6 @@ public record NIOSource(Location parent, Location location) {
     }
 
     public Result<String_, IOException> read() {
-        return Results.$Result(() -> JavaString.from(Files.readString(this.location.unwrap())));
+        return $Result(IOException.class, () -> JavaString.from(Files.readString(this.location.unwrap())));
     }
 }

@@ -3,8 +3,10 @@ package com.meti.app;
 import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
-import com.meti.core.Tuple;
-import com.meti.java.*;
+import com.meti.java.JavaList;
+import com.meti.java.JavaString;
+import com.meti.java.NonEmptyJavaList;
+import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
 
@@ -27,27 +29,11 @@ public record Compiler(String_ input) {
     }
 
     private static Result<String_, CompileException> renderState(State state) {
-        return Ok.apply(JavaString.empty());
-    }
-
-    private static Result<String_, CompileException> renderImport(Tuple<String_, List<String_>> key) {
-        var parent = key.a();
-        var children = key.b();
-        return children.iter()
-                .collect(JavaString.joining(JavaString.from(", ")))
-                .map(joinedChildren -> Ok.<String_, CompileException>apply(renderValidImport(parent, joinedChildren)))
-                .unwrapOrElseGet(() -> {
-                    var format = "No children present of size '%d' for parent '%s'.";
-                    var message = format.formatted(children.size().unwrap(), parent.unwrap());
-                    return new Err<>(new CompileException(message));
-                });
-    }
-
-    private static String_ renderValidImport(String_ parent, String_ joinedChildren) {
-        return JavaString.from("import { ")
-                .appendOwned(joinedChildren)
-                .append(" } from ")
-                .appendOwned(parent);
+        return Ok.apply(state.root()
+                .children().iter()
+                .map(Import::render)
+                .collect(JavaString.joining(JavaString.from("")))
+                .unwrapOrElse(JavaString.Empty));
     }
 
     Result<String_, CompileException> compile() {

@@ -1,13 +1,19 @@
 package com.meti.app;
 
-import com.meti.java.JavaList;
-import com.meti.java.List;
-import com.meti.java.NonEmptyJavaList;
-import com.meti.java.String_;
+import com.meti.java.*;
 
 public record Import(String_ value, List<Import> children) {
     public Import(String_ value) {
         this(value, JavaList.empty());
+    }
+
+    String_ render() {
+        var unwrap = children.iter()
+                .map(Import::render)
+                .collect(JavaString.joining(JavaString.from(", ")))
+                .unwrap();
+
+        return JavaString.from("{" + unwrap + "} from " + value);
     }
 
     public Import addChild(Import child) {

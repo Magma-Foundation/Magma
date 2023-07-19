@@ -10,12 +10,16 @@ public class Results {
         throw new RuntimeException("Neither the unwrap or err is present.");
     }
 
-    public static <T, E extends Exception> Result<T, E> $Result(Generator<T, E> generator) {
+    public static <T, E extends Exception> Result<T, E> $Result(Class<E> eClass, Generator<T, E> generator) {
         try {
             return Ok.apply(generator.generate());
         } catch (Exception e) {
-            //noinspection unchecked
-            return Err.apply((E) e);
+            try {
+                return Err.apply(eClass.cast(e));
+            } catch (ClassCastException ex) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
     }
 

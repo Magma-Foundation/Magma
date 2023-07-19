@@ -6,7 +6,7 @@ import com.meti.java.String_;
 
 public record State(Import root) {
     public State() {
-        this(new Import(JavaString.empty()));
+        this(new Import(JavaString.Empty));
     }
 
     State define(NonEmptyList<String_> segments) {

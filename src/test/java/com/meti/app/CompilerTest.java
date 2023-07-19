@@ -82,7 +82,7 @@ class CompilerTest {
 
     @Test
     void empty() {
-        assertEmpty(JavaString.empty());
+        assertEmpty(JavaString.Empty);
     }
 
     @ParameterizedTest

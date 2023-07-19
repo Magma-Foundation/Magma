@@ -33,7 +33,11 @@ public record Err<T, E>(E inner) implements Result<T, E> {
 
     @Override
     public void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer) {
-        errorConsumer.accept(inner);
+        try {
+            errorConsumer.accept(inner);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,10 +1,15 @@
 package com.meti.nio;
 
-import com.meti.core.*;
+import com.meti.core.None;
+import com.meti.core.Option;
+import com.meti.core.Result;
+import com.meti.core.Some;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static com.meti.core.Results.$Result;
 
 public final class NIOPath extends NIOLocation {
 
@@ -21,7 +26,7 @@ public final class NIOPath extends NIOLocation {
     }
 
     public Result<NIOFile, IOException> ensureAsFile() {
-        return Results.$Result(() -> {
+        return $Result(IOException.class, () -> {
             if (!isExists()) {
                 Files.createFile(value);
             }
@@ -38,7 +43,7 @@ public final class NIOPath extends NIOLocation {
     }
 
     public Result<NIODirectory, IOException> ensureAsDirectory() {
-        return Results.$Result(() -> {
+        return $Result(IOException.class, () -> {
             if (!Files.exists(value)) {
                 Files.createDirectories(value);
             }

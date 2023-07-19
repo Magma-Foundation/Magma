@@ -12,14 +12,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class JavaString implements String_ {
+    public static String_ Empty = new JavaString("");
     private final java.lang.String value;
 
     private JavaString(java.lang.String value) {
         this.value = value;
-    }
-
-    public static String_ empty() {
-        return from("");
     }
 
     public static Collector<String_, Option<String_>> joining(final String_ delimiter) {

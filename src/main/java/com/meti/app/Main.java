@@ -1,5 +1,6 @@
 package com.meti.app;
 
+import com.meti.java.JavaSet;
 import com.meti.nio.NIODirectory;
 
 import java.nio.file.Paths;
@@ -14,9 +15,15 @@ public class Main {
         var targetRoot = new NIODirectory(targetPath);
         var targetGateway = new DirectoryTargets(targetRoot);
 
-        new Application(sourceGateway, targetGateway).compileAll().consume(nioFileJavaSet -> System.out.println("Compiled " + nioFileJavaSet.size().value() + " files."), e -> {
-            System.err.println("Failed to compile.");
-            e.printStackTrace();
-        });
+        new Application(sourceGateway, targetGateway).compileAll().consume(Main::onSuccess, Main::onErr);
+    }
+
+    private static void onErr(CompileException e) {
+        System.err.println("Failed to compile.");
+        e.printStackTrace();
+    }
+
+    private static void onSuccess(JavaSet<NIOTarget> nioFileJavaSet) {
+        System.out.println("Compiled " + nioFileJavaSet.size().value() + " files.");
     }
 }

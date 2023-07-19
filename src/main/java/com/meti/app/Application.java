@@ -6,6 +6,8 @@ import com.meti.core.ThrowableResult;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.JavaSet;
 
+import static com.meti.core.Results.$Result;
+
 public final class Application {
     private final Sources sources;
     private final Targets targets;
@@ -26,7 +28,7 @@ public final class Application {
     }
 
     private Result<NIOTarget, CompileException> compile(NIOSource source) {
-        return Results.$Result(() -> {
+        return $Result(CompileException.class, () -> {
             var package_ = source.computePackage();
             var other = source.computeName().append(".mgs");
             var input = source.read()
