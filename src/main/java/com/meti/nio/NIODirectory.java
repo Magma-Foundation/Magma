@@ -4,6 +4,7 @@ import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.java.JavaSet;
+import com.meti.java.Set;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +16,7 @@ public class NIODirectory extends NIOLocation {
         super(location);
     }
 
-    public Result<JavaSet<NIOPath>, IOException> walk() {
+    public Result<Set<NIOPath>, IOException> walk() {
         try (var stream = Files.walk(value)) {
             var set = stream
                     .map(NIOPath::new)

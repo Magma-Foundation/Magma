@@ -1,10 +1,10 @@
 package com.meti.app;
 
 import com.meti.core.Result;
-import com.meti.java.JavaSet;
+import com.meti.java.Set;
 
 import java.io.IOException;
 
 public interface Sources {
-    Result<JavaSet<NIOSource>, IOException> collect();
+    Result<Set<NIOSource>, IOException> collect();
 }

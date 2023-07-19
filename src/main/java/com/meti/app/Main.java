@@ -1,6 +1,6 @@
 package com.meti.app;
 
-import com.meti.java.JavaSet;
+import com.meti.java.Set;
 import com.meti.nio.NIODirectory;
 
 import java.nio.file.Paths;
@@ -23,7 +23,7 @@ public class Main {
         e.printStackTrace();
     }
 
-    private static void onSuccess(JavaSet<NIOTarget> nioFileJavaSet) {
-        System.out.println("Compiled " + nioFileJavaSet.size().value() + " files.");
+    private static void onSuccess(Set<NIOTarget> set) {
+        System.out.println("Compiled " + set.size().value() + " files.");
     }
 }

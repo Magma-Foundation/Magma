@@ -4,6 +4,7 @@ import com.meti.collect.Index;
 import com.meti.core.Option;
 import com.meti.iterate.Iterator;
 
+import java.util.Comparator;
 import java.util.function.Function;
 
 public interface List<T> {
@@ -24,4 +25,6 @@ public interface List<T> {
     Index size();
 
     List<T> addAll(JavaList<T> others);
+
+    List<T> sort(Comparator<T> comparator);
 }

@@ -2,18 +2,28 @@ package com.meti.app;
 
 import com.meti.java.*;
 
-public record Import(String_ value, List<Import> children) {
+import java.util.ArrayList;
+
+public record Import(String_ value, Set<Import> children) {
     public Import(String_ value) {
-        this(value, JavaList.empty());
+        this(value, JavaSet.empty());
     }
 
     String_ render() {
-        var unwrap = children.iter()
-                .map(Import::render)
-                .collect(JavaString.joining(JavaString.from(", ")))
-                .unwrap();
+        if (children.isEmpty()) {
+            return value;
+        } else {
+            var sorted = new JavaList<>(new ArrayList<>(children.unwrap()))
+                    .sort((o1, o2) -> o1.value.compareTo(o2.value));
 
-        return JavaString.from("{" + unwrap + "} from " + value);
+            var unwrap = sorted.iter()
+                    .map(Import::render)
+                    .collect(JavaString.joining(JavaString.from(", ")))
+                    .unwrapOrElse(JavaString.Empty)
+                    .unwrap();
+
+            return JavaString.from("{ " + unwrap + " } from " + value.unwrap());
+        }
     }
 
     public Import addChild(Import child) {

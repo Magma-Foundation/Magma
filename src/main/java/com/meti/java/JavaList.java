@@ -9,11 +9,17 @@ import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
 public class JavaList<T> implements com.meti.java.List<T> {
     protected final List<T> values;
+
+    @SafeVarargs
+    public static <T> JavaList<T> ofList(T... child) {
+        return new JavaList<>(List.of(child));
+    }
 
     public JavaList(List<T> values) {
         this.values = new ArrayList<>(values);
@@ -33,9 +39,11 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
-    @SafeVarargs
-    public static <T> JavaList<T> of(T... child) {
-        return new JavaList<>(List.of(child));
+    @Override
+    public com.meti.java.List<T> sort(Comparator<T> comparator) {
+        var copy = new ArrayList<>(values);
+        copy.sort(comparator);
+        return new JavaList<>(copy);
     }
 
     public static <T> com.meti.java.List<T> empty() {

@@ -5,6 +5,7 @@ import com.meti.core.Results;
 import com.meti.core.ThrowableResult;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.JavaSet;
+import com.meti.java.Set;
 
 import static com.meti.core.Results.$Result;
 
@@ -17,7 +18,7 @@ public final class Application {
         this.targets = targets;
     }
 
-    Result<JavaSet<NIOTarget>, CompileException> compileAll() {
+    Result<Set<NIOTarget>, CompileException> compileAll() {
         return sources.collect()
                 .peekValue(value -> System.out.printf("Found '%s' sources.%n", value.size().value()))
                 .mapErr(CompileException::new)
@@ -39,10 +40,6 @@ public final class Application {
                     .compile()
                     .into(ThrowableResult::new)
                     .$();
-
-            if (!input.isEmpty() && output.isEmpty()) {
-                throw new CompileException("Input was not empty but output was? Input: " + input.unwrap());
-            }
 
             var target = targets.resolve(package_, other)
                     .mapErr(CompileException::new)

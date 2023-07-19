@@ -32,6 +32,7 @@ public record Compiler(String_ input) {
         return Ok.apply(state.root()
                 .children().iter()
                 .map(Import::render)
+                .map(value -> value.prepend("import "))
                 .collect(JavaString.joining(JavaString.from("")))
                 .unwrapOrElse(JavaString.Empty));
     }

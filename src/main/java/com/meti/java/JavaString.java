@@ -121,4 +121,14 @@ public final class JavaString implements String_ {
                 .collect(Collectors.toList()))
                 .iter();
     }
+
+    @Override
+    public String_ prepend(String prefix) {
+        return new JavaString(prefix + this.value);
+    }
+
+    @Override
+    public int compareTo(String_ other) {
+        return this.value.compareTo(other.unwrap());
+    }
 }

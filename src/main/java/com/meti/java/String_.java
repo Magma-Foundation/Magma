@@ -26,4 +26,8 @@ public interface String_ {
     Option<Index> lastIndexOfChar(char c);
 
     Iterator<String_> split(String regex);
+
+    String_ prepend(String prefix);
+
+    int compareTo(String_ other);
 }
