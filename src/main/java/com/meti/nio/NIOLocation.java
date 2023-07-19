@@ -41,7 +41,7 @@ public class NIOLocation implements Location {
 
     @Override
     public boolean isExtendedBy(String_ extension) {
-        return value.toString().endsWith("." + extension);
+        return value.toString().endsWith("." + extension.unwrap());
     }
 
     @Override

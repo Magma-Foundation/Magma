@@ -38,6 +38,10 @@ public final class Application {
                     .into(ThrowableResult::new)
                     .$();
 
+            if (!input.isEmpty() && output.isEmpty()) {
+                throw new CompileException("Input was not empty but output was? Input: " + input.unwrap());
+            }
+
             var target = targets.resolve(package_, other)
                     .mapErr(CompileException::new)
                     .into(ThrowableResult::new)
