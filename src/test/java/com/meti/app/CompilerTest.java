@@ -2,6 +2,7 @@ package com.meti.app;
 
 import com.meti.core.Results;
 import com.meti.java.JavaString;
+import com.meti.java.String_;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -9,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompilerTest {
-    private static void assertEmpty(JavaString input) {
+    private static void assertEmpty(String_ input) {
         try {
             assertTrue(compileImpl(input).isEmpty());
         } catch (CompileException e) {
@@ -17,7 +18,7 @@ class CompilerTest {
         }
     }
 
-    private static JavaString compileImpl(JavaString input) throws CompileException {
+    private static String_ compileImpl(String_ input) throws CompileException {
         try {
             return Results.unwrap(new Compiler(input).compile());
         } catch (CompileException e) {
@@ -31,7 +32,7 @@ class CompilerTest {
 
     private static void assertCompile(String input, String output) {
         try {
-            var actual = compileImpl(new JavaString(input)).unwrap();
+            var actual = compileImpl(JavaString.from(input)).unwrap();
             assertEquals(output, actual);
         } catch (CompileException e) {
             fail(e);
@@ -63,19 +64,19 @@ class CompilerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void importWithGrandParent(String parent) {
+    void importWithGrandParent(String_ parent) {
         assertCompile("import " + parent + ".foo.test", "import { test } from " + parent + ".foo");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void importWithParent(String parent) {
+    void importWithParent(String_ parent) {
         assertCompile("import " + parent + ".test", "import { test } from " + parent);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void testImport(String name) {
+    void testImport(String_ name) {
         assertCompile("import " + name);
     }
 
@@ -86,7 +87,7 @@ class CompilerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void testPackage(String name) {
-        assertEmpty(new JavaString("package %s;".formatted(name)));
+    void testPackage(String_ name) {
+        assertEmpty(JavaString.from("package %s;".formatted(name)));
     }
 }

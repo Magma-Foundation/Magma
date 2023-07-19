@@ -2,21 +2,21 @@ package com.meti.nio;
 
 import com.meti.core.Option;
 import com.meti.iterate.Iterator;
-import com.meti.java.JavaString;
+import com.meti.java.String_;
 
 import java.nio.file.Path;
 import java.util.function.Function;
 
 public interface Location {
-    JavaString asString();
+    String_ asString();
 
-    JavaString findFileNameAsString();
+    String_ findFileNameAsString();
 
-    Location resolveSibling(JavaString other);
+    Location resolveSibling(String_ other);
 
     Path unwrap();
 
-    boolean isExtendedBy(String extension);
+    boolean isExtendedBy(String_ extension);
 
     Iterator<Location> iter();
 
@@ -24,7 +24,7 @@ public interface Location {
 
     Location relativize(Location child);
 
-    Location resolve(JavaString child);
+    Location resolve(String_ child);
 
     Option<Location> parent();
 

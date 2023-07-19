@@ -5,13 +5,27 @@ import com.meti.core.Results;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
 import com.meti.java.List;
+import com.meti.java.String_;
 import com.meti.nio.Location;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
+/*
+import {
+    { Location } from nio,
+    { List, JavaList, JavaString } from java,
+    { Result, Results} from core
+} from com.meti;
+
+import {
+    { IOException from io },
+    { Files } from nio.file
+} from java;
+ */
+
 public record NIOSource(Location parent, Location location) {
-    List<JavaString> computePackage() {
+    List<String_> computePackage() {
         var list = parent.relativize(location)
                 .iter()
                 .map(Location::findFileNameAsString)
@@ -22,7 +36,7 @@ public record NIOSource(Location parent, Location location) {
                 .unwrapOrElse(list);
     }
 
-    JavaString computeName() {
+    String_ computeName() {
         var fileName = location.last()
                 .map(Location::findFileNameAsString)
                 .unwrapOrElse(JavaString.empty());
@@ -32,7 +46,7 @@ public record NIOSource(Location parent, Location location) {
                 .unwrapOrElse(fileName);
     }
 
-    public Result<JavaString, IOException> read() {
-        return Results.$Result(() -> new JavaString(Files.readString(this.location.unwrap())));
+    public Result<String_, IOException> read() {
+        return Results.$Result(() -> JavaString.from(Files.readString(this.location.unwrap())));
     }
 }

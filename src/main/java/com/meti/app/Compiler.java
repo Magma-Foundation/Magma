@@ -4,16 +4,13 @@ import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.core.Tuple;
-import com.meti.java.JavaList;
-import com.meti.java.JavaString;
-import com.meti.java.List;
-import com.meti.java.NonEmptyJavaList;
+import com.meti.java.*;
 
 import static com.meti.core.Options.$Option;
 
-public record Compiler(JavaString input) {
+public record Compiler(String_ input) {
     private static Result<State, CompileException> compileImport(
-            State state1, JavaString input) {
+            State state1, String_ input) {
         return $Option(() -> {
             var importIndex = input
                     .firstIndexOfSlice("import ").$()
@@ -29,16 +26,16 @@ public record Compiler(JavaString input) {
         }).unwrapOrElse(new Ok<>(state1));
     }
 
-    private static Result<JavaString, CompileException> renderState(State state) {
+    private static Result<String_, CompileException> renderState(State state) {
         return Ok.apply(JavaString.empty());
     }
 
-    private static Result<JavaString, CompileException> renderImport(Tuple<JavaString, List<JavaString>> key) {
+    private static Result<String_, CompileException> renderImport(Tuple<String_, List<String_>> key) {
         var parent = key.a();
         var children = key.b();
         return children.iter()
-                .collect(JavaString.joining(", "))
-                .map(joinedChildren -> Ok.<JavaString, CompileException>apply(renderValidImport(parent, joinedChildren)))
+                .collect(JavaString.joining(JavaString.from(", ")))
+                .map(joinedChildren -> Ok.<String_, CompileException>apply(renderValidImport(parent, joinedChildren)))
                 .unwrapOrElseGet(() -> {
                     var format = "No children present of size '%d' for parent '%s'.";
                     var message = format.formatted(children.size().unwrap(), parent.unwrap());
@@ -46,14 +43,14 @@ public record Compiler(JavaString input) {
                 });
     }
 
-    private static JavaString renderValidImport(JavaString parent, JavaString joinedChildren) {
-        return new JavaString("import { ")
+    private static String_ renderValidImport(String_ parent, String_ joinedChildren) {
+        return JavaString.from("import { ")
                 .appendOwned(joinedChildren)
                 .append(" } from ")
                 .appendOwned(parent);
     }
 
-    Result<JavaString, CompileException> compile() {
+    Result<String_, CompileException> compile() {
         return input.split(";")
                 .foldLeftToResult(new State(), Compiler::compileImport)
                 .mapValueToResult(Compiler::renderState);

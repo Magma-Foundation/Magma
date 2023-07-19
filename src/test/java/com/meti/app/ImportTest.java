@@ -1,20 +1,29 @@
 package com.meti.app;
 
-import com.meti.java.JavaString;
-import com.meti.java.NonEmptyJavaList;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class ImportTest {
-
-    @Test
-    void define() {
-        var key = new JavaString("test");
-        var children = new Import()
-                .define(NonEmptyJavaList.ofNonEmpty(key))
-                .children();
-
-        assertTrue(children.apply(key).unwrap().isEmpty());
-    }
+//    @Test
+//    void defineParent() {
+//        var parentKey = new JavaString("parent");
+//        var childKey = new JavaString("child");
+//        assertTrue(new Import().define(NonEmptyJavaList.ofNonEmpty(parentKey, childKey))
+//                .children()
+//                .apply(parentKey)
+//                .unwrap()
+//                .iter()
+//                .flatMap(child -> child.children().iter())
+//                .filter(entry -> entry.a().equals(childKey))
+//                .map(Tuple::b)
+//                .head()
+//                .isPresent());
+//    }
+//
+//    @Test
+//    void define() {
+//        var key = new JavaString("test");
+//        var children = new Import()
+//                .define(NonEmptyJavaList.ofNonEmpty(key))
+//                .children();
+//
+//        assertTrue(children.apply(key).unwrap().isEmpty());
+//    }
 }

@@ -7,6 +7,7 @@ import com.meti.core.Some;
 import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 import com.meti.java.JavaString;
+import com.meti.java.String_;
 
 import java.nio.file.Path;
 import java.util.function.Function;
@@ -19,17 +20,17 @@ public class NIOLocation implements Location {
     }
 
     @Override
-    public JavaString asString() {
-        return new JavaString(value.toString());
+    public String_ asString() {
+        return JavaString.from(value.toString());
     }
 
     @Override
-    public JavaString findFileNameAsString() {
-        return new JavaString(value.getFileName().toString());
+    public String_ findFileNameAsString() {
+        return JavaString.from(value.getFileName().toString());
     }
 
     @Override
-    public Location resolveSibling(JavaString other) {
+    public Location resolveSibling(String_ other) {
         return new NIOLocation(value.resolveSibling(other.unwrap()));
     }
 
@@ -39,7 +40,7 @@ public class NIOLocation implements Location {
     }
 
     @Override
-    public boolean isExtendedBy(String extension) {
+    public boolean isExtendedBy(String_ extension) {
         return value.toString().endsWith("." + extension);
     }
 
@@ -72,7 +73,7 @@ public class NIOLocation implements Location {
     }
 
     @Override
-    public Location resolve(JavaString child) {
+    public Location resolve(String_ child) {
         return new NIOLocation(value.resolve(child.unwrap()));
     }
 

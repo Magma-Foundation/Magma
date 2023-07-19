@@ -3,6 +3,7 @@ package com.meti.app;
 import com.meti.core.Result;
 import com.meti.iterate.Iterators;
 import com.meti.java.JavaSet;
+import com.meti.java.JavaString;
 import com.meti.nio.NIODirectory;
 import com.meti.nio.NIOFile;
 import com.meti.nio.NIOPath;
@@ -17,7 +18,7 @@ public record DirectorySources(NIODirectory directory) implements Sources {
             set.iter().take(5).forEach(path -> System.out.println(" - " + path.asString().unwrap()));
 
             return set.iter()
-                    .filter(path -> path.isExtendedBy("java"))
+                    .filter(path -> path.isExtendedBy(JavaString.from("java")))
                     .map(NIOPath::existsAsFile)
                     .flatMap(Iterators::fromOption)
                     .map((NIOFile parent) -> new NIOSource(directory, parent))
