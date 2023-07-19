@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Represents an error value.
+ * Represents an error name.
  */
 public record Err<T, E>(E inner) implements Result<T, E> {
     public static <T, E> Result<T, E> apply(E inner) {

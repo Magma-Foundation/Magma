@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static com.meti.java.JavaList.ofList;
+import static com.meti.java.JavaLists.ofNonEmptyList;
 import static com.meti.java.JavaString.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,25 +21,25 @@ class ImportTest {
 
     @Test
     void value() {
-        assertRender("value", "value", import_ -> import_);
+        assertRender("name", "name", import_ -> import_);
     }
 
     @Test
     void child() {
-        assertRender("{ Child } from parent", import_ -> import_.addPath(ofList(from("Child"))));
+        assertRender("{ Child } from parent", import_ -> import_.addPath(ofNonEmptyList(from("Child"))));
     }
 
     @Test
     void sibling() {
         assertRender("{ Child, Sibling } from parent", import_ -> import_
-                .addPath(ofList(from("Child")))
-                .addPath(ofList(from("Sibling"))));
+                .addPath(ofNonEmptyList(from("Child")))
+                .addPath(ofNonEmptyList(from("Sibling"))));
     }
 
     @Test
     void duplicateSiblings() {
         assertRender("{ Child } from parent", import_ -> import_
-                .addPath(ofList(from("Child")))
-                .addPath(ofList(from("Child"))));
+                .addPath(ofNonEmptyList(from("Child")))
+                .addPath(ofNonEmptyList(from("Child"))));
     }
 }

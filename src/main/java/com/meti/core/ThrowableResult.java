@@ -13,6 +13,6 @@ public class ThrowableResult<T, E extends Exception> {
 
         if (value.isPresent()) return value.unwrap();
         if (err.isPresent()) throw err.unwrap();
-        throw new RuntimeException("No value or error present?");
+        throw new RuntimeException("No name or error present?");
     }
 }

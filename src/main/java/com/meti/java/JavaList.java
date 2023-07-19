@@ -16,11 +16,6 @@ import java.util.function.Function;
 public class JavaList<T> implements com.meti.java.List<T> {
     protected final List<T> values;
 
-    @SafeVarargs
-    public static <T> JavaList<T> ofList(T... child) {
-        return new JavaList<>(List.of(child));
-    }
-
     public JavaList(List<T> values) {
         this.values = new ArrayList<>(values);
     }

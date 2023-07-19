@@ -30,4 +30,6 @@ public interface String_ {
     String_ prepend(String prefix);
 
     int compareTo(String_ other);
+
+    boolean equalsTo(String_ other);
 }

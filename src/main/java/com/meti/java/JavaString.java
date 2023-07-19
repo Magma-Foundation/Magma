@@ -131,4 +131,9 @@ public final class JavaString implements String_ {
     public int compareTo(String_ other) {
         return this.value.compareTo(other.unwrap());
     }
+
+    @Override
+    public boolean equalsTo(String_ other) {
+        return this.value.equals(other.unwrap());
+    }
 }

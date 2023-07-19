@@ -4,10 +4,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Represents a non-error value.
+ * Represents a non-error name.
  *
- * @param inner The value of this result.
- * @param <T>   The value type of this result.
+ * @param inner The name of this result.
+ * @param <T>   The name type of this result.
  * @param <E>   The error type of this result.
  */
 public record Ok<T, E>(T inner) implements Result<T, E> {

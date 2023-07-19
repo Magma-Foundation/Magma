@@ -21,7 +21,7 @@ public interface Result<T, E> {
     <R> Result<T, R> mapErr(Function<E, R> mapper);
 
     /**
-     * Peeks at this Result's value.
+     * Peeks at this Result's name.
      */
     Result<T, E> peekValue(Consumer<T> consumer);
 }

@@ -1,20 +1,23 @@
 package com.meti.app;
 
+import com.meti.core.Option;
 import com.meti.java.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.function.Function;
 
-public record Import(String_ value, Set<Import> children) {
+public record Import(String_ name, Set<Import> children) {
     public Import(String_ value) {
         this(value, JavaSet.empty());
     }
 
     String_ render() {
         if (children.isEmpty()) {
-            return value;
+            return name;
         } else {
             var sorted = new JavaList<>(new ArrayList<>(children.unwrap()))
-                    .sort((o1, o2) -> o1.value.compareTo(o2.value));
+                    .sort((o1, o2) -> o1.name.compareTo(o2.name));
 
             var unwrap = sorted.iter()
                     .map(Import::render)
@@ -22,27 +25,45 @@ public record Import(String_ value, Set<Import> children) {
                     .unwrapOrElse(JavaString.Empty)
                     .unwrap();
 
-            return JavaString.from("{ " + unwrap + " } from " + value.unwrap());
+            return JavaString.from("{ " + unwrap + " } from " + name.unwrap());
         }
     }
 
-    public Import addChild(Import child) {
-        return new Import(value, children.add(child));
+    public Option<Import> findChild(String_ name) {
+        return this.children.iter()
+                .filter(child -> child.name.equalsTo(name))
+                .head();
     }
 
-    public Import addPath(List<String_> path) {
-        return path.into(NonEmptyJavaList::from).map(list -> {
-            var currentValue = list.first();
-            var existingChild = children.iter()
-                    .filter(node -> node.value().equals(currentValue))
-                    .head();
+    public Import addPath(NonEmptyList<String_> path) {
+        var value = path.first();
+        return this.ensureChild(value, new Function<Import, Import>() {
+            @Override
+            public Import apply(Import anImport) {
+                return null;
+            }
+        });
+    }
 
-            var newNode = existingChild
-                    .unwrapOrElseGet(() -> new Import(currentValue))
-                    .addPath(list.sliceWithoutFirst());
+    private Import ensureChild(String_ name, Function<Import, Import> mapper) {
+        var list = new ArrayList<>(this.children.unwrap());
+        var index = -1;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).name.equalsTo(name)) {
+                index = i;
+            }
+        }
 
-            return addChild(newNode);
-        }).unwrapOrElseGet(() -> this);
+        if (index == -1) {
+            var next = mapper.apply(list.get(index));
+            list.set(index, next);
+            return new Import(this.name, new JavaSet<>(new HashSet<>(list)));
+        } else {
+            var child = new Import(name);
+            var newChild = mapper.apply(child);
+            this.children.add(newChild);
+            return new Import(this.name);
+        }
     }
 }
 
