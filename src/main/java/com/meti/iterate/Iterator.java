@@ -1,6 +1,5 @@
 package com.meti.iterate;
 
-import com.meti.collect.Collector;
 import com.meti.core.Option;
 import com.meti.core.Result;
 
@@ -29,5 +28,9 @@ public interface Iterator<T> {
     Iterator<T> take(int count);
 
     void forEach(Consumer<T> consumer);
+
+    <P, R> Unzip<T, P, R> unzip(Function<T, P> mapper);
+
+    Iterator<T> then(Iterator<T> other);
 }
 

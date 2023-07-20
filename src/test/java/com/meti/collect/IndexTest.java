@@ -1,5 +1,6 @@
 package com.meti.collect;
 
+import com.meti.iterate.Index;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

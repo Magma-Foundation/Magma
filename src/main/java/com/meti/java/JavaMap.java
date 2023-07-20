@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class JavaMap<K, V> {
+public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
     private final Map<K, V> map;
 
     public JavaMap() {
@@ -23,8 +24,13 @@ public class JavaMap<K, V> {
         this.map = map;
     }
 
+    public static <P, T, R> com.meti.java.Map<Predicate<P>, Function<Iterator<T>, Iterator<R>>> empty() {
+        return new JavaMap<>(new HashMap<>());
+    }
 
-    public JavaMap<K, V> insertOrMap(K key, Function<V, V> onPresent, Supplier<V> onAbsent) {
+
+    @Override
+    public com.meti.java.Map<K, V> insertOrMap(K key, Function<V, V> onPresent, Supplier<V> onAbsent) {
         if (this.map.containsKey(key)) {
             var oldValue = this.map.get(key);
             var newValue = onPresent.apply(oldValue);
@@ -36,23 +42,27 @@ public class JavaMap<K, V> {
         return this;
     }
 
+    @Override
     public Iterator<Tuple<K, V>> iter() {
         return new JavaList<>(new ArrayList<>(this.map.entrySet()))
                 .iter().map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
     }
 
-    public JavaMap<K, V> mapValue(K first, Function<V, V> mapper) {
+    @Override
+    public com.meti.java.Map<K, V> mapValue(K first, Function<V, V> mapper) {
         var previous = this.map.get(first);
         var next = mapper.apply(previous);
         this.map.put(first, next);
         return this;
     }
 
+    @Override
     public boolean hasKey(K key) {
         return this.map.containsKey(key);
     }
 
-    public Option<V> apply(K key) {
+    @Override
+    public Option<V> applyOptionally(K key) {
         if (this.map.containsKey(key)) {
             return new Some<>(this.map.get(key));
         } else {
@@ -60,8 +70,28 @@ public class JavaMap<K, V> {
         }
     }
 
-    public JavaMap<K, V> insert(K key, V value) {
+    @Override
+    public V apply(Key<K> key) {
+        return key.peek(this.map::get);
+    }
+
+    @Override
+    public com.meti.java.Map<K, V> insert(K key, V value) {
         this.map.put(key, value);
         return this;
+    }
+
+    @Override
+    public Iterator<Key<K>> keys() {
+        return new JavaSet<>(this.map.keySet())
+                .iter()
+                .map(KeyImpl::new);
+    }
+
+    private record KeyImpl<K>(K value) implements Key<K> {
+        @Override
+        public <R> R peek(Function<K, R> mapper) {
+            return mapper.apply(value);
+        }
     }
 }

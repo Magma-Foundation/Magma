@@ -22,4 +22,6 @@ public interface Option<T> {
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
     boolean isEmpty();
+
+    Option<T> or(Option<T> other);
 }

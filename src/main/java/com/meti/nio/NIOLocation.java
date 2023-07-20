@@ -1,9 +1,9 @@
 package com.meti.nio;
 
-import com.meti.collect.Index;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.iterate.Index;
 import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 import com.meti.java.JavaString;

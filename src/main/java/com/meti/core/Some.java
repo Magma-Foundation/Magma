@@ -9,6 +9,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> other) {
+        return this;
+    }
+
+    @Override
     public boolean isEmpty() {
         return false;
     }

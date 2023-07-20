@@ -1,6 +1,5 @@
 package com.meti.iterate;
 
-import com.meti.collect.Collector;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;

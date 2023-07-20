@@ -1,10 +1,13 @@
 package com.meti.app;
 
 import com.meti.core.Option;
+import com.meti.core.Tuple;
+import com.meti.iterate.Collectors;
+import com.meti.iterate.Iterator;
+import com.meti.iterate.TupleIterator;
 import com.meti.java.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.function.Function;
 
 public record Import(String_ name, Set<Import> children) {
@@ -37,32 +40,29 @@ public record Import(String_ name, Set<Import> children) {
 
     public Import addPath(NonEmptyList<String_> path) {
         var value = path.first();
-        return this.ensureChild(value, new Function<Import, Import>() {
-            @Override
-            public Import apply(Import anImport) {
-                return null;
-            }
-        });
+        return this.ensureChild(value, anImport -> path.sliceWithoutFirst()
+                .into(NonEmptyJavaList::from)
+                .map(anImport::addPath)
+                .unwrapOrElse(anImport));
     }
 
     private Import ensureChild(String_ name, Function<Import, Import> mapper) {
-        var list = new ArrayList<>(this.children.unwrap());
-        var index = -1;
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).name.equalsTo(name)) {
-                index = i;
-            }
-        }
+        var tuple = this.children.iter()
+                .<String_, Tuple<Boolean, Import>>unzip(child -> child.name)
+                .on(value -> value.equalsTo(name),
+                        iterator -> iterator.map(mapper).map(
+                                value -> new Tuple<>(true, value)))
+                .onDefault(iterator -> iterator.map(value -> new Tuple<>(false, value)))
+                .fold(Iterator::then)
+                .into(TupleIterator::new)
+                .collectTuple(Collectors.or(), JavaSet.asSet());
 
-        if (index == -1) {
-            var next = mapper.apply(list.get(index));
-            list.set(index, next);
-            return new Import(this.name, new JavaSet<>(new HashSet<>(list)));
+        var wasModified = tuple.a();
+        var newChildren = tuple.b();
+        if (wasModified) {
+            return new Import(this.name, newChildren);
         } else {
-            var child = new Import(name);
-            var newChild = mapper.apply(child);
-            this.children.add(newChild);
-            return new Import(this.name);
+            return new Import(this.name, newChildren.add(mapper.apply(new Import(name))));
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.meti.java;
 
-import com.meti.collect.Index;
+import com.meti.iterate.Index;
 
 public interface NonEmptyList<T> extends List<T> {
     Index lastIndex();

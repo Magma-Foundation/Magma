@@ -1,7 +1,7 @@
 package com.meti.java;
 
-import com.meti.collect.Collector;
-import com.meti.collect.Index;
+import com.meti.iterate.Collector;
+import com.meti.iterate.Index;
 import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 

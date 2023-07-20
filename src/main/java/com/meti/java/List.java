@@ -1,7 +1,7 @@
 package com.meti.java;
 
-import com.meti.collect.Index;
 import com.meti.core.Option;
+import com.meti.iterate.Index;
 import com.meti.iterate.Iterator;
 
 import java.util.Comparator;

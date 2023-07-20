@@ -20,6 +20,11 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public Option<T> or(Option<T> other) {
+        return other;
+    }
+
+    @Override
     public boolean isPresent() {
         return false;
     }

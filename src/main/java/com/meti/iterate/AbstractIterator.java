@@ -1,10 +1,11 @@
 package com.meti.iterate;
 
-import com.meti.collect.Collector;
 import com.meti.core.None;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.java.JavaMap;
+import com.meti.java.Map;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -12,6 +13,21 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
+    @Override
+    public <P, R> Unzip<T, P, R> unzip(Function<T, P> mapper) {
+        return new UnzipImpl<>(this, mapper);
+    }
+
+    @Override
+    public Iterator<T> then(Iterator<T> other) {
+        return new AbstractIterator<T>() {
+            @Override
+            public Option<T> head() {
+                return AbstractIterator.this.head().or(other.head());
+            }
+        };
+    }
+
     @Override
     public <C> C collect(Collector<T, C> collector) {
         return foldLeft(collector.initial(), collector::foldLeft);
@@ -113,5 +129,44 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
     public <R> R into(Function<Iterator<T>, R> mapper) {
         return mapper.apply(this);
+    }
+
+    private static class UnzipImpl<T, P, R> implements Unzip<T, P, R> {
+        private final Iterator<T> parent;
+        private final Function<T, P> keyMapper;
+        private final Map<Predicate<P>, Function<Iterator<T>, Iterator<R>>> valueHandlers;
+
+        public UnzipImpl(Iterator<T> parent, Function<T, P> keyMapper) {
+            this(parent, keyMapper, JavaMap.empty());
+        }
+
+        public UnzipImpl(Iterator<T> parent, Function<T, P> keyMapper, Map<Predicate<P>, Function<Iterator<T>, Iterator<R>>> valueHandlers) {
+            this.parent = parent;
+            this.keyMapper = keyMapper;
+            this.valueHandlers = valueHandlers;
+        }
+
+        @Override
+        public Unzip<T, P, R> on(Predicate<P> predicate, Function<Iterator<T>, Iterator<R>> handler) {
+            return new UnzipImpl<>(parent, keyMapper, valueHandlers.insert(predicate, handler));
+        }
+
+        @Override
+        public Unzipped<R> onDefault(Function<Iterator<T>, Iterator<R>> handler) {
+            return folder -> new AbstractIterator<Iterator<R>>() {
+                @Override
+                public Option<Iterator<R>> head() {
+                    return parent.head().map(head -> {
+                        var key = keyMapper.apply(head);
+                        return valueHandlers.keys()
+                                .filter(presentKey -> presentKey.peek(value -> value.test(key)))
+                                .map(valueHandlers::apply)
+                                .head()
+                                .unwrapOrElse(handler)
+                                .apply(Iterators.of(head));
+                    });
+                }
+            }.foldLeft(Iterators.empty(), folder);
+        }
     }
 }

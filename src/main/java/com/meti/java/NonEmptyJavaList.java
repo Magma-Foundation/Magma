@@ -1,9 +1,9 @@
 package com.meti.java;
 
-import com.meti.collect.Index;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.iterate.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
