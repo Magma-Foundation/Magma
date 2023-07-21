@@ -32,4 +32,8 @@ public interface String_ {
     int compareTo(String_ other);
 
     boolean equalsTo(String_ other);
+
+    String_ strip();
+
+    boolean startsWith(String slice);
 }

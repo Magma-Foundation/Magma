@@ -136,4 +136,14 @@ public final class JavaString implements String_ {
     public boolean equalsTo(String_ other) {
         return this.value.equals(other.unwrap());
     }
+
+    @Override
+    public String_ strip() {
+        return new JavaString(this.value.strip());
+    }
+
+    @Override
+    public boolean startsWith(String slice) {
+        return this.value.startsWith(slice);
+    }
 }
