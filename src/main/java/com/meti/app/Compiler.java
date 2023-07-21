@@ -31,7 +31,8 @@ public record Compiler(String_ input) {
     private static Result<String_, CompileException> renderState(State state) {
         return Ok.apply(state.root()
                 .children().iter()
-                .map(Import::render)
+                .map(anImport -> anImport.render(0))
+                .map(value -> value.append(";\n"))
                 .map(value -> value.prepend("import "))
                 .collect(JavaString.joining(JavaString.from("")))
                 .unwrapOrElse(JavaString.Empty));

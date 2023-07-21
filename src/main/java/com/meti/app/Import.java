@@ -15,21 +15,30 @@ public record Import(String_ name, Set<Import> children) {
         this(value, JavaSet.empty());
     }
 
-    String_ render() {
+    String_ render(int depth) {
         if (children.isEmpty()) {
             return name;
         } else {
             var sorted = new JavaList<>(new ArrayList<>(children.unwrap()))
                     .sort((o1, o2) -> o1.name.compareTo(o2.name));
 
-            var unwrap = sorted.iter()
-                    .map(Import::render)
-                    .collect(JavaString.joining(JavaString.from(", ")))
-                    .unwrapOrElse(JavaString.Empty)
-                    .unwrap();
+            var anyGrandchildren = sorted.iter().anyMatch(Import::hasChildren);
 
-            return JavaString.from("{ " + unwrap + " } from " + name.unwrap());
+            var repeat = anyGrandchildren ? ("\n" + "\t".repeat(depth + 1)) : " ";
+            var repeat1 = anyGrandchildren ? ("\n" + "\t".repeat(depth)) : " ";
+            var s = anyGrandchildren ? repeat : " ";
+            var unwrap = sorted.iter()
+                    .map(anImport -> anImport.render(depth + 1))
+                    .collect(JavaString.joining(JavaString.from("," + s)))
+                    .unwrapOrElse(JavaString.Empty)
+                    .append(repeat1)
+                    .unwrap();
+            return JavaString.from("{" + repeat + unwrap + "}" + " from " + name.unwrap());
         }
+    }
+
+    public boolean hasChildren() {
+        return !this.children.isEmpty();
     }
 
     public Option<Import> findChild(String_ name) {

@@ -15,7 +15,7 @@ class ImportTest {
 
     private static void assertRender(String parent, String output, Function<Import, Import> mapper) {
         var root = new Import(from(parent));
-        var rendered = mapper.apply(root).render();
+        var rendered = mapper.apply(root).render(0);
         assertEquals(output, rendered.unwrap());
     }
 

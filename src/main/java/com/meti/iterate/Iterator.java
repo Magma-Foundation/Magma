@@ -32,5 +32,7 @@ public interface Iterator<T> {
     <P, R> Unzip<T, P, R> unzip(Function<T, P> mapper);
 
     Iterator<T> then(Iterator<T> other);
+
+    boolean anyMatch(Predicate<T> predicate);
 }
 

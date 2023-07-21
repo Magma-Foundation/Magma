@@ -19,6 +19,11 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     }
 
     @Override
+    public boolean anyMatch(Predicate<T> predicate) {
+        return foldLeft(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+    }
+
+    @Override
     public Iterator<T> then(Iterator<T> other) {
         return new AbstractIterator<T>() {
             @Override
