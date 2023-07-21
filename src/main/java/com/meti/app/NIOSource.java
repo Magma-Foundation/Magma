@@ -48,6 +48,6 @@ public record NIOSource(Location parent, Location location) {
     }
 
     public Result<String_, IOException> read() {
-        return $Result(IOException.class, () -> JavaString.from(Files.readString(this.location.unwrap())));
+        return $Result(IOException.class, () -> JavaString.fromSlice(Files.readString(this.location.unwrap())));
     }
 }

@@ -29,11 +29,11 @@ public record Import(String_ name, Set<Import> children) {
             var s = anyGrandchildren ? repeat : " ";
             var unwrap = sorted.iter()
                     .map(anImport -> anImport.render(depth + 1))
-                    .collect(JavaString.joining(JavaString.from("," + s)))
+                    .collect(JavaString.joining(JavaString.fromSlice("," + s)))
                     .unwrapOrElse(JavaString.Empty)
                     .append(repeat1)
                     .unwrap();
-            return JavaString.from("{" + repeat + unwrap + "}" + " from " + name.unwrap());
+            return JavaString.fromSlice("{" + repeat + unwrap + "}" + " from " + name.unwrap());
         }
     }
 

@@ -21,12 +21,12 @@ public class NIOLocation implements Location {
 
     @Override
     public String_ asString() {
-        return JavaString.from(value.toString());
+        return JavaString.fromSlice(value.toString());
     }
 
     @Override
     public String_ findFileNameAsString() {
-        return JavaString.from(value.getFileName().toString());
+        return JavaString.fromSlice(value.getFileName().toString());
     }
 
     @Override

@@ -35,7 +35,7 @@ public final class JavaString implements String_ {
         };
     }
 
-    public static String_ from(String value) {
+    public static String_ fromSlice(String value) {
         return new JavaString(value);
     }
 
@@ -62,12 +62,12 @@ public final class JavaString implements String_ {
 
     @Override
     public String_ sliceFrom(Index index) {
-        return from(value.substring(index.unwrap()));
+        return fromSlice(value.substring(index.unwrap()));
     }
 
     @Override
     public String_ append(String value) {
-        return from(this.value + value);
+        return fromSlice(this.value + value);
     }
 
     @Override
@@ -82,7 +82,7 @@ public final class JavaString implements String_ {
 
     @Override
     public String_ sliceTo(Index index) {
-        return from(this.value.substring(0, index.value()));
+        return fromSlice(this.value.substring(0, index.value()));
     }
 
     @Override
@@ -103,7 +103,7 @@ public final class JavaString implements String_ {
 
     @Override
     public String_ sliceBetween(Index start, Index end) {
-        return from(this.value.substring(start.value(), end.value()));
+        return fromSlice(this.value.substring(start.value(), end.value()));
     }
 
     @Override
@@ -117,7 +117,7 @@ public final class JavaString implements String_ {
     @Override
     public Iterator<String_> split(String regex) {
         return new JavaList<>(Arrays.stream(this.value.split(regex))
-                .map(JavaString::from)
+                .map(JavaString::fromSlice)
                 .collect(Collectors.toList()))
                 .iter();
     }

@@ -12,7 +12,7 @@ public record Compiler(String_ input) {
                     return !line.strip().startsWith("package ");
                 })
                 .filter(line -> !line.strip().isEmpty())
-                .collect(JavaString.joining(JavaString.from(";")))
+                .collect(JavaString.joining(JavaString.fromSlice(";")))
                 .unwrapOrElse(JavaString.Empty);
 
         return Ok.apply(output);
