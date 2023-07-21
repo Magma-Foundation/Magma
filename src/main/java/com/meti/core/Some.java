@@ -1,11 +1,17 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
     public static <T> Option<T> apply(T value) {
         return new Some<>(value);
+    }
+
+    @Override
+    public void consumeOrElse(Consumer<T> onPresent, Runnable onEmpty) {
+        onPresent.accept(value);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -9,6 +10,11 @@ public class None<T> implements Option<T> {
 
     public static <T> Option<T> apply() {
         return new None<>();
+    }
+
+    @Override
+    public void consumeOrElse(Consumer<T> onPresent, Runnable onEmpty) {
+        onEmpty.run();
     }
 
     @Override

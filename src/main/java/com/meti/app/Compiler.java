@@ -4,10 +4,9 @@ import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.iterate.Iterator;
-import com.meti.java.JavaList;
-import com.meti.java.JavaMap;
-import com.meti.java.JavaString;
-import com.meti.java.String_;
+import com.meti.java.*;
+
+import java.util.ArrayList;
 
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
@@ -44,7 +43,15 @@ public record Compiler(String_ input) {
             var body = line.sliceFrom(contentStart);
             var compiledBody = compileNode(body);
 
-            return new Class_(name, compiledBody);
+            var block = Objects.cast(Block.class, compiledBody).$();
+            var parameters = new ArrayList<Renderable>();
+            var value = new ArrayList<Renderable>();
+            var unwrappedLines = block.lines().unwrap();
+            for (var instance : unwrappedLines) {
+                Objects.cast(Declaration.class, instance).consumeOrElse(parameters::add, () -> value.add(instance));
+            }
+
+            return new Class_(name, new JavaList<>(parameters), new Block(new JavaList<>(value)));
         });
     }
 
