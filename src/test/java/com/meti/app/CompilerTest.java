@@ -24,6 +24,11 @@ class CompilerTest {
     }
 
     @Test
+    void class_() {
+        assertCompile(fromSlice("class Test {}"), fromSlice("class def Test() => {}"));
+    }
+
+    @Test
     void importStatic() {
         assertCompile(fromSlice("import static foo.bar"), fromSlice("import { bar } from foo;\n"));
     }
