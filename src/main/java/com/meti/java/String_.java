@@ -39,4 +39,6 @@ public interface String_ {
     boolean startsWith(String slice);
 
     Iterator<Character> iter();
+
+    int length();
 }

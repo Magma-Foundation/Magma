@@ -9,6 +9,7 @@ import com.meti.java.*;
 
 import java.util.ArrayList;
 
+import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
 
@@ -46,6 +47,7 @@ public record Compiler(String_ input) {
         return $Option(() -> {
             var classIndex = line.firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();
+
 
             var contentStart = line.firstIndexOfChar('{').$();
 
@@ -95,9 +97,10 @@ public record Compiler(String_ input) {
             var resolvedType = resolveType(type);
 
             var paramString = line.sliceBetween(paramStart.nextExclusive().$().to(paramEnd).$());
-            var parameters = paramString.split(",").map(node -> {
-                return compileDeclaration(node).$();
-            }).collect(JavaSet.asSet());
+            var parameters = paramString.split(",")
+                    .map(String_::strip)
+                    .filter(value -> !value.isEmpty())
+                    .map(node -> compileDeclaration(node).$()).collect(JavaSet.asSet());
 
             var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
             var renderedParameters = parameters.iter()
@@ -130,10 +133,15 @@ public record Compiler(String_ input) {
 
     private Option<Renderable> compileBlock(String_ line) {
         return $Option(() -> {
-            var bodyStart = line.firstIndexOfChar('{').$();
-            var bodyEnd = line.firstIndexOfChar('}').$();
+            var stripped = line.strip();
+            var bodyStart = stripped.firstIndexOfChar('{').$();
+            var bodyEnd = stripped.lastIndexOfChar('}').$();
+            if (!(bodyStart.isStart() && bodyEnd.isEnd())) {
+                return $$();
+            }
+
             var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
-            var content = line.sliceBetween(range);
+            var content = stripped.sliceBetween(range);
             var map = split(content)
                     .map(this::compileNode)
                     .collect(JavaList.asList());

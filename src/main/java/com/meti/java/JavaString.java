@@ -157,4 +157,9 @@ public final class JavaString implements String_ {
 
         return Iterators.ofArray(charsCopy);
     }
+
+    @Override
+    public int length() {
+        return this.value.length();
+    }
 }

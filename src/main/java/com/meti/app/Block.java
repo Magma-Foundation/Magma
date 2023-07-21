@@ -11,7 +11,7 @@ public record Block(List<Renderable> lines) implements Renderable {
     public String_ render() {
         return lines.iter()
                 .map(Renderable::render)
-                .collect(JavaString.joining(fromSlice(";")))
+                .collect(JavaString.joining(fromSlice("")))
                 .unwrapOrElse(fromSlice(""))
                 .prepend("{")
                 .append("}");

@@ -29,7 +29,7 @@ class CompilerTest {
 
     @Test
     void methodWithinClass() {
-        assertCompile("class Test(){void test(){}}", "class def Test() => {def test() => {}}");
+        assertCompile("class Test{void test(){}}", "class def Test() => {def test() : Void => {}}");
     }
 
     @Test
