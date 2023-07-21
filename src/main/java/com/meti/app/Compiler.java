@@ -44,7 +44,7 @@ public record Compiler(String_ input) {
 
                             var contentStart = line.firstIndexOfChar('{').$();
 
-                            var name = line.sliceBetween(classIndex, contentStart).strip();
+                            var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
                             var body = line.sliceFrom(contentStart);
 
                             return fromSlice("class def " + name.unwrap() + "() => " + body.unwrap());

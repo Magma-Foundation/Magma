@@ -3,6 +3,7 @@ package com.meti.java;
 import com.meti.core.Option;
 import com.meti.iterate.Index;
 import com.meti.iterate.Iterator;
+import com.meti.iterate.Range;
 
 public interface String_ {
     Option<Index> firstIndexOfChar(char c);
@@ -21,7 +22,7 @@ public interface String_ {
 
     Option<Index> firstIndexOfSlice(java.lang.String slice);
 
-    String_ sliceBetween(Index start, Index end);
+    String_ sliceBetween(Range range);
 
     Option<Index> lastIndexOfChar(char c);
 

@@ -5,6 +5,14 @@ import com.meti.core.Option;
 import com.meti.core.Some;
 
 public record Index(int value, int length) {
+    public Option<Range> to(Index other) {
+        if (value < other.value) {
+            return Some.apply(new Range(value, other.value));
+        } else {
+            return new None<>();
+        }
+    }
+
     public int unwrap() {
         return value;
     }

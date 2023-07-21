@@ -6,6 +6,7 @@ import com.meti.core.Some;
 import com.meti.iterate.Collector;
 import com.meti.iterate.Index;
 import com.meti.iterate.Iterator;
+import com.meti.iterate.Range;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -102,8 +103,8 @@ public final class JavaString implements String_ {
     }
 
     @Override
-    public String_ sliceBetween(Index start, Index end) {
-        return fromSlice(this.value.substring(start.value(), end.value()));
+    public String_ sliceBetween(Range range) {
+        return fromSlice(this.value.substring(range.start, range.to));
     }
 
     @Override
