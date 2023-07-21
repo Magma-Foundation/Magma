@@ -3,6 +3,9 @@ package com.meti.app;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.iterate.Iterator;
+import com.meti.java.JavaList;
+import com.meti.java.JavaString;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
@@ -33,7 +36,7 @@ public record Compiler(String_ input) {
     }
 
     Result<String_, CompileException> compile() {
-        var output = input.split(";")
+        var output = split()
                 .filter(line -> {
                     return !line.strip().startsWith("package ");
                 })
@@ -54,5 +57,33 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(Empty);
 
         return Ok.apply(output);
+    }
+
+    private Iterator<String_> split() {
+        var unwrapped = input.unwrap();
+        var lines = JavaList.<String>empty();
+        var buffer = new StringBuffer();
+        var depth = 0;
+
+        for (int i = 0; i < unwrapped.length(); i++) {
+            var c = unwrapped.charAt(i);
+            if (c == '}' && depth == 1) {
+                buffer.append(c);
+                depth -= 1;
+
+                lines.add(buffer.toString());
+                buffer = new StringBuffer();
+            } else if (c == ';' && depth == 0) {
+                lines.add(buffer.toString());
+                buffer = new StringBuffer();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                buffer.append(c);
+            }
+        }
+
+        lines.add(buffer.toString());
+        return lines.iter().map(JavaString::fromSlice);
     }
 }
