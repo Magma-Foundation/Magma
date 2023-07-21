@@ -24,6 +24,17 @@ class CompilerTest {
     }
 
     @Test
+    void block() {
+        assertCompile(fromSlice("{}"), fromSlice("{}"));
+    }
+
+    @Test
+    void field() {
+        assertCompile(fromSlice("class Test {int x;}"),
+                fromSlice("class def Test(x : i16) => {}"));
+    }
+
+    @Test
     void class_() {
         assertCompile(fromSlice("class Test {}"), fromSlice("class def Test() => {}"));
     }
@@ -39,12 +50,12 @@ class CompilerTest {
                 fromSlice("import foo.bar;import foo.bas"),
                 fromSlice(
                         "import { bar } from foo;\n" +
-                        "import { bas } from foo;"));
+                        "import { bas } from foo;\n"));
     }
 
     @Test
     void import_() {
-        assertCompile(fromSlice("import foo.bar"), fromSlice("import { bar } from foo;"));
+        assertCompile(fromSlice("import foo.bar"), fromSlice("import { bar } from foo;\n"));
     }
 
     @Test

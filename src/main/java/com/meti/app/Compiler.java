@@ -35,34 +35,57 @@ public record Compiler(String_ input) {
         });
     }
 
+    private Option<String_> compileClass(String_ line) {
+        return $Option(() -> {
+            var classIndex = line.firstIndexOfSlice("class ").$()
+                    .nextExclusive("class ".length()).$();
+
+            var contentStart = line.firstIndexOfChar('{').$();
+
+            var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
+            var body = line.sliceFrom(contentStart);
+            var compiledBody = compileLine(body);
+
+            return fromSlice("class def " + name.unwrap() + "() => " + compiledBody.unwrap());
+        });
+    }
+
     Result<String_, CompileException> compile() {
-        var output = split()
-                .filter(line -> {
-                    return !line.strip().startsWith("package ");
-                })
-                .map(line -> compileImport(line)
-                        .or($Option(() -> {
-                            var classIndex = line.firstIndexOfSlice("class ").$()
-                                    .nextExclusive("class ".length()).$();
-
-                            var contentStart = line.firstIndexOfChar('{').$();
-
-                            var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
-                            var body = line.sliceFrom(contentStart);
-
-                            return fromSlice("class def " + name.unwrap() + "() => " + body.unwrap());
-                        }))
-                        .unwrapOrElse(line))
+        var output = split(input)
+                .filter(line -> !line.strip().startsWith("package "))
+                .map(this::compileLine)
                 .collect(joining(Empty))
                 .unwrapOrElse(Empty);
 
         return Ok.apply(output);
     }
 
-    private Iterator<String_> split() {
-        var unwrapped = input.unwrap();
+    private String_ compileLine(String_ line) {
+        return compileImport(line)
+                .or(compileClass(line))
+                .or(compileBlock(line))
+                .unwrapOrElse(line);
+    }
+
+    private Option<String_> compileBlock(String_ line) {
+        return $Option(() -> {
+            var bodyStart = line.firstIndexOfChar('{').$();
+            var bodyEnd = line.firstIndexOfChar('}').$();
+            var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
+            var content = line.sliceBetween(range);
+            return split(content)
+                    .map(this::compileLine)
+                    .collect(JavaString.joining(fromSlice(";")))
+                    .unwrapOrElse(fromSlice(""))
+                    .prepend("{")
+                    .append("}");
+        });
+    }
+
+    private Iterator<String_> split(String_ input1) {
+        var unwrapped = input1.unwrap();
         var lines = JavaList.<String>empty();
-        var buffer = new StringBuffer();
+        var buffer = new StringBuilder();
         var depth = 0;
 
         for (int i = 0; i < unwrapped.length(); i++) {
@@ -72,10 +95,10 @@ public record Compiler(String_ input) {
                 depth -= 1;
 
                 lines.add(buffer.toString());
-                buffer = new StringBuffer();
+                buffer = new StringBuilder();
             } else if (c == ';' && depth == 0) {
                 lines.add(buffer.toString());
-                buffer = new StringBuffer();
+                buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
