@@ -1,6 +1,8 @@
 package com.meti.app;
 
-import com.meti.core.*;
+import com.meti.core.Ok;
+import com.meti.core.Option;
+import com.meti.core.Result;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
 
@@ -73,11 +75,13 @@ public record Compiler(String_ input) {
     }
 
     private Option<Renderable> compileMethod(String_ line) {
-        if (line.equalsTo(fromSlice("void test(){}"))) {
-            return Some.apply(new Content(fromSlice("def test() => {}")));
-        } else {
-            return None.apply();
-        }
+        return $Option(() -> {
+            var paramStart = line.firstIndexOfChar('(').$();
+            var beforeParams = line.sliceTo(paramStart);
+            var nameSeparator = beforeParams.firstIndexOfChar(' ').$();
+            var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
+            return new Content(fromSlice("def " + name.unwrap() + "() => {}"));
+        });
     }
 
     private Option<Renderable> compileDeclaration(String_ line) {

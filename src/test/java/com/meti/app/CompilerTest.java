@@ -28,6 +28,11 @@ class CompilerTest {
     }
 
     @Test
+    void methodName() {
+        assertCompile("void foo(){}", "def foo() => {}");
+    }
+
+    @Test
     void method() {
         assertCompile("void test(){}", "def test() => {}");
     }
