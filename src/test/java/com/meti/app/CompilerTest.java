@@ -65,13 +65,11 @@ class CompilerTest {
 
     @Test
     void importMultiple() {
-        assertCompile(
-                fromSlice("import foo.bar;import foo.bas"),
-                fromSlice(
-                        """
-                                import { bar } from foo;
-                                import { bas } from foo;
-                                """));
+        assertCompile(fromSlice("import foo.bar;import foo.bas"),
+                fromSlice("""
+                        import { bar } from foo;
+                        import { bas } from foo;
+                        """));
     }
 
     @Test
