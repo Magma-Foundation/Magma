@@ -20,20 +20,17 @@ public record Compiler(String_ input) {
                     .flatMap(staticIndex -> staticIndex.nextExclusive("static ".length()))
                     .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
 
-            var slice = withoutStatic.lastIndexOfChar('.').map(separator -> {
+            var slice = withoutStatic.lastIndexOfChar('.').<Renderable>map(separator -> {
                 var parent = withoutStatic.sliceTo(separator);
 
                 var child = separator.nextExclusive().map(withoutStatic::sliceFrom)
                         .unwrapOrElse(Empty);
 
-                return fromSlice("import { ")
-                        .appendOwned(child)
-                        .append(" } from ")
-                        .appendOwned(parent)
-                        .append(";\n");
+                return new Import(parent, child);
             });
-            return slice.unwrapOrElse(line);
-        }).map(Content::new);
+
+            return slice.unwrapOrElse(Content.ofContent(line));
+        });
     }
 
     private Option<Renderable> compileClass(String_ line) {
@@ -45,10 +42,10 @@ public record Compiler(String_ input) {
 
             var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
             var body = line.sliceFrom(contentStart);
-            var compiledBody = compileNode(body).render();
+            var compiledBody = compileNode(body);
 
-            return fromSlice("class def " + name.unwrap() + "() => " + compiledBody.unwrap());
-        }).map(Content::new);
+            return new Class_(name, compiledBody);
+        });
     }
 
     Result<String_, CompileException> compile() {
@@ -66,7 +63,7 @@ public record Compiler(String_ input) {
                 .or(compileClass(line))
                 .or(compileBlock(line))
                 .or(compileDeclaration(line))
-                .unwrapOrElse(new Content(line));
+                .unwrapOrElse(Content.ofContent(line));
     }
 
     private Option<Renderable> compileDeclaration(String_ line) {
@@ -89,13 +86,11 @@ public record Compiler(String_ input) {
             var bodyEnd = line.firstIndexOfChar('}').$();
             var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
             var content = line.sliceBetween(range);
-            return split(content)
-                    .map(line1 -> compileNode(line1).render())
-                    .collect(JavaString.joining(fromSlice(";")))
-                    .unwrapOrElse(fromSlice(""))
-                    .prepend("{")
-                    .append("}");
-        }).map(Content::new);
+            var map = split(content)
+                    .map(this::compileNode)
+                    .collect(JavaList.asList());
+            return new Block(map);
+        });
     }
 
     private Iterator<String_> split(String_ input1) {
