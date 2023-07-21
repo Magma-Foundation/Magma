@@ -11,7 +11,7 @@ public record Class_(String_ name, List<Renderable> parameters, Renderable body)
     public String_ render() {
         var joinedParameters = parameters.iter()
                 .map(Renderable::render)
-                .collect(JavaString.joining(fromSlice(",")))
+                .collect(JavaString.joining(fromSlice(", ")))
                 .unwrapOrElse(JavaString.Empty);
 
         return fromSlice("class def " + name().unwrap() + "(" + joinedParameters.unwrap() + ") => " + body().render().unwrap());
