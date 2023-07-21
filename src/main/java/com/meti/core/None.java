@@ -4,6 +4,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
+    public None() {
+    }
+
     @Override
     public T $() throws IntentionalException {
         throw new IntentionalException();

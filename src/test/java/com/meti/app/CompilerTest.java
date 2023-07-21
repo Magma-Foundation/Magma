@@ -14,6 +14,10 @@ class CompilerTest {
         assertCompile(input, Empty);
     }
 
+    private static void assertCompile(String input, String output) {
+        assertCompile(fromSlice(input), fromSlice(output));
+    }
+
     private static void assertCompile(String_ input, String_ output) {
         try {
             var actual = unwrap(new Compiler(input).compile());
@@ -21,6 +25,11 @@ class CompilerTest {
         } catch (CompileException e) {
             fail(e);
         }
+    }
+
+    @Test
+    void declaration() {
+        assertCompile("int x", "x : i16");
     }
 
     @Test

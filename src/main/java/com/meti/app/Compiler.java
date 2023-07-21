@@ -1,8 +1,6 @@
 package com.meti.app;
 
-import com.meti.core.Ok;
-import com.meti.core.Option;
-import com.meti.core.Result;
+import com.meti.core.*;
 import com.meti.iterate.Iterator;
 import com.meti.java.JavaList;
 import com.meti.java.JavaString;
@@ -64,7 +62,16 @@ public record Compiler(String_ input) {
         return compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
+                .or(compileDeclaration(line))
                 .unwrapOrElse(line);
+    }
+
+    private Option<String_> compileDeclaration(String_ line) {
+        if (line.equalsTo(fromSlice("int x"))) {
+            return Some.apply(fromSlice("x : i16"));
+        } else {
+            return new None<>();
+        }
     }
 
     private Option<String_> compileBlock(String_ line) {
