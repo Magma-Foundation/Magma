@@ -24,11 +24,16 @@ class CompilerTest {
     }
 
     @Test
+    void importStatic() {
+        assertCompile(fromSlice("import static foo.bar"), fromSlice("import { bar } from foo;\n"));
+    }
+
+    @Test
     void importMultiple() {
         assertCompile(
                 fromSlice("import foo.bar;import foo.bas"),
                 fromSlice(
-                        "import { bar } from foo;" +
+                        "import { bar } from foo;\n" +
                         "import { bas } from foo;"));
     }
 

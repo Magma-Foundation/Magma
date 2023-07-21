@@ -16,17 +16,22 @@ public record Compiler(String_ input) {
                     return line.firstIndexOfSlice("import ").flatMap(index -> {
                         return index.nextExclusive("import ".length());
                     }).map(index -> {
-                        var slice1 = line.sliceFrom(index);
-                        var slice = slice1.lastIndexOfChar('.').map(separator -> {
-                            var parent = slice1.sliceTo(separator);
-                            var child = separator.nextExclusive().map(next -> slice1.sliceFrom(next))
+                        var withoutPrefix = line.sliceFrom(index);
+                        var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
+                                .flatMap(staticIndex -> staticIndex.nextExclusive("static ".length()))
+                                .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
+
+                        var slice = withoutStatic.lastIndexOfChar('.').map(separator -> {
+                            var parent = withoutStatic.sliceTo(separator);
+
+                            var child = separator.nextExclusive().map(withoutStatic::sliceFrom)
                                     .unwrapOrElse(Empty);
 
                             return fromSlice("import { ")
                                     .appendOwned(child)
                                     .append(" } from ")
                                     .appendOwned(parent)
-                                    .append(";");
+                                    .append(";\n");
                         });
                         return slice.unwrapOrElse(line);
                     }).unwrapOrElse(line);
