@@ -18,7 +18,9 @@ public record Compiler(String_ input) {
                     .firstIndexOfSlice("import ").$()
                     .nextExclusive("import ".length()).$();
 
-            return input.sliceFrom(importIndex)
+            var segments = input.sliceFrom(importIndex);
+
+            return segments
                     .split("\\.")
                     .collect(JavaList.asList())
                     .into(NonEmptyJavaList::from)
