@@ -45,7 +45,7 @@ public record Compiler(String_ input) {
 
             var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
             var body = line.sliceFrom(contentStart);
-            var compiledBody = compileLine(body);
+            var compiledBody = compileNode(body).unwrap();
 
             return fromSlice("class def " + name.unwrap() + "() => " + compiledBody.unwrap());
         });
@@ -54,35 +54,33 @@ public record Compiler(String_ input) {
     Result<String_, CompileException> compile() {
         var output = split(input)
                 .filter(line -> !line.strip().startsWith("package "))
-                .map(this::compileLine)
+                .map(line1 -> compileNode(line1).unwrap())
                 .collect(joining(Empty))
                 .unwrapOrElse(Empty);
 
         return Ok.apply(output);
     }
 
-    private String_ compileLine(String_ line) {
-        return compileImport(line)
+    private Content compileNode(String_ line) {
+        return new Content(compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
                 .or(compileDeclaration(line))
-                .unwrapOrElse(line);
+                .unwrapOrElse(line));
     }
 
     private Option<String_> compileDeclaration(String_ line) {
-        return line.firstIndexOfChar(' ').flatMap(index -> {
-            return $Option(() -> {
-                var type = line.sliceTo(index).strip();
-                var name = line.sliceFrom(index.nextExclusive().$()).strip();
+        return line.firstIndexOfChar(' ').flatMap(index -> $Option(() -> {
+            var type = line.sliceTo(index).strip();
+            var name = line.sliceFrom(index.nextExclusive().$()).strip();
 
-                var map = JavaMap.<String, String>empty()
-                        .insert("int", "i16")
-                        .applyOptionally(type.unwrap())
-                        .unwrapOrElse(type.unwrap());
+            var map = JavaMap.<String, String>empty()
+                    .insert("int", "i16")
+                    .applyOptionally(type.unwrap())
+                    .unwrapOrElse(type.unwrap());
 
-                return name.append(" : ").append(map);
-            });
-        });
+            return name.append(" : ").append(map);
+        }));
     }
 
     private Option<String_> compileBlock(String_ line) {
@@ -92,7 +90,7 @@ public record Compiler(String_ input) {
             var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
             var content = line.sliceBetween(range);
             return split(content)
-                    .map(this::compileLine)
+                    .map(line1 -> compileNode(line1).unwrap())
                     .collect(JavaString.joining(fromSlice(";")))
                     .unwrapOrElse(fromSlice(""))
                     .prepend("{")
