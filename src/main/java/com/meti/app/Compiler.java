@@ -13,7 +13,7 @@ import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
-    private static Option<String_> compileImport(String_ line) {
+    private static Option<Content> compileImport(String_ line) {
         return line.firstIndexOfSlice("import ").flatMap(index -> index.nextExclusive("import ".length())).map(index -> {
             var withoutPrefix = line.sliceFrom(index);
             var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
@@ -33,10 +33,10 @@ public record Compiler(String_ input) {
                         .append(";\n");
             });
             return slice.unwrapOrElse(line);
-        });
+        }).map(Content::new);
     }
 
-    private Option<String_> compileClass(String_ line) {
+    private Option<Content> compileClass(String_ line) {
         return $Option(() -> {
             var classIndex = line.firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();
@@ -48,7 +48,7 @@ public record Compiler(String_ input) {
             var compiledBody = compileNode(body).unwrap();
 
             return fromSlice("class def " + name.unwrap() + "() => " + compiledBody.unwrap());
-        });
+        }).map(Content::new);
     }
 
     Result<String_, CompileException> compile() {
@@ -62,14 +62,14 @@ public record Compiler(String_ input) {
     }
 
     private Content compileNode(String_ line) {
-        return new Content(compileImport(line)
+        return compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
                 .or(compileDeclaration(line))
-                .unwrapOrElse(line));
+                .unwrapOrElse(new Content(line));
     }
 
-    private Option<String_> compileDeclaration(String_ line) {
+    private Option<Content> compileDeclaration(String_ line) {
         return line.firstIndexOfChar(' ').flatMap(index -> $Option(() -> {
             var type = line.sliceTo(index).strip();
             var name = line.sliceFrom(index.nextExclusive().$()).strip();
@@ -79,11 +79,11 @@ public record Compiler(String_ input) {
                     .applyOptionally(type.unwrap())
                     .unwrapOrElse(type.unwrap());
 
-            return name.append(" : ").append(map);
+            return new Content(name.append(" : ").append(map));
         }));
     }
 
-    private Option<String_> compileBlock(String_ line) {
+    private Option<Content> compileBlock(String_ line) {
         return $Option(() -> {
             var bodyStart = line.firstIndexOfChar('{').$();
             var bodyEnd = line.firstIndexOfChar('}').$();
@@ -95,7 +95,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(fromSlice(""))
                     .prepend("{")
                     .append("}");
-        });
+        }).map(Content::new);
     }
 
     private Iterator<String_> split(String_ input1) {
