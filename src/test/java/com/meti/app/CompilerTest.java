@@ -28,6 +28,19 @@ class CompilerTest {
     }
 
     @Test
+    void constructor() {
+        assertCompile("class Test{public Test(){}}", """
+                class def Test() => {
+                }
+                                
+                object Tests {
+                    def new() => {
+                        return Test();
+                    }
+                }""");
+    }
+
+    @Test
     void declarationKeyword() {
         assertCompile("private int x", "x : i16");
     }
