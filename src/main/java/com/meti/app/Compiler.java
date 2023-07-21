@@ -86,13 +86,24 @@ public record Compiler(String_ input) {
     private Option<Renderable> compileMethod(String_ line) {
         return $Option(() -> {
             var paramStart = line.firstIndexOfChar('(').$();
+            var paramEnd = line.firstIndexOfChar(')').$();
+
             var beforeParams = line.sliceTo(paramStart);
             var nameSeparator = beforeParams.firstIndexOfChar(' ').$();
             var type = beforeParams.sliceTo(nameSeparator);
             var resolvedType = resolveType(type);
 
+            var paramString = line.sliceBetween(paramStart.nextExclusive().$().to(paramEnd).$());
+            var parameters = paramString.split(",").map(node -> {
+                return compileDeclaration(node).$();
+            }).collect(JavaSet.asSet());
+
             var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
-            return new Content(fromSlice("def " + name.unwrap() + "() : " + resolvedType.unwrap() + " => {}"));
+            var renderedParameters = parameters.iter()
+                    .map(Renderable::render)
+                    .collect(joining(fromSlice(", ")))
+                    .unwrapOrElse(Empty);
+            return new Content(fromSlice("def " + name.unwrap() + "(" + renderedParameters.unwrap() + ") : " + resolvedType.unwrap() + " => {}"));
         });
     }
 
