@@ -7,5 +7,5 @@ public interface NonEmptyList<T> extends List<T> {
 
     T first();
 
-    List<T> sliceWithoutFirst();
+    T last();
 }

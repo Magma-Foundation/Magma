@@ -28,6 +28,11 @@ class CompilerTest {
     }
 
     @Test
+    void declarationKeyword() {
+        assertCompile("private int x", "x : i16");
+    }
+
+    @Test
     void declaration() {
         assertCompile("int x", "x : i16");
     }
@@ -63,8 +68,10 @@ class CompilerTest {
         assertCompile(
                 fromSlice("import foo.bar;import foo.bas"),
                 fromSlice(
-                        "import { bar } from foo;\n" +
-                        "import { bas } from foo;\n"));
+                        """
+                                import { bar } from foo;
+                                import { bas } from foo;
+                                """));
     }
 
     @Test

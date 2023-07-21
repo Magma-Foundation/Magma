@@ -74,9 +74,14 @@ public record Compiler(String_ input) {
     }
 
     private Option<Renderable> compileDeclaration(String_ line) {
-        return line.firstIndexOfChar(' ').flatMap(index -> $Option(() -> {
-            var type = line.sliceTo(index).strip();
+        return line.lastIndexOfChar(' ').flatMap(index -> $Option(() -> {
+            var args = line.sliceTo(index).strip();
             var name = line.sliceFrom(index.nextExclusive().$()).strip();
+            var list = args.split(" ").collect(JavaList.asList())
+                    .into(NonEmptyJavaList::from)
+                    .unwrap();
+
+            var type = list.last();
 
             var map = JavaMap.<String, String>empty()
                     .insert("int", "i16")
