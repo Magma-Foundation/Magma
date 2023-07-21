@@ -28,13 +28,18 @@ class CompilerTest {
     }
 
     @Test
+    void methodReturns() {
+        assertCompile("int foo(){}", "def foo() : I16 => {}");
+    }
+
+    @Test
     void methodName() {
-        assertCompile("void foo(){}", "def foo() => {}");
+        assertCompile("void foo(){}", "def foo() : Void => {}");
     }
 
     @Test
     void method() {
-        assertCompile("void test(){}", "def test() => {}");
+        assertCompile("void test(){}", "def test() : Void => {}");
     }
 
     @Test
@@ -52,17 +57,17 @@ class CompilerTest {
 
     @Test
     void declarationKeyword() {
-        assertCompile("private int x", "x : i16");
+        assertCompile("private int x", "x : I16");
     }
 
     @Test
     void declaration() {
-        assertCompile("int x", "x : i16");
+        assertCompile("int x", "x : I16");
     }
 
     @Test
     void declarationName() {
-        assertCompile("int test", "test : i16");
+        assertCompile("int test", "test : I16");
     }
 
     @Test
@@ -73,7 +78,7 @@ class CompilerTest {
     @Test
     void field() {
         assertCompile(fromSlice("class Test {int x;}"),
-                fromSlice("class def Test(x : i16) => {}"));
+                fromSlice("class def Test(x : I16) => {}"));
     }
 
     @Test

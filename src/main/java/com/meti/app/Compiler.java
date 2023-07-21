@@ -32,6 +32,15 @@ public record Compiler(String_ input) {
         });
     }
 
+    private static String_ resolveType(String_ type) {
+        return JavaMap.<String, String>empty()
+                .insert("int", "I16")
+                .insert("void", "Void")
+                .applyOptionally(type.unwrap())
+                .map(JavaString::fromSlice)
+                .unwrapOrElse(type);
+    }
+
     private Option<Renderable> compileClass(String_ line) {
         return $Option(() -> {
             var classIndex = line.firstIndexOfSlice("class ").$()
@@ -79,8 +88,11 @@ public record Compiler(String_ input) {
             var paramStart = line.firstIndexOfChar('(').$();
             var beforeParams = line.sliceTo(paramStart);
             var nameSeparator = beforeParams.firstIndexOfChar(' ').$();
+            var type = beforeParams.sliceTo(nameSeparator);
+            var resolvedType = resolveType(type);
+
             var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
-            return new Content(fromSlice("def " + name.unwrap() + "() => {}"));
+            return new Content(fromSlice("def " + name.unwrap() + "() : " + resolvedType.unwrap() + " => {}"));
         });
     }
 
@@ -93,13 +105,9 @@ public record Compiler(String_ input) {
                     .unwrap();
 
             var type = list.last();
+            var map = resolveType(type);
 
-            var map = JavaMap.<String, String>empty()
-                    .insert("int", "i16")
-                    .applyOptionally(type.unwrap())
-                    .unwrapOrElse(type.unwrap());
-
-            return new Declaration(name, fromSlice(map));
+            return new Declaration(name, map);
         }));
     }
 
