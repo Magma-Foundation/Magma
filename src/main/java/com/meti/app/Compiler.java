@@ -1,8 +1,6 @@
 package com.meti.app;
 
-import com.meti.core.Ok;
-import com.meti.core.Option;
-import com.meti.core.Result;
+import com.meti.core.*;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
 
@@ -69,8 +67,17 @@ public record Compiler(String_ input) {
         return compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
+                .or(compileMethod(line))
                 .or(compileDeclaration(line))
                 .unwrapOrElse(Content.ofContent(line));
+    }
+
+    private Option<Renderable> compileMethod(String_ line) {
+        if (line.equalsTo(fromSlice("void test(){}"))) {
+            return Some.apply(new Content(fromSlice("def test() => {}")));
+        } else {
+            return None.apply();
+        }
     }
 
     private Option<Renderable> compileDeclaration(String_ line) {

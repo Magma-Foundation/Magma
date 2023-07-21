@@ -28,6 +28,11 @@ class CompilerTest {
     }
 
     @Test
+    void method() {
+        assertCompile("void test(){}", "def test() => {}");
+    }
+
+    @Test
     void constructor() {
         assertCompile("class Test{public Test(){}}", """
                 class def Test() => {
