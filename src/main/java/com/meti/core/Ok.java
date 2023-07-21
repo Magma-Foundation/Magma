@@ -22,7 +22,7 @@ public record Ok<T, E>(T inner) implements Result<T, E> {
 
     @Override
     public Option<E> err() {
-        return new None<>();
+        return None.apply();
     }
 
     @Override

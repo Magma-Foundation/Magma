@@ -13,7 +13,7 @@ public record Err<T, E>(E inner) implements Result<T, E> {
 
     @Override
     public Option<T> value() {
-        return new None<>();
+        return None.apply();
     }
 
     @Override

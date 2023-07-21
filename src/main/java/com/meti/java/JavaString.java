@@ -24,7 +24,7 @@ public final class JavaString implements String_ {
         return new Collector<>() {
             @Override
             public Option<String_> initial() {
-                return new None<>();
+                return None.apply();
             }
 
             @Override
@@ -57,7 +57,7 @@ public final class JavaString implements String_ {
     public Option<Index> firstIndexOfChar(char c) {
         var index = this.value.indexOf(c);
         return index == -1
-                ? new None<>()
+                ? None.apply()
                 : Some.apply(createIndex(index));
     }
 
@@ -94,7 +94,7 @@ public final class JavaString implements String_ {
     @Override
     public Option<Index> firstIndexOfSlice(java.lang.String slice) {
         var index = this.value.indexOf(slice);
-        if (index == -1) return new None<>();
+        if (index == -1) return None.apply();
         return Some.apply(createIndex(index));
     }
 
@@ -111,7 +111,7 @@ public final class JavaString implements String_ {
     public Option<Index> lastIndexOfChar(char c) {
         var index = this.value.lastIndexOf(c);
         return index == -1
-                ? new None<>()
+                ? None.apply()
                 : Some.apply(createIndex(index));
     }
 

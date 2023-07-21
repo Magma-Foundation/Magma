@@ -63,7 +63,7 @@ public class NIOLocation implements Location {
     public Option<Location> last() {
         var length = value.getNameCount();
         return length == 0
-                ? new None<>()
+                ? None.apply()
                 : new Some<>(new NIOLocation(value.getName(length - 1)));
     }
 
@@ -80,7 +80,7 @@ public class NIOLocation implements Location {
     @Override
     public Option<Location> parent() {
         var parent = value.getParent();
-        if (parent == null) return new None<>();
+        if (parent == null) return None.apply();
         else return Some.apply(new NIOLocation(parent));
     }
 

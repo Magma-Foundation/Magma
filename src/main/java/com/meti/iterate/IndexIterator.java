@@ -6,12 +6,12 @@ import com.meti.core.Some;
 
 public abstract class IndexIterator<T> extends AbstractIterator<T> {
     private final Index initial = new Index(0, length().unwrap());
-    private Option<Index> counter = new None<>();
+    private Option<Index> counter = None.apply();
 
     @Override
     public Option<T> head() {
         if (length().unwrap() == 0) {
-            return new None<>();
+            return None.apply();
         }
 
         if (counter.isEmpty()) {
@@ -26,7 +26,7 @@ public abstract class IndexIterator<T> extends AbstractIterator<T> {
                 return new Some<>(value);
             }
 
-            return new None<>();
+            return None.apply();
         }
     }
 

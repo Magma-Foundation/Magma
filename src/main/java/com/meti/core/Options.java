@@ -8,7 +8,7 @@ public class Options {
         try {
             return new Some<>(generator.generate());
         } catch (IntentionalException e) {
-            return new None<>();
+            return None.apply();
         }
     }
 }

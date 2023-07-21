@@ -65,7 +65,7 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
         if (this.map.containsKey(key)) {
             return new Some<>(this.map.get(key));
         } else {
-            return new None<V>();
+            return None.apply();
         }
     }
 

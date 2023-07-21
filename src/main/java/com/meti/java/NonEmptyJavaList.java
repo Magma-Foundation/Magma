@@ -16,7 +16,7 @@ public class NonEmptyJavaList<T> extends JavaList<T> implements NonEmptyList<T> 
 
     public static <T> Option<NonEmptyList<T>> from(com.meti.java.List<T> list) {
         return list.isEmpty()
-                ? new None<>()
+                ? None.apply()
                 : new Some<>(new NonEmptyJavaList<>(list.unwrap()));
     }
 

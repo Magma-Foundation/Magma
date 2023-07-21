@@ -66,7 +66,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                     counter++;
                     return AbstractIterator.this.head();
                 } else {
-                    return new None<>();
+                    return None.apply();
                 }
             }
         };
@@ -91,7 +91,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                         if (head1.a()) {
                             current = head1.b();
                         } else {
-                            return new None<>();
+                            return None.apply();
                         }
                     }
                 }

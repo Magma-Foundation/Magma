@@ -4,7 +4,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
-    public None() {
+    private None() {
+    }
+
+    public static <T> Option<T> apply() {
+        return new None<>();
     }
 
     @Override
@@ -34,7 +38,7 @@ public class None<T> implements Option<T> {
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return new None<>();
+        return apply();
     }
 
     @Override
@@ -54,6 +58,6 @@ public class None<T> implements Option<T> {
 
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return new None<>();
+        return apply();
     }
 }

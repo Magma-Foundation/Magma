@@ -9,7 +9,7 @@ public record Index(int value, int length) {
         if (value < other.value) {
             return Some.apply(new Range(value, other.value));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 
@@ -26,7 +26,7 @@ public record Index(int value, int length) {
         if (next < length) {
             return new Some<>(new Index(next, length));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 }

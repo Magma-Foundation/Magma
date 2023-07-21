@@ -70,7 +70,7 @@ public record Compiler(String_ input) {
         if (line.equalsTo(fromSlice("int x"))) {
             return Some.apply(fromSlice("x : i16"));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 

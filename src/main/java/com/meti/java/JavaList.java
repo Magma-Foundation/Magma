@@ -69,7 +69,7 @@ public class JavaList<T> implements com.meti.java.List<T> {
     @Override
     public Option<Index> lastIndexOptionally() {
         if (values.isEmpty()) {
-            return new None<>();
+            return None.apply();
         } else {
             return Some.apply(new Index(values.size() - 1, values.size()));
         }

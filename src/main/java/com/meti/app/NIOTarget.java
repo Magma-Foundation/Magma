@@ -14,7 +14,7 @@ public record NIOTarget(NIOFile path) {
     public Option<IOException> write(String_ value) {
         try {
             Files.writeString(path.unwrap(), value.unwrap());
-            return new None<>();
+            return None.apply();
         } catch (IOException e) {
             return Some.apply(e);
         }

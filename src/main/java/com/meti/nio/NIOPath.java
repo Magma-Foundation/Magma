@@ -38,7 +38,7 @@ public final class NIOPath extends NIOLocation {
         if (Files.exists(value)) {
             return Some.apply(new NIOFile(value));
         } else {
-            return new None<>();
+            return None.apply();
         }
     }
 

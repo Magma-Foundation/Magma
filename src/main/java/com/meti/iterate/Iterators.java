@@ -27,7 +27,7 @@ public class Iterators {
         return new AbstractIterator<>() {
             @Override
             public Option<T> head() {
-                return new None<>();
+                return None.apply();
             }
         };
     }
