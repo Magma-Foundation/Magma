@@ -48,7 +48,6 @@ public record Compiler(String_ input) {
             var classIndex = line.firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();
 
-
             var contentStart = line.firstIndexOfChar('{').$();
 
             var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
@@ -78,6 +77,7 @@ public record Compiler(String_ input) {
     }
 
     private Renderable compileNode(String_ line) {
+        System.out.println(line.unwrap());
         return compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
@@ -107,7 +107,12 @@ public record Compiler(String_ input) {
                     .map(Renderable::render)
                     .collect(joining(fromSlice(", ")))
                     .unwrapOrElse(Empty);
-            return new Content(fromSlice("def " + name.unwrap() + "(" + renderedParameters.unwrap() + ") : " + resolvedType.unwrap() + " => {}"));
+
+            var bodyStart = line.firstIndexOfChar('{').$();
+            var body = line.sliceFrom(bodyStart);
+            var node = compileNode(body);
+
+            return new Content(fromSlice("def " + name.unwrap() + "(" + renderedParameters.unwrap() + ") : " + resolvedType.unwrap() + " => " + node.render().unwrap()));
         });
     }
 
@@ -136,13 +141,15 @@ public record Compiler(String_ input) {
             var stripped = line.strip();
             var bodyStart = stripped.firstIndexOfChar('{').$();
             var bodyEnd = stripped.lastIndexOfChar('}').$();
-            if (!(bodyStart.isStart() && bodyEnd.isEnd())) {
+            if (!bodyStart.isStart() || !bodyEnd.isEnd()) {
                 return $$();
             }
 
             var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
             var content = stripped.sliceBetween(range);
             var map = split(content)
+                    .map(String_::strip)
+                    .filter(value -> !value.isEmpty())
                     .map(this::compileNode)
                     .collect(JavaList.asList());
             return new Block(map);
