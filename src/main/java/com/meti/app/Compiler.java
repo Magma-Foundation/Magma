@@ -13,7 +13,7 @@ import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
-    private static Option<Content> compileImport(String_ line) {
+    private static Option<Renderable> compileImport(String_ line) {
         return line.firstIndexOfSlice("import ").flatMap(index -> index.nextExclusive("import ".length())).map(index -> {
             var withoutPrefix = line.sliceFrom(index);
             var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
@@ -36,7 +36,7 @@ public record Compiler(String_ input) {
         }).map(Content::new);
     }
 
-    private Option<Content> compileClass(String_ line) {
+    private Option<Renderable> compileClass(String_ line) {
         return $Option(() -> {
             var classIndex = line.firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();
@@ -45,7 +45,7 @@ public record Compiler(String_ input) {
 
             var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
             var body = line.sliceFrom(contentStart);
-            var compiledBody = compileNode(body).unwrap();
+            var compiledBody = compileNode(body).render();
 
             return fromSlice("class def " + name.unwrap() + "() => " + compiledBody.unwrap());
         }).map(Content::new);
@@ -54,14 +54,14 @@ public record Compiler(String_ input) {
     Result<String_, CompileException> compile() {
         var output = split(input)
                 .filter(line -> !line.strip().startsWith("package "))
-                .map(line1 -> compileNode(line1).unwrap())
+                .map(line1 -> compileNode(line1).render())
                 .collect(joining(Empty))
                 .unwrapOrElse(Empty);
 
         return Ok.apply(output);
     }
 
-    private Content compileNode(String_ line) {
+    private Renderable compileNode(String_ line) {
         return compileImport(line)
                 .or(compileClass(line))
                 .or(compileBlock(line))
@@ -69,7 +69,7 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(new Content(line));
     }
 
-    private Option<Content> compileDeclaration(String_ line) {
+    private Option<Renderable> compileDeclaration(String_ line) {
         return line.firstIndexOfChar(' ').flatMap(index -> $Option(() -> {
             var type = line.sliceTo(index).strip();
             var name = line.sliceFrom(index.nextExclusive().$()).strip();
@@ -79,18 +79,18 @@ public record Compiler(String_ input) {
                     .applyOptionally(type.unwrap())
                     .unwrapOrElse(type.unwrap());
 
-            return new Content(name.append(" : ").append(map));
+            return new Declaration(name, fromSlice(map));
         }));
     }
 
-    private Option<Content> compileBlock(String_ line) {
+    private Option<Renderable> compileBlock(String_ line) {
         return $Option(() -> {
             var bodyStart = line.firstIndexOfChar('{').$();
             var bodyEnd = line.firstIndexOfChar('}').$();
             var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
             var content = line.sliceBetween(range);
             return split(content)
-                    .map(line1 -> compileNode(line1).unwrap())
+                    .map(line1 -> compileNode(line1).render())
                     .collect(JavaString.joining(fromSlice(";")))
                     .unwrapOrElse(fromSlice(""))
                     .prepend("{")
