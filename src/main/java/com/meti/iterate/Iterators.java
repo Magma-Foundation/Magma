@@ -10,6 +10,10 @@ public class Iterators {
 
     @SafeVarargs
     public static <T> Iterator<T> of(T... values) {
+        return ofArray(values);
+    }
+
+    public static <T> IndexIterator<T> ofArray(T[] values) {
         return new IndexIterator<>() {
             @Override
             protected T apply(Index index) {

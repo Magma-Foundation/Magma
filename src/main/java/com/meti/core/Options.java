@@ -4,6 +4,10 @@ public class Options {
     private Options() {
     }
 
+    public static <T> T $$() {
+        throw new IntentionalException();
+    }
+
     public static <T> Option<T> $Option(Generator<T, IntentionalException> generator) {
         try {
             return new Some<>(generator.generate());

@@ -3,10 +3,7 @@ package com.meti.java;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
-import com.meti.iterate.Collector;
-import com.meti.iterate.Index;
-import com.meti.iterate.Iterator;
-import com.meti.iterate.Range;
+import com.meti.iterate.*;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -146,5 +143,18 @@ public final class JavaString implements String_ {
     @Override
     public boolean startsWith(String slice) {
         return this.value.startsWith(slice);
+    }
+
+    @Override
+    public Iterator<Character> iter() {
+        var chars = this.value.toCharArray();
+
+        // Box the chars
+        var charsCopy = new Character[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            charsCopy[i] = chars[i];
+        }
+
+        return Iterators.ofArray(charsCopy);
     }
 }

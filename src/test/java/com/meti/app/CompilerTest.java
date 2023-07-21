@@ -28,6 +28,11 @@ class CompilerTest {
     }
 
     @Test
+    void methodWithinClass() {
+        assertCompile("class Test(){void test(){}}", "class def Test() => {def test() => {}}");
+    }
+
+    @Test
     void methodParameter() {
         assertCompile("int foo(int bar){}", "def foo(bar : I16) : I16 => {}");
     }

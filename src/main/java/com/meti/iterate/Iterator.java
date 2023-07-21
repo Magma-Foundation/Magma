@@ -34,5 +34,7 @@ public interface Iterator<T> {
     Iterator<T> then(Iterator<T> other);
 
     boolean anyMatch(Predicate<T> predicate);
+
+    boolean allMatch(Predicate<T> predicate);
 }
 

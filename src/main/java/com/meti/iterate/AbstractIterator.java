@@ -14,6 +14,11 @@ import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
+    public boolean allMatch(Predicate<T> predicate) {
+        return foldLeft(true, (aBoolean, t) -> aBoolean && predicate.test(t));
+    }
+
+    @Override
     public <P, R> Unzip<T, P, R> unzip(Function<T, P> mapper) {
         return new UnzipImpl<>(this, mapper);
     }

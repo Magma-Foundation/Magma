@@ -37,4 +37,6 @@ public interface String_ {
     String_ strip();
 
     boolean startsWith(String slice);
+
+    Iterator<Character> iter();
 }

@@ -2,6 +2,7 @@ package com.meti.app;
 
 import com.meti.core.Ok;
 import com.meti.core.Option;
+import com.meti.core.Options;
 import com.meti.core.Result;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
@@ -111,6 +112,11 @@ public record Compiler(String_ input) {
         return line.lastIndexOfChar(' ').flatMap(index -> $Option(() -> {
             var args = line.sliceTo(index).strip();
             var name = line.sliceFrom(index.nextExclusive().$()).strip();
+            var isValid = name.iter().allMatch(Character::isLetter);
+            if (!isValid) {
+                return Options.$$();
+            }
+
             var list = args.split(" ").collect(JavaList.asList())
                     .into(NonEmptyJavaList::from)
                     .unwrap();
