@@ -1,8 +1,11 @@
 package com.meti.app;
 
-import com.meti.core.*;
+import com.meti.core.Ok;
+import com.meti.core.Option;
+import com.meti.core.Result;
 import com.meti.iterate.Iterator;
 import com.meti.java.JavaList;
+import com.meti.java.JavaMap;
 import com.meti.java.JavaString;
 import com.meti.java.String_;
 
@@ -67,11 +70,19 @@ public record Compiler(String_ input) {
     }
 
     private Option<String_> compileDeclaration(String_ line) {
-        if (line.equalsTo(fromSlice("int x"))) {
-            return Some.apply(fromSlice("x : i16"));
-        } else {
-            return None.apply();
-        }
+        return line.firstIndexOfChar(' ').flatMap(index -> {
+            return $Option(() -> {
+                var type = line.sliceTo(index).strip();
+                var name = line.sliceFrom(index.nextExclusive().$()).strip();
+
+                var map = JavaMap.<String, String>empty()
+                        .insert("int", "i16")
+                        .applyOptionally(type.unwrap())
+                        .unwrapOrElse(type.unwrap());
+
+                return name.append(" : ").append(map);
+            });
+        });
     }
 
     private Option<String_> compileBlock(String_ line) {

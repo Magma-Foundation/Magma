@@ -33,6 +33,11 @@ class CompilerTest {
     }
 
     @Test
+    void declarationName() {
+        assertCompile("int test", "test : i16");
+    }
+
+    @Test
     void block() {
         assertCompile(fromSlice("{}"), fromSlice("{}"));
     }
