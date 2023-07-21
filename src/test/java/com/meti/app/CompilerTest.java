@@ -10,22 +10,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class CompilerTest {
-    private static void assertCompile(String_ input) {
+    private static void assertEmptyOutput(String_ input) {
+        assertCompile(input, Empty);
+    }
+
+    private static void assertCompile(String_ input, String_ output) {
         try {
             var actual = unwrap(new Compiler(input).compile());
-            assertEquals("", actual.unwrap());
+            assertEquals(output.unwrap(), actual.unwrap());
         } catch (CompileException e) {
             fail(e);
         }
     }
 
     @Test
+    void import_() {
+        assertCompile(fromSlice("import foo.bar"), fromSlice("import { bar } from foo;"));
+    }
+
+    @Test
     void package_() {
-        assertCompile(fromSlice("package test"));
+        assertEmptyOutput(fromSlice("package test"));
     }
 
     @Test
     void empty() {
-        assertCompile(Empty);
+        assertEmptyOutput(Empty);
     }
 }
