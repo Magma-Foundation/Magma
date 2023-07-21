@@ -24,6 +24,15 @@ class CompilerTest {
     }
 
     @Test
+    void importMultiple() {
+        assertCompile(
+                fromSlice("import foo.bar;import foo.bas"),
+                fromSlice(
+                        "import { bar } from foo;" +
+                        "import { bas } from foo;"));
+    }
+
+    @Test
     void import_() {
         assertCompile(fromSlice("import foo.bar"), fromSlice("import { bar } from foo;"));
     }

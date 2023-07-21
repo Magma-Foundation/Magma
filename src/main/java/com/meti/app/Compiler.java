@@ -31,7 +31,7 @@ public record Compiler(String_ input) {
                         return slice.unwrapOrElse(line);
                     }).unwrapOrElse(line);
                 })
-                .collect(joining(fromSlice(";")))
+                .collect(joining(Empty))
                 .unwrapOrElse(Empty);
 
         return Ok.apply(output);
