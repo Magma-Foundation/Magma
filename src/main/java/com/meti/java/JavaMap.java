@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
@@ -24,7 +23,7 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
         this.map = map;
     }
 
-    public static <P, T, R> com.meti.java.Map<Predicate<P>, Function<Iterator<T>, Iterator<R>>> empty() {
+    public static <K, V> com.meti.java.Map<K, V> empty() {
         return new JavaMap<>(new HashMap<>());
     }
 
