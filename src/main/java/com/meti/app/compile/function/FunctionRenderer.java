@@ -24,9 +24,9 @@ public record FunctionRenderer(Function function) implements Renderer {
                 .collect(JavaString.joiningEmpty())
                 .unwrapOrElse(Empty);
 
-        var body = function().body().value();
+        var body = function().body1().value();
         return body.map(value -> renderedKeywords.append("def")
-                .appendOwned(function().name()).append("(")
+                .appendOwned(function().name1()).append("(")
                 .appendOwned(joinedParameters).append(") => ")
                 .appendOwned(value));
     }

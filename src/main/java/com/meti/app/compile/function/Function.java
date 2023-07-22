@@ -5,8 +5,8 @@ import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
-public record Function(Set<String_> keywords, String_ name,
-                       List<Node> parameters, Node body) implements Node {
+public record Function(Set<String_> keywords, String_ name1,
+                       List<Node> parameters, Node body1) implements Node {
     @Override
     public String_ render() {
         return new FunctionRenderer(this).render().unwrap();

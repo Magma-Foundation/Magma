@@ -8,6 +8,7 @@ public interface Option<T> {
     //This should eventually be an extension method
     T $();
 
+    @Deprecated
     T unwrap();
 
     boolean isPresent();

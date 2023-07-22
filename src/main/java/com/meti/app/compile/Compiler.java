@@ -27,8 +27,8 @@ public record Compiler(String_ input) {
     }
 
     private Option<Node> compileClass(String_ line) {
-        return new ClassLexer(line).lexClass1()
-                .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name(), compileNode(s.body().render()))))
+        return new ClassLexer(line).lex()
+                .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name().unwrap(), compileNode(s.body().unwrap().value().unwrap()))))
                 .flatMap(Class_::transform);
     }
 
