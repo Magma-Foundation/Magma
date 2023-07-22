@@ -23,22 +23,9 @@ public record Compiler(String_ input) {
     }
 
     private Option<Renderable> compileClass(String_ line) {
-        return lexClass(new ClassLexer(line)).flatMap(Class_::transform);
-    }
-
-    private Option<Class_> lexClass(ClassLexer classLexer) {
-        return $Option(() -> {
-            var classIndex = classLexer.line().firstIndexOfSlice("class ").$()
-                    .nextExclusive("class ".length()).$();
-
-            var contentStart = classLexer.line().firstIndexOfChar('{').$();
-
-            var name = classLexer.line().sliceBetween(classIndex.to(contentStart).$()).strip();
-            var body = classLexer.line().sliceFrom(contentStart);
-            var compiledBody = compileNode(body);
-
-            return new Class_(name, compiledBody);
-        });
+        return new ClassLexer(line).lexClass1()
+                .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name(), compileNode(s.body().render()))))
+                .flatMap(Class_::transform);
     }
 
     Result<String_, CompileException> compile() {

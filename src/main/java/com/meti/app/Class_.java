@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
-public record Class_(String_ name, Renderable compiledBody) implements Transformable {
+public record Class_(String_ name, Renderable body) implements Transformable {
     @Override
     public Option<Renderable> transform() {
         return $Option(() -> {
-            var block = Objects.cast(Block.class, compiledBody()).$();
+            var block = Objects.cast(Block.class, body()).$();
 
             var parameters = new ArrayList<Renderable>();
             var value = new ArrayList<Renderable>();
