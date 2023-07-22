@@ -1,14 +1,12 @@
 package com.meti.app.compile.clazz;
 
+import com.meti.app.compile.Content;
 import com.meti.app.compile.Declaration;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.block.Block;
 import com.meti.app.compile.function.Function;
 import com.meti.core.Option;
-import com.meti.java.JavaList;
-import com.meti.java.JavaSet;
-import com.meti.java.List;
-import com.meti.java.Objects;
+import com.meti.java.*;
 
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
@@ -30,16 +28,16 @@ public record ClassTransformer(Node clazz) implements Transformer {
             var cache = block.values()
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
-            return new Function(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body));
+            return new Function(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body), new Content(fromSlice("Void")));
         });
     }
 
-    record Cache(List<Node> parameters, List<Node> body) {
+    record Cache(Set<Node> parameters, List<Node> body) {
         Cache() {
-            this(JavaList.empty(), JavaList.empty());
+            this(JavaSet.empty(), JavaList.empty());
         }
 
-        public Cache withParameters(List<Node> newParameters) {
+        public Cache withParameters(Set<Node> newParameters) {
             return new Cache(newParameters, body);
         }
 

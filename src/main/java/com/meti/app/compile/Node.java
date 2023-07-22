@@ -6,7 +6,7 @@ import com.meti.java.List;
 import com.meti.java.String_;
 
 public interface Node {
-    default Option<List<Node>> lines() {
+    default Option<List<? extends Node>> lines() {
         return None.apply();
     }
 

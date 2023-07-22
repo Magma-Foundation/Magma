@@ -6,9 +6,9 @@ import com.meti.core.Some;
 import com.meti.java.List;
 import com.meti.java.String_;
 
-public record Block(List<Node> values) implements Node {
+public record Block(List<? extends Node> values) implements Node {
     @Override
-    public Option<List<Node>> lines() {
+    public Option<List<? extends Node>> lines() {
         return Some.apply(values);
     }
 

@@ -1,23 +1,21 @@
 package com.meti.app.compile;
 
-import com.meti.app.compile.block.Block;
 import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.Class_;
 import com.meti.app.compile.imports.ImportLexer;
 import com.meti.core.Ok;
-import com.meti.core.Option;
-import com.meti.core.Options;
 import com.meti.core.Result;
-import com.meti.iterate.Iterator;
-import com.meti.java.*;
+import com.meti.java.JavaMap;
+import com.meti.java.JavaString;
+import com.meti.java.Objects;
+import com.meti.java.String_;
 
-import static com.meti.core.Options.$$;
-import static com.meti.core.Options.$Option;
-import static com.meti.java.JavaString.*;
+import static com.meti.java.JavaString.Empty;
+import static com.meti.java.JavaString.joining;
 
 public record Compiler(String_ input) {
 
-    private static String_ resolveType(String_ type) {
+    static String_ resolveType(String_ type) {
         return JavaMap.<String, String>empty()
                 .insert("int", "I16")
                 .insert("void", "Void")
@@ -26,14 +24,8 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(type);
     }
 
-    private Option<Node> compileClass(String_ line) {
-        return new ClassLexer(line).lex()
-                .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name().unwrap(), compileNode(s.body().unwrap().value().unwrap()))))
-                .flatMap(Class_::transform);
-    }
-
     public Result<String_, CompileException> compile() {
-        var output = split(input)
+        var output = new Splitter(input).split()
                 .filter(line -> !line.strip().startsWith("package "))
                 .map(line1 -> compileNode(line1).render())
                 .collect(joining(Empty))
@@ -45,108 +37,13 @@ public record Compiler(String_ input) {
     private Node compileNode(String_ line) {
         System.out.println(line.unwrap());
         return new ImportLexer(line).lex()
-                .or(compileClass(line))
-                .or(compileBlock(line))
-                .or(compileMethod(line))
-                .or(compileDeclaration(line))
+                .or(new ClassLexer(line).lex()
+                        .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name().unwrap(), compileNode(s.body().unwrap().value().unwrap()))))
+                        .flatMap(Class_::transform))
+                .or(new BlockLexer(line).lex())
+                .or(new FunctionLexer(line).lex())
+                .or(new DeclarationLexer(line).lex())
                 .unwrapOrElse(Content.ofContent(line));
     }
 
-    private Option<Node> compileMethod(String_ line) {
-        return $Option(() -> {
-            var paramStart = line.firstIndexOfChar('(').$();
-            var paramEnd = line.firstIndexOfChar(')').$();
-
-            var beforeParams = line.sliceTo(paramStart);
-            var nameSeparator = beforeParams.firstIndexOfChar(' ').$();
-            var type = beforeParams.sliceTo(nameSeparator);
-            var resolvedType = resolveType(type);
-
-            var paramString = line.sliceBetween(paramStart.nextExclusive().$().to(paramEnd).$());
-            var parameters = paramString.split(",")
-                    .map(String_::strip)
-                    .filter(value -> !value.isEmpty())
-                    .map(node -> compileDeclaration(node).$()).collect(JavaSet.asSet());
-
-            var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
-            var renderedParameters = parameters.iter()
-                    .map(Node::render)
-                    .collect(joining(fromSlice(", ")))
-                    .unwrapOrElse(Empty);
-
-            var bodyStart = line.firstIndexOfChar('{').$();
-            var body = line.sliceFrom(bodyStart);
-            var node = compileNode(body);
-
-            return new Content(fromSlice("def " + name.unwrap() + "(" + renderedParameters.unwrap() + ") : " + resolvedType.unwrap() + " => " + node.render().unwrap()));
-        });
-    }
-
-    private Option<Node> compileDeclaration(String_ line) {
-        return line.lastIndexOfChar(' ').flatMap(index -> $Option(() -> {
-            var args = line.sliceTo(index).strip();
-            var name = line.sliceFrom(index.nextExclusive().$()).strip();
-            var isValid = name.iter().allMatch(Character::isLetter);
-            if (!isValid) {
-                return Options.$$();
-            }
-
-            var list = args.split(" ").collect(JavaList.asList())
-                    .into(NonEmptyJavaList::from)
-                    .unwrap();
-
-            var type = list.last();
-            var map = resolveType(type);
-
-            return new Declaration(name, map);
-        }));
-    }
-
-    private Option<Node> compileBlock(String_ line) {
-        return $Option(() -> {
-            var stripped = line.strip();
-            var bodyStart = stripped.firstIndexOfChar('{').$();
-            var bodyEnd = stripped.lastIndexOfChar('}').$();
-            if (!bodyStart.isStart() || !bodyEnd.isEnd()) {
-                return $$();
-            }
-
-            var range = bodyStart.nextExclusive().$().to(bodyEnd).$();
-            var content = stripped.sliceBetween(range);
-            var map = split(content)
-                    .map(String_::strip)
-                    .filter(value -> !value.isEmpty())
-                    .map(this::compileNode)
-                    .collect(JavaList.asList());
-            return new Block(map);
-        });
-    }
-
-    private Iterator<String_> split(String_ input1) {
-        var unwrapped = input1.unwrap();
-        var lines = JavaList.<String>empty();
-        var buffer = new StringBuilder();
-        var depth = 0;
-
-        for (int i = 0; i < unwrapped.length(); i++) {
-            var c = unwrapped.charAt(i);
-            if (c == '}' && depth == 1) {
-                buffer.append(c);
-                depth -= 1;
-
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == ';' && depth == 0) {
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                buffer.append(c);
-            }
-        }
-
-        lines.add(buffer.toString());
-        return lines.iter().map(JavaString::fromSlice);
-    }
 }
