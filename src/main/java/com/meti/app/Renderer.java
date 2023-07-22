@@ -1,7 +1,8 @@
 package com.meti.app;
 
+import com.meti.core.Option;
 import com.meti.java.String_;
 
 public interface Renderer {
-    String_ render();
+    Option<String_> render();
 }
