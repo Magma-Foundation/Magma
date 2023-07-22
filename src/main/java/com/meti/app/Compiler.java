@@ -7,8 +7,6 @@ import com.meti.core.Result;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
 
-import java.util.ArrayList;
-
 import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
@@ -25,26 +23,21 @@ public record Compiler(String_ input) {
     }
 
     private Option<Renderable> compileClass(String_ line) {
+        return lexClass(new ClassLexer(line)).flatMap(Class_::transform);
+    }
+
+    private Option<Class_> lexClass(ClassLexer classLexer) {
         return $Option(() -> {
-            var classIndex = line.firstIndexOfSlice("class ").$()
+            var classIndex = classLexer.line().firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();
 
-            var contentStart = line.firstIndexOfChar('{').$();
+            var contentStart = classLexer.line().firstIndexOfChar('{').$();
 
-            var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
-            var body = line.sliceFrom(contentStart);
+            var name = classLexer.line().sliceBetween(classIndex.to(contentStart).$()).strip();
+            var body = classLexer.line().sliceFrom(contentStart);
             var compiledBody = compileNode(body);
 
-            var block = Objects.cast(Block.class, compiledBody).$();
-            var parameters = new ArrayList<Renderable>();
-            var value = new ArrayList<Renderable>();
-            var unwrappedLines = block.lines().unwrap();
-
-            for (var instance : unwrappedLines) {
-                Objects.cast(Declaration.class, instance).consumeOrElse(parameters::add, () -> value.add(instance));
-            }
-
-            return new Function(JavaSet.of(fromSlice("class")), name, new JavaList<>(parameters), new Block(new JavaList<>(value)));
+            return new Class_(name, compiledBody);
         });
     }
 
