@@ -1,5 +1,9 @@
-package com.meti.app;
+package com.meti.app.compile;
 
+import com.meti.app.compile.block.Block;
+import com.meti.app.compile.clazz.ClassLexer;
+import com.meti.app.compile.clazz.Class_;
+import com.meti.app.compile.imports.ImportLexer;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Options;
@@ -28,7 +32,7 @@ public record Compiler(String_ input) {
                 .flatMap(Class_::transform);
     }
 
-    Result<String_, CompileException> compile() {
+    public Result<String_, CompileException> compile() {
         var output = split(input)
                 .filter(line -> !line.strip().startsWith("package "))
                 .map(line1 -> compileNode(line1).render())

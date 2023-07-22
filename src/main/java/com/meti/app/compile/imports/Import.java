@@ -1,5 +1,6 @@
-package com.meti.app;
+package com.meti.app.compile.imports;
 
+import com.meti.app.compile.Node;
 import com.meti.java.String_;
 
 import static com.meti.java.JavaString.fromSlice;

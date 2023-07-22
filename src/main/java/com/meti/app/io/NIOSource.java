@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.io;
 
 import com.meti.core.Result;
 import com.meti.java.JavaList;
@@ -26,7 +26,7 @@ import {
  */
 
 public record NIOSource(Location parent, Location location) {
-    List<String_> computePackage() {
+    public List<String_> computePackage() {
         var list = parent.relativize(location)
                 .iter()
                 .map(Location::findFileNameAsString)
@@ -37,7 +37,7 @@ public record NIOSource(Location parent, Location location) {
                 .unwrapOrElse(list);
     }
 
-    String_ computeName() {
+    public String_ computeName() {
         var fileName = location.last()
                 .map(Location::findFileNameAsString)
                 .unwrapOrElse(JavaString.Empty);

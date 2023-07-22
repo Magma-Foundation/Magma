@@ -1,12 +1,13 @@
-package com.meti.app;
+package com.meti.app.compile.clazz;
 
+import com.meti.app.compile.Content;
 import com.meti.core.Option;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
 
 public record ClassLexer(String_ line) {
-    Option<Class_> lexClass1() {
+    public Option<Class_> lexClass1() {
         return $Option(() -> {
             var classIndex = line().firstIndexOfSlice("class ").$()
                     .nextExclusive("class ".length()).$();

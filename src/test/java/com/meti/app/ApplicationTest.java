@@ -1,5 +1,8 @@
 package com.meti.app;
 
+import com.meti.app.compile.CompileException;
+import com.meti.app.io.NIOTarget;
+import com.meti.app.io.SingleVolatileGateway;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.core.Results;

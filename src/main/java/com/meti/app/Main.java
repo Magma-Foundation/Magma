@@ -1,5 +1,9 @@
 package com.meti.app;
 
+import com.meti.app.compile.CompileException;
+import com.meti.app.io.DirectorySources;
+import com.meti.app.io.DirectoryTargets;
+import com.meti.app.io.NIOTarget;
 import com.meti.java.Set;
 import com.meti.nio.NIODirectory;
 

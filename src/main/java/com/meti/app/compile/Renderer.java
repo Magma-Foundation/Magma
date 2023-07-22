@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.compile;
 
 import com.meti.core.Option;
 import com.meti.java.String_;

@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.compile;
 
 import com.meti.core.None;
 import com.meti.core.Option;

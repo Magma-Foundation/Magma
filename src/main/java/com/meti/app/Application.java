@@ -1,5 +1,11 @@
 package com.meti.app;
 
+import com.meti.app.compile.CompileException;
+import com.meti.app.compile.Compiler;
+import com.meti.app.io.NIOSource;
+import com.meti.app.io.NIOTarget;
+import com.meti.app.io.Sources;
+import com.meti.app.io.Targets;
 import com.meti.core.Result;
 import com.meti.core.Results;
 import com.meti.core.ThrowableResult;

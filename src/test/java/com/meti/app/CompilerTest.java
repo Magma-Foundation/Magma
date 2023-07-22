@@ -1,5 +1,7 @@
 package com.meti.app;
 
+import com.meti.app.compile.CompileException;
+import com.meti.app.compile.Compiler;
 import com.meti.java.String_;
 import org.junit.jupiter.api.Test;
 

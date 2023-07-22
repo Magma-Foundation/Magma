@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.compile;
 
 public class CompileException extends Exception {
     public CompileException(Throwable cause) {
