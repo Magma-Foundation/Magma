@@ -24,7 +24,7 @@ public record Class_(String_ name, Node body) implements Transformable {
 
             var parameters = new ArrayList<Node>();
             var value = new ArrayList<Node>();
-            var unwrappedLines = block.lines().unwrap();
+            var unwrappedLines = block.values().unwrap();
 
             for (var instance : unwrappedLines) {
                 Objects.cast(Declaration.class, instance).consumeOrElse(parameters::add, () -> value.add(instance));
