@@ -17,6 +17,10 @@ public final class JavaString implements String_ {
         this.value = value;
     }
 
+    public static Collector<String_, Option<String_>> joiningEmpty() {
+        return joining(JavaString.Empty);
+    }
+
     public static Collector<String_, Option<String_>> joining(final String_ delimiter) {
         return new Collector<>() {
             @Override

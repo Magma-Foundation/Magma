@@ -39,11 +39,12 @@ public record Compiler(String_ input) {
             var parameters = new ArrayList<Renderable>();
             var value = new ArrayList<Renderable>();
             var unwrappedLines = block.lines().unwrap();
+
             for (var instance : unwrappedLines) {
                 Objects.cast(Declaration.class, instance).consumeOrElse(parameters::add, () -> value.add(instance));
             }
 
-            return new Class_(name, new JavaList<>(parameters), new Block(new JavaList<>(value)));
+            return new Function(JavaSet.of(fromSlice("class")), name, new JavaList<>(parameters), new Block(new JavaList<>(value)));
         });
     }
 
