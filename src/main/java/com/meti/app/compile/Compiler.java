@@ -1,7 +1,10 @@
 package com.meti.app.compile;
 
+import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.Class_;
+import com.meti.app.compile.declare.DeclarationLexer;
+import com.meti.app.compile.function.FunctionLexer;
 import com.meti.app.compile.imports.ImportLexer;
 import com.meti.core.Ok;
 import com.meti.core.Result;
@@ -15,7 +18,7 @@ import static com.meti.java.JavaString.joining;
 
 public record Compiler(String_ input) {
 
-    static String_ resolveType(String_ type) {
+    public static String_ resolveType(String_ type) {
         return JavaMap.<String, String>empty()
                 .insert("int", "I16")
                 .insert("void", "Void")

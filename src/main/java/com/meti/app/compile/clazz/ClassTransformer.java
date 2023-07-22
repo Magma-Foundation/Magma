@@ -1,9 +1,9 @@
 package com.meti.app.compile.clazz;
 
 import com.meti.app.compile.Content;
-import com.meti.app.compile.Declaration;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.block.Block;
+import com.meti.app.compile.declare.Declaration;
 import com.meti.app.compile.function.Function;
 import com.meti.core.Option;
 import com.meti.java.*;

@@ -6,7 +6,7 @@ import com.meti.java.JavaString;
 import com.meti.java.String_;
 
 public record Splitter(String_ input1) {
-    Iterator<String_> split() {
+    public Iterator<String_> split() {
         var unwrapped = input1().unwrap();
         var lines = JavaList.<String>empty();
         var buffer = new StringBuilder();

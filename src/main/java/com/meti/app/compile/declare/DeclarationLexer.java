@@ -1,5 +1,8 @@
-package com.meti.app.compile;
+package com.meti.app.compile.declare;
 
+import com.meti.app.compile.Compiler;
+import com.meti.app.compile.Lexer;
+import com.meti.app.compile.Node;
 import com.meti.core.Option;
 import com.meti.core.Options;
 import com.meti.java.JavaList;
