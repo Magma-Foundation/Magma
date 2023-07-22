@@ -17,20 +17,20 @@ public record ImportLexer(String_ input) implements Lexer {
     }
 
     @Override
-    public Option<Renderable> lex() {
+    public Option<Node> lex() {
         return input.firstIndexOfSlice("import ")
                 .flatMap(index -> index.nextExclusive("import ".length()))
                 .map(input::sliceFrom)
                 .map(this::lexValid);
     }
 
-    private Renderable lexValid(String_ withoutPrefix) {
+    private Node lexValid(String_ withoutPrefix) {
         var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
                 .flatMap(staticIndex -> staticIndex.nextExclusive("static ".length()))
                 .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
 
         return withoutStatic.lastIndexOfChar('.')
-                .<Renderable>map(separator -> lexFromProperties(withoutStatic, separator))
+                .<Node>map(separator -> lexFromProperties(withoutStatic, separator))
                 .unwrapOrElse(Content.ofContent(input()));
     }
 }

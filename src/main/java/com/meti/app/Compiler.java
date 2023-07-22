@@ -22,7 +22,7 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(type);
     }
 
-    private Option<Renderable> compileClass(String_ line) {
+    private Option<Node> compileClass(String_ line) {
         return new ClassLexer(line).lexClass1()
                 .flatMap(value -> Objects.cast(Class_.class, value).map(s -> new Class_(s.name(), compileNode(s.body().render()))))
                 .flatMap(Class_::transform);
@@ -38,7 +38,7 @@ public record Compiler(String_ input) {
         return Ok.apply(output);
     }
 
-    private Renderable compileNode(String_ line) {
+    private Node compileNode(String_ line) {
         System.out.println(line.unwrap());
         return new ImportLexer(line).lex()
                 .or(compileClass(line))
@@ -48,7 +48,7 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(Content.ofContent(line));
     }
 
-    private Option<Renderable> compileMethod(String_ line) {
+    private Option<Node> compileMethod(String_ line) {
         return $Option(() -> {
             var paramStart = line.firstIndexOfChar('(').$();
             var paramEnd = line.firstIndexOfChar(')').$();
@@ -66,7 +66,7 @@ public record Compiler(String_ input) {
 
             var name = beforeParams.sliceFrom(nameSeparator.nextExclusive().$());
             var renderedParameters = parameters.iter()
-                    .map(Renderable::render)
+                    .map(Node::render)
                     .collect(joining(fromSlice(", ")))
                     .unwrapOrElse(Empty);
 
@@ -78,7 +78,7 @@ public record Compiler(String_ input) {
         });
     }
 
-    private Option<Renderable> compileDeclaration(String_ line) {
+    private Option<Node> compileDeclaration(String_ line) {
         return line.lastIndexOfChar(' ').flatMap(index -> $Option(() -> {
             var args = line.sliceTo(index).strip();
             var name = line.sliceFrom(index.nextExclusive().$()).strip();
@@ -98,7 +98,7 @@ public record Compiler(String_ input) {
         }));
     }
 
-    private Option<Renderable> compileBlock(String_ line) {
+    private Option<Node> compileBlock(String_ line) {
         return $Option(() -> {
             var stripped = line.strip();
             var bodyStart = stripped.firstIndexOfChar('{').$();

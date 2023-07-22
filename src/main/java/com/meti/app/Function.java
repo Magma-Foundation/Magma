@@ -8,12 +8,12 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.Empty;
 import static com.meti.java.JavaString.fromSlice;
 
-public record Function(Set<String_> keywords, String_ name, List<Renderable> parameters,
-                       Renderable body) implements Renderable {
+public record Function(Set<String_> keywords, String_ name, List<Node> parameters,
+                       Node body) implements Node {
     @Override
     public String_ render() {
         var joinedParameters = parameters.iter()
-                .map(Renderable::render)
+                .map(Node::render)
                 .collect(JavaString.joining(fromSlice(", ")))
                 .unwrapOrElse(JavaString.Empty);
 

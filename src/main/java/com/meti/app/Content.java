@@ -2,14 +2,14 @@ package com.meti.app;
 
 import com.meti.java.String_;
 
-public class Content implements Renderable {
+public class Content implements Node {
     private final String_ value;
 
     public Content(String_ value) {
         this.value = value;
     }
 
-    public static Renderable ofContent(String_ value) {
+    public static Node ofContent(String_ value) {
         return new Content(value);
     }
 

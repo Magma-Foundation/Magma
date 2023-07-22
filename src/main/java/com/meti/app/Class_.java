@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
-public record Class_(String_ name, Renderable body) implements Transformable {
+public record Class_(String_ name, Node body) implements Transformable {
     @Override
-    public Option<Renderable> transform() {
+    public Option<Node> transform() {
         return $Option(() -> {
             var block = Objects.cast(Block.class, body()).$();
 
-            var parameters = new ArrayList<Renderable>();
-            var value = new ArrayList<Renderable>();
+            var parameters = new ArrayList<Node>();
+            var value = new ArrayList<Node>();
             var unwrappedLines = block.lines().unwrap();
 
             for (var instance : unwrappedLines) {
