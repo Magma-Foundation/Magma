@@ -14,25 +14,6 @@ import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
-    private static Option<Renderable> compileImport(String_ line) {
-        return line.firstIndexOfSlice("import ").flatMap(index -> index.nextExclusive("import ".length())).map(index -> {
-            var withoutPrefix = line.sliceFrom(index);
-            var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
-                    .flatMap(staticIndex -> staticIndex.nextExclusive("static ".length()))
-                    .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
-
-            var slice = withoutStatic.lastIndexOfChar('.').<Renderable>map(separator -> {
-                var parent = withoutStatic.sliceTo(separator);
-
-                var child = separator.nextExclusive().map(withoutStatic::sliceFrom)
-                        .unwrapOrElse(Empty);
-
-                return new Import(parent, child);
-            });
-
-            return slice.unwrapOrElse(Content.ofContent(line));
-        });
-    }
 
     private static String_ resolveType(String_ type) {
         return JavaMap.<String, String>empty()
@@ -78,7 +59,7 @@ public record Compiler(String_ input) {
 
     private Renderable compileNode(String_ line) {
         System.out.println(line.unwrap());
-        return compileImport(line)
+        return new ImportLexer(line).lex()
                 .or(compileClass(line))
                 .or(compileBlock(line))
                 .or(compileMethod(line))
