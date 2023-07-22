@@ -16,4 +16,12 @@ public interface Node {
 
     @Deprecated
     String_ render();
+
+    default Option<Node> body() {
+        return None.apply();
+    }
+
+    default Option<String_> name() {
+        return None.apply();
+    }
 }

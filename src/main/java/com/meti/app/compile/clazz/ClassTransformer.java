@@ -7,28 +7,44 @@ import com.meti.app.compile.function.Function;
 import com.meti.core.Option;
 import com.meti.java.JavaList;
 import com.meti.java.JavaSet;
+import com.meti.java.List;
 import com.meti.java.Objects;
-
-import java.util.ArrayList;
 
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
-public record ClassTransformer(Class_ aClass) implements Transformer {
+public record ClassTransformer(Node clazz) implements Transformer {
+    private static Cache collectDeclaration(Cache cache, Node node) {
+        return Objects.cast(Declaration.class, node)
+                .map(value -> cache.withParameters(cache.parameters.add(value)))
+                .unwrapOrElseGet(() -> cache.withBody(cache.body.add(node)));
+    }
+
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
-            var block = Objects.cast(Block.class, aClass().body()).$();
+            var name = clazz.name().$();
+            var body = clazz.body().$();
+            var block = Objects.cast(Block.class, body).$();
 
-            var parameters = new ArrayList<Node>();
-            var value = new ArrayList<Node>();
-            var unwrappedLines = block.values().unwrap();
-
-            for (var instance : unwrappedLines) {
-                Objects.cast(Declaration.class, instance).consumeOrElse(parameters::add, () -> value.add(instance));
-            }
-
-            return new Function(JavaSet.of(fromSlice("class")), aClass().name(), new JavaList<>(parameters), new Block(new JavaList<>(value)));
+            var cache = block.values()
+                    .iter()
+                    .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
+            return new Function(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body));
         });
+    }
+
+    record Cache(List<Node> parameters, List<Node> body) {
+        Cache() {
+            this(JavaList.empty(), JavaList.empty());
+        }
+
+        public Cache withParameters(List<Node> newParameters) {
+            return new Cache(newParameters, body);
+        }
+
+        public Cache withBody(List<Node> newBody) {
+            return new Cache(parameters, newBody);
+        }
     }
 }
