@@ -80,13 +80,11 @@ public record Declaration(String_ name1, Node type1) implements Node {
         }
     }
 
-    @Override
-    public Option<Node> withLines(List<? extends Node> lines) {
+    private Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withBody(Node body) {
+    private Option<Node> withBody(Node body) {
         return None.apply();
     }
 

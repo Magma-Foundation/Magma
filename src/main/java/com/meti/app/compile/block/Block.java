@@ -17,8 +17,7 @@ public record Block(List<? extends Node> values) implements Node {
         return Some.apply(values);
     }
 
-    @Override
-    public Option<Node> withLines(List<? extends Node> lines) {
+    private Option<Node> withLines(List<? extends Node> lines) {
         return Some.apply(new Block(lines));
     }
 
@@ -85,8 +84,7 @@ public record Block(List<? extends Node> values) implements Node {
         }
     }
 
-    @Override
-    public Option<Node> withBody(Node body) {
+    private Option<Node> withBody(Node body) {
         return None.apply();
     }
 

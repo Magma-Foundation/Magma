@@ -26,8 +26,7 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return Some.apply(body1);
     }
 
-    @Override
-    public Option<Node> withBody(Node body) {
+    private Option<Node> withBody(Node body) {
         return Some.apply(new Class_(name1, body));
     }
 
@@ -90,8 +89,7 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         }
     }
 
-    @Override
-    public Option<Node> withLines(List<? extends Node> lines) {
+    private Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();
     }
 

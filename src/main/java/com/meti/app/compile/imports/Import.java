@@ -80,13 +80,11 @@ public record Import(String_ parent1, String_ child1) implements Node {
         }
     }
 
-    @Override
-    public Option<Node> withLines(List<? extends Node> lines) {
+    private Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withBody(Node body) {
+    private Option<Node> withBody(Node body) {
         return None.apply();
     }
 

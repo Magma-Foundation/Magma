@@ -90,13 +90,11 @@ public abstract class Function implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withLines(List<? extends Node> lines) {
+    private Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withBody(Node body) {
+    protected Option<Node> withBody(Node body) {
         return None.apply();
     }
 
