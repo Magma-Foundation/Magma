@@ -29,6 +29,11 @@ public class NonEmptyJavaList<T> extends JavaList<T> implements NonEmptyList<T> 
     }
 
     @Override
+    public com.meti.java.List<T> sliceWithoutLast() {
+        return new JavaList<>(this.values.subList(0, this.values.size() - 1));
+    }
+
+    @Override
     public T first() {
         return values.get(0);
     }

@@ -8,4 +8,6 @@ public interface NonEmptyList<T> extends List<T> {
     T first();
 
     T last();
+
+    List<T> sliceWithoutLast();
 }

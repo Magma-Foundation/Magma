@@ -35,7 +35,7 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
-    public static <T> com.meti.java.List<T> from(T... values) {
+    public static <T> com.meti.java.List<T> of(T... values) {
         return new JavaList<>(new ArrayList<>(Arrays.asList(values)));
     }
 

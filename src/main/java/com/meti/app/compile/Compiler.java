@@ -35,7 +35,7 @@ public record Compiler(String_ input) {
     }
 
     private static Result<Node, CompileException> lexNode(String_ line) {
-        return JavaList.<Lexer>from(
+        return JavaList.<Lexer>of(
                         new ClassLexer(line),
                         new BlockLexer(line),
                         new MethodLexer(line),
