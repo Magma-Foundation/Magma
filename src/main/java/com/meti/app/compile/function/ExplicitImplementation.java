@@ -17,7 +17,7 @@ public final class ExplicitImplementation extends Abstraction {
 
     @Override
     public Option<Node> withReturns(Node returns) {
-        return Some.apply(new ExplicitImplementation(keywords1, name1, parameters1, returns, body1));
+        return Some.apply(new ExplicitImplementation(keywords1, name1, parameters1, body1, returns));
     }
 
     @Override
