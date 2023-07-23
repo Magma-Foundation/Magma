@@ -15,6 +15,11 @@ public class Abstraction extends Function {
     }
 
     @Override
+    public Option<Node> withParameters(Set<? extends Node> parameters) {
+        return Some.apply(new Abstraction(keywords1, name1, parameters, returnType));
+    }
+
+    @Override
     public Option<Node> withReturns(Node returns) {
         return Some.apply(new Abstraction(keywords1, name1, parameters1, returns));
     }

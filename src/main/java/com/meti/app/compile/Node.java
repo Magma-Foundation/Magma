@@ -58,4 +58,8 @@ public interface Node {
     default Option<Node> returns() {
         return None.apply();
     }
+
+    default Option<Node> withParameters(Set<? extends Node> parameters) {
+        return None.apply();
+    }
 }

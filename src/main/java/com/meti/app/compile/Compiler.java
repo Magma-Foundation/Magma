@@ -50,12 +50,20 @@ public record Compiler(String_ input) {
         return Results.$Result(CompileException.class, () -> {
             var node = lexNode(line).$();
 
-            var withReturns = node.returns().flatMap(Node::value)
-                    .map(Compiler::resolveType)
-                    .map(value -> value.mapValue(Content::new))
-                    .map(value -> value.mapValue(node::withReturns))
+            var withParameters = node.parameters().map(lines -> lines.iter()
+                            .map(Compiler::unwrapValue)
+                            .collect(exceptionally(JavaSet.asSet())))
+                    .map(value -> value.mapValue(node::withParameters))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(node))
+                    .$();
+
+            var withReturns = withParameters.returns().flatMap(Node::value)
+                    .map(Compiler::resolveType)
+                    .map(value -> value.mapValue(Content::new))
+                    .map(value -> value.mapValue(withParameters::withReturns))
+                    .flatMap(Results::invert)
+                    .unwrapOrElse(Ok.apply(withParameters))
                     .$();
 
             var withBody = withReturns.body().flatMap(Node::value)
@@ -66,9 +74,7 @@ public record Compiler(String_ input) {
                     .$();
 
             return withBody.lines().map(lines -> lines.iter()
-                            .map(node1 -> node1.value()
-                                    .map(Compiler::lexTree)
-                                    .unwrapOrElse(Err.apply(new CompileException("No value present in list."))))
+                            .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaList.asList())))
                     .map(value -> value.mapValue(withBody::withLines))
                     .flatMap(Results::invert)
@@ -77,23 +83,38 @@ public record Compiler(String_ input) {
         });
     }
 
+    private static Result<Node, CompileException> unwrapValue(Node node1) {
+        return node1.value()
+                .map(Compiler::lexTree)
+                .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
+    }
+
     private static Result<String_, CompileException> renderTree(Node transformed) {
         return $Result(CompileException.class, () -> {
-            var withBody = transformed.body().map(Compiler::renderTree)
-                    .map(r -> r.mapValue(body -> transformed.withBody(new Content(body))))
-                    .unwrapOrElse(Ok.apply(Some.apply(transformed))).$()
-                    .unwrapOrElse(transformed);
+            var withParameters = transformed.parameters().map(lines -> lines.iter().map(Compiler::renderTree)
+                            .into(ResultIterator::new)
+                            .mapToResult(Content::new)
+                            .collectToResult(JavaSet.asSet()))
+                    .map(value -> Results.invert(value.mapValue(transformed::withParameters)))
+                    .flatMap(value -> value)
+                    .unwrapOrElse(Ok.apply(transformed))
+                    .$();
 
-            var map = transformed.lines().map(lines -> lines.iter().map(Compiler::renderTree)
+            var withBody = withParameters.body().map(Compiler::renderTree)
+                    .map(r -> r.mapValue(body -> withParameters.withBody(new Content(body))))
+                    .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
+                    .unwrapOrElse(withParameters);
+
+            var withLines = withBody.lines().map(lines -> lines.iter().map(Compiler::renderTree)
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaList.asList()))
-                    .map(value -> Results.invert(value.mapValue(transformed::withLines)))
+                    .map(value -> Results.invert(value.mapValue(withBody::withLines)))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
 
-            return renderNode(map).$();
+            return renderNode(withLines).$();
         });
     }
 
