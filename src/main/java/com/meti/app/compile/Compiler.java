@@ -16,6 +16,7 @@ import com.meti.iterate.ResultIterator;
 import com.meti.java.*;
 
 import static com.meti.core.Results.$Result;
+import static com.meti.core.Results.invert;
 import static com.meti.iterate.Collectors.exceptionally;
 import static com.meti.java.JavaString.Empty;
 import static com.meti.java.JavaString.joining;
@@ -33,10 +34,11 @@ public record Compiler(String_ input) {
     }
 
     private static Result<Node, CompileException> lexNode(String_ line) {
-        return JavaList.<Lexer>from(new DeclarationLexer(line),
-                        new FunctionLexer(line),
-                        new BlockLexer(line),
+        return JavaList.<Lexer>from(
                         new ClassLexer(line),
+                        new BlockLexer(line),
+                        new FunctionLexer(line),
+                        new DeclarationLexer(line),
                         new ImportLexer(line))
                 .iter()
                 .map(Lexer::lex)
@@ -47,7 +49,11 @@ public record Compiler(String_ input) {
     }
 
     private static Result<Node, CompileException> lexTree(String_ line) {
-        return Results.$Result(CompileException.class, () -> {
+        if (line.isEmpty()) {
+            return Err.apply(new CompileException("Input cannot be empty."));
+        }
+
+        return $Result(CompileException.class, () -> {
             var node = lexNode(line).$();
 
             var withParameters = node.parameters().map(lines -> lines.iter()
@@ -80,7 +86,7 @@ public record Compiler(String_ input) {
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
-        });
+        }).mapErr(err -> new CompileException("Failed to lex line: " + line.unwrap(), err));
     }
 
     private static Result<Node, CompileException> unwrapValue(Node node1) {
@@ -91,11 +97,13 @@ public record Compiler(String_ input) {
 
     private static Result<String_, CompileException> renderTree(Node transformed) {
         return $Result(CompileException.class, () -> {
-            var withParameters = transformed.parameters().map(lines -> lines.iter().map(Compiler::renderTree)
-                            .into(ResultIterator::new)
-                            .mapToResult(Content::new)
-                            .collectToResult(JavaSet.asSet()))
-                    .map(value -> Results.invert(value.mapValue(transformed::withParameters)))
+            var withParameters = transformed.parameters().map(lines -> {
+                        return lines.iter().map(Compiler::renderTree)
+                                .into(ResultIterator::new)
+                                .mapToResult(Content::new)
+                                .collectToResult(JavaSet.asSet());
+                    })
+                    .map(value -> invert(value.mapValue(transformed::withParameters)))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
@@ -109,7 +117,7 @@ public record Compiler(String_ input) {
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaList.asList()))
-                    .map(value -> Results.invert(value.mapValue(withBody::withLines)))
+                    .map(value -> invert(value.mapValue(withBody::withLines)))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
@@ -144,12 +152,16 @@ public record Compiler(String_ input) {
 
     private Result<String_, CompileException> compileNode(String_ line) {
         return $Result(CompileException.class, () -> {
-            var withLines = lexTree(line).$();
-            var transformed = new ClassTransformer(withLines)
-                    .transform()
-                    .unwrapOrElse(withLines);
+            if (line.isEmpty()) {
+                return Empty;
+            } else {
+                var withLines = lexTree(line).$();
+                var transformed = new ClassTransformer(withLines)
+                        .transform()
+                        .unwrapOrElse(withLines);
 
-            return renderTree(transformed).$();
-        });
+                return renderTree(transformed).$();
+            }
+        }).mapErr(err -> new CompileException("Failed to compile line: '" + line.unwrap() + "'", err));
     }
 }

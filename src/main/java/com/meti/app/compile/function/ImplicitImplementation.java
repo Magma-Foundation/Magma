@@ -14,6 +14,10 @@ public final class ImplicitImplementation extends Function {
         this.body1 = body1;
     }
 
+    @Override
+    public Option<Node> withParameters(Set<? extends Node> parameters) {
+        return Some.apply(new ImplicitImplementation(keywords1, name1, parameters, body1));
+    }
 
     @Override
     public Option<Node> body() {
