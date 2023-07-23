@@ -26,6 +26,10 @@ public interface Node {
             return parameters().map(NodeSetAttribute::new);
         } else if (key.equalsTo(fromSlice("keywords"))) {
             return keywords().map(StringSetAttribute::new);
+        } else if (key.equalsTo(fromSlice("parent"))) {
+            return parent().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("child"))) {
+            return child().map(StringAttribute::new);
         } else {
             return None.apply();
         }
@@ -57,13 +61,9 @@ public interface Node {
 
     Option<Set<String_>> keywords();
 
-    default Option<String_> parent() {
-        return None.apply();
-    }
+    Option<String_> parent();
 
-    default Option<String_> child() {
-        return None.apply();
-    }
+    Option<String_> child();
 
     default Option<Node> returns() {
         return None.apply();

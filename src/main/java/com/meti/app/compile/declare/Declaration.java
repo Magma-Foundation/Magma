@@ -43,4 +43,14 @@ public record Declaration(String_ name1, Node type1) implements Node {
     public Option<Set<String_>> keywords() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> parent() {
+        return None.apply();
+    }
+
+    @Override
+    public Option<String_> child() {
+        return None.apply();
+    }
 }

@@ -54,4 +54,14 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
     public Option<Set<String_>> keywords() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> parent() {
+        return None.apply();
+    }
+
+    @Override
+    public Option<String_> child() {
+        return None.apply();
+    }
 }
