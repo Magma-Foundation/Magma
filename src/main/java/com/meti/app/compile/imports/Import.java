@@ -1,12 +1,16 @@
 package com.meti.app.compile.imports;
 
-import com.meti.app.compile.Node;
+import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
+import com.meti.app.compile.*;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
+
+import static com.meti.java.JavaString.fromSlice;
 
 public record Import(String_ parent1, String_ child1) implements Node {
     @Override
@@ -57,5 +61,32 @@ public record Import(String_ parent1, String_ child1) implements Node {
     @Override
     public Option<Node> returns() {
         return None.apply();
+    }
+
+    @Override
+    public Option<Attribute> apply(String_ key) {
+        if (key.equalsTo(fromSlice("lines"))) {
+            return lines().map(NodeListAttribute::new);
+        } else if (key.equalsTo(fromSlice("type"))) {
+            return type().map(NodeAttribute::new);
+        } else if (key.equalsTo(fromSlice("value"))) {
+            return value().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("body"))) {
+            return body().map(NodeAttribute::new);
+        } else if (key.equalsTo(fromSlice("name"))) {
+            return name().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("parameters"))) {
+            return parameters().map(NodeSetAttribute::new);
+        } else if (key.equalsTo(fromSlice("keywords"))) {
+            return keywords().map(StringSetAttribute::new);
+        } else if (key.equalsTo(fromSlice("parent"))) {
+            return parent().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("child"))) {
+            return child().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("returns"))) {
+            return returns().map(NodeAttribute::new);
+        } else {
+            return None.apply();
+        }
     }
 }
