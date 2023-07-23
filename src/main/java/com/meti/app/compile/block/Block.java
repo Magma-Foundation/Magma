@@ -42,18 +42,15 @@ public record Block(List<? extends Node> values) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Set<String_>> keywords() {
+    private Option<Set<String_>> keywords() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> parent() {
+    private Option<String_> parent() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> child() {
+    private Option<String_> child() {
         return None.apply();
     }
 

@@ -13,13 +13,11 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.fromSlice;
 
 public record Import(String_ parent1, String_ child1) implements Node {
-    @Override
-    public Option<String_> parent() {
+    private Option<String_> parent() {
         return Some.apply(parent1);
     }
 
-    @Override
-    public Option<String_> child() {
+    private Option<String_> child() {
         return Some.apply(child1);
     }
 
@@ -47,8 +45,7 @@ public record Import(String_ parent1, String_ child1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Set<String_>> keywords() {
+    private Option<Set<String_>> keywords() {
         return None.apply();
     }
 

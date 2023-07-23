@@ -23,8 +23,7 @@ public abstract class Function implements Node {
         this.parameters1 = parameters1;
     }
 
-    @Override
-    public Option<Set<String_>> keywords() {
+    private Option<Set<String_>> keywords() {
         return Some.apply(keywords1);
     }
 
@@ -48,13 +47,11 @@ public abstract class Function implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> parent() {
+    private Option<String_> parent() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> child() {
+    private Option<String_> child() {
         return None.apply();
     }
 

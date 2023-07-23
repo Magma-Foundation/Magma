@@ -22,12 +22,6 @@ public interface Node {
         return None.apply();
     }
 
-    Option<Set<String_>> keywords();
-
-    Option<String_> parent();
-
-    Option<String_> child();
-
     Option<Node> returns();
 
     default Option<Node> withParameters(Set<? extends Node> parameters) {
