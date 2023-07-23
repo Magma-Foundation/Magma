@@ -1,28 +1,21 @@
 package com.meti.app.compile;
 
 import com.meti.app.Attribute;
-import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
 public interface Node {
+    Option<Node> with(String_ key, Attribute attribute);
+
     Option<Attribute> apply(String_ key);
 
-    default Option<Node> withLines(List<? extends Node> lines) {
-        return None.apply();
-    }
+    Option<Node> withLines(List<? extends Node> lines);
 
-    default Option<Node> withBody(Node body) {
-        return None.apply();
-    }
+    Option<Node> withBody(Node body);
 
-    default Option<Node> withReturns(Node returns) {
-        return None.apply();
-    }
+    Option<Node> withReturns(Node returns);
 
-    default Option<Node> withParameters(Set<? extends Node> parameters) {
-        return None.apply();
-    }
+    Option<Node> withParameters(Set<? extends Node> parameters);
 }

@@ -89,4 +89,39 @@ public abstract class Function implements Node {
     protected Option<Node> body() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> withLines(List<? extends Node> lines) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Node> withBody(Node body) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Node> withReturns(Node returns) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Node> withParameters(Set<? extends Node> parameters) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Node> with(String_ key, Attribute attribute) {
+        if (key.equalsTo(fromSlice("lines"))) {
+            return attribute.asListOfNodes().flatMap(this::withLines);
+        } else if (key.equalsTo(fromSlice("body"))) {
+            return attribute.asNode().flatMap(this::withBody);
+        } else if (key.equalsTo(fromSlice("returns"))) {
+            return attribute.asNode().flatMap(this::withReturns);
+        } else if (key.equalsTo(fromSlice("parameters"))) {
+            return attribute.asSetOfNodes().flatMap(this::withParameters);
+        } else {
+            return None.apply();
+        }
+    }
 }

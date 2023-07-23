@@ -1,6 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ClassLexer;
@@ -59,7 +60,7 @@ public record Compiler(String_ input) {
             var withParameters = node.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaSet.asSet())))
-                    .map(value -> value.mapValue(node::withParameters))
+                    .map(value -> value.mapValue(parameters -> node.with(fromSlice("parameters"), new NodeSetAttribute(parameters))))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(node))
                     .$();
@@ -67,14 +68,14 @@ public record Compiler(String_ input) {
             var withReturns = withParameters.apply(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::resolveType)
                     .map(value -> value.mapValue(Content::new))
-                    .map(value -> value.mapValue(withParameters::withReturns))
+                    .map(value -> value.mapValue(returns -> withParameters.with(fromSlice("returns"), new NodeAttribute(returns))))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(withParameters))
                     .$();
 
             var withBody = withReturns.apply(fromSlice("body")).flatMap(Attribute::asNode).flatMap(node1 -> node1.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::lexTree)
-                    .map(value -> value.mapValue(withReturns::withBody))
+                    .map(value -> value.mapValue(body -> withReturns.with(fromSlice("body"), new NodeAttribute(body))))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(withReturns))
                     .$();
@@ -82,7 +83,7 @@ public record Compiler(String_ input) {
             return withBody.apply(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaList.asList())))
-                    .map(value -> value.mapValue(withBody::withLines))
+                    .map(value -> value.mapValue(lines1 -> withBody.with(fromSlice("lines"), new NodeListAttribute(lines1))))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
@@ -101,13 +102,13 @@ public record Compiler(String_ input) {
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaSet.asSet()))
-                    .map(value -> invert(value.mapValue(transformed::withParameters)))
+                    .map(value -> invert(value.mapValue(parameters -> transformed.with(fromSlice("parameters"), new NodeSetAttribute(parameters)))))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
 
             var withBody = withParameters.apply(fromSlice("body")).flatMap(Attribute::asNode).map(Compiler::renderTree)
-                    .map(r -> r.mapValue(body -> withParameters.withBody(new Content(body))))
+                    .map(r -> r.mapValue(body -> withParameters.with(fromSlice("body"), new NodeAttribute(new Content(body)))))
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);
 
@@ -115,7 +116,7 @@ public record Compiler(String_ input) {
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaList.asList()))
-                    .map(value -> invert(value.mapValue(withBody::withLines)))
+                    .map(value -> invert(value.mapValue(lines1 -> withBody.with(fromSlice("lines"), new NodeListAttribute(lines1)))))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
