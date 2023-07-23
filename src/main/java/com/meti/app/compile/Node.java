@@ -22,8 +22,6 @@ public interface Node {
         return None.apply();
     }
 
-    Option<Node> returns();
-
     default Option<Node> withParameters(Set<? extends Node> parameters) {
         return None.apply();
     }

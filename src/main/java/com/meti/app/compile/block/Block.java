@@ -54,8 +54,7 @@ public record Block(List<? extends Node> values) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> returns() {
+    private Option<Node> returns() {
         return None.apply();
     }
 

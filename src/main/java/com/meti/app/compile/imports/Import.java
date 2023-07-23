@@ -49,8 +49,7 @@ public record Import(String_ parent1, String_ child1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> returns() {
+    private Option<Node> returns() {
         return None.apply();
     }
 

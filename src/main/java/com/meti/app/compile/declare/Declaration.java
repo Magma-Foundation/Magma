@@ -49,8 +49,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> returns() {
+    private Option<Node> returns() {
         return None.apply();
     }
 

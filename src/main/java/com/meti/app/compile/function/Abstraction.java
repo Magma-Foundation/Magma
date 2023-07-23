@@ -24,7 +24,6 @@ public class Abstraction extends Function {
         return Some.apply(new Abstraction(keywords1, name1, parameters1, returns));
     }
 
-    @Override
     public Option<Node> returns() {
         return Some.apply(returnType);
     }

@@ -55,8 +55,7 @@ public abstract class Function implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> returns() {
+    protected Option<Node> returns() {
         return None.apply();
     }
 
