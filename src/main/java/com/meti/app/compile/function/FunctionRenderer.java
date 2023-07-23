@@ -29,7 +29,7 @@ public record FunctionRenderer(Node root) implements Renderer {
 
             Node node1 = root.apply(fromSlice("body")).flatMap(Attribute::asNode).$();
             var body = node1.apply(fromSlice("value")).flatMap(Attribute::asString).$();
-            var returns = root.returns()
+            var returns = root.apply(fromSlice("returns")).flatMap(Attribute::asNode)
                     .flatMap(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> JavaString.fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);

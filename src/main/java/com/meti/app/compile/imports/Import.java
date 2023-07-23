@@ -53,4 +53,9 @@ public record Import(String_ parent1, String_ child1) implements Node {
     public Option<Set<String_>> keywords() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> returns() {
+        return None.apply();
+    }
 }

@@ -30,6 +30,8 @@ public interface Node {
             return parent().map(StringAttribute::new);
         } else if (key.equalsTo(fromSlice("child"))) {
             return child().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("returns"))) {
+            return returns().map(NodeAttribute::new);
         } else {
             return None.apply();
         }
@@ -65,9 +67,7 @@ public interface Node {
 
     Option<String_> child();
 
-    default Option<Node> returns() {
-        return None.apply();
-    }
+    Option<Node> returns();
 
     default Option<Node> withParameters(Set<? extends Node> parameters) {
         return None.apply();

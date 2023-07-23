@@ -63,4 +63,9 @@ public abstract class Function implements Node {
     public Option<String_> child() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> returns() {
+        return None.apply();
+    }
 }

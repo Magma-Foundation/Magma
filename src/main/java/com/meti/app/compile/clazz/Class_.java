@@ -64,4 +64,9 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
     public Option<String_> child() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> returns() {
+        return None.apply();
+    }
 }

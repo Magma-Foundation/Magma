@@ -64,7 +64,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(node))
                     .$();
 
-            var withReturns = withParameters.returns().flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
+            var withReturns = withParameters.apply(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::resolveType)
                     .map(value -> value.mapValue(Content::new))
                     .map(value -> value.mapValue(withParameters::withReturns))
