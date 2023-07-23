@@ -25,10 +25,10 @@ public record MethodLexer(String_ line) implements Lexer {
                     .into(NonEmptyJavaList::from)
                     .$();
 
+            var keywords = keys.sliceWithoutLast().iter().collect(JavaSet.asSet());
+
             var type = keys.last();
             var name = args.last();
-
-            var beforeParams = line.sliceTo(paramStart);
 
             var paramString = line().sliceBetween(paramStart.nextExclusive().$().to(paramEnd).$());
             var parameters = paramString.split(",")
@@ -42,7 +42,7 @@ public record MethodLexer(String_ line) implements Lexer {
             var node = new Content(body);
 
             return new MapNode(JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("keywords"), new StringSetAttribute(JavaSet.empty()))
+                    .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
                     .insert(fromSlice("name"), new StringAttribute(name))
                     .insert(fromSlice("parameters"), new NodeSetAttribute(parameters))
                     .insert(fromSlice("body"), new NodeAttribute(node))
