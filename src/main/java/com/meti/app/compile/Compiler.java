@@ -8,8 +8,8 @@ import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.ClassTransformer;
 import com.meti.app.compile.declare.DeclarationLexer;
 import com.meti.app.compile.declare.DeclarationRenderer;
-import com.meti.app.compile.function.FunctionLexer;
 import com.meti.app.compile.function.FunctionRenderer;
+import com.meti.app.compile.function.MethodLexer;
 import com.meti.app.compile.imports.ImportLexer;
 import com.meti.app.compile.imports.ImportRenderer;
 import com.meti.core.*;
@@ -38,7 +38,7 @@ public record Compiler(String_ input) {
         return JavaList.<Lexer>from(
                         new ClassLexer(line),
                         new BlockLexer(line),
-                        new FunctionLexer(line),
+                        new MethodLexer(line),
                         new DeclarationLexer(line),
                         new ImportLexer(line))
                 .iter()

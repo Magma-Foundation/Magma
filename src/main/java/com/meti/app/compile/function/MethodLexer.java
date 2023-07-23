@@ -1,18 +1,18 @@
 package com.meti.app.compile.function;
 
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.Content;
-import com.meti.app.compile.Lexer;
-import com.meti.app.compile.Node;
+import com.meti.app.Attribute;
+import com.meti.app.compile.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.java.JavaMap;
 import com.meti.java.JavaSet;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
+import static com.meti.java.JavaString.fromSlice;
 
-public record FunctionLexer(String_ line) implements Lexer {
+public record MethodLexer(String_ line) implements Lexer {
     private Option<Node> lex1() {
         return $Option(() -> {
             var paramStart = line().firstIndexOfChar('(').$();
@@ -35,7 +35,12 @@ public record FunctionLexer(String_ line) implements Lexer {
             var body = line().sliceFrom(bodyStart);
             var node = new Content(body);
 
-            return new ExplicitImplementation(JavaSet.empty(), name, parameters, node, new Content(type));
+            return new MapNode(JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("keywords"), new StringSetAttribute(JavaSet.empty()))
+                    .insert(fromSlice("name"), new StringAttribute(name))
+                    .insert(fromSlice("parameters"), new NodeSetAttribute(parameters))
+                    .insert(fromSlice("body"), new NodeAttribute(node))
+                    .insert(fromSlice("returns"), new NodeAttribute(new Content(type))));
         });
     }
 
