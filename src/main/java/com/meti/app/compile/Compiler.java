@@ -10,13 +10,12 @@ import com.meti.app.compile.function.FunctionLexer;
 import com.meti.app.compile.function.FunctionRenderer;
 import com.meti.app.compile.imports.ImportLexer;
 import com.meti.app.compile.imports.ImportRenderer;
-import com.meti.core.Err;
-import com.meti.core.Ok;
-import com.meti.core.Result;
+import com.meti.core.*;
 import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.*;
 
+import static com.meti.core.Results.$Result;
 import static com.meti.iterate.Collectors.and;
 import static com.meti.java.JavaString.Empty;
 import static com.meti.java.JavaString.joining;
@@ -57,6 +56,41 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(withBody);
     }
 
+    private static Result<String_, CompileException> renderTree(Node transformed) {
+        return $Result(CompileException.class, () -> {
+            var withBody = transformed.body().map(Compiler::renderTree)
+                    .map(r -> r.mapValue(body -> transformed.withBody(new Content(body))))
+                    .unwrapOrElse(Ok.apply(Some.apply(transformed))).$()
+                    .unwrapOrElse(transformed);
+
+            var map = transformed.lines().map(lines -> lines.iter().map(Compiler::renderTree)
+                            .into(ResultIterator::new)
+                            .mapToResult(Content::new)
+                            .collectToResult(JavaList.asList()))
+                    .map(value -> Results.invert(value.mapValue(transformed::withLines)))
+                    .flatMap(value -> value)
+                    .unwrapOrElse(Ok.apply(withBody))
+                    .$();
+
+            return renderNode(map).$();
+        });
+    }
+
+    private static Result<String_, CompileException> renderNode(Node transformed) {
+        Set<? extends Renderer> renderers = JavaSet.of(new BlockRenderer(transformed),
+                new DeclarationRenderer(transformed),
+                new FunctionRenderer(transformed),
+                new ImportRenderer(transformed),
+                new ContentRenderer(transformed));
+
+        return renderers.iter()
+                .map(Renderer::render)
+                .flatMap(Iterators::fromOption)
+                .head()
+                .map(Ok::<String_, CompileException>apply)
+                .unwrapOrElse(Err.apply(new CompileException("Failed to render: " + transformed)));
+    }
+
     public Result<String_, CompileException> compile() {
         return new Splitter(input).split()
                 .filter(line -> !line.strip().startsWith("package "))
@@ -72,16 +106,6 @@ public record Compiler(String_ input) {
                 .transform()
                 .unwrapOrElse(withLines);
 
-        Set<? extends Renderer> renderers = JavaSet.of(new BlockRenderer(transformed),
-                new DeclarationRenderer(transformed),
-                new FunctionRenderer(transformed),
-                new ImportRenderer(transformed));
-
-        return renderers.iter()
-                .map(Renderer::render)
-                .flatMap(Iterators::fromOption)
-                .head()
-                .map(Ok::<String_, CompileException>apply)
-                .unwrapOrElse(Err.apply(new CompileException("Failed to render: " + transformed)));
+        return renderTree(transformed);
     }
 }

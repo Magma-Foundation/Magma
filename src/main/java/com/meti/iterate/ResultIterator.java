@@ -6,7 +6,7 @@ import com.meti.core.Result;
 
 import java.util.function.Function;
 
-public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
+public class ResultIterator<T, E extends Throwable> extends AbstractIterator<Result<T, E>> {
     private final Iterator<Result<T, E>> parent;
 
     public ResultIterator(Iterator<Result<T, E>> parent) {

@@ -29,6 +29,11 @@ public record Function(Set<String_> keywords1, String_ name1,
     }
 
     @Override
+    public Option<Node> returns() {
+        return Some.apply(returnType);
+    }
+
+    @Override
     public Option<Node> body() {
         return Some.apply(body1);
     }

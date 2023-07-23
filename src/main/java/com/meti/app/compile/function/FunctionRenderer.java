@@ -26,10 +26,14 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
+            var returns = root.returns().$().value().$();
+
             var body = root.body().$().value().$();
-            return renderedKeywords.append("def")
+            return renderedKeywords.append("def ")
                     .appendOwned(root.name().$()).append("(")
-                    .appendOwned(joinedParameters).append(") => ")
+                    .appendOwned(joinedParameters).append(") : ")
+                    .appendOwned(returns)
+                    .append(" => ")
                     .appendOwned(body);
         });
     }

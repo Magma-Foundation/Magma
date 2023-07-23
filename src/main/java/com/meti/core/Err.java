@@ -6,8 +6,8 @@ import java.util.function.Function;
 /**
  * Represents an error name1.
  */
-public record Err<T, E>(E inner) implements Result<T, E> {
-    public static <T, E> Result<T, E> apply(E inner) {
+public record Err<T, E extends Throwable>(E inner) implements Result<T, E> {
+    public static <T, E extends Throwable> Result<T, E> apply(E inner) {
         return new Err<>(inner);
     }
 
@@ -51,12 +51,17 @@ public record Err<T, E>(E inner) implements Result<T, E> {
     }
 
     @Override
-    public <R> Result<T, R> mapErr(Function<E, R> mapper) {
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Err<>(mapper.apply(inner));
     }
 
     @Override
     public Result<T, E> peekValue(Consumer<T> consumer) {
         return this;
+    }
+
+    @Override
+    public T $() throws E {
+        throw inner;
     }
 }

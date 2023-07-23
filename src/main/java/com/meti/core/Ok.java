@@ -10,8 +10,8 @@ import java.util.function.Function;
  * @param <T>   The name1 type of this result.
  * @param <E>   The error type of this result.
  */
-public record Ok<T, E>(T inner) implements Result<T, E> {
-    public static <T, E> Result<T, E> apply(T inner) {
+public record Ok<T, E extends Throwable>(T inner) implements Result<T, E> {
+    public static <T, E extends Throwable> Result<T, E> apply(T inner) {
         return new Ok<>(inner);
     }
 
@@ -51,8 +51,13 @@ public record Ok<T, E>(T inner) implements Result<T, E> {
     }
 
     @Override
-    public <R> Result<T, R> mapErr(Function<E, R> mapper) {
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Ok<>(inner);
+    }
+
+    @Override
+    public T $() throws E {
+        return this.inner;
     }
 
     @Override

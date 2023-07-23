@@ -44,7 +44,7 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
     }
 
     @Override
-    public <C, E> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder) {
+    public <C, E extends Throwable> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder) {
         return foldLeft(Ok.apply(initial), (result, t) -> result.mapValueToResult(s -> folder.apply(s, t)));
     }
 

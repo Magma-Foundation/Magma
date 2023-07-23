@@ -28,4 +28,11 @@ public class Results {
             throw option.unwrap();
         }
     }
+
+    public static <T, E extends Throwable> Option<Result<T, E>> invert(Result<Option<T>, E> result) {
+        return result.match(value -> value
+                        .map(s -> Some.apply(Ok.<T, E>apply(s)))
+                        .unwrapOrElseGet(None::apply),
+                err -> Some.apply(Err.apply(err)));
+    }
 }

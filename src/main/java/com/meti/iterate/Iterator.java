@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Iterator<T> {
-    <C, E> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder);
+    <C, E extends Throwable> Result<C, E> foldLeftToResult(C initial, BiFunction<C, T, Result<C, E>> folder);
 
     <C> C foldLeft(C initial, BiFunction<C, T, C> folder);
 

@@ -50,4 +50,8 @@ public interface Node {
     default Option<String_> child() {
         return None.apply();
     }
+
+    default Option<Node> returns() {
+        return None.apply();
+    }
 }

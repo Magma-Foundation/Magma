@@ -3,7 +3,7 @@ package com.meti.core;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface Result<T, E> {
+public interface Result<T, E extends Throwable> {
     Option<T> value();
 
     Option<E> err();
@@ -18,10 +18,12 @@ public interface Result<T, E> {
 
     <R> R match(Function<T, R> onOk, Function<E, R> onErr);
 
-    <R> Result<T, R> mapErr(Function<E, R> mapper);
+    <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 
     /**
      * Peeks at this Result's name1.
      */
     Result<T, E> peekValue(Consumer<T> consumer);
+
+    T $() throws E;
 }
