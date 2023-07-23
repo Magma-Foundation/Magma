@@ -38,8 +38,7 @@ public record Block(List<? extends Node> values) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Set<? extends Node>> parameters() {
+    private Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
 

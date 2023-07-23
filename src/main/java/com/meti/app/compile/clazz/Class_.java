@@ -43,8 +43,7 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Set<? extends Node>> parameters() {
+    private Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
 

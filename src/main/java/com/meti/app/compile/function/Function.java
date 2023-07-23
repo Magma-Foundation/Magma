@@ -32,8 +32,7 @@ public abstract class Function implements Node {
         return Some.apply(name1);
     }
 
-    @Override
-    public Option<Set<? extends Node>> parameters() {
+    private Option<Set<? extends Node>> parameters() {
         return Some.apply(parameters1);
     }
 

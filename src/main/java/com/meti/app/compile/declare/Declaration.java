@@ -33,8 +33,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Set<? extends Node>> parameters() {
+    private Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
 
