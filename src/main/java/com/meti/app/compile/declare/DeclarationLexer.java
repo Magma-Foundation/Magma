@@ -1,6 +1,7 @@
 package com.meti.app.compile.declare;
 
 import com.meti.app.compile.Compiler;
+import com.meti.app.compile.Content;
 import com.meti.app.compile.Lexer;
 import com.meti.app.compile.Node;
 import com.meti.core.Option;
@@ -26,7 +27,7 @@ public record DeclarationLexer(String_ line) implements Lexer {
             var type = list.last();
             var map = Compiler.resolveType(type);
 
-            return new Declaration(name, map);
+            return new Declaration(name, new Content(map));
         }));
     }
 }

@@ -1,19 +1,21 @@
 package com.meti.app.compile;
 
 import com.meti.app.compile.block.BlockLexer;
+import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.ClassTransformer;
 import com.meti.app.compile.declare.DeclarationLexer;
+import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.FunctionLexer;
+import com.meti.app.compile.function.FunctionRenderer;
 import com.meti.app.compile.imports.ImportLexer;
+import com.meti.app.compile.imports.ImportRenderer;
 import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
+import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
-import com.meti.java.JavaList;
-import com.meti.java.JavaMap;
-import com.meti.java.JavaString;
-import com.meti.java.String_;
+import com.meti.java.*;
 
 import static com.meti.iterate.Collectors.and;
 import static com.meti.java.JavaString.Empty;
@@ -57,21 +59,27 @@ public record Compiler(String_ input) {
         return new Splitter(input).split()
                 .filter(line -> !line.strip().startsWith("package "))
                 .map(this::compileNode)
-                .map(Node::value)
-                .map(value -> value
-                        .map(Ok::<String_, CompileException>apply)
-                        .unwrapOrElse(Err.apply(new CompileException("No value present."))))
                 .into(ResultIterator::new)
                 .collectToResult(joining(Empty))
                 .mapValue(inner -> inner.unwrapOrElse(Empty));
     }
 
-    private Node compileNode(String_ line) {
+    private Result<String_, CompileException> compileNode(String_ line) {
         var withLines = lexTree(line);
         var transformed = new ClassTransformer(withLines)
                 .transform()
                 .unwrapOrElse(withLines);
 
-        return transformed;
+        Set<? extends Renderer> renderers = JavaSet.of(new BlockRenderer(transformed),
+                new DeclarationRenderer(transformed),
+                new FunctionRenderer(transformed),
+                new ImportRenderer(transformed));
+
+        return renderers.iter()
+                .map(Renderer::render)
+                .flatMap(Iterators::fromOption)
+                .head()
+                .map(Ok::<String_, CompileException>apply)
+                .unwrapOrElse(Err.apply(new CompileException("Failed to render: " + transformed)));
     }
 }

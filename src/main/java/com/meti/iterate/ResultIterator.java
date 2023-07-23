@@ -39,4 +39,8 @@ public class ResultIterator<T, E> extends AbstractIterator<Result<T, E>> {
                 value -> value.map(Ok::<R, E>apply),
                 error -> Iterators.empty())));
     }
+
+    public <R> ResultIterator<R, E> mapToResult(Function<T, R> mapper) {
+        return new ResultIterator<>(parent.map(teResult -> teResult.mapValue(mapper)));
+    }
 }
