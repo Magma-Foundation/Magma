@@ -6,17 +6,23 @@ import com.meti.core.Some;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
-public record Function(Set<String_> keywords1, String_ name1,
-                       Set<? extends Node> parameters1, Node body1, Node returnType) implements Node {
-    public String_ render() {
-        return new FunctionRenderer(this).render().unwrap();
+public class Function implements Node {
+    protected final Set<String_> keywords1;
+    protected final String_ name1;
+    protected final Set<? extends Node> parameters1;
+    protected final Node returnType;
+
+    public Function(Set<String_> keywords1, String_ name1, Set<? extends Node> parameters1, Node returnType) {
+        this.keywords1 = keywords1;
+        this.name1 = name1;
+        this.parameters1 = parameters1;
+        this.returnType = returnType;
     }
 
     @Override
     public Option<Set<String_>> keywords() {
         return Some.apply(keywords1);
     }
-
 
     @Override
     public Option<String_> name() {
@@ -31,15 +37,5 @@ public record Function(Set<String_> keywords1, String_ name1,
     @Override
     public Option<Node> returns() {
         return Some.apply(returnType);
-    }
-
-    @Override
-    public Option<Node> body() {
-        return Some.apply(body1);
-    }
-
-    @Override
-    public Option<Node> withBody(Node body) {
-        return Some.apply(new Function(keywords1, name1, parameters1, body, returnType));
     }
 }

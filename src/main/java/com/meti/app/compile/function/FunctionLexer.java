@@ -33,7 +33,7 @@ public record FunctionLexer(String_ line) implements Lexer {
             var body = line().sliceFrom(bodyStart);
             var node = new Content(body);
 
-            return new Function(JavaSet.empty(), name, parameters, node, new Content(type));
+            return new Implementation(JavaSet.empty(), name, parameters, node, new Content(type));
         });
     }
 }
