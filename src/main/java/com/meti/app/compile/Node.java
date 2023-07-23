@@ -1,15 +1,25 @@
 package com.meti.app.compile;
 
+import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
+import static com.meti.java.JavaString.fromSlice;
+
 public interface Node {
-    default Option<List<? extends Node>> lines() {
-        return None.apply();
+    default Option<Attribute> apply(String_ key) {
+        if (key.equalsTo(fromSlice("lines"))) {
+            return lines().map(NodeListAttribute::new);
+        } else {
+            return None.apply();
+        }
     }
+
+    Option<List<? extends Node>> lines();
 
     default Option<Node> type() {
         return None.apply();

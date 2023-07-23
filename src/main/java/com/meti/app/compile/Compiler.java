@@ -1,5 +1,6 @@
 package com.meti.app.compile;
 
+import com.meti.app.Attribute;
 import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ClassLexer;
@@ -79,7 +80,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(withReturns))
                     .$();
 
-            return withBody.lines().map(lines -> lines.iter()
+            return withBody.apply(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaList.asList())))
                     .map(value -> value.mapValue(withBody::withLines))
@@ -113,7 +114,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);
 
-            var withLines = withBody.lines().map(lines -> lines.iter().map(Compiler::renderTree)
+            var withLines = withBody.apply(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter().map(Compiler::renderTree)
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaList.asList()))

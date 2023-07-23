@@ -1,8 +1,10 @@
 package com.meti.app.compile.function;
 
 import com.meti.app.compile.Node;
+import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
@@ -30,5 +32,10 @@ public abstract class Function implements Node {
     @Override
     public Option<Set<? extends Node>> parameters() {
         return Some.apply(parameters1);
+    }
+
+    @Override
+    public Option<List<? extends Node>> lines() {
+        return None.apply();
     }
 }
