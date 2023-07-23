@@ -27,15 +27,15 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .unwrapOrElse(Empty);
 
             var body = root.body().$().value().$();
-            var string = root.returns()
+            var returns = root.returns()
                     .flatMap(Node::value)
-                    .map(value -> JavaString.fromSlice(": ").appendOwned(value))
+                    .map(value -> JavaString.fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);
 
             return renderedKeywords.append("def ")
                     .appendOwned(root.name().$()).append("(")
                     .appendOwned(joinedParameters).append(") ")
-                    .appendOwned(string)
+                    .appendOwned(returns)
                     .append("=> ")
                     .appendOwned(body);
         });
