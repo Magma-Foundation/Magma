@@ -14,7 +14,7 @@ public record BlockRenderer(Node block) implements Renderer {
     @Override
     public Option<String_> render() {
         return block.apply(fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(line -> line.iter()
-                .map(Node::value)
+                .map(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))
                 .flatMap(Iterators::fromOption)
                 .collect(JavaString.joining(fromSlice("")))
                 .unwrapOrElse(fromSlice(""))

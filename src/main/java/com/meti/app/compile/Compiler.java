@@ -19,8 +19,7 @@ import com.meti.java.*;
 import static com.meti.core.Results.$Result;
 import static com.meti.core.Results.invert;
 import static com.meti.iterate.Collectors.exceptionally;
-import static com.meti.java.JavaString.Empty;
-import static com.meti.java.JavaString.joining;
+import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
 
@@ -65,7 +64,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(node))
                     .$();
 
-            var withReturns = withParameters.returns().flatMap(Node::value)
+            var withReturns = withParameters.returns().flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::resolveType)
                     .map(value -> value.mapValue(Content::new))
                     .map(value -> value.mapValue(withParameters::withReturns))
@@ -73,7 +72,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(withParameters))
                     .$();
 
-            var withBody = withReturns.body().flatMap(Node::value)
+            var withBody = withReturns.body().flatMap(node1 -> node1.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::lexTree)
                     .map(value -> value.mapValue(withReturns::withBody))
                     .flatMap(Results::invert)
@@ -91,19 +90,17 @@ public record Compiler(String_ input) {
     }
 
     private static Result<Node, CompileException> unwrapValue(Node node1) {
-        return node1.value()
+        return node1.apply(fromSlice("value")).flatMap(Attribute::asString)
                 .map(Compiler::lexTree)
                 .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
     }
 
     private static Result<String_, CompileException> renderTree(Node transformed) {
         return $Result(CompileException.class, () -> {
-            var withParameters = transformed.parameters().map(lines -> {
-                        return lines.iter().map(Compiler::renderTree)
-                                .into(ResultIterator::new)
-                                .mapToResult(Content::new)
-                                .collectToResult(JavaSet.asSet());
-                    })
+            var withParameters = transformed.parameters().map(lines -> lines.iter().map(Compiler::renderTree)
+                            .into(ResultIterator::new)
+                            .mapToResult(Content::new)
+                            .collectToResult(JavaSet.asSet()))
                     .map(value -> invert(value.mapValue(transformed::withParameters)))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(transformed))

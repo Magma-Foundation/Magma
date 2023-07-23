@@ -1,5 +1,6 @@
 package com.meti.app.compile.function;
 
+import com.meti.app.Attribute;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.Renderer;
 import com.meti.core.Option;
@@ -16,7 +17,7 @@ public record FunctionRenderer(Node root) implements Renderer {
     public Option<String_> render() {
         return $Option(() -> {
             var joinedParameters = root.parameters().$().iter()
-                    .map(Node::value)
+                    .map(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))
                     .unwrapOrElse(JavaString.Empty);
@@ -26,9 +27,10 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            var body = root.body().$().value().$();
+            Node node1 = root.body().$();
+            var body = node1.apply(fromSlice("value")).flatMap(Attribute::asString).$();
             var returns = root.returns()
-                    .flatMap(Node::value)
+                    .flatMap(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> JavaString.fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);
 

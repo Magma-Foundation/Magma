@@ -38,4 +38,9 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
     public Option<Node> type() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> value() {
+        return None.apply();
+    }
 }

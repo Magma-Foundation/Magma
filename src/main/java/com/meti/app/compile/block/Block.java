@@ -18,12 +18,13 @@ public record Block(List<? extends Node> values) implements Node {
         return Some.apply(new Block(lines));
     }
 
-    public String_ render() {
-        return new BlockRenderer(this).render().unwrap();
+    @Override
+    public Option<Node> type() {
+        return None.apply();
     }
 
     @Override
-    public Option<Node> type() {
+    public Option<String_> value() {
         return None.apply();
     }
 }

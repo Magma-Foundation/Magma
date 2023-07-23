@@ -22,4 +22,9 @@ public record Declaration(String_ name1, Node type1) implements Node {
     public Option<List<? extends Node>> lines() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> value() {
+        return None.apply();
+    }
 }
