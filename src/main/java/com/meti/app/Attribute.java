@@ -9,4 +9,8 @@ public interface Attribute {
     default Option<List<? extends Node>> asListOfNodes() {
         return None.apply();
     }
+
+    default Option<Node> asNode() {
+        return None.apply();
+    }
 }

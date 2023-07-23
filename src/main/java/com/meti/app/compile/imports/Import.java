@@ -22,4 +22,9 @@ public record Import(String_ parent1, String_ child1) implements Node {
     public Option<List<? extends Node>> lines() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> type() {
+        return None.apply();
+    }
 }

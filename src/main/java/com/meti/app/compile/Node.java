@@ -14,6 +14,8 @@ public interface Node {
     default Option<Attribute> apply(String_ key) {
         if (key.equalsTo(fromSlice("lines"))) {
             return lines().map(NodeListAttribute::new);
+        } else if (key.equalsTo(fromSlice("type"))) {
+            return type().map(NodeAttribute::new);
         } else {
             return None.apply();
         }
@@ -21,9 +23,7 @@ public interface Node {
 
     Option<List<? extends Node>> lines();
 
-    default Option<Node> type() {
-        return None.apply();
-    }
+    Option<Node> type();
 
     default Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();

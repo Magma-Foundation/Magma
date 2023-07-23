@@ -26,4 +26,9 @@ public class Content implements Node {
     public Option<List<? extends Node>> lines() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> type() {
+        return None.apply();
+    }
 }

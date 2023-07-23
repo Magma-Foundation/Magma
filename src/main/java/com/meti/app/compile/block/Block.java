@@ -1,6 +1,7 @@
 package com.meti.app.compile.block;
 
 import com.meti.app.compile.Node;
+import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.List;
@@ -19,5 +20,10 @@ public record Block(List<? extends Node> values) implements Node {
 
     public String_ render() {
         return new BlockRenderer(this).render().unwrap();
+    }
+
+    @Override
+    public Option<Node> type() {
+        return None.apply();
     }
 }
