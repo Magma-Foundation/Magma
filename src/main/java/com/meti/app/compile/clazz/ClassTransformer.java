@@ -11,7 +11,7 @@ import com.meti.java.*;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
-public record ClassTransformer(Node clazz) implements Transformer {
+public record ClassTransformer(Node root) implements Transformer {
     private static Cache collectDeclaration(Cache cache, Node node) {
         return Objects.cast(Declaration.class, node)
                 .map(value -> cache.withParameters(cache.parameters.add(value)))
@@ -21,6 +21,8 @@ public record ClassTransformer(Node clazz) implements Transformer {
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
+            var clazz = Objects.cast(Class_.class, root).$();
+
             var name = clazz.name().$();
             var body = clazz.body().$();
             var block = Objects.cast(Block.class, body).$();
