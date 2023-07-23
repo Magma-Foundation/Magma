@@ -6,6 +6,7 @@ import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.ClassTransformer;
+import com.meti.app.compile.clazz.ObjectRenderer;
 import com.meti.app.compile.declare.DeclarationLexer;
 import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.FunctionRenderer;
@@ -125,19 +126,21 @@ public record Compiler(String_ input) {
         });
     }
 
-    private static Result<String_, CompileException> renderNode(Node transformed) {
-        Set<? extends Renderer> renderers = JavaSet.of(new BlockRenderer(transformed),
-                new DeclarationRenderer(transformed),
-                new FunctionRenderer(transformed),
-                new ImportRenderer(transformed),
-                new ContentRenderer(transformed));
+    private static Result<String_, CompileException> renderNode(Node node) {
+        Set<? extends Renderer> renderers = JavaSet.of(
+                new ObjectRenderer(node),
+                new BlockRenderer(node),
+                new DeclarationRenderer(node),
+                new FunctionRenderer(node),
+                new ImportRenderer(node),
+                new ContentRenderer(node));
 
         return renderers.iter()
                 .map(Renderer::render)
                 .flatMap(Iterators::fromOption)
                 .head()
                 .map(Ok::<String_, CompileException>apply)
-                .unwrapOrElse(Err.apply(new CompileException("Failed to render: " + transformed)));
+                .unwrapOrElse(Err.apply(new CompileException("Failed to render: " + node)));
     }
 
     public Result<String_, CompileException> compile() {
