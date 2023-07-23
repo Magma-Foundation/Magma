@@ -38,8 +38,7 @@ public abstract class Function implements Node {
         return Some.apply(parameters1);
     }
 
-    @Override
-    public Option<List<? extends Node>> lines() {
+    private Option<List<? extends Node>> lines() {
         return None.apply();
     }
 

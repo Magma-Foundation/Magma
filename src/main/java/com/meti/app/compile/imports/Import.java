@@ -23,8 +23,7 @@ public record Import(String_ parent1, String_ child1) implements Node {
         return Some.apply(child1);
     }
 
-    @Override
-    public Option<List<? extends Node>> lines() {
+    private Option<List<? extends Node>> lines() {
         return None.apply();
     }
 

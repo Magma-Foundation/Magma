@@ -23,8 +23,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return Some.apply(type1);
     }
 
-    @Override
-    public Option<List<? extends Node>> lines() {
+    private Option<List<? extends Node>> lines() {
         return None.apply();
     }
 

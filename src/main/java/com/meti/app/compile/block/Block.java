@@ -13,8 +13,7 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.fromSlice;
 
 public record Block(List<? extends Node> values) implements Node {
-    @Override
-    public Option<List<? extends Node>> lines() {
+    private Option<List<? extends Node>> lines() {
         return Some.apply(values);
     }
 

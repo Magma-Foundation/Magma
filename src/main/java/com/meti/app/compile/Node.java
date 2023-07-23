@@ -10,8 +10,6 @@ import com.meti.java.String_;
 public interface Node {
     Option<Attribute> apply(String_ key);
 
-    Option<List<? extends Node>> lines();
-
     Option<Node> type();
 
     default Option<Node> withLines(List<? extends Node> lines) {

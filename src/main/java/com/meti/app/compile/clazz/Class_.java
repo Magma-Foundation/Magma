@@ -33,8 +33,7 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return Some.apply(new Class_(name1, body));
     }
 
-    @Override
-    public Option<List<? extends Node>> lines() {
+    private Option<List<? extends Node>> lines() {
         return None.apply();
     }
 
