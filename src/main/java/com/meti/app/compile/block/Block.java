@@ -88,13 +88,11 @@ public record Block(List<? extends Node> values) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withReturns(Node returns) {
+    private Option<Node> withReturns(Node returns) {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withParameters(Set<? extends Node> parameters) {
+    private Option<Node> withParameters(Set<? extends Node> parameters) {
         return None.apply();
     }
 

@@ -98,13 +98,11 @@ public abstract class Function implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withReturns(Node returns) {
+    protected Option<Node> withReturns(Node returns) {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> withParameters(Set<? extends Node> parameters) {
+    protected Option<Node> withParameters(Set<? extends Node> parameters) {
         return None.apply();
     }
 
