@@ -23,7 +23,7 @@ public record ClassTransformer(Node root) implements Transformer {
         return $Option(() -> {
             var clazz = Objects.cast(Class_.class, root).$();
 
-            var name = clazz.name().$();
+            var name = clazz.apply(fromSlice("name")).flatMap(Attribute::asString).$();
             var body = clazz.apply(fromSlice("body")).flatMap(Attribute::asNode).$();
             var block = Objects.cast(Block.class, body).$();
 

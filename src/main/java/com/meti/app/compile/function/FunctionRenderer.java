@@ -35,7 +35,7 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .unwrapOrElse(Empty);
 
             return renderedKeywords.append("def ")
-                    .appendOwned(root.name().$()).append("(")
+                    .appendOwned(root.apply(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
                     .appendOwned(joinedParameters).append(") ")
                     .appendOwned(returns)
                     .append("=> ")

@@ -37,4 +37,9 @@ public record Import(String_ parent1, String_ child1) implements Node {
     public Option<Node> body() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> name() {
+        return None.apply();
+    }
 }

@@ -20,6 +20,8 @@ public interface Node {
             return value().map(StringAttribute::new);
         } else if (key.equalsTo(fromSlice("body"))) {
             return body().map(NodeAttribute::new);
+        } else if (key.equalsTo(fromSlice("name"))) {
+            return name().map(StringAttribute::new);
         } else {
             return None.apply();
         }
@@ -41,9 +43,7 @@ public interface Node {
 
     Option<Node> body();
 
-    default Option<String_> name() {
-        return None.apply();
-    }
+    Option<String_> name();
 
     default Option<Set<? extends Node>> parameters() {
         return None.apply();

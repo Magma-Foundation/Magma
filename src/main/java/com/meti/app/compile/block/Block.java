@@ -32,4 +32,9 @@ public record Block(List<? extends Node> values) implements Node {
     public Option<Node> body() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> name() {
+        return None.apply();
+    }
 }

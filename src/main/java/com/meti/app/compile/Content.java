@@ -36,4 +36,9 @@ public class Content implements Node {
     public Option<Node> body() {
         return None.apply();
     }
+
+    @Override
+    public Option<String_> name() {
+        return None.apply();
+    }
 }
