@@ -6,6 +6,18 @@ import static com.meti.java.JavaString.fromSlice;
 
 class ClassTest extends CompiledTest {
     @Test
+    void staticMethod() {
+        assertCompile("class Test(){static void test(){}}",
+                """
+                        class def Test() => {
+                        }
+                        object Tests {
+                            def test() => {
+                            }
+                        }""");
+    }
+
+    @Test
     void constructor() {
         assertCompile("class Test{public Test(){}}", """
                 class def Test() => {
