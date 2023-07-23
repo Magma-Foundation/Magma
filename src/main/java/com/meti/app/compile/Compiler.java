@@ -32,23 +32,23 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(Err.apply(new CompileException("Unknown type: " + type.unwrap())));
     }
 
-    private static Node lexNode(String_ line) {
-        Lexer lexer = new DeclarationLexer(line);
-        Lexer lexer1 = new FunctionLexer(line);
-        Lexer lexer2 = new BlockLexer(line);
-        Lexer lexer3 = new ClassLexer(line);
-        Lexer lexer4 = new ImportLexer(line);
-        return lexer4.lex().flatMap(result4 -> result4.value())
-                .or(lexer3.lex().flatMap(result3 -> result3.value()))
-                .or(lexer2.lex().flatMap(result2 -> result2.value()))
-                .or(lexer1.lex().flatMap(result1 -> result1.value()))
-                .or(lexer.lex().flatMap(result -> result.value()))
-                .unwrapOrElse(Content.ofContent(line));
+    private static Result<Node, CompileException> lexNode(String_ line) {
+        return JavaList.<Lexer>from(new DeclarationLexer(line),
+                        new FunctionLexer(line),
+                        new BlockLexer(line),
+                        new ClassLexer(line),
+                        new ImportLexer(line))
+                .iter()
+                .map(Lexer::lex)
+                .flatMap(Iterators::fromOption)
+                .into(ResultIterator::new)
+                .head()
+                .unwrapOrElse(Ok.apply(new Content(line)));
     }
 
     private static Result<Node, CompileException> lexTree(String_ line) {
         return Results.$Result(CompileException.class, () -> {
-            var node = lexNode(line);
+            var node = lexNode(line).$();
 
             var withReturns = node.returns().flatMap(Node::value)
                     .map(Compiler::resolveType)

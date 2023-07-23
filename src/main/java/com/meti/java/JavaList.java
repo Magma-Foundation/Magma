@@ -9,6 +9,7 @@ import com.meti.iterate.IndexIterator;
 import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -34,15 +35,19 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
+    public static <T> com.meti.java.List<T> from(T... values) {
+        return new JavaList<>(new ArrayList<>(Arrays.asList(values)));
+    }
+
+    public static <T> com.meti.java.List<T> empty() {
+        return new JavaList<>(new ArrayList<>());
+    }
+
     @Override
     public com.meti.java.List<T> sort(Comparator<T> comparator) {
         var copy = new ArrayList<>(values);
         copy.sort(comparator);
         return new JavaList<>(copy);
-    }
-
-    public static <T> com.meti.java.List<T> empty() {
-        return new JavaList<>(new ArrayList<>());
     }
 
     @Override
