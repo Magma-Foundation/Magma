@@ -22,8 +22,7 @@ public class Content implements Node {
         return new Content(value);
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return Some.apply(value);
     }
 
@@ -31,8 +30,7 @@ public class Content implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return None.apply();
     }
 

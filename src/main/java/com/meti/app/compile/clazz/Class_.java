@@ -37,13 +37,11 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return None.apply();
     }
 

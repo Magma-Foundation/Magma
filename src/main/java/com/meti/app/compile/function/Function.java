@@ -42,13 +42,11 @@ public abstract class Function implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return None.apply();
     }
 

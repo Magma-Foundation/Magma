@@ -27,13 +27,11 @@ public record Import(String_ parent1, String_ child1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return None.apply();
     }
 

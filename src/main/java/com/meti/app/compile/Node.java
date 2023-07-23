@@ -10,13 +10,9 @@ import com.meti.java.String_;
 public interface Node {
     Option<Attribute> apply(String_ key);
 
-    Option<Node> type();
-
     default Option<Node> withLines(List<? extends Node> lines) {
         return None.apply();
     }
-
-    Option<String_> value();
 
     default Option<Node> withBody(Node body) {
         return None.apply();

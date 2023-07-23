@@ -22,13 +22,11 @@ public record Block(List<? extends Node> values) implements Node {
         return Some.apply(new Block(lines));
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return None.apply();
     }
 

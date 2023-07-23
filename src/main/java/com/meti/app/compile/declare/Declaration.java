@@ -18,8 +18,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return Some.apply(name1);
     }
 
-    @Override
-    public Option<Node> type() {
+    private Option<Node> type() {
         return Some.apply(type1);
     }
 
@@ -27,8 +26,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> value() {
+    private Option<String_> value() {
         return None.apply();
     }
 
