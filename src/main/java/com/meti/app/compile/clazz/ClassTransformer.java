@@ -1,10 +1,9 @@
 package com.meti.app.compile.clazz;
 
-import com.meti.app.compile.Content;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.block.Block;
 import com.meti.app.compile.declare.Declaration;
-import com.meti.app.compile.function.Implementation;
+import com.meti.app.compile.function.ImplicitImplementation;
 import com.meti.core.Option;
 import com.meti.java.*;
 
@@ -30,7 +29,7 @@ public record ClassTransformer(Node root) implements Transformer {
             var cache = block.values()
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
-            return new Implementation(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body), new Content(fromSlice("Void")));
+            return new ImplicitImplementation(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body));
         });
     }
 

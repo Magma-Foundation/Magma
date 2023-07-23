@@ -6,12 +6,11 @@ import com.meti.core.Some;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
-public final class Implementation extends Function {
+public final class ImplicitImplementation extends Function {
     private final Node body1;
 
-    public Implementation(Set<String_> keywords1, String_ name1, Set<? extends Node> parameters1, Node body1,
-                          Node returnType) {
-        super(keywords1, name1, parameters1, returnType);
+    public ImplicitImplementation(Set<String_> keywords1, String_ name1, Set<? extends Node> parameters1, Node body1) {
+        super(keywords1, name1, parameters1);
         this.body1 = body1;
     }
 
@@ -23,6 +22,6 @@ public final class Implementation extends Function {
 
     @Override
     public Option<Node> withBody(Node body) {
-        return Some.apply(new Implementation(keywords1, name1, parameters1, body, returnType));
+        return Some.apply(new ImplicitImplementation(keywords1, name1, parameters1, body));
     }
 }
