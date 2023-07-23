@@ -10,12 +10,17 @@ public interface Node {
         return None.apply();
     }
 
+    default Option<Node> withLines(List<? extends Node> lines) {
+        return None.apply();
+    }
+
     default Option<String_> value() {
         return None.apply();
     }
 
-    @Deprecated
-    String_ render();
+    default Option<Node> withBody(Node body) {
+        return None.apply();
+    }
 
     default Option<Node> body() {
         return None.apply();

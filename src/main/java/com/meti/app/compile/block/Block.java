@@ -13,6 +13,10 @@ public record Block(List<? extends Node> values) implements Node {
     }
 
     @Override
+    public Option<Node> withLines(List<? extends Node> lines) {
+        return Some.apply(new Block(lines));
+    }
+
     public String_ render() {
         return new BlockRenderer(this).render().unwrap();
     }

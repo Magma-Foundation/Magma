@@ -11,7 +11,6 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return new ClassTransformer(this).transform();
     }
 
-    @Override
     public String_ render() {
         throw new UnsupportedOperationException();
     }

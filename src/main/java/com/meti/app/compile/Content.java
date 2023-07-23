@@ -13,7 +13,6 @@ public class Content implements Node {
         return new Content(value);
     }
 
-    @Override
     public String_ render() {
         return value;
     }
