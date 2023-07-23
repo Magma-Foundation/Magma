@@ -30,13 +30,11 @@ public record Block(List<? extends Node> values) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> body() {
+    private Option<Node> body() {
         return None.apply();
     }
 
-    @Override
-    public Option<String_> name() {
+    private Option<String_> name() {
         return None.apply();
     }
 

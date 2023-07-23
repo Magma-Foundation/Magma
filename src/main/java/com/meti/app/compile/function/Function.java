@@ -28,8 +28,7 @@ public abstract class Function implements Node {
         return Some.apply(keywords1);
     }
 
-    @Override
-    public Option<String_> name() {
+    private Option<String_> name() {
         return Some.apply(name1);
     }
 
@@ -47,11 +46,6 @@ public abstract class Function implements Node {
     }
 
     private Option<String_> value() {
-        return None.apply();
-    }
-
-    @Override
-    public Option<Node> body() {
         return None.apply();
     }
 
@@ -95,5 +89,9 @@ public abstract class Function implements Node {
         } else {
             return None.apply();
         }
+    }
+
+    protected Option<Node> body() {
+        return None.apply();
     }
 }

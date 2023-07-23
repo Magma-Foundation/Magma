@@ -19,7 +19,6 @@ public final class ImplicitImplementation extends Function {
         return Some.apply(new ImplicitImplementation(keywords1, name1, parameters, body1));
     }
 
-    @Override
     public Option<Node> body() {
         return Some.apply(body1);
     }

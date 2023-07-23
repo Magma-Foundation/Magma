@@ -13,8 +13,7 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.fromSlice;
 
 public record Declaration(String_ name1, Node type1) implements Node {
-    @Override
-    public Option<String_> name() {
+    private Option<String_> name() {
         return Some.apply(name1);
     }
 
@@ -30,8 +29,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
         return None.apply();
     }
 
-    @Override
-    public Option<Node> body() {
+    private Option<Node> body() {
         return None.apply();
     }
 

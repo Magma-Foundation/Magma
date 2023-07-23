@@ -18,13 +18,11 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
         return new ClassTransformer(this).transform();
     }
 
-    @Override
-    public Option<String_> name() {
+    private Option<String_> name() {
         return Some.apply(name1);
     }
 
-    @Override
-    public Option<Node> body() {
+    private Option<Node> body() {
         return Some.apply(body1);
     }
 
