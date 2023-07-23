@@ -6,6 +6,7 @@ import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.List;
+import com.meti.java.Set;
 import com.meti.java.String_;
 
 public record Class_(String_ name1, Node body1) implements Transformable, Node {
@@ -41,6 +42,11 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
 
     @Override
     public Option<String_> value() {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
 }

@@ -56,7 +56,7 @@ public record Compiler(String_ input) {
         return $Result(CompileException.class, () -> {
             var node = lexNode(line).$();
 
-            var withParameters = node.parameters().map(lines -> lines.iter()
+            var withParameters = node.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaSet.asSet())))
                     .map(value -> value.mapValue(node::withParameters))
@@ -97,7 +97,7 @@ public record Compiler(String_ input) {
 
     private static Result<String_, CompileException> renderTree(Node transformed) {
         return $Result(CompileException.class, () -> {
-            var withParameters = transformed.parameters().map(lines -> lines.iter().map(Compiler::renderTree)
+            var withParameters = transformed.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(Compiler::renderTree)
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaSet.asSet()))

@@ -22,6 +22,8 @@ public interface Node {
             return body().map(NodeAttribute::new);
         } else if (key.equalsTo(fromSlice("name"))) {
             return name().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("parameters"))) {
+            return parameters().map(NodeSetAttribute::new);
         } else {
             return None.apply();
         }
@@ -45,9 +47,7 @@ public interface Node {
 
     Option<String_> name();
 
-    default Option<Set<? extends Node>> parameters() {
-        return None.apply();
-    }
+    Option<Set<? extends Node>> parameters();
 
     default Option<Node> withReturns(Node returns) {
         return None.apply();

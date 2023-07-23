@@ -16,7 +16,7 @@ public record FunctionRenderer(Node root) implements Renderer {
     @Override
     public Option<String_> render() {
         return $Option(() -> {
-            var joinedParameters = root.parameters().$().iter()
+            var joinedParameters = root.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).$().iter()
                     .map(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))

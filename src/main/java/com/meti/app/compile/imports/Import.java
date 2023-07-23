@@ -5,6 +5,7 @@ import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.List;
+import com.meti.java.Set;
 import com.meti.java.String_;
 
 public record Import(String_ parent1, String_ child1) implements Node {
@@ -40,6 +41,11 @@ public record Import(String_ parent1, String_ child1) implements Node {
 
     @Override
     public Option<String_> name() {
+        return None.apply();
+    }
+
+    @Override
+    public Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
 }
