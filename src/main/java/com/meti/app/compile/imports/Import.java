@@ -32,4 +32,9 @@ public record Import(String_ parent1, String_ child1) implements Node {
     public Option<String_> value() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> body() {
+        return None.apply();
+    }
 }

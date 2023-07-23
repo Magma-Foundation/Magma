@@ -72,7 +72,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(withParameters))
                     .$();
 
-            var withBody = withReturns.body().flatMap(node1 -> node1.apply(fromSlice("value")).flatMap(Attribute::asString))
+            var withBody = withReturns.apply(fromSlice("body")).flatMap(Attribute::asNode).flatMap(node1 -> node1.apply(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::lexTree)
                     .map(value -> value.mapValue(withReturns::withBody))
                     .flatMap(Results::invert)
@@ -106,7 +106,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
 
-            var withBody = withParameters.body().map(Compiler::renderTree)
+            var withBody = withParameters.apply(fromSlice("body")).flatMap(Attribute::asNode).map(Compiler::renderTree)
                     .map(r -> r.mapValue(body -> withParameters.withBody(new Content(body))))
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);

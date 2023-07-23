@@ -27,7 +27,7 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            Node node1 = root.body().$();
+            Node node1 = root.apply(fromSlice("body")).flatMap(Attribute::asNode).$();
             var body = node1.apply(fromSlice("value")).flatMap(Attribute::asString).$();
             var returns = root.returns()
                     .flatMap(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))

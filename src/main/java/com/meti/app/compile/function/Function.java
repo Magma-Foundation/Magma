@@ -48,4 +48,9 @@ public abstract class Function implements Node {
     public Option<String_> value() {
         return None.apply();
     }
+
+    @Override
+    public Option<Node> body() {
+        return None.apply();
+    }
 }

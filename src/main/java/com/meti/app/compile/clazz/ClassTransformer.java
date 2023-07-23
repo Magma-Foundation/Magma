@@ -1,5 +1,6 @@
 package com.meti.app.compile.clazz;
 
+import com.meti.app.Attribute;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.block.Block;
 import com.meti.app.compile.declare.Declaration;
@@ -23,7 +24,7 @@ public record ClassTransformer(Node root) implements Transformer {
             var clazz = Objects.cast(Class_.class, root).$();
 
             var name = clazz.name().$();
-            var body = clazz.body().$();
+            var body = clazz.apply(fromSlice("body")).flatMap(Attribute::asNode).$();
             var block = Objects.cast(Block.class, body).$();
 
             var cache = block.values()

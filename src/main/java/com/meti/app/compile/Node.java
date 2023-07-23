@@ -18,6 +18,8 @@ public interface Node {
             return type().map(NodeAttribute::new);
         } else if (key.equalsTo(fromSlice("value"))) {
             return value().map(StringAttribute::new);
+        } else if (key.equalsTo(fromSlice("body"))) {
+            return body().map(NodeAttribute::new);
         } else {
             return None.apply();
         }
@@ -37,9 +39,7 @@ public interface Node {
         return None.apply();
     }
 
-    default Option<Node> body() {
-        return None.apply();
-    }
+    Option<Node> body();
 
     default Option<String_> name() {
         return None.apply();
