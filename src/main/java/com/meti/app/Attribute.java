@@ -12,6 +12,10 @@ public interface Attribute {
         return None.apply();
     }
 
+    default Option<Set<String_>> asSetOfStrings() {
+        return None.apply();
+    }
+
     default Option<List<? extends Node>> asListOfNodes() {
         return None.apply();
     }

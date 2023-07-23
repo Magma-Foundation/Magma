@@ -22,7 +22,7 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joining(fromSlice(", ")))
                     .unwrapOrElse(JavaString.Empty);
 
-            var renderedKeywords = root.keywords().$().iter()
+            var renderedKeywords = root.apply(fromSlice("keywords")).flatMap(Attribute::asSetOfStrings).$().iter()
                     .map(value -> value.append(" "))
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);

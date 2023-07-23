@@ -49,4 +49,9 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
     public Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
+
+    @Override
+    public Option<Set<String_>> keywords() {
+        return None.apply();
+    }
 }

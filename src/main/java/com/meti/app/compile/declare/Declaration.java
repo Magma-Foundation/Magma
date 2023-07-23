@@ -38,4 +38,9 @@ public record Declaration(String_ name1, Node type1) implements Node {
     public Option<Set<? extends Node>> parameters() {
         return None.apply();
     }
+
+    @Override
+    public Option<Set<String_>> keywords() {
+        return None.apply();
+    }
 }
