@@ -1,9 +1,12 @@
 package com.meti.app.compile.imports;
 
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.Content;
 import com.meti.app.compile.Lexer;
 import com.meti.app.compile.Node;
+import com.meti.core.Ok;
 import com.meti.core.Option;
+import com.meti.core.Result;
 import com.meti.iterate.Index;
 import com.meti.java.String_;
 
@@ -19,8 +22,7 @@ public record ImportLexer(String_ input) implements Lexer {
         return new Import(parent, child);
     }
 
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex1() {
         return input.firstIndexOfSlice("import ")
                 .flatMap(index -> index.nextExclusive("import ".length()))
                 .map(input::sliceFrom)
@@ -35,5 +37,10 @@ public record ImportLexer(String_ input) implements Lexer {
         return withoutStatic.lastIndexOfChar('.')
                 .<Node>map(separator -> lexFromProperties(withoutStatic, separator))
                 .unwrapOrElse(Content.ofContent(input()));
+    }
+
+    @Override
+    public Option<Result<Node, CompileException>> lex() {
+        return lex1().map(Ok::apply);
     }
 }

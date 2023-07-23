@@ -1,10 +1,9 @@
 package com.meti.app.compile.block;
 
-import com.meti.app.compile.Content;
-import com.meti.app.compile.Lexer;
-import com.meti.app.compile.Node;
-import com.meti.app.compile.Splitter;
+import com.meti.app.compile.*;
+import com.meti.core.Ok;
 import com.meti.core.Option;
+import com.meti.core.Result;
 import com.meti.java.JavaList;
 import com.meti.java.String_;
 
@@ -12,8 +11,7 @@ import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 
 public record BlockLexer(String_ line) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex1() {
         return $Option(() -> {
             var stripped = line().strip();
             var bodyStart = stripped.firstIndexOfChar('{').$();
@@ -31,5 +29,10 @@ public record BlockLexer(String_ line) implements Lexer {
                     .collect(JavaList.asList());
             return new Block(map);
         });
+    }
+
+    @Override
+    public Option<Result<Node, CompileException>> lex() {
+        return lex1().map(Ok::apply);
     }
 }

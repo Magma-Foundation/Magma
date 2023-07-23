@@ -16,44 +16,65 @@ import com.meti.iterate.ResultIterator;
 import com.meti.java.*;
 
 import static com.meti.core.Results.$Result;
-import static com.meti.iterate.Collectors.and;
+import static com.meti.iterate.Collectors.exceptionally;
 import static com.meti.java.JavaString.Empty;
 import static com.meti.java.JavaString.joining;
 
 public record Compiler(String_ input) {
 
-    public static String_ resolveType(String_ type) {
+    public static Result<String_, CompileException> resolveType(String_ type) {
         return JavaMap.<String, String>empty()
                 .insert("int", "I16")
                 .insert("void", "Void")
                 .applyOptionally(type.unwrap())
                 .map(JavaString::fromSlice)
-                .unwrapOrElse(type);
+                .map(Ok::<String_, CompileException>apply)
+                .unwrapOrElse(Err.apply(new CompileException("Unknown type: " + type.unwrap())));
     }
 
     private static Node lexNode(String_ line) {
-        return new ImportLexer(line).lex()
-                .or(new ClassLexer(line).lex())
-                .or(new BlockLexer(line).lex())
-                .or(new FunctionLexer(line).lex())
-                .or(new DeclarationLexer(line).lex())
+        Lexer lexer = new DeclarationLexer(line);
+        Lexer lexer1 = new FunctionLexer(line);
+        Lexer lexer2 = new BlockLexer(line);
+        Lexer lexer3 = new ClassLexer(line);
+        Lexer lexer4 = new ImportLexer(line);
+        return lexer4.lex().flatMap(result4 -> result4.value())
+                .or(lexer3.lex().flatMap(result3 -> result3.value()))
+                .or(lexer2.lex().flatMap(result2 -> result2.value()))
+                .or(lexer1.lex().flatMap(result1 -> result1.value()))
+                .or(lexer.lex().flatMap(result -> result.value()))
                 .unwrapOrElse(Content.ofContent(line));
     }
 
-    private static Node lexTree(String_ line) {
-        var node = lexNode(line);
+    private static Result<Node, CompileException> lexTree(String_ line) {
+        return Results.$Result(CompileException.class, () -> {
+            var node = lexNode(line);
 
-        var withBody = node.body().flatMap(Node::value)
-                .map(Compiler::lexTree)
-                .flatMap(node::withBody)
-                .unwrapOrElse(node);
+            var withReturns = node.returns().flatMap(Node::value)
+                    .map(Compiler::resolveType)
+                    .map(value -> value.mapValue(Content::new))
+                    .map(value -> value.mapValue(node::withReturns))
+                    .flatMap(Results::invert)
+                    .unwrapOrElse(Ok.apply(node))
+                    .$();
 
-        return withBody.lines().flatMap(lines -> lines.iter()
-                        .map(Node::value)
-                        .map(value -> value.map(Compiler::lexTree))
-                        .collect(and(JavaList.asList())))
-                .flatMap(withBody::withLines)
-                .unwrapOrElse(withBody);
+            var withBody = withReturns.body().flatMap(Node::value)
+                    .map(Compiler::lexTree)
+                    .map(value -> value.mapValue(withReturns::withBody))
+                    .flatMap(Results::invert)
+                    .unwrapOrElse(Ok.apply(withReturns))
+                    .$();
+
+            return withBody.lines().map(lines -> lines.iter()
+                            .map(node1 -> node1.value()
+                                    .map(Compiler::lexTree)
+                                    .unwrapOrElse(Err.apply(new CompileException("No value present in list."))))
+                            .collect(exceptionally(JavaList.asList())))
+                    .map(value -> value.mapValue(withBody::withLines))
+                    .flatMap(Results::invert)
+                    .unwrapOrElse(Ok.apply(withBody))
+                    .$();
+        });
     }
 
     private static Result<String_, CompileException> renderTree(Node transformed) {
@@ -101,11 +122,13 @@ public record Compiler(String_ input) {
     }
 
     private Result<String_, CompileException> compileNode(String_ line) {
-        var withLines = lexTree(line);
-        var transformed = new ClassTransformer(withLines)
-                .transform()
-                .unwrapOrElse(withLines);
+        return $Result(CompileException.class, () -> {
+            var withLines = lexTree(line).$();
+            var transformed = new ClassTransformer(withLines)
+                    .transform()
+                    .unwrapOrElse(withLines);
 
-        return renderTree(transformed);
+            return renderTree(transformed).$();
+        });
     }
 }

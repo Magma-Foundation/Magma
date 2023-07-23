@@ -39,6 +39,10 @@ public interface Node {
         return None.apply();
     }
 
+    default Option<Node> withReturns(Node returns) {
+        return None.apply();
+    }
+
     default Option<Set<String_>> keywords() {
         return None.apply();
     }
