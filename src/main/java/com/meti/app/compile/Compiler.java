@@ -50,9 +50,11 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(node);
 
         return withBody.lines().flatMap(lines -> lines.iter()
-                .map(Node::value)
-                .map(value -> value.map(Compiler::lexTree))
-                .collect(and(JavaList.asList()))).flatMap(withBody::withLines).unwrapOrElse(withBody);
+                        .map(Node::value)
+                        .map(value -> value.map(Compiler::lexTree))
+                        .collect(and(JavaList.asList())))
+                .flatMap(withBody::withLines)
+                .unwrapOrElse(withBody);
     }
 
     public Result<String_, CompileException> compile() {
