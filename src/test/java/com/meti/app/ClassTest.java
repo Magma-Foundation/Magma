@@ -12,7 +12,7 @@ class ClassTest extends CompiledTest {
                         class def Test() => {
                         }
                         object Tests {
-                            def test() => {
+                            def test() : Void => {
                             }
                         }""");
     }
