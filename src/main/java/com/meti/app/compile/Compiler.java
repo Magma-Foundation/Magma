@@ -24,16 +24,6 @@ import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
 
-    public static Result<String_, CompileException> resolveType(String_ type) {
-        return JavaMap.<String, String>empty()
-                .insert("int", "I16")
-                .insert("void", "Void")
-                .applyOptionally(type.unwrap())
-                .map(JavaString::fromSlice)
-                .map(Ok::<String_, CompileException>apply)
-                .unwrapOrElse(Err.apply(new CompileException("Unknown type: " + type.unwrap())));
-    }
-
     private static Result<Node, CompileException> lexNode(String_ line) {
         return JavaList.<Lexer>of(
                         new ClassLexer(line),
@@ -66,7 +56,7 @@ public record Compiler(String_ input) {
                     .$();
 
             var withReturns = withParameters.apply(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
-                    .map(Compiler::resolveType)
+                    .map(type -> new Resolver(type).resolve())
                     .map(value -> value.mapValue(Content::new))
                     .map(value -> value.mapValue(returns -> withParameters.with(fromSlice("returns"), new NodeAttribute(returns))))
                     .flatMap(Results::invert)
