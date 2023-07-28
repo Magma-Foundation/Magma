@@ -114,6 +114,6 @@ public record Class_(String_ name1, Node body1) implements Node {
 
     @Override
     public boolean is(String_ name) {
-        throw new UnsupportedOperationException();
+        return name.equalsTo(fromSlice("class"));
     }
 }

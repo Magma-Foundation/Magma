@@ -7,7 +7,7 @@ import static com.meti.java.JavaString.fromSlice;
 class ClassTest extends CompiledTest {
     @Test
     void staticMethod() {
-        assertCompile("class Test(){static void test(){}}",
+        assertCompile("class Test {static void test(){}}",
                 """
                         class def Test() => {
                         }

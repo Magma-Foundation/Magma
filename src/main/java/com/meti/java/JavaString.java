@@ -42,6 +42,11 @@ public final class JavaString implements String_ {
     }
 
     @Override
+    public String toString() {
+        return this.value;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

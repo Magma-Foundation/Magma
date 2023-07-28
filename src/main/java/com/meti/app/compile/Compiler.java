@@ -4,10 +4,7 @@ import com.meti.app.Attribute;
 import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.block.BlockRenderer;
-import com.meti.app.compile.clazz.ClassLexer;
-import com.meti.app.compile.clazz.ClassTransformer;
-import com.meti.app.compile.clazz.ObjectRenderer;
-import com.meti.app.compile.clazz.StaticTransformer;
+import com.meti.app.compile.clazz.*;
 import com.meti.app.compile.declare.DeclarationLexer;
 import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.FunctionRenderer;
@@ -15,6 +12,7 @@ import com.meti.app.compile.function.MethodLexer;
 import com.meti.app.compile.imports.ImportLexer;
 import com.meti.app.compile.imports.ImportRenderer;
 import com.meti.core.*;
+import com.meti.iterate.Iterator;
 import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
 import com.meti.java.*;
@@ -161,8 +159,13 @@ public record Compiler(String_ input) {
                 var root = lexTree(line).$();
 
                 while (true) {
-                    var transform = new ClassTransformer(root).transform().or(new StaticTransformer(root).transform());
-                    var transformed = transform.toTuple(new MapNode(fromSlice("")));
+                    Iterator<? extends Transformer> transformers = Iterators.of(new StaticTransformer(root),
+                            new ClassTransformer(root));
+
+                    var transformed = transformers
+                            .map(Transformer::transform)
+                            .flatMap(Iterators::fromOption)
+                            .head().toTuple(new MapNode(fromSlice("")));
                     if (transformed.a()) {
                         root = transformed.b();
                     } else {
