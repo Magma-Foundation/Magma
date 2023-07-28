@@ -2,14 +2,13 @@ package com.meti.app.compile;
 
 import com.meti.app.Attribute;
 import com.meti.app.NodeListAttribute;
-import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.block.BlockRenderer;
-import com.meti.app.compile.clazz.*;
-import com.meti.app.compile.declare.DeclarationLexer;
+import com.meti.app.compile.clazz.ClassTransformer;
+import com.meti.app.compile.clazz.ObjectRenderer;
+import com.meti.app.compile.clazz.StaticTransformer;
+import com.meti.app.compile.clazz.Transformer;
 import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.FunctionRenderer;
-import com.meti.app.compile.function.MethodLexer;
-import com.meti.app.compile.imports.ImportLexer;
 import com.meti.app.compile.imports.ImportRenderer;
 import com.meti.core.*;
 import com.meti.iterate.Iterator;
@@ -23,29 +22,13 @@ import static com.meti.iterate.Collectors.exceptionally;
 import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
-
-    private static Result<Node, CompileException> lexNode(String_ line) {
-        return JavaList.<Lexer>of(
-                        new ClassLexer(line),
-                        new BlockLexer(line),
-                        new MethodLexer(line),
-                        new DeclarationLexer(line),
-                        new ImportLexer(line))
-                .iter()
-                .map(Lexer::lex)
-                .flatMap(Iterators::fromOption)
-                .into(ResultIterator::new)
-                .head()
-                .unwrapOrElse(Ok.apply(new Content(line)));
-    }
-
     private static Result<Node, CompileException> lexTree(String_ line) {
         if (line.isEmpty()) {
             return Err.apply(new CompileException("Input cannot be empty."));
         }
 
         return $Result(CompileException.class, () -> {
-            var node = lexNode(line).$();
+            var node = new JavaLexer(line).lex().unwrapOrElse(Ok.apply(new Content(line))).$();
 
             var withParameters = node.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
