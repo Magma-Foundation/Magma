@@ -96,9 +96,9 @@ public record Compiler(String_ input) {
                 .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
     }
 
-    private static Result<String_, CompileException> renderTree(Node transformed) {
+    private static Result<String_, CompileException> renderTree(Node transformed, int depth) {
         return $Result(CompileException.class, () -> {
-            var withParameters = transformed.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(Compiler::renderTree)
+            var withParameters = transformed.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaSet.asSet()))
@@ -107,12 +107,14 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
 
-            var withBody = withParameters.apply(fromSlice("body")).flatMap(Attribute::asNode).map(Compiler::renderTree)
+            var withBody = withParameters.apply(fromSlice("body")).flatMap(Attribute::asNode).map(node -> renderTree(node, depth + 1))
                     .map(r -> r.mapValue(body -> withParameters.with(fromSlice("body"), new NodeAttribute(new Content(body)))))
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);
 
-            var withLines = withBody.apply(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter().map(Compiler::renderTree)
+            var withLines = withBody.apply(JavaString.fromSlice("lines"))
+                    .flatMap(Attribute::asListOfNodes)
+                    .map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaList.asList()))
@@ -121,14 +123,14 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
 
-            return renderNode(withLines).$();
+            return renderNode(withLines, depth).$();
         });
     }
 
-    private static Result<String_, CompileException> renderNode(Node node) {
+    private static Result<String_, CompileException> renderNode(Node node, int depth) {
         Set<? extends Renderer> renderers = JavaSet.of(
                 new ObjectRenderer(node),
-                new BlockRenderer(node),
+                new BlockRenderer(node, depth),
                 new DeclarationRenderer(node),
                 new FunctionRenderer(node),
                 new ImportRenderer(node),
@@ -173,7 +175,7 @@ public record Compiler(String_ input) {
                     }
                 }
 
-                return renderTree(root).$();
+                return renderTree(root, 0).$();
             }
         }).mapErr(err -> new CompileException("Failed to compile line: '" + line.unwrap() + "'", err));
     }
