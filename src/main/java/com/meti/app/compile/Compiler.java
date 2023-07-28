@@ -7,6 +7,7 @@ import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ClassLexer;
 import com.meti.app.compile.clazz.ClassTransformer;
 import com.meti.app.compile.clazz.ObjectRenderer;
+import com.meti.app.compile.clazz.StaticTransformer;
 import com.meti.app.compile.declare.DeclarationLexer;
 import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.FunctionRenderer;
@@ -160,7 +161,7 @@ public record Compiler(String_ input) {
                 var root = lexTree(line).$();
 
                 while (true) {
-                    var transform = new ClassTransformer(root).transform();
+                    var transform = new ClassTransformer(root).transform().or(new StaticTransformer(root).transform());
                     var transformed = transform.toTuple(new MapNode(fromSlice("")));
                     if (transformed.a()) {
                         root = transformed.b();
