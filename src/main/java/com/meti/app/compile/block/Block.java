@@ -113,6 +113,6 @@ public record Block(List<? extends Node> values) implements Node {
 
     @Override
     public boolean is(String_ name) {
-        throw new UnsupportedOperationException();
+        return name.equalsTo(fromSlice("block"));
     }
 }

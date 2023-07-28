@@ -113,6 +113,6 @@ public record Import(String_ parent1, String_ child1) implements Node {
 
     @Override
     public boolean is(String_ name) {
-        throw new UnsupportedOperationException();
+        return name.equalsTo(fromSlice("import"));
     }
 }
