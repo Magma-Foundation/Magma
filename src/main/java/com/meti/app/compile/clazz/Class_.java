@@ -12,11 +12,7 @@ import com.meti.java.String_;
 
 import static com.meti.java.JavaString.fromSlice;
 
-public record Class_(String_ name1, Node body1) implements Transformable, Node {
-    @Override
-    public Option<Node> transform() {
-        return new ClassTransformer(this).transform();
-    }
+public record Class_(String_ name1, Node body1) implements Node {
 
     private Option<String_> name() {
         return Some.apply(name1);
