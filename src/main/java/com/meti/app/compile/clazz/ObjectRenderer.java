@@ -6,6 +6,7 @@ import com.meti.app.compile.Renderer;
 import com.meti.core.Option;
 import com.meti.java.String_;
 
+import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
@@ -13,6 +14,8 @@ public record ObjectRenderer(Node root) implements Renderer {
     @Override
     public Option<String_> render() {
         return $Option(() -> {
+            if (!root.is(fromSlice("object"))) return $$();
+
             var name = root.apply(fromSlice("name")).flatMap(Attribute::asString).$();
             var body = root
                     .apply(fromSlice("body")).flatMap(Attribute::asNode).$()

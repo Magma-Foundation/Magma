@@ -22,4 +22,9 @@ public record MapNode(Map<String_, Attribute> attributes) implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
 }

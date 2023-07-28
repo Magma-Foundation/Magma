@@ -119,4 +119,9 @@ public class Content implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
 }

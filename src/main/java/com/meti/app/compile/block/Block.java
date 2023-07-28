@@ -110,4 +110,9 @@ public record Block(List<? extends Node> values) implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -110,4 +110,9 @@ public record Declaration(String_ name1, Node type1) implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        return name.equalsTo(fromSlice("declaration"));
+    }
 }

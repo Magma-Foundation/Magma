@@ -120,4 +120,9 @@ public abstract class Function implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
 }

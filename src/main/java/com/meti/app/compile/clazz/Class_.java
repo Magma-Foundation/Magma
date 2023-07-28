@@ -115,4 +115,9 @@ public record Class_(String_ name1, Node body1) implements Transformable, Node {
             return None.apply();
         }
     }
+
+    @Override
+    public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
 }
