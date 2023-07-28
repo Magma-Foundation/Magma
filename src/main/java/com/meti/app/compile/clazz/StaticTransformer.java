@@ -19,6 +19,8 @@ public record StaticTransformer(Node root) implements Transformer {
     public Option<Node> transform() {
         return $Option(() -> {
             if (!root.is(fromSlice("class"))) return Options.$$();
+
+            var name = root.apply(fromSlice("name")).$().asString().$();
             var body = root.apply(fromSlice("body")).$().asNode().$();
             var lines = body.apply(fromSlice("lines")).$().asListOfNodes().$();
             var newLines = lines.iter()
@@ -33,7 +35,7 @@ public record StaticTransformer(Node root) implements Transformer {
                     .collect(JavaList.asList());
 
             var map = JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("name"), new StringAttribute(fromSlice("Tests")))
+                    .insert(fromSlice("name"), new StringAttribute(name.append("s")))
                     .insert(fromSlice("body"), new NodeAttribute(new Block(newLines)));
             return new MapNode(fromSlice("object"), map);
         });
