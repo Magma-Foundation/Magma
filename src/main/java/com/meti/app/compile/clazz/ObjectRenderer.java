@@ -16,10 +16,10 @@ public record ObjectRenderer(Node root) implements Renderer {
         return $Option(() -> {
             if (!root.is(fromSlice("object"))) return $$();
 
-            var name = root.apply(fromSlice("name")).flatMap(Attribute::asString).$();
+            var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
             var body = root
-                    .apply(fromSlice("body")).flatMap(Attribute::asNode).$()
-                    .apply(fromSlice("value")).flatMap(Attribute::asString).$();
+                    .applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$()
+                    .applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
             return fromSlice("object ")
                     .appendOwned(name)
                     .append(" ")

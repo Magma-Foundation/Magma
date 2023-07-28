@@ -16,26 +16,26 @@ public record FunctionRenderer(Node root) implements Renderer {
     @Override
     public Option<String_> render() {
         return $Option(() -> {
-            var joinedParameters = root.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).$().iter()
-                    .map(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
+            var joinedParameters = root.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).$().iter()
+                    .map(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))
                     .unwrapOrElse(JavaString.Empty);
 
-            var renderedKeywords = root.apply(fromSlice("keywords")).flatMap(Attribute::asSetOfStrings).$().iter()
+            var renderedKeywords = root.applyOptionally(fromSlice("keywords")).flatMap(Attribute::asSetOfStrings).$().iter()
                     .map(value -> value.append(" "))
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            Node node1 = root.apply(fromSlice("body")).flatMap(Attribute::asNode).$();
-            var body = node1.apply(fromSlice("value")).flatMap(Attribute::asString).$();
-            var returns = root.apply(fromSlice("returns")).flatMap(Attribute::asNode)
-                    .flatMap(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))
+            Node node1 = root.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
+            var body = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
+            var returns = root.applyOptionally(fromSlice("returns")).flatMap(Attribute::asNode)
+                    .flatMap(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> JavaString.fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);
 
             return renderedKeywords.append("def ")
-                    .appendOwned(root.apply(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
+                    .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
                     .appendOwned(joinedParameters).append(") ")
                     .appendOwned(returns)
                     .append("=> ")

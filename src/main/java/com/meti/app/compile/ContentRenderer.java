@@ -9,6 +9,6 @@ import static com.meti.java.JavaString.fromSlice;
 public record ContentRenderer(Node node) implements Renderer {
     @Override
     public Option<String_> render() {
-        return node.apply(fromSlice("value")).flatMap(Attribute::asString);
+        return node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString);
     }
 }

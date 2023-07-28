@@ -63,7 +63,7 @@ public class Content implements Node {
     }
 
     @Override
-    public Option<Attribute> apply(String_ key) {
+    public Option<Attribute> applyOptionally(String_ key) {
         if (key.equalsTo(fromSlice("lines"))) {
             return lines().map(NodeListAttribute::new);
         } else if (key.equalsTo(fromSlice("type"))) {

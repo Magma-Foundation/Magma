@@ -13,8 +13,8 @@ public record ImportRenderer(Node node) implements Renderer {
     @Override
     public Option<String_> render() {
         return $Option(() -> {
-            var parent = this.node.apply(fromSlice("parent")).flatMap(Attribute::asString).$();
-            var child = this.node.apply(fromSlice("child")).flatMap(Attribute::asString).$();
+            var parent = this.node.applyOptionally(fromSlice("parent")).flatMap(Attribute::asString).$();
+            var child = this.node.applyOptionally(fromSlice("child")).flatMap(Attribute::asString).$();
             return fromSlice("import { ")
                     .appendOwned(child)
                     .append(" } from ")

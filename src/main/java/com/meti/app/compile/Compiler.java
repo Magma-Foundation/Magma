@@ -30,7 +30,7 @@ public record Compiler(String_ input) {
         return $Result(CompileException.class, () -> {
             var node = new JavaLexer(line).lex().unwrapOrElse(Ok.apply(new Content(line))).$();
 
-            var withParameters = node.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
+            var withParameters = node.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaSet.asSet())))
                     .map(value -> value.mapValue(parameters -> node.with(fromSlice("parameters"), new NodeSetAttribute(parameters))))
@@ -38,7 +38,7 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(node))
                     .$();
 
-            var withReturns = withParameters.apply(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.apply(fromSlice("value")).flatMap(Attribute::asString))
+            var withReturns = withParameters.applyOptionally(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(type -> new Resolver(type).resolve())
                     .map(value -> value.mapValue(Content::new))
                     .map(value -> value.mapValue(returns -> withParameters.with(fromSlice("returns"), new NodeAttribute(returns))))
@@ -46,14 +46,14 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(withParameters))
                     .$();
 
-            var withBody = withReturns.apply(fromSlice("body")).flatMap(Attribute::asNode).flatMap(node1 -> node1.apply(fromSlice("value")).flatMap(Attribute::asString))
+            var withBody = withReturns.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).flatMap(node1 -> node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(Compiler::lexTree)
                     .map(value -> value.mapValue(body -> withReturns.with(fromSlice("body"), new NodeAttribute(body))))
                     .flatMap(Results::invert)
                     .unwrapOrElse(Ok.apply(withReturns))
                     .$();
 
-            return withBody.apply(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter()
+            return withBody.applyOptionally(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter()
                             .map(Compiler::unwrapValue)
                             .collect(exceptionally(JavaList.asList())))
                     .map(value -> value.mapValue(lines1 -> withBody.with(fromSlice("lines"), new NodeListAttribute(lines1))))
@@ -64,14 +64,14 @@ public record Compiler(String_ input) {
     }
 
     private static Result<Node, CompileException> unwrapValue(Node node1) {
-        return node1.apply(fromSlice("value")).flatMap(Attribute::asString)
+        return node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString)
                 .map(Compiler::lexTree)
                 .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
     }
 
     private static Result<String_, CompileException> renderTree(Node transformed, int depth) {
         return $Result(CompileException.class, () -> {
-            var withParameters = transformed.apply(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
+            var withParameters = transformed.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
                             .collectToResult(JavaSet.asSet()))
@@ -80,12 +80,12 @@ public record Compiler(String_ input) {
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
 
-            var withBody = withParameters.apply(fromSlice("body")).flatMap(Attribute::asNode).map(node -> renderTree(node, depth + 1))
+            var withBody = withParameters.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).map(node -> renderTree(node, depth + 1))
                     .map(r -> r.mapValue(body -> withParameters.with(fromSlice("body"), new NodeAttribute(new Content(body)))))
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);
 
-            var withLines = withBody.apply(JavaString.fromSlice("lines"))
+            var withLines = withBody.applyOptionally(JavaString.fromSlice("lines"))
                     .flatMap(Attribute::asListOfNodes)
                     .map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)

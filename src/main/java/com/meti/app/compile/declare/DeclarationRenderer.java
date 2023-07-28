@@ -13,9 +13,9 @@ public record DeclarationRenderer(Node node) implements Renderer {
     @Override
     public Option<String_> render() {
         return $Option(() -> {
-            var name = node.apply(fromSlice("name")).flatMap(Attribute::asString).$();
-            Node node1 = node.apply(fromSlice("type")).flatMap(Attribute::asNode).$();
-            var type = node1.apply(fromSlice("value")).flatMap(Attribute::asString).$();
+            var name = node.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
+            Node node1 = node.applyOptionally(fromSlice("type")).flatMap(Attribute::asNode).$();
+            var type = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
 
             return name.append(" : ").appendOwned(type);
         });

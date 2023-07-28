@@ -59,7 +59,7 @@ public record Class_(String_ name1, Node body1) implements Node {
     }
 
     @Override
-    public Option<Attribute> apply(String_ key) {
+    public Option<Attribute> applyOptionally(String_ key) {
         if (key.equalsTo(fromSlice("lines"))) {
             return lines().map(NodeListAttribute::new);
         } else if (key.equalsTo(fromSlice("type"))) {

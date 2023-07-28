@@ -19,7 +19,7 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
     }
 
     @Override
-    public Option<Attribute> apply(String_ key) {
+    public Option<Attribute> applyOptionally(String_ key) {
         return attributes.applyOptionally(key);
     }
 

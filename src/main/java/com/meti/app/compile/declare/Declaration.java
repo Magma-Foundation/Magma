@@ -54,7 +54,7 @@ public record Declaration(String_ name1, Node type1) implements Node {
     }
 
     @Override
-    public Option<Attribute> apply(String_ key) {
+    public Option<Attribute> applyOptionally(String_ key) {
         if (key.equalsTo(fromSlice("lines"))) {
             return lines().map(NodeListAttribute::new);
         } else if (key.equalsTo(fromSlice("type"))) {

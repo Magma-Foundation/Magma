@@ -20,9 +20,9 @@ public record StaticTransformer(Node root) implements Transformer {
         return $Option(() -> {
             if (!root.is(fromSlice("class"))) return Options.$$();
 
-            var name = root.apply(fromSlice("name")).$().asString().$();
-            var body = root.apply(fromSlice("body")).$().asNode().$();
-            var lines = body.apply(fromSlice("lines")).$().asListOfNodes().$();
+            var name = root.applyOptionally(fromSlice("name")).$().asString().$();
+            var body = root.applyOptionally(fromSlice("body")).$().asNode().$();
+            var lines = body.applyOptionally(fromSlice("lines")).$().asListOfNodes().$();
             var newLines = lines.iter()
                     .map(line -> {
                         if (line.is(fromSlice("method"))) {

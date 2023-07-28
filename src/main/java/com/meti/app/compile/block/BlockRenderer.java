@@ -14,7 +14,7 @@ import static com.meti.java.JavaString.fromSlice;
 public record BlockRenderer(Node block, int depth) implements Renderer {
     private String_ renderContent(List<? extends Node> content) {
         return content.iter()
-                .map(node -> node.apply(fromSlice("value")).flatMap(Attribute::asString))
+                .map(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                 .flatMap(Iterators::fromOption)
                 .map(line -> line.prepend("\t"))
                 .collect(JavaString.joining(fromSlice("")))
@@ -25,7 +25,7 @@ public record BlockRenderer(Node block, int depth) implements Renderer {
 
     @Override
     public Option<String_> render() {
-        return block.apply(fromSlice("lines"))
+        return block.applyOptionally(fromSlice("lines"))
                 .flatMap(Attribute::asListOfNodes)
                 .map(this::renderContent);
     }
