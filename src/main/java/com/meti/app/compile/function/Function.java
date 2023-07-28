@@ -123,6 +123,6 @@ public abstract class Function implements Node {
 
     @Override
     public boolean is(String_ name) {
-        throw new UnsupportedOperationException();
+        return name.equalsTo(fromSlice("function"));
     }
 }

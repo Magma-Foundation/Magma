@@ -157,12 +157,19 @@ public record Compiler(String_ input) {
             if (line.isEmpty()) {
                 return Empty;
             } else {
-                var withLines = lexTree(line).$();
-                var transformed = new ClassTransformer(withLines)
-                        .transform()
-                        .unwrapOrElse(withLines);
+                var root = lexTree(line).$();
 
-                return renderTree(transformed).$();
+                while (true) {
+                    var transform = new ClassTransformer(root).transform();
+                    var transformed = transform.toTuple(new MapNode(fromSlice("")));
+                    if (transformed.a()) {
+                        root = transformed.b();
+                    } else {
+                        break;
+                    }
+                }
+
+                return renderTree(root).$();
             }
         }).mapErr(err -> new CompileException("Failed to compile line: '" + line.unwrap() + "'", err));
     }
