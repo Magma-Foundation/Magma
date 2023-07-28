@@ -6,6 +6,7 @@ import com.meti.app.compile.*;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.java.JavaList;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
@@ -13,6 +14,14 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.fromSlice;
 
 public record Block(List<? extends Node> values) implements Node {
+    public Block() {
+        this(JavaList.empty());
+    }
+
+    public Block(List<? extends Node> values) {
+        this.values = values;
+    }
+
     private Option<List<? extends Node>> lines() {
         return Some.apply(values);
     }
