@@ -1,13 +1,15 @@
 package com.meti.app.compile.clazz;
 
 import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
+import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
-import com.meti.app.compile.block.Block;
 import com.meti.app.compile.declare.Declaration;
 import com.meti.app.compile.function.ImplicitImplementation;
 import com.meti.core.Option;
 import com.meti.java.*;
 
+import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
@@ -25,12 +27,17 @@ public record ClassTransformer(Node root) implements Transformer {
 
             var name = clazz.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
             var body = clazz.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
-            var block = Objects.cast(Block.class, body).$();
+            if (!body.is(fromSlice("block"))) {
+                return $$();
+            }
 
-            var cache = block.values()
+            var cache = body.applyOptionally(fromSlice("lines"))
+                    .flatMap(Attribute::asListOfNodes)
+                    .unwrapOrElse(JavaList.empty())
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
-            return new ImplicitImplementation(JavaSet.of(fromSlice("class")), name, cache.parameters, new Block(cache.body));
+            return new ImplicitImplementation(JavaSet.of(fromSlice("class")), name, cache.parameters, new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("lines"), new NodeListAttribute(cache.body))));
         });
     }
 

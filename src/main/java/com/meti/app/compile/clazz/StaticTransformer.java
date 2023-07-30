@@ -1,8 +1,8 @@
 package com.meti.app.compile.clazz;
 
 import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.*;
-import com.meti.app.compile.block.Block;
 import com.meti.core.Option;
 import com.meti.core.Options;
 import com.meti.core.Some;
@@ -36,7 +36,8 @@ public record StaticTransformer(Node root) implements Transformer {
 
             var map = JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name.append("s")))
-                    .insert(fromSlice("body"), new NodeAttribute(new Block(newLines)));
+                    .insert(fromSlice("body"), new NodeAttribute(new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                            .insert(fromSlice("lines"), new NodeListAttribute(newLines)))));
             return new MapNode(fromSlice("object"), map);
         });
     }

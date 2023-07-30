@@ -1,14 +1,18 @@
 package com.meti.app.compile.block;
 
+import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.java.JavaList;
+import com.meti.java.JavaMap;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
+import static com.meti.java.JavaString.fromSlice;
 
 public record BlockLexer(String_ line) implements Lexer {
     private Option<Node> lex1() {
@@ -27,7 +31,8 @@ public record BlockLexer(String_ line) implements Lexer {
                     .filter(value -> !value.isEmpty())
                     .map(Content::new)
                     .collect(JavaList.intoList());
-            return new Block(map);
+            return new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("lines"), new NodeListAttribute(map)));
         });
     }
 
