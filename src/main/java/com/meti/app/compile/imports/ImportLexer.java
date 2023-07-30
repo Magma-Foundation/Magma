@@ -1,25 +1,27 @@
 package com.meti.app.compile.imports;
 
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.Content;
-import com.meti.app.compile.Lexer;
-import com.meti.app.compile.Node;
+import com.meti.app.Attribute;
+import com.meti.app.compile.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.iterate.Index;
+import com.meti.java.JavaMap;
 import com.meti.java.String_;
 
 import static com.meti.java.JavaString.Empty;
+import static com.meti.java.JavaString.fromSlice;
 
 public record ImportLexer(String_ input) implements Lexer {
-    private static Import lexFromProperties(String_ withoutStatic, Index separator) {
+    private static Node lexFromProperties(String_ withoutStatic, Index separator) {
         var parent = withoutStatic.sliceTo(separator);
         var child = separator.nextExclusive()
                 .map(withoutStatic::sliceFrom)
                 .unwrapOrElse(Empty);
 
-        return new Import(parent, child);
+        return new MapNode(fromSlice("import"), JavaMap.<String_, Attribute>empty()
+                .insert(fromSlice("parent"), new StringAttribute(parent))
+                .insert(fromSlice("child"), new StringAttribute(child)));
     }
 
     private Option<Node> lex1() {
@@ -35,7 +37,7 @@ public record ImportLexer(String_ input) implements Lexer {
                 .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
 
         return withoutStatic.lastIndexOfChar('.')
-                .<Node>map(separator -> lexFromProperties(withoutStatic, separator))
+                .map(separator -> lexFromProperties(withoutStatic, separator))
                 .unwrapOrElse(Content.ofContent(input()));
     }
 
