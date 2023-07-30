@@ -5,6 +5,8 @@ import com.meti.app.NodeListAttribute;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.iterate.Iterator;
+import com.meti.java.Key;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
@@ -106,7 +108,7 @@ public class Content implements Node {
     }
 
     @Override
-    public Option<Node> with(String_ key, Attribute attribute) {
+    public Option<Node> withOptionally(String_ key, Attribute attribute) {
         if (key.equalsTo(fromSlice("lines"))) {
             return attribute.asListOfNodes().flatMap(this::withLines);
         } else if (key.equalsTo(fromSlice("body"))) {
@@ -121,7 +123,22 @@ public class Content implements Node {
     }
 
     @Override
+    public Node with(Key<String_> key, Attribute attribute) {
+        return this;
+    }
+
+    @Override
     public boolean is(String_ name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Attribute apply(Key<String_> key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Iterator<Key<String_>> ofGroup(Group group) {
         throw new UnsupportedOperationException();
     }
 }

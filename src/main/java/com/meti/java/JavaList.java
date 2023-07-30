@@ -21,7 +21,7 @@ public class JavaList<T> implements com.meti.java.List<T> {
         this.values = new ArrayList<>(values);
     }
 
-    public static <T> Collector<T, com.meti.java.List<T>> asList() {
+    public static <T> Collector<T, com.meti.java.List<T>> intoList() {
         return new Collector<>() {
             @Override
             public com.meti.java.List<T> initial() {
@@ -35,6 +35,7 @@ public class JavaList<T> implements com.meti.java.List<T> {
         };
     }
 
+    @SafeVarargs
     public static <T> com.meti.java.List<T> of(T... values) {
         return new JavaList<>(new ArrayList<>(Arrays.asList(values)));
     }

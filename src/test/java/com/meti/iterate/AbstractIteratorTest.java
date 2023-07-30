@@ -34,7 +34,7 @@ class AbstractIteratorTest {
     void filter() {
         var actual = Iterators.of(1, 2, 3, 4)
                 .filter(value -> value % 2 == 0)
-                .collect(JavaList.asList())
+                .collect(JavaList.intoList())
                 .unwrap();
         assertIterableEquals(List.of(2, 4), actual);
     }

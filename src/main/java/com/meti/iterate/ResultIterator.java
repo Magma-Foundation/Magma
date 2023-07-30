@@ -4,6 +4,7 @@ import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ResultIterator<T, E extends Throwable> extends AbstractIterator<Result<T, E>> {
@@ -13,7 +14,7 @@ public class ResultIterator<T, E extends Throwable> extends AbstractIterator<Res
         this.parent = parent;
     }
 
-    public <C> Result<C, E> collectToResult(Collector<T, C> collector) {
+    public <C> Result<C, E> collectAsResult(Collector<T, C> collector) {
         return parent.collect(new Collector<>() {
             @Override
             public Result<C, E> initial() {
@@ -34,13 +35,11 @@ public class ResultIterator<T, E extends Throwable> extends AbstractIterator<Res
         return parent.head();
     }
 
-    public <R> ResultIterator<R, E> flatMapInner(Function<T, Iterator<R>> fromOption) {
-        return new ResultIterator<>(parent.flatMap(result -> result.mapValue(fromOption).match(
-                value -> value.map(Ok::<R, E>apply),
-                error -> Iterators.empty())));
-    }
-
     public <R> ResultIterator<R, E> mapToResult(Function<T, R> mapper) {
         return new ResultIterator<>(parent.map(teResult -> teResult.mapValue(mapper)));
+    }
+
+    public <C> Result<C, E> foldLeftInner(C initial, BiFunction<C, T, C> folder) {
+        return parent.foldLeft(Ok.apply(initial), (ceResult, teResult) -> ceResult.mapValueToResult(accumulated -> teResult.mapValue(element -> folder.apply(accumulated, element))));
     }
 }

@@ -1,6 +1,5 @@
 package com.meti.core;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -10,8 +9,8 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
-    public void consumeOrElse(Consumer<T> onPresent, Runnable onEmpty) {
-        onPresent.accept(value);
+    public <R> Option<R> replace(R other) {
+        return Some.apply(other);
     }
 
     @Override

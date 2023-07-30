@@ -26,13 +26,13 @@ public record StaticTransformer(Node root) implements Transformer {
             var newLines = lines.iter()
                     .map(line -> {
                         if (line.is(fromSlice("method"))) {
-                            return line.with(fromSlice("keywords"), new StringSetAttribute());
+                            return line.withOptionally(fromSlice("keywords"), new StringSetAttribute());
                         } else {
                             return Some.apply(line);
                         }
                     })
                     .flatMap(Iterators::fromOption)
-                    .collect(JavaList.asList());
+                    .collect(JavaList.intoList());
 
             var map = JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name.append("s")))

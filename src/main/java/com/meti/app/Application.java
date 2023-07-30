@@ -31,7 +31,7 @@ public final class Application {
                 .mapValueToResult(nioSourceJavaSet -> nioSourceJavaSet.iter()
                         .map(this::compile)
                         .into(ResultIterator::new)
-                        .collectToResult(JavaSet.asSet()));
+                        .collectAsResult(JavaSet.fromSet()));
     }
 
     private Result<NIOTarget, CompileException> compile(NIOSource source) {

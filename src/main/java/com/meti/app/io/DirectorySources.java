@@ -18,7 +18,7 @@ public record DirectorySources(NIODirectory directory) implements Sources {
             return set.iter()
                     .filter(path -> path.isExtendedBy(JavaString.fromSlice("java")))
                     .map((parent) -> new NIOSource(directory, parent))
-                    .collect(JavaSet.asSet());
+                    .collect(JavaSet.fromSet());
         });
     }
 }

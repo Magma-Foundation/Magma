@@ -15,10 +15,6 @@ import java.util.function.Supplier;
 public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
     private final Map<K, V> map;
 
-    public JavaMap() {
-        this(new HashMap<>());
-    }
-
     public JavaMap(Map<K, V> map) {
         this.map = map;
     }
@@ -84,13 +80,7 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
     public Iterator<Key<K>> keys() {
         return new JavaSet<>(this.map.keySet())
                 .iter()
-                .map(KeyImpl::new);
+                .map(ImmutableKey::new);
     }
 
-    private record KeyImpl<K>(K value) implements Key<K> {
-        @Override
-        public <R> R peek(Function<K, R> mapper) {
-            return mapper.apply(value);
-        }
-    }
 }

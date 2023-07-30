@@ -30,7 +30,7 @@ public record NIOSource(Location parent, Location location) {
         var list = parent.relativize(location)
                 .iter()
                 .map(Location::findFileNameAsString)
-                .collect(JavaList.asList());
+                .collect(JavaList.intoList());
 
         return list.lastIndexOptionally()
                 .map(list::sliceTo)

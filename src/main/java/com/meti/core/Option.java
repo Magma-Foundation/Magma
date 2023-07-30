@@ -1,6 +1,5 @@
 package com.meti.core;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -27,5 +26,5 @@ public interface Option<T> {
 
     Option<T> or(Option<T> other);
 
-    void consumeOrElse(Consumer<T> onPresent, Runnable onEmpty);
+    <R> Option<R> replace(R other);
 }

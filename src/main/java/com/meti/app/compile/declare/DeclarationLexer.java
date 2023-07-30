@@ -20,7 +20,7 @@ public record DeclarationLexer(String_ line) implements Lexer {
             var isValid = name.iter().allMatch(Character::isLetter);
             if (!isValid) return Options.$$();
 
-            var list = args.split(" ").collect(JavaList.asList())
+            var list = args.split(" ").collect(JavaList.intoList())
                     .into(NonEmptyJavaList::from).$();
 
             var type = list.last();

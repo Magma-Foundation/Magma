@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public record JavaSet<T>(Set<T> value) implements com.meti.java.Set<T> {
-    public static <T> Collector<T, com.meti.java.Set<T>> asSet() {
+    public static <T> Collector<T, com.meti.java.Set<T>> fromSet() {
         return new Collector<>() {
             @Override
             public com.meti.java.Set<T> initial() {

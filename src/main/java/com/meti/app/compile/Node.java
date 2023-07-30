@@ -3,18 +3,25 @@ package com.meti.app.compile;
 import com.meti.app.Attribute;
 import com.meti.core.Option;
 import com.meti.iterate.Iterator;
-import com.meti.iterate.Iterators;
 import com.meti.java.Key;
 import com.meti.java.String_;
 
 public interface Node {
-    default Iterator<Key<String_>> ofGroup() {
-        return Iterators.empty();
-    }
+    Iterator<Key<String_>> ofGroup(Group group);
 
     boolean is(String_ name);
 
-    Option<Node> with(String_ key, Attribute attribute);
+    Option<Node> withOptionally(String_ key, Attribute attribute);
+
+    Node with(Key<String_> key, Attribute attribute);
+
+    Attribute apply(Key<String_> key);
 
     Option<Attribute> applyOptionally(String_ key);
+
+    enum Group {
+        NodeSet,
+        NodeList,
+        Node
+    }
 }

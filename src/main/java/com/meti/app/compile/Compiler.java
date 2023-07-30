@@ -18,7 +18,9 @@ import com.meti.java.*;
 
 import static com.meti.core.Results.$Result;
 import static com.meti.core.Results.invert;
-import static com.meti.iterate.Collectors.exceptionally;
+import static com.meti.java.JavaList.intoList;
+import static com.meti.java.JavaSet.fromSet;
+import static com.meti.java.JavaSet.of;
 import static com.meti.java.JavaString.*;
 
 public record Compiler(String_ input) {
@@ -29,41 +31,53 @@ public record Compiler(String_ input) {
 
         return $Result(CompileException.class, () -> {
             var node = new JavaLexer(line).lex().unwrapOrElse(Ok.apply(new Content(line))).$();
-
-            var withParameters = node.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter()
-                            .map(Compiler::unwrapValue)
-                            .collect(exceptionally(JavaSet.asSet())))
-                    .map(value -> value.mapValue(parameters -> node.with(fromSlice("parameters"), new NodeSetAttribute(parameters))))
-                    .flatMap(Results::invert)
-                    .unwrapOrElse(Ok.apply(node))
-                    .$();
-
-            var withReturns = withParameters.applyOptionally(fromSlice("returns")).flatMap(Attribute::asNode).flatMap(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
-                    .map(type -> new Resolver(type).resolve())
-                    .map(value -> value.mapValue(Content::new))
-                    .map(value -> value.mapValue(returns -> withParameters.with(fromSlice("returns"), new NodeAttribute(returns))))
-                    .flatMap(Results::invert)
-                    .unwrapOrElse(Ok.apply(withParameters))
-                    .$();
-
-            var withBody = withReturns.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).flatMap(node1 -> node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
-                    .map(Compiler::lexTree)
-                    .map(value -> value.mapValue(body -> withReturns.with(fromSlice("body"), new NodeAttribute(body))))
-                    .flatMap(Results::invert)
-                    .unwrapOrElse(Ok.apply(withReturns))
-                    .$();
-
-            return withBody.applyOptionally(JavaString.fromSlice("lines")).flatMap(Attribute::asListOfNodes).map(lines -> lines.iter()
-                            .map(Compiler::unwrapValue)
-                            .collect(exceptionally(JavaList.asList())))
-                    .map(value -> value.mapValue(lines1 -> withBody.with(fromSlice("lines"), new NodeListAttribute(lines1))))
-                    .flatMap(Results::invert)
-                    .unwrapOrElse(Ok.apply(withBody))
-                    .$();
+            var withNodeLists = attachNodeLists(node).$();
+            return attachNodes(withNodeLists).$();
         }).mapErr(err -> new CompileException("Failed to lex line: " + line.unwrap(), err));
     }
 
-    private static Result<Node, CompileException> unwrapValue(Node node1) {
+    private static Result<Node, CompileException> attachNodes(Node withNodeLists) {
+        return withNodeLists.ofGroup(Node.Group.NodeList)
+                .map(key -> lexNodeAttribute(key, withNodeLists))
+                .into(ResultIterator::new)
+                .foldLeftInner(withNodeLists, (accumulated, element) -> accumulated.with(element.a(), element.b()));
+    }
+
+    private static Result<Node, CompileException> attachNodeLists(Node node) {
+        return node.ofGroup(Node.Group.NodeList).map(key -> lexNodeList(node, key))
+                .into(ResultIterator::new)
+                .foldLeftInner(node, (accumulated, element) -> accumulated.with(element.a(), element.b()));
+    }
+
+    private static Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList(Node node, Key<String_> key) {
+        return node.apply(key)
+                .asListOfNodes()
+                .map(list -> lexNodeList1(key, list))
+                .unwrapOrElseGet(() -> createInvalid(key, "set of nodes"));
+    }
+
+    private static <T> Result<T, CompileException> createInvalid(Key<String_> key, String type) {
+        var format = "Key '%s' was not a %s.";
+        var message = format.formatted(key, type);
+        return Err.apply(new CompileException(message));
+    }
+
+    private static Result<Tuple<Key<String_>, NodeAttribute>, CompileException> lexNodeAttribute(Key<String_> key, Node withNodeLists) {
+        return withNodeLists.apply(key).asNode().map(list -> lexUnwrapped(list)
+                .mapValue(NodeAttribute::new)
+                .mapValue(value -> new Tuple<>(key, value))).unwrapOrElseGet(() -> createInvalid(key, "node"));
+    }
+
+    private static Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList1(Key<String_> key, List<? extends Node> list) {
+        return list.iter()
+                .map(Compiler::lexUnwrapped)
+                .into(ResultIterator::new)
+                .collectAsResult(intoList())
+                .mapValue(NodeListAttribute::new)
+                .mapValue(value -> new Tuple<>(key, value));
+    }
+
+    private static Result<Node, CompileException> lexUnwrapped(Node node1) {
         return node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString)
                 .map(Compiler::lexTree)
                 .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
@@ -74,14 +88,14 @@ public record Compiler(String_ input) {
             var withParameters = transformed.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asSetOfNodes).map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
-                            .collectToResult(JavaSet.asSet()))
-                    .map(value -> invert(value.mapValue(parameters -> transformed.with(fromSlice("parameters"), new NodeSetAttribute(parameters)))))
+                            .collectAsResult(fromSet()))
+                    .map(value -> invert(value.mapValue(parameters -> transformed.withOptionally(fromSlice("parameters"), new NodeSetAttribute(parameters)))))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(transformed))
                     .$();
 
             var withBody = withParameters.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).map(node -> renderTree(node, depth + 1))
-                    .map(r -> r.mapValue(body -> withParameters.with(fromSlice("body"), new NodeAttribute(new Content(body)))))
+                    .map(r -> r.mapValue(body -> withParameters.withOptionally(fromSlice("body"), new NodeAttribute(new Content(body)))))
                     .unwrapOrElse(Ok.apply(Some.apply(withParameters))).$()
                     .unwrapOrElse(withParameters);
 
@@ -90,8 +104,8 @@ public record Compiler(String_ input) {
                     .map(lines -> lines.iter().map(node -> renderTree(node, depth + 1))
                             .into(ResultIterator::new)
                             .mapToResult(Content::new)
-                            .collectToResult(JavaList.asList()))
-                    .map(value -> invert(value.mapValue(lines1 -> withBody.with(fromSlice("lines"), new NodeListAttribute(lines1)))))
+                            .collectAsResult(intoList()))
+                    .map(value -> invert(value.mapValue(lines1 -> withBody.withOptionally(fromSlice("lines"), new NodeListAttribute(lines1)))))
                     .flatMap(value -> value)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
@@ -101,7 +115,7 @@ public record Compiler(String_ input) {
     }
 
     private static Result<String_, CompileException> renderNode(Node node, int depth) {
-        Set<? extends Renderer> renderers = JavaSet.of(
+        Set<? extends Renderer> renderers = of(
                 new ObjectRenderer(node),
                 new BlockRenderer(node, depth),
                 new DeclarationRenderer(node),
@@ -122,7 +136,7 @@ public record Compiler(String_ input) {
                 .filter(line -> !line.strip().startsWith("package "))
                 .map(this::compileNode)
                 .into(ResultIterator::new)
-                .collectToResult(joining(Empty))
+                .collectAsResult(joining(Empty))
                 .mapValue(inner -> inner.unwrapOrElse(Empty));
     }
 

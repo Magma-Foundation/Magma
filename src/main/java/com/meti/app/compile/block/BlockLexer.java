@@ -26,7 +26,7 @@ public record BlockLexer(String_ line) implements Lexer {
                     .map(String_::strip)
                     .filter(value -> !value.isEmpty())
                     .map(Content::new)
-                    .collect(JavaList.asList());
+                    .collect(JavaList.intoList());
             return new Block(map);
         });
     }

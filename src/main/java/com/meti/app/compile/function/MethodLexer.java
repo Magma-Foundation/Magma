@@ -19,7 +19,7 @@ public record MethodLexer(String_ line) implements Lexer {
             var paramEnd = line.firstIndexOfChar(')').$();
 
             var args = line.sliceTo(paramStart).split(" ")
-                    .collect(JavaList.asList())
+                    .collect(JavaList.intoList())
                     .into(NonEmptyJavaList::from)
                     .$();
 
@@ -27,7 +27,7 @@ public record MethodLexer(String_ line) implements Lexer {
                     .into(NonEmptyJavaList::from)
                     .$();
 
-            var keywords = keys.sliceWithoutLast().iter().collect(JavaSet.asSet());
+            var keywords = keys.sliceWithoutLast().iter().collect(JavaSet.fromSet());
 
             var type = keys.last();
             var name = args.last();
@@ -37,7 +37,7 @@ public record MethodLexer(String_ line) implements Lexer {
                     .map(String_::strip)
                     .filter(value -> !value.isEmpty())
                     .map(Content::new)
-                    .collect(JavaSet.asSet());
+                    .collect(JavaSet.fromSet());
 
             var bodyStart = this.line().firstIndexOfChar('{').$();
             var body = this.line().sliceFrom(bodyStart);

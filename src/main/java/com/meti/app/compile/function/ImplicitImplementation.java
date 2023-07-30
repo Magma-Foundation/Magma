@@ -1,8 +1,10 @@
 package com.meti.app.compile.function;
 
+import com.meti.app.Attribute;
 import com.meti.app.compile.Node;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.java.Key;
 import com.meti.java.Set;
 import com.meti.java.String_;
 
@@ -24,5 +26,10 @@ public final class ImplicitImplementation extends Function {
 
     public Option<Node> withBody(Node body) {
         return Some.apply(new ImplicitImplementation(keywords1, name1, parameters1, body));
+    }
+
+    @Override
+    public Node with(Key<String_> key, Attribute attribute) {
+        return this;
     }
 }

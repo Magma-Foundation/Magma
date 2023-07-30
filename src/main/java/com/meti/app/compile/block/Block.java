@@ -6,7 +6,8 @@ import com.meti.app.compile.*;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
-import com.meti.java.JavaList;
+import com.meti.iterate.Iterator;
+import com.meti.java.Key;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
@@ -14,14 +15,6 @@ import com.meti.java.String_;
 import static com.meti.java.JavaString.fromSlice;
 
 public record Block(List<? extends Node> values) implements Node {
-    public Block() {
-        this(JavaList.empty());
-    }
-
-    public Block(List<? extends Node> values) {
-        this.values = values;
-    }
-
     private Option<List<? extends Node>> lines() {
         return Some.apply(values);
     }
@@ -106,7 +99,7 @@ public record Block(List<? extends Node> values) implements Node {
     }
 
     @Override
-    public Option<Node> with(String_ key, Attribute attribute) {
+    public Option<Node> withOptionally(String_ key, Attribute attribute) {
         if (key.equalsTo(fromSlice("lines"))) {
             return attribute.asListOfNodes().flatMap(this::withLines);
         } else if (key.equalsTo(fromSlice("body"))) {
@@ -121,7 +114,22 @@ public record Block(List<? extends Node> values) implements Node {
     }
 
     @Override
+    public Node with(Key<String_> key, Attribute attribute) {
+        return null;
+    }
+
+    @Override
     public boolean is(String_ name) {
         return name.equalsTo(fromSlice("block"));
+    }
+
+    @Override
+    public Attribute apply(Key<String_> key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Iterator<Key<String_>> ofGroup(Group group) {
+        throw new UnsupportedOperationException();
     }
 }
