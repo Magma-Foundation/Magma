@@ -15,63 +15,63 @@ import static com.meti.core.Results.$Result;
 import static com.meti.java.JavaList.intoList;
 import static com.meti.java.JavaString.fromSlice;
 
-public class LexingStage1 {
-    static Result<Node, CompileException> lexTree(String_ line) {
-        if (line.isEmpty()) {
+public record LexingStage(String_ input) {
+    Result<Node, CompileException> lexTree() {
+        if (input().isEmpty()) {
             return Err.apply(new CompileException("Input cannot be empty."));
         }
 
         return $Result(CompileException.class, () -> {
-            var node = new JavaLexer(line).lex().unwrapOrElse(Ok.apply(new Content(line))).$();
+            var node = new JavaLexer(input).lex().unwrapOrElse(Ok.apply(new Content(input))).$();
             var withNodeLists = attachNodeLists(node).$();
             return attachNodes(withNodeLists).$();
-        }).mapErr(err -> new CompileException("Failed to lex line: " + line.unwrap(), err));
+        }).mapErr(err -> new CompileException("Failed to lex input: " + input.unwrap(), err));
     }
 
-    public static Result<Node, CompileException> attachNodes(Node withNodeLists) {
+    public Result<Node, CompileException> attachNodes(Node withNodeLists) {
         return withNodeLists.ofGroup(Node.Group.NodeList)
                 .map(key -> lexNodeAttribute(key, withNodeLists))
                 .into(ResultIterator::new)
                 .foldLeftInner(withNodeLists, (accumulated, element) -> accumulated.with(element.a(), element.b()));
     }
 
-    public static Result<Node, CompileException> attachNodeLists(Node node) {
+    public Result<Node, CompileException> attachNodeLists(Node node) {
         return node.ofGroup(Node.Group.NodeList).map(key -> lexNodeList(node, key))
                 .into(ResultIterator::new)
                 .foldLeftInner(node, (accumulated, element) -> accumulated.with(element.a(), element.b()));
     }
 
-    public static Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList(Node node, Key<String_> key) {
+    public Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList(Node node, Key<String_> key) {
         return node.apply(key)
                 .asListOfNodes()
                 .map(list -> lexNodeList1(key, list))
                 .unwrapOrElseGet(() -> createInvalid(key, "set of nodes"));
     }
 
-    private static <T> Result<T, CompileException> createInvalid(Key<String_> key, String type) {
+    private <T> Result<T, CompileException> createInvalid(Key<String_> key, String type) {
         var format = "Key '%s' was not a %s.";
         var message = format.formatted(key, type);
         return Err.apply(new CompileException(message));
     }
 
-    public static Result<Tuple<Key<String_>, NodeAttribute>, CompileException> lexNodeAttribute(Key<String_> key, Node withNodeLists) {
+    public Result<Tuple<Key<String_>, NodeAttribute>, CompileException> lexNodeAttribute(Key<String_> key, Node withNodeLists) {
         return withNodeLists.apply(key).asNode().map(list -> lexUnwrapped(list)
                 .mapValue(NodeAttribute::new)
                 .mapValue(value -> new Tuple<>(key, value))).unwrapOrElseGet(() -> createInvalid(key, "node"));
     }
 
-    private static Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList1(Key<String_> key, List<? extends Node> list) {
+    private Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> lexNodeList1(Key<String_> key, List<? extends Node> list) {
         return list.iter()
-                .map(LexingStage1::lexUnwrapped)
+                .map(this::lexUnwrapped)
                 .into(ResultIterator::new)
                 .collectAsResult(intoList())
                 .mapValue(NodeListAttribute::new)
                 .mapValue(value -> new Tuple<>(key, value));
     }
 
-    private static Result<Node, CompileException> lexUnwrapped(Node node1) {
+    private Result<Node, CompileException> lexUnwrapped(Node node1) {
         return node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString)
-                .map(LexingStage1::lexTree)
+                .map(line -> lexTree())
                 .unwrapOrElse(Err.apply(new CompileException("No value present in list.")));
     }
 }

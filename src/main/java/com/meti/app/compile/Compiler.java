@@ -92,7 +92,7 @@ public record Compiler(String_ input) {
             if (line.isEmpty()) {
                 return Empty;
             } else {
-                var root = LexingStage1.lexTree(line).$();
+                var root = new LexingStage(line).lexTree().$();
 
                 while (true) {
                     Iterator<? extends Transformer> transformers = Iterators.of(new StaticTransformer(root),
@@ -111,6 +111,6 @@ public record Compiler(String_ input) {
 
                 return renderTree(root, 0).$();
             }
-        }).mapErr(err -> new CompileException("Failed to compile line: '" + line.unwrap() + "'", err));
+        }).mapErr(err -> new CompileException("Failed to compile input: '" + line.unwrap() + "'", err));
     }
 }
