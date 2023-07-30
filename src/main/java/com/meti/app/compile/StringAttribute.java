@@ -10,4 +10,9 @@ public record StringAttribute(String_ value) implements Attribute {
     public Option<String_> asString() {
         return Some.apply(value);
     }
+
+    @Override
+    public boolean is(Node.Group group) {
+        throw new UnsupportedOperationException();
+    }
 }

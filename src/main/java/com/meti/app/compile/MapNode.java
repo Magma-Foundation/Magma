@@ -4,11 +4,9 @@ import com.meti.app.Attribute;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
-import com.meti.java.JavaMap;
-import com.meti.java.Key;
-import com.meti.java.Map;
-import com.meti.java.String_;
+import com.meti.java.*;
 
 public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
@@ -23,11 +21,9 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
     @Override
     public Option<Node> withOptionally(String_ key, Attribute attribute) {
-        if (attributes.hasKey(key)) {
-            return Some.apply(new MapNode(name1, attributes.insert(key, attribute)));
-        } else {
-            return None.apply();
-        }
+        return attributes.hasKey(key)
+                ? Some.apply(new MapNode(name1, attributes.insert(key, attribute)))
+                : None.apply();
     }
 
     @Override
@@ -42,11 +38,14 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
     @Override
     public Attribute apply(Key<String_> key) {
-        throw new UnsupportedOperationException();
+        return attributes.apply(key);
     }
 
     @Override
     public Iterator<Key<String_>> ofGroup(Group group) {
-        throw new UnsupportedOperationException();
+        return attributes.iter()
+                .filter(tuple -> tuple.b().is(group))
+                .map(Tuple::a)
+                .map(ImmutableKey::new);
     }
 }

@@ -9,4 +9,9 @@ public record NodeAttribute(Node node) implements Attribute {
     public Option<Node> asNode() {
         return Some.apply(node);
     }
+
+    @Override
+    public boolean is(Node.Group group) {
+        throw new UnsupportedOperationException();
+    }
 }

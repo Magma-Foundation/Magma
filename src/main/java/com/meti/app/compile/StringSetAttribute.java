@@ -12,12 +12,13 @@ public record StringSetAttribute(Set<String_> values) implements Attribute {
         this(JavaSet.empty());
     }
 
-    public StringSetAttribute(Set<String_> values) {
-        this.values = values;
-    }
-
     @Override
     public Option<Set<String_>> asSetOfStrings() {
         return Some.apply(values);
+    }
+
+    @Override
+    public boolean is(Node.Group group) {
+        throw new UnsupportedOperationException();
     }
 }

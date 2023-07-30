@@ -10,4 +10,9 @@ public record NodeSetAttribute(Set<? extends Node> values) implements Attribute 
     public Option<Set<? extends Node>> asSetOfNodes() {
         return Some.apply(values);
     }
+
+    @Override
+    public boolean is(Node.Group group) {
+        throw new UnsupportedOperationException();
+    }
 }

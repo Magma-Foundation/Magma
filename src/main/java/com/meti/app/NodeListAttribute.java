@@ -10,4 +10,9 @@ public record NodeListAttribute(List<? extends Node> values) implements Attribut
     public Option<List<? extends Node>> asListOfNodes() {
         return Some.apply(values);
     }
+
+    @Override
+    public boolean is(Node.Group group) {
+        throw new UnsupportedOperationException();
+    }
 }

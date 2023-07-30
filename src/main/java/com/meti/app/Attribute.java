@@ -8,6 +8,8 @@ import com.meti.java.Set;
 import com.meti.java.String_;
 
 public interface Attribute {
+    boolean is(Node.Group group);
+
     default Option<Set<? extends Node>> asSetOfNodes() {
         return None.apply();
     }
