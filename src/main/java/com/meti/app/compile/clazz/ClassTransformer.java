@@ -4,7 +4,6 @@ import com.meti.app.Attribute;
 import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
-import com.meti.app.compile.declare.Declaration;
 import com.meti.app.compile.function.ImplicitImplementation;
 import com.meti.core.Option;
 import com.meti.java.*;
@@ -15,9 +14,9 @@ import static com.meti.java.JavaString.fromSlice;
 
 public record ClassTransformer(Node root) implements Transformer {
     private static Cache collectDeclaration(Cache cache, Node node) {
-        return Objects.cast(Declaration.class, node)
-                .map(value -> cache.withParameters(cache.parameters.add(value)))
-                .unwrapOrElseGet(() -> cache.withBody(cache.body.add(node)));
+        return node.is(fromSlice("declaration"))
+                ? cache.withParameters(cache.parameters.add(node))
+                : cache.withBody(cache.body.add(node));
     }
 
     @Override

@@ -1,14 +1,17 @@
 package com.meti.app.compile.declare;
 
+import com.meti.app.Attribute;
 import com.meti.app.compile.*;
 import com.meti.core.Option;
 import com.meti.core.Options;
 import com.meti.core.Result;
 import com.meti.java.JavaList;
+import com.meti.java.JavaMap;
 import com.meti.java.NonEmptyJavaList;
 import com.meti.java.String_;
 
 import static com.meti.core.Results.$Result;
+import static com.meti.java.JavaString.fromSlice;
 
 public record DeclarationLexer(String_ line) implements Lexer {
 
@@ -27,7 +30,9 @@ public record DeclarationLexer(String_ line) implements Lexer {
 
             return $Result(CompileException.class, () -> {
                 var map = new Resolver(type).resolve().$();
-                return new Declaration(name, new Content(map));
+                return new MapNode(fromSlice("declaration"), JavaMap.<String_, Attribute>empty()
+                        .insert(fromSlice("name"), new StringAttribute(name))
+                        .insert(fromSlice("type"), new NodeAttribute(new Content(map))));
             });
         }));
     }
