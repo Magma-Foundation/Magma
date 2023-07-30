@@ -1,6 +1,7 @@
 package com.meti.app.compile.function;
 
 import com.meti.app.Attribute;
+import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
@@ -37,7 +38,7 @@ public record MethodLexer(String_ line) implements Lexer {
                     .map(String_::strip)
                     .filter(value -> !value.isEmpty())
                     .map(Content::new)
-                    .collect(JavaSet.fromSet());
+                    .collect(JavaList.intoList());
 
             var bodyStart = this.line().firstIndexOfChar('{').$();
             var body = this.line().sliceFrom(bodyStart);
@@ -46,7 +47,7 @@ public record MethodLexer(String_ line) implements Lexer {
             return Ok.apply(new MapNode(fromSlice("method"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("parameters"), new NodeSetAttribute(parameters))
+                    .insert(fromSlice("parameters"), new NodeListAttribute(parameters))
                     .insert(fromSlice("body"), new NodeAttribute(node))
                     .insert(fromSlice("returns"), new NodeAttribute(new Content(type)))));
         });

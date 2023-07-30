@@ -2,9 +2,7 @@ package com.meti.app.compile.clazz;
 
 import com.meti.app.Attribute;
 import com.meti.app.NodeListAttribute;
-import com.meti.app.compile.MapNode;
-import com.meti.app.compile.Node;
-import com.meti.app.compile.function.ImplicitImplementation;
+import com.meti.app.compile.*;
 import com.meti.core.Option;
 import com.meti.java.*;
 
@@ -37,17 +35,23 @@ public record ClassTransformer(Node root) implements Transformer {
                     .unwrapOrElse(JavaList.empty())
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
-            return new ImplicitImplementation(JavaSet.of(fromSlice("class")), name, cache.parameters, new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("lines"), new NodeListAttribute(cache.body))));
+            Set<String_> keywords1 = JavaSet.of(fromSlice("class"));
+            Node body1 = new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("lines"), new NodeListAttribute(cache.body)));
+            return new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("keywords"), new StringSetAttribute(keywords1))
+                    .insert(fromSlice("name"), new StringAttribute(name))
+                    .insert(fromSlice("parameters"), new NodeListAttribute(cache.parameters))
+                    .insert(fromSlice("body"), new NodeAttribute(body1)));
         });
     }
 
-    record Cache(Set<Node> parameters, List<Node> body) {
+    record Cache(List<Node> parameters, List<Node> body) {
         Cache() {
-            this(JavaSet.empty(), JavaList.empty());
+            this(JavaList.empty(), JavaList.empty());
         }
 
-        public Cache withParameters(Set<Node> newParameters) {
+        public Cache withParameters(List<Node> newParameters) {
             return new Cache(newParameters, body);
         }
 
