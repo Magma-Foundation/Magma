@@ -23,10 +23,12 @@ public record ClassTransformer(Node root) implements Transformer {
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
-            var clazz = Objects.cast(Class_.class, root).$();
+            if (!root.is(fromSlice("class"))) {
+                return $$();
+            }
 
-            var name = clazz.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
-            var body = clazz.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
+            var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
+            var body = root.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
             if (!body.is(fromSlice("block"))) {
                 return $$();
             }

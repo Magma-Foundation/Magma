@@ -1,15 +1,15 @@
 package com.meti.app.compile.clazz;
 
-import com.meti.app.compile.CompileException;
-import com.meti.app.compile.Content;
-import com.meti.app.compile.Lexer;
-import com.meti.app.compile.Node;
+import com.meti.app.Attribute;
+import com.meti.app.compile.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.java.JavaMap;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
+import static com.meti.java.JavaString.fromSlice;
 
 public record ClassLexer(String_ line) implements Lexer {
     private Option<Node> lex1() {
@@ -23,7 +23,9 @@ public record ClassLexer(String_ line) implements Lexer {
             var name = line.sliceBetween(classIndex.to(contentStart).$()).strip();
             var body = line.sliceFrom(contentStart);
 
-            return new Class_(name, new Content(body));
+            return new MapNode(fromSlice("class"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("name"), new StringAttribute(name))
+                    .insert(fromSlice("body"), new NodeAttribute(new Content(body))));
         });
     }
 
