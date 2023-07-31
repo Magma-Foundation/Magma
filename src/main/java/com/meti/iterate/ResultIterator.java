@@ -35,11 +35,11 @@ public class ResultIterator<T, E extends Throwable> extends AbstractIterator<Res
         return parent.head();
     }
 
-    public <R> ResultIterator<R, E> mapToResult(Function<T, R> mapper) {
-        return new ResultIterator<>(parent.map(teResult -> teResult.mapValue(mapper)));
-    }
-
     public <C> Result<C, E> foldLeftInner(C initial, BiFunction<C, T, C> folder) {
         return parent.foldLeft(Ok.apply(initial), (ceResult, teResult) -> ceResult.mapValueToResult(accumulated -> teResult.mapValue(element -> folder.apply(accumulated, element))));
+    }
+
+    public <R> ResultIterator<R, E> mapInner(Function<T, R> mapper) {
+        return new ResultIterator<>(parent.map(teResult -> teResult.mapValue(mapper)));
     }
 }
