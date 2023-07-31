@@ -22,6 +22,6 @@ public interface Node {
     enum Group {
         NodeSet,
         NodeList,
-        Node
+        String, Node
     }
 }

@@ -13,6 +13,6 @@ public record StringAttribute(String_ value) implements Attribute {
 
     @Override
     public boolean is(Node.Group group) {
-        throw new UnsupportedOperationException();
+        return group == Node.Group.String;
     }
 }

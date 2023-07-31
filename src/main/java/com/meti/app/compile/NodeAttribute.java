@@ -12,6 +12,6 @@ public record NodeAttribute(Node node) implements Attribute {
 
     @Override
     public boolean is(Node.Group group) {
-        throw new UnsupportedOperationException();
+        return group == Node.Group.Node;
     }
 }
