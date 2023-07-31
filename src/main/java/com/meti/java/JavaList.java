@@ -45,6 +45,13 @@ public class JavaList<T> implements com.meti.java.List<T> {
     }
 
     @Override
+    public String toString() {
+        return "JavaList{" +
+               "values=" + values +
+               '}';
+    }
+
+    @Override
     public com.meti.java.List<T> sort(Comparator<T> comparator) {
         var copy = new ArrayList<>(values);
         copy.sort(comparator);

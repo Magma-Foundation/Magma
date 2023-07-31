@@ -13,6 +13,6 @@ public record NodeListAttribute(List<? extends Node> values) implements Attribut
 
     @Override
     public boolean is(Node.Group group) {
-        throw new UnsupportedOperationException();
+        return group == Node.Group.NodeList;
     }
 }

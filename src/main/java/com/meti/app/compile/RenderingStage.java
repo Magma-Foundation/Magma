@@ -7,6 +7,12 @@ import com.meti.java.String_;
 
 public class RenderingStage extends Stage<Node, String_> {
 
+    private static Result<String_, CompileException> createOnNoOutputError(Node output) {
+        var format = "No output present for output node: %s";
+        var message = format.formatted(output);
+        return Err.apply(new CompileException(message));
+    }
+
     @Override
     protected Result<Node, CompileException> before(Node input) {
         return Ok.apply(input);
@@ -17,7 +23,7 @@ public class RenderingStage extends Stage<Node, String_> {
         return new MagmaRenderer(output)
                 .render()
                 .map(Ok::<String_, CompileException>apply)
-                .unwrapOrElse(Err.apply(new CompileException("No output present.")));
+                .unwrapOrElseGet(() -> createOnNoOutputError(output));
     }
 
     @Override

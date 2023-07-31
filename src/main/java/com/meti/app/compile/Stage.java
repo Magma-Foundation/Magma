@@ -1,5 +1,6 @@
 package com.meti.app.compile;
 
+import com.meti.app.Attribute;
 import com.meti.app.NodeListAttribute;
 import com.meti.core.Err;
 import com.meti.core.Result;
@@ -69,17 +70,18 @@ public abstract class Stage<I, O> {
      */
     protected abstract Result<I, CompileException> toInput(Node node);
 
-    private <T> Result<T, CompileException> createInvalid(Key<String_> key, String type) {
-        var format = "Key '%s' was not a %s.";
-        var message = format.formatted(key, type);
+    private <T> Result<T, CompileException> createInvalid(Key<String_> key, Attribute attribute, String type) {
+        var format = "Key '%s' with value '%s' was not a %s.";
+        var message = format.formatted(key, attribute, type);
         return Err.apply(new CompileException(message));
     }
 
     private Result<Tuple<Key<String_>, NodeAttribute>, CompileException> performOnNodeAttribute(Node root, Key<String_> key) {
         return root.apply(key).asNode().map(list -> performOnContent(list)
-                .mapValue(this::fromOutput)
-                .mapValue(NodeAttribute::new)
-                .mapValue(value -> new Tuple<>(key, value))).unwrapOrElseGet(() -> createInvalid(key, "node"));
+                        .mapValue(this::fromOutput)
+                        .mapValue(NodeAttribute::new)
+                        .mapValue(value -> new Tuple<>(key, value)))
+                .unwrapOrElseGet(() -> createInvalid(key, root.apply(key), "node"));
     }
 
     /**
@@ -105,7 +107,7 @@ public abstract class Stage<I, O> {
         return node.apply(key)
                 .asListOfNodes()
                 .map(list -> performOnNodeList(key, list))
-                .unwrapOrElseGet(() -> createInvalid(key, "set of nodes"));
+                .unwrapOrElseGet(() -> createInvalid(key, node.apply(key), "set of nodes"));
     }
 
     private Result<Node, CompileException> attachNodes(Node withNodeLists) {

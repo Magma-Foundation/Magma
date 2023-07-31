@@ -23,6 +23,12 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
         return new JavaMap<>(new HashMap<>());
     }
 
+    @Override
+    public String toString() {
+        return "JavaMap{" +
+               "map=" + map +
+               '}';
+    }
 
     @Override
     public com.meti.java.Map<K, V> insertOrMap(K key, Function<V, V> onPresent, Supplier<V> onAbsent) {
