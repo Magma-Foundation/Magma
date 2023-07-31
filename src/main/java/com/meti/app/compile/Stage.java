@@ -1,7 +1,8 @@
 package com.meti.app.compile;
 
-import com.meti.app.Attribute;
-import com.meti.app.NodeListAttribute;
+import com.meti.app.compile.attribute.Attribute;
+import com.meti.app.compile.attribute.NodeAttribute;
+import com.meti.app.compile.attribute.NodeListAttribute;
 import com.meti.core.Err;
 import com.meti.core.Result;
 import com.meti.core.Tuple;

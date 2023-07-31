@@ -1,6 +1,6 @@
 package com.meti.app.compile;
 
-import com.meti.app.Attribute;
+import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.Option;
 import com.meti.iterate.Iterator;
 import com.meti.java.Key;
@@ -22,6 +22,6 @@ public interface Node {
     enum Group {
         NodeSet,
         NodeList,
-        String, Node
+        String, StringSet, Node
     }
 }

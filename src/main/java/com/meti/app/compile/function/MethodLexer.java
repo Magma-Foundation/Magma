@@ -1,8 +1,7 @@
 package com.meti.app.compile.function;
 
-import com.meti.app.Attribute;
-import com.meti.app.NodeListAttribute;
 import com.meti.app.compile.*;
+import com.meti.app.compile.attribute.*;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;

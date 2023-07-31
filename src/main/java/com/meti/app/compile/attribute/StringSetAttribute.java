@@ -1,6 +1,6 @@
-package com.meti.app.compile;
+package com.meti.app.compile.attribute;
 
-import com.meti.app.Attribute;
+import com.meti.app.compile.Node;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.JavaSet;
@@ -19,6 +19,6 @@ public record StringSetAttribute(Set<String_> values) implements Attribute {
 
     @Override
     public boolean is(Node.Group group) {
-        throw new UnsupportedOperationException();
+        return group == Node.Group.StringSet;
     }
 }

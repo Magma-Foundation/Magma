@@ -1,8 +1,8 @@
 package com.meti.app.compile.clazz;
 
-import com.meti.app.Attribute;
-import com.meti.app.NodeListAttribute;
-import com.meti.app.compile.*;
+import com.meti.app.compile.MapNode;
+import com.meti.app.compile.Node;
+import com.meti.app.compile.attribute.*;
 import com.meti.core.Option;
 import com.meti.java.*;
 

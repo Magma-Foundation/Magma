@@ -1,8 +1,8 @@
 package com.meti.app.compile.imports;
 
-import com.meti.app.Attribute;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.Renderer;
+import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.Option;
 import com.meti.java.String_;
 

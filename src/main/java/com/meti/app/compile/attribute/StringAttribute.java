@@ -1,6 +1,6 @@
-package com.meti.app.compile;
+package com.meti.app.compile.attribute;
 
-import com.meti.app.Attribute;
+import com.meti.app.compile.Node;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.java.String_;

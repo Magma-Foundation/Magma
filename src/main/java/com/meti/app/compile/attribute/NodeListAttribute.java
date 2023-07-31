@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.compile.attribute;
 
 import com.meti.app.compile.Node;
 import com.meti.core.Option;

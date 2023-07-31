@@ -1,7 +1,9 @@
 package com.meti.app.compile.declare;
 
-import com.meti.app.Attribute;
 import com.meti.app.compile.*;
+import com.meti.app.compile.attribute.Attribute;
+import com.meti.app.compile.attribute.NodeAttribute;
+import com.meti.app.compile.attribute.StringAttribute;
 import com.meti.core.Option;
 import com.meti.core.Options;
 import com.meti.core.Result;
