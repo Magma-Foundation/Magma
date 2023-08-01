@@ -1,9 +1,12 @@
 package com.meti.app.compile.block;
 
+import com.meti.app.compile.CompileException;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.Renderer;
 import com.meti.app.compile.attribute.Attribute;
+import com.meti.core.Ok;
 import com.meti.core.Option;
+import com.meti.core.Result;
 import com.meti.iterate.Iterators;
 import com.meti.java.JavaString;
 import com.meti.java.List;
@@ -23,9 +26,10 @@ public record BlockRenderer(Node block) implements Renderer {
     }
 
     @Override
-    public Option<String_> render() {
+    public Option<Result<String_, CompileException>> render() {
         return block.applyOptionally(fromSlice("lines"))
                 .flatMap(Attribute::asListOfNodes)
-                .map(this::renderContent);
+                .map(this::renderContent)
+                .map(Ok::apply);
     }
 }

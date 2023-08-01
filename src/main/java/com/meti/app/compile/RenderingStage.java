@@ -22,7 +22,6 @@ public class RenderingStage extends Stage<Node, String_> {
     protected Result<String_, CompileException> after(Node output) {
         return new MagmaRenderer(output)
                 .render()
-                .map(Ok::<String_, CompileException>apply)
                 .unwrapOrElseGet(() -> createOnNoOutputError(output));
     }
 
