@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 public class BlockTest extends CompiledTest {
     @Test
     void empty() {
-        assertCompile("{}", "{\n}\n");
+        assertCompile("{}", "{}");
     }
 
     @Test
     void within() {
-        assertCompile("{{}}", "{\n\t{\n\t}\n}\n");
+        assertCompile("{{}}", "{{}}");
     }
 }

@@ -112,7 +112,7 @@ public abstract class Stage<I, O> {
     }
 
     private Result<Node, CompileException> attachNodes(Node withNodeLists) {
-        return withNodeLists.ofGroup(Node.Group.NodeList)
+        return withNodeLists.ofGroup(Node.Group.Node)
                 .map(key -> performOnNodeAttribute(withNodeLists, key))
                 .into(ResultIterator::new)
                 .foldLeftInner(withNodeLists, (accumulated, element) -> accumulated.with(element.a(), element.b()));

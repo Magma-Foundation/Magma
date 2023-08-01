@@ -20,6 +20,14 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
 
     @Override
+    public String toString() {
+        return "{" +
+               "name: '" + name1.unwrap() + "', " +
+               "attributes: " + attributes.toString() +
+               "}";
+    }
+
+    @Override
     public Option<Node> withOptionally(String_ key, Attribute attribute) {
         return attributes.hasKey(key)
                 ? Some.apply(new MapNode(name1, attributes.insert(key, attribute)))

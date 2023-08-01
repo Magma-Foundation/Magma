@@ -12,6 +12,11 @@ public record NodeListAttribute(List<? extends Node> values) implements Attribut
     }
 
     @Override
+    public String toString() {
+        return values.toString();
+    }
+
+    @Override
     public boolean is(Node.Group group) {
         return group == Node.Group.NodeList;
     }

@@ -34,6 +34,13 @@ public record JavaSet<T>(Set<T> value) implements com.meti.java.Set<T> {
     }
 
     @Override
+    public String toString() {
+        return value.stream()
+                .map(Object::toString)
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+    }
+
+    @Override
     public com.meti.java.Set<T> add(T element) {
         this.value.add(element);
         return this;

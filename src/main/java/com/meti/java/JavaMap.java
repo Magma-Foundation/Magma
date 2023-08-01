@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
     private final Map<K, V> map;
@@ -25,9 +26,10 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
 
     @Override
     public String toString() {
-        return "JavaMap{" +
-               "map=" + map +
-               '}';
+        var joined = map.keySet()
+                .stream()
+                .map(key -> key.toString() + ": " + map.get(key).toString()).collect(Collectors.joining(", "));
+        return "{" + joined + "}";
     }
 
     @Override

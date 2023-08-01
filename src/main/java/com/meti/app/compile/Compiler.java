@@ -27,25 +27,31 @@ public record Compiler(String_ input) {
             if (line.isEmpty()) {
                 return Empty;
             } else {
-                var root = new LexingStage().perform(line).$();
-
+                var transformed = new LexingStage().perform(line).$();
                 while (true) {
-                    Iterator<? extends Transformer> transformers = Iterators.of(new StaticTransformer(root),
-                            new ClassTransformer(root));
+                    Iterator<? extends Transformer> transformers = Iterators.of(
+                            new StaticTransformer(transformed),
+                            new ClassTransformer(transformed));
 
-                    var transformed = transformers
+                    var afterTransform = transformers
                             .map(Transformer::transform)
                             .flatMap(Iterators::fromOption)
-                            .head().toTuple(new MapNode(fromSlice("")));
-                    if (transformed.a()) {
-                        root = transformed.b();
+                            .head()
+                            .toTuple(new MapNode(fromSlice("")));
+
+                    if (afterTransform.a()) {
+                        transformed = afterTransform.b();
                     } else {
                         break;
                     }
                 }
 
-                return new RenderingStage().perform(root).$();
+                return new RenderingStage().perform(transformed).$();
             }
-        }).mapErr(err -> new CompileException("Failed to compile input: '" + line.unwrap() + "'", err));
+        }).mapErr(err -> {
+            var format = "Failed to compile input: '%s'";
+            var message = format.formatted(line.unwrap());
+            return new CompileException(message, err);
+        });
     }
 }

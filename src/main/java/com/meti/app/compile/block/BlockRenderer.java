@@ -16,11 +16,10 @@ public record BlockRenderer(Node block) implements Renderer {
         return content.iter()
                 .map(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                 .flatMap(Iterators::fromOption)
-                .map(line -> line.prepend("\t"))
                 .collect(JavaString.joining(fromSlice("")))
                 .unwrapOrElse(fromSlice(""))
-                .prepend("{\n")
-                .append("\t" + "}\n");
+                .prepend("{")
+                .append("}");
     }
 
     @Override

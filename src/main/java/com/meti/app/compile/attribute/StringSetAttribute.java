@@ -18,6 +18,11 @@ public record StringSetAttribute(Set<String_> values) implements Attribute {
     }
 
     @Override
+    public String toString() {
+        return values.toString();
+    }
+
+    @Override
     public boolean is(Node.Group group) {
         return group == Node.Group.StringSet;
     }

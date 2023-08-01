@@ -19,6 +19,11 @@ public record Content(String_ value) implements Node {
     }
 
     @Override
+    public String toString() {
+        return "'" + value.toString() + "'";
+    }
+
+    @Override
     public Iterator<Key<String_>> ofGroup(Group group) {
         return Iterators.empty();
     }

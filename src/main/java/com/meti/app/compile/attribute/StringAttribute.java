@@ -12,6 +12,11 @@ public record StringAttribute(String_ value) implements Attribute {
     }
 
     @Override
+    public String toString() {
+        return "'" + value.toString() + "'";
+    }
+
+    @Override
     public boolean is(Node.Group group) {
         return group == Node.Group.String;
     }

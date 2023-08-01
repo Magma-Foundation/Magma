@@ -11,6 +11,11 @@ public record NodeAttribute(Node node) implements Attribute {
     }
 
     @Override
+    public String toString() {
+        return node.toString();
+    }
+
+    @Override
     public boolean is(Node.Group group) {
         return group == Node.Group.Node;
     }

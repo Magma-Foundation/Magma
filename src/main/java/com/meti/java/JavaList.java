@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class JavaList<T> implements com.meti.java.List<T> {
     protected final List<T> values;
@@ -46,9 +47,9 @@ public class JavaList<T> implements com.meti.java.List<T> {
 
     @Override
     public String toString() {
-        return "JavaList{" +
-               "values=" + values +
-               '}';
+        return values.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(",", "[", "]"));
     }
 
     @Override
