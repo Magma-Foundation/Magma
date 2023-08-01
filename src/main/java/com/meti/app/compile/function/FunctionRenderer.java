@@ -31,7 +31,7 @@ public record FunctionRenderer(Node root) implements Renderer {
 
     private Option<String_> renderWithinOption() {
         return $Option(() -> {
-            var joinedParameters = root.applyOptionally(fromSlice("parameters")).flatMap(Attribute::asListOfNodes).$().iter()
+            var joinedParameters = root.applyOptionally(fromSlice("parameters")).flatMap(attribute2 -> attribute2.asListOfNodes().map(value -> value.b())).$().iter()
                     .map(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))
@@ -42,9 +42,9 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            var node1 = root.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
+            var node1 = root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(value -> value.b())).$();
             var body = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
-            var returns = root.applyOptionally(fromSlice("returns")).flatMap(Attribute::asNode)
+            var returns = root.applyOptionally(fromSlice("returns")).flatMap(attribute -> attribute.asNode().map(value -> value.b()))
                     .flatMap(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);

@@ -27,7 +27,7 @@ public record ClassLexer(String_ line) implements Lexer {
 
             return new MapNode(fromSlice("class"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("body"), new NodeAttribute(new Content(body))));
+                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new Content(body))));
         });
     }
 

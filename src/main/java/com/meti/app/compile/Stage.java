@@ -7,12 +7,14 @@ import com.meti.core.Err;
 import com.meti.core.Result;
 import com.meti.core.Tuple;
 import com.meti.iterate.ResultIterator;
+import com.meti.java.JavaString;
 import com.meti.java.Key;
 import com.meti.java.List;
 import com.meti.java.String_;
 
 import static com.meti.core.Results.$Result;
 import static com.meti.java.JavaList.intoList;
+import static com.meti.java.JavaString.fromSlice;
 
 /**
  * This abstract class defines a stage in a compilation pipeline.
@@ -43,7 +45,7 @@ public abstract class Stage<I, O> {
 
     /**
      * This is the main method of the class. It receives an input of type 'I' and uses it to perform the compilation stage.
-     * It applies a series of transformations, including attaching nodes and node lists, and returns the final result.
+     * It applies a series of transformations, including attaching nodes and value lists, and returns the final result.
      *
      * @param input Input of type 'I' for the stage
      * @return A 'Result' containing either an output of type 'O' or a 'CompileException'
@@ -78,11 +80,12 @@ public abstract class Stage<I, O> {
     }
 
     private Result<Tuple<Key<String_>, NodeAttribute>, CompileException> performOnNodeAttribute(Node root, Key<String_> key) {
-        return root.apply(key).asNode().map(list -> performOnContent(list)
+        Attribute attribute = root.apply(key);
+        return attribute.asNode().map(value1 -> value1.b()).map(list -> performOnContent(list)
                         .mapValue(this::fromOutput)
-                        .mapValue(NodeAttribute::new)
+                        .mapValue(node -> new NodeAttribute(fromSlice("any"), node))
                         .mapValue(value -> new Tuple<>(key, value)))
-                .unwrapOrElseGet(() -> createInvalid(key, root.apply(key), "node"));
+                .unwrapOrElseGet(() -> createInvalid(key, root.apply(key), "value"));
     }
 
     /**
@@ -100,13 +103,13 @@ public abstract class Stage<I, O> {
                 .into(ResultIterator::new)
                 .mapInner(this::fromOutput)
                 .collectAsResult(intoList())
-                .mapValue(NodeListAttribute::new)
+                .mapValue(values -> new NodeListAttribute(JavaString.fromSlice("any"), values))
                 .mapValue(value -> new Tuple<>(key, value));
     }
 
     private Result<Tuple<Key<String_>, NodeListAttribute>, CompileException> performOnNodeListAttribute(Node node, Key<String_> key) {
-        return node.apply(key)
-                .asListOfNodes()
+        Attribute attribute = node.apply(key);
+        return attribute.asListOfNodes().<List<? extends Node>>map(value -> value.b())
                 .map(list -> performOnNodeList(key, list))
                 .unwrapOrElseGet(() -> createInvalid(key, node.apply(key), "set of nodes"));
     }

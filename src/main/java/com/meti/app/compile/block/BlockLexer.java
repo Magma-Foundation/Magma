@@ -8,6 +8,7 @@ import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.java.JavaList;
 import com.meti.java.JavaMap;
+import com.meti.java.JavaString;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$$;
@@ -32,7 +33,7 @@ public record BlockLexer(String_ line) implements Lexer {
                     .map(Content::new)
                     .collect(JavaList.intoList());
             return new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("lines"), new NodeListAttribute(map)));
+                    .insert(fromSlice("lines"), new NodeListAttribute(JavaString.fromSlice("any"), map)));
         });
     }
 

@@ -8,7 +8,7 @@ import com.meti.java.String_;
 public class RenderingStage extends Stage<Node, String_> {
 
     private static Result<String_, CompileException> createOnNoOutputError(Node output) {
-        var format = "Nothing could be rendered from node: %s";
+        var format = "Nothing could be rendered from value: %s";
         var message = format.formatted(output);
         return Err.apply(new CompileException(message));
     }

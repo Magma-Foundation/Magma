@@ -9,6 +9,7 @@ import com.meti.core.Some;
 import com.meti.iterate.Iterators;
 import com.meti.java.JavaList;
 import com.meti.java.JavaMap;
+import com.meti.java.List;
 import com.meti.java.String_;
 
 import static com.meti.core.Options.$Option;
@@ -21,8 +22,10 @@ public record StaticTransformer(Node root) implements Transformer {
             if (!root.is(fromSlice("class"))) return Options.$$();
 
             var name = root.applyOptionally(fromSlice("name")).$().asString().$();
-            var body = root.applyOptionally(fromSlice("body")).$().asNode().$();
-            var lines = body.applyOptionally(fromSlice("lines")).$().asListOfNodes().$();
+            Attribute attribute = root.applyOptionally(fromSlice("body")).$();
+            var body = attribute.asNode().map(value -> value.b()).$();
+            Attribute attribute1 = body.applyOptionally(fromSlice("lines")).$();
+            var lines = attribute1.asListOfNodes().<List<? extends Node>>map(value -> value.b()).$();
             var newLines = lines.iter()
                     .map(line -> {
                         if (line.is(fromSlice("method"))) {
@@ -36,8 +39,8 @@ public record StaticTransformer(Node root) implements Transformer {
 
             var map = JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name.append("s")))
-                    .insert(fromSlice("body"), new NodeAttribute(new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                            .insert(fromSlice("lines"), new NodeListAttribute(newLines)))));
+                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                            .insert(fromSlice("lines"), new NodeListAttribute(name, newLines)))));
             return new MapNode(fromSlice("object"), map);
         });
     }

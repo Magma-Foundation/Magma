@@ -25,24 +25,24 @@ public record ClassTransformer(Node root) implements Transformer {
             }
 
             var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
-            var body = root.applyOptionally(fromSlice("body")).flatMap(Attribute::asNode).$();
+            var body = root.applyOptionally(fromSlice("body")).flatMap(attribute -> attribute.asNode().map(value -> value.b())).$();
             if (!body.is(fromSlice("block"))) {
                 return $$();
             }
 
             var cache = body.applyOptionally(fromSlice("lines"))
-                    .flatMap(Attribute::asListOfNodes)
+                    .flatMap(attribute -> attribute.asListOfNodes().map(value -> value.b()))
                     .unwrapOrElse(JavaList.empty())
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
             Set<String_> keywords1 = JavaSet.of(fromSlice("class"));
             Node body1 = new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("lines"), new NodeListAttribute(cache.body)));
+                    .insert(fromSlice("lines"), new NodeListAttribute(name, cache.body)));
             return new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords1))
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("parameters"), new NodeListAttribute(cache.parameters))
-                    .insert(fromSlice("body"), new NodeAttribute(body1)));
+                    .insert(fromSlice("parameters"), new NodeListAttribute(name, cache.parameters))
+                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), body1)));
         });
     }
 

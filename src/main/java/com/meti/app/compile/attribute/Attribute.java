@@ -3,6 +3,7 @@ package com.meti.app.compile.attribute;
 import com.meti.app.compile.Node;
 import com.meti.core.None;
 import com.meti.core.Option;
+import com.meti.core.Tuple;
 import com.meti.java.List;
 import com.meti.java.Set;
 import com.meti.java.String_;
@@ -14,11 +15,11 @@ public interface Attribute {
         return None.apply();
     }
 
-    default Option<List<? extends Node>> asListOfNodes() {
+    default Option<Tuple<String_, List<? extends Node>>> asListOfNodes() {
         return None.apply();
     }
 
-    default Option<Node> asNode() {
+    default Option<Tuple<String_, Node>> asNode() {
         return None.apply();
     }
 

@@ -46,9 +46,9 @@ public record MethodLexer(String_ line) implements Lexer {
             return Ok.apply(new MapNode(fromSlice("method"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("parameters"), new NodeListAttribute(parameters))
-                    .insert(fromSlice("body"), new NodeAttribute(node))
-                    .insert(fromSlice("returns"), new NodeAttribute(new Content(type)))));
+                    .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))
+                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), node))
+                    .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(type)))));
         });
     }
 }

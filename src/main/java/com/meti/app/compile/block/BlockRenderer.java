@@ -28,7 +28,7 @@ public record BlockRenderer(Node block) implements Renderer {
     @Override
     public Option<Result<String_, CompileException>> render() {
         return block.applyOptionally(fromSlice("lines"))
-                .flatMap(Attribute::asListOfNodes)
+                .flatMap(attribute -> attribute.asListOfNodes().map(value -> value.b()))
                 .map(this::renderContent)
                 .map(Ok::apply);
     }
