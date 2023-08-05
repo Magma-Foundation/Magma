@@ -16,7 +16,7 @@ import static com.meti.java.JavaString.fromSlice;
 public record ImplementationRenderer(Node root) implements Renderer {
     @Override
     public Option<Result<String_, CompileException>> render() {
-        if (root.is(fromSlice("implementation"))) {
+        if (root.is(fromSlice("implementation")) || root.is(fromSlice("abstraction"))) {
             return Some.apply(renderValid());
         } else {
             return None.apply();
@@ -45,19 +45,27 @@ public record ImplementationRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            var node1 = root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(Tuple::b)).$();
-            var body = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
             var returns = root.applyOptionally(fromSlice("returns")).flatMap(attribute -> attribute.asNode().map(Tuple::b))
                     .flatMap(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);
 
-            return renderedKeywords.append("def ")
-                    .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
-                    .appendOwned(joinedParameters).append(") ")
-                    .appendOwned(returns)
-                    .append("=> ")
-                    .appendOwned(body);
+            return root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(Tuple::b))
+                    .map(node1 -> {
+                        var body = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
+                        return renderedKeywords.append("def ")
+                                .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
+                                .appendOwned(joinedParameters).append(") ")
+                                .appendOwned(returns)
+                                .append("=> ")
+                                .appendOwned(body);
+                    })
+                    .unwrapOrElseGet(() -> {
+                        return renderedKeywords.append("def ")
+                                .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
+                                .appendOwned(joinedParameters).append(") ")
+                                .appendOwned(returns);
+                    });
         });
     }
 }
