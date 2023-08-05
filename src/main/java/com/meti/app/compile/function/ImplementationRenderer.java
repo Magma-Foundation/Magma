@@ -47,7 +47,8 @@ public record ImplementationRenderer(Node root) implements Renderer {
 
             var returns = root.applyOptionally(fromSlice("returns")).flatMap(attribute -> attribute.asNode().map(Tuple::b))
                     .flatMap(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
-                    .map(value -> fromSlice(": ").appendOwned(value).append(" "))
+                    .map(value -> fromSlice(": ").appendOwned(value))
+                    .map(value -> root.has(fromSlice("body")).isPresent() ? value.append(" ") : value)
                     .unwrapOrElse(Empty);
 
             return root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(Tuple::b))
@@ -60,12 +61,10 @@ public record ImplementationRenderer(Node root) implements Renderer {
                                 .append("=> ")
                                 .appendOwned(body);
                     })
-                    .unwrapOrElseGet(() -> {
-                        return renderedKeywords.append("def ")
-                                .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
-                                .appendOwned(joinedParameters).append(") ")
-                                .appendOwned(returns);
-                    });
+                    .unwrapOrElseGet(() -> renderedKeywords.append("def ")
+                            .appendOwned(root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$()).append("(")
+                            .appendOwned(joinedParameters).append(") ")
+                            .appendOwned(returns));
         });
     }
 }

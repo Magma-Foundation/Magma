@@ -30,7 +30,7 @@ public record MethodLexer(String_ line) implements Lexer {
             var keywords = keys.sliceWithoutLast().iter().collect(JavaSet.fromSet());
 
             var type = keys.last();
-            var name = args.last();
+            var name = args.last().strip();
 
             var paramString = this.line().sliceBetween(paramStart.nextExclusive().$().to(paramEnd).$());
             var parameters = paramString.split(",")
@@ -49,13 +49,11 @@ public record MethodLexer(String_ line) implements Lexer {
                         .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))
                         .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), node))
                         .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), type)))));
-            }).unwrapOrElseGet(() -> {
-                return Ok.apply(new MapNode(fromSlice("abstraction"), JavaMap.<String_, Attribute>empty()
-                        .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
-                        .insert(fromSlice("name"), new StringAttribute(name))
-                        .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))
-                        .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), type)))));
-            });
+            }).unwrapOrElseGet(() -> Ok.apply(new MapNode(fromSlice("abstraction"), JavaMap.<String_, Attribute>empty()
+                    .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
+                    .insert(fromSlice("name"), new StringAttribute(name))
+                    .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))
+                    .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), type))))));
         });
     }
 }
