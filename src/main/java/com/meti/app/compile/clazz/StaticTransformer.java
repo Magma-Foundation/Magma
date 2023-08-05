@@ -25,7 +25,7 @@ public record StaticTransformer(Node root) implements Transformer {
             var finalCache = lines.iter().foldLeft(new Cache(), (cache, element) -> {
                 var key1 = element.has(fromSlice("keywords"));
                 return key1.map(key -> {
-                    if (element.is(fromSlice("method")) && element.apply(key)
+                    if (element.is(fromSlice("implementation")) && element.apply(key)
                             .asSetOfStrings()
                             .unwrapOrElse(JavaSet.empty())
                             .has(fromSlice("static"))) {
