@@ -18,7 +18,7 @@ public final class LexingStage extends Stage<Tuple<String_, String_>, Node> {
 
         return new JavaLexer(input.a(), input.b())
                 .lex()
-                .unwrapOrElse(Err.apply(new CompileException("Invalid input.")));
+                .unwrapOrElse(Err.apply(new CompileException("Invalid input: " + input.b().unwrap())));
     }
 
     @Override
