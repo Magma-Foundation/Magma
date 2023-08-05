@@ -1,6 +1,8 @@
 package com.meti.app.compile;
 
 import com.meti.app.compile.attribute.Attribute;
+import com.meti.app.compile.attribute.NodeAttribute;
+import com.meti.app.compile.attribute.StringAttribute;
 import com.meti.core.Option;
 import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
@@ -9,6 +11,10 @@ import com.meti.java.*;
 public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
         this(name, JavaMap.empty());
+    }
+
+    public static Builder create(String_ name) {
+        return new Builder(name);
     }
 
     @Override
@@ -55,5 +61,23 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
     @Override
     public String_ getType() {
         throw new UnsupportedOperationException();
+    }
+
+    public record Builder(String_ name, Map<String_, Attribute> attributes) {
+        public Builder(String_ name) {
+            this(name, JavaMap.empty());
+        }
+
+        public Builder withString(String_ name, String_ value) {
+            return new Builder(this.name, attributes.insert(name, new StringAttribute(value)));
+        }
+
+        public Builder withNode(String_ name, String_ type, Node value) {
+            return new Builder(this.name, attributes.insert(name, new NodeAttribute(type, value)));
+        }
+
+        public Node complete() {
+            return new MapNode(this.name, this.attributes);
+        }
     }
 }
