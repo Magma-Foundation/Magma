@@ -5,9 +5,21 @@ import com.meti.core.Option;
 import com.meti.core.Some;
 
 public record Index(int value, int length) {
+    public static Index startOf(Range value) {
+        return new Index(value.start, value.length);
+    }
+
+    public static Option<Index> endOf(Range range) {
+        if (range.end >= range.length) {
+            return None.apply();
+        } else {
+            return Some.apply(new Index(range.end, range.length));
+        }
+    }
+
     public Option<Range> to(Index other) {
         if (value <= other.value) {
-            return Some.apply(new Range(value, other.value));
+            return Some.apply(new Range(value, other.value, length));
         } else {
             return None.apply();
         }

@@ -20,7 +20,7 @@ public interface String_ {
 
     String_ appendOwned(String_ child);
 
-    Option<Index> firstIndexOfSlice(java.lang.String slice);
+    Option<Range> firstIndexOfSlice(java.lang.String slice);
 
     String_ sliceBetween(Range range);
 
@@ -29,8 +29,6 @@ public interface String_ {
     Iterator<String_> split(String regex);
 
     String_ prepend(String prefix);
-
-    int compareTo(String_ other);
 
     boolean equalsTo(String_ other);
 

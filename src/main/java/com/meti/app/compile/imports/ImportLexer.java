@@ -26,14 +26,14 @@ public record ImportLexer(String_ input) implements Lexer {
     }
 
     private Option<Node> lex1() {
-        return input.firstIndexOfSlice("import ")
+        return input.firstIndexOfSlice("import ").map(Index::startOf)
                 .flatMap(index -> index.nextExclusive("import ".length()))
                 .map(input::sliceFrom)
                 .map(this::lexValid);
     }
 
     private Node lexValid(String_ withoutPrefix) {
-        var withoutStatic = withoutPrefix.firstIndexOfSlice("static ")
+        var withoutStatic = withoutPrefix.firstIndexOfSlice("static ").map(Index::startOf)
                 .flatMap(staticIndex -> staticIndex.nextExclusive("static ".length()))
                 .map(withoutPrefix::sliceFrom).unwrapOrElse(withoutPrefix);
 

@@ -7,6 +7,7 @@ import com.meti.app.compile.attribute.StringAttribute;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.iterate.Index;
 import com.meti.java.JavaMap;
 import com.meti.java.String_;
 
@@ -18,8 +19,7 @@ public record ClassLexer(String_ type, String_ input) implements Lexer {
     @Override
     public Option<Result<Node, CompileException>> lex() {
         return $Option(() -> {
-            var classIndex = input
-                    .firstIndexOfSlice("class ").$()
+            var classIndex = input.firstIndexOfSlice("class ").map(Index::startOf).$()
                     .nextExclusive("class ".length()).$();
 
             var contentStart = input.firstIndexOfChar('{').$();

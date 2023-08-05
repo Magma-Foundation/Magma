@@ -5,6 +5,7 @@ import com.meti.app.compile.clazz.ObjectRenderer;
 import com.meti.app.compile.declare.DeclarationRenderer;
 import com.meti.app.compile.function.ImplementationRenderer;
 import com.meti.app.compile.imports.ImportRenderer;
+import com.meti.app.compile.trait.TraitRenderer;
 import com.meti.core.Option;
 import com.meti.core.Result;
 import com.meti.iterate.Iterators;
@@ -17,6 +18,7 @@ public record MagmaRenderer(Node node) implements Renderer {
     @Override
     public Option<Result<String_, CompileException>> render() {
         Set<? extends Renderer> renderers = of(
+                new TraitRenderer(node),
                 new ObjectRenderer(node()),
                 new BlockRenderer(node()),
                 new DeclarationRenderer(node()),

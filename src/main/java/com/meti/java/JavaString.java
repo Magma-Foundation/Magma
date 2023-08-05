@@ -98,10 +98,13 @@ public final class JavaString implements String_ {
     }
 
     @Override
-    public Option<Index> firstIndexOfSlice(java.lang.String slice) {
+    public Option<Range> firstIndexOfSlice(String slice) {
         var index = this.value.indexOf(slice);
-        if (index == -1) return None.apply();
-        return Some.apply(createIndex(index));
+        if (index == -1) {
+            return None.apply();
+        } else {
+            return Some.apply(new Range(index, index + slice.length(), this.value.length()));
+        }
     }
 
     private Index createIndex(int index) {
@@ -110,7 +113,7 @@ public final class JavaString implements String_ {
 
     @Override
     public String_ sliceBetween(Range range) {
-        return fromSlice(this.value.substring(range.start, range.to));
+        return fromSlice(this.value.substring(range.start, range.end));
     }
 
     @Override
@@ -132,11 +135,6 @@ public final class JavaString implements String_ {
     @Override
     public String_ prepend(String prefix) {
         return new JavaString(prefix + this.value);
-    }
-
-    @Override
-    public int compareTo(String_ other) {
-        return this.value.compareTo(other.unwrap());
     }
 
     @Override
