@@ -11,7 +11,7 @@ class LexingStageTest {
     void process() throws CompileException {
         var actual = new LexingStage()
                 .perform(new Tuple<>(fromSlice("statement"), fromSlice("void test(){}"))).$();
-        assertEquals("{name: 'method', attributes: {keywords: [], name: 'test', returns: 'Void', parameters: [], body: {name: 'block', attributes: {lines: []}}}}",
+        assertEquals("{name: 'implementation', attributes: {keywords: [], name: 'test', returns: 'Void', parameters: [], body: {name: 'block', attributes: {lines: []}}}}",
                 actual.toString());
     }
 }
