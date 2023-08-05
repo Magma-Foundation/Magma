@@ -14,6 +14,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return other.map(otherValue -> new Tuple<>(this.value, otherValue));
+    }
+
+    @Override
     public Option<T> or(Option<T> other) {
         return this;
     }

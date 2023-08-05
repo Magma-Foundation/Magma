@@ -27,4 +27,6 @@ public interface Option<T> {
     Option<T> or(Option<T> other);
 
     <R> Option<R> replace(R other);
+
+    <R> Option<Tuple<T, R>> and(Option<R> other);
 }

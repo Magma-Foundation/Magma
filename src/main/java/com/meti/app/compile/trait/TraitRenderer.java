@@ -3,6 +3,7 @@ package com.meti.app.compile.trait;
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.Renderer;
+import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.Ok;
 import com.meti.core.Option;
 import com.meti.core.Result;
@@ -24,9 +25,14 @@ public record TraitRenderer(Node value) implements Renderer {
                     .applyOptionally(fromSlice("value")).$()
                     .asString().$();
 
+            var genericSlice = value.applyOptionally(fromSlice("generic"))
+                    .flatMap(Attribute::asString)
+                    .map(value -> value.prepend("<").append(">"))
+                    .unwrapOrElse(fromSlice(" "));
+
             return Ok.apply(fromSlice("trait ")
                     .appendOwned(name)
-                    .append(" ")
+                    .appendOwned(genericSlice)
                     .appendOwned(body));
         });
     }

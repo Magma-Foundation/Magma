@@ -19,16 +19,26 @@ public record InterfaceLexer(String_ value) implements Lexer {
             var nameStart = Index.endOf(range).$();
 
             var genericsStart = value.firstIndexOfChar('<');
+            var genericsEnd = value.firstIndexOfChar('>');
+            var generics = genericsStart.flatMap(Index::nextExclusive).and(genericsEnd)
+                    .flatMap(value -> value.a().to(value.b()))
+                    .map(value::sliceBetween);
+
             var bodyStart = value.firstIndexOfChar('{').$();
 
             var name = value.sliceBetween(nameStart.to(genericsStart.unwrapOrElse(bodyStart)).$())
                     .strip();
 
             var body = value.sliceFrom(bodyStart);
-            return Ok.apply(MapNode.create(fromSlice("interface"))
+            var builder = MapNode.create(fromSlice("interface"))
                     .withString(fromSlice("name"), name)
-                    .withNode(fromSlice("body"), fromSlice("block"), Content.ofContent(body))
-                    .complete());
+                    .withNode(fromSlice("body"), fromSlice("block"), Content.ofContent(body));
+
+            var withGenerics = generics
+                    .map(genericString -> builder.withString(fromSlice("generic"), genericString))
+                    .unwrapOrElse(builder);
+
+            return Ok.apply(withGenerics.complete());
         });
     }
 }

@@ -17,6 +17,11 @@ public class None<T> implements Option<T> {
     }
 
     @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return None.apply();
+    }
+
+    @Override
     public T $() throws IntentionalException {
         throw new IntentionalException();
     }
