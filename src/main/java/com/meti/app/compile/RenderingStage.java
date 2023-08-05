@@ -5,6 +5,8 @@ import com.meti.core.Ok;
 import com.meti.core.Result;
 import com.meti.java.String_;
 
+import static com.meti.java.JavaString.fromSlice;
+
 public class RenderingStage extends Stage<Node, String_> {
 
     private static Result<String_, CompileException> createOnNoOutputError(Node output) {
@@ -32,6 +34,6 @@ public class RenderingStage extends Stage<Node, String_> {
 
     @Override
     protected Node fromOutput(String_ value) {
-        return new Content(value);
+        return new Content(fromSlice(""), value);
     }
 }

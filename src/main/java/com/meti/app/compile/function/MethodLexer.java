@@ -36,19 +36,19 @@ public record MethodLexer(String_ line) implements Lexer {
             var parameters = paramString.split(",")
                     .map(String_::strip)
                     .filter(value -> !value.isEmpty())
-                    .map(Content::new)
+                    .map(value1 -> new Content(fromSlice(""), value1))
                     .collect(JavaList.intoList());
 
             var bodyStart = this.line().firstIndexOfChar('{').$();
             var body = this.line().sliceFrom(bodyStart);
-            var node = new Content(body);
+            var node = new Content(fromSlice(""), body);
 
             return Ok.apply(new MapNode(fromSlice("method"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
                     .insert(fromSlice("name"), new StringAttribute(name))
                     .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))
                     .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), node))
-                    .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(type)))));
+                    .insert(fromSlice("returns"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), type)))));
         });
     }
 }

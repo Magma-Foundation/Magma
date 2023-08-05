@@ -4,6 +4,7 @@ import com.meti.app.compile.clazz.ClassTransformer;
 import com.meti.app.compile.clazz.StaticTransformer;
 import com.meti.app.compile.clazz.Transformer;
 import com.meti.core.Result;
+import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
 import com.meti.iterate.Iterators;
 import com.meti.iterate.ResultIterator;
@@ -27,7 +28,7 @@ public record Compiler(String_ input) {
             if (line.isEmpty()) {
                 return Empty;
             } else {
-                var transformed = new LexingStage().perform(line).$();
+                var transformed = new LexingStage().perform(new Tuple<>(fromSlice("node"), line)).$();
                 while (true) {
                     Iterator<? extends Transformer> transformers = Iterators.of(
                             new StaticTransformer(transformed),

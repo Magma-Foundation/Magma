@@ -56,4 +56,9 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
                 .map(Tuple::a)
                 .map(ImmutableKey::new);
     }
+
+    @Override
+    public String_ getType() {
+        throw new UnsupportedOperationException();
+    }
 }

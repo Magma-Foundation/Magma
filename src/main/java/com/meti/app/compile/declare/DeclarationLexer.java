@@ -31,10 +31,10 @@ public record DeclarationLexer(String_ line) implements Lexer {
             var type = list.last();
 
             return $Result(CompileException.class, () -> {
-                var map = new Resolver(type).resolve().$();
+                var map = new Content(fromSlice(""), type);
                 return new MapNode(fromSlice("declaration"), JavaMap.<String_, Attribute>empty()
                         .insert(fromSlice("name"), new StringAttribute(name))
-                        .insert(fromSlice("type"), new NodeAttribute(fromSlice("any"), new Content(map))));
+                        .insert(fromSlice("type"), new NodeAttribute(fromSlice("any"), map)));
             });
         }));
     }

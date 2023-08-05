@@ -13,7 +13,7 @@ import com.meti.java.JavaList;
 import com.meti.java.List;
 import com.meti.java.String_;
 
-public record JavaLexer(String_ line) implements Lexer {
+public record JavaLexer(String_ type, String_ value) implements Lexer {
     @Override
     public Option<Result<Node, CompileException>> lex() {
         return listLexers()
@@ -26,10 +26,11 @@ public record JavaLexer(String_ line) implements Lexer {
 
     private List<Lexer> listLexers() {
         return JavaList.of(
-                new ClassLexer(line),
-                new BlockLexer(line),
-                new MethodLexer(line),
-                new DeclarationLexer(line),
-                new ImportLexer(line));
+                new ClassLexer(type, value),
+                new BlockLexer(value),
+                new MethodLexer(value),
+                new DeclarationLexer(value),
+                new ImportLexer(value),
+                new Resolver(value));
     }
 }

@@ -19,6 +19,8 @@ public interface Node {
 
     Option<Attribute> applyOptionally(String_ key);
 
+    String_ getType();
+
     enum Group {
         NodeSet,
         NodeList,

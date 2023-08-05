@@ -30,7 +30,7 @@ public record BlockLexer(String_ line) implements Lexer {
             var map = new Splitter(content).split()
                     .map(String_::strip)
                     .filter(value -> !value.isEmpty())
-                    .map(Content::new)
+                    .map(value1 -> new Content(fromSlice(""), value1))
                     .collect(JavaList.intoList());
             return new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("lines"), new NodeListAttribute(JavaString.fromSlice("any"), map)));

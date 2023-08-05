@@ -4,18 +4,21 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.Err;
 import com.meti.core.Ok;
 import com.meti.core.Result;
+import com.meti.core.Tuple;
 import com.meti.java.String_;
 
 import static com.meti.java.JavaString.fromSlice;
 
-public final class LexingStage extends Stage<String_, Node> {
+public final class LexingStage extends Stage<Tuple<String_, String_>, Node> {
     @Override
-    protected Result<Node, CompileException> before(String_ input) {
-        if (input.isEmpty()) {
+    protected Result<Node, CompileException> before(Tuple<String_, String_> input) {
+        if (input.b().isEmpty()) {
             return Err.apply(new CompileException("Input cannot be empty."));
         }
 
-        return new JavaLexer(input).lex().unwrapOrElse(Ok.apply(new Content(input)));
+        return new JavaLexer(input.a(), input.b())
+                .lex()
+                .unwrapOrElse(Err.apply(new CompileException("Invalid input.")));
     }
 
     @Override
@@ -24,10 +27,12 @@ public final class LexingStage extends Stage<String_, Node> {
     }
 
     @Override
-    protected Result<String_, CompileException> toInput(Node node) {
+    protected Result<Tuple<String_, String_>, CompileException> toInput(Node node) {
+        var type = node.getType();
         return node.applyOptionally(fromSlice("value"))
                 .flatMap(Attribute::asString)
-                .map(Ok::<String_, CompileException>apply)
+                .map(value -> new Tuple<>(type, value))
+                .map(Ok::<Tuple<String_, String_>, CompileException>apply)
                 .unwrapOrElseGet(() -> Err.apply(new CompileException("No value present on content.")));
     }
 

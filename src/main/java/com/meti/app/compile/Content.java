@@ -13,9 +13,9 @@ import com.meti.java.String_;
 
 import static com.meti.java.JavaString.fromSlice;
 
-public record Content(String_ value) implements Node {
+public record Content(String_ type, String_ value) implements Node {
     public static Node ofContent(String_ input) {
-        return new Content(input);
+        return new Content(fromSlice(""), input);
     }
 
     @Override
@@ -40,7 +40,7 @@ public record Content(String_ value) implements Node {
 
     @Override
     public Node with(Key<String_> key, Attribute attribute) {
-        return new Content(attribute.asString().unwrapOrElse(fromSlice("")));
+        return new Content(fromSlice(""), attribute.asString().unwrapOrElse(fromSlice("")));
     }
 
     @Override
@@ -53,5 +53,10 @@ public record Content(String_ value) implements Node {
         return key.equalsTo(fromSlice("value"))
                 ? Some.apply(new StringAttribute(value))
                 : None.apply();
+    }
+
+    @Override
+    public String_ getType() {
+        return type;
     }
 }
