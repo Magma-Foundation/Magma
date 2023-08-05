@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.feature;
 
 import com.meti.app.compile.CompileException;
 import com.meti.app.compile.Compiler;

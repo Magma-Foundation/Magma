@@ -1,4 +1,4 @@
-package com.meti.app;
+package com.meti.app.feature;
 
 import org.junit.jupiter.api.Test;
 
