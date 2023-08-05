@@ -1,6 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.app.compile.clazz.ClassTransformer;
+import com.meti.app.compile.clazz.RecordTransformer;
 import com.meti.app.compile.clazz.StaticTransformer;
 import com.meti.app.compile.clazz.Transformer;
 import com.meti.core.Result;
@@ -31,6 +32,7 @@ public record Compiler(String_ input) {
                 var transformed = new LexingStage().perform(new Tuple<>(fromSlice("node"), line)).$();
                 while (true) {
                     Iterator<? extends Transformer> transformers = Iterators.of(
+                            new RecordTransformer(transformed),
                             new StaticTransformer(transformed),
                             new ClassTransformer(transformed));
 

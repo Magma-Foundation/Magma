@@ -2,6 +2,7 @@ package com.meti.app.compile;
 
 import com.meti.app.compile.block.BlockLexer;
 import com.meti.app.compile.clazz.ClassLexer;
+import com.meti.app.compile.clazz.RecordLexer;
 import com.meti.app.compile.declare.DeclarationLexer;
 import com.meti.app.compile.function.MethodLexer;
 import com.meti.app.compile.imports.ImportLexer;
@@ -27,6 +28,7 @@ public record JavaLexer(String_ type, String_ value) implements Lexer {
 
     private List<Lexer> listLexers() {
         return JavaList.of(
+                new RecordLexer(value),
                 new InterfaceLexer(value),
                 new ClassLexer(type, value),
                 new BlockLexer(value),

@@ -6,6 +6,8 @@ import com.meti.app.compile.Renderer;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.*;
 import com.meti.iterate.Iterators;
+import com.meti.java.JavaList;
+import com.meti.java.JavaSet;
 import com.meti.java.JavaString;
 import com.meti.java.String_;
 
@@ -33,14 +35,17 @@ public record ImplementationRenderer(Node root) implements Renderer {
         return $Option(() -> {
             var joinedParameters = root.applyOptionally(fromSlice("parameters"))
                     .flatMap(attribute2 -> attribute2.asListOfNodes().map(Tuple::b))
-                    .$()
+                    .unwrapOrElse(JavaList.empty())
                     .iter()
                     .map(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))
                     .unwrapOrElse(Empty);
 
-            var renderedKeywords = root.applyOptionally(fromSlice("keywords")).flatMap(Attribute::asSetOfStrings).$().iter()
+            var renderedKeywords = root.applyOptionally(fromSlice("keywords"))
+                    .flatMap(Attribute::asSetOfStrings)
+                    .unwrapOrElse(JavaSet.empty())
+                    .iter()
                     .map(value -> value.append(" "))
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
