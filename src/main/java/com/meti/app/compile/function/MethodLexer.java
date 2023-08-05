@@ -43,7 +43,7 @@ public record MethodLexer(String_ line) implements Lexer {
             var body = this.line().sliceFrom(bodyStart);
             var node = new Content(fromSlice(""), body);
 
-            return Ok.apply(new MapNode(fromSlice("method"), JavaMap.<String_, Attribute>empty()
+            return Ok.apply(new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords))
                     .insert(fromSlice("name"), new StringAttribute(name))
                     .insert(fromSlice("parameters"), new NodeListAttribute(JavaString.fromSlice("any"), parameters))

@@ -11,13 +11,13 @@ public interface Node {
 
     boolean is(String_ name);
 
-    Option<Node> withOptionally(String_ key, Attribute attribute);
-
     Node with(Key<String_> key, Attribute attribute);
 
     Attribute apply(Key<String_> key);
 
     Option<Attribute> applyOptionally(String_ key);
+
+    Option<Key<String_>> has(String_ key);
 
     String_ getType();
 

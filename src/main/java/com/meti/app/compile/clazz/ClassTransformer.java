@@ -4,6 +4,7 @@ import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.attribute.*;
 import com.meti.core.Option;
+import com.meti.core.Tuple;
 import com.meti.java.*;
 
 import static com.meti.core.Options.$$;
@@ -25,19 +26,21 @@ public record ClassTransformer(Node root) implements Transformer {
             }
 
             var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
-            var body = root.applyOptionally(fromSlice("body")).flatMap(attribute -> attribute.asNode().map(value -> value.b())).$();
+            var body = root.applyOptionally(fromSlice("body")).flatMap(attribute -> attribute.asNode().map(Tuple::b)).$();
             if (!body.is(fromSlice("block"))) {
                 return $$();
             }
 
             var cache = body.applyOptionally(fromSlice("lines"))
-                    .flatMap(attribute -> attribute.asListOfNodes().map(value -> value.b()))
+                    .flatMap(attribute -> attribute.asListOfNodes().map(Tuple::b))
                     .unwrapOrElse(JavaList.empty())
                     .iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
-            Set<String_> keywords1 = JavaSet.of(fromSlice("class"));
-            Node body1 = new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+
+            var keywords1 = JavaSet.of(fromSlice("class"));
+            var body1 = new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("lines"), new NodeListAttribute(name, cache.body)));
+
             return new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(keywords1))
                     .insert(fromSlice("name"), new StringAttribute(name))

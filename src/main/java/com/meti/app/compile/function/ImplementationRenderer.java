@@ -13,10 +13,10 @@ import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.Empty;
 import static com.meti.java.JavaString.fromSlice;
 
-public record FunctionRenderer(Node root) implements Renderer {
+public record ImplementationRenderer(Node root) implements Renderer {
     @Override
     public Option<Result<String_, CompileException>> render() {
-        if (root.is(fromSlice("method"))) {
+        if (root.is(fromSlice("implementation"))) {
             return Some.apply(renderValid());
         } else {
             return None.apply();
@@ -31,7 +31,10 @@ public record FunctionRenderer(Node root) implements Renderer {
 
     private Option<String_> renderWithinOption() {
         return $Option(() -> {
-            var joinedParameters = root.applyOptionally(fromSlice("parameters")).flatMap(attribute2 -> attribute2.asListOfNodes().map(value -> value.b())).$().iter()
+            var joinedParameters = root.applyOptionally(fromSlice("parameters"))
+                    .flatMap(attribute2 -> attribute2.asListOfNodes().map(Tuple::b))
+                    .$()
+                    .iter()
                     .map(node2 -> node2.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .flatMap(Iterators::fromOption)
                     .collect(JavaString.joining(fromSlice(", ")))
@@ -42,9 +45,9 @@ public record FunctionRenderer(Node root) implements Renderer {
                     .collect(JavaString.joiningEmpty())
                     .unwrapOrElse(Empty);
 
-            var node1 = root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(value -> value.b())).$();
+            var node1 = root.applyOptionally(fromSlice("body")).flatMap(attribute1 -> attribute1.asNode().map(Tuple::b)).$();
             var body = node1.applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
-            var returns = root.applyOptionally(fromSlice("returns")).flatMap(attribute -> attribute.asNode().map(value -> value.b()))
+            var returns = root.applyOptionally(fromSlice("returns")).flatMap(attribute -> attribute.asNode().map(Tuple::b))
                     .flatMap(node -> node.applyOptionally(fromSlice("value")).flatMap(Attribute::asString))
                     .map(value -> fromSlice(": ").appendOwned(value).append(" "))
                     .unwrapOrElse(Empty);

@@ -4,14 +4,10 @@ import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
 import com.meti.app.compile.attribute.*;
 import com.meti.core.Option;
-import com.meti.core.Options;
-import com.meti.core.Some;
-import com.meti.iterate.Iterators;
-import com.meti.java.JavaList;
-import com.meti.java.JavaMap;
-import com.meti.java.List;
-import com.meti.java.String_;
+import com.meti.core.Tuple;
+import com.meti.java.*;
 
+import static com.meti.core.Options.$$;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
@@ -19,29 +15,55 @@ public record StaticTransformer(Node root) implements Transformer {
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
-            if (!root.is(fromSlice("class"))) return Options.$$();
+            if (!root.is(fromSlice("class"))) return $$();
 
             var name = root.applyOptionally(fromSlice("name")).$().asString().$();
-            Attribute attribute = root.applyOptionally(fromSlice("body")).$();
-            var body = attribute.asNode().map(value -> value.b()).$();
-            Attribute attribute1 = body.applyOptionally(fromSlice("lines")).$();
-            var lines = attribute1.asListOfNodes().<List<? extends Node>>map(value -> value.b()).$();
-            var newLines = lines.iter()
-                    .map(line -> {
-                        if (line.is(fromSlice("method"))) {
-                            return line.withOptionally(fromSlice("keywords"), new StringSetAttribute());
-                        } else {
-                            return Some.apply(line);
-                        }
-                    })
-                    .flatMap(Iterators::fromOption)
-                    .collect(JavaList.intoList());
+            var attribute = root.applyOptionally(fromSlice("body")).$();
+            var body = attribute.asNode().map(Tuple::b).$();
+            var attribute1 = body.applyOptionally(fromSlice("lines")).$();
+            var lines = attribute1.asListOfNodes().<List<? extends Node>>map(Tuple::b).$();
+            var finalCache = lines.iter().foldLeft(new Cache(), (cache, element) -> {
+                var key1 = element.has(fromSlice("keywords"));
+                return key1.map(key -> {
+                    if (element.is(fromSlice("method")) && element.apply(key)
+                            .asSetOfStrings()
+                            .unwrapOrElse(JavaSet.empty())
+                            .has(fromSlice("static"))) {
 
-            var map = JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("name"), new StringAttribute(name.append("s")))
-                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                            .insert(fromSlice("lines"), new NodeListAttribute(name, newLines)))));
-            return new MapNode(fromSlice("object"), map);
+                        return cache.withStatic(element.with(key, new StringSetAttribute()));
+                    } else {
+                        return cache.withInstance(element);
+                    }
+                }).unwrapOrElse(cache);
+            });
+
+            if (finalCache.hasAnyStaticValues()) {
+                var map = JavaMap.<String_, Attribute>empty()
+                        .insert(fromSlice("name"), new StringAttribute(name.append("s")))
+                        .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                                .insert(fromSlice("lines"), new NodeListAttribute(name, finalCache.staticNodes)))));
+                return new MapNode(fromSlice("object"), map);
+            } else {
+                return $$();
+            }
         });
+    }
+
+    record Cache(List<Node> staticNodes, List<Node> instanceNodes) {
+        Cache() {
+            this(JavaList.empty(), JavaList.empty());
+        }
+
+        public Cache withStatic(Node node) {
+            return new Cache(staticNodes.add(node), instanceNodes);
+        }
+
+        public Cache withInstance(Node node) {
+            return new Cache(staticNodes, instanceNodes.add(node));
+        }
+
+        public boolean hasAnyStaticValues() {
+            return !this.staticNodes.isEmpty();
+        }
     }
 }

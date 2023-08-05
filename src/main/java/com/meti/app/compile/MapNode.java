@@ -1,9 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.app.compile.attribute.Attribute;
-import com.meti.core.None;
 import com.meti.core.Option;
-import com.meti.core.Some;
 import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
@@ -18,6 +16,10 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
         return attributes.applyOptionally(key);
     }
 
+    @Override
+    public Option<Key<String_>> has(String_ key) {
+        return attributes.applyOptionally(key).replace(new ImmutableKey<>(key));
+    }
 
     @Override
     public String toString() {
@@ -25,13 +27,6 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
                "name: '" + name1.unwrap() + "', " +
                "attributes: " + attributes.toString() +
                "}";
-    }
-
-    @Override
-    public Option<Node> withOptionally(String_ key, Attribute attribute) {
-        return attributes.hasKey(key)
-                ? Some.apply(new MapNode(name1, attributes.insert(key, attribute)))
-                : None.apply();
     }
 
     @Override

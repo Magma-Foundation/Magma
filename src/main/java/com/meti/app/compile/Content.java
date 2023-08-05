@@ -34,11 +34,6 @@ public record Content(String_ type, String_ value) implements Node {
     }
 
     @Override
-    public Option<Node> withOptionally(String_ key, Attribute attribute) {
-        return key.equalsTo(fromSlice("value")) ? Some.apply(with(new ImmutableKey<>(key), attribute)) : None.apply();
-    }
-
-    @Override
     public Node with(Key<String_> key, Attribute attribute) {
         return new Content(fromSlice(""), attribute.asString().unwrapOrElse(fromSlice("")));
     }
@@ -53,6 +48,15 @@ public record Content(String_ type, String_ value) implements Node {
         return key.equalsTo(fromSlice("value"))
                 ? Some.apply(new StringAttribute(value))
                 : None.apply();
+    }
+
+    @Override
+    public Option<Key<String_>> has(String_ key) {
+        if (key.equalsTo(fromSlice("value"))) {
+            return Some.apply(new ImmutableKey<>(fromSlice("value")));
+        } else {
+            return None.apply();
+        }
     }
 
     @Override

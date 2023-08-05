@@ -3,7 +3,7 @@ package com.meti.app.compile;
 import com.meti.app.compile.block.BlockRenderer;
 import com.meti.app.compile.clazz.ObjectRenderer;
 import com.meti.app.compile.declare.DeclarationRenderer;
-import com.meti.app.compile.function.FunctionRenderer;
+import com.meti.app.compile.function.ImplementationRenderer;
 import com.meti.app.compile.imports.ImportRenderer;
 import com.meti.core.Option;
 import com.meti.core.Result;
@@ -20,7 +20,7 @@ public record MagmaRenderer(Node node) implements Renderer {
                 new ObjectRenderer(node()),
                 new BlockRenderer(node()),
                 new DeclarationRenderer(node()),
-                new FunctionRenderer(node()),
+                new ImplementationRenderer(node()),
                 new ImportRenderer(node()),
                 new ContentRenderer(node()));
 

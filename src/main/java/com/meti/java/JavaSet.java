@@ -73,6 +73,11 @@ public record JavaSet<T>(Set<T> value) implements com.meti.java.Set<T> {
     }
 
     @Override
+    public boolean has(T element) {
+        return this.value.contains(element);
+    }
+
+    @Override
     public Set<T> unwrap() {
         return value;
     }

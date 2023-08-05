@@ -13,4 +13,6 @@ public interface Set<T> {
     boolean isEmpty();
 
     java.util.Set<T> unwrap();
+
+    boolean has(T element);
 }
