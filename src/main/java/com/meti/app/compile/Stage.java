@@ -16,17 +16,17 @@ import static com.meti.java.JavaList.intoList;
 
 /**
  * This abstract class defines a stage in a compilation pipeline.
- * Each stage performs transformation from an input type 'I' to an output type 'O' while handling potential compilation errors.
+ * Each stage performs transformation from an input value 'I' to an output value 'O' while handling potential compilation errors.
  *
  * @param <I> Type of the input to this stage
  * @param <O> Type of the output from this stage
  */
 public abstract class Stage<I, O> {
     /**
-     * Takes an input of type 'I' and returns a 'Result' that either contains a Node or a 'CompileException'.
+     * Takes an input of value 'I' and returns a 'Result' that either contains a Node or a 'CompileException'.
      * This method is executed before any other operations in the 'perform' method.
      *
-     * @param input Input of type 'I'
+     * @param input Input of value 'I'
      * @return A 'Result' containing either a 'Node' or a 'CompileException'
      */
     protected abstract Result<Node, CompileException> before(I input);
@@ -37,16 +37,16 @@ public abstract class Stage<I, O> {
      * The subclasses need to provide a concrete implementation for this method.
      *
      * @param output The Node output that needs to be converted
-     * @return A 'Result' containing either an output of type 'O' or a 'CompileException'
+     * @return A 'Result' containing either an output of value 'O' or a 'CompileException'
      */
     protected abstract Result<O, CompileException> after(Node output);
 
     /**
-     * This is the main method of the class. It receives an input of type 'I' and uses it to perform the compilation stage.
+     * This is the main method of the class. It receives an input of value 'I' and uses it to perform the compilation stage.
      * It applies a series of transformations, including attaching nodes and value lists, and returns the final result.
      *
-     * @param input Input of type 'I' for the stage
-     * @return A 'Result' containing either an output of type 'O' or a 'CompileException'
+     * @param input Input of value 'I' for the stage
+     * @return A 'Result' containing either an output of value 'O' or a 'CompileException'
      */
     Result<O, CompileException> perform(I input) {
         return $Result(CompileException.class, () -> {
@@ -63,11 +63,11 @@ public abstract class Stage<I, O> {
     }
 
     /**
-     * An abstract method that converts a Node to an object of type 'I'.
+     * An abstract method that converts a Node to an object of value 'I'.
      * Subclasses need to provide a concrete implementation for this method.
      *
-     * @param node The Node that needs to be converted to an object of type 'I'
-     * @return A 'Result' containing either an object of type 'I' or a 'CompileException'
+     * @param node The Node that needs to be converted to an object of value 'I'
+     * @return A 'Result' containing either an object of value 'I' or a 'CompileException'
      */
     protected abstract Result<I, CompileException> toInput(Node node);
 
@@ -88,10 +88,10 @@ public abstract class Stage<I, O> {
     }
 
     /**
-     * An abstract method that converts an object of type 'O' to a Node.
+     * An abstract method that converts an object of value 'O' to a Node.
      * Subclasses need to provide a concrete implementation for this method.
      *
-     * @param value The object of type 'O' to be converted to a Node
+     * @param value The object of value 'O' to be converted to a Node
      * @return The converted Node
      */
     protected abstract Node fromOutput(O value);
