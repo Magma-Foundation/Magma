@@ -15,6 +15,7 @@ public record Resolver(String_ type) implements Lexer {
         return JavaMap.<String, String>empty()
                 .insert("int", "I16")
                 .insert("void", "Void")
+                .insert("boolean", "Bool")
                 .applyOptionally(type().unwrap())
                 .map(JavaString::fromSlice)
                 .map(value -> new Content(fromSlice(""), value))
