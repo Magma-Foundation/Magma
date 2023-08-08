@@ -1,5 +1,8 @@
 package com.meti.java;
 
+import com.meti.core.None;
+import com.meti.core.Option;
+import com.meti.core.Some;
 import com.meti.iterate.Collector;
 import com.meti.iterate.Index;
 import com.meti.iterate.IndexIterator;
@@ -75,6 +78,17 @@ public record JavaSet<T>(Set<T> value) implements com.meti.java.Set<T> {
     @Override
     public boolean has(T element) {
         return this.value.contains(element);
+    }
+
+    @Override
+    public Option<com.meti.java.Set<T>> remove(T element) {
+        if (value.contains(element)) {
+            var copy = new HashSet<>(value);
+            copy.remove(element);
+            return Some.apply(new JavaSet<>(copy));
+        } else {
+            return None.apply();
+        }
     }
 
     @Override
