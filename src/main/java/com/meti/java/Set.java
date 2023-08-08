@@ -1,5 +1,6 @@
 package com.meti.java;
 
+import com.meti.core.Option;
 import com.meti.iterate.Index;
 import com.meti.iterate.Iterator;
 
@@ -15,4 +16,6 @@ public interface Set<T> {
     java.util.Set<T> unwrap();
 
     boolean has(T element);
+
+    Option<Set<T>> remove(T element);
 }

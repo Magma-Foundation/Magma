@@ -2,11 +2,14 @@ package com.meti.app.compile;
 
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.NodeAttribute;
+import com.meti.app.compile.attribute.NodeListAttribute;
 import com.meti.app.compile.attribute.StringAttribute;
 import com.meti.core.Option;
 import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
+
+import java.util.function.Function;
 
 public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
@@ -78,6 +81,14 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
         public Node complete() {
             return new MapNode(this.name, this.attributes);
+        }
+
+        public Builder withNodeLists(String_ name, String_ type, List<Node> values) {
+            return new Builder(this.name, this.attributes.insert(name, new NodeListAttribute(type, values)));
+        }
+
+        public Builder withNodeListMapper(String_ name, Function<Node, Node> mapper) {
+            return new Builder(this.name, attributes.insert(name, new NodeListMapper(mapper)));
         }
     }
 }
