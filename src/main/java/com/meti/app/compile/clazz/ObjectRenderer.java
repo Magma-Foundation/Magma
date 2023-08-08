@@ -21,7 +21,7 @@ public record ObjectRenderer(Node root) implements Renderer {
 
             var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
             var body = root
-                    .applyOptionally(fromSlice("body")).flatMap(attribute -> attribute.asNode().map(value -> value.b())).$()
+                    .applyOptionally(fromSlice("statements")).flatMap(attribute -> attribute.asNode().map(value -> value.b())).$()
                     .applyOptionally(fromSlice("value")).flatMap(Attribute::asString).$();
             return fromSlice("object ")
                     .appendOwned(name)

@@ -9,6 +9,7 @@ import com.meti.iterate.Iterator;
 import com.meti.iterate.Iterators;
 import com.meti.java.ImmutableKey;
 import com.meti.java.Key;
+import com.meti.java.Map;
 import com.meti.java.String_;
 
 import static com.meti.java.JavaString.fromSlice;
@@ -62,5 +63,10 @@ public record Content(String_ type, String_ value) implements Node {
     @Override
     public String_ getType() {
         return type;
+    }
+
+    @Override
+    public Option<Map<String_, Attribute>> extract(Node format) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -2,12 +2,13 @@ package com.meti.app.compile.clazz;
 
 import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
-import com.meti.app.compile.attribute.*;
 import com.meti.core.Option;
-import com.meti.core.Tuple;
-import com.meti.java.*;
+import com.meti.java.JavaList;
+import com.meti.java.JavaSet;
+import com.meti.java.List;
 
-import static com.meti.core.Options.$$;
+import static com.meti.app.compile.MapNode.Builder;
+import static com.meti.app.compile.MapNode.create;
 import static com.meti.core.Options.$Option;
 import static com.meti.java.JavaString.fromSlice;
 
@@ -15,51 +16,54 @@ public record ClassTransformer(Node root) implements Transformer {
     private static Cache collectDeclaration(Cache cache, Node node) {
         return node.is(fromSlice("declaration"))
                 ? cache.withParameters(cache.parameters.add(node))
-                : cache.withBody(cache.body.add(node));
+                : cache.withBody(cache.statements.add(node));
     }
 
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
-            if (!root.is(fromSlice("class"))) {
-                return $$();
-            }
+            var extractor = new Extractor();
+            var nameKey = extractor.extract("name");
+            var linesKey = extractor.extract("lines");
 
-            var name = root.applyOptionally(fromSlice("name")).flatMap(Attribute::asString).$();
-            var body = root.applyOptionally(fromSlice("body")).flatMap(attribute -> attribute.asNode().map(Tuple::b)).$();
-            if (!body.is(fromSlice("block"))) {
-                return $$();
-            }
+            var node = create("class")
+                    .with(nameKey)
+                    .withNode("statements", "node", create("block").with(linesKey))
+                    .complete();
 
-            var cache = body.applyOptionally(fromSlice("lines"))
-                    .flatMap(attribute -> attribute.asListOfNodes().map(Tuple::b))
-                    .unwrapOrElse(JavaList.empty())
-                    .iter()
+            var extracted = root.extract(node).$();
+            var name = extracted.apply(nameKey.key()).asString().$();
+            var lines = extracted.apply(linesKey.key()).asListOfNodes().$();
+
+            var cache = lines.b().iter()
                     .foldLeft(new Cache(), ClassTransformer::collectDeclaration);
 
             var keywords1 = JavaSet.of(fromSlice("class"));
-            var body1 = new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("lines"), new NodeListAttribute(name, cache.body)));
+            var builder = create("implementation")
+                    .withSetOfStrings("keywords", keywords1)
+                    .withString("name", name);
 
-            return new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
-                    .insert(fromSlice("keywords"), new StringSetAttribute(keywords1))
-                    .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("parameters"), new NodeListAttribute(name, cache.parameters))
-                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), body1)));
+            return cache.attachTo(builder).complete();
         });
     }
 
-    record Cache(List<Node> parameters, List<Node> body) {
+    record Cache(List<Node> parameters, List<Node> statements) {
         Cache() {
             this(JavaList.empty(), JavaList.empty());
         }
 
         public Cache withParameters(List<Node> newParameters) {
-            return new Cache(newParameters, body);
+            return new Cache(newParameters, statements);
         }
 
         public Cache withBody(List<Node> newBody) {
             return new Cache(parameters, newBody);
+        }
+
+        public Builder attachTo(Builder builder) {
+            return builder.withListOfNodes("parameters", "parameter", parameters)
+                    .withNode("statements", "block",
+                            MapNode.create("block").withListOfNodes("lines", "statement", statements));
         }
     }
 }

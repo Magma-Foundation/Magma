@@ -28,7 +28,7 @@ public record RecordLexer(String_ value) implements Lexer {
 
             return Ok.apply(new MapNode(fromSlice("record"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("node"), Content.ofContent(body)))));
+                    .insert(fromSlice("statements"), new NodeAttribute(fromSlice("node"), Content.ofContent(body)))));
         });
     }
 }

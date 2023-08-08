@@ -20,6 +20,10 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
         this.map = map;
     }
 
+    public JavaMap() {
+        this(new HashMap<>());
+    }
+
     public static <K, V> com.meti.java.Map<K, V> empty() {
         return new JavaMap<>(new HashMap<>());
     }

@@ -29,7 +29,7 @@ public record ClassLexer(String_ type, String_ input) implements Lexer {
 
             return Ok.apply(new MapNode(fromSlice("class"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), body)))));
+                    .insert(fromSlice("statements"), new NodeAttribute(fromSlice("any"), new Content(fromSlice(""), body)))));
         });
     }
 }

@@ -1,15 +1,11 @@
 package com.meti.app.compile;
 
-import com.meti.app.compile.attribute.Attribute;
-import com.meti.app.compile.attribute.NodeAttribute;
-import com.meti.app.compile.attribute.NodeListAttribute;
-import com.meti.app.compile.attribute.StringAttribute;
+import com.meti.app.compile.attribute.*;
+import com.meti.app.compile.clazz.Extractor;
 import com.meti.core.Option;
 import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
-
-import java.util.function.Function;
 
 public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
@@ -18,6 +14,10 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
     public static Builder create(String_ name) {
         return new Builder(name);
+    }
+
+    public static Builder create(String slice) {
+        return new Builder(JavaString.fromSlice(slice));
     }
 
     @Override
@@ -66,29 +66,54 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Option<Map<String_, Attribute>> extract(Node format) {
+        throw new UnsupportedOperationException();
+    }
+
     public record Builder(String_ name, Map<String_, Attribute> attributes) {
         public Builder(String_ name) {
             this(name, JavaMap.empty());
         }
 
         public Builder withString(String_ name, String_ value) {
-            return new Builder(this.name, attributes.insert(name, new StringAttribute(value)));
+            return copy(attributes.insert(name, new StringAttribute(value)));
         }
 
         public Builder withNode(String_ name, String_ type, Node value) {
-            return new Builder(this.name, attributes.insert(name, new NodeAttribute(type, value)));
+            return copy(attributes.insert(name, new NodeAttribute(type, value)));
         }
 
         public Node complete() {
             return new MapNode(this.name, this.attributes);
         }
 
-        public Builder withNodeLists(String_ name, String_ type, List<Node> values) {
-            return new Builder(this.name, this.attributes.insert(name, new NodeListAttribute(type, values)));
+        public Builder withNode(String name, String type, Builder builder) {
+            return copy(this.attributes.insert(JavaString.fromSlice(name), new NodeAttribute(JavaString.fromSlice(type), builder.complete())));
         }
 
-        public Builder withNodeListMapper(String_ name, Function<Node, Node> mapper) {
-            return new Builder(this.name, attributes.insert(name, new NodeListMapper(mapper)));
+        public Builder with(Extractor.Extraction extraction) {
+            return copy(this.attributes.insert(extraction.name(), extraction.attribute()));
+        }
+
+        public Builder withSetOfStrings(String name, Set<String_> values) {
+            return copy(this.attributes.insert(JavaString.fromSlice(name), new StringSetAttribute(values)));
+        }
+
+        public Builder withString(String name, String_ name1) {
+            return withAttribute(name, new StringAttribute(name1));
+        }
+
+        private Builder withAttribute(String name, Attribute attribute) {
+            return copy(this.attributes.insert(JavaString.fromSlice(name), attribute));
+        }
+
+        private Builder copy(Map<String_, Attribute> attributes) {
+            return new Builder(this.name, attributes);
+        }
+
+        public Builder withListOfNodes(String name, String type, List<Node> values) {
+            return withAttribute(name, new NodeListAttribute(JavaString.fromSlice(type), values));
         }
     }
 }

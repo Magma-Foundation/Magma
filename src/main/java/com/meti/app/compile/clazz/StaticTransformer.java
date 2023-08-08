@@ -18,7 +18,7 @@ public record StaticTransformer(Node root) implements Transformer {
             if (!root.is(fromSlice("class"))) return $$();
 
             var name = root.applyOptionally(fromSlice("name")).$().asString().$();
-            var attribute = root.applyOptionally(fromSlice("body")).$();
+            var attribute = root.applyOptionally(fromSlice("statements")).$();
             var body = attribute.asNode().map(Tuple::b).$();
             var attribute1 = body.applyOptionally(fromSlice("lines")).$();
             var lines = attribute1.asListOfNodes().<List<? extends Node>>map(Tuple::b).$();
@@ -40,7 +40,7 @@ public record StaticTransformer(Node root) implements Transformer {
             if (finalCache.hasAnyStaticValues()) {
                 var map = JavaMap.<String_, Attribute>empty()
                         .insert(fromSlice("name"), new StringAttribute(name.append("s")))
-                        .insert(fromSlice("body"), new NodeAttribute(fromSlice("any"), new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
+                        .insert(fromSlice("statements"), new NodeAttribute(fromSlice("any"), new MapNode(fromSlice("block"), JavaMap.<String_, Attribute>empty()
                                 .insert(fromSlice("lines"), new NodeListAttribute(name, finalCache.staticNodes)))));
                 return new MapNode(fromSlice("object"), map);
             } else {

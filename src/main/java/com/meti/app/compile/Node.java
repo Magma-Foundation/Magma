@@ -4,10 +4,13 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.Option;
 import com.meti.iterate.Iterator;
 import com.meti.java.Key;
+import com.meti.java.Map;
 import com.meti.java.String_;
 
 public interface Node {
     Iterator<Key<String_>> ofGroup(Group group);
+
+    Option<Map<String_, Attribute>> extract(Node format);
 
     boolean is(String_ name);
 
@@ -24,6 +27,6 @@ public interface Node {
     enum Group {
         NodeSet,
         NodeList,
-        String, StringSet, Node
+        String, StringSet, Extract, Node
     }
 }

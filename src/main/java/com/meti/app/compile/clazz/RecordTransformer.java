@@ -21,12 +21,12 @@ public record RecordTransformer(Node root) implements Transformer {
             if (!root.is(fromSlice("record"))) return $$();
 
             var name = root.apply(root.has(fromSlice("name")).$()).asString().$();
-            var body = root.apply(root.has(fromSlice("body")).$());
+            var body = root.apply(root.has(fromSlice("statements")).$());
 
             return new MapNode(fromSlice("implementation"), JavaMap.<String_, Attribute>empty()
                     .insert(fromSlice("keywords"), new StringSetAttribute(JavaSet.of(fromSlice("class"))))
                     .insert(fromSlice("name"), new StringAttribute(name))
-                    .insert(fromSlice("body"), body));
+                    .insert(fromSlice("statements"), body));
         });
     }
 }
