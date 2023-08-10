@@ -1,6 +1,8 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public interface Option<T> {
@@ -29,4 +31,8 @@ public interface Option<T> {
     <R> Option<R> replace(R other);
 
     <R> Option<Tuple<T, R>> and(Option<R> other);
+
+    Option<T> filter(Predicate<T> predicate);
+
+    Option<T> peek(Consumer<T> consumer);
 }

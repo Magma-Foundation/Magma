@@ -7,10 +7,7 @@ import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.iterate.Iterator;
 import com.meti.iterate.Iterators;
-import com.meti.java.ImmutableKey;
-import com.meti.java.Key;
-import com.meti.java.Map;
-import com.meti.java.String_;
+import com.meti.java.*;
 
 import static com.meti.java.JavaString.fromSlice;
 
@@ -66,7 +63,21 @@ public record Content(String_ type, String_ value) implements Node {
     }
 
     @Override
+    public boolean equalsTo(Node other) {
+        return false;
+    }
+
+    @Override
     public Option<Map<String_, Attribute>> extract(Node format) {
-        throw new UnsupportedOperationException();
+        if (format.has(fromSlice("value")).isPresent()) {
+            return Some.apply(JavaMap.<String_, Attribute>empty().insert(fromSlice("value"), new StringAttribute(this.value)));
+        } else {
+            return None.apply();
+        }
+    }
+
+    @Override
+    public Iterator<Key<String_>> keys() {
+        return Iterators.of(new ImmutableKey<>(fromSlice("value")));
     }
 }

@@ -12,6 +12,8 @@ public interface Node {
 
     Option<Map<String_, Attribute>> extract(Node format);
 
+    Iterator<Key<String_>> keys();
+
     boolean is(String_ name);
 
     Node with(Key<String_> key, Attribute attribute);
@@ -23,6 +25,8 @@ public interface Node {
     Option<Key<String_>> has(String_ key);
 
     String_ getType();
+
+    boolean equalsTo(Node other);
 
     enum Group {
         NodeSet,

@@ -37,6 +37,13 @@ public record StringSetAttribute(Set<String_> values) implements Attribute {
         });
     }
 
+    @Override
+    public boolean equalsTo(Attribute other) {
+        return other.asSetOfStrings()
+                .map(set -> values.iter().allMatch(set::has) && set.iter().allMatch(values::has))
+                .unwrapOrElse(false);
+    }
+
     private Option<Node> asNode1() {
         return None.apply();
     }

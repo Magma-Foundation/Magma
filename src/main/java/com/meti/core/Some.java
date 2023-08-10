@@ -1,6 +1,8 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
@@ -16,6 +18,17 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public <R> Option<Tuple<T, R>> and(Option<R> other) {
         return other.map(otherValue -> new Tuple<>(this.value, otherValue));
+    }
+
+    @Override
+    public Option<T> filter(Predicate<T> predicate) {
+        return predicate.test(value) ? Some.apply(value) : None.apply();
+    }
+
+    @Override
+    public Option<T> peek(Consumer<T> consumer) {
+        consumer.accept(value);
+        return this;
     }
 
     @Override

@@ -36,7 +36,7 @@ public class Collectors {
         };
     }
 
-    public static <T, C> Collector<Option<T>, Option<C>> optionally(Collector<T, C> collector) {
+    public static <T, C> Collector<Option<T>, Option<C>> andRequireAll(Collector<T, C> collector) {
         return new Collector<>() {
             @Override
             public Option<C> initial() {

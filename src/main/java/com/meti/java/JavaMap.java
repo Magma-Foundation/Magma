@@ -4,6 +4,7 @@ import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.core.Tuple;
+import com.meti.iterate.Collector;
 import com.meti.iterate.Iterator;
 
 import java.util.ArrayList;
@@ -26,6 +27,20 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
 
     public static <K, V> com.meti.java.Map<K, V> empty() {
         return new JavaMap<>(new HashMap<>());
+    }
+
+    public static <K, V> Collector<com.meti.java.Map<K, V>, com.meti.java.Map<K, V>> toMap() {
+        return new Collector<>() {
+            @Override
+            public com.meti.java.Map<K, V> initial() {
+                return JavaMap.empty();
+            }
+
+            @Override
+            public com.meti.java.Map<K, V> foldLeft(com.meti.java.Map<K, V> accumulated, com.meti.java.Map<K, V> element) {
+                return accumulated.insertAll(element);
+            }
+        };
     }
 
     @Override
@@ -91,8 +106,18 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
     @Override
     public Iterator<Key<K>> keys() {
         return new JavaSet<>(this.map.keySet())
-                .iter()
-                .map(ImmutableKey::new);
+                .iter().map(ImmutableKey::new);
     }
 
+    @Override
+    public com.meti.java.Map<K, V> insertAll(com.meti.java.Map<K, V> other) {
+        other.entries().forEach(tuple -> this.map.put(tuple.a(), tuple.b()));
+        return this;
+    }
+
+    @Override
+    public Iterator<Tuple<K, V>> entries() {
+        return new JavaSet<>(this.map.entrySet()).iter()
+                .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
+    }
 }

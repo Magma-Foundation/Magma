@@ -1,6 +1,8 @@
 package com.meti.core;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
@@ -18,6 +20,16 @@ public class None<T> implements Option<T> {
 
     @Override
     public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<T> filter(Predicate<T> predicate) {
+        return None.apply();
+    }
+
+    @Override
+    public Option<T> peek(Consumer<T> consumer) {
         return None.apply();
     }
 

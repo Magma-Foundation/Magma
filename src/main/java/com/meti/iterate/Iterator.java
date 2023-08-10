@@ -2,6 +2,7 @@ package com.meti.iterate;
 
 import com.meti.core.Option;
 import com.meti.core.Result;
+import com.meti.core.Tuple;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -36,5 +37,9 @@ public interface Iterator<T> {
     boolean anyMatch(Predicate<T> predicate);
 
     boolean allMatch(Predicate<T> predicate);
+
+    <R> Iterator<Tuple<T, R>> zip(Iterator<R> entries);
+
+    Iterator<T> distinct();
 }
 

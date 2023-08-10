@@ -1,11 +1,10 @@
 package com.meti.iterate;
 
-import com.meti.core.None;
-import com.meti.core.Ok;
-import com.meti.core.Option;
-import com.meti.core.Result;
+import com.meti.core.*;
 import com.meti.java.JavaMap;
+import com.meti.java.JavaSet;
 import com.meti.java.Map;
+import com.meti.java.Set;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -13,6 +12,33 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
+    @Override
+    public <R> Iterator<Tuple<T, R>> zip(Iterator<R> other) {
+        return new AbstractIterator<>() {
+            @Override
+            public Option<Tuple<T, R>> head() {
+                return AbstractIterator.this.head().and(other.head());
+            }
+        };
+    }
+
+    @Override
+    public Iterator<T> distinct() {
+        return new AbstractIterator<>() {
+            private Set<T> set = JavaSet.empty();
+
+            @Override
+            public Option<T> head() {
+                /*
+                This is inherently stateful.
+                */
+                return AbstractIterator.this.head()
+                        .filter(set::has)
+                        .peek(value -> this.set = set.add(value));
+            }
+        };
+    }
+
     @Override
     public boolean allMatch(Predicate<T> predicate) {
         return foldLeft(true, (aBoolean, t) -> aBoolean && predicate.test(t));

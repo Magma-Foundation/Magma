@@ -3,9 +3,13 @@ package com.meti.app.compile;
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.clazz.Extractor;
 import com.meti.core.Option;
+import com.meti.core.Some;
 import com.meti.core.Tuple;
+import com.meti.iterate.Collectors;
 import com.meti.iterate.Iterator;
 import com.meti.java.*;
+
+import static com.meti.app.compile.attribute.ExtractAttribute.Extract;
 
 public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
@@ -18,6 +22,35 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
     public static Builder create(String slice) {
         return new Builder(JavaString.fromSlice(slice));
+    }
+
+    private static Option<Map<String_, Attribute>> extractAttribute(String_ key, Attribute thisAttribute, Attribute otherAttribute) {
+        if (otherAttribute.equalsTo(Extract)) {
+            return Some.apply(JavaMap.<String_, Attribute>empty().insert(key, thisAttribute));
+        } else {
+            return extractNodeAttribute(thisAttribute, otherAttribute).or(extractNodeListAttribute(thisAttribute, otherAttribute));
+        }
+    }
+
+    private static Option<Map<String_, Attribute>> extractNodeListAttribute(Attribute thisAttribute, Attribute otherAttribute) {
+        return thisAttribute.asListOfNodes().and(otherAttribute.asListOfNodes()).flatMap(listTuple -> {
+            var thisList = listTuple.a().b();
+            var formatList = listTuple.b().b();
+
+            return thisList.iter().zip(formatList.iter()).map(innerNodeTuple -> {
+                var thisNode = innerNodeTuple.a();
+                var formatNode = innerNodeTuple.b();
+                return thisNode.extract(formatNode);
+            }).collect(Collectors.andRequireAll(JavaMap.toMap()));
+        });
+    }
+
+    private static Option<Map<String_, Attribute>> extractNodeAttribute(Attribute thisAttribute, Attribute otherAttribute) {
+        return thisAttribute.asNode().and(otherAttribute.asNode()).flatMap(nodeTuple -> {
+            var thisNode = nodeTuple.a().b();
+            var formatNode = nodeTuple.b().b();
+            return thisNode.extract(formatNode);
+        });
     }
 
     @Override
@@ -67,8 +100,25 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
     }
 
     @Override
+    public boolean equalsTo(Node other) {
+        return other.is(name1) && this.attributes.iter().allMatch(entry ->
+                other.applyOptionally(entry.a()).map(otherAttribute ->
+                        entry.b().equalsTo(otherAttribute)).unwrapOrElse(false));
+    }
+
+    @Override
     public Option<Map<String_, Attribute>> extract(Node format) {
-        throw new UnsupportedOperationException();
+        return keys().then(format.keys()).distinct()
+                .map(Key::unwrap)
+                .map(key -> applyOptionally(key)
+                        .and(format.applyOptionally(key))
+                        .flatMap(attributeTuple -> extractAttribute(key, attributeTuple.a(), attributeTuple.b())))
+                .collect(Collectors.andRequireAll(JavaMap.toMap()));
+    }
+
+    @Override
+    public Iterator<Key<String_>> keys() {
+        return attributes().keys();
     }
 
     public record Builder(String_ name, Map<String_, Attribute> attributes) {

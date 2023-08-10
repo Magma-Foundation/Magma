@@ -13,4 +13,9 @@ public class ExtractAttribute implements Attribute {
     public boolean is(Node.Group group) {
         return group == Node.Group.Extract;
     }
+
+    @Override
+    public boolean equalsTo(Attribute other) {
+        return other == Extract;
+    }
 }

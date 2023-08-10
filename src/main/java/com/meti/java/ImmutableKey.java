@@ -7,4 +7,9 @@ public record ImmutableKey<K>(K value) implements Key<K> {
     public <R> R peek(Function<K, R> mapper) {
         return mapper.apply(value);
     }
+
+    @Override
+    public K unwrap() {
+        return value;
+    }
 }

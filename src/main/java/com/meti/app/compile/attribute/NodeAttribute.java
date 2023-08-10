@@ -22,4 +22,11 @@ public record NodeAttribute(String_ type, Node value) implements Attribute {
     public Option<Tuple<String_, Node>> asNode() {
         return Some.apply(new Tuple<>(type, value));
     }
+
+    @Override
+    public boolean equalsTo(Attribute other) {
+        return other.asNode()
+                .map(tuple -> type.equalsTo(tuple.a()) && value.equalsTo(tuple.b()))
+                .unwrapOrElse(false);
+    }
 }

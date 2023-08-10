@@ -14,6 +14,15 @@ public record NodeListAttribute(String_ type, List<? extends Node> values) imple
     }
 
     @Override
+    public boolean equalsTo(Attribute other) {
+        return other.asListOfNodes()
+                .map(tuple -> type.equalsTo(tuple.a()) && values.iter()
+                        .zip(tuple.b().iter())
+                        .allMatch(tuple1 -> tuple1.a().equals(tuple1.b())))
+                .unwrapOrElse(false);
+    }
+
+    @Override
     public boolean is(Node.Group group) {
         return group == Node.Group.NodeList;
     }

@@ -23,4 +23,8 @@ public interface Map<K, V> {
     Map<K, V> insert(K key, V value);
 
     Iterator<Key<K>> keys();
+
+    Map<K, V> insertAll(Map<K, V> other);
+
+    Iterator<Tuple<K, V>> entries();
 }

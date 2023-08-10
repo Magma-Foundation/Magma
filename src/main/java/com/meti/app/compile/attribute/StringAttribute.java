@@ -15,6 +15,13 @@ public record StringAttribute(String_ value) implements Attribute {
     }
 
     @Override
+    public boolean equalsTo(Attribute other) {
+        return other.asString()
+                .map(this.value::equalsTo)
+                .unwrapOrElse(false);
+    }
+
+    @Override
     public String toString() {
         return "'" + value.toString() + "'";
     }

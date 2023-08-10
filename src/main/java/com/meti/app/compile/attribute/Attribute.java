@@ -26,4 +26,6 @@ public interface Attribute {
     default Option<String_> asString() {
         return None.apply();
     }
+
+    boolean equalsTo(Attribute other);
 }
