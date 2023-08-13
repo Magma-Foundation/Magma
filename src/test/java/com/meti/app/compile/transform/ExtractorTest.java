@@ -95,15 +95,15 @@ class ExtractorTest {
         assertFalse(extractImpl(left, right).isPresent());
     }
 
-/*    @Test
+    @Test
     void child() {
-        *//*
+        /*
         <a>
             <test type="type">
                 <value test="foo"/>
             </test>
         </a>
-         *//*
+        */
         var left = MapNode.create("a")
                 .withNode("test", "type", MapNode
                         .create("value")
@@ -122,5 +122,5 @@ class ExtractorTest {
                 .$();
 
         assertTrue(extract.equalsTo(new StringAttribute(JavaString.fromSlice("foo"))));
-    }*/
+    }
 }

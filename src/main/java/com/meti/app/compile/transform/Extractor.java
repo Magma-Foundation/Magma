@@ -21,17 +21,21 @@ public class Extractor {
     }
 
     public Option<Map<String_, Attribute>> extract() {
-        if (root.is(format.getType())) {
-            return format.entries().map(entry -> {
+        return extractImpl(root, format);
+    }
+
+    private Option<Map<String_, Attribute>> extractImpl(Node root1, Node format1) {
+        if (root1.is(format1.getType())) {
+            return format1.entries().map(entry -> {
                         var formatKey = entry.a().unwrap();
                         var formatAttribute = entry.b();
-                        return root.applyOptionally(formatKey).flatMap(rootAttribute -> {
+                        return root1.applyOptionally(formatKey).flatMap(rootAttribute -> {
                             if (formatAttribute.equalsTo(ExtractAttribute.Extract)) {
                                 return Some.apply(JavaMap.<String_, Attribute>empty().insert(formatKey, rootAttribute));
                             } else if (formatAttribute.equalsTo(rootAttribute)) {
-                                return Some.apply(JavaMap.<String_, Attribute>empty());
+                                return Some.apply(JavaMap.empty());
                             } else {
-                                return None.apply();
+                                return rootAttribute.asNode().and(formatAttribute.asNode()).flatMap(tuple -> extractImpl(tuple.a().b(), tuple.b().b()));
                             }
                         });
                     })
