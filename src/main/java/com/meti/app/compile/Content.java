@@ -73,7 +73,6 @@ public record Content(String_ type, String_ value) implements Node {
         return Iterators.of(new Tuple<>(new ImmutableKey<>(fromSlice("value")), new StringAttribute(value)));
     }
 
-    @Override
     public Option<Map<String_, Attribute>> extract(Node format) {
         if (format.has(fromSlice("value")).isPresent()) {
             return Some.apply(JavaMap.<String_, Attribute>empty().insert(fromSlice("value"), new StringAttribute(this.value)));

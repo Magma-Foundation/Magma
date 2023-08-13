@@ -2,6 +2,7 @@ package com.meti.app.compile.clazz;
 
 import com.meti.app.compile.MapNode;
 import com.meti.app.compile.Node;
+import com.meti.app.compile.transform.Extractor;
 import com.meti.core.Option;
 import com.meti.java.JavaList;
 import com.meti.java.JavaSet;
@@ -31,7 +32,7 @@ public record ClassTransformer(Node root) implements Transformer {
                     .withNode("statements", "node", create("block").with(linesKey))
                     .complete();
 
-            var extracted = root.extract(node).$();
+            var extracted = new Extractor(root, node).extract().$();
             var name = extracted.apply(nameKey.key()).asString().$();
             var lines = extracted.apply(linesKey.key()).asListOfNodes().$();
 

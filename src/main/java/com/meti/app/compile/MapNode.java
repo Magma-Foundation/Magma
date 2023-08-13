@@ -2,6 +2,7 @@ package com.meti.app.compile;
 
 import com.meti.app.compile.attribute.*;
 import com.meti.app.compile.clazz.Extractions;
+import com.meti.app.compile.transform.Extractor;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.core.Tuple;
@@ -40,7 +41,7 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
             return thisList.iter().zip(formatList.iter()).map(innerNodeTuple -> {
                 var thisNode = innerNodeTuple.a();
                 var formatNode = innerNodeTuple.b();
-                return thisNode.extract(formatNode);
+                return new Extractor(thisNode, formatNode).extract();
             }).collect(Collectors.andRequireAll(JavaMap.toIntersection()));
         });
     }
@@ -49,7 +50,7 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
         return thisAttribute.asNode().and(otherAttribute.asNode()).flatMap(nodeTuple -> {
             var thisNode = nodeTuple.a().b();
             var formatNode = nodeTuple.b().b();
-            return thisNode.extract(formatNode);
+            return new Extractor(thisNode, formatNode).extract();
         });
     }
 
@@ -111,7 +112,6 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
         return this.attributes.iter().map(tuple -> tuple.mapLeft(ImmutableKey::new));
     }
 
-    @Override
     public Option<Map<String_, Attribute>> extract(Node format) {
         return keys().then(format.keys()).distinct()
                 .map(Key::unwrap)
