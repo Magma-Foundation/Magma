@@ -2,9 +2,10 @@ package com.meti.app.compile.transform;
 
 import com.meti.app.compile.Node;
 import com.meti.app.compile.attribute.Attribute;
+import com.meti.app.compile.attribute.ExtractAttribute;
 import com.meti.core.None;
 import com.meti.core.Option;
-import com.meti.core.Tuple;
+import com.meti.core.Some;
 import com.meti.iterate.Collectors;
 import com.meti.java.JavaMap;
 import com.meti.java.Map;
@@ -21,11 +22,20 @@ public class Extractor {
 
     public Option<Map<String_, Attribute>> extract() {
         if (root.is(format.getType())) {
-
-            return format.entries().map(entry ->
-                            root.applyOptionally(entry.a().unwrap()).map(value ->
-                                    new Tuple<>(entry.a().unwrap(), value)))
-                    .collect(Collectors.andRequireAll(JavaMap.toMap()));
+            return format.entries().map(entry -> {
+                        var formatKey = entry.a().unwrap();
+                        var formatAttribute = entry.b();
+                        return root.applyOptionally(formatKey).flatMap(rootAttribute -> {
+                            if (formatAttribute.equalsTo(ExtractAttribute.Extract)) {
+                                return Some.apply(JavaMap.<String_, Attribute>empty().insert(formatKey, rootAttribute));
+                            } else if (formatAttribute.equalsTo(rootAttribute)) {
+                                return Some.apply(JavaMap.<String_, Attribute>empty());
+                            } else {
+                                return None.apply();
+                            }
+                        });
+                    })
+                    .collect(Collectors.andRequireAll(JavaMap.toIntersection()));
         }
         return None.apply();
     }
