@@ -11,8 +11,10 @@ public class ThrowableResult<T, E extends Exception> {
         var value = parent.value();
         var err = parent.err();
 
-        if (value.isPresent()) return value.unwrap();
-        if (err.isPresent()) throw err.unwrap();
-        throw new RuntimeException("No name1 or error present?");
+        if (value.isPresent()) //noinspection deprecation
+            return value.unwrap();
+        if (err.isPresent()) //noinspection deprecation
+            throw err.unwrap();
+        throw new RuntimeException("No type or error present?");
     }
 }

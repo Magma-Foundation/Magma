@@ -4,10 +4,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Represents a non-error name1.
+ * Represents a non-error type.
  *
- * @param inner The name1 of this result.
- * @param <T>   The name1 value of this result.
+ * @param inner The type of this result.
+ * @param <T>   The type value of this result.
  * @param <E>   The error value of this result.
  */
 public record Ok<T, E extends Throwable>(T inner) implements Result<T, E> {

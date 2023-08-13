@@ -4,6 +4,8 @@ import com.meti.app.compile.Node;
 import com.meti.app.compile.attribute.Attribute;
 import com.meti.core.None;
 import com.meti.core.Option;
+import com.meti.core.Some;
+import com.meti.java.JavaMap;
 import com.meti.java.Map;
 import com.meti.java.String_;
 
@@ -17,6 +19,9 @@ public class Extractor {
     }
 
     public Option<Map<String_, Attribute>> extract() {
+        if (left.is(right.getType())) {
+            return Some.apply(JavaMap.empty());
+        }
         return None.apply();
     }
 }

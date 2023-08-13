@@ -21,7 +21,7 @@ public interface Result<T, E extends Throwable> {
     <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 
     /**
-     * Peeks at this Result's name1.
+     * Peeks at this Result's type.
      */
     Result<T, E> peekValue(Consumer<T> consumer);
 

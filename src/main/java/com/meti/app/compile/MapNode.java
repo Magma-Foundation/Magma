@@ -11,7 +11,7 @@ import com.meti.java.*;
 
 import static com.meti.app.compile.attribute.ExtractAttribute.Extract;
 
-public record MapNode(String_ name1, Map<String_, Attribute> attributes) implements Node {
+public record MapNode(String_ type, Map<String_, Attribute> attributes) implements Node {
     public MapNode(String_ name) {
         this(name, JavaMap.empty());
     }
@@ -66,19 +66,19 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
     @Override
     public String toString() {
         return "{" +
-               "name: '" + name1.unwrap() + "', " +
+               "name: '" + type.unwrap() + "', " +
                "attributes: " + attributes.toString() +
                "}";
     }
 
     @Override
     public Node with(Key<String_> key, Attribute attribute) {
-        return key.peek(keyValue -> new MapNode(name1, attributes.insert(keyValue, attribute)));
+        return key.peek(keyValue -> new MapNode(type, attributes.insert(keyValue, attribute)));
     }
 
     @Override
     public boolean is(String_ name) {
-        return this.name1.equalsTo(name);
+        return this.type.equalsTo(name);
     }
 
     @Override
@@ -96,12 +96,12 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
 
     @Override
     public String_ getType() {
-        throw new UnsupportedOperationException();
+        return this.type;
     }
 
     @Override
     public boolean equalsTo(Node other) {
-        return other.is(name1) && this.attributes.iter().allMatch(entry ->
+        return other.is(type) && this.attributes.iter().allMatch(entry ->
                 other.applyOptionally(entry.a()).map(otherAttribute ->
                         entry.b().equalsTo(otherAttribute)).unwrapOrElse(false));
     }
