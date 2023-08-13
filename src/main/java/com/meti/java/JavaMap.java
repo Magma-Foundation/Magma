@@ -29,7 +29,21 @@ public class JavaMap<K, V> implements com.meti.java.Map<K, V> {
         return new JavaMap<>(new HashMap<>());
     }
 
-    public static <K, V> Collector<com.meti.java.Map<K, V>, com.meti.java.Map<K, V>> toMap() {
+    public static <K, V> Collector<Tuple<K, V>, com.meti.java.Map<K, V>> toMap() {
+        return new Collector<>() {
+            @Override
+            public com.meti.java.Map<K, V> initial() {
+                return JavaMap.empty();
+            }
+
+            @Override
+            public com.meti.java.Map<K, V> foldLeft(com.meti.java.Map<K, V> accumulated, Tuple<K, V> element) {
+                return accumulated.insert(element.a(), element.b());
+            }
+        };
+    }
+
+    public static <K, V> Collector<com.meti.java.Map<K, V>, com.meti.java.Map<K, V>> toIntersection() {
         return new Collector<>() {
             @Override
             public com.meti.java.Map<K, V> initial() {

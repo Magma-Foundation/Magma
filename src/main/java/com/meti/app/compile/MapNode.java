@@ -41,7 +41,7 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
                 var thisNode = innerNodeTuple.a();
                 var formatNode = innerNodeTuple.b();
                 return thisNode.extract(formatNode);
-            }).collect(Collectors.andRequireAll(JavaMap.toMap()));
+            }).collect(Collectors.andRequireAll(JavaMap.toIntersection()));
         });
     }
 
@@ -107,13 +107,18 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
     }
 
     @Override
+    public Iterator<Tuple<Key<String_>, Attribute>> entries() {
+        return this.attributes.iter().map(tuple -> tuple.mapLeft(ImmutableKey::new));
+    }
+
+    @Override
     public Option<Map<String_, Attribute>> extract(Node format) {
         return keys().then(format.keys()).distinct()
                 .map(Key::unwrap)
                 .map(key -> applyOptionally(key)
                         .and(format.applyOptionally(key))
                         .flatMap(attributeTuple -> extractAttribute(key, attributeTuple.a(), attributeTuple.b())))
-                .collect(Collectors.andRequireAll(JavaMap.toMap()));
+                .collect(Collectors.andRequireAll(JavaMap.toIntersection()));
     }
 
     @Override
@@ -154,7 +159,7 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
             return withAttribute(name, new StringAttribute(name1));
         }
 
-        private Builder withAttribute(String name, Attribute attribute) {
+        public Builder withAttribute(String name, Attribute attribute) {
             return copy(this.attributes.insert(JavaString.fromSlice(name), attribute));
         }
 
@@ -164,6 +169,10 @@ public record MapNode(String_ type, Map<String_, Attribute> attributes) implemen
 
         public Builder withListOfNodes(String name, String type, List<Node> values) {
             return withAttribute(name, new NodeListAttribute(JavaString.fromSlice(type), values));
+        }
+
+        public Builder withString(String name, String value) {
+            return withAttribute(name, new StringAttribute(JavaString.fromSlice(value)));
         }
     }
 }

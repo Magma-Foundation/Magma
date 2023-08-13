@@ -5,6 +5,7 @@ import com.meti.app.compile.attribute.StringAttribute;
 import com.meti.core.None;
 import com.meti.core.Option;
 import com.meti.core.Some;
+import com.meti.core.Tuple;
 import com.meti.iterate.Iterator;
 import com.meti.iterate.Iterators;
 import com.meti.java.*;
@@ -65,6 +66,11 @@ public record Content(String_ type, String_ value) implements Node {
     @Override
     public boolean equalsTo(Node other) {
         return false;
+    }
+
+    @Override
+    public Iterator<Tuple<Key<String_>, Attribute>> entries() {
+        return Iterators.of(new Tuple<>(new ImmutableKey<>(fromSlice("value")), new StringAttribute(value)));
     }
 
     @Override
