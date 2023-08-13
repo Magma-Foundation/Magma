@@ -22,7 +22,7 @@ public record ClassTransformer(Node root) implements Transformer {
     @Override
     public Option<Node> transform() {
         return $Option(() -> {
-            var extractor = new Extractor();
+            var extractor = new Extractions();
             var nameKey = extractor.extract("name");
             var linesKey = extractor.extract("lines");
 

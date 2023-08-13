@@ -1,7 +1,7 @@
 package com.meti.app.compile;
 
 import com.meti.app.compile.attribute.*;
-import com.meti.app.compile.clazz.Extractor;
+import com.meti.app.compile.clazz.Extractions;
 import com.meti.core.Option;
 import com.meti.core.Some;
 import com.meti.core.Tuple;
@@ -142,7 +142,7 @@ public record MapNode(String_ name1, Map<String_, Attribute> attributes) impleme
             return copy(this.attributes.insert(JavaString.fromSlice(name), new NodeAttribute(JavaString.fromSlice(type), builder.complete())));
         }
 
-        public Builder with(Extractor.Extraction extraction) {
+        public Builder with(Extractions.Extraction extraction) {
             return copy(this.attributes.insert(extraction.name(), extraction.attribute()));
         }
 

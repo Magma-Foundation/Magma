@@ -4,7 +4,7 @@ import com.meti.app.compile.attribute.Attribute;
 import com.meti.app.compile.attribute.ExtractAttribute;
 import com.meti.java.*;
 
-public class Extractor {
+public class Extractions {
     private Map<String_, Extraction> mapper = new JavaMap<>();
 
     public Extraction extract(String name) {
