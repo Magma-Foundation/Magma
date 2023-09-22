@@ -1,7 +1,0 @@
-...
-
-record : {
-    name : string,
-    argument : declaration
-    value : statement
-} = "record " + name + "(" + [ argument / "," ] + ")" + value;
