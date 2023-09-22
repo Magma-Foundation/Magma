@@ -37,7 +37,11 @@ public class Main {
                     .collect(Collectors.joining());
 
             var relative = source.relativize(file);
-            var outputFile = dist.resolve(relative);
+            var fileName = relative.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var withoutSeparator = fileName.substring(0, separator);
+
+            var outputFile = dist.resolve(withoutSeparator + ".mgs");
             Files.writeString(outputFile, output);
         } catch (IOException e) {
             e.printStackTrace();
