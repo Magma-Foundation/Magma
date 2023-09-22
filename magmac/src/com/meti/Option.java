@@ -14,4 +14,6 @@ public interface Option<T> {
     Option<T> orElseGet(Supplier<Option<T>> other);
 
     T $() throws IntentionalException;
+
+    <R> Option<R> replaceValue(R value);
 }

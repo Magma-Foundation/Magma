@@ -81,13 +81,22 @@ public class Main {
 
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
-        return stripped.firstIndexOfSlice("import ")
-                .filter(index -> index.value() != 0)
-                .map(index -> compileImport(stripped, index))
+        return compilePackage(stripped)
+                .orElseGet(() -> compileImport(stripped))
                 .orElseGet(() -> compileBody(stripped))
                 .orElseGet(() -> compileClass(stripped))
                 .orElseGet(() -> compileRecord(stripped))
                 .unwrapOrElseGet(() -> input + ";");
+    }
+
+    private static Option<String> compilePackage(JavaString stripped) {
+        return stripped.firstIndexOfSlice("package ")
+                .filter(Index::isStart)
+                .replaceValue("");
+    }
+
+    private static Option<String> compileImport(JavaString stripped) {
+        return stripped.firstIndexOfSlice("import ").map(index -> compileValidImport(stripped, index));
     }
 
     private static Option<String> compileRecord(JavaString stripped) {
@@ -145,11 +154,11 @@ public class Main {
             return split(slicedBody)
                     .stream()
                     .map(Main::compileLine)
-                    .collect(Collectors.joining());
+                    .collect(Collectors.joining("", "{\n", "\n}"));
         });
     }
 
-    private static String compileImport(JavaString stripped, Index index) {
+    private static String compileValidImport(JavaString stripped, Index index) {
         var name = stripped.slice(index);
         var separator = name.lastIndexOf('.');
         var parent = name.substring(0, separator);

@@ -5,6 +5,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
+    @Override
+    public <R> Option<R> replaceValue(R value) {
+        return new None<>();
+    }
+
     public static <T> Option<T> apply() {
         return new None<>();
     }

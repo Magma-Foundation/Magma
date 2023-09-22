@@ -5,8 +5,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
-
     public static <T> Option<T> apply(T value) {
+        return new Some<>(value);
+    }
+
+    @Override
+    public <R> Option<R> replaceValue(R value) {
         return new Some<>(value);
     }
 
