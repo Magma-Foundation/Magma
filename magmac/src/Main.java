@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,31 +20,33 @@ public class Main {
         }
 
         try (var list = Files.list(source)) {
-            list.forEach(file -> {
-                try {
-                    var input = Files.readString(file);
-                    var output = Stream.of(input.split(";"))
-                            .map(line -> {
-                                var stripped = line.strip();
-                                if (stripped.startsWith("import ")) {
-                                    var name = stripped.substring("import ".length());
-                                    var separator = name.lastIndexOf('.');
-                                    var parent = name.substring(0, separator);
-                                    var child = name.substring(separator + 1);
-                                    return "import { " + child + " } from " + parent + ";\n";
-                                } else {
-                                    return line + ";";
-                                }
-                            })
-                            .collect(Collectors.joining());
+            list.forEach(file -> compileFile(source, dist, file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-                    var relative = source.relativize(file);
-                    var outputFile = dist.resolve(relative);
-                    Files.writeString(outputFile, output);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+    private static void compileFile(Path source, Path dist, Path file) {
+        try {
+            var input = Files.readString(file);
+            var output = Stream.of(input.split(";"))
+                    .map(line -> {
+                        var stripped = line.strip();
+                        if (stripped.startsWith("import ")) {
+                            var name = stripped.substring("import ".length());
+                            var separator = name.lastIndexOf('.');
+                            var parent = name.substring(0, separator);
+                            var child = name.substring(separator + 1);
+                            return "import { " + child + " } from " + parent + ";\n";
+                        } else {
+                            return line + ";";
+                        }
+                    })
+                    .collect(Collectors.joining());
+
+            var relative = source.relativize(file);
+            var outputFile = dist.resolve(relative);
+            Files.writeString(outputFile, output);
         } catch (IOException e) {
             e.printStackTrace();
         }
