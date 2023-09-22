@@ -81,37 +81,73 @@ public class Main {
 
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
-        return stripped.indexOfSlice("import ")
+        return stripped.firstIndexOfSlice("import ")
                 .filter(index -> index.value() != 0)
                 .map(index -> compileImport(stripped, index))
+                .orElseGet(() -> compileBody(stripped))
                 .orElseGet(() -> compileClass(stripped))
+                .orElseGet(() -> compileRecord(stripped))
                 .unwrapOrElseGet(() -> input + ";");
+    }
+
+    private static Option<String> compileRecord(JavaString stripped) {
+        return $Option(() -> {
+            var nameStart = stripped.firstIndexOfSlice("record ").$()
+                    .nextBy("record ".length())
+                    .$();
+
+            var paramStart = stripped.firstIndexOfChar('(').$();
+            var paramEnd = stripped.firstIndexOfChar(')').$();
+            var bodyStart = stripped.firstIndexOfChar('{').$();
+            var bodyEnd = stripped.lastIndexOfChar('}').$()
+                    .next()
+                    .$();
+
+            var name = stripped.slice(nameStart.to(paramStart).$());
+            var bodySlice = stripped.slice(bodyStart.to(bodyEnd).$());
+            var compiledBody = compileLine(bodySlice);
+            return "export class def " + name + "() => " + compiledBody;
+        });
     }
 
     private static Option<String> compileClass(JavaString stripped) {
         return $Option(() -> {
-            var bodyStart = stripped.indexOfChar('{').$();
+            var bodyStart = stripped.firstIndexOfChar('{').$();
             var bodyEnd = stripped
-                    .lastIndexOf('}').$()
+                    .lastIndexOfChar('}').$()
                     .next().$();
 
-            var body = stripped.substring(bodyStart.to(bodyEnd).$());
+            var body = stripped.slice(bodyStart.to(bodyEnd).$());
             var keys = stripped.sliceTo(bodyStart).strip();
             var separator = keys.lastIndexOf(' ');
             var name = keys.substring(separator + 1);
-
-            var slicedBody = body.substring(1, body.length() - 1).strip();
-            var outputBody = split(slicedBody)
-                    .stream()
-                    .map(Main::compileLine)
-                    .collect(Collectors.joining());
-
+            var outputBody = compileLine(body);
             return "export class def " + name + " => " + outputBody;
         });
     }
 
+    private static Option<String> compileBody(JavaString body) {
+        return $Option(() -> {
+            var bodyStart = body.firstIndexOfChar('{')
+                    .filter(Index::isStart)
+                    .$()
+                    .next()
+                    .$();
+
+            var bodyEnd = body.lastIndexOfChar('}')
+                    .filter(Index::isEnd)
+                    .$();
+
+            var slicedBody = body.slice(bodyStart.to(bodyEnd).$()).strip();
+            return split(slicedBody)
+                    .stream()
+                    .map(Main::compileLine)
+                    .collect(Collectors.joining());
+        });
+    }
+
     private static String compileImport(JavaString stripped, Index index) {
-        var name = stripped.substring(index);
+        var name = stripped.slice(index);
         var separator = name.lastIndexOf('.');
         var parent = name.substring(0, separator);
         var child = name.substring(separator + 1);

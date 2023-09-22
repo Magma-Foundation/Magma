@@ -2,7 +2,11 @@ package com.meti;
 
 public record Index(int value, int length) {
     public Option<Index> next() {
-        var nextLength = value + 1;
+        return nextBy(1);
+    }
+
+    public Option<Index> nextBy(int count) {
+        var nextLength = value + count;
         if (nextLength > length) {
             return None.apply();
         } else {
@@ -16,5 +20,13 @@ public record Index(int value, int length) {
         } else {
             return None.apply();
         }
+    }
+
+    public boolean isStart() {
+        return value == 0;
+    }
+
+    public boolean isEnd() {
+        return value == length - 1;
     }
 }
