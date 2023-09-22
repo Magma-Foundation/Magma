@@ -1,3 +1,5 @@
+package com.meti;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -5,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.meti.Options.$Option;
 
 public class Main {
     public static void main(String[] args) {
@@ -69,18 +73,23 @@ public class Main {
     }
 
     private static String compileLine(String input) {
-        var stripped = input.strip();
-        if (stripped.startsWith("import ")) {
-            var name = stripped.substring("import ".length());
-            var separator = name.lastIndexOf('.');
-            var parent = name.substring(0, separator);
-            var child = name.substring(separator + 1);
-            return "import { " + child + " } from " + parent + ";\n";
-        } else if (stripped.contains("class")) {
-            var bodyStart = stripped.indexOf('{');
-            var bodyEnd = stripped.lastIndexOf('}');
-            var body = stripped.substring(bodyStart, bodyEnd + 1);
-            var keys = stripped.substring(0, bodyStart).strip();
+        var stripped = new JavaString(input.strip());
+        return stripped.indexOfSlice("import ")
+                .filter(index -> index.value() != 0)
+                .map(index -> compileImport(stripped, index))
+                .orElseGet(() -> compileClass(stripped))
+                .unwrapOrElseGet(() -> input + ";");
+    }
+
+    private static Option<String> compileClass(JavaString stripped) {
+        return $Option(() -> {
+            var bodyStart = stripped.indexOfChar('{').$();
+            var bodyEnd = stripped
+                    .lastIndexOf('}').$()
+                    .next().$();
+
+            var body = stripped.substring(bodyStart.to(bodyEnd).$());
+            var keys = stripped.sliceTo(bodyStart).strip();
             var separator = keys.lastIndexOf(' ');
             var name = keys.substring(separator + 1);
 
@@ -91,8 +100,14 @@ public class Main {
                     .collect(Collectors.joining());
 
             return "export class def " + name + " => " + outputBody;
-        } else {
-            return input + ";";
-        }
+        });
+    }
+
+    private static String compileImport(JavaString stripped, Index index) {
+        var name = stripped.substring(index);
+        var separator = name.lastIndexOf('.');
+        var parent = name.substring(0, separator);
+        var child = name.substring(separator + 1);
+        return "import { " + child + " } from " + parent + ";\n";
     }
 }
