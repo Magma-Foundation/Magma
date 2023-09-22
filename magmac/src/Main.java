@@ -30,18 +30,7 @@ public class Main {
         try {
             var input = Files.readString(file);
             var output = Stream.of(input.split(";"))
-                    .map(line -> {
-                        var stripped = line.strip();
-                        if (stripped.startsWith("import ")) {
-                            var name = stripped.substring("import ".length());
-                            var separator = name.lastIndexOf('.');
-                            var parent = name.substring(0, separator);
-                            var child = name.substring(separator + 1);
-                            return "import { " + child + " } from " + parent + ";\n";
-                        } else {
-                            return line + ";";
-                        }
-                    })
+                    .map(Main::compileLine)
                     .collect(Collectors.joining());
 
             var relative = source.relativize(file);
@@ -49,6 +38,19 @@ public class Main {
             Files.writeString(outputFile, output);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static String compileLine(String line) {
+        var stripped = line.strip();
+        if (stripped.startsWith("import ")) {
+            var name = stripped.substring("import ".length());
+            var separator = name.lastIndexOf('.');
+            var parent = name.substring(0, separator);
+            var child = name.substring(separator + 1);
+            return "import { " + child + " } from " + parent + ";\n";
+        } else {
+            return line + ";";
         }
     }
 }
