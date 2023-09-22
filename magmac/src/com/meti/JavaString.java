@@ -14,9 +14,7 @@ public record JavaString(String value) {
     }
 
     private Option<Index> wrapIndex(int index) {
-        return index == -1
-                ? Some.apply(new Index(index, value.length()))
-                : None.apply();
+        return index == -1 ? None.apply() : Some.apply(new Index(index, value.length()));
     }
 
     public Option<Index> lastIndexOf(int ch) {

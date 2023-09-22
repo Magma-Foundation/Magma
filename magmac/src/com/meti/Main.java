@@ -24,8 +24,8 @@ public class Main {
             }
         }
 
-        try (var list = Files.list(source)) {
-            list.forEach(file -> compileFile(source, dist, file));
+        try (var list = Files.walk(source)) {
+            list.filter(Files::isRegularFile).forEach(file -> compileFile(source, dist, file));
         } catch (IOException e) {
             e.printStackTrace();
         }
