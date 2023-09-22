@@ -68,8 +68,8 @@ public class Main {
         return lines;
     }
 
-    private static String compileLine(String line) {
-        var stripped = line.strip();
+    private static String compileLine(String input) {
+        var stripped = input.strip();
         if (stripped.startsWith("import ")) {
             var name = stripped.substring("import ".length());
             var separator = name.lastIndexOf('.');
@@ -83,9 +83,16 @@ public class Main {
             var keys = stripped.substring(0, bodyStart).strip();
             var separator = keys.lastIndexOf(' ');
             var name = keys.substring(separator + 1);
-            return "export class def " + name + "() => " + body;
+
+            var slicedBody = body.substring(1, body.length() - 1).strip();
+            var outputBody = split(slicedBody)
+                    .stream()
+                    .map(Main::compileLine)
+                    .collect(Collectors.joining());
+
+            return "export class def " + name + " => " + outputBody;
         } else {
-            return line + ";";
+            return input + ";";
         }
     }
 }
