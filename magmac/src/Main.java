@@ -2,8 +2,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
@@ -29,7 +30,9 @@ public class Main {
     private static void compileFile(Path source, Path dist, Path file) {
         try {
             var input = Files.readString(file);
-            var output = Stream.of(input.split(";"))
+            var lines = split(input);
+
+            var output = lines.stream()
                     .map(Main::compileLine)
                     .collect(Collectors.joining());
 
@@ -41,6 +44,26 @@ public class Main {
         }
     }
 
+    private static List<String> split(String input) {
+        var lines = new ArrayList<String>();
+        var buffer = new StringBuilder();
+        var depth = 0;
+
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                buffer.append(c);
+            }
+        }
+        lines.add(buffer.toString());
+        return lines;
+    }
+
     private static String compileLine(String line) {
         var stripped = line.strip();
         if (stripped.startsWith("import ")) {
@@ -49,6 +72,14 @@ public class Main {
             var parent = name.substring(0, separator);
             var child = name.substring(separator + 1);
             return "import { " + child + " } from " + parent + ";\n";
+        } else if (stripped.contains("class")) {
+            var bodyStart = stripped.indexOf('{');
+            var bodyEnd = stripped.lastIndexOf('}');
+            var body = stripped.substring(bodyStart, bodyEnd + 1);
+            var keys = stripped.substring(0, bodyStart).strip();
+            var separator = keys.lastIndexOf(' ');
+            var name = keys.substring(separator + 1);
+            return "export class def " + name + "() => " + body;
         } else {
             return line + ";";
         }
