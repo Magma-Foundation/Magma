@@ -32,4 +32,8 @@ public record JavaString(String value) {
     public int length() {
         return value.length();
     }
+
+    public boolean contains(String slice) {
+        return this.value.contains(slice);
+    }
 }

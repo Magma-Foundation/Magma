@@ -8,4 +8,8 @@ public class Options {
             return None.apply();
         }
     }
+
+    public static <T> T $$() throws IntentionalException {
+        throw new IntentionalException();
+    }
 }

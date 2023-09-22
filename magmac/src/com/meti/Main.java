@@ -97,7 +97,6 @@ public class Main {
                     .$();
 
             var paramStart = stripped.firstIndexOfChar('(').$();
-            var paramEnd = stripped.firstIndexOfChar(')').$();
             var bodyStart = stripped.firstIndexOfChar('{').$();
             var bodyEnd = stripped.lastIndexOfChar('}').$()
                     .next()
@@ -112,6 +111,10 @@ public class Main {
 
     private static Option<String> compileClass(JavaString stripped) {
         return $Option(() -> {
+            if (!stripped.contains("class ")) {
+                return Options.$$();
+            }
+
             var bodyStart = stripped.firstIndexOfChar('{').$();
             var bodyEnd = stripped
                     .lastIndexOfChar('}').$()
