@@ -41,11 +41,18 @@ public class Main {
                     .collect(Collectors.joining());
 
             var relative = source.relativize(file);
+            var parent = relative.getParent();
+
             var fileName = relative.getFileName().toString();
             var separator = fileName.indexOf('.');
             var withoutSeparator = fileName.substring(0, separator);
 
-            var outputFile = dist.resolve(withoutSeparator + ".mgs");
+            var resolvedParent = dist.resolve(parent);
+            if (!Files.exists(resolvedParent)) {
+                Files.createDirectories(resolvedParent);
+            }
+
+            var outputFile = resolvedParent.resolve(withoutSeparator + ".mgs");
             Files.writeString(outputFile, output);
         } catch (IOException e) {
             e.printStackTrace();
