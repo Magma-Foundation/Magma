@@ -76,7 +76,18 @@ public class Main {
     }
 
     private static String renderNode(Node node) {
-        return new ImportRenderer(node).render().unwrapOrElseGet(() -> "");
+        return enumerateRenderers(node)
+                .map(Renderer::render)
+                .head()
+                .flatMap(value -> value)
+                .unwrapOrElseGet(() -> "");
+    }
+
+    private static Iterator<Renderer> enumerateRenderers(Node node) {
+        return Iterators.from(
+                new ImportRenderer(node),
+                new BlockRenderer(node)
+        );
     }
 
     private static Option<String> compileRecord(JavaString stripped) {
@@ -138,28 +149,19 @@ public class Main {
     }
 
     private static Option<String> compileBlock(JavaString body) {
-        return $Option(() -> {
-            var bodyStart = body.firstIndexOfChar('{')
-                    .filter(Index::isStart)
-                    .$()
-                    .next()
-                    .$();
+        return new BlockLexer(body)
+                .lex()
+                .map(Main::transform)
+                .map(Main::renderNode);
+    }
 
-            var bodyEnd = body.lastIndexOfChar('}')
-                    .filter(Index::isEnd)
-                    .$();
-
-            var slicedBody = body.slice(bodyStart.to(bodyEnd).$()).strip();
-            var collect1 = new Splitter(slicedBody).split();
-            return new BlockNode(collect1);
-        }).map(node -> {
-            var collect = node
-                    .lines()
+    private static Node transform(Node node) {
+        return node.getLines().<Node>map(lines -> {
+            var collect = lines
                     .stream()
                     .map(Main::compileLine)
                     .collect(Collectors.toList());
             return new BlockNode(collect);
-        }).map(node -> new BlockRenderer(node).render().unwrapOrElseGet(() -> ""));
+        }).unwrapOrElse(node);
     }
-
 }

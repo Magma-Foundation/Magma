@@ -18,4 +18,6 @@ public interface Option<T> {
     <R> Option<R> replaceValue(R value);
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+    T unwrapOrElse(T other);
 }
