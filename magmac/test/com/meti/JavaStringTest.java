@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.api.collect.Index;
+import com.meti.api.collect.JavaString;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

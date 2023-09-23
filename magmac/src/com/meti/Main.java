@@ -1,5 +1,12 @@
 package com.meti;
 
+import com.meti.api.collect.JavaString;
+import com.meti.compile.JavaLexer;
+import com.meti.compile.MagmaRenderer;
+import com.meti.compile.Node;
+import com.meti.compile.Splitter;
+import com.meti.compile.block.BlockNode;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
