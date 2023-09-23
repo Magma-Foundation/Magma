@@ -21,7 +21,7 @@ public record MagmaRenderer(Node node) implements Renderer {
     public Option<JavaString> render() {
         return enumerateRenderers(node())
                 .map(Renderer::render)
-                .head()
-                .flatMap(value -> value);
+                .flatMap(Iterators::fromOption)
+                .head();
     }
 }
