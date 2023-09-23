@@ -57,22 +57,11 @@ public class Main {
 
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
-        var lexers = enumerateLexers(stripped);
-        return lexers.map(Lexer::lex)
-                .head()
-                .flatMap(value -> value)
+        return new JavaLexer(stripped)
+                .lex()
                 .map(Main::transform)
                 .map(Main::renderNode)
                 .unwrapOrElseGet(() -> input);
-    }
-
-    private static Iterator<Lexer> enumerateLexers(JavaString stripped) {
-        return Iterators.from(
-                new ImportLexer(stripped),
-                new BlockLexer(stripped),
-                new ClassLexer(stripped),
-                new RecordLexer(stripped)
-        );
     }
 
     private static String renderNode(Node node) {
