@@ -140,15 +140,15 @@ public class Main {
 
             var slicedBody = body.slice(bodyStart.to(bodyEnd).$()).strip();
             var collect1 = new Splitter(slicedBody).split();
-            var node = new BlockNode(collect1);
-
+            return new BlockNode(collect1);
+        }).map(node -> {
             var collect = node
                     .lines()
                     .stream()
                     .map(Main::compileLine)
                     .collect(Collectors.toList());
-            return new BlockRenderer(new BlockNode(collect)).render();
-        });
+            return new BlockNode(collect);
+        }).map(node -> new BlockRenderer(node).render());
     }
 
     private static String compileValidImport(JavaString stripped, Index index) {
