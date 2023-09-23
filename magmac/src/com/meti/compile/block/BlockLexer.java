@@ -2,6 +2,7 @@ package com.meti.compile.block;
 
 import com.meti.api.collect.Index;
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
 import com.meti.compile.Lexer;
 import com.meti.compile.Node;
@@ -23,7 +24,8 @@ public record BlockLexer(JavaString root) implements Lexer {
                     .filter(Index::isEnd)
                     .$();
 
-            var slicedBody = root().sliceBetween(bodyStart.to(bodyEnd).$()).strip();
+            Range range = bodyStart.to(bodyEnd).$();
+            var slicedBody = this.root().sliceBetween(range).strip();
             var collect1 = new Splitter(slicedBody).split();
             return new BlockNode(collect1);
         });

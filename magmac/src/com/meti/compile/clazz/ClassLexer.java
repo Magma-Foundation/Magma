@@ -1,6 +1,7 @@
 package com.meti.compile.clazz;
 
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.compile.Lexer;
@@ -32,7 +33,8 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                 return keys.substring(separator + 1).strip();
             });
 
-            var body = stripped().sliceBetween(bodyStart.to(bodyEnd).$()).strip();
+            Range range = bodyStart.to(bodyEnd).$();
+            var body = this.stripped().sliceBetween(range).value().strip();
             return new ClassNode(name, body);
         });
     }

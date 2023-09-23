@@ -25,8 +25,8 @@ public record JavaString(String value) {
         return new JavaString(value.substring(beginIndex.value()));
     }
 
-    public String sliceBetween(Range range) {
-        return value.substring(range.startInclusive(), range.endExclusive());
+    public JavaString sliceBetween(Range range) {
+        return new JavaString(value.substring(range.startInclusive(), range.endExclusive()));
     }
 
     public JavaString sliceTo1(Index index) {

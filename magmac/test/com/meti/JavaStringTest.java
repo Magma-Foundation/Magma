@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.api.collect.Index;
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.Range;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,8 @@ class JavaStringTest {
         var string = new JavaString("foobar");
         var start = string.firstIndexOfChar('o').unwrapOrElseGet(Assertions::fail);
         var end = string.firstIndexOfChar('b').unwrapOrElseGet(Assertions::fail);
-        var slice = string.sliceBetween(start.to(end).unwrapOrElseGet(Assertions::fail));
+        Range range = start.to(end).unwrapOrElseGet(Assertions::fail);
+        var slice = string.sliceBetween(range).value();
         assertEquals("oo", slice);
     }
 

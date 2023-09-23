@@ -1,6 +1,7 @@
 package com.meti.compile.function;
 
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
 import com.meti.compile.Lexer;
 import com.meti.compile.Node;
@@ -21,8 +22,10 @@ public record RecordLexer(JavaString stripped) implements Lexer {
                     .next()
                     .$();
 
-            var name = stripped().sliceBetween(nameStart.to(paramStart).$());
-            var bodySlice = stripped().sliceBetween(bodyStart.to(bodyEnd).$());
+            Range range1 = nameStart.to(paramStart).$();
+            var name = this.stripped().sliceBetween(range1).value();
+            Range range = bodyStart.to(bodyEnd).$();
+            var bodySlice = this.stripped().sliceBetween(range).value();
 
             var node = new MethodNode(name, "()", bodySlice);
             return node;
