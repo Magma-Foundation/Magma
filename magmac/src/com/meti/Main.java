@@ -83,7 +83,7 @@ public class Main {
         var stripped = new JavaString(input.strip());
         return compilePackage(stripped)
                 .orElseGet(() -> compileImport(stripped))
-                .orElseGet(() -> compileBody(stripped))
+                .orElseGet(() -> compileBlock(stripped))
                 .orElseGet(() -> compileClass(stripped))
                 .orElseGet(() -> compileRecord(stripped))
                 .unwrapOrElseGet(() -> input + ";");
@@ -138,7 +138,7 @@ public class Main {
         });
     }
 
-    private static Option<String> compileBody(JavaString body) {
+    private static Option<String> compileBlock(JavaString body) {
         return $Option(() -> {
             var bodyStart = body.firstIndexOfChar('{')
                     .filter(Index::isStart)
