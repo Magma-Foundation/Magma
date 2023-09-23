@@ -1,5 +1,5 @@
 package com.meti;
 
 public interface Renderer {
-    String render();
+    Option<String> render();
 }

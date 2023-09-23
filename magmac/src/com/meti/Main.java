@@ -60,7 +60,9 @@ public class Main {
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
         return compilePackage(stripped)
-                .orElseGet(() -> lexImport(stripped).map(Main::renderNode))
+                .orElseGet(() -> new ImportLexer(stripped)
+                        .lex()
+                        .map(Main::renderNode))
                 .orElseGet(() -> compileBlock(stripped))
                 .orElseGet(() -> compileClass(stripped))
                 .orElseGet(() -> compileRecord(stripped))
@@ -73,20 +75,8 @@ public class Main {
                 .replaceValue("");
     }
 
-    private static Option<ImportNode> lexImport(JavaString stripped) {
-        return stripped.firstIndexOfSlice("import ")
-                .flatMap(option -> option.nextBy("import ".length()))
-                .map(index -> {
-                    var name = stripped.slice(index).strip();
-                    var separator = name.lastIndexOf('.');
-                    var parent = name.substring(0, separator).strip();
-                    var child = name.substring(separator + 1).strip();
-                    return new ImportNode(parent, child);
-                });
-    }
-
-    private static String renderNode(ImportNode node) {
-        return new ImportRenderer(node).render();
+    private static String renderNode(Node node) {
+        return new ImportRenderer(node).render().unwrapOrElseGet(() -> "");
     }
 
     private static Option<String> compileRecord(JavaString stripped) {
@@ -105,7 +95,7 @@ public class Main {
             var bodySlice = stripped.slice(bodyStart.to(bodyEnd).$());
 
             return getMethodNode(new MethodNode(name, "()", bodySlice));
-        }).map(node -> new FunctionRenderer(node).render());
+        }).map(node -> new FunctionRenderer(node).render().unwrapOrElseGet(() -> ""));
     }
 
     private static MethodNode getMethodNode(MethodNode methodNode) {
@@ -117,7 +107,7 @@ public class Main {
         return lexClass(stripped).map(node -> {
             var outputBody = compileLine(node.body());
             return new MethodNode(node.name(), "", outputBody);
-        }).map(node1 -> new FunctionRenderer(node1).render());
+        }).map(node1 -> new FunctionRenderer(node1).render().unwrapOrElseGet(() -> ""));
     }
 
     private static Option<ClassNode> lexClass(JavaString stripped) {
@@ -169,7 +159,7 @@ public class Main {
                     .map(Main::compileLine)
                     .collect(Collectors.toList());
             return new BlockNode(collect);
-        }).map(node -> new BlockRenderer(node).render());
+        }).map(node -> new BlockRenderer(node).render().unwrapOrElseGet(() -> ""));
     }
 
 }

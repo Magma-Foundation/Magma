@@ -1,8 +1,15 @@
 package com.meti;
 
-public record ImportRenderer(ImportNode importNode) implements Renderer {
+import static com.meti.Options.$Option;
+
+public record ImportRenderer(Node importNode) implements Renderer {
+
     @Override
-    public String render() {
-        return "import { " + importNode().child() + " } from " + importNode().parent() + ";\n";
+    public Option<String> render() {
+        return $Option(() -> {
+            var child = this.importNode().getChild();
+            var parent = this.importNode().getParent();
+            return "import { " + child + " } from " + parent + ";\n";
+        });
     }
 }
