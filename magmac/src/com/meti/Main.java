@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.meti.Options.$Option;
@@ -34,7 +32,7 @@ public class Main {
     private static void compileFile(Path source, Path dist, Path file) {
         try {
             var input = Files.readString(file);
-            var lines = split(input);
+            var lines = new Splitter(input).split();
 
             var output = lines.stream()
                     .map(Main::compileLine)
@@ -59,26 +57,6 @@ public class Main {
         }
     }
 
-    private static List<String> split(String input) {
-        var lines = new ArrayList<String>();
-        var buffer = new StringBuilder();
-        var depth = 0;
-
-        for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (c == ';' && depth == 0) {
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                buffer.append(c);
-            }
-        }
-        lines.add(buffer.toString());
-        return lines;
-    }
-
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
         return compilePackage(stripped)
@@ -86,7 +64,7 @@ public class Main {
                 .orElseGet(() -> compileBlock(stripped))
                 .orElseGet(() -> compileClass(stripped))
                 .orElseGet(() -> compileRecord(stripped))
-                .unwrapOrElseGet(() -> input + ";");
+                .unwrapOrElseGet(() -> input);
     }
 
     private static Option<String> compilePackage(JavaString stripped) {
@@ -129,10 +107,18 @@ public class Main {
                     .lastIndexOfChar('}').$()
                     .next().$();
 
-            var body = stripped.slice(bodyStart.to(bodyEnd).$());
-            var keys = stripped.sliceTo(bodyStart).strip();
-            var separator = keys.lastIndexOf(' ');
-            var name = keys.substring(separator + 1);
+            var extendsIndex = stripped.firstIndexOfSlice("extends ");
+            var name = extendsIndex.map(extendsIndex1 -> {
+                var keys = stripped.sliceTo(extendsIndex1).strip();
+                var separator = keys.lastIndexOf(' ');
+                return keys.substring(separator + 1).strip();
+            }).unwrapOrElseGet(() -> {
+                var keys = stripped.sliceTo(bodyStart).strip();
+                var separator = keys.lastIndexOf(' ');
+                return keys.substring(separator + 1).strip();
+            });
+
+            var body = stripped.slice(bodyStart.to(bodyEnd).$()).strip();
             var outputBody = compileLine(body);
             return "export class def " + name + " => " + outputBody;
         });
@@ -151,10 +137,10 @@ public class Main {
                     .$();
 
             var slicedBody = body.slice(bodyStart.to(bodyEnd).$()).strip();
-            return split(slicedBody)
+            return new Splitter(slicedBody).split()
                     .stream()
                     .map(Main::compileLine)
-                    .collect(Collectors.joining("", "{\n", "\n}"));
+                    .collect(Collectors.joining("\t", "{\n", "\n}"));
         });
     }
 

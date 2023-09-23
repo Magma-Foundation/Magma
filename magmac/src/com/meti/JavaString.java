@@ -26,7 +26,7 @@ public record JavaString(String value) {
     }
 
     public String sliceTo(Index index) {
-        return value.substring(0, index.length());
+        return value.substring(0, index.value());
     }
 
     public int length() {
