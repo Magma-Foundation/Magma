@@ -16,4 +16,6 @@ public interface Option<T> {
     T $() throws IntentionalException;
 
     <R> Option<R> replaceValue(R value);
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 }

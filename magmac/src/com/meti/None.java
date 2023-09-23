@@ -10,6 +10,11 @@ public class None<T> implements Option<T> {
         return new None<>();
     }
 
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return new None<>();
+    }
+
     public static <T> Option<T> apply() {
         return new None<>();
     }

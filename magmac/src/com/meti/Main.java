@@ -60,7 +60,7 @@ public class Main {
     private static String compileLine(String input) {
         var stripped = new JavaString(input.strip());
         return compilePackage(stripped)
-                .orElseGet(() -> compileImport(stripped))
+                .orElseGet(() -> lexImport(stripped).map(Main::renderNode))
                 .orElseGet(() -> compileBlock(stripped))
                 .orElseGet(() -> compileClass(stripped))
                 .orElseGet(() -> compileRecord(stripped))
@@ -73,8 +73,20 @@ public class Main {
                 .replaceValue("");
     }
 
-    private static Option<String> compileImport(JavaString stripped) {
-        return stripped.firstIndexOfSlice("import ").map(index -> compileValidImport(stripped, index));
+    private static Option<ImportNode> lexImport(JavaString stripped) {
+        return stripped.firstIndexOfSlice("import ")
+                .flatMap(option -> option.nextBy("import ".length()))
+                .map(index -> {
+                    var name = stripped.slice(index).strip();
+                    var separator = name.lastIndexOf('.');
+                    var parent = name.substring(0, separator).strip();
+                    var child = name.substring(separator + 1).strip();
+                    return new ImportNode(parent, child);
+                });
+    }
+
+    private static String renderNode(ImportNode node) {
+        return new ImportRenderer(node).render();
     }
 
     private static Option<String> compileRecord(JavaString stripped) {
@@ -160,11 +172,4 @@ public class Main {
         }).map(node -> new BlockRenderer(node).render());
     }
 
-    private static String compileValidImport(JavaString stripped, Index index) {
-        var name = stripped.slice(index);
-        var separator = name.lastIndexOf('.');
-        var parent = name.substring(0, separator);
-        var child = name.substring(separator + 1);
-        return new ImportRenderer(new ImportNode(parent, child)).render();
-    }
 }

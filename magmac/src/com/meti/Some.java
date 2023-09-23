@@ -15,6 +15,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
+    }
+
+    @Override
     public Option<T> filter(Predicate<T> predicate) {
         return predicate.test(value) ? this : None.apply();
     }
