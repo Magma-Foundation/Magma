@@ -91,12 +91,24 @@ public class Main {
 
             var name = stripped.slice(nameStart.to(paramStart).$());
             var bodySlice = stripped.slice(bodyStart.to(bodyEnd).$());
-            var compiledBody = compileLine(bodySlice);
-            return new MethodNode(name, "()", compiledBody).renderMethod();
-        });
+
+            return getMethodNode(new MethodNode(name, "()", bodySlice));
+        }).map(node -> new FunctionRenderer(node).render());
+    }
+
+    private static MethodNode getMethodNode(MethodNode methodNode) {
+        var compiledBody = compileLine(methodNode.body());
+        return new MethodNode(methodNode.name(), "()", compiledBody);
     }
 
     private static Option<String> compileClass(JavaString stripped) {
+        return lexClass(stripped).map(node -> {
+            var outputBody = compileLine(node.body());
+            return new MethodNode(node.name(), "", outputBody);
+        }).map(node1 -> new FunctionRenderer(node1).render());
+    }
+
+    private static Option<ClassNode> lexClass(JavaString stripped) {
         return $Option(() -> {
             if (!stripped.contains("class ")) {
                 return Options.$$();
@@ -119,10 +131,7 @@ public class Main {
             });
 
             var body = stripped.slice(bodyStart.to(bodyEnd).$()).strip();
-
-            var classNode = new ClassNode(name, body);
-            var outputBody = compileLine(classNode.body());
-            return new MethodNode(classNode.name(), "", outputBody).renderMethod();
+            return new ClassNode(name, body);
         });
     }
 
