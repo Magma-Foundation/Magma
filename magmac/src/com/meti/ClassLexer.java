@@ -17,16 +17,16 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
             var extendsIndex = stripped().firstIndexOfSlice("extends ");
             var name = extendsIndex.map(extendsIndex1 -> {
-                var keys = stripped().sliceTo(extendsIndex1).strip();
+                var keys = this.stripped().sliceTo1(extendsIndex1).value().strip();
                 var separator = keys.lastIndexOf(' ');
                 return keys.substring(separator + 1).strip();
             }).unwrapOrElseGet(() -> {
-                var keys = stripped().sliceTo(bodyStart).strip();
+                var keys = this.stripped().sliceTo1(bodyStart).value().strip();
                 var separator = keys.lastIndexOf(' ');
                 return keys.substring(separator + 1).strip();
             });
 
-            var body = stripped().slice(bodyStart.to(bodyEnd).$()).strip();
+            var body = stripped().sliceBetween(bodyStart.to(bodyEnd).$()).strip();
             return new ClassNode(name, body);
         });
     }

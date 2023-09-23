@@ -16,8 +16,8 @@ public record RecordLexer(JavaString stripped) implements Lexer {
                     .next()
                     .$();
 
-            var name = stripped().slice(nameStart.to(paramStart).$());
-            var bodySlice = stripped().slice(bodyStart.to(bodyEnd).$());
+            var name = stripped().sliceBetween(nameStart.to(paramStart).$());
+            var bodySlice = stripped().sliceBetween(bodyStart.to(bodyEnd).$());
 
             var node = new MethodNode(name, "()", bodySlice);
             return node;

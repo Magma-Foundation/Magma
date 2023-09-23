@@ -16,7 +16,7 @@ public record BlockLexer(JavaString root) implements Lexer {
                     .filter(Index::isEnd)
                     .$();
 
-            var slicedBody = root().slice(bodyStart.to(bodyEnd).$()).strip();
+            var slicedBody = root().sliceBetween(bodyStart.to(bodyEnd).$()).strip();
             var collect1 = new Splitter(slicedBody).split();
             return new BlockNode(collect1);
         });

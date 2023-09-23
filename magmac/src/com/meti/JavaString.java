@@ -17,16 +17,16 @@ public record JavaString(String value) {
         return wrapIndex(value.lastIndexOf(ch));
     }
 
-    public String slice(Index beginIndex) {
-        return value.substring(beginIndex.value());
+    public JavaString sliceFrom(Index beginIndex) {
+        return new JavaString(value.substring(beginIndex.value()));
     }
 
-    public String slice(Range range) {
+    public String sliceBetween(Range range) {
         return value.substring(range.startInclusive(), range.endExclusive());
     }
 
-    public String sliceTo(Index index) {
-        return value.substring(0, index.value());
+    public JavaString sliceTo1(Index index) {
+        return new JavaString(value.substring(0, index.value()));
     }
 
     public int length() {
@@ -36,4 +36,9 @@ public record JavaString(String value) {
     public boolean contains(String slice) {
         return this.value.contains(slice);
     }
+
+    public JavaString strip() {
+        return new JavaString(this.value.strip());
+    }
+
 }

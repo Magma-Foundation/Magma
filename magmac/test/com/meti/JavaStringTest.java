@@ -39,7 +39,7 @@ class JavaStringTest {
         var string = new JavaString("foobar");
         var start = string.firstIndexOfChar('o').unwrapOrElseGet(Assertions::fail);
         var end = string.firstIndexOfChar('b').unwrapOrElseGet(Assertions::fail);
-        var slice = string.slice(start.to(end).unwrapOrElseGet(Assertions::fail));
+        var slice = string.sliceBetween(start.to(end).unwrapOrElseGet(Assertions::fail));
         assertEquals("oo", slice);
     }
 
