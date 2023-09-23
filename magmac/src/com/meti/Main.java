@@ -65,19 +65,7 @@ public class Main {
     }
 
     private static String renderNode(Node node) {
-        return enumerateRenderers(node)
-                .map(Renderer::render)
-                .head()
-                .flatMap(value -> value)
-                .unwrapOrElseGet(() -> "");
-    }
-
-    private static Iterator<Renderer> enumerateRenderers(Node node) {
-        return Iterators.from(
-                new ImportRenderer(node),
-                new BlockRenderer(node),
-                new FunctionRenderer(node)
-        );
+        return new MagmaRenderer(node).render().unwrapOrElseGet(() -> "");
     }
 
     private static Node transform(Node node) {

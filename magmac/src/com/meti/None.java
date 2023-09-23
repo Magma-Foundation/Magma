@@ -15,6 +15,11 @@ public class None<T> implements Option<T> {
         return new None<>();
     }
 
+    @Override
+    public T unwrapOrElse(T other) {
+        return other;
+    }
+
     public static <T> Option<T> apply() {
         return new None<>();
     }
