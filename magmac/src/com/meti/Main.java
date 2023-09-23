@@ -92,12 +92,8 @@ public class Main {
             var name = stripped.slice(nameStart.to(paramStart).$());
             var bodySlice = stripped.slice(bodyStart.to(bodyEnd).$());
             var compiledBody = compileLine(bodySlice);
-            return renderMethod(name, "()", compiledBody);
+            return new MethodNode(name, "()", compiledBody).renderMethod();
         });
-    }
-
-    private static String renderMethod(String name, String parameters, String body) {
-        return "export class def " + name + parameters + " => " + body;
     }
 
     private static Option<String> compileClass(JavaString stripped) {
@@ -123,8 +119,10 @@ public class Main {
             });
 
             var body = stripped.slice(bodyStart.to(bodyEnd).$()).strip();
-            var outputBody = compileLine(body);
-            return renderMethod(name, "", outputBody);
+
+            var classNode = new ClassNode(name, body);
+            var outputBody = compileLine(classNode.body());
+            return new MethodNode(classNode.name(), "", outputBody).renderMethod();
         });
     }
 
@@ -141,10 +139,15 @@ public class Main {
                     .$();
 
             var slicedBody = body.slice(bodyStart.to(bodyEnd).$()).strip();
-            return new Splitter(slicedBody).split()
+            var collect1 = new Splitter(slicedBody).split();
+            var node = new BlockNode(collect1);
+
+            var collect = node
+                    .lines()
                     .stream()
                     .map(Main::compileLine)
-                    .collect(Collectors.joining("\t", "{\n", "\n}"));
+                    .collect(Collectors.toList());
+            return new BlockRenderer(new BlockNode(collect)).render();
         });
     }
 
@@ -153,7 +156,6 @@ public class Main {
         var separator = name.lastIndexOf('.');
         var parent = name.substring(0, separator);
         var child = name.substring(separator + 1);
-        return new ImportNode(parent, child).render();
+        return new ImportRenderer(new ImportNode(parent, child)).render();
     }
-
 }
