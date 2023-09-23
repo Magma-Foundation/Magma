@@ -92,8 +92,12 @@ public class Main {
             var name = stripped.slice(nameStart.to(paramStart).$());
             var bodySlice = stripped.slice(bodyStart.to(bodyEnd).$());
             var compiledBody = compileLine(bodySlice);
-            return "export class def " + name + "() => " + compiledBody;
+            return renderMethod(name, "()", compiledBody);
         });
+    }
+
+    private static String renderMethod(String name, String parameters, String body) {
+        return "export class def " + name + parameters + " => " + body;
     }
 
     private static Option<String> compileClass(JavaString stripped) {
@@ -120,7 +124,7 @@ public class Main {
 
             var body = stripped.slice(bodyStart.to(bodyEnd).$()).strip();
             var outputBody = compileLine(body);
-            return "export class def " + name + " => " + outputBody;
+            return renderMethod(name, "", outputBody);
         });
     }
 
@@ -149,6 +153,7 @@ public class Main {
         var separator = name.lastIndexOf('.');
         var parent = name.substring(0, separator);
         var child = name.substring(separator + 1);
-        return "import { " + child + " } from " + parent + ";\n";
+        return new ImportNode(parent, child).render();
     }
+
 }
