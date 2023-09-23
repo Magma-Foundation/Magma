@@ -1,17 +1,12 @@
 package com.meti;
 
 import com.meti.api.collect.JavaString;
-import com.meti.compile.JavaLexer;
-import com.meti.compile.MagmaRenderer;
-import com.meti.compile.Node;
-import com.meti.compile.Splitter;
-import com.meti.compile.block.BlockNode;
+import com.meti.compile.Compiler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -37,11 +32,7 @@ public class Main {
     private static void compileFile(Path source, Path dist, Path file) {
         try {
             var input = Files.readString(file);
-            var lines = new Splitter(input).split();
-
-            var output = lines.stream()
-                    .map(Main::compileLine)
-                    .collect(Collectors.joining());
+            var output = new Compiler(new JavaString(input.strip())).compile();
 
             var relative = source.relativize(file);
             var parent = relative.getParent();
@@ -60,33 +51,5 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static String compileLine(String input) {
-        var stripped = new JavaString(input.strip());
-        return new JavaLexer(stripped)
-                .lex()
-                .map(Main::transform)
-                .map(Main::renderNode)
-                .unwrapOrElseGet(() -> input);
-    }
-
-    private static String renderNode(Node node) {
-        return new MagmaRenderer(node).render().unwrapOrElseGet(() -> "");
-    }
-
-    private static Node transform(Node node) {
-        var withBody = node.getBody().map(body -> {
-            var compiledBody = compileLine(body);
-            return node.withBody(compiledBody);
-        }).unwrapOrElse(node);
-
-        return withBody.getLines().<Node>map(lines -> {
-            var collect = lines
-                    .stream()
-                    .map(Main::compileLine)
-                    .collect(Collectors.toList());
-            return new BlockNode(collect);
-        }).unwrapOrElse(withBody);
     }
 }
