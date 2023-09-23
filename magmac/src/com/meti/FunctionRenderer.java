@@ -1,12 +1,16 @@
 package com.meti;
 
-public record FunctionRenderer(MethodNode node) implements Renderer {
-    private String render1() {
-        return "export class def " + node().name() + node().parameters() + " => " + node().body();
-    }
+import static com.meti.Options.$Option;
+
+public record FunctionRenderer(Node node) implements Renderer {
 
     @Override
     public Option<String> render() {
-        return Some.apply(render1());
+        return $Option(() -> {
+            var name = this.node().getName().$();
+            var parameters = this.node().getParameters().$();
+            var body = this.node().getBody().$();
+            return "export class def " + name + parameters + " => " + body;
+        });
     }
 }

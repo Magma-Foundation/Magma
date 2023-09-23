@@ -3,6 +3,10 @@ package com.meti;
 import java.util.List;
 
 public interface Node {
+    default Node withBody(String compiledBody) {
+        return this;
+    }
+
     default Option<String> getChild() {
         return None.apply();
     }
@@ -12,6 +16,18 @@ public interface Node {
     }
 
     default Option<List<String>> getLines() {
+        return None.apply();
+    }
+
+    default Option<String> getName() {
+        return None.apply();
+    }
+
+    default Option<String> getParameters() {
+        return None.apply();
+    }
+
+    default Option<String> getBody() {
         return None.apply();
     }
 }
