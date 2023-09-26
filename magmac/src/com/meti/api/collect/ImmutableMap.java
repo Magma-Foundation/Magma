@@ -12,6 +12,10 @@ public record ImmutableMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
         this(new HashMap<>());
     }
 
+    public static <K, V> Map<K, V> empty() {
+        return new ImmutableMap<>();
+    }
+
     @Override
     public boolean hasKey(K key) {
         return map.containsKey(key);
