@@ -1,1 +1,6 @@
 /out
+/target
+/build
+/generated
+/.gradle
+/.idea
