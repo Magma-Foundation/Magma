@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.api.collect.JavaString;
 import com.meti.api.iterate.Iterator;
 import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
@@ -17,7 +18,7 @@ public record MagmaRenderer(Node node) implements Renderer {
     }
 
     @Override
-    public Option<String> render() {
+    public Option<JavaString> render() {
         return enumerateRenderers(node())
                 .map(Renderer::render)
                 .head()

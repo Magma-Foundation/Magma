@@ -1,14 +1,14 @@
 package com.meti.compile.block;
 
+import com.meti.api.collect.JavaString;
+import com.meti.api.collect.List;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.Node;
 
-import java.util.List;
-
-public record BlockNode(List<String> lines) implements Node {
+public record BlockNode(com.meti.api.collect.List<JavaString> lines) implements Node {
     @Override
-    public Option<List<String>> getLines() {
+    public Option<List<JavaString>> getLines() {
         return Some.apply(lines);
     }
 }

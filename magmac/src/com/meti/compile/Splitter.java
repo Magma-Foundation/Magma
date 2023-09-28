@@ -1,13 +1,14 @@
 package com.meti.compile;
 
+import com.meti.api.collect.ImmutableList;
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.List;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public record Splitter(JavaString input) {
-    public List<String> split() {
-        var lines = new ArrayList<String>();
+    public List<JavaString> split() {
+        var lines = new ArrayList<JavaString>();
         var buffer = new StringBuilder();
         var depth = 0;
 
@@ -15,7 +16,7 @@ public record Splitter(JavaString input) {
         for (int i = 0; i < value.length(); i++) {
             var c = value.charAt(i);
             if (c == ';' && depth == 0) {
-                lines.add(buffer.toString());
+                lines.add(new JavaString(buffer.toString()));
                 buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
@@ -23,7 +24,7 @@ public record Splitter(JavaString input) {
                 buffer.append(c);
             }
         }
-        lines.add(buffer.toString());
-        return lines;
+        lines.add(new JavaString(buffer.toString()));
+        return new ImmutableList<>(lines);
     }
 }

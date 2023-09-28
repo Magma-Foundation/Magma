@@ -1,36 +1,36 @@
 package com.meti.compile;
 
+import com.meti.api.collect.JavaString;
+import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 
-import java.util.List;
-
 public interface Node {
-    default Node withBody(String compiledBody) {
+    default Node withBody(JavaString compiledBody) {
         return this;
     }
 
-    default Option<String> getChild() {
+    default Option<JavaString> getChild() {
         return None.apply();
     }
 
-    default Option<String> getParent() {
+    default Option<JavaString> getParent() {
         return None.apply();
     }
 
-    default Option<List<String>> getLines() {
+    default Option<List<JavaString>> getLines() {
         return None.apply();
     }
 
-    default Option<String> getName() {
+    default Option<JavaString> getName() {
         return None.apply();
     }
 
-    default Option<String> getParameters() {
+    default Option<JavaString> getParameters() {
         return None.apply();
     }
 
-    default Option<String> getBody() {
+    default Option<JavaString> getBody() {
         return None.apply();
     }
 }

@@ -5,6 +5,8 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 public record JavaString(String value) {
+    public static final JavaString Empty = new JavaString("");
+
     public Option<Index> firstIndexOfSlice(String slice) {
         return wrapIndex(value.indexOf(slice));
     }
@@ -45,4 +47,7 @@ public record JavaString(String value) {
         return new JavaString(this.value.strip());
     }
 
+    public JavaString concat(JavaString other) {
+        return new JavaString(value + other.value);
+    }
 }
