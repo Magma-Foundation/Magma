@@ -15,7 +15,7 @@ public record FunctionRenderer(Node node) implements Renderer {
             var name = this.node().getName().$();
             var parameters = this.node().getParameters().$();
             var body = this.node().getBody().$();
-            return "export class def " + name + parameters + " => " + body;
+            return new JavaString("export class def " + name + parameters + " => " + body);
         });
     }
 }

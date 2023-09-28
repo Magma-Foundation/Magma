@@ -23,11 +23,11 @@ public record RecordLexer(JavaString stripped) implements Lexer {
                     .$();
 
             Range range1 = nameStart.to(paramStart).$();
-            var name = this.stripped().sliceBetween(range1).value();
+            var name = this.stripped().sliceBetween(range1);
             Range range = bodyStart.to(bodyEnd).$();
-            var bodySlice = this.stripped().sliceBetween(range).value();
+            var bodySlice = this.stripped().sliceBetween(range);
 
-            var node = new MethodNode(name, "()", bodySlice);
+            var node = new MethodNode(name, new JavaString("()"), bodySlice);
             return node;
         });
     }

@@ -1,27 +1,28 @@
 package com.meti.compile.function;
 
+import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.Node;
 
-public record MethodNode(String name, String parameters, String body) implements Node {
+public record MethodNode(JavaString name, JavaString parameters, JavaString body) implements Node {
     @Override
-    public Node withBody(String compiledBody) {
-        return new MethodNode(getName().unwrapOrElse(""), parameters, compiledBody);
+    public Node withBody(JavaString compiledBody) {
+        return new MethodNode(getName().unwrapOrElse(JavaString.Empty), parameters, compiledBody);
     }
 
     @Override
-    public Option<String> getName() {
+    public Option<JavaString> getName() {
         return Some.apply(name);
     }
 
     @Override
-    public Option<String> getParameters() {
+    public Option<JavaString> getParameters() {
         return Some.apply(parameters);
     }
 
     @Override
-    public Option<String> getBody() {
+    public Option<JavaString> getBody() {
         return Some.apply(body);
     }
 }

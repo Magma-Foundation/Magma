@@ -14,7 +14,7 @@ public record ImportRenderer(Node importNode) implements Renderer {
         return $Option(() -> {
             var child = this.importNode().getChild().$();
             var parent = this.importNode().getParent().$();
-            return "import { " + child + " } from " + parent + ";\n";
+            return new JavaString("import { " + child + " } from " + parent + ";\n");
         });
     }
 }

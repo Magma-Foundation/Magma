@@ -50,4 +50,12 @@ public record JavaString(String value) {
     public JavaString concat(JavaString other) {
         return new JavaString(value + other.value);
     }
+
+    public JavaString prepend(String slice) {
+        return new JavaString(slice + value);
+    }
+
+    public JavaString append(String slice) {
+        return new JavaString(value + slice);
+    }
 }

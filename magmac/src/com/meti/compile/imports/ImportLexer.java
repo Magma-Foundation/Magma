@@ -19,7 +19,7 @@ public record ImportLexer(JavaString stripped) implements Lexer {
             var separator = name.lastIndexOfChar('.').$();
             var parent = name.sliceTo1(separator).strip();
             var child = name.sliceFrom(separator.next().$()).strip();
-            return new ImportNode(parent.value(), child.value());
+            return new ImportNode(parent, child);
         });
     }
 }

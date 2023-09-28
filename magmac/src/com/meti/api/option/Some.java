@@ -1,5 +1,7 @@
 package com.meti.api.option;
 
+import com.meti.api.tuple.Tuple;
+
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -22,6 +24,21 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public T unwrapOrElse(T other) {
         return value;
+    }
+
+    @Override
+    public <R> R into(Function<Option<T>, R> mapper) {
+        return mapper.apply(this);
+    }
+
+    @Override
+    public Tuple<Boolean, T> unwrapToTuple(T other) {
+        return new Tuple<>(true, value);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
     }
 
     @Override

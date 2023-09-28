@@ -3,6 +3,7 @@ package com.meti.api.option;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.api.tuple.Tuple;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,7 +16,17 @@ public class ThrowableOption<T> implements Option<T> {
         this.parent = parent;
     }
 
-    public <E> Result<T, E> unwrapOrThrow(E value) {
+    @Override
+    public Tuple<Boolean, T> unwrapToTuple(T other) {
+        return parent.unwrapToTuple(other);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return parent.isEmpty();
+    }
+
+    public <E extends Throwable> Result<T, E> unwrapOrThrow(E value) {
         return parent.map(Ok::<T, E>apply).unwrapOrElse(Err.apply(value));
     }
 

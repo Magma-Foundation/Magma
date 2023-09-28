@@ -4,6 +4,8 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
+import java.util.ArrayList;
+
 public record ImmutableList<T>(java.util.List<T> nativeList) implements List<T> {
     @Override
     public Iterator<T> iter() {
@@ -21,5 +23,12 @@ public record ImmutableList<T>(java.util.List<T> nativeList) implements List<T> 
                 }
             }
         };
+    }
+
+    @Override
+    public List<T> addLast(T element) {
+        var copy = new ArrayList<>(nativeList);
+        copy.add(element);
+        return new ImmutableList<>(copy);
     }
 }

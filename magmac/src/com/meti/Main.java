@@ -47,7 +47,13 @@ public class Main {
             }
 
             var outputFile = resolvedParent.resolve(withoutSeparator + ".mgs");
-            Files.writeString(outputFile, output);
+            output.match(outputValue -> {
+                try {
+                    Files.writeString(outputFile, outputValue.value());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }, Throwable::printStackTrace);
         } catch (IOException e) {
             e.printStackTrace();
         }

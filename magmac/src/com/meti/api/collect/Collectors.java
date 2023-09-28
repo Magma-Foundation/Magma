@@ -31,6 +31,10 @@ public class Collectors {
     }
 
     public static Collector<JavaString, Option<JavaString>> joining() {
+        return joining(JavaString.Empty);
+    }
+
+    public static Collector<JavaString, Option<JavaString>> joining(final JavaString delimiter) {
         return new Collector<>() {
             @Override
             public Option<JavaString> initial() {
@@ -42,7 +46,7 @@ public class Collectors {
                 if (accumulated.isEmpty()) {
                     return Some.apply(element);
                 } else {
-                    return accumulated.map(accumulatedValue -> accumulatedValue.concat(element));
+                    return accumulated.map(accumulatedValue -> accumulatedValue.concat(delimiter).concat(element));
                 }
             }
         };
