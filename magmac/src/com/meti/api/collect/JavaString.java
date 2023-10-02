@@ -7,6 +7,10 @@ import com.meti.api.option.Some;
 public record JavaString(String value) {
     public static final JavaString Empty = new JavaString("");
 
+    public static JavaString apply(String slice) {
+        return new JavaString(slice);
+    }
+
     public Option<Index> firstIndexOfSlice(String slice) {
         return wrapIndex(value.indexOf(slice));
     }

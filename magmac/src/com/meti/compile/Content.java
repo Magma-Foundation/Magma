@@ -6,14 +6,18 @@ import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 
-public record MapNode(JavaString name) implements Node {
-    @Override
-    public boolean is(String name) {
-        return this.name.equalsToSlice(name);
+public class Content implements Node {
+    public Content(JavaString value) {
+
     }
 
-    private Node withBody(JavaString compiledBody) {
-        return this;
+    public static Node from(JavaString value) {
+        return new Content(value);
+    }
+
+    @Override
+    public boolean is(String name) {
+        return name.equals("content");
     }
 
     public Option<JavaString> getChild() {
@@ -70,6 +74,10 @@ public record MapNode(JavaString name) implements Node {
         } else {
             return None.apply();
         }
+    }
+
+    private Node withBody(JavaString compiledBody) {
+        return this;
     }
 
     @Override

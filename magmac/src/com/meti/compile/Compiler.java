@@ -4,16 +4,15 @@ import com.meti.api.collect.Collectors;
 import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
-import com.meti.api.result.Results;
 import com.meti.compile.block.BlockNode;
 
-import static com.meti.api.result.Results.*;
 import static com.meti.api.result.Results.$Result;
 
 public record Compiler(JavaString input) {
@@ -48,11 +47,22 @@ public record Compiler(JavaString input) {
                 return new DiscardState();
             }
 
-            var withBody = node.getBody()
-                    .map(body -> compileLine(body).mapValue(node::withBody))
+            var withBody = node.apply(JavaString.apply("body"))
+                    .flatMap(Attribute::asNode)
+                    .flatMap(node11 -> node11.apply(JavaString.apply("value")))
+                    .flatMap(Attribute::asString)
+                    .map(body -> compileLine(body).mapValue(compiledBody -> node.with(new JavaString("body"), new NodeAttribute(Content.from(compiledBody)))
+                            .unwrapOrElse(node)))
                     .unwrapOrElse(Ok.apply(node)).$();
 
-            var value = withBody.getLines().map(Compiler::compileLines)
+            var value = withBody.apply(JavaString.apply("lines"))
+                    .flatMap(Attribute::asListOfNodes)
+                    .map(node11 -> node11.iter()
+                            .map(child -> child.apply(JavaString.apply("value")))
+                            .flatMap(Iterators::fromOption)
+                            .map(Attribute::asString)
+                            .flatMap(Iterators::fromOption)
+                            .collect(ImmutableLists.into())).map(Compiler::compileLines)
                     .unwrapOrElse(Ok.apply(withBody))
                     .$();
 

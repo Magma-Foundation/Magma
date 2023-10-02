@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class ImmutableLists {
     private ImmutableLists(){}
 
-    public static <T> Collector<T, List<T>> into() {
+    public static <T> Collector< T, List<T>> into() {
         return new Collector<>() {
             @Override
             public List<T> initial() {
