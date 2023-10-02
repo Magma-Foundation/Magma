@@ -28,6 +28,6 @@ public record MethodNode(JavaString name, JavaString parameters, JavaString body
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return name.equals("method");
     }
 }

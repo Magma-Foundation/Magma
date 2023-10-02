@@ -14,6 +14,6 @@ public record BlockNode(com.meti.api.collect.List<JavaString> lines) implements 
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return name.equals("block");
     }
 }

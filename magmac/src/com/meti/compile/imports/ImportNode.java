@@ -18,6 +18,6 @@ public record ImportNode(JavaString parent, JavaString child) implements Node {
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        return name.equals("import");
     }
 }
