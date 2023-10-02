@@ -22,4 +22,17 @@ public class Iterators {
             }
         };
     }
+
+    public static <T> Iterator<T> empty() {
+        return new AbstractIterator<T>() {
+            @Override
+            public Option<T> head() {
+                return None.apply();
+            }
+        };
+    }
+
+    public static <T> Iterator<T> fromOption(Option<T> option) {
+        return option.map(Iterators::from).unwrapOrElse(Iterators.empty());
+    }
 }

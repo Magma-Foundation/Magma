@@ -25,8 +25,7 @@ public record JavaLexer(JavaString stripped) implements Lexer {
     public Option<Node> lex() {
         return enumerateLexers(this.stripped())
                 .map(Lexer::lex)
-                .head()
-                .flatMap(value -> value);
+                .flatMap(Iterators::fromOption)
+                .head();
     }
-
 }
