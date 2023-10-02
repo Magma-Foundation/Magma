@@ -7,13 +7,13 @@ import com.meti.api.option.Some;
 public record JavaString(String value) {
     public static final JavaString Empty = new JavaString("");
 
+    public static JavaString apply(String slice) {
+        return new JavaString(slice);
+    }
+
     @Override
     public String toString() {
         return value;
-    }
-
-    public static JavaString apply(String slice) {
-        return new JavaString(slice);
     }
 
     public Option<Index> firstIndexOfSlice(String slice) {
@@ -78,5 +78,17 @@ public record JavaString(String value) {
 
     public JavaString append(JavaString suffix) {
         return new JavaString(this.value + suffix.value);
+    }
+
+    public JavaString truncate(int length) {
+        if (length <= this.length()) {
+            return new JavaString(this.value.substring(0, length));
+        } else {
+            return this;
+        }
+    }
+
+    public JavaString replace(String regex, String replacement) {
+        return new JavaString(this.value.replaceAll(regex, replacement));
     }
 }

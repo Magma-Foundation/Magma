@@ -36,7 +36,7 @@ public class Content implements Node {
 
     @Override
     public JavaString toXML() {
-        return value.prepend("<Content>")
-                .append("</Content>");
+        var truncated = value.truncate(5).append("...");
+        return truncated.prepend("<Content>\"").append("\"</Content>");
     }
 }
