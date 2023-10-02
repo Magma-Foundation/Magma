@@ -1,9 +1,13 @@
 package com.meti.compile;
 
+import com.meti.api.Tuple;
+import com.meti.api.collect.ImmutableList;
+import com.meti.api.collect.Iterator;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public record ImmutableMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
@@ -25,14 +29,16 @@ public record ImmutableMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     }
 
     @Override
-    public boolean hasKey(K key) {
-        return map.containsKey(key);
-    }
-
-    @Override
     public Map<K, V> put(K key, V value) {
         var copy = new HashMap<>(map);
         copy.put(key, value);
         return new ImmutableMap<>(copy);
+    }
+
+    @Override
+    public Iterator<Tuple<K, V>> iter() {
+        return new ImmutableList<>(new ArrayList<>(map.entrySet()))
+                .iter()
+                .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
     }
 }

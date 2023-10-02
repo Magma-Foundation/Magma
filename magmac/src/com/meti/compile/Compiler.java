@@ -31,7 +31,8 @@ public record Compiler(JavaString input) {
     private static Result<JavaString, CompileException> renderNode(Node node) {
         return new MagmaRenderer(node).render()
                 .into(ThrowableOption::new)
-                .unwrapOrThrow(new CompileException("Cannot render: " + node));
+                .unwrapOrThrow(new CompileException("Cannot render: " + node))
+                .flatMapValue(value -> value);
     }
 
     private static Result<State, CompileException> transform(Node node) {

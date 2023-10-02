@@ -17,4 +17,6 @@ public interface Attribute {
     default Option<List<Node>> asListOfNodes() {
         return None.apply();
     }
+
+    JavaString toXML();
 }

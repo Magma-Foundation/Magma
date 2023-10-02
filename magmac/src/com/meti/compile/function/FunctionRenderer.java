@@ -4,7 +4,10 @@ import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
 import com.meti.compile.Attribute;
+import com.meti.compile.CompileException;
 import com.meti.compile.Node;
 import com.meti.compile.Renderer;
 
@@ -13,7 +16,7 @@ import static com.meti.api.option.Options.$Option;
 public record FunctionRenderer(Node node) implements Renderer {
 
     @Override
-    public Option<JavaString> render() {
+    public Option<Result<JavaString, CompileException>> render() {
         return $Option(() -> {
             var name = this.node().apply(JavaString.apply("name"))
                     .flatMap(Attribute::asString).$();
@@ -29,7 +32,7 @@ public record FunctionRenderer(Node node) implements Renderer {
                     .flatMap(Attribute::asNode)
                     .flatMap(node11 -> node11.apply(JavaString.apply("value")))
                     .flatMap(Attribute::asString).$();
-            return new JavaString("export class def " + name + parameters + " => " + body);
+            return Ok.apply(new JavaString("export class def " + name + parameters + " => " + body));
         });
     }
 }

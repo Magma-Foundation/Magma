@@ -1,10 +1,9 @@
 package com.meti.compile;
 
+import com.meti.api.collect.Collectors;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
-import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.api.option.Some;
 
 public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {
@@ -16,6 +15,20 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
     }
 
     @Override
+    public JavaString toXML() {
+        var actualName = name.value();
+        var joinedAttributes = attributes.iter()
+                .map(entry -> entry.a()
+                        .prepend(" ")
+                        .append("=")
+                        .append(entry.b().toXML()))
+                .collect(Collectors.joining())
+                .unwrapOrElse(JavaString.Empty);
+
+        return new JavaString("<" + actualName + joinedAttributes.value() + "></" + actualName + ">");
+    }
+
+    @Override
     public boolean is(String name) {
         return this.name.equalsToSlice(name);
     }
@@ -23,15 +36,6 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
     @Override
     public Option<Attribute> apply(JavaString name) {
         return attributes.get(name);
-    }
-
-    @Override
-    public Option<Node> with(JavaString name, Attribute attribute) {
-        if (attributes.hasKey(name)) {
-            return Some.apply(new MapNode(this.name, attributes.put(name, attribute)));
-        } else {
-            return None.apply();
-        }
     }
 
     public record Builder(JavaString name, Map<JavaString, Attribute> attributes) {

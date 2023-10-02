@@ -7,6 +7,11 @@ import com.meti.api.option.Some;
 public record JavaString(String value) {
     public static final JavaString Empty = new JavaString("");
 
+    @Override
+    public String toString() {
+        return value;
+    }
+
     public static JavaString apply(String slice) {
         return new JavaString(slice);
     }
@@ -69,5 +74,9 @@ public record JavaString(String value) {
 
     public boolean isBlank() {
         return this.value.isBlank();
+    }
+
+    public JavaString append(JavaString suffix) {
+        return new JavaString(this.value + suffix.value);
     }
 }

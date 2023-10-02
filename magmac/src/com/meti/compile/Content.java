@@ -33,4 +33,10 @@ public class Content implements Node {
             return None.apply();
         }
     }
+
+    @Override
+    public JavaString toXML() {
+        return value.prepend("<Content>")
+                .append("</Content>");
+    }
 }
