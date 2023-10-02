@@ -13,7 +13,7 @@ public record PackageLexer(JavaString stripped) implements Lexer {
     @Override
     public Option<Node> lex() {
         if (stripped.firstIndexOfSlice("package ").isPresent()) {
-            return Some.apply(new MapNode(new JavaString("package")));
+            return Some.apply(new MapNode(new JavaString("package"), attributes));
         } else {
             return None.apply();
         }

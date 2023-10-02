@@ -1,86 +1,50 @@
 package com.meti.compile;
 
-import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
-public record MapNode(JavaString name) implements Node {
+public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) implements Node {
+    public static Builder Builder(JavaString name) {
+        return new Builder(name);
+    }
+
     @Override
     public boolean is(String name) {
         return this.name.equalsToSlice(name);
     }
 
-    private Node withBody(JavaString compiledBody) {
-        return this;
-    }
-
-    public Option<JavaString> getChild() {
-        return None.apply();
-    }
-
-    public Option<JavaString> getParent() {
-        return None.apply();
-    }
-
-    public Option<List<JavaString>> getLines() {
-        return None.apply();
-    }
-
-    public Option<JavaString> getName() {
-        return None.apply();
-    }
-
-    public Option<JavaString> getParameters() {
-        return None.apply();
-    }
-
-    public Option<JavaString> getBody() {
-        return None.apply();
+    @Override
+    public Option<Attribute> apply(JavaString name) {
+        return attributes.get(name);
     }
 
     @Override
-    public Option<Attribute> apply(JavaString name) {
-        return None.apply();
-        if (name.equalsToSlice("child")) {
-            return getChild()
-                    .map(Content::from)
-                    .map(NodeAttribute::new);
-        } else if (name.equalsToSlice("parent")) {
-            return getParent()
-                    .map(Content::from)
-                    .map(NodeAttribute::new);
-        } else if (name.equalsToSlice("lines")) {
-            return getLines().map(lines -> lines.iter()
-                            .map(Content::from)
-                            .collect(ImmutableLists.into()))
-                    .map(NodeListAttribute::from);
-        } else if (name.equalsToSlice("name")) {
-            return getName().map(StringAttribute::new);
-        } else if (name.equalsToSlice("parameters")) {
-            return getLines().map(lines -> lines.iter()
-                            .map(Content::from)
-                            .collect(ImmutableLists.into()))
-                    .map(NodeListAttribute::from);
-        } else if (name.equalsToSlice("body")) {
-            return getBody()
-                    .map(Content::from)
-                    .map(NodeAttribute::new);
+    public Option<Node> with(JavaString name, Attribute attribute) {
+        if (attributes.hasKey(name)) {
+            return Some.apply(new MapNode(this.name, attributes.put(name, attribute)));
         } else {
             return None.apply();
         }
     }
 
-    @Override
-    public Option<Node> with(JavaString name, Attribute attribute) {
-        if(name.equalsToSlice("body")) {
-            return attribute.asNode()
-                    .flatMap(node -> node.apply(JavaString.apply("value")))
-                    .flatMap(Attribute::asString)
-                    .map(this::withBody);
-        } else {
-            return None.apply();
+    public record Builder(JavaString name, Map<JavaString, Attribute> attributes) {
+        public Builder(JavaString name) {
+            this(name, ImmutableMaps.empty());
+        }
+
+        public Node complete() {
+            return new MapNode(name, attributes);
+        }
+
+        public Builder withListOfNodes(JavaString name, List<? extends Node> value) {
+            return new Builder(this.name, attributes.put(name, new NodeListAttribute(value)));
+        }
+
+        public Builder withString(JavaString name, JavaString value) {
+            return new Builder(this.name, attributes.put(name, new StringAttribute(value)));
         }
     }
 }

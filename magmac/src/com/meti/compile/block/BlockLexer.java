@@ -1,12 +1,8 @@
 package com.meti.compile.block;
 
-import com.meti.api.collect.Index;
-import com.meti.api.collect.JavaString;
-import com.meti.api.collect.Range;
+import com.meti.api.collect.*;
 import com.meti.api.option.Option;
-import com.meti.compile.Lexer;
-import com.meti.compile.Node;
-import com.meti.compile.Splitter;
+import com.meti.compile.*;
 
 import static com.meti.api.option.Options.$Option;
 
@@ -27,7 +23,13 @@ public record BlockLexer(JavaString root) implements Lexer {
             Range range = bodyStart.to(bodyEnd).$();
             var slicedBody = this.root().sliceBetween(range).strip();
             var collect1 = new Splitter(slicedBody).split();
-            return new BlockNode(collect1);
+            var collect = collect1.iter()
+                    .map(Content::new)
+                    .collect(ImmutableLists.into());
+
+            return MapNode.Builder(JavaString.apply("block"))
+                    .withListOfNodes(JavaString.apply("lines"), collect)
+                    .complete();
         });
     }
 }

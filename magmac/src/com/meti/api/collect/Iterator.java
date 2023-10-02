@@ -2,6 +2,7 @@ package com.meti.api.collect;
 
 import com.meti.api.option.Option;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -15,4 +16,6 @@ public interface Iterator<T> {
     <R> R collect(Collector<T, R> collector);
 
     Iterator<T> filter(Predicate<T> predicate);
+
+    <R> R foldRight(R initial, BiFunction<R, T, R> mapper);
 }

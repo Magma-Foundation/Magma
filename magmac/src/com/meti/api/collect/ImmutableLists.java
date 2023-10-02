@@ -19,7 +19,7 @@ public class ImmutableLists {
         };
     }
 
-    private static <T> List<T> empty() {
+    public static <T> List<T> empty() {
         return new ImmutableList<>(new ArrayList<>());
     }
 }
