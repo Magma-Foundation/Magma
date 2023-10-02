@@ -2,11 +2,16 @@ package com.meti.api.option;
 
 import com.meti.api.tuple.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
+    public static <T> Option<T> apply() {
+        return new None<>();
+    }
+
     @Override
     public <R> Option<R> replaceValue(R value) {
         return new None<>();
@@ -42,8 +47,8 @@ public class None<T> implements Option<T> {
         return false;
     }
 
-    public static <T> Option<T> apply() {
-        return new None<>();
+    @Override
+    public void ifPresent(Consumer<T> consumer) {
     }
 
     @Override

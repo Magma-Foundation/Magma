@@ -1,7 +1,7 @@
 package com.meti.compile;
 
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
-import com.meti.api.iterate.Iterator;
 import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.compile.block.BlockLexer;

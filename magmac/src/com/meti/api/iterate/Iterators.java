@@ -1,5 +1,7 @@
 package com.meti.api.iterate;
 
+import com.meti.api.collect.AbstractIterator;
+import com.meti.api.collect.Iterator;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;

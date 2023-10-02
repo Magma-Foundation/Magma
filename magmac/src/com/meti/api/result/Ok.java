@@ -1,5 +1,8 @@
 package com.meti.api.result;
 
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -24,7 +27,17 @@ public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
     }
 
     @Override
-    public void match(Consumer<T> okConsumer, Consumer<E> errConsumer) {
+    public void consume(Consumer<T> okConsumer, Consumer<E> errConsumer) {
         okConsumer.accept(value);
+    }
+
+    @Override
+    public <R> R match(Function<T, R> okMapper, Function<E, R> errMapper) {
+        return okMapper.apply(value);
+    }
+
+    @Override
+    public Option<E> err() {
+        return None.apply();
     }
 }

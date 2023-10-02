@@ -2,6 +2,7 @@ package com.meti.api.option;
 
 import com.meti.api.tuple.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -44,6 +45,11 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public boolean isPresent() {
         return true;
+    }
+
+    @Override
+    public void ifPresent(Consumer<T> consumer) {
+        consumer.accept(value);
     }
 
     @Override

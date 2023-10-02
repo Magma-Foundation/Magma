@@ -5,6 +5,7 @@ import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
 import com.meti.api.tuple.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -29,6 +30,11 @@ public class ThrowableOption<T> implements Option<T> {
     @Override
     public boolean isPresent() {
         return parent.isPresent();
+    }
+
+    @Override
+    public void ifPresent(Consumer<T> consumer) {
+        parent.ifPresent(consumer);
     }
 
     public <E extends Throwable> Result<T, E> unwrapOrThrow(E value) {
