@@ -46,5 +46,9 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
         public Builder withString(JavaString name, JavaString value) {
             return new Builder(this.name, attributes.put(name, new StringAttribute(value)));
         }
+
+        public Builder withNode(String name, Node value) {
+            return new Builder(this.name, attributes.put(new JavaString(name), new NodeAttribute(value)));
+        }
     }
 }
