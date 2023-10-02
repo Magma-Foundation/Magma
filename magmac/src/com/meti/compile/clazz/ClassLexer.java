@@ -4,7 +4,9 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
+import com.meti.compile.Content;
 import com.meti.compile.Lexer;
+import com.meti.compile.MapNode;
 import com.meti.compile.Node;
 
 import static com.meti.api.option.Options.$Option;
@@ -35,7 +37,10 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
             Range range = bodyStart.to(bodyEnd).$();
             var body = this.stripped().sliceBetween(range).value().strip();
-            return ClassNode.createClassNode(name, body);
+            return MapNode.Builder("class")
+                    .withString("name", new JavaString(name))
+                    .withNode("body", Content.from(body))
+                    .complete();
         });
     }
 }

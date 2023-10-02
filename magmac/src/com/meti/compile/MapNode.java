@@ -5,7 +5,6 @@ import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.compile.clazz.ClassNode;
 
 public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {

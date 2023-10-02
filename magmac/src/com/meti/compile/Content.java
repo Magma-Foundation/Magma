@@ -16,6 +16,10 @@ public class Content implements Node {
         return new Content(value);
     }
 
+    public static Node from(String slice) {
+        return new Content(JavaString.apply(slice));
+    }
+
     @Override
     public boolean is(String name) {
         return name.equals("content");
