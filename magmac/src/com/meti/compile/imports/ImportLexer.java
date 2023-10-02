@@ -4,6 +4,7 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.compile.Lexer;
+import com.meti.compile.MapNode;
 import com.meti.compile.Node;
 
 public record ImportLexer(JavaString stripped) implements Lexer {
@@ -19,7 +20,10 @@ public record ImportLexer(JavaString stripped) implements Lexer {
             var separator = name.lastIndexOfChar('.').$();
             var parent = name.sliceTo1(separator).strip();
             var child = name.sliceFrom(separator.next().$()).strip();
-            return new ImportNode(parent, child);
+            return MapNode.Builder("import")
+                    .withString("parent", parent)
+                    .withString("child", child)
+                    .complete();
         });
     }
 }
