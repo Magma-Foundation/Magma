@@ -28,8 +28,10 @@ public record Compiler(JavaString input) {
         });
     }
 
-    private static JavaString renderNode(Node node) {
-        return new MagmaRenderer(node).render().unwrapOrElseGet(() -> JavaString.Empty);
+    private static Result<JavaString, CompileException> renderNode(Node node) {
+        return new MagmaRenderer(node).render()
+                .into(ThrowableOption::new)
+                .unwrapOrThrow(new CompileException("Cannot render: " + node));
     }
 
     private static Result<State, CompileException> transform(Node node) {
@@ -59,7 +61,7 @@ public record Compiler(JavaString input) {
             return cache.values()
                     .iter()
                     .map(Compiler::renderNode)
-                    .collect(Collectors.joining())
+                    .collect(Collectors.exceptionally(Collectors.joining())).$()
                     .unwrapOrElse(JavaString.Empty);
         });
     }
