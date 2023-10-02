@@ -71,9 +71,7 @@ public class Main {
                 } catch (IOException e) {
                     return Some.apply(new CompileException("", e));
                 }
-            }, err -> {
-                return None.apply();
-            });
+            }, Some::apply);
 
 
         } catch (IOException e) {
