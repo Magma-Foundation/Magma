@@ -25,4 +25,9 @@ public record MethodNode(JavaString name, JavaString parameters, JavaString body
     public Option<JavaString> getBody() {
         return Some.apply(body);
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

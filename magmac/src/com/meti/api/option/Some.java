@@ -42,6 +42,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public boolean isPresent() {
+        return true;
+    }
+
+    @Override
     public Option<T> filter(Predicate<T> predicate) {
         return predicate.test(value) ? this : None.apply();
     }

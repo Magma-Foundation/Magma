@@ -11,4 +11,9 @@ public record BlockNode(com.meti.api.collect.List<JavaString> lines) implements 
     public Option<List<JavaString>> getLines() {
         return Some.apply(lines);
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

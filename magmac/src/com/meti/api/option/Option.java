@@ -28,4 +28,6 @@ public interface Option<T> {
     Tuple<Boolean, T> unwrapToTuple(T other);
 
     boolean isEmpty();
+
+    boolean isPresent();
 }

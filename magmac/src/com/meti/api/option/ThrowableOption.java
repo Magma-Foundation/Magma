@@ -26,6 +26,11 @@ public class ThrowableOption<T> implements Option<T> {
         return parent.isEmpty();
     }
 
+    @Override
+    public boolean isPresent() {
+        return parent.isPresent();
+    }
+
     public <E extends Throwable> Result<T, E> unwrapOrThrow(E value) {
         return parent.map(Ok::<T, E>apply).unwrapOrElse(Err.apply(value));
     }

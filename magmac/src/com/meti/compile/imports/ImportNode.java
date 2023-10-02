@@ -15,4 +15,9 @@ public record ImportNode(JavaString parent, JavaString child) implements Node {
     public Option<JavaString> getParent() {
         return Some.apply(parent);
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException("Not implemented yet.");
+    }
 }

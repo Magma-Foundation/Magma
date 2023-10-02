@@ -33,4 +33,6 @@ public interface Node {
     default Option<JavaString> getBody() {
         return None.apply();
     }
+
+    boolean is(String name);
 }

@@ -58,4 +58,12 @@ public record JavaString(String value) {
     public JavaString append(String slice) {
         return new JavaString(value + slice);
     }
+
+    public boolean equalsToSlice(String value) {
+        return this.value.equals(value);
+    }
+
+    public boolean isBlank() {
+        return this.value.isBlank();
+    }
 }

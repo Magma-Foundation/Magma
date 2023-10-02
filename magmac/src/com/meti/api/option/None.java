@@ -37,6 +37,11 @@ public class None<T> implements Option<T> {
         return true;
     }
 
+    @Override
+    public boolean isPresent() {
+        return false;
+    }
+
     public static <T> Option<T> apply() {
         return new None<>();
     }
