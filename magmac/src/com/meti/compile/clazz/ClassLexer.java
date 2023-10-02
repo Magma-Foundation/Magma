@@ -35,7 +35,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
             Range range = bodyStart.to(bodyEnd).$();
             var body = this.stripped().sliceBetween(range).value().strip();
-            return new ClassNode(name, body);
+            return ClassNode.createClassNode(name, body);
         });
     }
 }

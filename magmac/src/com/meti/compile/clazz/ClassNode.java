@@ -8,6 +8,17 @@ import com.meti.api.option.Option;
 import com.meti.compile.*;
 
 public record ClassNode(String name, String body) implements Node {
+    private ClassNode(String name, String body) {
+        this.name = name;
+        this.body = body;
+    }
+
+    public static ClassNode createClassNode(String name, String body) {
+        return MapNode.Builder("class")
+                .withString("name", new JavaString(name))
+                .
+    }
+
     @Override
     public boolean is(String name) {
         return name.equals("class");

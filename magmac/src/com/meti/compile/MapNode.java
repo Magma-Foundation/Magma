@@ -5,10 +5,15 @@ import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
+import com.meti.compile.clazz.ClassNode;
 
 public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {
         return new Builder(name);
+    }
+
+    public static Builder Builder(String name) {
+        return new Builder(JavaString.apply(name));
     }
 
     @Override
@@ -49,6 +54,10 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
 
         public Builder withNode(String name, Node value) {
             return new Builder(this.name, attributes.put(new JavaString(name), new NodeAttribute(value)));
+        }
+
+        public Builder withString(String name, JavaString value) {
+            return new Builder(this.name, attributes.put(new JavaString(name), new StringAttribute(value)));
         }
     }
 }
