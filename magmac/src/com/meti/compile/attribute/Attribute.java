@@ -1,9 +1,10 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.compile.node.Node;
 
 public interface Attribute {
     default Option<Node> asNode() {
@@ -14,7 +15,7 @@ public interface Attribute {
         return None.apply();
     }
 
-    default Option<List<Node>> asListOfNodes() {
+    default Option<List<? extends Node>> asListOfNodes() {
         return None.apply();
     }
 

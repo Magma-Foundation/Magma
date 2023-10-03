@@ -7,8 +7,8 @@ import com.meti.api.option.Some;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Result;
 import com.meti.compile.CompileException;
-import com.meti.compile.Node;
 import com.meti.compile.Renderer;
+import com.meti.compile.node.Node;
 
 import static com.meti.api.option.Options.$Option;
 

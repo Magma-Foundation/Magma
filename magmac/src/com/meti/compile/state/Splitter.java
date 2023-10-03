@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.compile.state;
 
 import com.meti.api.collect.ImmutableList;
 import com.meti.api.collect.JavaString;

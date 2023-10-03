@@ -1,15 +1,12 @@
-package com.meti.compile;
+package com.meti.compile.state;
 
 import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.List;
+import com.meti.compile.node.Node;
 
 public record Cache(List<Node> nodes) {
     public Cache() {
         this(ImmutableLists.empty());
-    }
-
-    public Cache(List<Node> nodes) {
-        this.nodes = nodes;
     }
 
     public Cache add(State state) {

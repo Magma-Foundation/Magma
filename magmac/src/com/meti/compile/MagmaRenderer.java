@@ -8,6 +8,7 @@ import com.meti.api.result.Result;
 import com.meti.compile.block.BlockRenderer;
 import com.meti.compile.function.FunctionRenderer;
 import com.meti.compile.imports.ImportRenderer;
+import com.meti.compile.node.Node;
 
 public record MagmaRenderer(Node node) implements Renderer {
     static Iterator<Renderer> enumerateRenderers(Node node) {

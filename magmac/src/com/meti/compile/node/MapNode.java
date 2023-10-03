@@ -1,9 +1,15 @@
-package com.meti.compile;
+package com.meti.compile.node;
 
 import com.meti.api.collect.Collectors;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
+import com.meti.api.collect.map.ImmutableMaps;
+import com.meti.api.collect.map.Map;
 import com.meti.api.option.Option;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
+import com.meti.compile.attribute.StringAttribute;
 
 public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {
@@ -61,6 +67,10 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
 
         public Builder withString(String name, JavaString value) {
             return new Builder(this.name, attributes.put(new JavaString(name), new StringAttribute(value)));
+        }
+
+        public Builder withListOfNodes(String name, List<Node> values) {
+            return withListOfNodes(JavaString.apply(name), values);
         }
     }
 }

@@ -1,8 +1,9 @@
-package com.meti.compile;
+package com.meti.compile.node;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.compile.attribute.Attribute;
 
 public interface Node {
 

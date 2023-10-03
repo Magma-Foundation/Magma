@@ -1,9 +1,11 @@
-package com.meti.compile;
+package com.meti.compile.node;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.StringAttribute;
 
 public class Content implements Node {
     private final JavaString value;

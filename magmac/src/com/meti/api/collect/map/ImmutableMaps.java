@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.api.collect.map;
 
 public class ImmutableMaps {
     private ImmutableMaps() {

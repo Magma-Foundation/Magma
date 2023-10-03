@@ -9,6 +9,12 @@ import com.meti.api.option.Some;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.node.MapNode;
+import com.meti.compile.node.Node;
+import com.meti.compile.state.Cache;
+import com.meti.compile.state.Splitter;
+import com.meti.compile.state.State;
 
 import static com.meti.api.result.Results.$Result;
 
@@ -41,7 +47,22 @@ public record Compiler(JavaString input) {
                 return new DiscardState();
             }
 
-            return new ContinueState(node);
+            Node actualNode;
+            if (node.is("class")) {
+                var name = node.apply("name")
+                        .flatMap(Attribute::asString)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No name present.", node))
+                        .$();
+
+                actualNode = MapNode.Builder("function")
+                        .withString("name", name)
+                        .withListOfNodes("parameters", ImmutableLists.empty())
+                        .complete();
+            } else {
+                actualNode = node;
+            }
+            return new ContinueState(actualNode);
         });
     }
 

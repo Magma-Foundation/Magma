@@ -4,8 +4,8 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.compile.Lexer;
-import com.meti.compile.MapNode;
-import com.meti.compile.Node;
+import com.meti.compile.node.MapNode;
+import com.meti.compile.node.Node;
 
 public record ImportLexer(JavaString stripped) implements Lexer {
     @Override

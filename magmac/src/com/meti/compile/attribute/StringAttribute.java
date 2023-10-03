@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.compile.attribute;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;

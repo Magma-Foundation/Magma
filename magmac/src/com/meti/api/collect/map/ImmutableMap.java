@@ -1,4 +1,4 @@
-package com.meti.compile;
+package com.meti.api.collect.map;
 
 import com.meti.api.Tuple;
 import com.meti.api.collect.ImmutableList;

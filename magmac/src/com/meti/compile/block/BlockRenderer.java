@@ -7,10 +7,10 @@ import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
-import com.meti.compile.Attribute;
 import com.meti.compile.CompileException;
-import com.meti.compile.Node;
 import com.meti.compile.Renderer;
+import com.meti.compile.attribute.Attribute;
+import com.meti.compile.node.Node;
 
 public record BlockRenderer(Node node) implements Renderer {
 

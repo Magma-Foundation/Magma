@@ -5,8 +5,8 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.Lexer;
-import com.meti.compile.MapNode;
-import com.meti.compile.Node;
+import com.meti.compile.node.MapNode;
+import com.meti.compile.node.Node;
 
 public record PackageLexer(JavaString stripped) implements Lexer {
 

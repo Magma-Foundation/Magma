@@ -1,10 +1,13 @@
-package com.meti.compile;
+package com.meti.compile.trait;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
+import com.meti.compile.Lexer;
+import com.meti.compile.node.MapNode;
+import com.meti.compile.node.Node;
 
-record InterfaceLexer(JavaString stripped) implements Lexer {
+public record InterfaceLexer(JavaString stripped) implements Lexer {
 
     @Override
     public Option<Node> lex() {
