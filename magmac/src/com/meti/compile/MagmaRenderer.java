@@ -9,13 +9,15 @@ import com.meti.compile.block.BlockRenderer;
 import com.meti.compile.function.FunctionRenderer;
 import com.meti.compile.imports.ImportRenderer;
 import com.meti.compile.node.Node;
+import com.meti.compile.struct.StructRenderer;
 
 public record MagmaRenderer(Node node) implements Renderer {
     static Iterator<Renderer> enumerateRenderers(Node node) {
         return Iterators.from(
                 new ImportRenderer(node),
                 new BlockRenderer(node),
-                new FunctionRenderer(node)
+                new FunctionRenderer(node),
+                new StructRenderer(node)
         );
     }
 

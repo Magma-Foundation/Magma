@@ -9,6 +9,7 @@ import com.meti.api.option.Some;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.api.result.Results;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
@@ -47,8 +48,30 @@ public record Compiler(JavaString input) {
                 return new DiscardState();
             }
 
-            Node actualNode;
-            if (node.is("class")) {
+            var actualNode = transformClass(node)
+                    .orElseGet(() -> removeInterface(node))
+                    .unwrapOrElse(Ok.apply(node))
+                    .$();
+
+            return new ContinueState(actualNode);
+        });
+    }
+
+    private static Option<Result<Node, CompileException>> removeInterface(Node node) {
+        if (node.is("interface")) {
+            return Some.apply(node.apply("name")
+                    .flatMap(Attribute::asString)
+                    .map(value -> MapNode.Builder("struct").withString("name", value).complete())
+                    .into(ThrowableOption::new)
+                    .unwrapOrThrow(new NodeException("No name present.", node)));
+        } else {
+            return None.apply();
+        }
+    }
+
+    private static Option<Result<Node, CompileException>> transformClass(Node node) {
+        if (node.is("class")) {
+            return Some.apply(Results.$Result(() -> {
                 var name = node.apply("name")
                         .flatMap(Attribute::asString)
                         .into(ThrowableOption::new)
@@ -60,17 +83,15 @@ public record Compiler(JavaString input) {
                         .into(ThrowableOption::new)
                         .unwrapOrThrow(new NodeException("No body present.", node))
                         .$();
-
-                actualNode = MapNode.Builder("function")
+                return MapNode.Builder("function")
                         .withString("name", name)
                         .withListOfNodes("parameters", ImmutableLists.empty())
                         .withNode("body", body)
                         .complete();
-            } else {
-                actualNode = node;
-            }
-            return new ContinueState(actualNode);
-        });
+            }));
+        } else {
+            return None.apply();
+        }
     }
 
     public Result<JavaString, CompileException> compile() {
