@@ -1,5 +1,6 @@
 package com.meti.compile.function;
 
+import com.meti.api.collect.Collectors;
 import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
@@ -52,7 +53,12 @@ public record FunctionRenderer(Node node) implements Renderer {
                         .unwrapOrThrow(new CompileException("No body present: " + node.toXML().value()))
                         .$();
 
-                return new JavaString("export class def " + name + parameters + " => " + body);
+                var joinedParameters = parameters.iter()
+                        .collect(Collectors.joining())
+                        .map(value -> value.prepend("(").append(")"))
+                        .unwrapOrElse(JavaString.Empty);
+
+                return new JavaString("export class def " + name + joinedParameters + " => " + body);
             }));
         } else {
             return None.apply();
