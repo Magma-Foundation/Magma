@@ -33,4 +33,8 @@ public record Index(int value, int length) {
     public boolean isEnd() {
         return value == length - 1;
     }
+
+    public Index min(Index other) {
+        return new Index(Math.min(this.value, other.value), length);
+    }
 }

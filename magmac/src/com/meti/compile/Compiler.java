@@ -48,13 +48,65 @@ public record Compiler(JavaString input) {
                 return new DiscardState();
             }
 
-            var actualNode = transformClass(node)
+            var actualNode = removeClass(node)
+                    .orElseGet(() -> removeRecord(node))
                     .orElseGet(() -> removeInterface(node))
+                    .orElseGet(() -> removeMethod(node))
                     .unwrapOrElse(Ok.apply(node))
                     .$();
 
             return new ContinueState(actualNode);
         });
+    }
+
+    private static Option<Result<Node, CompileException>> removeRecord(Node node) {
+        if (node.is("record")) {
+            return Some.apply($Result(() -> {
+                var name = node.apply("name")
+                        .flatMap(Attribute::asString)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No name present.", node))
+                        .$();
+
+                var body = node.apply("body")
+                        .flatMap(Attribute::asNode)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No body present.", node))
+                        .$();
+
+                return MapNode.Builder("function")
+                        .withString("name", name)
+                        .withNodeList("parameters", ImmutableLists.empty())
+                        .withNode("body", body)
+                        .complete();
+            }));
+        } else {
+            return None.apply();
+        }
+    }
+
+    private static Option<Result<Node, CompileException>> removeMethod(Node node) {
+        if (node.is("method")) {
+            return Some.apply($Result(() -> {
+                var name = node.apply("name").flatMap(Attribute::asString)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No name present.", node))
+                        .$();
+
+                var parameters = node.apply("parameters")
+                        .flatMap(Attribute::asListOfNodes)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No parameters present.", node))
+                        .$();
+
+                return MapNode.Builder("function")
+                        .withString("name", name)
+                        .withNodeList("parameters", parameters)
+                        .complete();
+            }));
+        } else {
+            return None.apply();
+        }
     }
 
     private static Option<Result<Node, CompileException>> removeInterface(Node node) {
@@ -69,7 +121,7 @@ public record Compiler(JavaString input) {
         }
     }
 
-    private static Option<Result<Node, CompileException>> transformClass(Node node) {
+    private static Option<Result<Node, CompileException>> removeClass(Node node) {
         if (node.is("class")) {
             return Some.apply(Results.$Result(() -> {
                 var name = node.apply("name")
@@ -83,9 +135,10 @@ public record Compiler(JavaString input) {
                         .into(ThrowableOption::new)
                         .unwrapOrThrow(new NodeException("No body present.", node))
                         .$();
+
                 return MapNode.Builder("function")
                         .withString("name", name)
-                        .withListOfNodes("parameters", ImmutableLists.empty())
+                        .withNodeList("parameters", ImmutableLists.empty())
                         .withNode("body", body)
                         .complete();
             }));

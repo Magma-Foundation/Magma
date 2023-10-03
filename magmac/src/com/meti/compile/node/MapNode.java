@@ -53,7 +53,7 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
             return new MapNode(name, attributes);
         }
 
-        public Builder withListOfNodes(JavaString name, List<? extends Node> value) {
+        public Builder withNodeList(JavaString name, List<? extends Node> value) {
             return new Builder(this.name, attributes.put(name, new NodeListAttribute(value)));
         }
 
@@ -69,8 +69,8 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
             return new Builder(this.name, attributes.put(new JavaString(name), new StringAttribute(value)));
         }
 
-        public Builder withListOfNodes(String name, List<Node> values) {
-            return withListOfNodes(JavaString.apply(name), values);
+        public Builder withNodeList(String name, List<? extends Node> values) {
+            return withNodeList(JavaString.apply(name), values);
         }
     }
 }

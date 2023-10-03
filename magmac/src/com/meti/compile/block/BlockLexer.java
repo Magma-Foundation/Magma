@@ -35,7 +35,7 @@ public record BlockLexer(JavaString root) implements Lexer {
                     .collect(ImmutableLists.into());
 
             return MapNode.Builder(JavaString.apply("block"))
-                    .withListOfNodes(JavaString.apply("lines"), collect)
+                    .withNodeList(JavaString.apply("lines"), collect)
                     .complete();
         });
     }
