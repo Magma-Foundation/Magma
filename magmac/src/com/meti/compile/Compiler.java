@@ -55,9 +55,16 @@ public record Compiler(JavaString input) {
                         .unwrapOrThrow(new NodeException("No name present.", node))
                         .$();
 
+                var body = node.apply("body")
+                        .flatMap(Attribute::asNode)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new NodeException("No body present.", node))
+                        .$();
+
                 actualNode = MapNode.Builder("function")
                         .withString("name", name)
                         .withListOfNodes("parameters", ImmutableLists.empty())
+                        .withNode("body", body)
                         .complete();
             } else {
                 actualNode = node;
