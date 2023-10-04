@@ -7,6 +7,10 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 public record ValueRule(JavaString value) implements Rule {
+    public static Rule of(JavaString value) {
+        return new ValueRule(value);
+    }
+
     @Override
     public Option<RuleResult> extract(JavaString value) {
         if (!this.value.equals(value)) return None.apply();

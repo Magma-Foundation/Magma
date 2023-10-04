@@ -18,4 +18,6 @@ public interface Iterator<T> {
     Iterator<T> filter(Predicate<T> predicate);
 
     <R> R foldRight(R initial, BiFunction<R, T, R> mapper);
+
+    Iterator<T> concat(Iterator<T> other);
 }

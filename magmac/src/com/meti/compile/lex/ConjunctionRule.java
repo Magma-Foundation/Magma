@@ -1,12 +1,17 @@
 package com.meti.compile.lex;
 
 import com.meti.api.collect.JavaString;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 
 import static com.meti.api.option.Options.$$;
 import static com.meti.api.option.Options.$Option;
 
 public record ConjunctionRule(Rule left, Rule right) implements Rule {
+    public static Rule of(Rule first, Rule... more) {
+        return Iterators.from(more).foldRight(first, ConjunctionRule::new);
+    }
+
     @Override
     public Option<RuleResult> extract(JavaString value) {
         return $Option(() -> {

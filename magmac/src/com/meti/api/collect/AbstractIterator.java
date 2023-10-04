@@ -11,6 +11,21 @@ import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
+    public Iterator<T> concat(Iterator<T> other) {
+        return new AbstractIterator<>() {
+            @Override
+            public Option<T> head() {
+                var head = AbstractIterator.this.head();
+                if (head.isPresent()) {
+                    return head;
+                } else {
+                    return other.head();
+                }
+            }
+        };
+    }
+
+    @Override
     public <R> R foldRight(R initial, BiFunction<R, T, R> mapper) {
         var current = initial;
 

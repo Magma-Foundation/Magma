@@ -6,6 +6,10 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
 public record AnyRule(JavaString type) implements Rule {
+    public static Rule of(JavaString type) {
+        return new AnyRule(type);
+    }
+
     @Override
     public Option<RuleResult> extract(JavaString value) {
         return Some.apply(new MapRuleResult(
