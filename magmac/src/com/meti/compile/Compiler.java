@@ -97,7 +97,7 @@ public record Compiler(JavaString input) {
             return new JavaLexer(input, type)
                     .lex()
                     .into(ThrowableOption::new)
-                    .unwrapOrThrow(new CompileException("Invalid input: '%s'.".formatted(input)))
+                    .unwrapOrThrow(new CompileException("For type '%s', invalid input value '%s'.".formatted(type, input)))
                     .$();
         });
     }
