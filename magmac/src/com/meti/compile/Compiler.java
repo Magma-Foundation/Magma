@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.api.Tuple;
 import com.meti.api.collect.Collectors;
 import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
@@ -11,17 +12,56 @@ import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
 import com.meti.api.result.Results;
 import com.meti.compile.attribute.Attribute;
+import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 import com.meti.compile.state.Cache;
 import com.meti.compile.state.Splitter;
 import com.meti.compile.state.State;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BiFunction;
 
 import static com.meti.api.result.Results.$Result;
 
 public record Compiler(JavaString input) {
 
     private static Result<Node, CompileException> lex(JavaString input) {
+        return $Result(() -> {
+            var root = lexNode(input).$();
+            var collect = root.stream(Attribute.Group.Node)
+                    .foldRight(Ok.apply(root), new BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>() {
+                        @Override
+                        public Result<Node, CompileException> apply(Result<Node, CompileException> nodeCompileExceptionResult, Tuple<JavaString, Attribute> javaStringAttributeTuple) {
+                            return $Result(() -> {
+                                var node = nodeCompileExceptionResult.$();
+                                var key = javaStringAttributeTuple.a();
+                                var value = javaStringAttributeTuple.b()
+                                        .asNode()
+                                        .into(ThrowableOption::new)
+                                        .unwrapOrThrow(new CompileException(key.append(" was not a node.").value()))
+                                        .$()
+                                        .apply("value")
+                                        .flatMap(Attribute::asString)
+                                        .into(ThrowableOption::new)
+                                        .unwrapOrThrow(new CompileException(key.append(key.prepend("Node '").append("' did not have content.")).value()))
+                                        .flatMapValue(Compiler::lexNode)
+                                        .mapValue(NodeAttribute::new)
+                                        .$();
+
+                                return node.with(key, value)
+                                        .into(ThrowableOption::new)
+                                        .unwrapOrThrow(new CompileException("New value was not replaced."))
+                                        .$();
+                            });
+                        }
+                    }).$();
+            return collect;
+        });
+    }
+
+    @NotNull
+    private static Result<Node, CompileException> lexNode(JavaString input) {
         return $Result(() -> {
             if (input.isBlank()) {
                 throw new CompileException("Input cannot be empty.");

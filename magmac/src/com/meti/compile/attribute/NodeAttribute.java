@@ -8,6 +8,11 @@ import com.meti.compile.node.Node;
 public class NodeAttribute implements Attribute {
     private final Node value;
 
+    @Override
+    public boolean is(Group group) {
+        return group == Group.Node;
+    }
+
     public NodeAttribute(Node value) {
         this.value = value;
     }

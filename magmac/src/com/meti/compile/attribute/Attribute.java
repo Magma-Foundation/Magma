@@ -20,4 +20,13 @@ public interface Attribute {
     }
 
     JavaString toXML();
+
+    default boolean is(Group group) {
+        return false;
+    }
+
+    enum Group {
+        Node,
+        NodeList
+    }
 }

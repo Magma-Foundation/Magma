@@ -10,4 +10,6 @@ public interface Map<K, V> {
     Map<K, V> put(K key, V value);
 
     Iterator<Tuple<K, V>> iter();
+
+    boolean hasKey(K key);
 }

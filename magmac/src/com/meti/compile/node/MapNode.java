@@ -7,7 +7,9 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
 import com.meti.api.collect.map.ImmutableMaps;
 import com.meti.api.collect.map.Map;
+import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
 import com.meti.compile.attribute.NodeListAttribute;
@@ -46,6 +48,26 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
         return attributes.get(name);
     }
 
+    @Override
+    public Iterator<Tuple<JavaString, Attribute>> iter() {
+        return attributes.iter();
+    }
+
+    @Override
+    public Iterator<Tuple<JavaString, Attribute>> stream(Attribute.Group group) {
+        return attributes.iter().filter(tuple -> tuple.b().is(group));
+    }
+
+    @Override
+    public Option<Node> with(JavaString key, Attribute value) {
+        if(attributes.hasKey(key)) {
+            var newAttributes = attributes.put(key, value);
+            return Some.apply(new MapNode(this.name, newAttributes));
+        } else {
+            return None.apply();
+        }
+    }
+
     public record Builder(JavaString name, Map<JavaString, Attribute> attributes) {
         public Builder(JavaString name) {
             this(name, ImmutableMaps.empty());
@@ -79,10 +101,5 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
             var withAttributes = node.iter().foldRight(this.attributes, (map, tuple) -> map.put(tuple.a(), tuple.b()));
             return new Builder(name, withAttributes);
         }
-    }
-
-    @Override
-    public Iterator<Tuple<JavaString, Attribute>> iter() {
-        return attributes.iter();
     }
 }

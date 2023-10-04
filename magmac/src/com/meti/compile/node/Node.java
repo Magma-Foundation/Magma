@@ -9,11 +9,9 @@ import com.meti.api.option.Option;
 import com.meti.compile.attribute.Attribute;
 
 public interface Node {
-
     default Option<Attribute> apply(JavaString name) {
         return None.apply();
     }
-
 
     JavaString toXML();
 
@@ -26,4 +24,12 @@ public interface Node {
     default Iterator<Tuple<JavaString, Attribute>> iter() {
         return Iterators.empty();
     }
+
+    default Iterator<Tuple<JavaString, Attribute>> stream(Attribute.Group group) {
+        return Iterators.empty();
+    }
+
+    default Option<Node> with(JavaString key, Attribute value) {
+        return None.apply();
+    };
 }
