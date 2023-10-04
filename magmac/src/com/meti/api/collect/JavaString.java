@@ -40,7 +40,7 @@ public record JavaString(String value) {
         return new JavaString(value.substring(range.startInclusive(), range.endExclusive()));
     }
 
-    public JavaString sliceTo1(Index index) {
+    public JavaString sliceTo(Index index) {
         return new JavaString(value.substring(0, index.value()));
     }
 
@@ -90,5 +90,31 @@ public record JavaString(String value) {
 
     public JavaString replace(String regex, String replacement) {
         return new JavaString(this.value.replaceAll(regex, replacement));
+    }
+
+    public Iterator<Index> indices() {
+        return new AbstractIterator<Index>() {
+            private int current = 0;
+
+            @Override
+            public Option<Index> head() {
+                var length = JavaString.this.value.length();
+                if (current < length) {
+                    var copy = current;
+                    current++;
+                    return Some.apply(new Index(copy, length));
+                } else {
+                    return None.apply();
+                }
+            }
+        };
+    }
+
+    public Option<Index> indexOf(int value) {
+        if (value < this.value.length()) {
+            return Some.apply(new Index(value, this.value.length()));
+        } else {
+            return None.apply();
+        }
     }
 }

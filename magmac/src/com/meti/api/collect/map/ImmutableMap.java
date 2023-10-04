@@ -46,4 +46,14 @@ public record ImmutableMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
     public boolean hasKey(K key) {
         return this.map.containsKey(key);
     }
+
+    @Override
+    public Map<K, V> putAll(Map<K, V> others) {
+        var copy = new HashMap<>(this.map);
+        var kvHashMap = others.iter().foldRight(copy, (kvHashMap1, kvTuple) -> {
+            kvHashMap1.put(kvTuple.a(), kvTuple.b());
+            return kvHashMap1;
+        });
+        return new ImmutableMap<>(kvHashMap);
+    }
 }

@@ -18,7 +18,7 @@ public record ImportLexer(JavaString stripped) implements Lexer {
             var javaString = this.stripped().sliceFrom(index);
             var name = javaString.strip();
             var separator = name.lastIndexOfChar('.').$();
-            var parent = name.sliceTo1(separator).strip();
+            var parent = name.sliceTo(separator).strip();
             var child = name.sliceFrom(separator.next().$()).strip();
             return MapNode.Builder("import")
                     .withString("parent", parent)

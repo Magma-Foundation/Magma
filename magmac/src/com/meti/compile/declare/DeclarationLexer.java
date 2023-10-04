@@ -27,7 +27,7 @@ public class DeclarationLexer implements Lexer {
 
         return $Option(() -> {
             var separator = input.firstIndexOfChar(' ').$();
-            var left = input.sliceTo1(separator);
+            var left = input.sliceTo(separator);
             var right = input.sliceFrom(separator);
             return MapNode.Builder("type")
                     .withString("name", right)

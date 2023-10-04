@@ -37,6 +37,11 @@ public class ThrowableOption<T> implements Option<T> {
         parent.ifPresent(consumer);
     }
 
+    @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return parent.and(other);
+    }
+
     public <E extends Throwable> Result<T, E> unwrapOrThrow(E value) {
         return parent.map(Ok::<T, E>apply).unwrapOrElse(Err.apply(value));
     }

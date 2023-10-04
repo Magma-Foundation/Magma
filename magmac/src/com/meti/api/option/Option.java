@@ -24,7 +24,7 @@ public interface Option<T> {
 
     T unwrapOrElse(T other);
 
-    <R > R into(Function<Option<T>, R> mapper);
+    <R> R into(Function<Option<T>, R> mapper);
 
     Tuple<Boolean, T> unwrapToTuple(T other);
 
@@ -33,4 +33,6 @@ public interface Option<T> {
     boolean isPresent();
 
     void ifPresent(Consumer<T> consumer);
+
+    <R> Option<Tuple<T, R>> and(Option<R> other);
 }

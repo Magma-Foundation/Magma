@@ -12,4 +12,6 @@ public interface Map<K, V> {
     Iterator<Tuple<K, V>> iter();
 
     boolean hasKey(K key);
+
+    Map<K, V> putAll(Map<K, V> others);
 }
