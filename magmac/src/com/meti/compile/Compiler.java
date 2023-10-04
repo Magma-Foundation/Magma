@@ -20,7 +20,6 @@ import com.meti.compile.node.Node;
 import com.meti.compile.state.Cache;
 import com.meti.compile.state.Splitter;
 import com.meti.compile.state.State;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
 
@@ -28,9 +27,9 @@ import static com.meti.api.result.Results.$Result;
 
 public record Compiler(JavaString input) {
 
-    private static Result<Node, CompileException> lexTree(JavaString input) {
+    private static Result<Node, CompileException> lexTree(JavaString input, JavaString type) {
         return $Result(() -> {
-            var root = lexNode(input).$();
+            var root = lexNode(input, type).$();
             var withNodes = root.stream(Attribute.Group.Node).foldRight(Ok.apply(root), (BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>) (nodeCompileExceptionResult, javaStringAttributeTuple) -> $Result(() -> {
                 var node11 = nodeCompileExceptionResult.$();
                 var key = javaStringAttributeTuple.a();
@@ -40,14 +39,8 @@ public record Compiler(JavaString input) {
                         .unwrapOrThrow(new CompileException(key.append(" was not a node.").value()))
                         .$();
 
-                var value = node1
-                        .apply("value")
-                        .flatMap(Attribute::asString)
-                        .into(ThrowableOption::new)
-                        .unwrapOrThrow(new CompileException(key.append(key.prepend("Node '").append("' did not have content.")).value()))
-                        .flatMapValue(Compiler::lexNode)
-                        .mapValue(NodeAttribute::new)
-                        .$();
+                var tuple = extractValue(node1).$();
+                var value = new NodeAttribute(lexNode(tuple.a(), tuple.b()).$());
 
                 return node11.with(key, value)
                         .into(ThrowableOption::new)
@@ -65,7 +58,7 @@ public record Compiler(JavaString input) {
                         .$();
 
                 var list = value.iter()
-                        .map(value1 -> extractValue(value1).flatMapValue(Compiler::lexTree))
+                        .map(value1 -> extractValue(value1).flatMapValue((Tuple<JavaString, JavaString> input1) -> lexTree(input1.a(), input1.b())))
                         .collect(Collectors.exceptionally(ImmutableLists.into()))
                         .$();
 
@@ -77,21 +70,31 @@ public record Compiler(JavaString input) {
         });
     }
 
-    private static Result<JavaString, CompileException> extractValue(Node value1) {
-        return value1.apply("value")
-                .flatMap(Attribute::asString)
-                .into(ThrowableOption::new)
-                .unwrapOrThrow(new CompileException("No value present"));
+    private static Result<Tuple<JavaString, JavaString>, CompileException> extractValue(Node value1) {
+        return $Result(() -> {
+            var value = value1.apply("value")
+                    .flatMap(Attribute::asString)
+                    .into(ThrowableOption::new)
+                    .unwrapOrThrow(new CompileException("No value present"))
+                    .$();
+
+            var type = value1.apply("type")
+                    .flatMap(Attribute::asString)
+                    .into(ThrowableOption::new)
+                    .unwrapOrThrow(new CompileException("No value present"))
+                    .$();
+
+            return new Tuple<>(value, type);
+        });
     }
 
-    @NotNull
-    private static Result<Node, CompileException> lexNode(JavaString input) {
+    private static Result<Node, CompileException> lexNode(JavaString input, JavaString type) {
         return $Result(() -> {
             if (input.isBlank()) {
                 throw new CompileException("Input cannot be empty.");
             }
 
-            return new JavaLexer(input)
+            return new JavaLexer(input, type)
                     .lex()
                     .into(ThrowableOption::new)
                     .unwrapOrThrow(new CompileException("Invalid input: '%s'.".formatted(input)))
@@ -111,7 +114,7 @@ public record Compiler(JavaString input) {
                         .$();
 
                 var rendered = renderNode(node1).$();
-                return root.with(key, new NodeAttribute(new Content(rendered)))
+                return root.with(key, new NodeAttribute(new Content(rendered, JavaString.Empty)))
                         .into(ThrowableOption::new)
                         .unwrapOrThrow(new CompileException("Did not add attribute."))
                         .$();
@@ -221,7 +224,7 @@ public record Compiler(JavaString input) {
             var lines = new Splitter(input()).split();
             var lexed = lines.iter()
                     .map(JavaString::strip)
-                    .map(Compiler::lexTree)
+                    .map(input1 -> lexTree(input1, JavaString.apply("any")))
                     .collect(Collectors.exceptionally(ImmutableLists.into()))
                     .$();
 

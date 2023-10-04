@@ -31,7 +31,7 @@ public record BlockLexer(JavaString root) implements Lexer {
             var slicedBody = this.root().sliceBetween(range).strip();
             var collect1 = new Splitter(slicedBody).split();
             var collect = collect1.iter()
-                    .map(Content::new)
+                    .map(value -> new Content(value, JavaString.Empty))
                     .collect(ImmutableLists.into());
 
             return MapNode.Builder(JavaString.apply("block"))

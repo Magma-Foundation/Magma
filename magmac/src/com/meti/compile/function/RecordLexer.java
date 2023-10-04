@@ -37,12 +37,12 @@ public record RecordLexer(JavaString stripped) implements Lexer {
             var range = bodyStart.to(bodyEnd).$();
             var bodySlice = this.stripped().sliceBetween(range);
 
-            var parameters = ImmutableLists.of(new Content(stripped.sliceBetween(paramStart.next().$().to(paramEnd).$())));
+            var parameters = ImmutableLists.of(new Content(stripped.sliceBetween(paramStart.next().$().to(paramEnd).$()), JavaString.Empty));
 
             return MapNode.Builder(JavaString.apply("record"))
                     .withString(JavaString.apply("name"), name)
                     .withNodeList("parameters", parameters)
-                    .withNode("body", new Content(bodySlice))
+                    .withNode("body", new Content(bodySlice, JavaString.Empty))
                     .complete();
         });
     }

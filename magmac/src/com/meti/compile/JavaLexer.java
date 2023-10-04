@@ -12,7 +12,7 @@ import com.meti.compile.node.Node;
 import com.meti.compile.package_.PackageLexer;
 import com.meti.compile.trait.InterfaceLexer;
 
-public record JavaLexer(JavaString stripped) implements Lexer {
+public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
     static Iterator<Lexer> enumerateLexers(JavaString stripped) {
         return Iterators.from(
                 new InterfaceLexer(stripped),

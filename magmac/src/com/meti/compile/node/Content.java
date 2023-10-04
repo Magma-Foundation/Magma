@@ -9,17 +9,19 @@ import com.meti.compile.attribute.StringAttribute;
 
 public class Content implements Node {
     private final JavaString value;
+    private final JavaString type;
 
-    public Content(JavaString value) {
+    public Content(JavaString value, JavaString type) {
         this.value = value;
+        this.type = type;
     }
 
-    public static Node from(JavaString value) {
-        return new Content(value);
+    public static Node from(JavaString value, JavaString type) {
+        return new Content(value, type);
     }
 
-    public static Node from(String slice) {
-        return new Content(JavaString.apply(slice));
+    public static Node from(String slice, String type) {
+        return from(JavaString.apply(slice), JavaString.apply(type));
     }
 
     @Override
@@ -31,6 +33,8 @@ public class Content implements Node {
     public Option<Attribute> apply(JavaString name) {
         if (name.equalsToSlice("value")) {
             return Some.apply(new StringAttribute(this.value));
+        } else if (name.equalsToSlice("type")) {
+            return Some.apply(new StringAttribute(this.type));
         } else {
             return None.apply();
         }
@@ -38,6 +42,6 @@ public class Content implements Node {
 
     @Override
     public JavaString toXML() {
-        return JavaString.apply("<Content/>");
+        return JavaString.apply("<Content type=\"" + this.type.value() + "\"/>");
     }
 }
