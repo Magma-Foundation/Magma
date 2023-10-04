@@ -13,6 +13,7 @@ import com.meti.api.result.Result;
 import com.meti.api.result.Results;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.attribute.NodeListAttribute;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
@@ -27,38 +28,60 @@ import static com.meti.api.result.Results.$Result;
 
 public record Compiler(JavaString input) {
 
-    private static Result<Node, CompileException> lex(JavaString input) {
+    private static Result<Node, CompileException> lexTree(JavaString input) {
         return $Result(() -> {
             var root = lexNode(input).$();
-            var collect = root.stream(Attribute.Group.Node)
-                    .foldRight(Ok.apply(root), new BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>() {
-                        @Override
-                        public Result<Node, CompileException> apply(Result<Node, CompileException> nodeCompileExceptionResult, Tuple<JavaString, Attribute> javaStringAttributeTuple) {
-                            return $Result(() -> {
-                                var node = nodeCompileExceptionResult.$();
-                                var key = javaStringAttributeTuple.a();
-                                var value = javaStringAttributeTuple.b()
-                                        .asNode()
-                                        .into(ThrowableOption::new)
-                                        .unwrapOrThrow(new CompileException(key.append(" was not a node.").value()))
-                                        .$()
-                                        .apply("value")
-                                        .flatMap(Attribute::asString)
-                                        .into(ThrowableOption::new)
-                                        .unwrapOrThrow(new CompileException(key.append(key.prepend("Node '").append("' did not have content.")).value()))
-                                        .flatMapValue(Compiler::lexNode)
-                                        .mapValue(NodeAttribute::new)
-                                        .$();
+            var withNodes = root.stream(Attribute.Group.Node).foldRight(Ok.apply(root), (BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>) (nodeCompileExceptionResult, javaStringAttributeTuple) -> $Result(() -> {
+                var node11 = nodeCompileExceptionResult.$();
+                var key = javaStringAttributeTuple.a();
+                var node1 = javaStringAttributeTuple.b()
+                        .asNode()
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException(key.append(" was not a node.").value()))
+                        .$();
 
-                                return node.with(key, value)
-                                        .into(ThrowableOption::new)
-                                        .unwrapOrThrow(new CompileException("New value was not replaced."))
-                                        .$();
-                            });
-                        }
-                    }).$();
-            return collect;
+                var value = node1
+                        .apply("value")
+                        .flatMap(Attribute::asString)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException(key.append(key.prepend("Node '").append("' did not have content.")).value()))
+                        .flatMapValue(Compiler::lexNode)
+                        .mapValue(NodeAttribute::new)
+                        .$();
+
+                return node11.with(key, value)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("New value was not replaced."))
+                        .$();
+            })).$();
+
+            return withNodes.stream(Attribute.Group.NodeList).foldRight(Ok.apply(withNodes), (BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>) (nodeCompileExceptionResult, javaStringAttributeTuple) -> $Result(() -> {
+                var node = nodeCompileExceptionResult.$();
+                var key = javaStringAttributeTuple.a();
+                var value = javaStringAttributeTuple.b()
+                        .asListOfNodes()
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("Not a list of nodes."))
+                        .$();
+
+                var list = value.iter()
+                        .map(value1 -> extractValue(value1).flatMapValue(Compiler::lexTree))
+                        .collect(Collectors.exceptionally(ImmutableLists.into()))
+                        .$();
+
+                return node.with(key, new NodeListAttribute(list))
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("Could not attach list."))
+                        .$();
+            })).$();
         });
+    }
+
+    private static Result<JavaString, CompileException> extractValue(Node value1) {
+        return value1.apply("value")
+                .flatMap(Attribute::asString)
+                .into(ThrowableOption::new)
+                .unwrapOrThrow(new CompileException("No value present"));
     }
 
     @NotNull
@@ -198,7 +221,7 @@ public record Compiler(JavaString input) {
             var lines = new Splitter(input()).split();
             var lexed = lines.iter()
                     .map(JavaString::strip)
-                    .map(Compiler::lex)
+                    .map(Compiler::lexTree)
                     .collect(Collectors.exceptionally(ImmutableLists.into()))
                     .$();
 

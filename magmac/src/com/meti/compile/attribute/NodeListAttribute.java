@@ -13,6 +13,11 @@ public record NodeListAttribute(List<? extends Node> values) implements Attribut
     }
 
     @Override
+    public boolean is(Group group) {
+        return group == Group.NodeList;
+    }
+
+    @Override
     public Option<List<? extends Node>> asListOfNodes() {
         return Some.apply(values);
     }
