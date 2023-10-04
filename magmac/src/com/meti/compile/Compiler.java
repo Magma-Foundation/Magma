@@ -61,25 +61,9 @@ public record Compiler(JavaString input) {
 
     private static Option<Result<Node, CompileException>> removeRecord(Node node) {
         if (node.is("record")) {
-            return Some.apply($Result(() -> {
-                var name = node.apply("name")
-                        .flatMap(Attribute::asString)
-                        .into(ThrowableOption::new)
-                        .unwrapOrThrow(new NodeException("No name present.", node))
-                        .$();
-
-                var body = node.apply("body")
-                        .flatMap(Attribute::asNode)
-                        .into(ThrowableOption::new)
-                        .unwrapOrThrow(new NodeException("No body present.", node))
-                        .$();
-
-                return MapNode.Builder("function")
-                        .withString("name", name)
-                        .withNodeList("parameters", ImmutableLists.empty())
-                        .withNode("body", body)
-                        .complete();
-            }));
+            return Some.apply($Result(() -> MapNode.Builder("function")
+                    .with(node)
+                    .complete()));
         } else {
             return None.apply();
         }

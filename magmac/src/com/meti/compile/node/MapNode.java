@@ -1,6 +1,8 @@
 package com.meti.compile.node;
 
+import com.meti.api.Tuple;
 import com.meti.api.collect.Collectors;
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
 import com.meti.api.collect.map.ImmutableMaps;
@@ -72,5 +74,15 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
         public Builder withNodeList(String name, List<? extends Node> values) {
             return withNodeList(JavaString.apply(name), values);
         }
+
+        public Builder with(Node node) {
+            var withAttributes = node.iter().foldRight(this.attributes, (map, tuple) -> map.put(tuple.a(), tuple.b()));
+            return new Builder(name, withAttributes);
+        }
+    }
+
+    @Override
+    public Iterator<Tuple<JavaString, Attribute>> iter() {
+        return attributes.iter();
     }
 }
