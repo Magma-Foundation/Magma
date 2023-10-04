@@ -1,5 +1,6 @@
 package com.meti.compile.function;
 
+import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.compile.Lexer;
@@ -20,6 +21,8 @@ public record RecordLexer(JavaString stripped) implements Lexer {
             var anyTypeStart = stripped.firstIndexOfChar('<');
 
             var paramStart = stripped().firstIndexOfChar('(').$();
+            var paramEnd = stripped.firstIndexOfChar(')').$();
+
             var bodyStart = stripped().firstIndexOfChar('{').$();
             var bodyEnd = stripped().lastIndexOfChar('}').$()
                     .next()
@@ -34,8 +37,11 @@ public record RecordLexer(JavaString stripped) implements Lexer {
             var range = bodyStart.to(bodyEnd).$();
             var bodySlice = this.stripped().sliceBetween(range);
 
+            var parameters = ImmutableLists.of(new Content(stripped.sliceBetween(paramStart.next().$().to(paramEnd).$())));
+
             return MapNode.Builder(JavaString.apply("record"))
                     .withString(JavaString.apply("name"), name)
+                    .withNodeList("parameters", parameters)
                     .withNode("body", new Content(bodySlice))
                     .complete();
         });

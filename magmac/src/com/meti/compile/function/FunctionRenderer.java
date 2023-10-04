@@ -1,6 +1,6 @@
 package com.meti.compile.function;
 
-import com.meti.api.collect.ImmutableLists;
+import com.meti.api.collect.Collectors;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.List;
 import com.meti.api.iterate.Iterators;
@@ -17,13 +17,15 @@ import com.meti.compile.node.Node;
 
 public record FunctionRenderer(Node node) implements Renderer {
 
-    private static List<JavaString> extractValues(List<? extends Node> values) {
+    private static JavaString extractValues(List<? extends Node> values) {
         return values.iter()
                 .map(child -> child.apply(JavaString.apply("value")))
                 .flatMap(Iterators::fromOption)
                 .map(Attribute::asString)
                 .flatMap(Iterators::fromOption)
-                .collect(ImmutableLists.into());
+                .collect(Collectors.joining())
+                .map(value -> value.prepend("(").append(")"))
+                .unwrapOrElse(JavaString.Empty);
     }
 
     @Override
@@ -52,7 +54,7 @@ public record FunctionRenderer(Node node) implements Renderer {
                         .unwrapOrThrow(new CompileException("No body present: " + node.toXML().value()))
                         .$();
 
-                return new JavaString("export class def " + name + parameters + " => " + body);
+                return new JavaString("export class def " + name + parameters.value() + " => " + body);
             }));
         } else {
             return None.apply();

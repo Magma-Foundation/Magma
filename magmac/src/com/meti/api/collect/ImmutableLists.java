@@ -1,11 +1,13 @@
 package com.meti.api.collect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ImmutableLists {
-    private ImmutableLists(){}
+    private ImmutableLists() {
+    }
 
-    public static <T> Collector< T, List<T>> into() {
+    public static <T> Collector<T, List<T>> into() {
         return new Collector<>() {
             @Override
             public List<T> initial() {
@@ -21,5 +23,10 @@ public class ImmutableLists {
 
     public static <T> List<T> empty() {
         return new ImmutableList<>(new ArrayList<>());
+    }
+
+    @SafeVarargs
+    public static <T> List<T> of(T... values) {
+        return new ImmutableList<>(Arrays.asList(values));
     }
 }
