@@ -39,7 +39,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             var body = this.stripped().sliceBetween(range).value().strip();
             return MapNode.Builder("class")
                     .withString("name", new JavaString(name))
-                    .withNode("body", Content.from(body))
+                    .withNode("body", Content.from(body, ""))
                     .complete();
         });
     }

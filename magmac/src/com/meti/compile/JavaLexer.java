@@ -3,24 +3,47 @@ package com.meti.compile;
 import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
 import com.meti.api.iterate.Iterators;
+import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.compile.block.BlockLexer;
 import com.meti.compile.clazz.ClassLexer;
 import com.meti.compile.function.RecordLexer;
 import com.meti.compile.imports.ImportLexer;
+import com.meti.compile.node.Content;
+import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 import com.meti.compile.package_.PackageLexer;
 import com.meti.compile.trait.InterfaceLexer;
 
-public record JavaLexer(JavaString stripped) implements Lexer {
-    static Iterator<Lexer> enumerateLexers(JavaString stripped) {
+import static com.meti.api.option.Options.$Option;
+
+public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
+    Iterator<Lexer> enumerateLexers(JavaString input) {
         return Iterators.from(
-                new InterfaceLexer(stripped),
-                new PackageLexer(stripped),
-                new ImportLexer(stripped),
-                new BlockLexer(stripped),
-                new ClassLexer(stripped),
-                new RecordLexer(stripped)
+                new Lexer() {
+                    @Override
+                    public Option<Node> lex() {
+                        if (!type.equalsToSlice("definition")) {
+                            return None.apply();
+                        }
+
+                        return $Option(() -> {
+                            var separator = input.firstIndexOfChar(' ').$();
+                            var left = input.sliceTo1(separator);
+                            var right = input.sliceFrom(separator);
+                            return MapNode.Builder("type")
+                                    .withString("name", right)
+                                    .withNode("type", new Content(left, JavaString.apply("type")))
+                                    .complete();
+                        });
+                    }
+                },
+                new InterfaceLexer(input),
+                new PackageLexer(input),
+                new ImportLexer(input),
+                new BlockLexer(input),
+                new ClassLexer(input),
+                new RecordLexer(input)
         );
     }
 

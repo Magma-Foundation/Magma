@@ -41,4 +41,9 @@ public record ImmutableMap<K, V>(java.util.Map<K, V> map) implements Map<K, V> {
                 .iter()
                 .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
     }
+
+    @Override
+    public boolean hasKey(K key) {
+        return this.map.containsKey(key);
+    }
 }
