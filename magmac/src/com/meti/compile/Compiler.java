@@ -13,6 +13,7 @@ import com.meti.api.result.Result;
 import com.meti.api.result.Results;
 import com.meti.compile.attribute.Attribute;
 import com.meti.compile.attribute.NodeAttribute;
+import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 import com.meti.compile.state.Cache;
@@ -72,6 +73,27 @@ public record Compiler(JavaString input) {
                     .into(ThrowableOption::new)
                     .unwrapOrThrow(new CompileException("Invalid input: '%s'.".formatted(input)))
                     .$();
+        });
+    }
+
+    private static Result<JavaString, CompileException> renderTree(Node node) {
+        return $Result(() -> {
+            var renderedTree = node.stream(Attribute.Group.Node).foldRight(Ok.apply(node), (BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>) (nodeCompileExceptionResult, tuple) -> $Result(() -> {
+                var root = nodeCompileExceptionResult.$();
+                var key = tuple.a();
+                var value = tuple.b();
+                var node1 = value.asNode()
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("Not a node."))
+                        .$();
+
+                var rendered = renderNode(node1).$();
+                return root.with(key, new NodeAttribute(new Content(rendered)))
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("Did not add attribute."))
+                        .$();
+            })).$();
+            return renderNode(renderedTree).$();
         });
     }
 
@@ -187,7 +209,7 @@ public record Compiler(JavaString input) {
 
             return cache.values()
                     .iter()
-                    .map(Compiler::renderNode)
+                    .map(Compiler::renderTree)
                     .collect(Collectors.exceptionally(Collectors.joining())).$()
                     .unwrapOrElse(JavaString.Empty);
         });
