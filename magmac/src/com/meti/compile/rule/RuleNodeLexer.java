@@ -4,33 +4,24 @@ import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.compile.Lexer;
-import com.meti.compile.RuleLexerFactory;
+import com.meti.compile.NodeLexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
 import static com.meti.api.option.Options.$Option;
 
-public class RuleLexer implements Lexer {
+public class RuleNodeLexer implements NodeLexer {
     private final JavaString input;
     private final JavaString actualType;
     private final Rule rule;
     private final String requiredType;
 
-    public RuleLexer(JavaString input, JavaString actualType, Rule rule, String requiredType) {
+    public RuleNodeLexer(JavaString input, JavaString actualType, Rule rule, String requiredType) {
         this.input = input;
         this.actualType = actualType;
         this.requiredType = requiredType;
         this.rule = rule;
-    }
-
-    public static RuleLexer createDeclarationLexer(JavaString input, JavaString type) {
-        return new RuleLexerFactory("definition", ConjunctionRule.of(
-                ContentRule.of(JavaString.apply("type")),
-                ValueRule.of(JavaString.apply(" ")),
-                TextRule.of(JavaString.apply("name"))
-        )).createDeclarationLexer(input, type);
     }
 
     private static MapNode.Builder attachText(RuleResult result, MapNode.Builder builder) {

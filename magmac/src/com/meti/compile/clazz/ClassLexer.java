@@ -4,14 +4,14 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
-import com.meti.compile.Lexer;
+import com.meti.compile.NodeLexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
 import static com.meti.api.option.Options.$Option;
 
-public record ClassLexer(JavaString stripped) implements Lexer {
+public record ClassLexer(JavaString stripped) implements NodeLexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {

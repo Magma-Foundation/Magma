@@ -5,7 +5,7 @@ import com.meti.api.collect.Index;
 import com.meti.api.collect.JavaString;
 import com.meti.api.collect.Range;
 import com.meti.api.option.Option;
-import com.meti.compile.Lexer;
+import com.meti.compile.NodeLexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
@@ -13,7 +13,7 @@ import com.meti.compile.state.Splitter;
 
 import static com.meti.api.option.Options.$Option;
 
-public record BlockLexer(JavaString root) implements Lexer {
+public record BlockLexer(JavaString root) implements NodeLexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {

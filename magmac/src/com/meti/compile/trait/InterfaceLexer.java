@@ -3,11 +3,11 @@ package com.meti.compile.trait;
 import com.meti.api.collect.JavaString;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
-import com.meti.compile.Lexer;
+import com.meti.compile.NodeLexer;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
-public record InterfaceLexer(JavaString stripped) implements Lexer {
+public record InterfaceLexer(JavaString stripped) implements NodeLexer {
 
     @Override
     public Option<Node> lex() {

@@ -2,10 +2,10 @@ package com.meti.compile;
 
 import com.meti.api.collect.JavaString;
 import com.meti.compile.rule.Rule;
-import com.meti.compile.rule.RuleLexer;
+import com.meti.compile.rule.RuleNodeLexer;
 
 public record RuleLexerFactory(String requiredType, Rule rule) {
-    public RuleLexer createDeclarationLexer(JavaString input, JavaString type) {
-        return new RuleLexer(input, type, rule(), requiredType());
+    public RuleNodeLexer create(JavaString input, JavaString type) {
+        return new RuleNodeLexer(input, type, rule(), requiredType());
     }
 }

@@ -10,13 +10,13 @@ import com.meti.compile.function.RecordLexer;
 import com.meti.compile.imports.ImportLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.package_.PackageLexer;
-import com.meti.compile.rule.RuleLexer;
+import com.meti.compile.rule.RuleNodeLexers;
 import com.meti.compile.trait.InterfaceLexer;
 
-public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
-    Iterator<Lexer> enumerateLexers(JavaString input) {
+public record JavaLexer(JavaString stripped, JavaString type) implements NodeLexer {
+    Iterator<NodeLexer> enumerateLexers(JavaString input) {
         return Iterators.from(
-                RuleLexer.createDeclarationLexer(input, type),
+                RuleNodeLexers.createDeclarationLexer(input, type),
                 new InterfaceLexer(input),
                 new PackageLexer(input),
                 new ImportLexer(input),
@@ -29,7 +29,7 @@ public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
     @Override
     public Option<Node> lex() {
         return enumerateLexers(this.stripped())
-                .map(Lexer::lex)
+                .map(NodeLexer::lex)
                 .flatMap(Iterators::fromOption)
                 .head();
     }
