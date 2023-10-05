@@ -12,6 +12,10 @@ public class Content implements Node {
     private final JavaString type;
 
     public Content(JavaString value, JavaString type) {
+        if (value.isBlank()) {
+            new RuntimeException("Input cannot be empty.").printStackTrace();
+        }
+
         this.value = value;
         this.type = type;
     }

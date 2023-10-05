@@ -41,4 +41,9 @@ public record Err<T, E extends Throwable>(E value) implements Result<T, E> {
     public Option<E> err() {
         return Some.apply(value);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
 }

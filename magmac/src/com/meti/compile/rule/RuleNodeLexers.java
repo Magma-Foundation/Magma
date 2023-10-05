@@ -1,12 +1,14 @@
 package com.meti.compile.rule;
 
+import com.meti.api.collect.ImmutableLists;
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
+import com.meti.api.collect.List;
 import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
-import com.meti.compile.Lexer;
 import com.meti.compile.RuleLexerFactory;
 
 import static com.meti.api.result.Results.$Result;
@@ -32,20 +34,29 @@ public class RuleNodeLexers {
     }
 
     private static Result<Rule, RuleException> parseValue(JavaString value) {
-        return $Result(() -> {
-            var rule = lexRuleString(value)
-                    .into(ThrowableOption::new)
-                    .unwrapOrThrow(new RuleException("Invalid syntax: '" + value + "'."))
-                    .$();
+        var collect = lexRuleString(value)
+                .map(RuleNodeLexers::parseValueTree)
+                .collect(ImmutableLists.into());
+        var head = collect
+                .iter()
+                .filter(value1 -> value1.isOk())
+                .head();
+        return head
+                .into(ThrowableOption::new)
+                .unwrapOrThrow(new RuleException("Invalid syntax: '" + value + "'."))
+                .flatMapValue(value1 -> value1);
+    }
 
-            var withLeft = rule.left().map(leftRule -> $Result(() -> {
+    private static Result<Rule, RuleException> parseValueTree(Rule potentialRule) {
+        return $Result(() -> {
+            var withLeft = potentialRule.left().map(leftRule -> $Result(() -> {
                 var leftValue = leftRule.asString()
                         .into(ThrowableOption::new)
                         .unwrapOrThrow(new RuleException("A left value was present, but is not a string."))
                         .$();
                 var parsedLeft = parseValue(leftValue).$();
-                return rule.withLeft(parsedLeft);
-            })).unwrapOrElse(Ok.apply(rule)).$();
+                return potentialRule.withLeft(parsedLeft);
+            })).unwrapOrElse(Ok.apply(potentialRule)).$();
 
             return withLeft.right().map(rightRule -> $Result(() -> {
                 var rightValue = rightRule.asString()
@@ -58,15 +69,14 @@ public class RuleNodeLexers {
         });
     }
 
-    private static Option<Rule> lexRuleString(JavaString value) {
+    private static Iterator<Rule> lexRuleString(JavaString value) {
         return Iterators.from(
                         new ConjunctionRuleLexer(value),
                         new ContentRuleLexer(value),
                         new TextRuleLexer(value),
                         new ValueRuleLexer(value)
-                ).map(Lexer::lex)
-                .flatMap(Iterators::fromOption)
-                .head();
+                )
+                .flatMap(RuleLexer::lex);
     }
 
     public static RuleNodeLexer createDeclarationLexer(JavaString input, JavaString type) {

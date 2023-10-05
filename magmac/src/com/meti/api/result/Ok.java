@@ -40,4 +40,9 @@ public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
     public Option<E> err() {
         return None.apply();
     }
+
+    @Override
+    public boolean isOk() {
+        return true;
+    }
 }

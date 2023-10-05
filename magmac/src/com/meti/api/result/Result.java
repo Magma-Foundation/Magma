@@ -17,4 +17,6 @@ public interface Result<T, E extends Throwable> {
     <R> R match(Function<T, R> okMapper, Function<E, R> errMapper);
 
     Option<E> err();
+
+    boolean isOk();
 }

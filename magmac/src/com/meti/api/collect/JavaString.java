@@ -117,4 +117,15 @@ public record JavaString(String value) {
             return None.apply();
         }
     }
+
+    public Iterator<Index> indicesOfChar(char c) {
+        var indices = ImmutableLists.<Index>empty();
+        var length = this.value.length();
+        for (int i = 0; i < length; i++) {
+            if (this.value.charAt(i) == c) {
+                indices = indices.addLast(new Index(i, length));
+            }
+        }
+        return indices.iter();
+    }
 }
