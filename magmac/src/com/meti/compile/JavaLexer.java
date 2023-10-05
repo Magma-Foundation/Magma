@@ -16,7 +16,7 @@ import com.meti.compile.trait.InterfaceLexer;
 public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
     Iterator<Lexer> enumerateLexers(JavaString input) {
         return Iterators.from(
-                new DeclarationLexer(input, type),
+                DeclarationLexer.createDeclarationLexer(input, type),
                 new InterfaceLexer(input),
                 new PackageLexer(input),
                 new ImportLexer(input),

@@ -60,7 +60,7 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
 
     @Override
     public Option<Node> with(JavaString key, Attribute value) {
-        if(attributes.hasKey(key)) {
+        if (attributes.hasKey(key)) {
             var newAttributes = attributes.put(key, value);
             return Some.apply(new MapNode(this.name, newAttributes));
         } else {
@@ -71,6 +71,10 @@ public record MapNode(JavaString name, Map<JavaString, Attribute> attributes) im
     public record Builder(JavaString name, Map<JavaString, Attribute> attributes) {
         public Builder(JavaString name) {
             this(name, ImmutableMaps.empty());
+        }
+
+        public Builder withContent(String name, JavaString content) {
+            return withNode(name, new Content(content, new JavaString(name)));
         }
 
         public Node complete() {

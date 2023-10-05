@@ -4,10 +4,11 @@ import com.meti.api.collect.JavaString;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.compile.Lexer;
+import com.meti.compile.RuleLexerFactory;
 import com.meti.compile.lex.AnyRule;
 import com.meti.compile.lex.ConjunctionRule;
+import com.meti.compile.lex.Rule;
 import com.meti.compile.lex.ValueRule;
-import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
@@ -15,24 +16,30 @@ import static com.meti.api.option.Options.$Option;
 
 public class DeclarationLexer implements Lexer {
     private final JavaString input;
-    private final JavaString type;
+    private final JavaString actualType;
+    private final Rule rule;
+    private final String requiredType;
 
-    public DeclarationLexer(JavaString input, JavaString type) {
+    public DeclarationLexer(JavaString input, JavaString actualType, Rule rule, String requiredType) {
         this.input = input;
-        this.type = type;
+        this.actualType = actualType;
+        this.requiredType = requiredType;
+        this.rule = rule;
+    }
+
+    public static DeclarationLexer createDeclarationLexer(JavaString input, JavaString type) {
+        return new RuleLexerFactory("definition", ConjunctionRule.of(
+                AnyRule.of(JavaString.apply("type")),
+                ValueRule.of(JavaString.apply(" ")),
+                AnyRule.of(JavaString.apply("name"))
+        )).createDeclarationLexer(input, type);
     }
 
     @Override
     public Option<Node> lex() {
-        if (!type.equalsToSlice("definition")) {
+        if (!actualType.equalsToSlice(requiredType)) {
             return None.apply();
         }
-
-        var rule = ConjunctionRule.of(
-                AnyRule.of(JavaString.apply("type")),
-                ValueRule.of(JavaString.apply(" ")),
-                AnyRule.of(JavaString.apply("name"))
-        );
 
         return $Option(() -> {
             var result = rule.extract(input).$();
@@ -40,7 +47,7 @@ public class DeclarationLexer implements Lexer {
             var right = result.getStrings().get("name").$();
             return MapNode.Builder("type")
                     .withString("name", right)
-                    .withNode("type", new Content(left, JavaString.apply("type")))
+                    .withContent("type", left)
                     .complete();
         });
     }
