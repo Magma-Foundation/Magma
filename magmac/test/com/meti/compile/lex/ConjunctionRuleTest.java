@@ -9,7 +9,7 @@ class ConjunctionRuleTest {
     @Test
     void test() {
         var present = ConjunctionRule.of(
-                AnyRule.of(JavaString.apply("type")),
+                TextRule.of(JavaString.apply("type")),
                 ValueRule.of(JavaString.apply(" "))
         ).extract(JavaString.apply("test ")).isPresent();
         assertTrue(present);

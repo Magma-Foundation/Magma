@@ -14,6 +14,6 @@ public record ValueRule(JavaString value) implements Rule {
     @Override
     public Option<RuleResult> extract(JavaString value) {
         if (!this.value.equals(value)) return None.apply();
-        return Some.apply(new MapRuleResult(ImmutableMaps.empty(), ImmutableMaps.empty()));
+        return Some.apply(new MapRuleResult(ImmutableMaps.empty(), ImmutableMaps.empty(), ImmutableMaps.empty()));
     }
 }

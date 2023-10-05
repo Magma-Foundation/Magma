@@ -5,10 +5,7 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.compile.Lexer;
 import com.meti.compile.RuleLexerFactory;
-import com.meti.compile.lex.AnyRule;
-import com.meti.compile.lex.ConjunctionRule;
-import com.meti.compile.lex.Rule;
-import com.meti.compile.lex.ValueRule;
+import com.meti.compile.lex.*;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
@@ -29,9 +26,9 @@ public class DeclarationLexer implements Lexer {
 
     public static DeclarationLexer createDeclarationLexer(JavaString input, JavaString type) {
         return new RuleLexerFactory("definition", ConjunctionRule.of(
-                AnyRule.of(JavaString.apply("type")),
+                ContentRule.of(JavaString.apply("type")),
                 ValueRule.of(JavaString.apply(" ")),
-                AnyRule.of(JavaString.apply("name"))
+                TextRule.of(JavaString.apply("name"))
         )).createDeclarationLexer(input, type);
     }
 
@@ -43,8 +40,8 @@ public class DeclarationLexer implements Lexer {
 
         return $Option(() -> {
             var result = rule.extract(input).$();
-            var left = result.getStrings().get("type").$();
-            var right = result.getStrings().get("name").$();
+            var left = result.getContent().get("type").$();
+            var right = result.getText().get("name").$();
             return MapNode.Builder("type")
                     .withString("name", right)
                     .withContent("type", left)
