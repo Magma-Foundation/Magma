@@ -1,4 +1,4 @@
-package com.meti.compile.lex;
+package com.meti.compile.rule;
 
 import com.meti.api.collect.JavaString;
 import com.meti.api.iterate.Iterators;

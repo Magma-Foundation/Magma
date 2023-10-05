@@ -8,9 +8,9 @@ import com.meti.compile.block.BlockLexer;
 import com.meti.compile.clazz.ClassLexer;
 import com.meti.compile.function.RecordLexer;
 import com.meti.compile.imports.ImportLexer;
-import com.meti.compile.lex.RuleLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.package_.PackageLexer;
+import com.meti.compile.rule.RuleLexer;
 import com.meti.compile.trait.InterfaceLexer;
 
 public record JavaLexer(JavaString stripped, JavaString type) implements Lexer {
