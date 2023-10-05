@@ -4,6 +4,9 @@ import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public record JavaString(String value) {
     public static final JavaString Empty = new JavaString("");
 
@@ -110,11 +113,17 @@ public record JavaString(String value) {
         };
     }
 
-    public Option<Index> indexOf(int value) {
+    public Option<Index> validateIndex(int value) {
         if (value < this.value.length()) {
             return Some.apply(new Index(value, this.value.length()));
         } else {
             return None.apply();
         }
+    }
+
+    public List<JavaString> split(String regexSlice) {
+        return new ImmutableList<>(Arrays.stream(this.value.split(regexSlice))
+                .map(JavaString::new)
+                .collect(Collectors.toList()));
     }
 }

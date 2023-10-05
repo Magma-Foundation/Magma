@@ -18,7 +18,7 @@ public record ConjunctionRule(Rule left, Rule right) implements Rule {
             for (int leftSliceSize = 0; leftSliceSize < value.length(); leftSliceSize++) {
                 var windowCount = value.length() - leftSliceSize + 1;
                 for (int temp = 0; temp < windowCount; temp++) {
-                    var rightIndexStart = value.indexOf(temp).$();
+                    var rightIndexStart = value.validateIndex(temp).$();
                     var leftSlice = value.sliceTo(rightIndexStart);
                     var rightSlice = value.sliceFrom(rightIndexStart);
                     var extractedLeft = left.extract(leftSlice);
