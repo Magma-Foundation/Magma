@@ -3,9 +3,7 @@ package com.meti.compile.rule;
 import com.meti.api.collect.ImmutableLists;
 import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
-import com.meti.api.collect.List;
 import com.meti.api.iterate.Iterators;
-import com.meti.api.option.Option;
 import com.meti.api.option.ThrowableOption;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
@@ -79,9 +77,9 @@ public class RuleNodeLexers {
                 .flatMap(RuleLexer::lex);
     }
 
-    public static RuleNodeLexer createDeclarationLexer(JavaString input, JavaString type) {
+    public static RuleNodeLexer createDeclarationLexer(String line, JavaString input, JavaString type) {
         try {
-            var parse = parse(JavaString.apply("definition = <type> \" \" (name)"));
+            var parse = parse(JavaString.apply(line));
             return parse.$().create(input, type);
         } catch (RuleException e) {
             e.printStackTrace();

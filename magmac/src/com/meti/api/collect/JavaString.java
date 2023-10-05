@@ -1,5 +1,6 @@
 package com.meti.api.collect;
 
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
@@ -127,5 +128,10 @@ public record JavaString(String value) {
             }
         }
         return indices.iter();
+    }
+
+    public Iterator<JavaString> split(String regexSlice) {
+        return Iterators.from(this.value.split(regexSlice))
+                .map(JavaString::new);
     }
 }
