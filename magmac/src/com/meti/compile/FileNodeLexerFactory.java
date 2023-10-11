@@ -16,6 +16,8 @@ public class FileNodeLexerFactory {
             @Override
             Iterator<NodeLexer> enumerateLexers() {
                 return content.split("\n")
+                        .map(JavaString::strip)
+                        .filter(value -> !value.isBlank())
                         .map(line -> RuleNodeLexers.createDeclarationLexer(line.value(), input, type));
             }
         };
