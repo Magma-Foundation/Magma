@@ -9,16 +9,25 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.CompileException;
 import com.meti.compile.Compiler;
+import com.meti.compile.FileNodeLexerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
+        FileNodeLexerFactory factory;
+        try {
+            var content = Files.readString(Paths.get(".", "lang", "java.lag"));
+            factory = new FileNodeLexerFactory(new JavaString(content));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         var root = Paths.get(".", "magmac");
         var source = root.resolve("src");
         var dist = root.resolve("dist");
@@ -39,7 +48,7 @@ public class Main {
                     .collect(ImmutableLists.into());
 
             lines.iter()
-                    .map(file -> compileFile(source, dist, file))
+                    .map(file -> compileFile(source, dist, file, factory))
                     .flatMap(Iterators::fromOption)
                     .head()
                     .ifPresent(Throwable::printStackTrace);
@@ -48,10 +57,10 @@ public class Main {
         }
     }
 
-    private static Option<CompileException> compileFile(Path source, Path dist, Path file) {
+    private static Option<CompileException> compileFile(Path source, Path dist, Path file, FileNodeLexerFactory factory) {
         try {
             var input = Files.readString(file);
-            return new Compiler(new JavaString(input.strip())).compile().match(output -> {
+            return new Compiler(new JavaString(input.strip()), factory).compile().match(output -> {
                 var relative = source.relativize(file);
                 var parent = relative.getParent();
 
