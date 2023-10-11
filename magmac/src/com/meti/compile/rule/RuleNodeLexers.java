@@ -77,13 +77,10 @@ public class RuleNodeLexers {
                 .flatMap(RuleLexer::lex);
     }
 
-    public static RuleNodeLexer createDeclarationLexer(String line, JavaString input, JavaString type) {
-        try {
+    public static Result<RuleNodeLexer, RuleException> create(String line, JavaString input, JavaString type) {
+        return $Result(() -> {
             var parse = parse(JavaString.apply(line));
             return parse.$().create(input, type);
-        } catch (RuleException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        });
     }
 }

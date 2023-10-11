@@ -19,4 +19,6 @@ public interface Result<T, E extends Throwable> {
     Option<E> err();
 
     boolean isOk();
+
+    <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 }

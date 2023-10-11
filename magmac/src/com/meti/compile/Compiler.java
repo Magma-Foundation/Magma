@@ -95,6 +95,8 @@ public record Compiler(JavaString input, FileNodeLexerFactory factory) {
             }
 
             return factory.create(input, type)
+                    .mapErr(CompileException::new)
+                    .$()
                     .lex()
                     .into(ThrowableOption::new)
                     .unwrapOrThrow(new CompileException("For type '%s', invalid input value '%s'.".formatted(type, input)))
