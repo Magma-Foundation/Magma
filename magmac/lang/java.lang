@@ -1,4 +1,5 @@
 package : {
-    segment = string;
-} = "package" + whitespace + (segment / ".")
+    segment = string,
+    segments = [ segment / "." ],
+} = "package" + whitespace + (segment / ".");
 

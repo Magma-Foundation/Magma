@@ -37,11 +37,11 @@ public class RuleNodeLexers {
                 .collect(ImmutableLists.into());
         var head = collect
                 .iter()
-                .filter(value1 -> value1.isOk())
+                .filter(Result::isOk)
                 .head();
         return head
                 .into(ThrowableOption::new)
-                .unwrapOrThrow(new RuleException("Invalid syntax: '" + value + "'."))
+                .unwrapOrThrow(new RuleException("Invalid syntax for rule: '" + value + "'."))
                 .flatMapValue(value1 -> value1);
     }
 
