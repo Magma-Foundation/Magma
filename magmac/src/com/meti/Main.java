@@ -21,7 +21,7 @@ public class Main {
     public static void main(String[] args) {
         FileNodeLexerFactory factory;
         try {
-            var content = Files.readString(Paths.get(".", "lang", "java.lag"));
+            var content = Files.readString(Paths.get(".", "lang", "java.lang"));
             factory = new FileNodeLexerFactory(new JavaString(content));
         } catch (IOException e) {
             e.printStackTrace();
