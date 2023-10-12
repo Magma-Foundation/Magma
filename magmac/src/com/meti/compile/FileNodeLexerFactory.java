@@ -85,10 +85,10 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
                 .flatMap(RuleLexer::lex);
     }
 
-    public static Result<RuleNodeLexer, RuleException> create(String line, JavaString input, JavaString type) {
+    public static Result<Lexer<Node>, CompileException> create(String line, JavaString input, JavaString type) {
         return $Result(() -> {
             var parse = parse(JavaString.apply(line));
-            return parse.$().create(input, type);
+            return parse.$().create(input, type).$();
         });
     }
 
@@ -101,7 +101,7 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
                 .collect(Collectors.exceptionally(ImmutableLists.into()))
                 .mapValue(value -> new CompoundLexer() {
                     @Override
-                    Iterator<? extends NodeLexer> enumerateLexers() {
+                    Iterator<? extends Lexer<Node>> enumerateLexers() {
                         return value.iter();
                     }
                 });

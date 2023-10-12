@@ -7,10 +7,9 @@ import com.meti.api.iterate.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.compile.CompileException;
+import com.meti.compile.*;
 import com.meti.compile.Compiler;
-import com.meti.compile.FileNodeLexerFactory;
-import com.meti.compile.NodeLexerFactory;
+import com.meti.compile.node.Node;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        NodeLexerFactory factory;
+        LexerFactory<Node> factory;
         try {
             var content = Files.readString(Paths.get(".", "magmac", "lang", "java.lang").toAbsolutePath());
             factory = new FileNodeLexerFactory(new JavaString(content));
@@ -58,7 +57,7 @@ public class Main {
         }
     }
 
-    private static Option<CompileException> compileFile(Path source, Path dist, Path file, NodeLexerFactory factory) {
+    private static Option<CompileException> compileFile(Path source, Path dist, Path file, LexerFactory<Node> factory) {
         try {
             var input = Files.readString(file);
             return new Compiler(new JavaString(input.strip()), factory).compile().match(output -> {

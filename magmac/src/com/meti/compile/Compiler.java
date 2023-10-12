@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
 
 import static com.meti.api.result.Results.$Result;
 
-public record Compiler(JavaString input, NodeLexerFactory factory) {
+public record Compiler(JavaString input, LexerFactory<Node> factory) {
 
     private Result<Node, CompileException> lexTree(JavaString input, JavaString type) {
         return $Result(() -> {

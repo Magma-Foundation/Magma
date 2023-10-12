@@ -6,7 +6,7 @@ import com.meti.api.option.Option;
 import com.meti.compile.node.Node;
 
 public abstract class CompoundLexer implements NodeLexer {
-    abstract Iterator<? extends NodeLexer> enumerateLexers();
+    abstract Iterator<? extends Lexer<Node>> enumerateLexers();
 
     @Override
     public Option<Node> lex() {
