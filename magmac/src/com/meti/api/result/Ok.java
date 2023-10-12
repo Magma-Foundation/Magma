@@ -22,6 +22,11 @@ public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
     }
 
     @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Ok<>(value);
+    }
+
+    @Override
     public <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper) {
         return mapper.apply(value);
     }
