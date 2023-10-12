@@ -1,7 +1,7 @@
 package com.meti.compile;
 
-import com.meti.api.option.Option;
+import com.meti.api.collect.Iterator;
 
 public interface Lexer<T> {
-    Option<T> lex();
+    Iterator<T> lex();
 }

@@ -1,18 +1,12 @@
 package com.meti.compile;
 
 import com.meti.api.collect.Iterator;
-import com.meti.api.iterate.Iterators;
-import com.meti.api.option.Option;
-import com.meti.compile.node.Node;
 
-public abstract class CompoundLexer implements NodeLexer {
-    abstract Iterator<? extends Lexer<Node>> enumerateLexers();
+public abstract class CompoundLexer<T> implements Lexer<T> {
+    abstract Iterator<? extends Lexer<T>> enumerateLexers();
 
     @Override
-    public Option<Node> lex() {
-        return enumerateLexers()
-                .map(NodeLexer::lex)
-                .flatMap(Iterators::fromOption)
-                .head();
+    public Iterator<T> lex() {
+        return enumerateLexers().flatMap(Lexer::lex);
     }
 }

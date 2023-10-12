@@ -94,10 +94,10 @@ public record Compiler(JavaString input, LexerFactory<Node> factory) {
                 throw new CompileException("Input cannot be empty.");
             }
 
-            return factory.create(input, type)
+            Lexer<Node> nodeLexer = factory.create(input, type)
                     .mapErr(CompileException::new)
-                    .$()
-                    .lex()
+                    .$();
+            return nodeLexer.lex().head()
                     .into(ThrowableOption::new)
                     .unwrapOrThrow(new CompileException("For type '%s', invalid input value '%s'.".formatted(type, input)))
                     .$();

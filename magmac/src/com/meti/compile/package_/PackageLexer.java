@@ -10,8 +10,7 @@ import com.meti.compile.node.Node;
 
 public record PackageLexer(JavaString stripped) implements NodeLexer {
 
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         if (stripped.firstIndexOfSlice("package ").isPresent()) {
             return Some.apply(MapNode.Builder("package").complete());
         } else {

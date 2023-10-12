@@ -38,8 +38,7 @@ public class RuleNodeLexer implements NodeLexer {
                 .collect(ImmutableLists.into())));
     }
 
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         if (!actualType.equalsToSlice(requiredType)) {
             return None.apply();
         }

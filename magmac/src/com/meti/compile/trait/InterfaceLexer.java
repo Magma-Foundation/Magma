@@ -9,8 +9,7 @@ import com.meti.compile.node.Node;
 
 public record InterfaceLexer(JavaString stripped) implements NodeLexer {
 
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         return Options.$Option(() -> {
             var nameStart = stripped.firstIndexOfChar('<').$();
             var keywordEnd = stripped.firstIndexOfSlice("interface ").$()

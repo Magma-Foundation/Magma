@@ -11,8 +11,7 @@ import com.meti.compile.node.Node;
 import static com.meti.api.option.Options.$Option;
 
 public record RecordLexer(JavaString stripped) implements NodeLexer {
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         return $Option(() -> {
             var nameStart = stripped().firstIndexOfSlice("record ").$()
                     .nextBy("record ".length())

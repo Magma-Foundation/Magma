@@ -14,8 +14,7 @@ import com.meti.compile.state.Splitter;
 import static com.meti.api.option.Options.$Option;
 
 public record BlockLexer(JavaString root) implements NodeLexer {
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         return $Option(() -> {
             var bodyStart = root().firstIndexOfChar('{')
                     .filter(Index::isStart)

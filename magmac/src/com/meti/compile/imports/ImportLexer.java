@@ -8,8 +8,7 @@ import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
 public record ImportLexer(JavaString stripped) implements NodeLexer {
-    @Override
-    public Option<Node> lex() {
+    public Option<Node> lex1() {
         return Options.$Option(() -> {
             var index = stripped
                     .firstIndexOfSlice("import ").$()

@@ -20,7 +20,7 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
         this.content = content;
     }
 
-    public static Result<RuleLexerFactory, RuleException> parse(JavaString content) {
+    public static Result<LexerFactory<Node>, RuleException> parse(JavaString content) {
         return $Result(() -> {
             var separator = content.firstIndexOfChar('=')
                     .into(ThrowableOption::new)
@@ -40,7 +40,19 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
     }
 
     private static Result<Rule, RuleException> parseValue(JavaString value) {
-        var collect = lexRuleString(value)
+        var rootRuleLexer = new CompoundLexer<Rule>() {
+            @Override
+            Iterator<? extends Lexer<Rule>> enumerateLexers() {
+                return Iterators.from(
+                        new ConjunctionRuleLexer(value),
+                        new ContentRuleLexer(value),
+                        new TextRuleLexer(value),
+                        new ValueRuleLexer(value)
+                );
+            }
+        };
+
+        var collect = rootRuleLexer.lex()
                 .map(FileNodeLexerFactory::parseValueTree)
                 .collect(ImmutableLists.into());
         var head = collect
@@ -99,7 +111,7 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
                 .filter(value -> !value.isBlank())
                 .map(line -> create(line.value(), input, type))
                 .collect(Collectors.exceptionally(ImmutableLists.into()))
-                .mapValue(value -> new CompoundLexer() {
+                .mapValue(value -> new CompoundLexer<Node>() {
                     @Override
                     Iterator<? extends Lexer<Node>> enumerateLexers() {
                         return value.iter();
