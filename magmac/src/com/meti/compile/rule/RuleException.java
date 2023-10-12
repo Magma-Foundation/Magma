@@ -1,6 +1,8 @@
 package com.meti.compile.rule;
 
-public class RuleException extends Exception {
+import com.meti.compile.CompileException;
+
+public class RuleException extends CompileException {
     public RuleException(String message) {
         super(message);
     }
