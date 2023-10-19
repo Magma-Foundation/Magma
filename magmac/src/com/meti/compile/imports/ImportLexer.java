@@ -1,6 +1,8 @@
 package com.meti.compile.imports;
 
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.compile.NodeLexer;
@@ -8,7 +10,7 @@ import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
 public record ImportLexer(JavaString stripped) implements NodeLexer {
-    public Option<Node> lex1() {
+    private Option<Node> lex1() {
         return Options.$Option(() -> {
             var index = stripped
                     .firstIndexOfSlice("import ").$()
@@ -24,5 +26,10 @@ public record ImportLexer(JavaString stripped) implements NodeLexer {
                     .withString("child", child)
                     .complete();
         });
+    }
+
+    @Override
+    public Iterator<Node> lex() {
+        return Iterators.fromOption(lex1());
     }
 }

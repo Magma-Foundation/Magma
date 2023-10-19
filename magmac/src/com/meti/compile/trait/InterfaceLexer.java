@@ -1,6 +1,8 @@
 package com.meti.compile.trait;
 
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.compile.NodeLexer;
@@ -9,7 +11,7 @@ import com.meti.compile.node.Node;
 
 public record InterfaceLexer(JavaString stripped) implements NodeLexer {
 
-    public Option<Node> lex1() {
+    private Option<Node> lex1() {
         return Options.$Option(() -> {
             var nameStart = stripped.firstIndexOfChar('<').$();
             var keywordEnd = stripped.firstIndexOfSlice("interface ").$()
@@ -19,5 +21,10 @@ public record InterfaceLexer(JavaString stripped) implements NodeLexer {
                     .withString(JavaString.apply("name"), name)
                     .complete();
         });
+    }
+
+    @Override
+    public Iterator<Node> lex() {
+        return Iterators.fromOption(lex1());
     }
 }

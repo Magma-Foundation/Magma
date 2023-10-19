@@ -1,7 +1,9 @@
 package com.meti.compile.rule;
 
 import com.meti.api.collect.ImmutableLists;
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.compile.NodeLexer;
@@ -38,7 +40,7 @@ public class RuleNodeLexer implements NodeLexer {
                 .collect(ImmutableLists.into())));
     }
 
-    public Option<Node> lex1() {
+    private Option<Node> lex1() {
         if (!actualType.equalsToSlice(requiredType)) {
             return None.apply();
         }
@@ -51,5 +53,10 @@ public class RuleNodeLexer implements NodeLexer {
             var withLists = getAttachLists(result, withContent);
             return withLists.complete();
         });
+    }
+
+    @Override
+    public Iterator<Node> lex() {
+        return Iterators.fromOption(lex1());
     }
 }

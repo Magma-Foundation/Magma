@@ -1,9 +1,7 @@
 package com.meti.compile.block;
 
-import com.meti.api.collect.ImmutableLists;
-import com.meti.api.collect.Index;
-import com.meti.api.collect.JavaString;
-import com.meti.api.collect.Range;
+import com.meti.api.collect.*;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
 import com.meti.compile.NodeLexer;
 import com.meti.compile.node.Content;
@@ -14,7 +12,7 @@ import com.meti.compile.state.Splitter;
 import static com.meti.api.option.Options.$Option;
 
 public record BlockLexer(JavaString root) implements NodeLexer {
-    public Option<Node> lex1() {
+    private Option<Node> lex1() {
         return $Option(() -> {
             var bodyStart = root().firstIndexOfChar('{')
                     .filter(Index::isStart)
@@ -37,5 +35,10 @@ public record BlockLexer(JavaString root) implements NodeLexer {
                     .withNodeList(JavaString.apply("lines"), collect)
                     .complete();
         });
+    }
+
+    @Override
+    public Iterator<Node> lex() {
+        return Iterators.fromOption(lex1());
     }
 }
