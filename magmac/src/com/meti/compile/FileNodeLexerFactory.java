@@ -34,6 +34,8 @@ public class FileNodeLexerFactory implements NodeLexerFactory {
 
             var name = content.sliceTo(separator).strip();
             var value = content.sliceFrom(afterSeparator).strip();
+            System.out.println("Found rule for '" + name + "'.");
+
             var rule = parseValue(value).$();
             return new RuleLexerFactory(name.value(), rule);
         });
