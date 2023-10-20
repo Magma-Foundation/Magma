@@ -3,6 +3,8 @@ package com.meti;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,8 +33,18 @@ public class ApplicationTest {
 
     @Test
     void generateEmptyTarget() throws IOException {
-        var output = Files.readString(runWithSource().orElseThrow());
-        assertTrue(output.isEmpty());
+        assertCompile("", "");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Test0", "Test1"})
+    void generateClass(String name) throws IOException {
+        assertCompile("class " + name + " {}", "class def " + name + "() => {}");
+    }
+
+    private void assertCompile(String input, String output) throws IOException {
+        var target = Files.readString(runWithSource(input).orElseThrow());
+        assertEquals(output, target);
     }
 
     @Test
@@ -42,7 +54,11 @@ public class ApplicationTest {
     }
 
     private Optional<Path> runWithSource() throws IOException {
-        Files.createFile(source);
+        return runWithSource("");
+    }
+
+    private Optional<Path> runWithSource(String input) throws IOException {
+        Files.writeString(source, input);
         return new Application(source).run();
     }
 

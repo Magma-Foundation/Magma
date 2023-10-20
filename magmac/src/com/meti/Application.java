@@ -8,11 +8,21 @@ import java.util.Optional;
 public record Application(Path source) {
     Optional<Path> run() throws IOException {
         if (Files.exists(source())) {
+            var input = Files.readString(source);
+            String output;
+            if (input.startsWith("class ")) {
+                var bodyStart = input.indexOf('{');
+                var className = input.substring("class ".length(), bodyStart).strip();
+                output = "class def " + className + "() => {}";
+            } else {
+                output = "";
+            }
+
             var fileName = source().getFileName().toString();
             var separator = fileName.indexOf(".");
             var fileNameWithoutExtension = fileName.substring(0, separator);
             var actualTarget = source().resolveSibling(fileNameWithoutExtension + ".mgs");
-            Files.createFile(actualTarget);
+            Files.writeString(actualTarget, output);
             return Optional.of(actualTarget);
         } else {
             return Optional.empty();
