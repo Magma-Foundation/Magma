@@ -4,12 +4,18 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
-    private static String compileLine(String lines) {
+    private static String compileLine(String line) {
         String output;
-        if (lines.startsWith("class ")) {
-            var bodyStart = lines.indexOf('{');
-            var className = lines.substring("class ".length(), bodyStart).strip();
+        if (line.startsWith("class ")) {
+            var bodyStart = line.indexOf('{');
+            var className = line.substring("class ".length(), bodyStart).strip();
             output = "class def " + className + "() => {}";
+        } else if (line.startsWith("import ")) {
+            var segments = line.substring("import ".length()).strip();
+            var separator = segments.lastIndexOf(".");
+            var parent = segments.substring(0, separator).strip();
+            var child = segments.substring(separator + 1).strip();
+            return "import { " + child + " } from " + parent + ";";
         } else {
             output = "";
         }
