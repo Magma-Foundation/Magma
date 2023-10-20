@@ -6,11 +6,36 @@ import java.util.stream.Collectors;
 
 public record Compiler(String input) {
     private static String compileLine(String line) {
-        return compileRecord(line)
+        return compilePackage(line)
+                .or(() -> compileBody(line))
+                .or(() -> compileRecord(line))
                 .or(() -> compileClass(line))
                 .or(() -> compileImport(line))
                 .or(() -> compileMethod(line))
-                .orElse("");
+                .orElseThrow(() -> new RuntimeException("Unknown input '" + line + "'."));
+    }
+
+    private static Optional<String> compilePackage(String line) {
+        if (line.startsWith("package ")) {
+            return Optional.of("");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileBody(String line) {
+        if (line.startsWith("{") && line.endsWith("}")) {
+            var slice = line.substring(1, line.length() - 1).strip();
+            String compiledSlice;
+            if (slice.isEmpty()) {
+                compiledSlice = "";
+            } else {
+                compiledSlice = compileLine(slice);
+            }
+            return Optional.of("{" + compiledSlice + "}");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileMethod(String line) {
@@ -39,7 +64,12 @@ public record Compiler(String input) {
         var name = line.substring(keywordStart + "record ".length(), paramStart).strip();
         var prefix = keywords.equals("public ") ? "export " : "";
 
-        return Optional.of(prefix + "class def " + name + "(" + parameterOutput + ") => {}");
+        var bodyStart = line.indexOf('{');
+        var bodyEnd = line.indexOf('}');
+        var bodySlice = line.substring(bodyStart, bodyEnd + 1).strip();
+        var body = compileLine(bodySlice);
+
+        return Optional.of(prefix + "class def " + name + "(" + parameterOutput + ") => " + body);
     }
 
     private static String compileParameters(String parameterString) {

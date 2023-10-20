@@ -11,6 +11,12 @@ class CompilerTest {
     }
 
     @Test
+    void methodInRecord() {
+        assertCompile("record Test(){void test(){}}",
+                "class def Test() => {def test() => {}}");
+    }
+
+    @Test
     void method() {
         assertCompile("void test(){}", "def test() => {}");
     }
