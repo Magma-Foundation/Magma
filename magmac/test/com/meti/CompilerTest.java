@@ -11,6 +11,11 @@ class CompilerTest {
     }
 
     @Test
+    void records() {
+        assertCompile("record Test(){}", "class def Test() => {}");
+    }
+
+    @Test
     void imports() {
         assertCompile("import parent.Child", "import { Child } from parent;");
     }

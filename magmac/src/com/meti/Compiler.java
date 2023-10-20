@@ -6,7 +6,11 @@ import java.util.stream.Collectors;
 public record Compiler(String input) {
     private static String compileLine(String line) {
         String output;
-        if (line.startsWith("class ")) {
+        if (line.startsWith("record ")) {
+            var paramStart = line.indexOf('(');
+            var name = line.substring("record ".length(), paramStart).strip();
+            return "class def " + name + "() => {}";
+        } else if (line.startsWith("class ")) {
             var bodyStart = line.indexOf('{');
             var className = line.substring("class ".length(), bodyStart).strip();
             output = "class def " + className + "() => {}";
