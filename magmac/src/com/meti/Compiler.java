@@ -9,7 +9,23 @@ public record Compiler(String input) {
         return compileRecord(line)
                 .or(() -> compileClass(line))
                 .or(() -> compileImport(line))
+                .or(() -> compileMethod(line))
                 .orElse("");
+    }
+
+    private static Optional<String> compileMethod(String line) {
+        var nameStart = line.indexOf(' ');
+        if (nameStart == -1) {
+            return Optional.empty();
+        }
+
+        var nameEnd = line.indexOf('(');
+        if (nameEnd == -1) {
+            return Optional.empty();
+        }
+
+        var name = line.substring(nameStart + 1, nameEnd).strip();
+        return Optional.of("def " + name + "() => {}");
     }
 
     private static Optional<String> compileRecord(String line) {
