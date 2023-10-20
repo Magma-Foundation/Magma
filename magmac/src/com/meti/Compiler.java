@@ -13,10 +13,20 @@ public record Compiler(String input) {
     }
 
     private static Optional<String> compileRecord(String line) {
-        if (!line.startsWith("record ")) return Optional.empty();
+        if (!line.contains("record ")) return Optional.empty();
+        var keywordStart = line.indexOf("record ");
+        var keywords = line.substring(0, keywordStart);
+
         var paramStart = line.indexOf('(');
-        var name = line.substring("record ".length(), paramStart).strip();
-        return Optional.of("class def " + name + "() => {}");
+        var name = line.substring(keywordStart + "record ".length(), paramStart).strip();
+        String prefix;
+        if (keywords.equals("public ")) {
+            prefix = "export ";
+        } else {
+            prefix = "";
+        }
+
+        return Optional.of(prefix + "class def " + name + "() => {}");
     }
 
     private static Optional<String> compileClass(String line) {

@@ -11,6 +11,11 @@ class CompilerTest {
     }
 
     @Test
+    void publicModifier() {
+        assertCompile("public record Test(){}", "export class def Test() => {}");
+    }
+
+    @Test
     void records() {
         assertCompile("record Test(){}", "class def Test() => {}");
     }
