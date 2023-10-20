@@ -18,15 +18,23 @@ public record Compiler(String input) {
         var keywords = line.substring(0, keywordStart);
 
         var paramStart = line.indexOf('(');
-        var name = line.substring(keywordStart + "record ".length(), paramStart).strip();
-        String prefix;
-        if (keywords.equals("public ")) {
-            prefix = "export ";
-        } else {
-            prefix = "";
-        }
+        var parameterOutput = compileParameters(line.substring(paramStart + 1, line.indexOf(')')).strip());
 
-        return Optional.of(prefix + "class def " + name + "() => {}");
+        var name = line.substring(keywordStart + "record ".length(), paramStart).strip();
+        var prefix = keywords.equals("public ") ? "export " : "";
+
+        return Optional.of(prefix + "class def " + name + "(" + parameterOutput + ") => {}");
+    }
+
+    private static String compileParameters(String parameterString) {
+        if (parameterString.isEmpty()) {
+            return "";
+        } else {
+            var parameterSeparator = parameterString.indexOf(' ');
+            var type = parameterString.substring(0, parameterSeparator).strip();
+            var parameterName = parameterString.substring(parameterSeparator + 1).strip();
+            return parameterName + " : " + type;
+        }
     }
 
     private static Optional<String> compileClass(String line) {
