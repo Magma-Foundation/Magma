@@ -29,17 +29,10 @@ public class ApplicationTest {
         assertTrue(Files.exists(target));
     }
 
-    private Optional<Path> run() throws IOException {
-        if (Files.exists(source)) {
-            var fileName = source.getFileName().toString();
-            var separator = fileName.indexOf(".");
-            var fileNameWithoutExtension = fileName.substring(0, separator);
-            var actualTarget = source.resolveSibling(fileNameWithoutExtension + ".mgs");
-            Files.createFile(actualTarget);
-            return Optional.of(actualTarget);
-        } else {
-            return Optional.empty();
-        }
+    @Test
+    void generateEmptyTarget() throws IOException {
+        var output = Files.readString(runWithSource().orElseThrow());
+        assertTrue(output.isEmpty());
     }
 
     @Test
@@ -50,7 +43,7 @@ public class ApplicationTest {
 
     private Optional<Path> runWithSource() throws IOException {
         Files.createFile(source);
-        return run();
+        return new Application(source).run();
     }
 
     @AfterEach
@@ -61,7 +54,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNoTarget() throws IOException {
-        run();
+        new Application(source).run();
         assertFalse(Files.exists(target));
     }
 }
