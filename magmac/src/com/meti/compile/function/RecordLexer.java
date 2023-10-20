@@ -1,18 +1,19 @@
 package com.meti.compile.function;
 
 import com.meti.api.collect.ImmutableLists;
+import com.meti.api.collect.Iterator;
 import com.meti.api.collect.JavaString;
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.Option;
-import com.meti.compile.Lexer;
+import com.meti.compile.NodeLexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 
 import static com.meti.api.option.Options.$Option;
 
-public record RecordLexer(JavaString stripped) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+public record RecordLexer(JavaString stripped) implements NodeLexer {
+    private Option<Node> lex1() {
         return $Option(() -> {
             var nameStart = stripped().firstIndexOfSlice("record ").$()
                     .nextBy("record ".length())
@@ -45,5 +46,10 @@ public record RecordLexer(JavaString stripped) implements Lexer {
                     .withNode("body", new Content(bodySlice, JavaString.Empty))
                     .complete();
         });
+    }
+
+    @Override
+    public Iterator<Node> lex() {
+        return Iterators.fromOption(lex1());
     }
 }

@@ -1,11 +1,9 @@
 package com.meti.api.collect;
 
+import com.meti.api.iterate.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public record JavaString(String value) {
     public static final JavaString Empty = new JavaString("");
@@ -113,7 +111,7 @@ public record JavaString(String value) {
         };
     }
 
-    public Option<Index> validateIndex(int value) {
+    public Option<Index> indexOf(int value) {
         if (value < this.value.length()) {
             return Some.apply(new Index(value, this.value.length()));
         } else {
@@ -121,9 +119,19 @@ public record JavaString(String value) {
         }
     }
 
-    public List<JavaString> split(String regexSlice) {
-        return new ImmutableList<>(Arrays.stream(this.value.split(regexSlice))
-                .map(JavaString::new)
-                .collect(Collectors.toList()));
+    public Iterator<Index> indicesOfChar(char c) {
+        var indices = ImmutableLists.<Index>empty();
+        var length = this.value.length();
+        for (int i = 0; i < length; i++) {
+            if (this.value.charAt(i) == c) {
+                indices = indices.addLast(new Index(i, length));
+            }
+        }
+        return indices.iter();
+    }
+
+    public Iterator<JavaString> split(String regexSlice) {
+        return Iterators.from(this.value.split(regexSlice))
+                .map(JavaString::new);
     }
 }

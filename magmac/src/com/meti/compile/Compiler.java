@@ -25,9 +25,9 @@ import java.util.function.BiFunction;
 
 import static com.meti.api.result.Results.$Result;
 
-public record Compiler(JavaString input) {
+public record Compiler(JavaString input, LexerFactory<Node> factory) {
 
-    private static Result<Node, CompileException> lexTree(JavaString input, JavaString type) {
+    private Result<Node, CompileException> lexTree(JavaString input, JavaString type) {
         return $Result(() -> {
             var root = lexNode(input, type).$();
             var withNodes = root.stream(Attribute.Group.Node).foldRight(Ok.apply(root), (BiFunction<Result<Node, CompileException>, Tuple<JavaString, Attribute>, Result<Node, CompileException>>) (nodeCompileExceptionResult, javaStringAttributeTuple) -> $Result(() -> {
@@ -88,14 +88,16 @@ public record Compiler(JavaString input) {
         });
     }
 
-    private static Result<Node, CompileException> lexNode(JavaString input, JavaString type) {
+    private  Result<Node, CompileException> lexNode(JavaString input, JavaString type) {
         return $Result(() -> {
             if (input.isBlank()) {
                 throw new CompileException("Input cannot be empty.");
             }
 
-            return new JavaLexer(input, type)
-                    .lex()
+            Lexer<Node> nodeLexer = factory.create(input, type)
+                    .mapErr(CompileException::new)
+                    .$();
+            return nodeLexer.lex().head()
                     .into(ThrowableOption::new)
                     .unwrapOrThrow(new CompileException("For type '%s', invalid input value '%s'.".formatted(type, input)))
                     .$();

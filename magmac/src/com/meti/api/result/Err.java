@@ -41,4 +41,14 @@ public record Err<T, E extends Throwable>(E value) implements Result<T, E> {
     public Option<E> err() {
         return Some.apply(value);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
+
+    @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Err<>(mapper.apply(value));
+    }
 }
