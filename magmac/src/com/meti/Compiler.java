@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record Compiler(String input) {
     static Result<String, CompileException> compileImport(String input) {
-        var separator = input.indexOf('.');
+        var separator = input.lastIndexOf('.');
         if (separator == -1) {
             return new Err<>(new CompileException("Invalid import syntax."));
         } else {
