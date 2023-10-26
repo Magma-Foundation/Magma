@@ -1,10 +1,14 @@
-package com.meti;
+package com.meti.compile.iterator;
 
-class ArrayIterator extends AbstractIterator<String> {
+import com.meti.compile.option.None;
+import com.meti.compile.option.Option;
+import com.meti.compile.option.Some;
+
+public class ArrayIterator extends AbstractIterator<String> {
     private final String[] args;
     private int counter = 0;
 
-    ArrayIterator(String[] args) {
+    public ArrayIterator(String[] args) {
         this.args = args;
     }
 

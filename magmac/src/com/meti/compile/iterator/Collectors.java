@@ -1,4 +1,7 @@
-package com.meti;
+package com.meti.compile.iterator;
+
+import com.meti.compile.result.Ok;
+import com.meti.compile.result.Result;
 
 public class Collectors {
     public static Collector<String, String> joining() {
