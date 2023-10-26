@@ -1,26 +1,32 @@
 package com.meti;
 
 public record Compiler(String input) {
-    static String compileImport(String input) throws CompileException {
-        String output;
+    static Result<String, CompileException> compileImport(String input) {
         var separator = input.indexOf('.');
         if (separator == -1) {
-            throw new CompileException("Invalid import syntax.");
+            return new Err<>(new CompileException("Invalid import syntax."));
         } else {
             var parent = input.substring("import ".length(), separator).strip();
             var child = input.substring(separator + 1).strip();
-            output = "import { %s } from %s;".formatted(child, parent);
+            return new Ok<>("import { %s } from %s;".formatted(child, parent));
         }
-        return output;
     }
 
     String compile() throws CompileException {
-        String output;
-        if (input().startsWith("import ")) {
-            output = compileImport(input());
-        } else {
-            output = "";
+        var args = input.split(";");
+        var buffer = new StringBuilder();
+        for (var arg : args) {
+            var line = compileLine(arg).unwrap();
+            buffer.append(line);
         }
-        return output;
+        return buffer.toString();
+    }
+
+    private Result<String, CompileException> compileLine(String input1) {
+        if (input1.startsWith("import ")) {
+            return compileImport(input1);
+        } else {
+            return new Ok<>("");
+        }
     }
 }
