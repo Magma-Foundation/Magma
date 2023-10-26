@@ -25,7 +25,7 @@ public record Compiler(String input) {
     }
 
     @NotNull
-    private Result<String, CompileException> foldRight(String[] args) throws CompileException {
+    private Result<String, CompileException> foldRight(String[] args) {
         return new ArrayIterator(args)
                 .map(this::compileLine)
                 .collect(Collectors.exceptionally(Collectors.joining()));
