@@ -47,13 +47,13 @@ public class ApplicationTest {
         try {
             Files.writeString(source, input);
             return new Application(source).run();
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             return fail(e);
         }
     }
 
     @Test
-    void generatesNoTarget() throws IOException {
+    void generatesNoTarget() throws CompileException {
         new Application(source).run();
         assertFalse(Files.exists(target));
     }
@@ -74,6 +74,11 @@ public class ApplicationTest {
 
     @Test
     void compilePackage() {
-        assertIntegratedCompile("package test;", "");
+        assertIntegratedCompile("package test", "");
+    }
+
+    @Test
+    void compileImport() {
+        assertIntegratedCompile("import parent.Child", "import { Child } from parent;");
     }
 }
