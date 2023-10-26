@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.util.function.Function;
+
 public class Err<T, E extends Throwable> implements Result<T, E> {
     private final E value;
 
@@ -10,5 +12,15 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
     @Override
     public T unwrap() throws E {
         throw value;
+    }
+
+    @Override
+    public <R> Result<R, E> mapValue(Function<T, R> mapper) {
+        return new Err<>(value);
+    }
+
+    @Override
+    public <R> Result<R, E> mapValueExceptionally(Function<T, Result<R, E>> mapper) {
+        return new Err<>(value);
     }
 }
