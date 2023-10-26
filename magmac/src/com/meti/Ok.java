@@ -14,7 +14,7 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
-    public T unwrap() throws E {
+    public T unwrap() {
         return value;
     }
 
