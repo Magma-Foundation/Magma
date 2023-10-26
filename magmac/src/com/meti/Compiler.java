@@ -31,11 +31,17 @@ public record Compiler(String input) {
                 .collect(Collectors.exceptionally(Collectors.joining()));
     }
 
-    private Result<String, CompileException> compileLine(String input1) {
-        if (input1.startsWith("import ")) {
-            return compileImport(input1);
-        } else {
-            return Ok.apply("");
+    private Result<String, CompileException> compileLine(String line) {
+        if (line.startsWith("import ")) {
+            return compileImport(line);
         }
+        if (line.startsWith("record ")) {
+            var paramStart = line.indexOf('(');
+            if (paramStart != -1) {
+                var name = line.substring("record ".length(), paramStart).strip();
+                return Ok.apply("class def " + name + "() => {}");
+            }
+        }
+        return Ok.apply("");
     }
 }
