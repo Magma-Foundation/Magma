@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -30,21 +30,24 @@ public class ApplicationTest {
     }
 
     @Test
+    void generatesCorrectTarget() throws IOException {
+        assertEquals(target, runWithSource().orElseThrow());
+    }
+
+    @Test
     void generatesTarget() throws IOException {
-        Files.createFile(source);
-        run();
+        runWithSource();
         assertTrue(Files.exists(target));
     }
 
-    private void run() throws IOException {
-        if (Files.exists(source)) {
-            Files.createFile(target);
-        }
+    private Optional<Path> runWithSource() throws IOException {
+        Files.createFile(source);
+        return new Application(source).run();
     }
 
     @Test
     void generatesNoTarget() throws IOException {
-        run();
+        new Application(source).run();
         assertFalse(Files.exists(target));
     }
 }
