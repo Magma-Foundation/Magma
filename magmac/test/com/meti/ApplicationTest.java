@@ -39,9 +39,17 @@ public class ApplicationTest {
         assertTrue(Files.exists(target));
     }
 
-    private Optional<Path> runWithSource() throws IOException {
-        Files.createFile(source);
-        return new Application(source).run();
+    private Optional<Path> runWithSource() {
+        return runWithSource("");
+    }
+
+    private Optional<Path> runWithSource(String input) {
+        try {
+            Files.writeString(source, input);
+            return new Application(source).run();
+        } catch (IOException e) {
+            return fail(e);
+        }
     }
 
     @Test
@@ -51,7 +59,21 @@ public class ApplicationTest {
     }
 
     @Test
-    void empty(){
+    void empty() {
+        assertIntegratedCompile("", "");
+    }
 
+    private void assertIntegratedCompile(String input, String output) {
+        try {
+            var actual = Files.readString(runWithSource(input).orElseThrow());
+            assertEquals(output, actual);
+        } catch (IOException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void compilePackage() {
+        assertIntegratedCompile("package test;", "");
     }
 }
