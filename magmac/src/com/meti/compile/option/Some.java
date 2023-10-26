@@ -40,4 +40,9 @@ public class Some<T> implements Option<T> {
     public T unwrapOrElse(T other) {
         return value;
     }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
+    }
 }

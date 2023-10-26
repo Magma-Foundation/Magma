@@ -3,12 +3,15 @@ package com.meti.compile;
 import com.meti.CompileException;
 import com.meti.compile.iterator.ArrayIterator;
 import com.meti.compile.iterator.Collectors;
+import com.meti.compile.option.None;
+import com.meti.compile.option.Some;
 import com.meti.compile.result.Err;
 import com.meti.compile.result.Ok;
 import com.meti.compile.result.Result;
+import com.meti.compile.rule.ConjunctionRule;
+import com.meti.compile.rule.EqualRule;
+import com.meti.compile.rule.ValueRule;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
 
 public record Compiler(String input) {
     static Result<String, CompileException> compileImport(String input) {
@@ -38,16 +41,22 @@ public record Compiler(String input) {
         if (line.startsWith("import ")) {
             return compileImport(line);
         }
-        if (line.startsWith("record ")) {
-            var paramStart = line.indexOf('(');
-            if (paramStart != -1) {
-                var strip = line.substring("record ".length(), paramStart).strip();
-                var result = new HashMap<String, String>();
-                result.put("name", strip);
-                var name = result.get("name");
-                return Ok.apply("class def " + name + "() => {}");
-            }
-        }
-        return Ok.apply("");
+
+        return new ConjunctionRule(new EqualRule("record "),
+                new ConjunctionRule(new ValueRule("name"),
+                        new EqualRule("(){}")))
+                .evaluate(line)
+                .flatMap(evaluated -> {
+                    if (evaluated.isEmpty()) {
+                        return None.apply();
+                    } else {
+                        return Some.apply(evaluated.get(0));
+                    }
+                })
+                .map(evaluated -> {
+                    var name = evaluated.values().get("name");
+                    return Ok.<String, CompileException>apply("class def " + name + "() => {}");
+                })
+                .unwrapOrElse(Ok.apply(""));
     }
 }

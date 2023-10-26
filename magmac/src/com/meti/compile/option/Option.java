@@ -15,4 +15,6 @@ public interface Option<T> {
     void ifPresent(Consumer<T> consumer);
 
     T unwrapOrElse(T other);
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 }
