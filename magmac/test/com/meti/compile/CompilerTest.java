@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.compile;
 
+import com.meti.CompileException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +20,7 @@ class CompilerTest {
     void records() {
         assertCompile("record Test(){}", "class def Test() => {}");
     }
+
 
     @Test
     void multipleImports() {

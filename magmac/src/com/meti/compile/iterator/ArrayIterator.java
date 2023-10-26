@@ -4,16 +4,16 @@ import com.meti.compile.option.None;
 import com.meti.compile.option.Option;
 import com.meti.compile.option.Some;
 
-public class ArrayIterator extends AbstractIterator<String> {
-    private final String[] args;
+public class ArrayIterator<T> extends AbstractIterator<T> {
+    private final T[] args;
     private int counter = 0;
 
-    public ArrayIterator(String[] args) {
+    public ArrayIterator(T[] args) {
         this.args = args;
     }
 
     @Override
-    public Option<String> head() {
+    public Option<T> head() {
         if (counter < args.length) {
             var current = args[counter];
             counter++;

@@ -1,11 +1,14 @@
-package com.meti;
+package com.meti.compile;
 
+import com.meti.CompileException;
 import com.meti.compile.iterator.ArrayIterator;
 import com.meti.compile.iterator.Collectors;
 import com.meti.compile.result.Err;
 import com.meti.compile.result.Ok;
 import com.meti.compile.result.Result;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 
 public record Compiler(String input) {
     static Result<String, CompileException> compileImport(String input) {
@@ -19,14 +22,14 @@ public record Compiler(String input) {
         }
     }
 
-    String compile() throws CompileException {
+    public String compile() throws CompileException {
         var args = input.split(";");
         return foldRight(args).unwrap();
     }
 
     @NotNull
     private Result<String, CompileException> foldRight(String[] args) {
-        return new ArrayIterator(args)
+        return new ArrayIterator<String>(args)
                 .map(this::compileLine)
                 .collect(Collectors.exceptionally(Collectors.joining()));
     }
@@ -38,7 +41,10 @@ public record Compiler(String input) {
         if (line.startsWith("record ")) {
             var paramStart = line.indexOf('(');
             if (paramStart != -1) {
-                var name = line.substring("record ".length(), paramStart).strip();
+                var strip = line.substring("record ".length(), paramStart).strip();
+                var result = new HashMap<String, String>();
+                result.put("name", strip);
+                var name = result.get("name");
                 return Ok.apply("class def " + name + "() => {}");
             }
         }
