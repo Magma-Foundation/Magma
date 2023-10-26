@@ -13,7 +13,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-
     private Path target;
     private Path source;
 
@@ -49,5 +48,10 @@ public class ApplicationTest {
     void generatesNoTarget() throws IOException {
         new Application(source).run();
         assertFalse(Files.exists(target));
+    }
+
+    @Test
+    void empty(){
+
     }
 }
