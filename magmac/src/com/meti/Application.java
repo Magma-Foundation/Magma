@@ -8,28 +8,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public record Application(Path source) {
-    private static String compileImport(String input) throws CompileException {
-        String output;
-        var separator = input.indexOf('.');
-        if (separator == -1) {
-            throw new CompileException("Invalid import syntax.");
-        } else {
-            var parent = input.substring("import ".length(), separator).strip();
-            var child = input.substring(separator + 1).strip();
-            output = "import { %s } from %s;".formatted(child, parent);
-        }
-        return output;
-    }
-
-    private static String compile(String input) throws CompileException {
-        String output;
-        if (input.startsWith("import ")) {
-            output = compileImport(input);
-        } else {
-            output = "";
-        }
-        return output;
-    }
 
     private static Optional<Path> writeTarget(String output, Path target) throws CompileException {
         try {
@@ -49,7 +27,7 @@ public record Application(Path source) {
 
     private Optional<Path> compileSource() throws CompileException {
         var input = readSource();
-        var output = compile(input);
+        var output = new Compiler(input).compile();
         var target = resolveTarget();
         return writeTarget(output, target);
     }
