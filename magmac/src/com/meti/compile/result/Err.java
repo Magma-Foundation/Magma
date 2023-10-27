@@ -9,6 +9,10 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
         this.value = value;
     }
 
+    public static <T, E extends Throwable> Result<T, E> apply(E value) {
+        return new Err<>(value);
+    }
+
     @Override
     public T unwrap() throws E {
         throw value;

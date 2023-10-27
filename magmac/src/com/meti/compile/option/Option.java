@@ -1,9 +1,6 @@
 package com.meti.compile.option;
 
-import com.meti.CompileException;
 import com.meti.compile.Tuple;
-import com.meti.compile.iterator.AbstractIterator;
-import com.meti.compile.result.Result;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,4 +21,8 @@ public interface Option<T> {
     Option<T> or(Option<T> other);
 
     boolean isPresent();
+
+    default <R> R into(Function<Option<T>, R> mapper) {
+        return mapper.apply(this);
+    }
 }
