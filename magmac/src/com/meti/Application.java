@@ -1,7 +1,6 @@
 package com.meti;
 
 import com.meti.compile.Compiler;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +32,6 @@ public record Application(Path source) {
         return writeTarget(output, target);
     }
 
-    @NotNull
     private Path resolveTarget() {
         var fileName = source().getFileName().toString();
         var separator = fileName.indexOf('.');

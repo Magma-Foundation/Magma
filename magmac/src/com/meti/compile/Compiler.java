@@ -10,7 +10,6 @@ import com.meti.compile.result.Result;
 import com.meti.compile.rule.ConjunctionRule;
 import com.meti.compile.rule.EqualRule;
 import com.meti.compile.rule.ValueRule;
-import org.jetbrains.annotations.NotNull;
 
 public record Compiler(String input) {
 
@@ -46,7 +45,6 @@ public record Compiler(String input) {
         return foldRight(args).unwrap();
     }
 
-    @NotNull
     private Result<String, CompileException> foldRight(String[] args) {
         return new ArrayIterator<>(args)
                 .map(this::compileLine)
