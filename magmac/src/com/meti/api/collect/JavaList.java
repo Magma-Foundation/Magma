@@ -1,6 +1,5 @@
 package com.meti.api.collect;
 
-import com.meti.api.iterator.AbstractIterator;
 import com.meti.api.iterator.Collector;
 import com.meti.api.iterator.Iterator;
 import com.meti.api.option.None;
@@ -74,19 +73,6 @@ public class JavaList<T> implements List<T> {
 
     @Override
     public Iterator<T> iter() {
-        return new AbstractIterator<T>() {
-            private int counter = 0;
-
-            @Override
-            public Option<T> head() {
-                if (counter < inner.size()) {
-                    var temp = inner.get(counter);
-                    counter++;
-                    return Some.apply(temp);
-                } else {
-                    return None.apply();
-                }
-            }
-        };
+        return new NativeListIterator<>(inner);
     }
 }
