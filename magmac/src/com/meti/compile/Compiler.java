@@ -5,10 +5,12 @@ import com.meti.compile.collect.List;
 import com.meti.compile.iterator.ArrayIterator;
 import com.meti.compile.iterator.Collectors;
 import com.meti.compile.option.Option;
+import com.meti.compile.result.Err;
 import com.meti.compile.result.Ok;
 import com.meti.compile.result.Result;
 import com.meti.compile.rule.ConjunctionRule;
 import com.meti.compile.rule.EqualRule;
+import com.meti.compile.rule.Rule;
 import com.meti.compile.rule.ValueRule;
 
 public record Compiler(String input) {
@@ -20,11 +22,22 @@ public record Compiler(String input) {
                         new EqualRule("."),
                         new ValueRule("child")
                 ).evaluate(line).flatMap(List::head)
-                .map(evaluated -> {
-                    var parent = evaluated.values().get("parent");
-                    var child = evaluated.values().get("child");
-                    return Ok.apply("import { %s } from %s;".formatted(child, parent));
-                });
+                .map(evaluated -> render(evaluated, "import"));
+    }
+
+    private static Result<String, CompileException> render(Rule.Result evaluated, String type) {
+        if ("import".equals(type)) {
+            var parent = evaluated.values().get("parent");
+            var child = evaluated.values().get("child");
+            var formatted = "import { %s } from %s;".formatted(child, parent);
+            return Ok.apply(formatted);
+        } else if ("function".equals(type)) {
+            var name = evaluated.values().get("name");
+            var value = "class def " + name + "() => {}";
+            return Ok.apply(value);
+        } else {
+            return new Err<>(new CompileException("Unknown type: '" + type + "'."));
+        }
     }
 
     private static Option<Result<String, CompileException>> compileRecord(String line) {
@@ -34,10 +47,7 @@ public record Compiler(String input) {
                         new EqualRule("(){}"))
                 .evaluate(line)
                 .flatMap(List::head)
-                .map(evaluated -> {
-                    var name = evaluated.values().get("name");
-                    return Ok.apply("class def " + name + "() => {}");
-                });
+                .map(evaluated -> render(evaluated, "function"));
     }
 
     public String compile() throws CompileException {
