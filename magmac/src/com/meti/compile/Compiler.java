@@ -6,8 +6,8 @@ import com.meti.api.collect.List;
 import com.meti.api.iterator.ArrayIterator;
 import com.meti.api.iterator.Collectors;
 import com.meti.api.iterator.Iterators;
+import com.meti.api.option.None;
 import com.meti.api.option.Option;
-import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
 import com.meti.api.result.ThrowableOption;
@@ -21,25 +21,24 @@ import java.util.Map;
 public record Compiler(String input) {
 
     private static Result<String, CompileException> render(ResultNode node) {
-        Option<String> output;
-        if ("import".equals(node.type())) {
-            output = ConjunctionRule.join(
-                    new EqualRule("import { "),
-                    new ValueRule("child"),
-                    new EqualRule(" } from "),
-                    new ValueRule("parent"),
-                    new EqualRule(";")
-            ).toString(node);
-        } else if ("function".equals(node.type())) {
-            output = ConjunctionRule.join(
-                    new EqualRule("class def "),
-                    new ValueRule("name"),
-                    new EqualRule("() => {}")
-            ).toString(node);
-        } else {
-            return new Err<>(new CompileException("Unknown type: '" + node.type() + "'."));
-        }
-        return output.into(ThrowableOption::new).unwrapOrThrow(new CompileException("Cannot render node."));
+        var map = new JavaMap<>(Map.of(
+                "import", ConjunctionRule.join(
+                        new EqualRule("import { "),
+                        new ValueRule("child"),
+                        new EqualRule(" } from "),
+                        new ValueRule("parent"),
+                        new EqualRule(";")),
+                "function", ConjunctionRule.join(
+                        new EqualRule("class def "),
+                        new ValueRule("name"),
+                        new EqualRule("() => {}"))
+        ));
+
+        return map.iter()
+                .map(entry -> entry.a().equals(node.type()) ? entry.b().toString(node) : None.<String>apply())
+                .flatMap(Iterators::ofOption).head()
+                .into(ThrowableOption::new)
+                .unwrapOrThrow(new CompileException("Cannot render node."));
     }
 
     private static Option<Result<String, CompileException>> evaluateRule(String type, Rule rule, String line) {
