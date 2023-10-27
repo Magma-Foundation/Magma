@@ -10,6 +10,7 @@ import com.meti.compile.result.Ok;
 import com.meti.compile.result.Result;
 import com.meti.compile.rule.ConjunctionRule;
 import com.meti.compile.rule.EqualRule;
+import com.meti.compile.rule.Rule;
 import com.meti.compile.rule.ValueRule;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,17 +43,13 @@ public record Compiler(String input) {
             return compileImport(line);
         }
 
-        return new ConjunctionRule(new EqualRule("record "),
-                new ConjunctionRule(new ValueRule("name"),
-                        new EqualRule("(){}")))
-                .evaluate(line)
-                .flatMap(evaluated -> {
-                    if (evaluated.isEmpty()) {
-                        return None.apply();
-                    } else {
-                        return Some.apply(evaluated.get(0));
-                    }
-                })
+        var rule = ConjunctionRule.join(
+                new EqualRule("record "),
+                new ValueRule("name"),
+                new EqualRule("(){}")
+        );
+        return rule.evaluate(line)
+                .flatMap(evaluated -> evaluated.isEmpty() ? None.apply() : Some.apply(evaluated.get(0)))
                 .map(evaluated -> {
                     var name = evaluated.values().get("name");
                     return Ok.<String, CompileException>apply("class def " + name + "() => {}");

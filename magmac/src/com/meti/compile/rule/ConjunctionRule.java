@@ -8,6 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record ConjunctionRule(Rule left, Rule right) implements Rule {
+    public static Rule join(Rule first, Rule... more) {
+        var current = first;
+        for (Rule rule : more) {
+            current = new ConjunctionRule(current, rule);
+        }
+        return current;
+    }
+
     @Override
     public Option<List<Result>> evaluate(String input) {
         var results = new ArrayList<Result>();
