@@ -1,11 +1,11 @@
-package com.meti.compile.collect;
+package com.meti.api.collect;
 
-import com.meti.compile.iterator.AbstractIterator;
-import com.meti.compile.iterator.Collector;
-import com.meti.compile.iterator.Iterator;
-import com.meti.compile.option.None;
-import com.meti.compile.option.Option;
-import com.meti.compile.option.Some;
+import com.meti.api.iterator.AbstractIterator;
+import com.meti.api.iterator.Collector;
+import com.meti.api.iterator.Iterator;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.util.ArrayList;
 import java.util.Arrays;

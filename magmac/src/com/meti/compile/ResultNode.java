@@ -1,8 +1,8 @@
 package com.meti.compile;
 
-import com.meti.compile.option.None;
-import com.meti.compile.option.Option;
-import com.meti.compile.option.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.compile.rule.Rule;
 
 public record ResultNode(Rule.Result evaluated, String type) {

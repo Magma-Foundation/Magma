@@ -1,8 +1,8 @@
-package com.meti.compile.iterator;
+package com.meti.api.iterator;
 
-import com.meti.compile.option.None;
-import com.meti.compile.option.Option;
-import com.meti.compile.option.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public class ArrayIterator<T> extends AbstractIterator<T> {
     private final T[] args;

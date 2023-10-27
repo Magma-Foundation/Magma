@@ -1,59 +1,58 @@
-package com.meti.compile.result;
+package com.meti.api.option;
 
 import com.meti.compile.Tuple;
-import com.meti.compile.option.Option;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ThrowableOption<T> implements Option<T> {
-    private final Option<T> inner;
+public class Some<T> implements Option<T> {
+    private final T value;
 
-    public ThrowableOption(Option<T> inner) {
-        this.inner = inner;
+    public Some(T value) {
+        this.value = value;
     }
 
-    public <E extends Throwable> Result<T, E> unwrapOrThrow(E value) {
-        return inner.map(Ok::<T, E>apply).unwrapOrElse(Err.apply(value));
+    public static <T> Option<T> apply(T value) {
+        return new Some<>(value);
     }
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return inner.map(mapper);
+        return new Some<>(mapper.apply(value));
     }
 
     @Override
     public Tuple<Boolean, T> unwrapToTuple(T other) {
-        return inner.unwrapToTuple(other);
+        return new Tuple<>(true, value);
     }
 
     @Override
     public <R> Option<Tuple<T, R>> and(Option<R> other) {
-        return inner.and(other);
+        return other.map(otherValue -> new Tuple<>(this.value, otherValue));
     }
 
     @Override
     public void ifPresent(Consumer<T> consumer) {
-        inner.ifPresent(consumer);
+        consumer.accept(value);
     }
 
     @Override
     public T unwrapOrElse(T other) {
-        return inner.unwrapOrElse(other);
+        return value;
     }
 
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return inner.flatMap(mapper);
+        return mapper.apply(value);
     }
 
     @Override
     public Option<T> or(Option<T> other) {
-        return inner.or(other);
+        return this;
     }
 
     @Override
     public boolean isPresent() {
-        return inner.isPresent();
+        return true;
     }
 }

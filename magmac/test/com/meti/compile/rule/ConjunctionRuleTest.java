@@ -1,6 +1,6 @@
 package com.meti.compile.rule;
 
-import com.meti.compile.collect.JavaList;
+import com.meti.api.collect.JavaList;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

@@ -1,7 +1,7 @@
-package com.meti.compile.iterator;
+package com.meti.api.iterator;
 
-import com.meti.compile.option.None;
-import com.meti.compile.option.Option;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

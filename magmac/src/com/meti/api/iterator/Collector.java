@@ -1,4 +1,4 @@
-package com.meti.compile.iterator;
+package com.meti.api.iterator;
 
 public interface Collector<T, R> {
     R initial();

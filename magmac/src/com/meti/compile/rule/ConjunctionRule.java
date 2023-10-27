@@ -1,12 +1,12 @@
 package com.meti.compile.rule;
 
+import com.meti.api.collect.JavaList;
+import com.meti.api.collect.List;
+import com.meti.api.iterator.Iterators;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 import com.meti.compile.ResultNode;
-import com.meti.compile.collect.JavaList;
-import com.meti.compile.collect.List;
-import com.meti.compile.iterator.Iterators;
-import com.meti.compile.option.None;
-import com.meti.compile.option.Option;
-import com.meti.compile.option.Some;
 
 public record ConjunctionRule(Rule left, Rule right) implements Rule {
     public static Rule join(Rule first, Rule... more) {

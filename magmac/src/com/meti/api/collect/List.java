@@ -1,9 +1,7 @@
-package com.meti.compile.collect;
+package com.meti.api.collect;
 
-import com.meti.compile.iterator.Iterator;
-import com.meti.compile.option.Option;
-
-import java.util.Map;
+import com.meti.api.iterator.Iterator;
+import com.meti.api.option.Option;
 
 public interface List<T> {
     Option<T> head();
