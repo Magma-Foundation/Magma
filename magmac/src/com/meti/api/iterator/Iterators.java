@@ -35,4 +35,8 @@ public class Iterators {
             }
         };
     }
+
+    public static <T> Iterator<T> ofOption(Option<T> option) {
+        return option.map(Iterators::of).unwrapOrElse(Iterators.empty());
+    }
 }
