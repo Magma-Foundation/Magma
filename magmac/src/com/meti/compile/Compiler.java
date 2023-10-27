@@ -26,21 +26,25 @@ public record Compiler(String input) {
     }
 
     private static Result<String, CompileException> render(ResultNode node) {
+        Option<String> output;
         if ("import".equals(node.type())) {
-            return ConjunctionRule.join(
+            output = ConjunctionRule.join(
                     new EqualRule("import { "),
                     new ValueRule("child"),
                     new EqualRule(" } from "),
                     new ValueRule("parent"),
                     new EqualRule(";")
-            ).toString(node).into(ThrowableOption::new).unwrapOrThrow(new CompileException("Invalid import configuration."));
+            ).toString(node);
         } else if ("function".equals(node.type())) {
-            var name = node.getString("name").unwrapOrElse("");
-            var value = "class def " + name + "() => {}";
-            return Ok.apply(value);
+            output = ConjunctionRule.join(
+                    new EqualRule("class def "),
+                    new ValueRule("name"),
+                    new EqualRule("() => {}")
+            ).toString(node);
         } else {
             return new Err<>(new CompileException("Unknown type: '" + node.type() + "'."));
         }
+        return output.into(ThrowableOption::new).unwrapOrThrow(new CompileException("Cannot render node."));
     }
 
     private static Option<Result<String, CompileException>> compileRecord(String line) {
