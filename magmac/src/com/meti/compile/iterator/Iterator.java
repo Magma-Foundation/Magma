@@ -13,4 +13,6 @@ public interface Iterator<T> {
     <R> Iterator<R> map(Function<T, R> mapper);
 
     Option<T> head();
+
+    <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
 }

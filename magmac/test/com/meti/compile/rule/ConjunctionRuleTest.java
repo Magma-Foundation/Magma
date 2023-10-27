@@ -1,21 +1,19 @@
 package com.meti.compile.rule;
 
-import com.meti.compile.option.Option;
+import com.meti.compile.collect.JavaList;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConjunctionRuleTest {
     @Test
     void size() {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .evaluate("abc")
-                .unwrapOrElse(Collections.emptyList());
+                .unwrapOrElse(JavaList.empty());
         assertEquals(2, results.size());
     }
 
@@ -23,8 +21,8 @@ class ConjunctionRuleTest {
     void first() {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .evaluate("abc")
-                .unwrapOrElse(Collections.emptyList());
-        var actual = results.get(0).values();
+                .unwrapOrElse(JavaList.empty());
+        var actual = results.get(0).map(Rule.Result::values).unwrapOrElse(new HashMap<>());
         assertEquals(Map.of("left", "a", "right", "bc"), actual);
     }
 
@@ -32,8 +30,8 @@ class ConjunctionRuleTest {
     void second() {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .evaluate("abc")
-                .unwrapOrElse(Collections.emptyList());
-        var actual = results.get(1).values();
+                .unwrapOrElse(JavaList.empty());
+        var actual = results.get(1).map(Rule.Result::values).unwrapOrElse(new HashMap<>());
         assertEquals(Map.of("left", "ab", "right", "c"), actual);
     }
 }

@@ -1,5 +1,6 @@
 package com.meti.compile.iterator;
 
+import com.meti.compile.option.None;
 import com.meti.compile.option.Option;
 
 import java.util.function.BiFunction;
@@ -14,6 +15,38 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                 return AbstractIterator.this.head().map(mapper);
             }
         };
+    }
+
+    @Override
+    public <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper) {
+        return head().map(mapper).<Iterator<R>>map(initial -> new AbstractIterator<>() {
+            private Iterator<R> current = initial;
+
+            @Override
+            public Option<R> head() {
+                while (true) {
+                    var head = current.head();
+                    if (head.isPresent()) {
+                        return head;
+                    } else {
+                        var tuple = AbstractIterator.this.head()
+                                .map(mapper)
+                                .unwrapToTuple(current);
+
+                        if (tuple.a()) {
+                            current = tuple.b();
+                        } else {
+                            return None.apply();
+                        }
+                    }
+                }
+            }
+        }).unwrapOrElse(new AbstractIterator<>() {
+            @Override
+            public Option<R> head() {
+                return None.apply();
+            }
+        });
     }
 
     @Override

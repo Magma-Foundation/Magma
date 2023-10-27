@@ -45,4 +45,14 @@ public class Some<T> implements Option<T> {
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return mapper.apply(value);
     }
+
+    @Override
+    public Option<T> or(Option<T> other) {
+        return this;
+    }
+
+    @Override
+    public boolean isPresent() {
+        return true;
+    }
 }
