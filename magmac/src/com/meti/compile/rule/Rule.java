@@ -2,7 +2,7 @@ package com.meti.compile.rule;
 
 import com.meti.api.collect.List;
 import com.meti.api.option.Option;
-import com.meti.compile.ResultNode;
+import com.meti.compile.Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import java.util.Map;
 public interface Rule {
     Option<List<Result>> fromString(String input);
 
-    Option<String> toString(ResultNode node);
+    Option<String> toString(Node node);
 
     record Result(Map<String, String> values) {
         public Result add(Result other) {

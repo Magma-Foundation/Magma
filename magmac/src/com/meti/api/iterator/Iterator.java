@@ -4,6 +4,7 @@ import com.meti.api.option.Option;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface Iterator<T> {
     <R> R collect(Collector<T, R> collector);
@@ -15,4 +16,6 @@ public interface Iterator<T> {
     Option<T> head();
 
     <R> Iterator<R> flatMap(Function<T, Iterator<R>> mapper);
+
+    Iterator<T> filter(Predicate<T> predicate);
 }

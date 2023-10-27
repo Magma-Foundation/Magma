@@ -6,7 +6,7 @@ import com.meti.api.iterator.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.compile.ResultNode;
+import com.meti.compile.Node;
 
 public record ConjunctionRule(Rule left, Rule right) implements Rule {
     public static Rule join(Rule first, Rule... more) {
@@ -40,7 +40,7 @@ public record ConjunctionRule(Rule left, Rule right) implements Rule {
     }
 
     @Override
-    public Option<String> toString(ResultNode node) {
+    public Option<String> toString(Node node) {
         return left.toString(node).and(right.toString(node)).map(tuple -> tuple.a() + tuple.b());
     }
 }

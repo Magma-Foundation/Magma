@@ -2,9 +2,11 @@ package com.meti.api.iterator;
 
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class AbstractIterator<T> implements Iterator<T> {
     @Override
@@ -15,6 +17,12 @@ public abstract class AbstractIterator<T> implements Iterator<T> {
                 return AbstractIterator.this.head().map(mapper);
             }
         };
+    }
+
+    @Override
+    public Iterator<T> filter(Predicate<T> predicate) {
+        return map(element -> predicate.test(element) ? Some.apply(element) : None.<T>apply())
+                .flatMap(Iterators::ofOption);
     }
 
     @Override

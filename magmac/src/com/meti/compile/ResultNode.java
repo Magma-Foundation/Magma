@@ -5,7 +5,13 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.rule.Rule;
 
-public record ResultNode(Rule.Result evaluated, String type) {
+public record ResultNode(String type, Rule.Result evaluated) implements Node {
+    @Override
+    public boolean is(String type) {
+        return this.type.equals(type);
+    }
+
+    @Override
     public Option<String> getString(String name) {
         var values = evaluated().values();
         if (values.containsKey(name)) {

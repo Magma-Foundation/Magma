@@ -5,7 +5,7 @@ import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
-import com.meti.compile.ResultNode;
+import com.meti.compile.Node;
 
 import java.util.Collections;
 
@@ -20,7 +20,7 @@ public record EqualRule(String value) implements Rule {
     }
 
     @Override
-    public Option<String> toString(ResultNode node) {
+    public Option<String> toString(Node node) {
         return Some.apply(value);
     }
 }
