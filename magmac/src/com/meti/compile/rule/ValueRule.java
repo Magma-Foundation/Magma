@@ -7,6 +7,7 @@ import com.meti.api.option.Option;
 import com.meti.api.option.Some;
 import com.meti.compile.Node;
 
+import java.util.Collections;
 import java.util.Map;
 
 public record ValueRule(String name) implements Rule {
@@ -15,7 +16,7 @@ public record ValueRule(String name) implements Rule {
         if (input.isEmpty()) {
             return None.apply();
         } else {
-            return Some.apply(JavaList.of(new Result(Map.of(name, input))));
+            return Some.apply(JavaList.of(new Result(Map.of(name, input), Collections.emptyMap())));
         }
     }
 

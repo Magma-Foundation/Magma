@@ -12,11 +12,14 @@ public interface Rule {
 
     Option<String> toString(Node node);
 
-    record Result(Map<String, String> values) {
+    record Result(Map<String, String> text, Map<String, String> nodes) {
         public Result add(Result other) {
-            var copy = new HashMap<>(values);
-            copy.putAll(other.values);
-            return new Result(copy);
+            var textCopy = new HashMap<>(text);
+            textCopy.putAll(other.text);
+
+            var nodesCopy = new HashMap<>(nodes);
+            nodesCopy.putAll(other.nodes);
+            return new Result(textCopy, nodesCopy);
         }
     }
 }

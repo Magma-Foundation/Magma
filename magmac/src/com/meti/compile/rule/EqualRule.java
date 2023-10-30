@@ -12,8 +12,8 @@ import java.util.Collections;
 public record EqualRule(String value) implements Rule {
     @Override
     public Option<List<Result>> fromString(String input) {
-        if(value.equals(input)) {
-            return Some.apply(JavaList.of(new Result(Collections.emptyMap())));
+        if (value.equals(input)) {
+            return Some.apply(JavaList.of(new Result(Collections.emptyMap(), Collections.emptyMap())));
         } else {
             return None.apply();
         }

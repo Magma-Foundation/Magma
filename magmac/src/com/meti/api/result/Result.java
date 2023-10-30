@@ -8,4 +8,6 @@ public interface Result<T, E extends Throwable> {
     <R> Result<R, E> mapValue(Function<T, R> mapper);
 
     <R> Result<R, E> mapValueExceptionally(Function<T, Result<R, E>> mapper);
+
+    T $() throws E;
 }

@@ -13,7 +13,7 @@ public record ResultNode(String type, Rule.Result evaluated) implements Node {
 
     @Override
     public Option<String> getString(String name) {
-        var values = evaluated().values();
+        var values = evaluated().text();
         if (values.containsKey(name)) {
             return Some.apply(values.get(name));
         } else {

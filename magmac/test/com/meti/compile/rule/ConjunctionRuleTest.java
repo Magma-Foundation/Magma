@@ -22,7 +22,7 @@ class ConjunctionRuleTest {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .fromString("abc")
                 .unwrapOrElse(JavaList.empty());
-        var actual = results.get(0).map(Rule.Result::values).unwrapOrElse(new HashMap<>());
+        var actual = results.get(0).map(Rule.Result::text).unwrapOrElse(new HashMap<>());
         assertEquals(Map.of("left", "a", "right", "bc"), actual);
     }
 
@@ -31,7 +31,7 @@ class ConjunctionRuleTest {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .fromString("abc")
                 .unwrapOrElse(JavaList.empty());
-        var actual = results.get(1).map(Rule.Result::values).unwrapOrElse(new HashMap<>());
+        var actual = results.get(1).map(Rule.Result::text).unwrapOrElse(new HashMap<>());
         assertEquals(Map.of("left", "ab", "right", "c"), actual);
     }
 }

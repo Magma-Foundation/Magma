@@ -10,6 +10,7 @@ import com.meti.api.iterator.Iterators;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
 import com.meti.api.option.Some;
+import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
 import com.meti.api.result.ThrowableOption;
 import com.meti.compile.rule.ConjunctionRule;
@@ -18,6 +19,9 @@ import com.meti.compile.rule.Rule;
 import com.meti.compile.rule.ValueRule;
 
 import java.util.Map;
+import java.util.function.BiFunction;
+
+import static com.meti.api.result.Results.$Result;
 
 public record Compiler(String input) {
 
@@ -39,7 +43,7 @@ public record Compiler(String input) {
                 .map(entry -> node.is(entry.a()) ? entry.b().toString(node) : None.<String>apply())
                 .flatMap(Iterators::ofOption).head()
                 .into(ThrowableOption::new)
-                .unwrapOrThrow(new CompileException("Cannot render node."));
+                .unwrapOrThrow(new CompileException("Cannot render nodes."));
     }
 
     private static Option<Node> lexByRule(String type, Rule rule, String line) {
@@ -70,7 +74,7 @@ public record Compiler(String input) {
         var args = input.split(";");
         return new ArrayIterator<>(args)
                 .filter(line -> !line.isEmpty())
-                .map(this::lexLine)
+                .map(this::lexTree)
                 .collect(Collectors.exceptionally(JavaList.collect()))
                 .mapValue(nodes -> nodes.iter()
                         .map(Compiler::transformNode)
@@ -78,6 +82,27 @@ public record Compiler(String input) {
                         .collect(JavaList.collect()))
                 .mapValueExceptionally(Compiler::renderNodes)
                 .unwrap();
+    }
+
+    private Result<Node, CompileException> lexTree(String line1) {
+        return $Result(() -> {
+            var root = lexLine(line1).$();
+            var nodeKeys = root.getNodes().foldRight(Ok.apply(root), (BiFunction<Result<Node, CompileException>, Tuple<String, Node>, Result<Node, CompileException>>) (nodeCompileExceptionResult, stringNodeTuple) -> $Result(() -> {
+                var root1 = nodeCompileExceptionResult.$();
+                var key = stringNodeTuple.a();
+                var value = stringNodeTuple.b();
+                var textValue = value.getValue()
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("No value present."))
+                        .$();
+                var newValue = lexLine(textValue).$();
+                return root1.withNode(key, newValue)
+                        .into(ThrowableOption::new)
+                        .unwrapOrThrow(new CompileException("Original node did not have required property."))
+                        .$();
+            })).$();
+            return nodeKeys;
+        });
     }
 
     private Result<Node, CompileException> lexLine(String line) {
