@@ -49,7 +49,7 @@ public record Compiler(String input) {
     private static Option<Node> lexByRule(String type, Rule rule, String line) {
         return rule.fromString(line)
                 .flatMap(List::head)
-                .map(evaluated -> new ResultNode(type, evaluated));
+                .map(evaluated -> ResultNode.createResultNode(type, evaluated));
     }
 
     private static Option<Node> transformNode(Node node) {

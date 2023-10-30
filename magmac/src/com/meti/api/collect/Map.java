@@ -8,4 +8,8 @@ public interface Map<K, V> {
     Iterator<Tuple<K, V>> iter();
 
     Option<V> get(K key);
+
+    Map<K, V> putAll(Map<V, V> text);
+
+    boolean hasKey(K key);
 }
