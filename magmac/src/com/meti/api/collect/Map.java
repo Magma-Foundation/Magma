@@ -9,7 +9,9 @@ public interface Map<K, V> {
 
     Option<V> get(K key);
 
-    Map<K, V> putAll(Map<V, V> text);
+    Map<K, V> putAll(Map<K, V> text);
 
     boolean hasKey(K key);
+
+    Map<K,V> put(K key, V value);
 }

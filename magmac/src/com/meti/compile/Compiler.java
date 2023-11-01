@@ -18,6 +18,7 @@ import com.meti.compile.rule.EqualRule;
 import com.meti.compile.rule.Rule;
 import com.meti.compile.rule.ValueRule;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -49,7 +50,7 @@ public record Compiler(String input) {
     private static Option<Node> lexByRule(String type, Rule rule, String line) {
         return rule.fromString(line)
                 .flatMap(List::head)
-                .map(evaluated -> ResultNode.createResultNode(type, evaluated));
+                .map(evaluated -> MapNode.create(type, evaluated));
     }
 
     private static Option<Node> transformNode(Node node) {
@@ -57,8 +58,8 @@ public record Compiler(String input) {
             return None.apply();
         } else if (node.is("record")) {
             return Some.apply(new MapNode("function", new JavaMap<>(Map.of(
-                    "name", node.getString("name").unwrapOrElse("")
-            ))));
+                    "name", node.getString("name").unwrapOrElse(""))),
+                    new JavaMap<>(new HashMap<>())));
         } else {
             return Some.apply(node);
         }

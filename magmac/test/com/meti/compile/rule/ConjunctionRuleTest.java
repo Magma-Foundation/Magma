@@ -1,6 +1,7 @@
 package com.meti.compile.rule;
 
 import com.meti.api.collect.JavaList;
+import com.meti.api.collect.JavaMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -22,8 +23,8 @@ class ConjunctionRuleTest {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .fromString("abc")
                 .unwrapOrElse(JavaList.empty());
-        var actual = results.get(0).map(Rule.Result::text).unwrapOrElse(new HashMap<>());
-        assertEquals(Map.of("left", "a", "right", "bc"), actual);
+        var actual = results.get(0).map(Rule.Result::text).unwrapOrElse(JavaMap.empty());
+        assertEquals(new JavaMap<>(Map.of("left", "a", "right", "bc")), actual);
     }
 
     @Test
@@ -31,7 +32,7 @@ class ConjunctionRuleTest {
         var results = new ConjunctionRule(new ValueRule("left"), new ValueRule("right"))
                 .fromString("abc")
                 .unwrapOrElse(JavaList.empty());
-        var actual = results.get(1).map(Rule.Result::text).unwrapOrElse(new HashMap<>());
-        assertEquals(Map.of("left", "ab", "right", "c"), actual);
+        var actual = results.get(1).map(Rule.Result::text).unwrapOrElse(JavaMap.empty());
+        assertEquals(new JavaMap<>(Map.of("left", "ab", "right", "c")), actual);
     }
 }

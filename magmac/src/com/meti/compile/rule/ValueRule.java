@@ -1,6 +1,7 @@
 package com.meti.compile.rule;
 
 import com.meti.api.collect.JavaList;
+import com.meti.api.collect.JavaMap;
 import com.meti.api.collect.List;
 import com.meti.api.option.None;
 import com.meti.api.option.Option;
@@ -16,7 +17,7 @@ public record ValueRule(String name) implements Rule {
         if (input.isEmpty()) {
             return None.apply();
         } else {
-            return Some.apply(JavaList.of(new Result(Map.of(name, input), Collections.emptyMap())));
+            return Some.apply(JavaList.of(new Result(new JavaMap<>(Map.of(name, input)), new JavaMap<>(Collections.emptyMap()))));
         }
     }
 

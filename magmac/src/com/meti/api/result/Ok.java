@@ -27,4 +27,9 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     public <R> Result<R, E> mapValueExceptionally(Function<T, Result<R, E>> mapper) {
         return mapper.apply(value);
     }
+
+    @Override
+    public T $() throws E {
+        return value;
+    }
 }

@@ -27,4 +27,9 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
     public <R> Result<R, E> mapValueExceptionally(Function<T, Result<R, E>> mapper) {
         return new Err<>(value);
     }
+
+    @Override
+    public T $() throws E {
+        throw value;
+    }
 }
