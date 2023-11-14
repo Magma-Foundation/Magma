@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,18 +30,40 @@ public class ApplicationTest {
         Files.deleteIfExists(source);
     }
 
+    @Test
+    void package_() throws IOException {
+        assertTrue(Files.readString(runWithSource().orElseThrow()).isEmpty());
+    }
+
+    @Test
+    void import_() throws IOException {
+        assertEquals("import { Bar } from foo;", Files.readString(runWithSource("import foo.Bar").orElseThrow()));
+    }
+
+    @Test
+    void empty() throws IOException {
+        runWithSource();
+        assertTrue(Files.readString(target).isEmpty());
+    }
+
+    private Optional<Path> runWithSource() throws IOException {
+        return runWithSource("");
+    }
+
+    private Optional<Path> runWithSource(String input) throws IOException {
+        Files.writeString(source, input);
+        return new Application(source).run();
+    }
 
     @Test
     void generatesTarget() throws IOException {
-        Files.createFile(source);
-        new Application(source).run();
+        runWithSource();
         assertTrue(Files.exists(target));
     }
 
     @Test
     void generatesProperTarget() throws IOException {
-        Files.createFile(source);
-        assertEquals(target, new Application(source).run().orElseThrow());
+        assertEquals(target, runWithSource().orElseThrow());
     }
 
     @Test
