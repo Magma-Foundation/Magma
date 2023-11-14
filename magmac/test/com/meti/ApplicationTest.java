@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,15 +41,15 @@ public class ApplicationTest {
     @Test
     void generatesProperTarget() throws IOException {
         Files.createFile(source);
-        assertEquals(target, run());
+        assertEquals(target, run().orElseThrow());
     }
 
-    private Path run() throws IOException {
+    private Optional<Path> run() throws IOException {
         if (Files.exists(source)) {
             Files.createFile(target);
-            return target;
+            return Optional.of(target);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
