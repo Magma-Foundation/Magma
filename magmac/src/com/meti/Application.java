@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class Application {
     private final Source source;
@@ -14,7 +15,7 @@ public final class Application {
     }
 
     Optional<Path> run() throws IOException {
-        var sources = source.listPath();
+        var sources = source.list().stream().map(Location::value).collect(Collectors.toSet());
 
         var targets = new HashSet<Path>();
         for (Path path : sources) {

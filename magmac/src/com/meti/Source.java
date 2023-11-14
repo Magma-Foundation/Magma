@@ -1,8 +1,8 @@
 package com.meti;
 
-import java.nio.file.Path;
+import java.io.IOException;
 import java.util.Set;
 
 public interface Source {
-    Set<Path> listPath();
+    Set<Location> list() throws IOException;
 }
