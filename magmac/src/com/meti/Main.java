@@ -8,7 +8,7 @@ public class Main {
         try {
             var sourceDirectory = Paths.get(".", "magmac", "src");
             var source = new DirectorySource(sourceDirectory);
-            new Application(source).run();
+            new Application(source, new Target(Paths.get(".", "magmac", "dist"))).run();
         } catch (IOException e) {
             e.printStackTrace();
         }

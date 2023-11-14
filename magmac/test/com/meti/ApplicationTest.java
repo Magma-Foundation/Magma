@@ -52,7 +52,7 @@ public class ApplicationTest {
 
     private Optional<Path> runWithSource(String input) throws IOException {
         Files.writeString(source, input);
-        return new Application(new SingleSource(source)).run();
+        return new Application(new SingleSource(source), new Target(Paths.get(".", "magmac", "dist"))).run();
     }
 
     @Test
@@ -68,7 +68,7 @@ public class ApplicationTest {
 
     @Test
     void generateNoTarget() throws IOException {
-        new Application(new SingleSource(source)).run();
+        new Application(new SingleSource(source), new Target(Paths.get(".", "magmac", "dist"))).run();
         assertFalse(Files.exists(target));
     }
 }

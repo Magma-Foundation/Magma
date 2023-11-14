@@ -5,27 +5,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class Application {
     private final Source source;
+    private final Target target;
 
-    public Application(Source source) {
+    public Application(Source source, Target target) {
         this.source = source;
+        this.target = target;
     }
 
     Optional<Path> run() throws IOException {
-        var sources = source.list().stream().map(Location::value).collect(Collectors.toSet());
+        var sources = new HashSet<>(source.list());
 
         var targets = new HashSet<Path>();
-        for (Path path : sources) {
-            var fileName = path.getFileName().toString();
-            var separator = fileName.indexOf('.');
-            var name = fileName.substring(0, separator);
-            var target = path.resolveSibling(name + ".mgs");
-
-            var input = Files.readString(path);
+        for (var location : sources) {
+            var input = location.read();
             var output = new Compiler(input).compile();
+            var target = this.target.resolveTarget(location, ".mgs");
+
+            var parent = target.getParent();
+            if (!Files.exists(parent)) {
+                Files.createDirectories(parent);
+            }
+
             Files.writeString(target, output);
             targets.add(target);
         }

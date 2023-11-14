@@ -21,6 +21,6 @@ public record DirectorySource(Path root) implements Source {
                 return FileVisitResult.CONTINUE;
             }
         });
-        return files.stream().map(Location::new).collect(Collectors.toSet());
+        return files.stream().map((Path value) -> new Location(root, value)).collect(Collectors.toSet());
     }
 }

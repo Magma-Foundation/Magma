@@ -17,6 +17,6 @@ public record SingleSource(Path source) implements Source {
 
     @Override
     public Set<Location> list() {
-        return listPath1().stream().map(Location::new).collect(Collectors.toSet());
+        return listPath1().stream().map((Path root) -> new Location(source.getParent(), root)).collect(Collectors.toSet());
     }
 }
