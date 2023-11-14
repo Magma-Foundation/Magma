@@ -6,19 +6,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 public record Application(Path source) {
-    private static String compile(String input) {
-        String output;
-        if (input.isEmpty()) {
-            output = "";
-        } else {
-            var slice = input.substring("import ".length());
-            var importSeparator = slice.indexOf('.');
-            var parent = slice.substring(0, importSeparator);
-            var child = slice.substring(importSeparator + 1);
-            output = "import { " + child + " } from " + parent + ";";
-        }
-        return output;
-    }
 
     Optional<Path> run() throws IOException {
         if (Files.exists(source)) {
@@ -28,7 +15,7 @@ public record Application(Path source) {
             var target = source.resolveSibling(name + ".mgs");
 
             var input = Files.readString(source);
-            var output = compile(input);
+            var output = new Compiler(input).compile();
             Files.writeString(target, output);
             return Optional.of(target);
         } else {
