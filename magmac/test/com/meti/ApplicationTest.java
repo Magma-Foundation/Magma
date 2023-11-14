@@ -9,8 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
@@ -30,6 +29,7 @@ public class ApplicationTest {
         Files.deleteIfExists(source);
     }
 
+
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(source);
@@ -37,9 +37,18 @@ public class ApplicationTest {
         assertTrue(Files.exists(target));
     }
 
-    private void run() throws IOException {
+    @Test
+    void generatesProperTarget() throws IOException {
+        Files.createFile(source);
+        assertEquals(target, run());
+    }
+
+    private Path run() throws IOException {
         if (Files.exists(source)) {
             Files.createFile(target);
+            return target;
+        } else {
+            return null;
         }
     }
 
