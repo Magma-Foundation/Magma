@@ -45,6 +45,11 @@ class CompilerTest {
         assertCompile("{void test()}", "{def test() : Void}");
     }
 
+    @Test
+    void blockInInterface(){
+        assertCompile("interface Test {void test()}", "trait Test {def test() : Void}");
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"Foo", "Bar"})
     void interfaces(String name) {

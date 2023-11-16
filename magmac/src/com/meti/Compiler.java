@@ -22,8 +22,10 @@ public record Compiler(String input) {
         if (input.isEmpty()) {
             output = "";
         } else if(input.startsWith("interface ")) {
-            var name = input.substring("interface ".length(), input.indexOf('{')).strip();
-            output = "trait " + name + " {}";
+            var braceStart = input.indexOf('{');
+            var name = input.substring("interface ".length(), braceStart).strip();
+            var content = input.substring(braceStart).strip();
+            output = "trait " + name + " " + compileLine(content);
         } else if (input.startsWith("{")) {
             var content = input.substring(1, input.length() - 1).strip();
             output = Arrays.stream(content.split(";"))
