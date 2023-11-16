@@ -21,6 +21,9 @@ public record Compiler(String input) {
         String output;
         if (input.isEmpty()) {
             output = "";
+        } else if(input.startsWith("interface ")) {
+            var name = input.substring("interface ".length(), input.indexOf('{')).strip();
+            output = "trait " + name + " {}";
         } else if (input.startsWith("{")) {
             var content = input.substring(1, input.length() - 1).strip();
             output = Arrays.stream(content.split(";"))

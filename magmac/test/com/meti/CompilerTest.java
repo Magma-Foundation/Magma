@@ -44,4 +44,10 @@ class CompilerTest {
     void blockChildren() {
         assertCompile("{void test()}", "{def test() : Void}");
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Foo", "Bar"})
+    void interfaces(String name) {
+        assertCompile("interface " + name + " {}", "trait " + name + " {}");
+    }
 }
