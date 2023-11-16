@@ -55,4 +55,9 @@ class CompilerTest {
     void interfaces(String name) {
         assertCompile("interface " + name + " {}", "trait " + name + " {}");
     }
+
+    @Test
+    void publicKeyword(){
+        assertCompile("public interface Test {}", "public trait Test {}");
+    }
 }
