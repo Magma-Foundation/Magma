@@ -4,6 +4,13 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public record Compiler(String input) {
+    private static String compileType(String inputType) {
+        if (inputType.equals("void")) {
+            return "Void";
+        }
+        return inputType;
+    }
+
     String compile() {
         return Arrays.stream(input.split(";"))
                 .map(this::compileLine)
@@ -14,7 +21,7 @@ public record Compiler(String input) {
         String output;
         if (input.isEmpty()) {
             output = "";
-        } else if(input.startsWith("import ")){
+        } else if (input.startsWith("import ")) {
             var slice = input.substring("import ".length());
             var importSeparator = slice.indexOf('.');
             var parent = slice.substring(0, importSeparator);
@@ -23,9 +30,17 @@ public record Compiler(String input) {
         } else {
             var separator = input.indexOf(' ');
             var end = input.indexOf('(');
-            var type = input.substring(0, separator).strip();
+            var inputType = input.substring(0, separator).strip();
             var name = input.substring(separator + 1, end).strip();
-            output = "def " + name + "() : "+ type;
+
+            var throwsIndex = input.indexOf("throws");
+            String throwsExtra;
+            if (throwsIndex != -1) {
+                throwsExtra = " ? " + input.substring(throwsIndex + "throws".length()).strip();
+            } else {
+                throwsExtra = "";
+            }
+            output = "def " + name + "() : " + compileType(inputType) + throwsExtra;
         }
         return output;
     }

@@ -28,4 +28,10 @@ class CompilerTest {
     void returns(String returns) {
         assertCompile(returns + " test()", "def test() : " + returns);
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Foo", "Bar"})
+    void throwing(String throwing) {
+        assertCompile("void test() throws " + throwing, "def test() : Void ? " + throwing);
+    }
 }
