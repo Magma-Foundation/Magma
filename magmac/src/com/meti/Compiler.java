@@ -21,6 +21,11 @@ public record Compiler(String input) {
         String output;
         if (input.isEmpty()) {
             output = "";
+        } else if (input.startsWith("{")) {
+            var content = input.substring(1, input.length() - 1).strip();
+            output = Arrays.stream(content.split(";"))
+                    .map(this::compileLine)
+                    .collect(Collectors.joining("", "{", "}"));
         } else if (input.startsWith("import ")) {
             var slice = input.substring("import ".length());
             var importSeparator = slice.indexOf('.');

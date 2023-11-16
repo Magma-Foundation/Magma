@@ -34,4 +34,14 @@ class CompilerTest {
     void throwing(String throwing) {
         assertCompile("void test() throws " + throwing, "def test() : Void ? " + throwing);
     }
+
+    @Test
+    void block() {
+        assertCompile("{}", "{}");
+    }
+
+    @Test
+    void blockChildren() {
+        assertCompile("{void test()}", "{def test() : Void}");
+    }
 }
