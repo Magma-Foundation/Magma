@@ -22,4 +22,10 @@ class CompilerTest {
     void abstractMethod(String name) {
         assertCompile("void " + name + "()", "def " + name + "() : Void");
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Foo", "Bar"})
+    void returns(String returns) {
+        assertCompile(returns + " test()", "def test() : " + returns);
+    }
 }

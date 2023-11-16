@@ -21,10 +21,11 @@ public record Compiler(String input) {
             var child = slice.substring(importSeparator + 1);
             output = "import { " + child + " } from " + parent + ";";
         } else {
-            var start = input.indexOf(' ');
+            var separator = input.indexOf(' ');
             var end = input.indexOf('(');
-            var name = input.substring(start + 1, end).strip();
-            output = "def " + name + "() : Void";
+            var type = input.substring(0, separator).strip();
+            var name = input.substring(separator + 1, end).strip();
+            output = "def " + name + "() : "+ type;
         }
         return output;
     }
