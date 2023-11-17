@@ -6,15 +6,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 
-public final class Application {
-    private final Source source;
-    private final Target target;
-
-    public Application(Source source, Target target) {
-        this.source = source;
-        this.target = target;
-    }
-
+public record Application(Source source, Target target) {
     Optional<Path> run() throws IOException {
         var sources = new HashSet<>(source.list());
 

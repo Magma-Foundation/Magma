@@ -75,11 +75,21 @@ public record Compiler(String input) {
         }
 
         return Stream.<Supplier<Optional<String>>>of(
+                () -> compileRecord(input),
                 () -> compileClass(input),
                 () -> compileInterface(input),
                 () -> compileBlock(input),
                 () -> compileImport(input),
                 () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
+    }
+
+    private Optional<String> compileRecord(String input) {
+        if (input.startsWith("record ")) {
+            var name = input.substring("record ".length(), input.indexOf('(')).strip();
+            return Optional.of("class def " + name + "() => {}");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<String> compileClass(String input) {
