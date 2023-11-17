@@ -98,23 +98,9 @@ public record Compiler(String input) {
                 () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
     }
 
-    private Optional<String> compileRecord(String input) {
-        if (input.startsWith("record ")) {
-            var paramStart = input.indexOf('(');
-            var paramEnd = input.indexOf(')');
-            var renderedParams = Arrays.stream(input.substring(paramStart + 1, paramEnd).strip().split(","))
-                    .map(String::strip)
-                    .filter(value -> !value.isEmpty())
-                    .map(Compiler::compileParameter)
-                    .collect(Collectors.joining(", "));
-
-            var name = input.substring("record ".length(), paramStart).strip();
-            var body = input.substring(input.indexOf('{'), input.indexOf('}') + 1).strip();
-            var compiledBody = compileLine(body);
-            return Optional.of("class def " + name + "(" + renderedParams + ") => " + compiledBody);
-        } else {
-            return Optional.empty();
-        }
+    private static String compileKeys(String slice) {
+        var keys = Arrays.stream(slice.split(" ")).map(String::strip).filter(value -> !value.isEmpty()).collect(Collectors.toSet());
+        return keys.isEmpty() ? "" : String.join(" ", keys) + " ";
     }
 
     private Optional<String> compileClass(String input) {
@@ -126,12 +112,35 @@ public record Compiler(String input) {
         }
     }
 
+    private Optional<String> compileRecord(String input) {
+        var recordIndex = input.indexOf("record ");
+        if (recordIndex == -1) {
+            return Optional.empty();
+        } else {
+            var paramStart = input.indexOf('(');
+            var paramEnd = input.indexOf(')');
+            var renderedParams = Arrays.stream(input.substring(paramStart + 1, paramEnd).strip().split(","))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .map(Compiler::compileParameter)
+                    .collect(Collectors.joining(", "));
+            var keyString = compileKeys(input.substring(0, recordIndex).strip());
+
+            var name = input.substring(recordIndex + "record ".length(), paramStart).strip();
+            var body = input.substring(input.indexOf('{'), input.indexOf('}') + 1).strip();
+            var compiledBody = compileLine(body);
+            return Optional.of(keyString + "class def " + name + "(" + renderedParams + ") => " + compiledBody);
+        }
+    }
+
     private Optional<String> compileInterface(String input) {
         var index = input.indexOf("interface ");
         if (index == -1) {
             return Optional.empty();
         }
-        var keys = Arrays.stream(input.substring(0, index).strip().split(" ")).map(String::strip).filter(value -> !value.isEmpty()).collect(Collectors.toSet());
+
+        var slice = input.substring(0, index).strip();
+        var keyString = compileKeys(slice);
 
         var start = index + "interface ".length();
         var braceStart = input.indexOf('{', start);
@@ -141,7 +150,6 @@ public record Compiler(String input) {
 
         var name = input.substring(start, braceStart).strip();
         var content = input.substring(braceStart).strip();
-        var keyString = keys.size() == 0 ? "" : String.join(" ", keys) + " ";
         return Optional.of(keyString + "trait " + name + " " + compileLine(content));
     }
 
