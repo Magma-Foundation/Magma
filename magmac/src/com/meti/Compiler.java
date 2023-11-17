@@ -74,7 +74,21 @@ public record Compiler(String input) {
             return "";
         }
 
-        return Stream.<Supplier<Optional<String>>>of(() -> compileInterface(input), () -> compileBlock(input), () -> compileImport(input), () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
+        return Stream.<Supplier<Optional<String>>>of(
+                () -> compileClass(input),
+                () -> compileInterface(input),
+                () -> compileBlock(input),
+                () -> compileImport(input),
+                () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
+    }
+
+    private Optional<String> compileClass(String input) {
+        if (input.startsWith("class ")) {
+            var name = input.substring("class ".length(), input.indexOf('{')).strip();
+            return Optional.of("class def " + name + "() => {}");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<String> compileInterface(String input) {

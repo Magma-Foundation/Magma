@@ -4,13 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class CompilerTest {
-    private static void assertCompile(String input, String output) {
-        var actual = new Compiler(input).compile();
-        assertEquals(output, actual);
-    }
+class CompilerTest extends CompiledTest {
 
     @Test
     void multiple() {
