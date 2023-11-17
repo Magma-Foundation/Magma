@@ -67,6 +67,19 @@ public record Compiler(String input) {
         return Optional.of("def " + name + "() : " + compileType(inputType) + throwsExtra + ";");
     }
 
+    private static String compileParameter(String paramString) {
+        String renderedParams;
+        var separator = paramString.indexOf(' ');
+        if (separator == -1) {
+            renderedParams = "";
+        } else {
+            var paramType = paramString.substring(0, separator).strip();
+            var paramName = paramString.substring(separator + 1).strip();
+            renderedParams = paramName + " : " + compileType(paramType);
+        }
+        return renderedParams;
+    }
+
     String compile() {
         return stream(this.input).map(String::strip).filter(value -> !value.isEmpty()).map(this::compileLine).collect(Collectors.joining());
     }
@@ -89,16 +102,11 @@ public record Compiler(String input) {
         if (input.startsWith("record ")) {
             var paramStart = input.indexOf('(');
             var paramEnd = input.indexOf(')');
-            var paramString = input.substring(paramStart + 1, paramEnd).strip();
-            String renderedParams;
-            var separator = paramString.indexOf(' ');
-            if (separator != -1) {
-                var paramType = paramString.substring(0, separator).strip();
-                var paramName = paramString.substring(separator + 1).strip();
-                renderedParams = paramName + " : " + compileType(paramType);
-            } else {
-                renderedParams = "";
-            }
+            var renderedParams = Arrays.stream(input.substring(paramStart + 1, paramEnd).strip().split(","))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .map(Compiler::compileParameter)
+                    .collect(Collectors.joining(", "));
 
             var name = input.substring("record ".length(), paramStart).strip();
             return Optional.of("class def " + name + "(" + renderedParams + ") => {}");
