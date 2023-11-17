@@ -20,19 +20,19 @@ class CompilerTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void abstractMethod(String name) {
-        assertCompile("void " + name + "()", "def " + name + "() : Void");
+        assertCompile("void " + name + "()", "def " + name + "() : Void;");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"Foo", "Bar"})
     void returns(String returns) {
-        assertCompile(returns + " test()", "def test() : " + returns);
+        assertCompile(returns + " test()", "def test() : " + returns + ";");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"Foo", "Bar"})
     void throwing(String throwing) {
-        assertCompile("void test() throws " + throwing, "def test() : Void ? " + throwing);
+        assertCompile("void test() throws " + throwing, "def test() : Void ? " + throwing + ";");
     }
 
     @Test
@@ -42,12 +42,12 @@ class CompilerTest {
 
     @Test
     void blockChildren() {
-        assertCompile("{void test()}", "{def test() : Void}");
+        assertCompile("{void test()}", "{def test() : Void;}");
     }
 
     @Test
     void blockInInterface(){
-        assertCompile("interface Test {void test()}", "trait Test {def test() : Void}");
+        assertCompile("interface Test {void test()}", "trait Test {def test() : Void;}");
     }
 
     @ParameterizedTest

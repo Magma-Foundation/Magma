@@ -62,15 +62,11 @@ public record Compiler(String input) {
         } else {
             throwsExtra = "";
         }
-        return Optional.of("def " + name + "() : " + compileType(inputType) + throwsExtra);
+        return Optional.of("def " + name + "() : " + compileType(inputType) + throwsExtra + ";");
     }
 
     String compile() {
-        return stream(this.input)
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .map(this::compileLine)
-                .collect(Collectors.joining());
+        return stream(this.input).map(String::strip).filter(value -> !value.isEmpty()).map(this::compileLine).collect(Collectors.joining());
     }
 
     private String compileLine(String input) {
@@ -78,14 +74,7 @@ public record Compiler(String input) {
             return "";
         }
 
-        return Stream.<Supplier<Optional<String>>>of(() -> compileInterface(input),
-                        () -> compileBlock(input),
-                        () -> compileImport(input),
-                        () -> compileMethod(input))
-                .map(Supplier::get)
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElse(input);
+        return Stream.<Supplier<Optional<String>>>of(() -> compileInterface(input), () -> compileBlock(input), () -> compileImport(input), () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
     }
 
     private Optional<String> compileInterface(String input) {
@@ -93,10 +82,7 @@ public record Compiler(String input) {
         if (index == -1) {
             return Optional.empty();
         }
-        var keys = Arrays.stream(input.substring(0, index).strip().split(" "))
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .collect(Collectors.toSet());
+        var keys = Arrays.stream(input.substring(0, index).strip().split(" ")).map(String::strip).filter(value -> !value.isEmpty()).collect(Collectors.toSet());
 
         var start = index + "interface ".length();
         var braceStart = input.indexOf('{', start);
@@ -113,9 +99,7 @@ public record Compiler(String input) {
     public Optional<String> compileBlock(String input) {
         if (input.startsWith("{")) {
             var content = input.substring(1, input.length() - 1).strip();
-            return Optional.of(stream(content)
-                    .map(this::compileLine)
-                    .collect(Collectors.joining("", "{", "}")));
+            return Optional.of(stream(content).map(this::compileLine).collect(Collectors.joining("", "{", "}")));
         }
         return Optional.empty();
     }
