@@ -109,7 +109,9 @@ public record Compiler(String input) {
                     .collect(Collectors.joining(", "));
 
             var name = input.substring("record ".length(), paramStart).strip();
-            return Optional.of("class def " + name + "(" + renderedParams + ") => {}");
+            var body = input.substring(input.indexOf('{'), input.indexOf('}') + 1).strip();
+            var compiledBody = compileLine(body);
+            return Optional.of("class def " + name + "(" + renderedParams + ") => " + compiledBody);
         } else {
             return Optional.empty();
         }

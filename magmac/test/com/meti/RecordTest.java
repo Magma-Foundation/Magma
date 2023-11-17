@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 
 public class RecordTest extends CompiledTest {
     @Test
+    void content() {
+        assertCompile("record Test(){void empty();}", "class def Test() => {def empty() : Void;}");
+    }
+
+    @Test
     void parameters() {
         assertCompile("record Test(int first, int second){}", "class def Test(first : I16, second : I16) => {}");
     }
