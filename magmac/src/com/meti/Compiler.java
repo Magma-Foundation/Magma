@@ -47,7 +47,25 @@ public record Compiler(String input) {
         return Optional.empty();
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static String compileParameter(String paramString) {
+        String renderedParams;
+        var separator = paramString.indexOf(' ');
+        if (separator == -1) {
+            renderedParams = "";
+        } else {
+            var paramType = paramString.substring(0, separator).strip();
+            var paramName = paramString.substring(separator + 1).strip();
+            renderedParams = paramName + " : " + compileType(paramType);
+        }
+        return renderedParams;
+    }
+
+    private static String compileKeys(String slice) {
+        var keys = Arrays.stream(slice.split(" ")).map(String::strip).filter(value -> !value.isEmpty()).collect(Collectors.toSet());
+        return keys.isEmpty() ? "" : String.join(" ", keys) + " ";
+    }
+
+    private Optional<String> compileMethod(String input) {
         var separator = input.indexOf(' ');
         var end = input.indexOf('(');
         if (end == -1) {
@@ -64,20 +82,16 @@ public record Compiler(String input) {
         } else {
             throwsExtra = "";
         }
-        return Optional.of("def " + name + "() : " + compileType(inputType) + throwsExtra + ";");
-    }
 
-    private static String compileParameter(String paramString) {
-        String renderedParams;
-        var separator = paramString.indexOf(' ');
-        if (separator == -1) {
-            renderedParams = "";
+        var braceStart = input.indexOf('{');
+        String content;
+        if (braceStart != -1) {
+            content = " => " + compileLine(input.substring(braceStart).strip());
         } else {
-            var paramType = paramString.substring(0, separator).strip();
-            var paramName = paramString.substring(separator + 1).strip();
-            renderedParams = paramName + " : " + compileType(paramType);
+            content = ";";
         }
-        return renderedParams;
+
+        return Optional.of("def " + name + "() : " + compileType(inputType) + throwsExtra + content);
     }
 
     String compile() {
@@ -90,17 +104,14 @@ public record Compiler(String input) {
         }
 
         return Stream.<Supplier<Optional<String>>>of(
-                () -> compileRecord(input),
-                () -> compileClass(input),
-                () -> compileInterface(input),
-                () -> compileBlock(input),
-                () -> compileImport(input),
-                () -> compileMethod(input)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(input);
-    }
-
-    private static String compileKeys(String slice) {
-        var keys = Arrays.stream(slice.split(" ")).map(String::strip).filter(value -> !value.isEmpty()).collect(Collectors.toSet());
-        return keys.isEmpty() ? "" : String.join(" ", keys) + " ";
+                        () -> compileRecord(input),
+                        () -> compileClass(input),
+                        () -> compileInterface(input),
+                        () -> compileBlock(input),
+                        () -> compileImport(input),
+                        () -> compileMethod(input))
+                .map(Supplier::get)
+                .flatMap(Optional::stream).findFirst().orElse(input);
     }
 
     private Optional<String> compileClass(String input) {
