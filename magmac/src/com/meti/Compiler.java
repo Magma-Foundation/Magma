@@ -11,6 +11,8 @@ public record Compiler(String input) {
     private static String compileType(String inputType) {
         if (inputType.equals("void")) {
             return "Void";
+        } else if (inputType.equals("int")) {
+            return "I16";
         }
         return inputType;
     }
@@ -85,8 +87,21 @@ public record Compiler(String input) {
 
     private Optional<String> compileRecord(String input) {
         if (input.startsWith("record ")) {
-            var name = input.substring("record ".length(), input.indexOf('(')).strip();
-            return Optional.of("class def " + name + "() => {}");
+            var paramStart = input.indexOf('(');
+            var paramEnd = input.indexOf(')');
+            var paramString = input.substring(paramStart + 1, paramEnd).strip();
+            String renderedParams;
+            var separator = paramString.indexOf(' ');
+            if (separator != -1) {
+                var paramType = paramString.substring(0, separator).strip();
+                var paramName = paramString.substring(separator + 1).strip();
+                renderedParams = paramName + " : " + compileType(paramType);
+            } else {
+                renderedParams = "";
+            }
+
+            var name = input.substring("record ".length(), paramStart).strip();
+            return Optional.of("class def " + name + "(" + renderedParams + ") => {}");
         } else {
             return Optional.empty();
         }
