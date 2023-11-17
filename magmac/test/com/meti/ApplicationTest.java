@@ -52,11 +52,7 @@ public class ApplicationTest {
 
     private Optional<Path> runWithSource(String input) throws IOException {
         Files.writeString(source, input);
-        return createApplication().run();
-    }
-
-    private Application createApplication() {
-        return new Application(new SingleSource(source), new Target(Paths.get(".")));
+        return new Application(new SingleSource(source), new Target(Paths.get("."))).run();
     }
 
     @Test
@@ -72,7 +68,7 @@ public class ApplicationTest {
 
     @Test
     void generateNoTarget() throws IOException {
-        createApplication().run();
+        new Application(new SingleSource(source), new Target(Paths.get("."))).run();
         assertFalse(Files.exists(target));
     }
 }
