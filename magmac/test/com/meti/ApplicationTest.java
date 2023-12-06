@@ -19,12 +19,7 @@ public class ApplicationTest {
     private static Optional<Path> run() throws IOException {
         if (Files.exists(Source)) {
             var input = Files.readString(Source);
-            String output;
-            if (input.equals("import parent.Child;")) {
-                output = "import { Child } from parent;";
-            } else {
-                output = "";
-            }
+            var output = new Compiler(input).compile();
 
             Files.writeString(Target, output);
             return Optional.of(Target);
