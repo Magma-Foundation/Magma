@@ -7,25 +7,38 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
     public static final Path Target = Paths.get(".", "Index.mgs");
     public static final Path Source = Paths.get(".", "Index.java");
 
-    private static void run() throws IOException {
+    private static Optional<Path> run() throws IOException {
         if (Files.exists(Source)) {
             Files.createFile(Target);
+            return Optional.of(Target);
+        } else {
+            return Optional.empty();
         }
+    }
+
+    private static Optional<Path> runWithSource() throws IOException {
+        Files.createFile(Source);
+        return run();
+    }
+
+    @Test
+    void generatesAnyTarget() throws IOException {
+        var target = runWithSource().orElseThrow();
+        assertEquals(target, Target);
     }
 
     @Test
     void generatesTarget() throws IOException {
-        Files.createFile(Source);
-        run();
+        runWithSource();
         assertTrue(Files.exists(Target));
     }
 
