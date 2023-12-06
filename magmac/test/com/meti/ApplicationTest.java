@@ -26,8 +26,17 @@ public class ApplicationTest {
     }
 
     private static Optional<Path> runWithSource() throws IOException {
-        Files.createFile(Source);
+        return runWithSource("");
+    }
+
+    private static Optional<Path> runWithSource(String input) throws IOException {
+        Files.writeString(Source, input);
         return run();
+    }
+
+    @Test
+    void omitPackage() throws IOException {
+        assertTrue(Files.readString(runWithSource("package test;").orElseThrow()).isEmpty());
     }
 
     @Test
