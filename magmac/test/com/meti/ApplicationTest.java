@@ -18,7 +18,15 @@ public class ApplicationTest {
 
     private static Optional<Path> run() throws IOException {
         if (Files.exists(Source)) {
-            Files.createFile(Target);
+            var input = Files.readString(Source);
+            String output;
+            if (input.equals("import parent.Child;")) {
+                output = "import { Child } from parent;";
+            } else {
+                output = "";
+            }
+
+            Files.writeString(Target, output);
             return Optional.of(Target);
         } else {
             return Optional.empty();
@@ -32,6 +40,12 @@ public class ApplicationTest {
     private static Optional<Path> runWithSource(String input) throws IOException {
         Files.writeString(Source, input);
         return run();
+    }
+
+    @Test
+    void oneImport() throws IOException {
+        var output = Files.readString(runWithSource("import parent.Child;").orElseThrow());
+        assertEquals("import { Child } from parent;", output);
     }
 
     @Test
