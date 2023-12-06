@@ -11,6 +11,12 @@ class CompilerTest {
     }
 
     @Test
+    void importMultiple() {
+        assertCompile("import one.Two;import three.Four;",
+                "import { Two } from one;\nimport { Four } from three;");
+    }
+
+    @Test
     void importParent() {
         assertCompile("import foo.Bar;", "import { Bar } from foo;");
     }
