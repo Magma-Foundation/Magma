@@ -6,7 +6,12 @@ public record Compiler(String input) {
         if (input().isEmpty() || input().startsWith("package ")) {
             output = "";
         } else {
-            output = "import { Child } from parent;";
+            var slice = input.substring("import ".length()).strip();
+
+            var index = slice.indexOf(".");
+            var parent = slice.substring(0, index);
+
+            output = "import { Child } from " + parent + ";";
         }
         return output;
     }
