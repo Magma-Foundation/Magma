@@ -8,6 +8,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class DirectorySource implements Source {
     private final Path root;
@@ -33,5 +34,12 @@ public class DirectorySource implements Source {
         });
 
         return set;
+    }
+
+    @Override
+    public Stream<Unit> streamUnits() throws IOException {
+        return collectSources()
+                .stream()
+                .map((Path source) -> new Unit(source, root));
     }
 }
