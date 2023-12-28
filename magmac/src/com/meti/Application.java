@@ -17,7 +17,7 @@ public final class Application {
         return run().stream().findFirst();
     }
 
-    private HashSet<Path> run() throws IOException {
+    public HashSet<Path> run() throws IOException {
         var sources = source.collectSources();
         var targets = new HashSet<Path>();
         for (var source : sources) {
