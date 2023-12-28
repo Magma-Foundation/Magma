@@ -43,7 +43,7 @@ public final class Application {
                 Files.createDirectories(parentDirectory);
             }
 
-            var target = parentDirectory.resolveSibling(fileName + ".mgs");
+            var target = parentDirectory.resolve(fileName + ".mgs");
             Files.createFile(target);
             return Ok.apply(target);
         } catch (IOException e) {
