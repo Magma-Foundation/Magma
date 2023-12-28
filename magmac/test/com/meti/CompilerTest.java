@@ -6,9 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompilerTest {
+    private static void assertCompile(String expected, String input) {
+        assertEquals(expected, new Compiler(input).compile());
+    }
+
     @Test
     void importParent() {
-        assertEquals("import { Child } from bar;", new Compiler("import bar.Child").compile());
+        assertCompile("import { Child } from bar;", "import bar.Child");
+    }
+
+    @Test
+    void importChild() {
+        assertCompile("import { Bar } from foo;", "import foo.Bar");
     }
 
     @Test

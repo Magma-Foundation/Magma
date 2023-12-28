@@ -9,9 +9,10 @@ public record Compiler(String input) {
             var slice = input.substring("import ".length()).strip();
 
             var index = slice.indexOf(".");
-            var parent = slice.substring(0, index);
+            var parent = slice.substring(0, index).strip();
+            var child = slice.substring(index + 1).strip();
 
-            output = "import { Child } from " + parent + ";";
+            output = "import { " + child + " } from " + parent + ";";
         }
         return output;
     }
