@@ -51,6 +51,12 @@ public class ApplicationTest {
     }
 
     @Test
+    void compileImport() throws IOException {
+        var actual = Files.readString(tryRunWithSource("import parent.Child").orElseThrow());
+        assertEquals("import { Child } from parent;", actual);
+    }
+
+    @Test
     void generateTarget() {
         tryRunWithSource();
         assertTrue(Files.exists(Target));

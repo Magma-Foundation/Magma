@@ -44,7 +44,10 @@ public final class Application {
             }
 
             var target = parentDirectory.resolve(fileName + ".mgs");
-            Files.createFile(target);
+
+            var input = unit.read();
+            var output = new Compiler(input).compile();
+            Files.writeString(target, output);
             return Ok.apply(target);
         } catch (IOException e) {
             return Err.apply(e);
