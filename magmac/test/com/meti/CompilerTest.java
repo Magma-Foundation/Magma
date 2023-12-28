@@ -11,6 +11,11 @@ class CompilerTest {
     }
 
     @Test
+    void sameParent() {
+        assertCompile("import { Bar, Foo } from parent;", "import parent.Foo;import parent.Bar;");
+    }
+
+    @Test
     void importParent() {
         assertCompile("import { Child } from bar;", "import bar.Child");
     }
