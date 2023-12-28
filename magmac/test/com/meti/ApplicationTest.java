@@ -16,15 +16,13 @@ public class ApplicationTest {
     public static final Path Target = Paths.get(".", "Index.mgs");
     public static final Path Source = Paths.get(".", "Index.java");
 
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.deleteIfExists(Source);
-        Files.deleteIfExists(Target);
+    private static Optional<Path> tryRunWithSource() {
+        return tryRunWithSource("");
     }
 
-    private static Optional<Path> tryRunWithSource() {
+    private static Optional<Path> tryRunWithSource(String input) {
         try {
-            Files.createFile(Source);
+            Files.writeString(Source, input);
             return tryRun();
         } catch (IOException e) {
             fail(e);
@@ -39,6 +37,17 @@ public class ApplicationTest {
             fail(e);
             return Optional.empty();
         }
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(Source);
+        Files.deleteIfExists(Target);
+    }
+
+    @Test
+    void removesPackage() throws IOException {
+        assertTrue(Files.readString(tryRunWithSource("package test;").orElseThrow()).isEmpty());
     }
 
     @Test
