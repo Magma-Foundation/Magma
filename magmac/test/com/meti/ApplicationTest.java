@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,31 +22,35 @@ public class ApplicationTest {
         Files.deleteIfExists(Target);
     }
 
-    private static Path tryRunWithSource() {
+    private static Optional<Path> tryRunWithSource() {
         try {
             Files.createFile(Source);
             return tryRun();
         } catch (IOException e) {
             fail(e);
-            return null;
+            return Optional.empty();
         }
     }
 
-    private static Path tryRun() {
+    private static Optional<Path> tryRun() {
         try {
             return run();
         } catch (IOException e) {
             fail(e);
-            return null;
+            return Optional.empty();
         }
     }
 
-    private static Path run() throws IOException {
+    private static Optional<Path> run() throws IOException {
         if (Files.exists(Source)) {
-            Files.createFile(Target);
-            return Target;
+            var fileNameAsString = Source.getFileName().toString();
+            var separator = fileNameAsString.indexOf('.');
+            var fileName = fileNameAsString.substring(0, separator);
+            var target = Source.resolveSibling(fileName + ".mgs");
+            Files.createFile(target);
+            return Optional.of(target);
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -57,7 +62,7 @@ public class ApplicationTest {
 
     @Test
     void generatesCorrectTarget() {
-        assertEquals(Target, tryRunWithSource());
+        assertEquals(Target, tryRunWithSource().orElseThrow());
     }
 
     @Test
