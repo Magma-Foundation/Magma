@@ -13,7 +13,11 @@ public final class Application {
         this.source = source;
     }
 
-    Optional<Path> run() throws IOException {
+    Optional<Path> runSingle() throws IOException {
+        return run().stream().findFirst();
+    }
+
+    private HashSet<Path> run() throws IOException {
         var sources = source.collectSources();
         var targets = new HashSet<Path>();
         for (var source : sources) {
@@ -24,6 +28,6 @@ public final class Application {
             Files.createFile(target);
             targets.add(target);
         }
-        return targets.stream().findFirst();
+        return targets;
     }
 }

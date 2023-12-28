@@ -34,7 +34,7 @@ public class ApplicationTest {
 
     private static Optional<Path> tryRun() {
         try {
-            return new Application(new SingleSource(Source)).run();
+            return new Application(new SingleSource(Source)).runSingle();
         } catch (IOException e) {
             fail(e);
             return Optional.empty();
