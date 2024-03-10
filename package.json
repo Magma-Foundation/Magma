@@ -2,13 +2,15 @@
   "name": "magma",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index.js"
+    "start": "ts-node index.ts"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.11.25"
+    "@types/node": "^20.11.25",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
   }
 }

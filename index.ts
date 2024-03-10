@@ -1,14 +1,11 @@
-"use strict"
+import * as fs from "fs";
 
-const fs = require("fs");
-
-const lines = fs.readFileSync("./index0.js")
+const lines : string[] = fs.readFileSync("./index.ts")
     .toString()
     .split("\n");
 
 let output = lines
-    .map(line => line.trim())
-    .filter(line => line.length !== 0)
+    .filter(line => line.trim().length !== 0)
     .flatMap(line => {
     if(line === "\"use strict\"") {
         return [];
@@ -17,5 +14,4 @@ let output = lines
     }
 });
 
-console.log(output);
 fs.writeFileSync("./index.mgs", output.join("\n"));
