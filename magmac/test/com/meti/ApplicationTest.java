@@ -8,24 +8,40 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
     public static final Path TARGET = Paths.get(".", "Index.mgs");
     public static final Path SOURCE = Paths.get(".", "Index.java");
 
-    private static void run() throws IOException {
+    private static Path run() throws IOException {
         if (Files.exists(SOURCE)) {
-            Files.createFile(TARGET);
+            var fileName = SOURCE.getFileName().toString();
+            var index = fileName.indexOf(".");
+            var name = fileName.substring(0, index);
+            var target = SOURCE.resolveSibling(name + ".mgs");
+            Files.createFile(target);
+            return target;
+        } else {
+            return null;
         }
+    }
+
+    private static Path runWithSource() throws IOException {
+        Files.createFile(SOURCE);
+        return run();
     }
 
     @Test
     void generatesNothing() throws IOException {
         run();
         assertFalse(Files.exists(TARGET));
+    }
+
+    @Test
+    void generatesProperTarget() throws IOException {
+        assertEquals(runWithSource(), TARGET);
     }
 
     @AfterEach
@@ -36,8 +52,7 @@ public class ApplicationTest {
 
     @Test
     void generatesSomething() throws IOException {
-        Files.createFile(SOURCE);
-        run();
+        runWithSource();
         assertTrue(Files.exists(TARGET));
     }
 }
