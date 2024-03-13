@@ -12,4 +12,6 @@ public class ApplicationTest {
     void generatesNothing() {
         assertFalse(Files.exists(Paths.get(".", "Index.mgs")));
     }
+
+
 }
