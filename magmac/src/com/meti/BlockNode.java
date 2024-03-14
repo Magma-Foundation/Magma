@@ -6,10 +6,20 @@ import java.util.stream.Collectors;
 
 import static com.meti.Some.Some;
 
-public record BlockNode(int indent, List<Node> stringStream) implements Node {
+public record BlockNode(int indent, List<? extends Node> children) implements Node {
+    @Override
+    public Option<List<? extends Node>> findChildren() {
+        return Some(children);
+    }
+
+    @Override
+    public Option<Node> withChildren(List<? extends Node> children) {
+        return Some(new BlockNode(indent, children));
+    }
+
     @Override
     public Option<String> render() {
-        return Some(stringStream()
+        return Some(children()
                 .stream()
                 .map(Node::render)
                 .map(output -> output.map(Optional::of).orElse(Optional.empty()))

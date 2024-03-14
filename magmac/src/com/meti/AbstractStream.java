@@ -7,6 +7,23 @@ import static com.meti.None.None;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     @Override
+    public <C> C collect(Collector<T, C> collector) {
+        var current = collector.initial();
+        while (true) {
+            C finalCurrent = current;
+            var tuple = next()
+                    .map(next -> collector.fold(finalCurrent, next))
+                    .toTuple(current);
+
+            if (tuple.a()) {
+                current = tuple.b();
+            } else {
+                return current;
+            }
+        }
+    }
+
+    @Override
     public Stream<T> filter(Predicate<T> predicate) {
         return flatMap(element -> predicate.test(element) ? Streams.from(element) : Streams.empty());
     }
