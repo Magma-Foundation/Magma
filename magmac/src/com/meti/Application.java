@@ -15,9 +15,17 @@ import static com.meti.None.None;
 import static com.meti.Some.Some;
 
 public record Application(Path source) {
-    private static String compileLine(String line, int indent) {
+    private static String compileExpression(String line, int indent) {
         var stripped = line.strip();
-        return Stream.<Function<String, Option<String>>>of(Application::compileString, value -> compileField(value, indent), stripped2 -> compileBlock(stripped2, indent), Application::compileClass, Application::compileImport, Application::compileInvocation, stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().flatMap(option -> option.map(Optional::of).orElse(Optional.empty())).orElse("");
+        return Stream.<Function<String, Option<String>>>of(
+                Application::compileString,
+                value -> compileField(value, indent),
+                stripped2 -> compileBlock(stripped2, indent),
+                Application::compileClass,
+                Application::compileImport,
+                Application::compileInvocation,
+                stripped1 -> compileMethod(stripped1, indent))
+                .map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().flatMap(option -> option.map(Optional::of).orElse(Optional.empty())).orElse("");
     }
 
     private static Option<String> compileMethod(String stripped, int indent) {
@@ -46,7 +54,7 @@ public record Application(Path source) {
                 }
             });
 
-            var content = compileLine(stripped.substring(contentStart).strip(), indent);
+            var content = compileExpression(stripped.substring(contentStart).strip(), indent);
             var more = stripped.substring(paramEnd + 1, contentStart).strip();
             var moreOutput = more.startsWith("throws ")
                     ? " ? " + compileType(more.substring("throws ".length()))
@@ -89,7 +97,7 @@ public record Application(Path source) {
             var content = stripped.substring("public static final Path ".length());
             var equals = content.indexOf('=');
             var name = content.substring(0, equals).strip();
-            var compiledValue = compileLine(content.substring(equals + 1), 0);
+            var compiledValue = compileExpression(content.substring(equals + 1), 0);
             return Some("\t".repeat(indent) + "pub const " + name + " = " + compiledValue + ";\n");
         }
         return None();
@@ -97,7 +105,7 @@ public record Application(Path source) {
 
     private static Option<String> compileBlock(String stripped, int indent) {
         if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            return Some(split(stripped.substring(1, stripped.length() - 1).strip()).map(line1 -> compileLine(line1, 1)).collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
+            return Some(split(stripped.substring(1, stripped.length() - 1).strip()).map(line1 -> compileExpression(line1, 1)).collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
         } else {
             return None();
         }
@@ -109,7 +117,7 @@ public record Application(Path source) {
 
             var name = stripped.substring("public class ".length(), start).strip();
             var content = stripped.substring(start);
-            var contentOutput = compileLine(content, 0);
+            var contentOutput = compileExpression(content, 0);
 
             return Some("export object " + name + " = " + contentOutput);
         }
@@ -138,7 +146,7 @@ public record Application(Path source) {
         if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
-            var args = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileLine(arg, 0)).collect(Collectors.joining(", ", "(", ")"));
+            var args = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileExpression(arg, 0)).collect(Collectors.joining(", ", "(", ")"));
             return Some("Paths.get" + args);
         }
         return None();
@@ -172,7 +180,7 @@ public record Application(Path source) {
         if (!Files.exists(source)) return None();
 
         var input = Files.readString(source);
-        var root = split(input).map(line -> compileLine(line, 0)).collect(Collectors.joining());
+        var root = split(input).map(line -> compileExpression(line, 0)).collect(Collectors.joining());
 
         var fileName = source().getFileName().toString();
         var index = fileName.indexOf(".");
