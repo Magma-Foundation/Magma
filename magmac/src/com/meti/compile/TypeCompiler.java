@@ -1,7 +1,7 @@
 package com.meti.compile;
 
 public record TypeCompiler(String type) {
-    String compile() {
+    public String compile() {
         if (type.equals("void")) {
             return "Void";
         } else {

@@ -6,7 +6,7 @@ import com.meti.collect.stream.Streams;
 import java.util.ArrayList;
 
 public record Splitter(String input) {
-    Stream<String> split() {
+    public Stream<String> split() {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;

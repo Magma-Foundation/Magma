@@ -25,4 +25,6 @@ public interface Option<T> {
     Tuple<Boolean, T> toTuple(T other);
 
     boolean isEmpty();
+
+    T $() throws IntentionalException;
 }

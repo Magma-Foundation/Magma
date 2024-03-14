@@ -12,6 +12,7 @@ import com.meti.compile.scope.BlockLexer;
 import com.meti.compile.scope.FieldLexer;
 import com.meti.compile.scope.ObjectLexer;
 import com.meti.compile.string.StringLexer;
+import com.meti.java.JavaString;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +30,7 @@ public record Application(Path source) {
                         exp -> new BlockLexer(exp, indent).lex(),
                         stripped -> new ObjectLexer(stripped).lex(),
                         stripped2 -> new ImportLexer(stripped2).lex(),
-                        stripped1 -> new InvocationLexer(stripped1).lex(),
+                        stripped1 -> new InvocationLexer(new JavaString(stripped1)).lex(),
                         stripped1 -> new MethodLexer(stripped1, indent).lex())
                 .map(procedure -> procedure.apply(line.strip()))
                 .flatMap(Streams::fromOption)

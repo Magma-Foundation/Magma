@@ -1,6 +1,7 @@
 package com.meti.compile.node;
 
 import com.meti.collect.option.Option;
+import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Some.Some;
 
@@ -17,6 +18,12 @@ public class Content implements Node {
     public Option<Integer> findIndent() {
         return Some(indent);
     }
+
+    public Content(JavaString value, int indent) {
+        this.value = value.inner();
+        this.indent = indent;
+    }
+
 
     public Content(String value, int indent) {
         this.value = value;
