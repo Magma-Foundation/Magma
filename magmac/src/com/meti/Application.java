@@ -17,17 +17,31 @@ public record Application(Path source) {
     private static String compileLine(String line, int indent) {
         var stripped = line.strip();
         return Stream.<Function<String, Option<String>>>of(
-                Application::compileString,
-                value -> compileField(indent, value),
-                Application::compileBlock,
-                Application::compileClass,
-                Application::compileImport,
-                Application::compileInvocation)
+                        Application::compileString,
+                        value -> compileField(value, indent),
+                        stripped2 -> compileBlock(stripped2, indent),
+                        Application::compileClass,
+                        Application::compileImport,
+                        Application::compileInvocation,
+                        stripped1 -> compileMethod(stripped1, indent))
                 .map(procedure -> procedure.apply(stripped))
                 .filter(Option::isPresent)
                 .findFirst()
                 .flatMap(option -> option.map(Optional::of).orElse(Optional.empty()))
                 .orElse("");
+    }
+
+    private static Option<String> compileMethod(String stripped, int indent) {
+        var paramStart = stripped.indexOf('(');
+        var contentStart = stripped.indexOf('{');
+
+        if (paramStart != -1 && contentStart != -1) {
+            var name = stripped.substring("private static Option<Path> ".length(), paramStart);
+            var content = compileLine(stripped.substring(contentStart).strip(), indent);
+
+            return Some("\t".repeat(indent) + "def " + name + "() => " + content);
+        }
+        return None();
     }
 
     private static Option<String> compileString(String stripped) {
@@ -37,7 +51,7 @@ public record Application(Path source) {
         return None();
     }
 
-    private static Option<String> compileField(int indent, String stripped) {
+    private static Option<String> compileField(String stripped, int indent) {
         if (stripped.startsWith("public static final Path ")) {
             var content = stripped.substring("public static final Path ".length());
             var equals = content.indexOf('=');
@@ -48,11 +62,11 @@ public record Application(Path source) {
         return None();
     }
 
-    private static Option<String> compileBlock(String stripped) {
+    private static Option<String> compileBlock(String stripped, int indent) {
         if (stripped.startsWith("{") && stripped.endsWith("}")) {
             return Some(split(stripped.substring(1, stripped.length() - 1).strip())
                     .map(line1 -> compileLine(line1, 1))
-                    .collect(Collectors.joining("", "{\n", "}")));
+                    .collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
         } else {
             return None();
         }
