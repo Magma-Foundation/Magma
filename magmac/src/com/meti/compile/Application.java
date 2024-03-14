@@ -9,6 +9,7 @@ import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
+import com.meti.compile.procedure.ConstructionLexer;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
 import com.meti.compile.scope.*;
@@ -28,8 +29,16 @@ import static com.meti.collect.result.Results.$Result;
 public record Application(Path source) {
     private static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
+                exp -> new ConstructionLexer(new JavaString(exp)),
                 exp -> new ReturnLexer(new JavaString(exp)),
-                exp -> new TryLexer(new JavaString(exp)), PackageLexer::new, StringLexer::new, exp -> new DefinitionLexer(exp, indent), exp -> new BlockLexer(exp, indent), ObjectLexer::new, ImportLexer::new, stripped1 -> new MethodLexer(new JavaString(stripped1), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Application::lexTree);
+                exp -> new TryLexer(new JavaString(exp)),
+                PackageLexer::new,
+                StringLexer::new,
+                exp -> new DefinitionLexer(exp, indent),
+                exp -> new BlockLexer(exp, indent),
+                ObjectLexer::new,
+                ImportLexer::new,
+                exp -> new MethodLexer(new JavaString(exp), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Application::lexTree);
     }
 
     private static Result<Node, CompileException> lexTree(Node node) {
