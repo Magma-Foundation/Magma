@@ -5,8 +5,9 @@ import java.util.List;
 import static com.meti.None.None;
 import static com.meti.Some.Some;
 
-public record FieldLexer(String stripped, int indent) {
-    Option<Node> lex() {
+public record FieldLexer(String stripped, int indent) implements Lexer {
+    @Override
+    public Option<Node> lex() {
         if (!stripped().startsWith("public static final Path ")) return None();
         var content = stripped().substring("public static final Path ".length());
         var equals = content.indexOf('=');

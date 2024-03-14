@@ -7,6 +7,17 @@ import static com.meti.Some.Some;
 
 public record MethodNode(int indent, Option<?> moreOutputValue, List<String> annotations, String name, String type,
                          Node content) implements Node {
+
+    @Override
+    public Option<Node> findValueAsNode() {
+        return Some(content);
+    }
+
+    @Override
+    public Option<Node> withValue(Node value) {
+        return Some(new MethodNode(indent, moreOutputValue, annotations, name, type, value));
+    }
+
     @Override
     public Option<String> render() {
         var exceptions = moreOutputValue().map(value -> " ? " + value).orElse("");

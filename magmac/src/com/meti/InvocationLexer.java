@@ -2,7 +2,8 @@ package com.meti;
 
 import java.util.Arrays;
 
-public record InvocationLexer(String stripped) {
+public record InvocationLexer(String stripped) implements Lexer{
+    @Override
     public Option<Node> lex() {
         if (stripped().startsWith("Paths.get(")) {
             var start = stripped().indexOf("(");
