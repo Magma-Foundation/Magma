@@ -77,6 +77,11 @@ public record Application(Path source) {
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
+            } else if(c == '}' && depth == 1) {
+                builder.append("}");
+                depth--;
+                lines.add(builder.toString());
+                builder = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
