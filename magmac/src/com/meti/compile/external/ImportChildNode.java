@@ -10,4 +10,9 @@ public record ImportChildNode(String child, String parent) implements Node {
     public Option<String> render() {
         return Some("import { " + child() + " } from " + parent() + ";\n");
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -34,4 +34,9 @@ public class Content implements Node {
     public Option<String> render() {
         return Some(value);
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

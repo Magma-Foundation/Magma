@@ -7,6 +7,7 @@ import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
 import com.meti.compile.external.ImportLexer;
+import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
@@ -28,15 +29,17 @@ import static com.meti.collect.result.Results.$Result;
 
 public record Application(Path source) {
     private static Result<Node, CompileException> lexExpression(String line, int indent) {
-        return Streams.<Function<String, Option<Node>>>from(
-                        exp -> new StringLexer(exp).lex(),
-                        exp -> new FieldLexer(exp, indent).lex(),
-                        exp -> new BlockLexer(exp, indent).lex(),
-                        stripped -> new ObjectLexer(stripped).lex(),
-                        stripped2 -> new ImportLexer(stripped2).lex(),
-                        stripped1 -> new MethodLexer(stripped1, indent).lex(),
-                        stripped1 -> new InvocationLexer(new JavaString(stripped1)).lex())
-                .map(procedure -> procedure.apply(line.strip()))
+        return Streams.<Function<String, Lexer>>from(
+                        PackageLexer::new,
+                        StringLexer::new,
+                        exp -> new FieldLexer(exp, indent),
+                        exp -> new BlockLexer(exp, indent),
+                        ObjectLexer::new,
+                        ImportLexer::new,
+                        stripped1 -> new MethodLexer(stripped1, indent),
+                        stripped1 -> new InvocationLexer(new JavaString(stripped1)))
+                .map(constructor -> constructor.apply(line.strip()))
+                .map(Lexer::lex)
                 .flatMap(Streams::fromOption)
                 .next()
                 .into(ThrowableOption::new)
@@ -74,13 +77,22 @@ public record Application(Path source) {
         if (!Files.exists(source)) return None();
 
         var input = Files.readString(source);
-        var root = new Splitter(input).split()
-                .map(line -> lexExpression(line, 0))
-                .into(ExceptionalStream::new)
-                .mapValues(node -> node.render().orElse(""))
-                .collectExceptionally(Collectors.joining())
-                .$()
-                .orElse("");
+
+        var root = $Result(() -> {
+            var tree = new Splitter(input).split()
+                    .map(line -> lexExpression(line, 0))
+                    .collect(Collectors.exceptionally(Collectors.toList()))
+                    .$();
+
+            var outputTree = Streams.fromList(tree)
+                    .filter(element -> !element.is("package"))
+                    .collect(Collectors.toList());
+
+            return Streams.fromList(outputTree)
+                    .map(node -> node.render().orElse(""))
+                    .collect(Collectors.joining())
+                    .orElse("");
+        }).$();
 
         var fileName = source().getFileName().toString();
         var index = fileName.indexOf(".");

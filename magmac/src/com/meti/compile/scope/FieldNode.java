@@ -24,4 +24,9 @@ public record FieldNode(int indent, List<String> flags, String name, Node value)
     public Option<Node> withValue(Node value) {
         return Some(new FieldNode(indent, flags, name, value));
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -41,4 +41,9 @@ public record InvocationNode(Node caller, List<? extends Node> children) impleme
 
         return Some(caller.render().orElse("") + args);
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

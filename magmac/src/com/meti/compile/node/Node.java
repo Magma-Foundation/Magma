@@ -9,6 +9,8 @@ import static com.meti.collect.option.None.None;
 public interface Node {
     Option<String> render();
 
+    boolean is(String name);
+
     default Option<List<? extends Node>> findChildren() {
         return None();
     }

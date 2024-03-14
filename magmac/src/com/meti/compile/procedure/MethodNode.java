@@ -28,4 +28,9 @@ public record MethodNode(int indent, Option<?> moreOutputValue, List<String> ann
 
         return Some("\n" + annotationsString + "\t".repeat(indent()) + "def " + name() + "() : " + type() + exceptions + " => " + content.render().orElse(""));
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

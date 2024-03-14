@@ -23,4 +23,9 @@ public record ObjectNode(List<String> flags, String name, Node value) implements
         var flagsString = !flags().isEmpty() ? String.join(" ", flags()) + " " : "";
         return Some("\n" + flagsString + "object " + name() + " = " + value.render().orElse(""));
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }

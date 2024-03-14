@@ -29,4 +29,9 @@ public record BlockNode(int indent, List<? extends Node> children) implements No
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining("", "{\n", "\t".repeat(indent()) + "}\n")));
     }
+
+    @Override
+    public boolean is(String name) {
+        throw new UnsupportedOperationException();
+    }
 }
