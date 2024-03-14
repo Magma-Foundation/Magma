@@ -1,9 +1,11 @@
 package com.meti.compile;
 
-import com.meti.collect.stream.Collectors;
-import com.meti.collect.option.None;
-import com.meti.collect.stream.Streams;
 import com.meti.collect.option.Option;
+import com.meti.collect.result.ExceptionalStream;
+import com.meti.collect.result.Result;
+import com.meti.collect.result.ThrowableOption;
+import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.procedure.InvocationLexer;
@@ -21,9 +23,11 @@ import java.util.function.Function;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
+import static com.meti.collect.result.Ok.Ok;
+import static com.meti.collect.result.Results.$Result;
 
 public record Application(Path source) {
-    private static Node lexExpression(String line, int indent) {
+    private static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Option<Node>>>from(
                         exp -> new StringLexer(exp).lex(),
                         exp -> new FieldLexer(exp, indent).lex(),
@@ -35,42 +39,47 @@ public record Application(Path source) {
                 .map(procedure -> procedure.apply(line.strip()))
                 .flatMap(Streams::fromOption)
                 .next()
-                .map(Application::lexTree)
-                .orElse(None::None);
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line)))
+                .flatMapValue(Application::lexTree);
     }
 
-    private static Node lexTree(Node node) {
-        var withValue = node.findValueAsNode().flatMap(value -> {
-                    var nodeOption = lexContent(value);
-                    return nodeOption.flatMap(node::withValue);
-                })
-                .orElse(node);
+    private static Result<Node, CompileException> lexTree(Node node) {
+        return $Result(() -> {
+            var withValue = node.findValueAsNode()
+                    .map(value -> lexContent(value).mapValue(content -> node.withValue(content).orElse(node)))
+                    .orElse(Ok(node)).$();
 
-        return withValue.findChildren().flatMap(children -> {
-            var newChildren = Streams.fromList(children)
-                    .map(Application::lexContent)
-                    .flatMap(Streams::fromOption)
-                    .collect(Collectors.toList());
+            return withValue.findChildren().map(oldChildren -> $Result(() -> {
+                var newChildren = Streams.fromList(oldChildren)
+                        .map(Application::lexContent)
+                        .collect(Collectors.exceptionally(Collectors.toList()))
+                        .$();
 
-            return withValue.withChildren(newChildren);
-        }).orElse(withValue);
+                return withValue.withChildren(newChildren).orElse(withValue);
+            })).orElse(Ok(withValue)).$();
+        });
     }
 
-    private static Option<Node> lexContent(Node content) {
+    private static Result<Node, CompileException> lexContent(Node content) {
         return content.findValueAsString()
                 .and(content.findIndent())
-                .map(tuple -> lexExpression(tuple.a(), tuple.b()));
+                .map(tuple -> lexExpression(tuple.a(), tuple.b()))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new CompileException("Both the value and the indent must be present. This is not Content."))
+                .flatMapValue(Function.identity());
     }
 
-    public Option<Path> run() throws IOException {
+    public Option<Path> run() throws IOException, CompileException {
         if (!Files.exists(source)) return None();
 
         var input = Files.readString(source);
         var root = new Splitter(input).split()
                 .map(line -> lexExpression(line, 0))
-                .map(Node::render)
-                .flatMap(Streams::fromOption)
-                .collect(Collectors.joining())
+                .into(ExceptionalStream::new)
+                .mapValues(node -> node.render().orElse(""))
+                .collectExceptionally(Collectors.joining())
+                .$()
                 .orElse("");
 
         var fileName = source().getFileName().toString();

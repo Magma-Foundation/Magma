@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.compile.Application;
+import com.meti.compile.CompileException;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -10,7 +11,7 @@ public class Main {
         var source = Paths.get(".", "Personal", "Magma", "magmac", "test", "com", "meti", "ApplicationTest.java");
         try {
             new Application(source).run();
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             throw new RuntimeException(e);
         }
     }

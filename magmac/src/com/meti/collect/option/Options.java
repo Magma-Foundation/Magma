@@ -1,5 +1,7 @@
 package com.meti.collect.option;
 
+import com.meti.collect.Action;
+
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 

@@ -15,4 +15,8 @@ public interface Stream<T> {
     <R> Stream<R> flatMap(Function<T, Stream<R>> mapper);
 
     <C> C collect(Collector<T, C> collector);
+
+    default <R> R into(Function<Stream<T>, R> mapper) {
+        return mapper.apply(this);
+    }
 }

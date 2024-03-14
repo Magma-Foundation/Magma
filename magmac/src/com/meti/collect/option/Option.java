@@ -27,4 +27,8 @@ public interface Option<T> {
     boolean isEmpty();
 
     T $() throws IntentionalException;
+
+    default <R> R into(Function<Option<T>, R> mapper) {
+        return mapper.apply(this);
+    }
 }

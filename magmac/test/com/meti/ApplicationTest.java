@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.collect.option.Option;
 import com.meti.compile.Application;
+import com.meti.compile.CompileException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,19 +17,23 @@ public class ApplicationTest {
     public static final Path TARGET = Paths.get(".", "Index.mgs");
     public static final Path SOURCE = Paths.get(".", "Index.java");
 
-    private static Option<Path> runWithSource() throws IOException {
-        Files.createFile(SOURCE);
-        return new Application(SOURCE).run();
+    private static Option<Path> runWithSource() {
+        try {
+            Files.createFile(SOURCE);
+            return new Application(SOURCE).run();
+        } catch (IOException | CompileException e) {
+            return fail(e);
+        }
     }
 
     @Test
-    void generatesNothing() throws IOException {
+    void generatesNothing() throws IOException, CompileException {
         new Application(SOURCE).run();
         assertFalse(Files.exists(TARGET));
     }
 
     @Test
-    void generatesProperTarget() throws IOException {
+    void generatesProperTarget() {
         assertEquals(runWithSource().orElseNull(), TARGET);
     }
 
@@ -39,7 +44,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void generatesSomething() throws IOException {
+    void generatesSomething() {
         runWithSource();
         assertTrue(Files.exists(TARGET));
     }

@@ -1,6 +1,10 @@
 package com.meti.collect.stream;
 
 import com.meti.collect.option.Option;
+import com.meti.collect.result.Ok;
+import com.meti.collect.result.Result;
+import com.meti.compile.CompileException;
+import com.meti.compile.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,20 @@ public class Collectors {
                 if(current.isEmpty()) return Some(element);
 
                 return current.map(currentValue -> currentValue + element);
+            }
+        };
+    }
+
+    public static <T, C, E extends Throwable> Collector<Result<T, E>, Result<C, E>> exceptionally(Collector<T, C> parent) {
+        return new Collector<>() {
+            @Override
+            public Result<C, E> initial() {
+                return Ok.Ok(parent.initial());
+            }
+
+            @Override
+            public Result<C, E> fold(Result<C, E> current, Result<T, E> element) {
+                return current.and(element).mapValue(tuple -> parent.fold(tuple.a(), tuple.b()));
             }
         };
     }
