@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-
     public static final Path TARGET = Paths.get(".", "Index.mgs");
     public static final Path SOURCE = Paths.get(".", "Index.java");
 

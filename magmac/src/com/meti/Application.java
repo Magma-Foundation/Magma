@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,21 +12,28 @@ import static com.meti.None.None;
 import static com.meti.Some.Some;
 
 public record Application(Path source) {
-    private static String compileLine(String line) {
+    private static String compileLine(String line, int indent) {
         var stripped = line.strip();
-        if (stripped.startsWith("{") && stripped.endsWith("}")) {
+        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
+            return "\"" + stripped.substring(1, stripped.length() - 1) + "\"";
+        } else if (stripped.startsWith("public static final Path ")) {
+            var content = stripped.substring("public static final Path ".length());
+            var equals = content.indexOf('=');
+            var name = content.substring(0, equals).strip();
+            var compiledValue = compileLine(content.substring(equals + 1), 0);
+            return "\t".repeat(indent) + "pub const " + name + " = " + compiledValue + ";\n";
+        } else if (stripped.startsWith("{") && stripped.endsWith("}")) {
             return split(stripped.substring(1, stripped.length() - 1).strip())
-                    .map(Application::compileLine)
-                    .collect(Collectors.joining("", "{", "}"));
+                    .map(line1 -> compileLine(line1, 1))
+                    .collect(Collectors.joining("", "{\n", "}"));
         } else if (stripped.startsWith("public class ")) {
             var start = stripped.indexOf("{");
-            var end = stripped.lastIndexOf("}");
 
             var name = stripped.substring("public class ".length(), start).strip();
             var content = stripped.substring(start);
-            var contentOutput = compileLine(content);
+            var contentOutput = compileLine(content, 0);
 
-            return "export class def " + name + "() => " + contentOutput;
+            return "export object " + name + " = " + contentOutput;
         } else if (stripped.startsWith("import ")) {
             var isStatic = stripped.startsWith("import static ");
             var content = stripped.substring(isStatic
@@ -47,6 +55,14 @@ public record Application(Path source) {
                        parent +
                        ";\n";
             }
+        } else if (stripped.startsWith("Paths.get(")) {
+            var start = stripped.indexOf("(");
+            var end = stripped.indexOf(")");
+            var args = Arrays.stream(stripped.substring(start + 1, end)
+                            .split(","))
+                    .map(arg -> compileLine(arg, 0))
+                    .collect(Collectors.joining(", ", "(", ")"));
+            return "Paths.get" + args;
         } else {
             return "";
         }
@@ -76,7 +92,7 @@ public record Application(Path source) {
 
         var input = Files.readString(source);
         var root = split(input)
-                .map(Application::compileLine)
+                .map(line -> compileLine(line, 0))
                 .collect(Collectors.joining());
 
         var fileName = source().getFileName().toString();
