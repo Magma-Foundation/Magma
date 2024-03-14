@@ -33,4 +33,8 @@ public record JavaString(String inner) {
     public Stream<JavaString> split(String regex) {
         return Streams.fromList(Arrays.asList(inner.split(regex))).map(JavaString::new);
     }
+
+    public JavaString sliceTo(Index end) {
+        return new JavaString(this.inner.substring(0, end.value()));
+    }
 }

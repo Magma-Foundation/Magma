@@ -30,8 +30,8 @@ public record Application(Path source) {
                         exp -> new BlockLexer(exp, indent).lex(),
                         stripped -> new ObjectLexer(stripped).lex(),
                         stripped2 -> new ImportLexer(stripped2).lex(),
-                        stripped1 -> new InvocationLexer(new JavaString(stripped1)).lex(),
-                        stripped1 -> new MethodLexer(stripped1, indent).lex())
+                        stripped1 -> new MethodLexer(stripped1, indent).lex(),
+                        stripped1 -> new InvocationLexer(new JavaString(stripped1)).lex())
                 .map(procedure -> procedure.apply(line.strip()))
                 .flatMap(Streams::fromOption)
                 .next()
@@ -40,8 +40,10 @@ public record Application(Path source) {
     }
 
     private static Node lexTree(Node node) {
-        var withValue = node.findValueAsNode().flatMap(value -> lexContent(value)
-                        .flatMap(node::withValue))
+        var withValue = node.findValueAsNode().flatMap(value -> {
+                    var nodeOption = lexContent(value);
+                    return nodeOption.flatMap(node::withValue);
+                })
                 .orElse(node);
 
         return withValue.findChildren().flatMap(children -> {

@@ -59,4 +59,9 @@ public class None<T> implements Option<T> {
     public boolean isEmpty() {
         return true;
     }
+
+    @Override
+    public T $() throws IntentionalException {
+        throw new IntentionalException();
+    }
 }

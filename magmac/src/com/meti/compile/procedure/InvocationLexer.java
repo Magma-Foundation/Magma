@@ -28,14 +28,14 @@ public final class InvocationLexer implements Lexer {
         return $Option(() -> {
             var start = stripped.firstIndexOfChar('(').$();
             var end = stripped.lastIndexOf(')').$();
-            var range = start.to(end).$();
 
-            var list = stripped.sliceBetween(range)
+            var caller = new Content(stripped.sliceTo(start), 0);
+            var list = stripped.sliceBetween(start.to(end).$())
                     .split(",")
                     .map(arg -> new Content(arg, 0))
                     .collect(Collectors.toList());
 
-            return new InvocationNode(list);
+            return new InvocationNode(caller, list);
         });
     }
 }

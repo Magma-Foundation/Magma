@@ -65,4 +65,9 @@ public class Some<T> implements Option<T> {
     public boolean isEmpty() {
         return false;
     }
+
+    @Override
+    public T $() {
+        return value;
+    }
 }
