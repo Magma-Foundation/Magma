@@ -1,3 +1,5 @@
+import { Option } from com.meti.collect.option;
+import { Application } from com.meti.compile;
 import { AfterEach } from org.junit.jupiter.api;
 import { Test } from org.junit.jupiter.api;
 import { IOException } from java.io;
