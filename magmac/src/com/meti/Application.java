@@ -16,14 +16,18 @@ import static com.meti.Some.Some;
 
 public record Application(Path source) {
     private static Node compileExpression(String line, int indent) {
-        var stripped = line.strip();
-        return Stream.<Function<String, Option<Node>>>of(stripped3 -> new StringLexer(stripped3).lex(),
-                value -> compileField(value, indent),
-                stripped2 -> compileBlock(stripped2, indent),
-                Application::compileObject,
-                Application::compileImport,
-                stripped1 -> new InvocationLexer(stripped1).lex(),
-                stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().map(optional -> optional.map(Some::Some).orElse(None.None())).orElse(None.None()).map(Application::lexTree).orElse(None::None);
+        return Streams.<Function<String, Option<Node>>>from(stripped3 -> new StringLexer(stripped3).lex(),
+                        value -> compileField(value, indent),
+                        stripped2 -> compileBlock(stripped2, indent),
+                        Application::compileObject,
+                        Application::compileImport,
+                        stripped1 -> new InvocationLexer(stripped1).lex(),
+                        stripped1 -> compileMethod(stripped1, indent))
+                .map(procedure -> procedure.apply(line.strip()))
+                .flatMap(Streams::fromOption)
+                .next()
+                .map(Application::lexTree)
+                .orElse(None::None);
     }
 
     private static Node lexTree(Node node) {

@@ -48,4 +48,14 @@ public class Some<T> implements Option<T> {
     public <R> Option<Tuple<T, R>> and(Option<R> other) {
         return other.map(otherValue -> new Tuple<>(value, otherValue));
     }
+
+    @Override
+    public T orElseGet(Supplier<T> other) {
+        return value;
+    }
+
+    @Override
+    public Tuple<Boolean, T> toTuple(T other) {
+        return new Tuple<>(true, value);
+    }
 }
