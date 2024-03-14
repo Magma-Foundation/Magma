@@ -14,15 +14,26 @@ public record Application(Path source) {
             for (String line : lines) {
                 var stripped = line.strip();
                 if (stripped.startsWith("import ")) {
-                    var content = stripped.substring("import ".length());
-                    var last = content.indexOf('.');
+                    var isStatic = stripped.startsWith("import static ");
+                    var content = stripped.substring(isStatic
+                            ? "import static ".length()
+                            : "import ".length());
+
+                    var last = content.lastIndexOf('.');
                     var child = content.substring(last + 1).strip();
                     var parent = content.substring(0, last).strip();
-                    output.append("import { ")
-                            .append(child)
-                            .append(" } from ")
-                            .append(parent)
-                            .append(";\n");
+
+                    if (child.equals("*")) {
+                        output.append("import ")
+                                .append(parent)
+                                .append(";\n");
+                    } else {
+                        output.append("import { ")
+                                .append(child)
+                                .append(" } from ")
+                                .append(parent)
+                                .append(";\n");
+                    }
                 }
             }
 
