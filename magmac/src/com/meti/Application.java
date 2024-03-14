@@ -18,7 +18,7 @@ public record Application(Path source) {
     private static String compileExpression(String line, int indent) {
         var stripped = line.strip();
         return Stream.<Function<String, Option<Node>>>of(
-                        Application::compileString,
+                        stripped3 -> new StringLexer(stripped3).compileString(),
                         value -> compileField(value, indent),
                         stripped2 -> compileBlock(stripped2, indent),
                         Application::compileObject,
@@ -85,13 +85,6 @@ public record Application(Path source) {
                 return type;
             }
         }
-    }
-
-    private static Option<Node> compileString(String stripped) {
-        if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return Some(new StringNode(stripped.substring(1, stripped.length() - 1)));
-        }
-        return None();
     }
 
     private static Option<Node> compileField(String stripped, int indent) {
