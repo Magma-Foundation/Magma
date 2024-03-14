@@ -36,7 +36,14 @@ public record Application(Path source) {
         var contentStart = stripped.indexOf('{');
 
         if (paramStart != -1 && contentStart != -1) {
-            var name = stripped.substring("private static Option<Path> ".length(), paramStart);
+            var keyString = stripped.substring(0, paramStart);
+            var space = keyString.lastIndexOf(' ');
+            if(space == -1) {
+                return None();
+            }
+
+            var name = keyString.substring(space + 1).strip();
+
             var content = compileLine(stripped.substring(contentStart).strip(), indent);
 
             return Some("\t".repeat(indent) + "def " + name + "() => " + content);

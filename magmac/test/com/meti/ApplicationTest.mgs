@@ -10,12 +10,12 @@ export object ApplicationTest = {
 	pub const SOURCE = Paths.get(".", "Index.java");
 	def runWithSource() => {
 	}
-	def hing() => {
+	def generatesNothing() => {
 	}
-	def perTarget() => {
+	def generatesProperTarget() => {
 	}
-	def n() => {
+	def tearDown() => {
 	}
-	def ething() => {
+	def generatesSomething() => {
 	}
 }
