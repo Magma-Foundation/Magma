@@ -18,13 +18,13 @@ public record Application(Path source) {
     private static String compileExpression(String line, int indent) {
         var stripped = line.strip();
         return Stream.<Function<String, Option<String>>>of(
-                Application::compileString,
-                value -> compileField(value, indent),
-                stripped2 -> compileBlock(stripped2, indent),
-                Application::compileClass,
-                Application::compileImport,
-                Application::compileInvocation,
-                stripped1 -> compileMethod(stripped1, indent))
+                        Application::compileString,
+                        value -> compileField(value, indent),
+                        stripped2 -> compileBlock(stripped2, indent),
+                        Application::compileClass,
+                        Application::compileImport,
+                        Application::compileInvocation,
+                        stripped1 -> compileMethod(stripped1, indent))
                 .map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().flatMap(option -> option.map(Optional::of).orElse(Optional.empty())).orElse("");
     }
 
@@ -49,7 +49,7 @@ public record Application(Path source) {
 
             List<String> annotations = new ArrayList<>();
             flagsString.forEach(flagString -> {
-                if(flagString.startsWith("@")) {
+                if (flagString.startsWith("@")) {
                     annotations.add(compileType(flagString.substring(1)));
                 }
             });
@@ -87,7 +87,7 @@ public record Application(Path source) {
 
     private static Option<String> compileString(String stripped) {
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return Some("\"" + stripped.substring(1, stripped.length() - 1) + "\"");
+            return new StringNode(stripped.substring(1, stripped.length() - 1)).render();
         }
         return None();
     }
@@ -98,14 +98,17 @@ public record Application(Path source) {
             var equals = content.indexOf('=');
             var name = content.substring(0, equals).strip();
             var compiledValue = compileExpression(content.substring(equals + 1), 0);
-            return Some("\t".repeat(indent) + "pub const " + name + " = " + compiledValue + ";\n");
+            var flags = List.of("pub", "const");
+            return new FieldNode(indent, flags, name, compiledValue).renderField();
         }
         return None();
     }
 
     private static Option<String> compileBlock(String stripped, int indent) {
         if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            return Some(split(stripped.substring(1, stripped.length() - 1).strip()).map(line1 -> compileExpression(line1, 1)).collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
+            var split = split(stripped.substring(1, stripped.length() - 1).strip());
+            var stringStream = split.map(line1 -> compileExpression(line1, 1)).collect(Collectors.toList());
+            return new BlockNode(indent, stringStream).render();
         } else {
             return None();
         }
@@ -119,7 +122,8 @@ public record Application(Path source) {
             var content = stripped.substring(start);
             var contentOutput = compileExpression(content, 0);
 
-            return Some("export object " + name + " = " + contentOutput);
+            var flags = List.of("export");
+            return new ObjectNode(flags, name, contentOutput).renderObject();
         }
         return None();
     }
@@ -133,11 +137,9 @@ public record Application(Path source) {
             var child = content.substring(last + 1).strip();
             var parent = content.substring(0, last).strip();
 
-            if (child.equals("*")) {
-                return Some("import " + parent + ";\n");
-            } else {
-                return Some("import { " + child + " } from " + parent + ";\n");
-            }
+            return child.equals("*")
+                    ? new ImportAllNode(parent).render()
+                    : new ImportChildNode(child, parent).render();
         }
         return None();
     }
@@ -146,8 +148,11 @@ public record Application(Path source) {
         if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
-            var args = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileExpression(arg, 0)).collect(Collectors.joining(", ", "(", ")"));
-            return Some("Paths.get" + args);
+            var list = Arrays.stream(stripped.substring(start + 1, end).split(","))
+                    .map(arg -> compileExpression(arg, 0))
+                    .toList();
+
+            return new InvocationNode(list).render();
         }
         return None();
     }
