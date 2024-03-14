@@ -31,7 +31,7 @@ public record Application(Path source) {
                         .flatMap(node::withValue))
                 .orElse(node);
 
-        return withValue.findChildren().map(children -> {
+        return withValue.findChildren().flatMap(children -> {
             var newChildren = children.stream()
                     .map(Application::compileContent)
                     .map(output -> output.map(Optional::of).orElse(Optional.empty()))
@@ -39,7 +39,7 @@ public record Application(Path source) {
                     .collect(Collectors.toList());
 
             return withValue.withChildren(newChildren);
-        }).orElseNull().orElse(withValue);
+        }).orElse(withValue);
     }
 
     private static Option<Node> compileContent(Node content) {
