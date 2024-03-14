@@ -37,4 +37,9 @@ public class None<T> implements Option<T> {
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
         return new None<>();
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return new None<>();
+    }
 }

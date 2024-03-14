@@ -5,9 +5,10 @@ import { Files } from java.nio.file;
 import { Path } from java.nio.file;
 import { Paths } from java.nio.file;
 import org.junit.jupiter.api.Assertions;
+
 export object ApplicationTest = {
-	pub const TARGET = Paths.get(".", "Index.mgs");
-	pub const SOURCE = Paths.get(".", "Index.java");
+	pub const TARGET =  Paths.get(".", "Index.mgs");
+	pub const SOURCE =  Paths.get(".", "Index.java");
 
 	def runWithSource() : Option[Path] ? IOException => {
 	}

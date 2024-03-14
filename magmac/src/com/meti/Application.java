@@ -15,22 +15,13 @@ import static com.meti.None.None;
 import static com.meti.Some.Some;
 
 public record Application(Path source) {
-    private static String compileExpression(String line, int indent) {
+    private static Node compileExpression(String line, int indent) {
         var stripped = line.strip();
-        return Stream.<Function<String, Option<Node>>>of(
-                        stripped3 -> new StringLexer(stripped3).compileString(),
-                        value -> compileField(value, indent),
-                        stripped2 -> compileBlock(stripped2, indent),
-                        Application::compileObject,
-                        Application::compileImport,
-                        Application::compileInvocation,
-                        stripped1 -> compileMethod(stripped1, indent))
-                .map(procedure -> procedure.apply(stripped)).filter(Option::isPresent)
-                .findFirst()
-                .flatMap(option -> option
-                        .flatMap(Node::render)
-                        .map(Optional::of).orElse(Optional.empty()))
-                .orElse("");
+        return Stream.<Function<String, Option<Node>>>of(stripped3 -> new StringLexer(stripped3).compileString(), value -> compileField(value, indent), stripped2 -> compileBlock(stripped2, indent), Application::compileObject, Application::compileImport, Application::compileInvocation, stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().map(optional -> optional.map(Some::Some).orElse(None.None())).orElse(None.None()).map(Application::lexTree).orElse(None::None);
+    }
+
+    private static Node lexTree(Node node) {
+        return node.findValueAsNode().flatMap(value -> value.findValueAsString().and(value.findIndent()).map(tuple -> compileExpression(tuple.a(), tuple.b())).flatMap(node::withValue)).orElse(node);
     }
 
     private static Option<Node> compileMethod(String stripped, int indent) {
@@ -62,9 +53,7 @@ public record Application(Path source) {
             var content = compileExpression(stripped.substring(contentStart).strip(), indent);
             var more = stripped.substring(paramEnd + 1, contentStart).strip();
 
-            var moreOutputValue = more.startsWith("throws ")
-                    ? Some(compileType(more.substring("throws ".length())))
-                    : None();
+            var moreOutputValue = more.startsWith("throws ") ? Some(compileType(more.substring("throws ".length()))) : None();
 
             return Some(new MethodNode(indent, moreOutputValue, annotations, name, type, content));
         }
@@ -92,7 +81,7 @@ public record Application(Path source) {
             var content = stripped.substring("public static final Path ".length());
             var equals = content.indexOf('=');
             var name = content.substring(0, equals).strip();
-            var compiledValue = compileExpression(content.substring(equals + 1), 0);
+            var compiledValue = new Content(content.substring(equals + 1), 0);
             var flags = List.of("pub", "const");
             return Some(new FieldNode(indent, flags, name, compiledValue));
         }
@@ -132,9 +121,7 @@ public record Application(Path source) {
             var child = content.substring(last + 1).strip();
             var parent = content.substring(0, last).strip();
 
-            return Some(child.equals("*")
-                    ? new ImportAllNode(parent)
-                    : new ImportChildNode(child, parent));
+            return Some(child.equals("*") ? new ImportAllNode(parent) : new ImportChildNode(child, parent));
         }
         return None();
     }
@@ -143,9 +130,7 @@ public record Application(Path source) {
         if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
-            var list = Arrays.stream(stripped.substring(start + 1, end).split(","))
-                    .map(arg -> compileExpression(arg, 0))
-                    .toList();
+            var list = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileExpression(arg, 0)).toList();
 
             return Some(new InvocationNode(list));
         }
@@ -180,7 +165,12 @@ public record Application(Path source) {
         if (!Files.exists(source)) return None();
 
         var input = Files.readString(source);
-        var root = split(input).map(line -> compileExpression(line, 0)).collect(Collectors.joining());
+        var root = split(input)
+                .map(line -> compileExpression(line, 0))
+                .map(Node::render)
+                .map(output -> output.map(Optional::of).orElse(Optional.empty()))
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining());
 
         var fileName = source().getFileName().toString();
         var index = fileName.indexOf(".");

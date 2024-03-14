@@ -15,4 +15,6 @@ public interface Option<T> {
     <R> Option<R> map(Function<T, R> mapper);
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+    <R> Option<Tuple<T, R>> and(Option<R> other);
 }
