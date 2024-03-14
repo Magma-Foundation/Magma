@@ -22,12 +22,12 @@ public record MethodLexer(JavaString stripped, int indent) implements Lexer {
             var contentStart = stripped.firstIndexOfChar('{').$();
 
             var keyString = stripped.sliceTo(paramStart);
-            var space = keyString.lastIndexOf(' ').$();
+            var space = keyString.lastIndexOfChar(' ').$();
 
             var name = keyString.sliceFrom(space.next().$()).strip();
             var featuresString = keyString.sliceTo(space).strip();
 
-            var typeSeparator = featuresString.lastIndexOf(' ').$();
+            var typeSeparator = featuresString.lastIndexOfChar(' ').$();
             var type = new TypeCompiler(featuresString.sliceFrom(typeSeparator.next().$()).strip().inner()).compile();
 
             var annotations = featuresString.sliceTo(typeSeparator).strip().split(" ")

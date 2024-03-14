@@ -22,7 +22,7 @@ public record JavaString(String inner) {
         return wrapNegativeIndex(inner.indexOf(c));
     }
 
-    public Option<Index> lastIndexOf(char c) {
+    public Option<Index> lastIndexOfChar(char c) {
         return wrapNegativeIndex(inner.lastIndexOf(c));
     }
 

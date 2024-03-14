@@ -5,6 +5,7 @@ import com.meti.collect.result.Result;
 import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
+import com.meti.compile.attempt.CatchLexer;
 import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
@@ -29,6 +30,7 @@ import static com.meti.collect.result.Results.$Result;
 public record Application(Path source) {
     private static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
+                exp -> new CatchLexer(new JavaString(exp)),
                 exp -> new ConstructionLexer(new JavaString(exp)),
                 exp -> new ReturnLexer(new JavaString(exp)),
                 exp -> new TryLexer(new JavaString(exp)),
