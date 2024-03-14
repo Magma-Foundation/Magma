@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,27 +16,63 @@ import static com.meti.Some.Some;
 public record Application(Path source) {
     private static String compileLine(String line, int indent) {
         var stripped = line.strip();
+        return Stream.<Function<String, Option<String>>>of(
+                Application::compileString,
+                value -> compileField(indent, value),
+                Application::compileBlock,
+                Application::compileClass,
+                Application::compileImport,
+                Application::compileInvocation)
+                .map(procedure -> procedure.apply(stripped))
+                .filter(Option::isPresent)
+                .findFirst()
+                .flatMap(option -> option.map(Optional::of).orElse(Optional.empty()))
+                .orElse("");
+    }
+
+    private static Option<String> compileString(String stripped) {
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return "\"" + stripped.substring(1, stripped.length() - 1) + "\"";
-        } else if (stripped.startsWith("public static final Path ")) {
+            return Some("\"" + stripped.substring(1, stripped.length() - 1) + "\"");
+        }
+        return None();
+    }
+
+    private static Option<String> compileField(int indent, String stripped) {
+        if (stripped.startsWith("public static final Path ")) {
             var content = stripped.substring("public static final Path ".length());
             var equals = content.indexOf('=');
             var name = content.substring(0, equals).strip();
             var compiledValue = compileLine(content.substring(equals + 1), 0);
-            return "\t".repeat(indent) + "pub const " + name + " = " + compiledValue + ";\n";
-        } else if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            return split(stripped.substring(1, stripped.length() - 1).strip())
+            return Some("\t".repeat(indent) + "pub const " + name + " = " + compiledValue + ";\n");
+        }
+        return None();
+    }
+
+    private static Option<String> compileBlock(String stripped) {
+        if (stripped.startsWith("{") && stripped.endsWith("}")) {
+            return Some(split(stripped.substring(1, stripped.length() - 1).strip())
                     .map(line1 -> compileLine(line1, 1))
-                    .collect(Collectors.joining("", "{\n", "}"));
-        } else if (stripped.startsWith("public class ")) {
+                    .collect(Collectors.joining("", "{\n", "}")));
+        } else {
+            return None();
+        }
+    }
+
+    private static Option<String> compileClass(String stripped) {
+        if (stripped.startsWith("public class ")) {
             var start = stripped.indexOf("{");
 
             var name = stripped.substring("public class ".length(), start).strip();
             var content = stripped.substring(start);
             var contentOutput = compileLine(content, 0);
 
-            return "export object " + name + " = " + contentOutput;
-        } else if (stripped.startsWith("import ")) {
+            return Some("export object " + name + " = " + contentOutput);
+        }
+        return None();
+    }
+
+    private static Option<String> compileImport(String stripped) {
+        if (stripped.startsWith("import ")) {
             var isStatic = stripped.startsWith("import static ");
             var content = stripped.substring(isStatic
                     ? "import static ".length()
@@ -45,27 +83,31 @@ public record Application(Path source) {
             var parent = content.substring(0, last).strip();
 
             if (child.equals("*")) {
-                return "import " +
-                       parent +
-                       ";\n";
+                return Some("import " +
+                            parent +
+                            ";\n");
             } else {
-                return "import { " +
-                       child +
-                       " } from " +
-                       parent +
-                       ";\n";
+                return Some("import { " +
+                            child +
+                            " } from " +
+                            parent +
+                            ";\n");
             }
-        } else if (stripped.startsWith("Paths.get(")) {
+        }
+        return None();
+    }
+
+    private static Option<String> compileInvocation(String stripped) {
+        if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
             var args = Arrays.stream(stripped.substring(start + 1, end)
                             .split(","))
                     .map(arg -> compileLine(arg, 0))
                     .collect(Collectors.joining(", ", "(", ")"));
-            return "Paths.get" + args;
-        } else {
-            return "";
+            return Some("Paths.get" + args);
         }
+        return None();
     }
 
     private static Stream<String> split(String input) {
@@ -77,7 +119,7 @@ public record Application(Path source) {
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
-            } else if(c == '}' && depth == 1) {
+            } else if (c == '}' && depth == 1) {
                 builder.append("}");
                 depth--;
                 lines.add(builder.toString());
