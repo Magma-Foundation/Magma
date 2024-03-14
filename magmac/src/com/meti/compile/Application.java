@@ -10,10 +10,7 @@ import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
-import com.meti.compile.scope.BlockLexer;
-import com.meti.compile.scope.DefinitionLexer;
-import com.meti.compile.scope.FieldLexer;
-import com.meti.compile.scope.ObjectLexer;
+import com.meti.compile.scope.*;
 import com.meti.compile.string.StringLexer;
 import com.meti.java.JavaString;
 
@@ -38,7 +35,8 @@ public record Application(Path source) {
                         ImportLexer::new,
                         stripped1 -> new MethodLexer(stripped1, indent),
                         stripped1 -> new InvocationLexer(new JavaString(stripped1)),
-                        input -> new FieldLexer(new JavaString(input)))
+                        input -> new FieldLexer(new JavaString(input)),
+                        exp -> new VariableLexer(exp))
                 .map(constructor -> constructor.apply(line.strip()))
                 .map(Lexer::lex)
                 .flatMap(Streams::fromOption)
