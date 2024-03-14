@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,9 +33,18 @@ public record Application(Path source) {
             }
 
             var name = keyString.substring(space + 1).strip();
-            var flagString = keyString.substring(0, space).strip();
-            var typeSeparator = flagString.lastIndexOf(' ');
-            var type = compileType(flagString.substring(typeSeparator + 1).strip());
+            var featuresString = keyString.substring(0, space).strip();
+
+            var typeSeparator = featuresString.lastIndexOf(' ');
+            var type = compileType(featuresString.substring(typeSeparator + 1).strip());
+            var flagsString = Arrays.stream(featuresString.substring(0, typeSeparator).strip().split(" ")).toList();
+
+            List<String> annotations = new ArrayList<>();
+            flagsString.forEach(flagString -> {
+                if(flagString.startsWith("@")) {
+                    annotations.add(compileType(flagString.substring(1)));
+                }
+            });
 
             var content = compileLine(stripped.substring(contentStart).strip(), indent);
             var more = stripped.substring(paramEnd + 1, contentStart).strip();
@@ -42,7 +52,11 @@ public record Application(Path source) {
                     ? " ? " + compileType(more.substring("throws ".length()))
                     : "";
 
-            return Some("\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
+            var annotationsString = annotations.stream()
+                    .map(annotation -> "\t".repeat(indent) + "@" + annotation + "\n")
+                    .collect(Collectors.joining());
+
+            return Some(annotationsString + "\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
         }
         return None();
     }
