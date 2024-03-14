@@ -56,7 +56,7 @@ public record Application(Path source) {
                     .map(annotation -> "\t".repeat(indent) + "@" + annotation + "\n")
                     .collect(Collectors.joining());
 
-            return Some(annotationsString + "\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
+            return Some("\n" + annotationsString + "\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
         }
         return None();
     }
