@@ -15,27 +15,14 @@ public class ApplicationTest {
     public static final Path TARGET = Paths.get(".", "Index.mgs");
     public static final Path SOURCE = Paths.get(".", "Index.java");
 
-    private static Option<Path> run() throws IOException {
-        if (Files.exists(SOURCE)) {
-            var fileName = SOURCE.getFileName().toString();
-            var index = fileName.indexOf(".");
-            var name = fileName.substring(0, index);
-            var target = SOURCE.resolveSibling(name + ".mgs");
-            Files.createFile(target);
-            return Some.Some(target);
-        } else {
-            return None.None();
-        }
-    }
-
     private static Option<Path> runWithSource() throws IOException {
         Files.createFile(SOURCE);
-        return run();
+        return new Application(SOURCE).run();
     }
 
     @Test
     void generatesNothing() throws IOException {
-        run();
+        new Application(SOURCE).run();
         assertFalse(Files.exists(TARGET));
     }
 
