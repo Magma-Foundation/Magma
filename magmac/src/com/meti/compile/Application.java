@@ -28,7 +28,8 @@ import static com.meti.collect.result.Results.$Result;
 public record Application(Path source) {
     private static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
-                input1 -> new TryLexer(new JavaString(input1)), PackageLexer::new, StringLexer::new, exp -> new DefinitionLexer(exp, indent), exp -> new BlockLexer(exp, indent), ObjectLexer::new, ImportLexer::new, stripped1 -> new MethodLexer(new JavaString(stripped1), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Application::lexTree);
+                exp -> new ReturnLexer(new JavaString(exp)),
+                exp -> new TryLexer(new JavaString(exp)), PackageLexer::new, StringLexer::new, exp -> new DefinitionLexer(exp, indent), exp -> new BlockLexer(exp, indent), ObjectLexer::new, ImportLexer::new, stripped1 -> new MethodLexer(new JavaString(stripped1), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Application::lexTree);
     }
 
     private static Result<Node, CompileException> lexTree(Node node) {
