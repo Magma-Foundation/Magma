@@ -5,36 +5,4 @@ import { Files } from java.nio.file;
 import { Path } from java.nio.file;
 import { Paths } from java.nio.file;
 import org.junit.jupiter.api.Assertions;
-export class def ApplicationTest() => {
-
-    public static final Path TARGET = Paths.get(".", "Index.mgs");
-    public static final Path SOURCE = Paths.get(".", "Index.java");
-
-    private static Option<Path> runWithSource() throws IOException {
-        Files.createFile(SOURCE);
-        return new Application(SOURCE).run();
-    }
-
-    @Test
-    void generatesNothing() throws IOException {
-        new Application(SOURCE).run();
-        assertFalse(Files.exists(TARGET));
-    }
-
-    @Test
-    void generatesProperTarget() throws IOException {
-        assertEquals(runWithSource().orElseNull(), TARGET);
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.deleteIfExists(SOURCE);
-        Files.deleteIfExists(TARGET);
-    }
-
-    @Test
-    void generatesSomething() throws IOException {
-        runWithSource();
-        assertTrue(Files.exists(TARGET));
-    }
-}
+export class def ApplicationTest() => {}

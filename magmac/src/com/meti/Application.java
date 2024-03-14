@@ -13,14 +13,19 @@ import static com.meti.Some.Some;
 public record Application(Path source) {
     private static String compileLine(String line) {
         var stripped = line.strip();
-        if (stripped.startsWith("public class ")) {
+        if (stripped.startsWith("{") && stripped.endsWith("}")) {
+            return split(stripped.substring(1, stripped.length() - 1).strip())
+                    .map(Application::compileLine)
+                    .collect(Collectors.joining("", "{", "}"));
+        } else if (stripped.startsWith("public class ")) {
             var start = stripped.indexOf("{");
             var end = stripped.lastIndexOf("}");
 
             var name = stripped.substring("public class ".length(), start).strip();
             var content = stripped.substring(start);
+            var contentOutput = compileLine(content);
 
-            return "export class def " + name + "() => " + content;
+            return "export class def " + name + "() => " + contentOutput;
         } else if (stripped.startsWith("import ")) {
             var isStatic = stripped.startsWith("import static ");
             var content = stripped.substring(isStatic
@@ -57,8 +62,8 @@ public record Application(Path source) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
+                if (c == '{') depth++;
+                if (c == '}') depth--;
                 builder.append(c);
             }
         }
