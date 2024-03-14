@@ -1,46 +1,52 @@
 package com.meti.compile.procedure;
 
+import com.meti.collect.option.Option;
+import com.meti.collect.option.Options;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
-import com.meti.collect.option.Option;
 import com.meti.compile.Lexer;
 import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
+import com.meti.java.JavaString;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
-public record MethodLexer(String stripped, int indent) implements Lexer {
+public record MethodLexer(JavaString stripped, int indent) implements Lexer {
     @Override
     public Option<Node> lex() {
-        var paramStart = stripped().indexOf('(');
-        var paramEnd = stripped().indexOf(')');
-        var contentStart = stripped().indexOf('{');
+        return Options.$Option(() -> {
+            var paramStart = stripped.firstIndexOfChar('(').$();
+            var paramEnd = stripped.firstIndexOfChar(')').$();
+            var contentStart = stripped.firstIndexOfChar('{').$();
 
-        if (paramStart == -1 || paramEnd == -1 || contentStart == -1) return None();
+            var keyString = stripped.sliceTo(paramStart);
+            var space = keyString.lastIndexOf(' ').$();
 
-        var keyString = stripped().substring(0, paramStart);
-        var space = keyString.lastIndexOf(' ');
-        if (space == -1) return None();
+            var name = keyString.sliceFrom(space.next().$()).strip();
+            var featuresString = keyString.sliceTo(space).strip();
 
-        var name = keyString.substring(space + 1).strip();
-        var featuresString = keyString.substring(0, space).strip();
+            var typeSeparator = featuresString.lastIndexOf(' ').$();
+            var type = new TypeCompiler(featuresString.sliceFrom(typeSeparator.next().$()).strip().inner()).compile();
 
-        var typeSeparator = featuresString.lastIndexOf(' ');
-        var type = new TypeCompiler(featuresString.substring(typeSeparator + 1).strip()).compile();
-        var annotations = Streams.from(featuresString.substring(0, typeSeparator).strip().split(" "))
-                .filter(token -> token.startsWith("@"))
-                .map(token -> token.substring(1))
-                .map(TypeCompiler::new)
-                .map(TypeCompiler::compile)
-                .collect(Collectors.toList());
+            var annotations = featuresString.sliceTo(typeSeparator).strip().split(" ")
+                    .filter(token -> token.startsWithSlice("@"))
+                    .map(token -> token.sliceFromRaw(1))
+                    .flatMap(Streams::fromOption)
+                    .map(JavaString::inner)
+                    .map(TypeCompiler::new)
+                    .map(TypeCompiler::compile)
+                    .collect(Collectors.toList());
 
-        var content = new Content(stripped().substring(contentStart).strip(), indent());
-        var more = stripped().substring(paramEnd + 1, contentStart).strip();
+            var content = new Content(stripped.sliceFrom(contentStart).strip(), indent());
+            var more = stripped.sliceBetween(paramEnd.next().$().to(contentStart).$()).strip();
 
-        var moreOutputValue = more.startsWith("throws ") ? Some(new TypeCompiler(more.substring("throws ".length())).compile()) : None();
+            var moreOutputValue = more.startsWithSlice("throws ")
+                    ? Some(new TypeCompiler(more.sliceFromRaw("throws ".length()).$().inner()).compile())
+                    : None();
 
-        return Some(new MethodNode(indent(), moreOutputValue, annotations, name, type, content));
+            return new MethodNode(indent(), moreOutputValue, annotations, name, type, content);
+        });
     }
 }

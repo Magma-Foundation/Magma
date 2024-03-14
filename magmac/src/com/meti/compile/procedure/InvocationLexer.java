@@ -30,7 +30,7 @@ public final class InvocationLexer implements Lexer {
             var end = stripped.lastIndexOf(')').$();
 
             var caller = new Content(stripped.sliceTo(start), 0);
-            var list = stripped.sliceBetween(start.to(end).$())
+            var list = stripped.sliceBetween(start.next().$().to(end).$())
                     .split(",")
                     .map(arg -> new Content(arg, 0))
                     .collect(Collectors.toList());

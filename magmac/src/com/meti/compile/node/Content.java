@@ -9,6 +9,16 @@ public class Content implements Node {
     private final String value;
     private final int indent;
 
+    public Content(JavaString value, int indent) {
+        this.value = value.inner();
+        this.indent = indent;
+    }
+
+    public Content(String value, int indent) {
+        this.value = value;
+        this.indent = indent;
+    }
+
     @Override
     public Option<String> findValueAsString() {
         return Some(value);
@@ -19,15 +29,12 @@ public class Content implements Node {
         return Some(indent);
     }
 
-    public Content(JavaString value, int indent) {
-        this.value = value.inner();
-        this.indent = indent;
-    }
-
-
-    public Content(String value, int indent) {
-        this.value = value;
-        this.indent = indent;
+    @Override
+    public String toString() {
+        return "Content{" +
+               "value='" + value + '\'' +
+               ", indent=" + indent +
+               '}';
     }
 
     @Override

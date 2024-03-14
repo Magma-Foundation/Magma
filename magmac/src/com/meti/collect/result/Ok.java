@@ -31,6 +31,11 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Ok<>(value);
+    }
+
+    @Override
     public <R> Result<Tuple<T, R>, E> and(Result<R, E> other) {
         return other.mapValue(otherValue -> new Tuple<>(value, otherValue));
     }

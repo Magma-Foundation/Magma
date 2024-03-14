@@ -10,6 +10,14 @@ public class FieldNode implements Node {
     private final Node parent;
     private final JavaString child;
 
+    @Override
+    public String toString() {
+        return "FieldNode{" +
+               "parent=" + parent +
+               ", child=" + child +
+               '}';
+    }
+
     public FieldNode(Node parent, JavaString child) {
         this.parent = parent;
         this.child = child;

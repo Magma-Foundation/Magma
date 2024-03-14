@@ -33,10 +33,10 @@ public record Application(Path source) {
                         exp -> new BlockLexer(exp, indent),
                         ObjectLexer::new,
                         ImportLexer::new,
-                        stripped1 -> new MethodLexer(stripped1, indent),
+                        stripped1 -> new MethodLexer(new JavaString(stripped1), indent),
                         stripped1 -> new InvocationLexer(new JavaString(stripped1)),
                         input -> new FieldLexer(new JavaString(input)),
-                        exp -> new VariableLexer(exp))
+                        VariableLexer::new)
                 .map(constructor -> constructor.apply(line.strip()))
                 .map(Lexer::lex)
                 .flatMap(Streams::fromOption)
@@ -60,7 +60,7 @@ public record Application(Path source) {
 
                 return withValue.withChildren(newChildren).orElse(withValue);
             })).orElse(Ok(withValue)).$();
-        });
+        }).mapErr(err -> new CompileException("Failed to lex AST for: '" + node + "'", err));
     }
 
     private static Result<Node, CompileException> lexContent(Node content) {

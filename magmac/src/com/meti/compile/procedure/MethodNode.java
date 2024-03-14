@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.meti.collect.option.Some.Some;
 
-public record MethodNode(int indent, Option<?> moreOutputValue, List<String> annotations, String name, String type,
+public record MethodNode(int indent, Option<?> moreOutputValue, List<String> annotations, com.meti.java.JavaString name, String type,
                          Node content) implements Node {
 
     @Override
@@ -26,7 +26,7 @@ public record MethodNode(int indent, Option<?> moreOutputValue, List<String> ann
         var exceptions = moreOutputValue().map(value -> " ? " + value).orElse("");
         var annotationsString = annotations().stream().map(annotation -> "\t".repeat(indent()) + "@" + annotation + "\n").collect(Collectors.joining());
 
-        return Some("\n" + annotationsString + "\t".repeat(indent()) + "def " + name() + "() : " + type() + exceptions + " => " + content.render().orElse(""));
+        return Some("\n" + annotationsString + "\t".repeat(indent()) + "def " + name + "() : " + type() + exceptions + " => " + content.render().orElse(""));
     }
 
     @Override

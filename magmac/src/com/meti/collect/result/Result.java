@@ -12,4 +12,6 @@ public interface Result<T, E extends Throwable> {
     T $() throws E;
 
     <R> Result<Tuple<T, R>, E> and(Result<R, E> other);
+
+    <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 }

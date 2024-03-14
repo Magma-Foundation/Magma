@@ -26,6 +26,20 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        try {
+            var apply = mapper.apply(value);
+            try {
+                return new Err<>(apply);
+            } catch (Exception e) {
+                throw new RuntimeException(apply);
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException(value);
+        }
+    }
+
+    @Override
     public T $() throws E {
         throw value;
     }
