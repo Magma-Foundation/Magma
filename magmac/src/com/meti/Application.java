@@ -16,29 +16,18 @@ import static com.meti.Some.Some;
 public record Application(Path source) {
     private static String compileLine(String line, int indent) {
         var stripped = line.strip();
-        return Stream.<Function<String, Option<String>>>of(
-                        Application::compileString,
-                        value -> compileField(value, indent),
-                        stripped2 -> compileBlock(stripped2, indent),
-                        Application::compileClass,
-                        Application::compileImport,
-                        Application::compileInvocation,
-                        stripped1 -> compileMethod(stripped1, indent))
-                .map(procedure -> procedure.apply(stripped))
-                .filter(Option::isPresent)
-                .findFirst()
-                .flatMap(option -> option.map(Optional::of).orElse(Optional.empty()))
-                .orElse("");
+        return Stream.<Function<String, Option<String>>>of(Application::compileString, value -> compileField(value, indent), stripped2 -> compileBlock(stripped2, indent), Application::compileClass, Application::compileImport, Application::compileInvocation, stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().flatMap(option -> option.map(Optional::of).orElse(Optional.empty())).orElse("");
     }
 
     private static Option<String> compileMethod(String stripped, int indent) {
         var paramStart = stripped.indexOf('(');
+        var paramEnd = stripped.indexOf(')');
         var contentStart = stripped.indexOf('{');
 
-        if (paramStart != -1 && contentStart != -1) {
+        if (paramStart != -1 && paramEnd != -1 && contentStart != -1) {
             var keyString = stripped.substring(0, paramStart);
             var space = keyString.lastIndexOf(' ');
-            if(space == -1) {
+            if (space == -1) {
                 return None();
             }
 
@@ -48,19 +37,23 @@ public record Application(Path source) {
             var type = compileType(flagString.substring(typeSeparator + 1).strip());
 
             var content = compileLine(stripped.substring(contentStart).strip(), indent);
+            var more = stripped.substring(paramEnd + 1, contentStart).strip();
+            var moreOutput = more.startsWith("throws ")
+                    ? " ? " + compileType(more.substring("throws ".length()))
+                    : "";
 
-            return Some("\t".repeat(indent) + "def " + name + "() : " + type + " => " + content);
+            return Some("\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
         }
         return None();
     }
 
     private static String compileType(String type) {
-        if(type.equals("void")) {
+        if (type.equals("void")) {
             return "Void";
         } else {
             var start = type.indexOf('<');
             var end = type.lastIndexOf('>');
-            if(start != -1 && end != -1 && start < end) {
+            if (start != -1 && end != -1 && start < end) {
                 var name = type.substring(0, start).strip();
                 var subType = type.substring(start + 1, end).strip();
                 return name + "[" + compileType(subType) + "]";
@@ -90,9 +83,7 @@ public record Application(Path source) {
 
     private static Option<String> compileBlock(String stripped, int indent) {
         if (stripped.startsWith("{") && stripped.endsWith("}")) {
-            return Some(split(stripped.substring(1, stripped.length() - 1).strip())
-                    .map(line1 -> compileLine(line1, 1))
-                    .collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
+            return Some(split(stripped.substring(1, stripped.length() - 1).strip()).map(line1 -> compileLine(line1, 1)).collect(Collectors.joining("", "{\n", "\t".repeat(indent) + "}\n")));
         } else {
             return None();
         }
@@ -114,24 +105,16 @@ public record Application(Path source) {
     private static Option<String> compileImport(String stripped) {
         if (stripped.startsWith("import ")) {
             var isStatic = stripped.startsWith("import static ");
-            var content = stripped.substring(isStatic
-                    ? "import static ".length()
-                    : "import ".length());
+            var content = stripped.substring(isStatic ? "import static ".length() : "import ".length());
 
             var last = content.lastIndexOf('.');
             var child = content.substring(last + 1).strip();
             var parent = content.substring(0, last).strip();
 
             if (child.equals("*")) {
-                return Some("import " +
-                            parent +
-                            ";\n");
+                return Some("import " + parent + ";\n");
             } else {
-                return Some("import { " +
-                            child +
-                            " } from " +
-                            parent +
-                            ";\n");
+                return Some("import { " + child + " } from " + parent + ";\n");
             }
         }
         return None();
@@ -141,10 +124,7 @@ public record Application(Path source) {
         if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
-            var args = Arrays.stream(stripped.substring(start + 1, end)
-                            .split(","))
-                    .map(arg -> compileLine(arg, 0))
-                    .collect(Collectors.joining(", ", "(", ")"));
+            var args = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileLine(arg, 0)).collect(Collectors.joining(", ", "(", ")"));
             return Some("Paths.get" + args);
         }
         return None();
@@ -178,9 +158,7 @@ public record Application(Path source) {
         if (!Files.exists(source)) return None();
 
         var input = Files.readString(source);
-        var root = split(input)
-                .map(line -> compileLine(line, 0))
-                .collect(Collectors.joining());
+        var root = split(input).map(line -> compileLine(line, 0)).collect(Collectors.joining());
 
         var fileName = source().getFileName().toString();
         var index = fileName.indexOf(".");
