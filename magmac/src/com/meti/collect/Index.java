@@ -7,7 +7,11 @@ import static com.meti.collect.option.Some.Some;
 
 public record Index(int value, int length) {
     public Option<Index> next() {
-        var next = value + 1;
+        return next(1);
+    }
+
+    public Option<Index> next(int more) {
+        var next = value + more;
         if (next < length) {
             return Some(new Index(next, length));
         } else {
@@ -22,5 +26,9 @@ public record Index(int value, int length) {
         } else {
             return None();
         }
+    }
+
+    public boolean isStart() {
+        return this.value == 0;
     }
 }

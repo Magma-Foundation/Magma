@@ -13,4 +13,8 @@ public class Options {
             return None();
         }
     }
+
+    public static void $$() throws IntentionalException {
+        throw new IntentionalException();
+    }
 }

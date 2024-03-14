@@ -5,6 +5,7 @@ import com.meti.collect.result.Result;
 import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
+import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
@@ -27,36 +28,15 @@ import static com.meti.collect.result.Results.$Result;
 public record Application(Path source) {
     private static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
-                        PackageLexer::new,
-                        StringLexer::new,
-                        exp -> new DefinitionLexer(exp, indent),
-                        exp -> new BlockLexer(exp, indent),
-                        ObjectLexer::new,
-                        ImportLexer::new,
-                        stripped1 -> new MethodLexer(new JavaString(stripped1), indent),
-                        stripped1 -> new InvocationLexer(new JavaString(stripped1)),
-                        input -> new FieldLexer(new JavaString(input)),
-                        VariableLexer::new)
-                .map(constructor -> constructor.apply(line.strip()))
-                .map(Lexer::lex)
-                .flatMap(Streams::fromOption)
-                .next()
-                .into(ThrowableOption::new)
-                .orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line)))
-                .flatMapValue(Application::lexTree);
+                input1 -> new TryLexer(new JavaString(input1)), PackageLexer::new, StringLexer::new, exp -> new DefinitionLexer(exp, indent), exp -> new BlockLexer(exp, indent), ObjectLexer::new, ImportLexer::new, stripped1 -> new MethodLexer(new JavaString(stripped1), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Application::lexTree);
     }
 
     private static Result<Node, CompileException> lexTree(Node node) {
         return $Result(() -> {
-            var withValue = node.findValueAsNode()
-                    .map(value -> lexContent(value).mapValue(content -> node.withValue(content).orElse(node)))
-                    .orElse(Ok(node)).$();
+            var withValue = node.findValueAsNode().map(value -> lexContent(value).mapValue(content -> node.withValue(content).orElse(node))).orElse(Ok(node)).$();
 
             return withValue.findChildren().map(oldChildren -> $Result(() -> {
-                var newChildren = Streams.fromList(oldChildren)
-                        .map(Application::lexContent)
-                        .collect(Collectors.exceptionally(Collectors.toList()))
-                        .$();
+                var newChildren = Streams.fromList(oldChildren).map(Application::lexContent).collect(Collectors.exceptionally(Collectors.toList())).$();
 
                 return withValue.withChildren(newChildren).orElse(withValue);
             })).orElse(Ok(withValue)).$();
@@ -64,12 +44,7 @@ public record Application(Path source) {
     }
 
     private static Result<Node, CompileException> lexContent(Node content) {
-        return content.findValueAsString()
-                .and(content.findIndent())
-                .map(tuple -> lexExpression(tuple.a(), tuple.b()))
-                .into(ThrowableOption::new)
-                .orElseThrow(() -> new CompileException("Both the value and the indent must be present. This is not Content."))
-                .flatMapValue(Function.identity());
+        return content.findValueAsString().and(content.findIndent()).map(tuple -> lexExpression(tuple.a(), tuple.b())).into(ThrowableOption::new).orElseThrow(() -> new CompileException("Both the value and the indent must be present. This is not Content.")).flatMapValue(Function.identity());
     }
 
     public Option<Path> run() throws IOException, CompileException {
@@ -78,19 +53,11 @@ public record Application(Path source) {
         var input = Files.readString(source);
 
         var root = $Result(() -> {
-            var tree = new Splitter(input).split()
-                    .map(line -> lexExpression(line, 0))
-                    .collect(Collectors.exceptionally(Collectors.toList()))
-                    .$();
+            var tree = new Splitter(input).split().map(line -> lexExpression(line, 0)).collect(Collectors.exceptionally(Collectors.toList())).$();
 
-            var outputTree = Streams.fromList(tree)
-                    .filter(element -> !element.is("package"))
-                    .collect(Collectors.toList());
+            var outputTree = Streams.fromList(tree).filter(element -> !element.is("package")).collect(Collectors.toList());
 
-            return Streams.fromList(outputTree)
-                    .map(node -> node.render().orElse(""))
-                    .collect(Collectors.joining())
-                    .orElse("");
+            return Streams.fromList(outputTree).map(node -> node.render().orElse("")).collect(Collectors.joining()).orElse("");
         }).$();
 
         var fileName = source().getFileName().toString();

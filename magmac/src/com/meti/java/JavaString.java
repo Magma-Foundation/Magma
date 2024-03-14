@@ -66,4 +66,8 @@ public record JavaString(String inner) {
     public Option<JavaString> sliceFromRaw(int index) {
         return asIndex(index).map(this::sliceFrom);
     }
+
+    public Option<Index> firstIndexOfSlice(String slice) {
+        return wrapNegativeIndex(this.inner.indexOf(slice));
+    }
 }
