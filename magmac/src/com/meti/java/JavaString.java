@@ -37,4 +37,8 @@ public record JavaString(String inner) {
     public JavaString sliceTo(Index end) {
         return new JavaString(this.inner.substring(0, end.value()));
     }
+
+    public JavaString sliceFrom(Index start) {
+        return new JavaString(this.inner.substring(start.value()));
+    }
 }
