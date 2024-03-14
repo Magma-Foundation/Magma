@@ -31,4 +31,8 @@ public record Index(int value, int length) {
     public boolean isStart() {
         return this.value == 0;
     }
+
+    public Index max(Index other) {
+        return new Index(Math.max(this.value, other.value), length);
+    }
 }

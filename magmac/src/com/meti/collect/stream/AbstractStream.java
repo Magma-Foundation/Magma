@@ -1,7 +1,9 @@
 package com.meti.collect.stream;
 
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -9,12 +11,12 @@ import static com.meti.collect.option.None.None;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     @Override
-    public <C> C collect(Collector<T, C> collector) {
-        var current = collector.initial();
+    public <C> C foldRight(C initial, BiFunction<C, T, C> folder) {
+        var current = initial;
         while (true) {
             C finalCurrent = current;
             var tuple = next()
-                    .map(next -> collector.fold(finalCurrent, next))
+                    .map(next -> folder.apply(finalCurrent, next))
                     .toTuple(current);
 
             if (tuple.a()) {
@@ -23,6 +25,16 @@ public abstract class AbstractStream<T> implements Stream<T> {
                 return current;
             }
         }
+    }
+
+    @Override
+    public <R> Stream<Tuple<T, R>> extend(Function<T, R> extender) {
+        return map(value -> new Tuple<>(value, extender.apply(value)));
+    }
+
+    @Override
+    public <C> C collect(Collector<T, C> collector) {
+        return foldRight(collector.initial(), collector::fold);
     }
 
     @Override

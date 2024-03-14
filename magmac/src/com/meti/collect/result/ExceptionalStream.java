@@ -1,15 +1,32 @@
 package com.meti.collect.result;
 
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collector;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Stream;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<T, E>> {
     private final Stream<Result<T, E>> parent;
+
+    @Override
+    public <R> R into(Function<Stream<Result<T, E>>, R> mapper) {
+        return parent.into(mapper);
+    }
+
+    @Override
+    public <C> C foldRight(C initial, BiFunction<C, Result<T, E>, C> folder) {
+        return parent.foldRight(initial, folder);
+    }
+
+    @Override
+    public <R> Stream<Tuple<Result<T, E>, R>> extend(Function<Result<T, E>, R> extender) {
+        return parent.extend(extender);
+    }
 
     public ExceptionalStream(Stream<Result<T, E>> parent) {
         this.parent = parent;

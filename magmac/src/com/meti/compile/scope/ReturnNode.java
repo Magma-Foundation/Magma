@@ -27,6 +27,13 @@ public class ReturnNode implements Node {
     }
 
     @Override
+    public String toString() {
+        return "ReturnNode{" +
+               "content=" + content +
+               '}';
+    }
+
+    @Override
     public boolean is(String name) {
         return name.equals("return");
     }

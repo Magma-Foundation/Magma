@@ -3,6 +3,7 @@ package com.meti.java;
 import com.meti.collect.Index;
 import com.meti.collect.Range;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.AbstractStream;
 import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 
@@ -69,5 +70,36 @@ public record JavaString(String inner) {
 
     public Option<Index> firstIndexOfSlice(String slice) {
         return wrapNegativeIndex(this.inner.indexOf(slice));
+    }
+
+    public Stream<Index> streamReverse() {
+        if (inner.isEmpty()) return Streams.empty();
+
+        return new AbstractStream<>() {
+            private int current = inner.length() - 1;
+
+            @Override
+            public Option<Index> next() {
+                if (current >= 0) {
+                    var indexValue = current;
+                    current--;
+                    return Some(new Index(indexValue, inner.length()));
+                } else {
+                    return None();
+                }
+            }
+        };
+    }
+
+    public int length() {
+        return this.inner.length();
+    }
+
+    public char apply(Index index) {
+        try {
+            return this.inner.charAt(index.value());
+        } catch (Exception e) {
+            throw new RuntimeException(index + " " + this.inner);
+        }
     }
 }
