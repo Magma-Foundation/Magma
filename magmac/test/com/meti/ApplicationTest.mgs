@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Assertions;
 export object ApplicationTest = {
 	pub const TARGET = Paths.get(".", "Index.mgs");
 	pub const SOURCE = Paths.get(".", "Index.java");
-	def runWithSource() => {
+	def runWithSource() : Option[Path] => {
 	}
-	def generatesNothing() => {
+	def generatesNothing() : Void => {
 	}
-	def generatesProperTarget() => {
+	def generatesProperTarget() : Void => {
 	}
-	def tearDown() => {
+	def tearDown() : Void => {
 	}
-	def generatesSomething() => {
+	def generatesSomething() : Void => {
 	}
 }

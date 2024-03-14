@@ -43,12 +43,31 @@ public record Application(Path source) {
             }
 
             var name = keyString.substring(space + 1).strip();
+            var flagString = keyString.substring(0, space).strip();
+            var typeSeparator = flagString.lastIndexOf(' ');
+            var type = compileType(flagString.substring(typeSeparator + 1).strip());
 
             var content = compileLine(stripped.substring(contentStart).strip(), indent);
 
-            return Some("\t".repeat(indent) + "def " + name + "() => " + content);
+            return Some("\t".repeat(indent) + "def " + name + "() : " + type + " => " + content);
         }
         return None();
+    }
+
+    private static String compileType(String type) {
+        if(type.equals("void")) {
+            return "Void";
+        } else {
+            var start = type.indexOf('<');
+            var end = type.lastIndexOf('>');
+            if(start != -1 && end != -1 && start < end) {
+                var name = type.substring(0, start).strip();
+                var subType = type.substring(start + 1, end).strip();
+                return name + "[" + compileType(subType) + "]";
+            } else {
+                return type;
+            }
+        }
     }
 
     private static Option<String> compileString(String stripped) {
