@@ -2,9 +2,9 @@ package com.meti;
 
 import static com.meti.Some.Some;
 
-public record StringNode(String value) implements Node {
+public record ImportAllNode(String parent) implements Node {
     @Override
     public Option<String> render() {
-        return Some("\"" + value() + "\"");
+        return Some("import " + parent() + ";\n");
     }
 }

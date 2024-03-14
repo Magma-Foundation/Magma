@@ -13,4 +13,6 @@ public interface Option<T> {
     boolean isPresent();
 
     <R> Option<R> map(Function<T, R> mapper);
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 }

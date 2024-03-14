@@ -17,18 +17,23 @@ import static com.meti.Some.Some;
 public record Application(Path source) {
     private static String compileExpression(String line, int indent) {
         var stripped = line.strip();
-        return Stream.<Function<String, Option<String>>>of(
+        return Stream.<Function<String, Option<Node>>>of(
                         Application::compileString,
                         value -> compileField(value, indent),
                         stripped2 -> compileBlock(stripped2, indent),
-                        Application::compileClass,
+                        Application::compileObject,
                         Application::compileImport,
                         Application::compileInvocation,
                         stripped1 -> compileMethod(stripped1, indent))
-                .map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().flatMap(option -> option.map(Optional::of).orElse(Optional.empty())).orElse("");
+                .map(procedure -> procedure.apply(stripped)).filter(Option::isPresent)
+                .findFirst()
+                .flatMap(option -> option
+                        .flatMap(Node::render)
+                        .map(Optional::of).orElse(Optional.empty()))
+                .orElse("");
     }
 
-    private static Option<String> compileMethod(String stripped, int indent) {
+    private static Option<Node> compileMethod(String stripped, int indent) {
         var paramStart = stripped.indexOf('(');
         var paramEnd = stripped.indexOf(')');
         var contentStart = stripped.indexOf('{');
@@ -56,15 +61,12 @@ public record Application(Path source) {
 
             var content = compileExpression(stripped.substring(contentStart).strip(), indent);
             var more = stripped.substring(paramEnd + 1, contentStart).strip();
-            var moreOutput = more.startsWith("throws ")
-                    ? " ? " + compileType(more.substring("throws ".length()))
-                    : "";
 
-            var annotationsString = annotations.stream()
-                    .map(annotation -> "\t".repeat(indent) + "@" + annotation + "\n")
-                    .collect(Collectors.joining());
+            var moreOutputValue = more.startsWith("throws ")
+                    ? Some(compileType(more.substring("throws ".length())))
+                    : None();
 
-            return Some("\n" + annotationsString + "\t".repeat(indent) + "def " + name + "() : " + type + moreOutput + " => " + content);
+            return Some(new MethodNode(indent, moreOutputValue, annotations, name, type, content));
         }
         return None();
     }
@@ -85,36 +87,36 @@ public record Application(Path source) {
         }
     }
 
-    private static Option<String> compileString(String stripped) {
+    private static Option<Node> compileString(String stripped) {
         if (stripped.startsWith("\"") && stripped.endsWith("\"")) {
-            return new StringNode(stripped.substring(1, stripped.length() - 1)).render();
+            return Some(new StringNode(stripped.substring(1, stripped.length() - 1)));
         }
         return None();
     }
 
-    private static Option<String> compileField(String stripped, int indent) {
+    private static Option<Node> compileField(String stripped, int indent) {
         if (stripped.startsWith("public static final Path ")) {
             var content = stripped.substring("public static final Path ".length());
             var equals = content.indexOf('=');
             var name = content.substring(0, equals).strip();
             var compiledValue = compileExpression(content.substring(equals + 1), 0);
             var flags = List.of("pub", "const");
-            return new FieldNode(indent, flags, name, compiledValue).renderField();
+            return Some(new FieldNode(indent, flags, name, compiledValue));
         }
         return None();
     }
 
-    private static Option<String> compileBlock(String stripped, int indent) {
+    private static Option<Node> compileBlock(String stripped, int indent) {
         if (stripped.startsWith("{") && stripped.endsWith("}")) {
             var split = split(stripped.substring(1, stripped.length() - 1).strip());
             var stringStream = split.map(line1 -> compileExpression(line1, 1)).collect(Collectors.toList());
-            return new BlockNode(indent, stringStream).render();
+            return Some(new BlockNode(indent, stringStream));
         } else {
             return None();
         }
     }
 
-    private static Option<String> compileClass(String stripped) {
+    private static Option<Node> compileObject(String stripped) {
         if (stripped.startsWith("public class ")) {
             var start = stripped.indexOf("{");
 
@@ -123,12 +125,12 @@ public record Application(Path source) {
             var contentOutput = compileExpression(content, 0);
 
             var flags = List.of("export");
-            return new ObjectNode(flags, name, contentOutput).renderObject();
+            return Some(new ObjectNode(flags, name, contentOutput));
         }
         return None();
     }
 
-    private static Option<String> compileImport(String stripped) {
+    private static Option<Node> compileImport(String stripped) {
         if (stripped.startsWith("import ")) {
             var isStatic = stripped.startsWith("import static ");
             var content = stripped.substring(isStatic ? "import static ".length() : "import ".length());
@@ -137,14 +139,14 @@ public record Application(Path source) {
             var child = content.substring(last + 1).strip();
             var parent = content.substring(0, last).strip();
 
-            return child.equals("*")
-                    ? new ImportAllNode(parent).render()
-                    : new ImportChildNode(child, parent).render();
+            return Some(child.equals("*")
+                    ? new ImportAllNode(parent)
+                    : new ImportChildNode(child, parent));
         }
         return None();
     }
 
-    private static Option<String> compileInvocation(String stripped) {
+    private static Option<Node> compileInvocation(String stripped) {
         if (stripped.startsWith("Paths.get(")) {
             var start = stripped.indexOf("(");
             var end = stripped.indexOf(")");
@@ -152,7 +154,7 @@ public record Application(Path source) {
                     .map(arg -> compileExpression(arg, 0))
                     .toList();
 
-            return new InvocationNode(list).render();
+            return Some(new InvocationNode(list));
         }
         return None();
     }
