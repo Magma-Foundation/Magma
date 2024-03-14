@@ -15,20 +15,20 @@ public class ApplicationTest {
     public static final Path TARGET = Paths.get(".", "Index.mgs");
     public static final Path SOURCE = Paths.get(".", "Index.java");
 
-    private static Path run() throws IOException {
+    private static Option<Path> run() throws IOException {
         if (Files.exists(SOURCE)) {
             var fileName = SOURCE.getFileName().toString();
             var index = fileName.indexOf(".");
             var name = fileName.substring(0, index);
             var target = SOURCE.resolveSibling(name + ".mgs");
             Files.createFile(target);
-            return target;
+            return Some.Some(target);
         } else {
-            return null;
+            return None.None();
         }
     }
 
-    private static Path runWithSource() throws IOException {
+    private static Option<Path> runWithSource() throws IOException {
         Files.createFile(SOURCE);
         return run();
     }
@@ -41,7 +41,7 @@ public class ApplicationTest {
 
     @Test
     void generatesProperTarget() throws IOException {
-        assertEquals(runWithSource(), TARGET);
+        assertEquals(runWithSource().orElseNull(), TARGET);
     }
 
     @AfterEach
