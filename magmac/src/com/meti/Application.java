@@ -17,11 +17,33 @@ import static com.meti.Some.Some;
 public record Application(Path source) {
     private static Node compileExpression(String line, int indent) {
         var stripped = line.strip();
-        return Stream.<Function<String, Option<Node>>>of(stripped3 -> new StringLexer(stripped3).compileString(), value -> compileField(value, indent), stripped2 -> compileBlock(stripped2, indent), Application::compileObject, Application::compileImport, Application::compileInvocation, stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().map(optional -> optional.map(Some::Some).orElse(None.None())).orElse(None.None()).map(Application::lexTree).orElse(None::None);
+        return Stream.<Function<String, Option<Node>>>of(stripped3 -> new StringLexer(stripped3).lex(),
+                value -> compileField(value, indent),
+                stripped2 -> compileBlock(stripped2, indent),
+                Application::compileObject,
+                Application::compileImport,
+                stripped1 -> new InvocationLexer(stripped1).lex(),
+                stripped1 -> compileMethod(stripped1, indent)).map(procedure -> procedure.apply(stripped)).filter(Option::isPresent).findFirst().map(optional -> optional.map(Some::Some).orElse(None.None())).orElse(None.None()).map(Application::lexTree).orElse(None::None);
     }
 
     private static Node lexTree(Node node) {
-        return node.findValueAsNode().flatMap(value -> value.findValueAsString().and(value.findIndent()).map(tuple -> compileExpression(tuple.a(), tuple.b())).flatMap(node::withValue)).orElse(node);
+        var withValue = node.findValueAsNode().flatMap(value -> compileContent(value)
+                        .flatMap(node::withValue))
+                .orElse(node);
+
+        return withValue.findChildren().map(children -> {
+            var newChildren = children.stream()
+                    .map(Application::compileContent)
+                    .map(output -> output.map(Optional::of).orElse(Optional.empty()))
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toList());
+
+            return withValue.withChildren(newChildren);
+        }).orElseNull().orElse(withValue);
+    }
+
+    private static Option<Node> compileContent(Node content) {
+        return content.findValueAsString().and(content.findIndent()).map(tuple -> compileExpression(tuple.a(), tuple.b()));
     }
 
     private static Option<Node> compileMethod(String stripped, int indent) {
@@ -122,17 +144,6 @@ public record Application(Path source) {
             var parent = content.substring(0, last).strip();
 
             return Some(child.equals("*") ? new ImportAllNode(parent) : new ImportChildNode(child, parent));
-        }
-        return None();
-    }
-
-    private static Option<Node> compileInvocation(String stripped) {
-        if (stripped.startsWith("Paths.get(")) {
-            var start = stripped.indexOf("(");
-            var end = stripped.indexOf(")");
-            var list = Arrays.stream(stripped.substring(start + 1, end).split(",")).map(arg -> compileExpression(arg, 0)).toList();
-
-            return Some(new InvocationNode(list));
         }
         return None();
     }
