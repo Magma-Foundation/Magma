@@ -2,13 +2,7 @@ package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class CompilerTest {
-    private static void assertCompile(String input, String output) throws CompileException {
-        var actual = new Compiler(input).compile();
-        assertEquals(output, actual);
-    }
+class CompilerTest extends CompiledTest {
 
     @Test
     void test1() throws CompileException {
