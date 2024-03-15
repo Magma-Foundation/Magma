@@ -1,8 +1,30 @@
 package com.meti.compile;
 
+import com.meti.collect.stream.Collectors;
+import com.meti.compile.node.Content;
+import com.meti.compile.scope.DefinitionNode;
+import com.meti.compile.string.StringNode;
+import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+
 class CompilerTest extends CompiledTest {
+    @Test
+    void lexHead() {
+        var actual = Compiler.lexHead("\"var actual = new Compiler(input)\"", 0)
+                .collect(Collectors.toList());
+
+        assertIterableEquals(List.of(
+                new StringNode("var actual = new Compiler(input)"),
+                new DefinitionNode(0, Collections.emptyList(),
+                        new JavaString("actual"),
+                        new Content("new Compiler(input)\"", 0))
+        ), actual);
+    }
 
     @Test
     void test1() throws CompileException {

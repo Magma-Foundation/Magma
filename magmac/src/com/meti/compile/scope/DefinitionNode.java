@@ -6,9 +6,12 @@ import com.meti.collect.stream.Streams;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
+import java.util.List;
+
 import static com.meti.collect.option.Some.Some;
 
-public record DefinitionNode(int indent, java.util.ArrayList<com.meti.java.JavaString> flags, com.meti.java.JavaString name, Node value) implements Node {
+public record DefinitionNode(int indent, List<JavaString> flags, com.meti.java.JavaString name,
+                             Node value) implements Node {
     @Override
     public Option<String> render() {
         var withPrefix = Streams.fromList(flags).map(JavaString::inner)

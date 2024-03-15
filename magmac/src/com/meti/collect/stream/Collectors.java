@@ -59,4 +59,18 @@ public class Collectors {
             }
         };
     }
+
+    public static <T, C> Collector<Option<T>, Option<C>> required(Collector<T, C> list) {
+        return new Collector<>() {
+            @Override
+            public Option<C> initial() {
+                return Some(list.initial());
+            }
+
+            @Override
+            public Option<C> fold(Option<C> current, Option<T> element) {
+                return current.and(element).map(tuple -> list.fold(tuple.a(), tuple.b()));
+            }
+        };
+    }
 }

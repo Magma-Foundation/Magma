@@ -1,5 +1,5 @@
 import { assertEquals } from import static org.junit.jupiter.api.Assertions;
-pub let  = Compiler(input).compile();
+pub actual = Compiler(input).compile();
         assertEquals(output, actual);
     }
 }

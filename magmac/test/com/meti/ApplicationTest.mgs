@@ -12,7 +12,7 @@ import { Path } from import java.nio.file;
 import { Paths } from import java.nio.file;
 import { List } from import java.util;
 import import static org.junit.jupiter.api.Assertions;
-pub const  = pub const  = let  = Application(SingleSource(SOURCE)).run().$();
+pub const TARGET = pub const SOURCE = list = Application(SingleSource(SOURCE)).run().$();
             return list.isEmpty() ? None.None() : Some.Some(list.get(0));
         } catch (IOException e) {
             return fail(e);

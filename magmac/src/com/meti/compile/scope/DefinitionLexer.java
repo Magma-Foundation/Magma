@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.meti.collect.option.None.None;
+import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.collect.option.Some.Some;
 
@@ -20,15 +21,19 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
     public Option<Node> lex() {
         return $Option(() -> {
             var separator = stripped.firstIndexOfChar('=').$();
-            var withName = stripped.sliceTo(separator);
+            var withName = stripped.sliceTo(separator).strip();
             var nameSeparator = withName.lastIndexOfChar(' ').$();
             var name = withName.sliceFrom(nameSeparator.next().$());
+            if(name.isEmpty()) {
+                $$();
+            }
 
-            var withType = withName.sliceTo(nameSeparator);
+            var withType = withName.sliceTo(nameSeparator).strip();
             var typeSeparatorOptional = withType.lastIndexOfChar(' ');
 
             var inputFlags = typeSeparatorOptional.map(typeSeparator -> {
                 return withType.sliceTo(typeSeparator)
+                        .strip()
                         .split(" ")
                         .map(JavaString::inner)
                         .collect(Collectors.toList());
@@ -41,7 +46,7 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
             if(inputFlags.contains("final")) flagsString.add(new JavaString("const"));
             if(inputFlags.contains("var")) flagsString.add(new JavaString("let"));
 
-            var compiledValue = new Content(stripped.sliceFrom(separator.next().$()), 0);
+            var compiledValue = new Content(stripped.sliceFrom(separator.next().$()).strip(), 0);
             return new DefinitionNode(indent, flagsString, name, compiledValue);
         });
     }

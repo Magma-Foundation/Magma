@@ -6,6 +6,11 @@ import org.junit.jupiter.api.Test;
 
 public class DeclarationTest extends CompiledTest {
     @Test
+    void complex() throws CompileException {
+        assertCompile("var actual = new Compiler(input)", "let actual = Compiler(input)");
+    }
+
+    @Test
     void simple() throws CompileException {
         assertCompile("var test=\"test\";", "let test = \"test\"");
     }

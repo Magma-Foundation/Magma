@@ -22,10 +22,6 @@ public class InvocationLexer implements Lexer {
         this.stripped = javaString;
     }
 
-    protected String prefix() {
-        return "";
-    }
-
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
