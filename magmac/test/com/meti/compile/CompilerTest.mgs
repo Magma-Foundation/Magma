@@ -1,0 +1,46 @@
+import { Collectors } from import com.meti.collect.stream;
+import { Stream } from import com.meti.collect.stream;
+import { Content } from import com.meti.compile.node;
+import { Node } from import com.meti.compile.node;
+import { DefinitionNode } from import com.meti.compile.scope;
+import { StringNode } from import com.meti.compile.string;
+import { JavaString } from import com.meti.java;
+import { Test } from import org.junit.jupiter.api;
+import { Collections } from import java.util;
+import { List } from import java.util;
+import { assertIterableEquals } from import static org.junit.jupiter.api.Assertions;
+actual = actual = actual = input = actual = input = actual = actual = Compiler.lexTree(input).collect(Collectors.toList());
+        assertIterableEquals(Collections.singletonList(input), actual);
+    }
+
+    @Test
+    void test1() throws CompileException {
+        assertCompile("SOURCE", "SOURCE");
+    }
+
+    @Test
+    void field() throws CompileException {
+        assertCompile("first.second", "first.second");
+    }
+
+    @Test
+    void test2() throws CompileException {
+        assertCompile("new Application(SOURCE)", "Application(SOURCE)");
+    }
+
+    @Test
+    void test3() throws CompileException {
+        assertCompile("new Application(SOURCE).run()", "Application(SOURCE).run()");
+    }
+
+    @Test
+    void test4() throws CompileException {
+        assertCompile("new Application(SOURCE).run", "Application(SOURCE).run");
+    }
+
+
+    @Test
+    void test() throws CompileException {
+        assertCompile("runWithSource()", "runWithSource()");
+    }
+}
