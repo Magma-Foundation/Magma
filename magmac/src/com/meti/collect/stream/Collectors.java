@@ -3,8 +3,6 @@ package com.meti.collect.stream;
 import com.meti.collect.option.Option;
 import com.meti.collect.result.Ok;
 import com.meti.collect.result.Result;
-import com.meti.compile.CompileException;
-import com.meti.compile.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +27,10 @@ public class Collectors {
     }
 
     public static Collector<String, Option<String>> joining() {
+        return joining("");
+    }
+
+    public static Collector<String, Option<String>> joining(String delimiter) {
         return new Collector<>() {
             @Override
             public Option<String> initial() {
@@ -37,9 +39,9 @@ public class Collectors {
 
             @Override
             public Option<String> fold(Option<String> current, String element) {
-                if(current.isEmpty()) return Some(element);
+                if (current.isEmpty()) return Some(element);
 
-                return current.map(currentValue -> currentValue + element);
+                return current.map(currentValue -> currentValue + delimiter + element);
             }
         };
     }

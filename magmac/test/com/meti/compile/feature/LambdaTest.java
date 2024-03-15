@@ -9,4 +9,9 @@ public class LambdaTest extends CompiledTest {
     void basic() throws CompileException {
         assertCompile("() -> {}", "() => {}");
     }
+
+    @Test
+    void parameter() throws CompileException {
+        assertCompile("test -> {}", "test => {}");
+    }
 }
