@@ -31,7 +31,7 @@ public class CatchLexer implements Lexer {
             var args = prefix.sliceBetween(start.next().$().to(end).$());
             var separator = args.lastIndexOfChar(' ').$();
             var exceptionTypes = args.sliceTo(separator)
-                    .split("|")
+                    .split("\\|")
                     .map(type -> new TypeCompiler(type.inner()).compile())
                     .map(JavaString::new)
                     .collect(Collectors.toList());
