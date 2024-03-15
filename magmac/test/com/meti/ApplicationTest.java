@@ -1,9 +1,11 @@
 package com.meti;
 
+import com.meti.collect.option.None;
 import com.meti.collect.option.Option;
+import com.meti.collect.option.Some;
 import com.meti.compile.Application;
 import com.meti.compile.CompileException;
-import com.meti.compile.Source;
+import com.meti.compile.SingleSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,22 +24,18 @@ public class ApplicationTest {
     private static Option<Path> runWithSource() {
         try {
             Files.createFile(SOURCE);
-            return new Application(new Source(SOURCE)).run().map(result -> {
-                try {
-                    return result.$();
-                } catch (CompileException e) {
-                    return fail(e);
-
-                }
-            });
+            var list = new Application(new SingleSource(SOURCE)).run().$();
+            return list.isEmpty() ? None.None() : Some.Some(list.get(0));
         } catch (IOException e) {
+            return fail(e);
+        } catch (CompileException e) {
             return fail(e);
         }
     }
 
     @Test
     void generatesNothing() throws IOException, CompileException {
-        new Application(new Source(SOURCE)).run();
+        new Application(new SingleSource(SOURCE)).run();
         assertFalse(Files.exists(TARGET));
     }
 

@@ -1,0 +1,21 @@
+import { CompileException } from com.meti.compile;
+import { CompiledTest } from com.meti.compile;
+import { Test } from org.junit.jupiter.api;
+
+export object LambdaTest extends CompiledTest = {
+	
+	@Test
+	def basic() : Void ? CompileException => {
+		assertCompile("() -> {}", "() => {}");
+	}
+	
+	@Test
+	def parameter() : Void ? CompileException => {
+		assertCompile("test -> {}", "test => {}");
+	}
+	
+	@Test
+	def body() : Void ? CompileException => {
+		assertCompile("() -> {return \"test\";}", "() => {return \"test\";}");
+	}
+}

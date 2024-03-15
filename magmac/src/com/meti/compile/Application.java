@@ -1,14 +1,17 @@
 package com.meti.compile;
 
-import com.meti.collect.option.Option;
+import com.meti.collect.option.Some;
+import com.meti.collect.result.Err;
 import com.meti.collect.result.Result;
 import com.meti.collect.result.Results;
+import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public final class Application {
     private final Source source;
@@ -17,10 +20,12 @@ public final class Application {
         this.source = source1;
     }
 
-    public Option<Result<Path, CompileException>> run() {
-        var sources = new HashSet<Path>();
-        if (Files.exists(source.source())) {
-            sources.add(source.source());
+    public Result<List<Path>, CompileException> run() {
+        Set<Path> sources;
+        try {
+            sources = source.collectSources();
+        } catch (IOException e) {
+            return new Err<>(new CompileException(e));
         }
 
         return Streams.fromSet(sources).map(source -> Results.$Result(() -> {
@@ -42,6 +47,6 @@ public final class Application {
                 throw new CompileException(e);
             }
             return target;
-        })).next();
+        })).collect(Collectors.exceptionally(Collectors.toList()));
     }
 }

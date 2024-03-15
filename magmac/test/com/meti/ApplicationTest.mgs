@@ -1,7 +1,7 @@
 import { Option } from com.meti.collect.option;
 import { Application } from com.meti.compile;
 import { CompileException } from com.meti.compile;
-import { Source } from com.meti.compile;
+import { SingleSource } from com.meti.compile;
 import { AfterEach } from org.junit.jupiter.api;
 import { Test } from org.junit.jupiter.api;
 import { IOException } from java.io;
@@ -17,7 +17,7 @@ export object ApplicationTest = {
 	def runWithSource() : Option[Path] => {
 		try {
 			Files.createFile(SOURCE);
-			return Application(Source(SOURCE)).run().map(result => {
+			return Application(SingleSource(SOURCE)).run().map(result => {
                 try {
                     return result.$();
                 } catch (CompileException e) {
@@ -33,7 +33,7 @@ export object ApplicationTest = {
 	
 	@Test
 	def generatesNothing() : Void ? IOException, CompileException => {
-		Application(Source(SOURCE)).run();
+		Application(SingleSource(SOURCE)).run();
 		assertFalse(Files.exists(TARGET));
 	}
 	

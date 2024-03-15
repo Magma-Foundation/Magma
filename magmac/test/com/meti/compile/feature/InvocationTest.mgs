@@ -1,0 +1,16 @@
+import { CompileException } from com.meti.compile;
+import { CompiledTest } from com.meti.compile;
+import { Test } from org.junit.jupiter.api;
+
+export object InvocationTest extends CompiledTest = {
+	
+	@Test
+	def simple() : Void ? CompileException => {
+		assertCompile("test()", "test()");
+	}
+	
+	@Test
+	def lambda() : Void ? CompileException => {
+		assertCompile("test(() -> {})", "test(() => {})");
+	}
+}
