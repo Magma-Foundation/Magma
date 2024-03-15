@@ -1,7 +1,6 @@
 package com.meti.compile.procedure;
 
 import com.meti.collect.Index;
-import com.meti.collect.Range;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
@@ -30,8 +29,8 @@ public class InvocationLexer implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
-            var prefix = stripped.firstIndexOfSlice(prefix()).$();
-            if (!prefix.isStart()) $$();
+            var isConstruction = stripped.startsWithSlice("new ");
+            if(!stripped.endsWithSlice(")")) $$();
 
             var end = stripped.lastIndexOfChar(')').$();
             var furthestComputer = stripped.sliceTo(end).streamReverse().extend(stripped::apply).foldRight(new State(0, None()), (state, tuple) -> {
@@ -41,7 +40,10 @@ public class InvocationLexer implements Lexer {
                 return state;
             });
 
-            var prefixIndex = prefix.next(prefix().length()).$();
+            var prefixIndex = isConstruction
+                    ? stripped.asIndex("new ".length()).orElse(stripped.starts())
+                    : stripped.starts();
+
             var start = furthestComputer.furthest.$();
             var caller = new Content(stripped.sliceBetween(prefixIndex.to(start).$()), 0);
             var range = start.next().$().to(end).$();

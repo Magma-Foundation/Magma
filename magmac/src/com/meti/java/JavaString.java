@@ -106,4 +106,12 @@ public record JavaString(String inner) {
     public boolean isEmpty() {
         return this.inner.isEmpty();
     }
+
+    public Index starts() {
+        return new Index(0, this.inner.length());
+    }
+
+    public boolean endsWithSlice(String slice) {
+        return this.inner.endsWith(slice);
+    }
 }

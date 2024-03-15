@@ -15,7 +15,7 @@ export object ApplicationTest = {
 	def runWithSource() : Option[Path] => {
 		try {
 			Files.createFile(SOURCE);
-			return Application(SOURCE)()
+			return Application(SOURCE).run()
 
 		}
 
@@ -28,13 +28,13 @@ export object ApplicationTest = {
 
 	@Test
 	def generatesNothing() : Void ? IOException, CompileException => {
-		Application(SOURCE)();
+		Application(SOURCE).run();
 		assertFalse(Files.exists(TARGET));
 	}
 
 	@Test
 	def generatesProperTarget() : Void => {
-		assertEquals(runWithSource()(), TARGET);
+		assertEquals(runWithSource().orElseNull(), TARGET);
 	}
 
 	@AfterEach

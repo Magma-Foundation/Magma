@@ -28,7 +28,6 @@ public record Compiler(String input) {
     static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
                 exp -> new CatchLexer(new JavaString(exp), indent),
-                exp -> new ConstructionLexer(new JavaString(exp)),
                 exp -> new ReturnLexer(new JavaString(exp), indent),
                 exp -> new TryLexer(new JavaString(exp), indent),
                 PackageLexer::new,
@@ -37,7 +36,10 @@ public record Compiler(String input) {
                 exp -> new BlockLexer(exp, indent),
                 ObjectLexer::new,
                 ImportLexer::new,
-                exp -> new MethodLexer(new JavaString(exp), indent), stripped1 -> new InvocationLexer(new JavaString(stripped1)), input -> new FieldLexer(new JavaString(input)), VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Compiler::lexTree);
+                exp -> new MethodLexer(new JavaString(exp), indent),
+                exp -> new InvocationLexer(new JavaString(exp)),
+                input -> new FieldLexer(new JavaString(input)),
+                VariableLexer::new).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Compiler::lexTree);
     }
 
     private static Result<Node, CompileException> lexTree(Node node) {
