@@ -35,7 +35,12 @@ public final class Application {
             } catch (IOException e) {
                 throw new CompileException(e);
             }
-            var output = new Compiler(input).compile();
+            String output;
+            try {
+                output = new Compiler(input).compile();
+            } catch (CompileException e) {
+                throw new CompileException("Failed to compile file: '" + source + "'", e);
+            }
 
             var fileName = source.getFileName().toString();
             var index = fileName.indexOf(".");

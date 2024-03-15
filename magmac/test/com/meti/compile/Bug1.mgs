@@ -1,4 +1,4 @@
-import { Test } from org.junit.jupiter.api;
+import { Test } from import org.junit.jupiter.api;
 
 export object Bug1 extends CompiledTest = {
 	

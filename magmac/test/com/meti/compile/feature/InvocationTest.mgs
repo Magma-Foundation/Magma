@@ -1,6 +1,6 @@
-import { CompileException } from com.meti.compile;
-import { CompiledTest } from com.meti.compile;
-import { Test } from org.junit.jupiter.api;
+import { CompileException } from import com.meti.compile;
+import { CompiledTest } from import com.meti.compile;
+import { Test } from import org.junit.jupiter.api;
 
 export object InvocationTest extends CompiledTest = {
 	
