@@ -35,7 +35,7 @@ public class CatchNode implements Node {
     public Option<String> render() {
         var exceptionTypeString = exceptionTypes.stream()
                 .map(JavaString::inner)
-                .collect(Collectors.joining(" | ", "(", " " + exceptionName + " )"));
+                .collect(Collectors.joining(" | ", "(", " " + exceptionName + ")"));
 
         return Some.Some( "catch " + exceptionTypeString + value.render().orElse(""));
     }
