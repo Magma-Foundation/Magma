@@ -26,6 +26,6 @@ public record ObjectNode(List<String> flags, String name, Node value) implements
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("object");
     }
 }

@@ -13,6 +13,6 @@ public record ImportAllNode(String parent) implements Node {
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("import_all");
     }
 }

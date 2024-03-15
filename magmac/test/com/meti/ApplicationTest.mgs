@@ -1,5 +1,6 @@
 import { Option } from com.meti.collect.option;
 import { Application } from com.meti.compile;
+import { CompileException } from com.meti.compile;
 import { AfterEach } from org.junit.jupiter.api;
 import { Test } from org.junit.jupiter.api;
 import { IOException } from java.io;
@@ -9,25 +10,27 @@ import { Paths } from java.nio.file;
 import org.junit.jupiter.api.Assertions;
 
 export object ApplicationTest = {
-	pub const TARGET = ("Index.mgs");
-	pub const SOURCE = ("Index.java");
+	pub const TARGET = Paths.get(".", "Index.mgs");
+	pub const SOURCE = Paths.get(".", "Index.java");
 
-	def runWithSource() : Option[Path] ? IOException => {
-()(())	}
-
-	@Test
-	def generatesNothing() : Void ? IOException => {
-(())(())	}
+	def runWithSource() : Option[Path] => {
+try{
+Files.createFile(SOURCE)return Application(SOURCE)()}
+catch (I | O | E | x | c | e | p | t | i | o | n |   | | |   | C | o | m | p | i | l | e | E | x | c | e | p | t | i | o | n e )com.meti.collect.option.Some@694f9431	}
 
 	@Test
-	def generatesProperTarget() : Void ? IOException => {
-((()))	}
+	def generatesNothing() : Void ? IOException, CompileException => {
+Application(SOURCE)()assertFalse(Files.exists(TARGET))	}
+
+	@Test
+	def generatesProperTarget() : Void => {
+assertEquals(runWithSource()(), TARGET)	}
 
 	@AfterEach
 	def tearDown() : Void ? IOException => {
-()()	}
+Files.deleteIfExists(SOURCE)Files.deleteIfExists(TARGET)	}
 
 	@Test
-	def generatesSomething() : Void ? IOException => {
-()(())	}
+	def generatesSomething() : Void => {
+runWithSource()assertTrue(Files.exists(TARGET))	}
 }
