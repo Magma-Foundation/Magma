@@ -33,7 +33,7 @@ public record Compiler(String input) {
                         exp -> new ReturnLexer(new JavaString(exp), indent),
                         exp -> new TryLexer(new JavaString(exp), indent),
                         PackageLexer::new,
-                        StringLexer::new,
+                        exp -> new StringLexer(new JavaString(exp)),
                         exp -> new ObjectLexer(new JavaString(exp)),
                         exp -> new BlockLexer(exp, indent),
                         exp -> new MethodLexer(new JavaString(exp), indent),

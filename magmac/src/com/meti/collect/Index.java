@@ -35,4 +35,8 @@ public record Index(int value, int length) {
     public Index max(Index other) {
         return new Index(Math.max(this.value, other.value), length);
     }
+
+    public boolean isEnd() {
+        return this.value == this.length - 1;
+    }
 }

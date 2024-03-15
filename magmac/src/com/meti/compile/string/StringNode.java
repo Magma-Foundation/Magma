@@ -5,10 +5,10 @@ import com.meti.collect.option.Option;
 
 import static com.meti.collect.option.Some.Some;
 
-public record StringNode(String value) implements Node {
+public record StringNode(com.meti.java.JavaString value) implements Node {
     @Override
     public Option<String> render() {
-        return Some("\"" + value() + "\"");
+        return Some("\"" + value.inner() + "\"");
     }
 
     @Override
