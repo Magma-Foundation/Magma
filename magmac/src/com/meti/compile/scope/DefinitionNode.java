@@ -12,7 +12,7 @@ public record DefinitionNode(int indent, List<String> flags, String name, Node v
     public Option<String> render() {
         var flagsString = String.join(" ", flags());
         var withSuffix = flagsString.isEmpty() ? "" : flagsString + " ";
-        return Some("\t".repeat(indent()) + withSuffix + name() + " = " + value.render().orElse("") + ";\n");
+        return Some("\n" + "\t".repeat(indent()) + withSuffix + name() + " = " + value.render().orElse("") + ";");
     }
 
     @Override
@@ -27,6 +27,6 @@ public record DefinitionNode(int indent, List<String> flags, String name, Node v
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("definition");
     }
 }

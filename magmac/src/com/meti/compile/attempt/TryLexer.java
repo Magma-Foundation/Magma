@@ -9,7 +9,7 @@ import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
 
-public record TryLexer(JavaString input) implements Lexer {
+public record TryLexer(JavaString input, int indent) implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
@@ -17,7 +17,7 @@ public record TryLexer(JavaString input) implements Lexer {
             if(!index.isStart()) Options.$$();
 
             var content = index.next("try".length()).$();
-            return new TryNode(new Content(input.sliceFrom(content), 0));
+            return new TryNode(new Content(input.sliceFrom(content), indent), indent);
         });
     }
 }

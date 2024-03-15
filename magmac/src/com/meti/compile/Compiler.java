@@ -9,6 +9,7 @@ import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
+import com.meti.compile.node.Statement;
 import com.meti.compile.procedure.ConstructionLexer;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
@@ -16,6 +17,8 @@ import com.meti.compile.scope.*;
 import com.meti.compile.string.StringLexer;
 import com.meti.java.JavaString;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.meti.collect.result.Ok.Ok;
@@ -24,10 +27,10 @@ import static com.meti.collect.result.Results.$Result;
 public record Compiler(String input) {
     static Result<Node, CompileException> lexExpression(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
-                exp -> new CatchLexer(new JavaString(exp)),
+                exp -> new CatchLexer(new JavaString(exp), indent),
                 exp -> new ConstructionLexer(new JavaString(exp)),
-                exp -> new ReturnLexer(new JavaString(exp)),
-                exp -> new TryLexer(new JavaString(exp)),
+                exp -> new ReturnLexer(new JavaString(exp), indent),
+                exp -> new TryLexer(new JavaString(exp), indent),
                 PackageLexer::new,
                 StringLexer::new,
                 exp -> new DefinitionLexer(exp, indent),
@@ -53,11 +56,46 @@ public record Compiler(String input) {
         return content.findValueAsString().and(content.findIndent()).map(tuple -> lexExpression(tuple.a(), tuple.b())).into(ThrowableOption::new).orElseThrow(() -> new CompileException("Both the value and the indent must be present. This is not Content.")).flatMapValue(Function.identity());
     }
 
+    private static Node transformAST(Node tree) {
+        var withValue = tree.findValueAsNode()
+                .map(value -> transformAST(value))
+                .flatMap(node -> tree.withValue(node))
+                .orElse(tree);
+
+        var node = withValue.findChildren()
+                .map(children -> Streams.fromList(children)
+                        .map(child -> transformAST(child))
+                        .collect(Collectors.toList()))
+                .flatMap(children -> withValue.withChildren(children))
+                .orElse(withValue);
+
+        return transformNode(node);
+    }
+
+    private static Node transformNode(Node node) {
+        if (node.is("block")) {
+            var children = node.findChildren().orElse(Collections.emptyList());
+            var newChildren = Streams.fromList(children)
+                    .map(child -> {
+                        if (child.is("invocation")) {
+                            return new Statement(child, node.findIndent().orElse(0) + 1);
+                        } else {
+                            return child;
+                        }
+                    }).collect(Collectors.toList());
+            return node.withChildren(newChildren).orElse(node);
+        } else {
+            return node;
+        }
+    }
+
     String compile() throws CompileException {
         return $Result(() -> {
             var tree = new Splitter(this.input()).split().map(line -> lexExpression(line, 0)).collect(Collectors.exceptionally(Collectors.toList())).$();
-
-            var outputTree = Streams.fromList(tree).filter(element -> !element.is("package")).collect(Collectors.toList());
+            var outputTree = Streams.fromList(tree)
+                    .filter(element -> !element.is("package"))
+                    .map(Compiler::transformAST)
+                    .collect(Collectors.toList());
 
             return Streams.fromList(outputTree).map(node -> node.render().orElse("")).collect(Collectors.joining()).orElse("");
         }).$();

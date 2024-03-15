@@ -21,17 +21,22 @@ public record BlockNode(int indent, List<? extends Node> children) implements No
     }
 
     @Override
+    public Option<Integer> findIndent() {
+        return Some(indent);
+    }
+
+    @Override
     public Option<String> render() {
         return Some(children()
                 .stream()
                 .map(Node::render)
                 .map(output -> output.map(Optional::of).orElse(Optional.empty()))
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining("", "{\n", "\t".repeat(indent()) + "}\n")));
+                .collect(Collectors.joining("", "{", "\n" + "\t".repeat(indent) + "}\n")));
     }
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("block");
     }
 }

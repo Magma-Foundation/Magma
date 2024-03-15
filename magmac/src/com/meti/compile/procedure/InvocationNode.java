@@ -49,6 +49,6 @@ public record InvocationNode(Node caller, List<? extends Node> children) impleme
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("invocation");
     }
 }

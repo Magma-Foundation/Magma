@@ -6,19 +6,21 @@ import com.meti.compile.node.Node;
 
 public class ReturnNode implements Node {
     private final Node content;
+    private final int indent;
 
-    public ReturnNode(Node content) {
+    public ReturnNode(Node content, int indent) {
         this.content = content;
+        this.indent = indent;
     }
 
     @Override
     public Option<String> render() {
-        return content.render().map(value -> "return " + value);
+        return content.render().map(value -> "\n" + "\t".repeat(indent) + "return " + value + "\n");
     }
 
     @Override
     public Option<Node> withValue(Node value) {
-        return Some.Some(new ReturnNode(value));
+        return Some.Some(new ReturnNode(value, indent ));
     }
 
     @Override

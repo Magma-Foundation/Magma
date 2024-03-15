@@ -12,27 +12,41 @@ import org.junit.jupiter.api.Assertions;
 export object ApplicationTest = {
 	pub const TARGET = Paths.get(".", "Index.mgs");
 	pub const SOURCE = Paths.get(".", "Index.java");
-
 	def runWithSource() : Option[Path] => {
-try{
-Files.createFile(SOURCE)return Application(SOURCE)()}
-catch (IOException  |  CompileException e ){
-return fail(e)}
+		try {
+			Files.createFile(SOURCE);
+			return Application(SOURCE)()
+
+		}
+
+		catch (IOException  |  CompileException e ){
+			return fail(e)
+
+		}
+
 	}
 
 	@Test
 	def generatesNothing() : Void ? IOException, CompileException => {
-Application(SOURCE)()assertFalse(Files.exists(TARGET))	}
+		Application(SOURCE)();
+		assertFalse(Files.exists(TARGET));
+	}
 
 	@Test
 	def generatesProperTarget() : Void => {
-assertEquals(runWithSource()(), TARGET)	}
+		assertEquals(runWithSource()(), TARGET);
+	}
 
 	@AfterEach
 	def tearDown() : Void ? IOException => {
-Files.deleteIfExists(SOURCE)Files.deleteIfExists(TARGET)	}
+		Files.deleteIfExists(SOURCE);
+		Files.deleteIfExists(TARGET);
+	}
 
 	@Test
 	def generatesSomething() : Void => {
-runWithSource()assertTrue(Files.exists(TARGET))	}
+		runWithSource();
+		assertTrue(Files.exists(TARGET));
+	}
+
 }

@@ -31,6 +31,6 @@ public record MethodNode(int indent, Option<?> moreOutputValue, List<String> ann
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("method");
     }
 }

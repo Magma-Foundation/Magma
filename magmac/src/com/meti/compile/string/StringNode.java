@@ -13,6 +13,6 @@ public record StringNode(String value) implements Node {
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("string");
     }
 }

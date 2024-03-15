@@ -13,9 +13,11 @@ import static com.meti.collect.option.Options.$Option;
 
 public class CatchLexer implements Lexer {
     private final JavaString input;
+    private final int indent;
 
-    public CatchLexer(JavaString input) {
+    public CatchLexer(JavaString input, int indent) {
         this.input = input;
+        this.indent = indent;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class CatchLexer implements Lexer {
                     .collect(Collectors.toList());
 
             var exceptionName = args.sliceFrom(separator.next().$());
-            return new CatchNode(exceptionTypes, exceptionName, new Content(input.sliceFrom(blockStart), 0));
+            return new CatchNode(exceptionTypes, exceptionName, new Content(input.sliceFrom(blockStart), indent), indent);
         });
     }
 }
