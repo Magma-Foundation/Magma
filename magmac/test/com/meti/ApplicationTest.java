@@ -23,7 +23,7 @@ public class ApplicationTest {
     private static Option<Path> runWithSource() {
         try {
             Files.createFile(SOURCE);
-            var list = new Application(new SingleSourceSet(SOURCE)).run().$();
+            var list = new Application(new SingleSourceSet(SOURCE), Paths.get(".")).run().$();
             return list.isEmpty() ? None.None() : Some.Some(list.get(0));
         } catch (IOException e) {
             return fail(e);
@@ -34,7 +34,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException, CompileException {
-        new Application(new SingleSourceSet(SOURCE)).run();
+        new Application(new SingleSourceSet(SOURCE), Paths.get(".")).run();
         assertFalse(Files.exists(TARGET));
     }
 

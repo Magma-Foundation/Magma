@@ -11,16 +11,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public final class Application {
     private final SourceSet source;
+    private final Path root;
 
-    public Application(SourceSet source1) {
+    public Application(SourceSet source1, Path root) {
         this.source = source1;
+        this.root = root;
     }
 
     public Result<List<Path>, CompileException> run() {
-        Set<Path> sources;
+        Set<Source> sources;
         try {
             sources = source.collectSources();
         } catch (IOException e) {
@@ -28,12 +31,10 @@ public final class Application {
         }
 
         return Streams.fromSet(sources).map(source -> Results.$Result(() -> {
-            String input;
-            try {
-                input = Files.readString(source);
-            } catch (IOException e) {
-                throw new CompileException(e);
-            }
+            var input = source.read()
+                    .mapErr(CompileException::new)
+                    .$();
+
             String output;
             try {
                 output = new Compiler(input).compile();
@@ -41,11 +42,20 @@ public final class Application {
                 throw new CompileException("Failed to compile file: '" + source + "'", e);
             }
 
-            var fileName = source.getFileName().toString();
-            var index = fileName.indexOf(".");
-            var name = fileName.substring(0, index);
-            var target = source.resolveSibling(name + ".mgs");
+            var name = source.findName();
+            var package1 = source.findPackage();
+            var target = Streams.fromList(package1)
+                    .foldRight(root, Path::resolve)
+                    .resolve(name + ".mgs");
+
             try {
+                var parent = target.getParent();
+                if (parent != null) {
+                    if(!Files.exists(parent)) {
+                        Files.createDirectories(parent);
+                    }
+                }
+
                 Files.writeString(target, output);
             } catch (IOException e) {
                 throw new CompileException(e);
