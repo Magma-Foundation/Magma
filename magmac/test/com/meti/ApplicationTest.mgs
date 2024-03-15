@@ -1,56 +1,46 @@
-import { Option } from com.meti.collect.option;
-import { Application } from com.meti.compile;
-import { CompileException } from com.meti.compile;
-import { SingleSource } from com.meti.compile;
-import { AfterEach } from org.junit.jupiter.api;
-import { Test } from org.junit.jupiter.api;
-import { IOException } from java.io;
-import { Files } from java.nio.file;
-import { Path } from java.nio.file;
-import { Paths } from java.nio.file;
-import org.junit.jupiter.api.Assertions;
+import { None } from import com.meti.collect.option;
+import { Option } from import com.meti.collect.option;
+import { Some } from import com.meti.collect.option;
+import { Application } from import com.meti.compile;
+import { CompileException } from import com.meti.compile;
+import { SingleSource } from import com.meti.compile;
+import { AfterEach } from import org.junit.jupiter.api;
+import { Test } from import org.junit.jupiter.api;
+import { IOException } from import java.io;
+import { Files } from import java.nio.file;
+import { Path } from import java.nio.file;
+import { Paths } from import java.nio.file;
+import { List } from import java.util;
+import import static org.junit.jupiter.api.Assertions;
+pub const  = pub const  = let  = Application(SingleSource(SOURCE)).run().$();
+            return list.isEmpty() ? None.None() : Some.Some(list.get(0));
+        } catch (IOException e) {
+            return fail(e);
+        } catch (CompileException e) {
+            return fail(e);
+        }
+    }
 
-export object ApplicationTest = {
-	pub const TARGET = Paths.get(".", "Index.mgs");
-	pub const SOURCE = Paths.get(".", "Index.java");
-	
-	def runWithSource() : Option[Path] => {
-		try {
-			Files.createFile(SOURCE);
-			return Application(SingleSource(SOURCE)).run().map(result => {
-                try {
-                    return result.$();
-                } catch (CompileException e) {
-                    return fail(e);
+    @Test
+    void generatesNothing() throws IOException, CompileException {
+        new Application(new SingleSource(SOURCE)).run();
+        assertFalse(Files.exists(TARGET));
+    }
 
-                }
-            });
-		}
-		catch (IOException e){
-			return fail(e);
-		}
-	}
-	
-	@Test
-	def generatesNothing() : Void ? IOException, CompileException => {
-		Application(SingleSource(SOURCE)).run();
-		assertFalse(Files.exists(TARGET));
-	}
-	
-	@Test
-	def generatesProperTarget() : Void => {
-		assertEquals(runWithSource().orElseNull(), TARGET);
-	}
-	
-	@AfterEach
-	def tearDown() : Void ? IOException => {
-		Files.deleteIfExists(SOURCE);
-		Files.deleteIfExists(TARGET);
-	}
-	
-	@Test
-	def generatesSomething() : Void => {
-		runWithSource();
-		assertTrue(Files.exists(TARGET));
-	}
+    @Test
+    void generatesProperTarget() {
+        assertEquals(runWithSource().orElseNull(), TARGET);
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(SOURCE);
+        Files.deleteIfExists(TARGET);
+    }
+
+    @Test
+    void generatesSomething() {
+        runWithSource();
+        assertTrue(Files.exists(TARGET));
+    }
 }

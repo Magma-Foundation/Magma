@@ -1,18 +1,22 @@
 package com.meti.compile.scope;
 
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.node.Node;
-
-import java.util.List;
+import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Some.Some;
 
-public record DefinitionNode(int indent, List<String> flags, String name, Node value) implements Node {
+public record DefinitionNode(int indent, java.util.ArrayList<com.meti.java.JavaString> flags, com.meti.java.JavaString name, Node value) implements Node {
     @Override
     public Option<String> render() {
-        var flagsString = String.join(" ", flags());
-        var withSuffix = flagsString.isEmpty() ? "" : flagsString + " ";
-        return Some(withSuffix + name() + " = " + value.render().orElse(""));
+        var withPrefix = Streams.fromList(flags).map(JavaString::inner)
+                .collect(Collectors.joining(" "))
+                .map(value -> value + " ")
+                .orElse("");
+
+        return Some(withPrefix + name.inner() + " = " + value.render().orElse(""));
     }
 
     @Override

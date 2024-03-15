@@ -31,7 +31,7 @@ public record Compiler(String input) {
                 exp -> new TryLexer(new JavaString(exp), indent),
                 PackageLexer::new,
                 StringLexer::new,
-                exp -> new DefinitionLexer(exp, indent),
+                exp -> new DefinitionLexer(new JavaString(exp), indent),
                 exp -> new BlockLexer(exp, indent),
                 ObjectLexer::new,
                 exp -> new ImportLexer(new JavaString(exp)),
