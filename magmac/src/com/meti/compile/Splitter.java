@@ -26,7 +26,10 @@ public record Splitter(String input) {
                 builder.append(c);
             }
         }
+
         lines.add(builder.toString());
-        return Streams.fromList(lines);
+        return Streams.fromList(lines)
+                .map(String::strip)
+                .filter(line -> !line.isEmpty());
     }
 }

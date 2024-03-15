@@ -15,7 +15,7 @@ public class TryNode implements Node {
 
     @Override
     public Option<String> render() {
-        return content.render().map(value -> "\n" + "\t".repeat(indent) + "try " + value);
+        return content.render().map(value -> "try " + value);
     }
 
     @Override

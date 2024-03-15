@@ -15,7 +15,7 @@ public class ReturnNode implements Node {
 
     @Override
     public Option<String> render() {
-        return content.render().map(value -> "\n" + "\t".repeat(indent) + "return " + value + "\n");
+        return content.render().map(value -> "return " + value);
     }
 
     @Override

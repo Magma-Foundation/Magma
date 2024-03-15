@@ -2,10 +2,22 @@ package com.meti.compile.node;
 
 import com.meti.collect.option.Option;
 
-public record Statement(Node child, int indent) implements Node {
+public class Statement implements Node {
+    protected final Node child;
+    protected final int indent;
+
+    public Statement(Node child, int indent) {
+        this.child = child;
+        this.indent = indent;
+    }
+
     @Override
     public Option<String> render() {
-        return child.render().map(value -> "\n" + "\t".repeat(indent) + value + ";");
+        return child.render().map(value -> "\n" + "\t".repeat(indent) + value + suffix());
+    }
+
+    protected String suffix() {
+        return "";
     }
 
     @Override

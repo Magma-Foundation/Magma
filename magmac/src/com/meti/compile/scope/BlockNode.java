@@ -32,7 +32,7 @@ public record BlockNode(int indent, List<? extends Node> children) implements No
                 .map(Node::render)
                 .map(output -> output.map(Optional::of).orElse(Optional.empty()))
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining("", "{", "\n" + "\t".repeat(indent) + "}\n")));
+                .collect(Collectors.joining("", "{", "\n" + "\t".repeat(indent) + "}")));
     }
 
     @Override

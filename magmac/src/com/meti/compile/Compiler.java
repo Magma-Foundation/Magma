@@ -10,7 +10,7 @@ import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Statement;
-import com.meti.compile.procedure.ConstructionLexer;
+import com.meti.compile.node.TerminatingStatement;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
 import com.meti.compile.scope.*;
@@ -18,7 +18,6 @@ import com.meti.compile.string.StringLexer;
 import com.meti.java.JavaString;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 
 import static com.meti.collect.result.Ok.Ok;
@@ -60,15 +59,15 @@ public record Compiler(String input) {
 
     private static Node transformAST(Node tree) {
         var withValue = tree.findValueAsNode()
-                .map(value -> transformAST(value))
-                .flatMap(node -> tree.withValue(node))
+                .map(Compiler::transformAST)
+                .flatMap(tree::withValue)
                 .orElse(tree);
 
         var node = withValue.findChildren()
                 .map(children -> Streams.fromList(children)
-                        .map(child -> transformAST(child))
+                        .map(Compiler::transformAST)
                         .collect(Collectors.toList()))
-                .flatMap(children -> withValue.withChildren(children))
+                .flatMap(withValue::withChildren)
                 .orElse(withValue);
 
         return transformNode(node);
@@ -79,12 +78,14 @@ public record Compiler(String input) {
             var children = node.findChildren().orElse(Collections.emptyList());
             var newChildren = Streams.fromList(children)
                     .map(child -> {
-                        if (child.is("invocation")) {
-                            return new Statement(child, node.findIndent().orElse(0) + 1);
+                        var realIndent = node.findIndent().orElse(0) + 1;
+                        if (child.is("method") || child.is("try") || child.is("catch")) {
+                            return new Statement(child, realIndent);
                         } else {
-                            return child;
+                            return new TerminatingStatement(child, realIndent);
                         }
-                    }).collect(Collectors.toList());
+                    })
+                    .collect(Collectors.toList());
             return node.withChildren(newChildren).orElse(node);
         } else {
             return node;

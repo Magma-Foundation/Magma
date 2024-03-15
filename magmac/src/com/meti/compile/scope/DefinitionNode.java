@@ -12,7 +12,7 @@ public record DefinitionNode(int indent, List<String> flags, String name, Node v
     public Option<String> render() {
         var flagsString = String.join(" ", flags());
         var withSuffix = flagsString.isEmpty() ? "" : flagsString + " ";
-        return Some("\n" + "\t".repeat(indent()) + withSuffix + name() + " = " + value.render().orElse("") + ";");
+        return Some(withSuffix + name() + " = " + value.render().orElse(""));
     }
 
     @Override
