@@ -44,6 +44,6 @@ public record ConstructionNode(Node caller, List<? extends Node> children) imple
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("construction");
     }
 }

@@ -9,6 +9,8 @@ import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
+import java.util.List;
+
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
@@ -50,8 +52,12 @@ public class InvocationLexer implements Lexer {
                     .map(arg -> new Content(arg, 0))
                     .collect(Collectors.toList());
 
-            return new InvocationNode(caller, list);
+            return create(caller, list);
         });
+    }
+
+    protected Node create(Content caller, List<Content> list) {
+        return new InvocationNode(caller, list);
     }
 
     private record State(int depth, Option<Index> furthest) {

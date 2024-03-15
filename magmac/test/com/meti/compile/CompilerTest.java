@@ -6,8 +6,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CompilerTest {
     @Test
+    void test1() throws CompileException {
+        assertCompile("SOURCE", "SOURCE");
+    }
+
+    @Test
+    void test2() throws CompileException {
+        assertCompile("new Application(SOURCE)", "new Application(SOURCE)");
+    }
+
+
+    @Test
     void test() throws CompileException {
-        var actual = new Compiler("runWithSource()").compile();
-        assertEquals("runWithSource()", actual);
+        assertCompile("runWithSource()", "runWithSource()");
+    }
+
+    private static void assertCompile(String input, String output) throws CompileException {
+        var actual = new Compiler(input).compile();
+        assertEquals(output, actual);
     }
 }
