@@ -36,7 +36,7 @@ public class CatchNode implements Node {
                 .map(JavaString::inner)
                 .collect(Collectors.joining(" | ", "(", " " + exceptionName + " )"));
 
-        return Some.Some("catch " + exceptionTypeString + value.render());
+        return Some.Some("catch " + exceptionTypeString + value.render().orElse(""));
     }
 
     @Override

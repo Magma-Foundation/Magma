@@ -16,7 +16,9 @@ export object ApplicationTest = {
 	def runWithSource() : Option[Path] => {
 try{
 Files.createFile(SOURCE)return Application(SOURCE)()}
-catch (IOException  |  CompileException e )com.meti.collect.option.Some@694f9431	}
+catch (IOException  |  CompileException e ){
+return fail(e)}
+	}
 
 	@Test
 	def generatesNothing() : Void ? IOException, CompileException => {
