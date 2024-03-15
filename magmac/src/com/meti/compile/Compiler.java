@@ -36,7 +36,7 @@ public record Compiler(String input) {
                         StringLexer::new,
                         exp -> new DefinitionLexer(new JavaString(exp), indent),
                         exp -> new BlockLexer(exp, indent),
-                        ObjectLexer::new,
+                        exp -> new ObjectLexer(new JavaString(exp)),
                         exp -> new ImportLexer(new JavaString(exp)),
                         exp -> new MethodLexer(new JavaString(exp), indent),
                         exp -> new InvocationLexer(new JavaString(exp)),
@@ -70,7 +70,7 @@ public record Compiler(String input) {
 
         List<Stream<Node>> childrenPossibilities = Streams.fromList(content)
                 .map(Compiler::lexContent)
-                .collect(Collectors.toList());
+                .collect(Collectors.toNativeList());
 
         return Streams.fromList(childrenPossibilities).foldRightFromTwo((first, second) -> {
             return Streams.crossToList(first, () -> second);
@@ -99,7 +99,7 @@ public record Compiler(String input) {
         var node = withValue.findChildren()
                 .map(children -> Streams.fromList(children)
                         .map(Compiler::transformAST)
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toNativeList()))
                 .flatMap(withValue::withChildren)
                 .orElse(withValue);
 
@@ -118,7 +118,7 @@ public record Compiler(String input) {
                             return new TerminatingStatement(child, realIndent);
                         }
                     })
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
             return node.withChildren(newChildren).orElse(node);
         } else {
             return node;
@@ -131,14 +131,14 @@ public record Compiler(String input) {
                     .split()
                     .map(line -> lexExpression(line, 0).next())
                     .flatMap(Streams::fromOption)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
 
             var outputTree = Streams.fromList(tree)
                     .filter(element -> !element.is("package"))
                     .map(Compiler::transformAST)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
 
-            return Streams.fromList(outputTree).map(node -> node.render().orElse("")).collect(Collectors.joining()).orElse("");
+            return Streams.fromList(outputTree).map(node -> node.render().orElse("")).collect(Collectors.joiningNatively()).orElse("");
         }).$();
     }
 }

@@ -18,7 +18,7 @@ public record BlockLexer(String stripped, int indent) implements Lexer {
         var split = new Splitter(stripped().substring(1, stripped().length() - 1).strip()).split();
         var content = split
                 .map(line1 -> new Content(line1, indent + 1))
-                .collect(Collectors.toList());
+                .collect(Collectors.toNativeList());
 
         return Some(new BlockNode(indent(), content));
     }

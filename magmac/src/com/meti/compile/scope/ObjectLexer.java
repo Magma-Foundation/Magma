@@ -1,26 +1,44 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
+import com.meti.java.JavaString;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.meti.collect.option.None.None;
-import static com.meti.collect.option.Some.Some;
+import static com.meti.collect.option.Options.$$;
+import static com.meti.collect.option.Options.$Option;
 
-public record ObjectLexer(String stripped) implements Lexer {
+public record ObjectLexer(JavaString stripped) implements Lexer {
     @Override
     public Option<Node> lex() {
-        if (!stripped().startsWith("public class ")) return None();
-        var start = stripped().indexOf("{");
+        return $Option(() -> {
+            var bodyStart = stripped.firstIndexOfChar('{').$();
+            var args = stripped.sliceTo(bodyStart)
+                    .strip()
+                    .split(" ")
+                    .collect(Collectors.toList());
 
-        var name = stripped().substring("public class ".length(), start).strip();
-        var content = stripped().substring(start);
-        var contentOutput = new Content(content, 0);
+            var nameList = args.popLast().$();
+            var flags = nameList.b();
+            var name = nameList.a();
 
-        var flags = List.of("export");
-        return Some(new ObjectNode(flags, name, contentOutput));
+            if(!flags.contains(new JavaString("class"))) $$();
+
+            var content = stripped.sliceFrom(bodyStart);
+            var contentOutput = new Content(content, 0);
+
+            var outputFlags = new JavaList<JavaString>();
+            if (flags.contains(new JavaString("public"))) {
+                outputFlags = JavaList.from(new JavaString("export"));
+            }
+
+            return new ObjectNode(outputFlags, name, contentOutput);
+        });
     }
 }

@@ -12,7 +12,7 @@ class SplitterTest {
     void invoke_lambda() {
         assertIterableEquals(new Splitter("test(() -> {})")
                 .split()
-                .collect(Collectors.toList()),
+                .collect(Collectors.toNativeList()),
                 List.of("test(() -> {})"));
     }
 }

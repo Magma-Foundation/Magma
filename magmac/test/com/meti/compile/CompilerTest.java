@@ -1,9 +1,7 @@
 package com.meti.compile;
 
 import com.meti.collect.stream.Collectors;
-import com.meti.collect.stream.Stream;
 import com.meti.compile.node.Content;
-import com.meti.compile.node.Node;
 import com.meti.compile.scope.DefinitionNode;
 import com.meti.compile.string.StringNode;
 import com.meti.java.JavaString;
@@ -18,7 +16,7 @@ class CompilerTest extends CompiledTest {
     @Test
     void lexHead() {
         var actual = Compiler.lexHead("\"var actual = new Compiler(input)\"", 0)
-                .collect(Collectors.toList());
+                .collect(Collectors.toNativeList());
 
         assertIterableEquals(List.of(
                 new StringNode("var actual = new Compiler(input)"),
@@ -34,14 +32,14 @@ class CompilerTest extends CompiledTest {
                 new JavaString("actual"),
                 new Content("new Compiler(input)\"", 0));
 
-        var actual = Compiler.lexTree(input).collect(Collectors.toList());
+        var actual = Compiler.lexTree(input).collect(Collectors.toNativeList());
         assertIterableEquals(Collections.emptyList(), actual);
     }
 
     @Test
     void lexTree0() {
         var input = new StringNode("var actual = new Compiler(input)");
-        var actual = Compiler.lexTree(input).collect(Collectors.toList());
+        var actual = Compiler.lexTree(input).collect(Collectors.toNativeList());
         assertIterableEquals(Collections.singletonList(input), actual);
     }
 

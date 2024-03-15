@@ -1,8 +1,10 @@
 package com.meti.collect.stream;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.result.Ok;
 import com.meti.collect.result.Result;
+import com.meti.java.JavaString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +13,7 @@ import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
 public class Collectors {
-    public static <T> Collector<T, List<T>> toList() {
+    public static <T> Collector<T, List<T>> toNativeList() {
         return new Collector<>() {
             @Override
             public List<T> initial() {
@@ -26,11 +28,11 @@ public class Collectors {
         };
     }
 
-    public static Collector<String, Option<String>> joining() {
-        return joining("");
+    public static Collector<String, Option<String>> joiningNatively() {
+        return joiningNatively("");
     }
 
-    public static Collector<String, Option<String>> joining(String delimiter) {
+    public static Collector<String, Option<String>> joiningNatively(String delimiter) {
         return new Collector<>() {
             @Override
             public Option<String> initial() {
@@ -42,6 +44,26 @@ public class Collectors {
                 if (current.isEmpty()) return Some(element);
 
                 return current.map(currentValue -> currentValue + delimiter + element);
+            }
+        };
+    }
+
+    public static Collector<JavaString, Option<JavaString>> joining() {
+        return joining(JavaString.Empty);
+    }
+
+    public static Collector<JavaString, Option<JavaString>> joining(JavaString delimiter) {
+        return new Collector<>() {
+            @Override
+            public Option<JavaString> initial() {
+                return None();
+            }
+
+            @Override
+            public Option<JavaString> fold(Option<JavaString> current, JavaString element) {
+                if (current.isEmpty()) return Some(element);
+
+                return current.map(currentValue -> currentValue.concatOwned(delimiter).concatOwned(element));
             }
         };
     }
@@ -70,6 +92,20 @@ public class Collectors {
             @Override
             public Option<C> fold(Option<C> current, Option<T> element) {
                 return current.and(element).map(tuple -> list.fold(tuple.a(), tuple.b()));
+            }
+        };
+    }
+
+    public static <T> Collector<T, JavaList<T>> toList() {
+        return new Collector<>() {
+            @Override
+            public JavaList<T> initial() {
+                return new JavaList<>();
+            }
+
+            @Override
+            public JavaList<T> fold(JavaList<T> current, T element) {
+                return current.add(element);
             }
         };
     }

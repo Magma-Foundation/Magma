@@ -13,6 +13,8 @@ import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
 public record JavaString(String inner) {
+    public static final JavaString Empty = new JavaString("");
+
     @Override
     public String toString() {
         return inner;
@@ -117,5 +119,13 @@ public record JavaString(String inner) {
 
     public boolean equalsToSlice(String slice) {
         return this.inner.equals(slice);
+    }
+
+    public JavaString concatOwned(JavaString other) {
+        return new JavaString(this.inner + other.inner);
+    }
+
+    public JavaString concatSlice(String other) {
+        return new JavaString(this.inner + other);
     }
 }

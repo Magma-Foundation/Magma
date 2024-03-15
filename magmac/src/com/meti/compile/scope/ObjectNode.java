@@ -1,13 +1,15 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Collectors;
 import com.meti.compile.node.Node;
-
-import java.util.List;
+import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Some.Some;
 
-public record ObjectNode(List<String> flags, String name, Node value) implements Node {
+public record ObjectNode(JavaList<JavaString> flags, JavaString name,
+                         Node value) implements Node {
     @Override
     public Option<Node> findValueAsNode() {
         return Some(value);
@@ -20,8 +22,12 @@ public record ObjectNode(List<String> flags, String name, Node value) implements
 
     @Override
     public Option<String> render() {
-        var flagsString = !flags().isEmpty() ? String.join(" ", flags()) + " " : "";
-        return Some("\n" + flagsString + "object " + name() + " = " + value.render().orElse(""));
+        var flagsString = flags.stream()
+                .collect(Collectors.joining(new JavaString(" ")))
+                .map(value -> value.concatSlice(" "))
+                .orElse(JavaString.Empty);
+
+        return Some("\n" + flagsString + "object " + name.inner() + " = " + value.render().orElse(""));
     }
 
     @Override

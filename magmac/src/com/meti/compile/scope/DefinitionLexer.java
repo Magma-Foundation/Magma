@@ -9,12 +9,9 @@ import com.meti.java.JavaString;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
-import static com.meti.collect.option.Some.Some;
 
 public record DefinitionLexer(JavaString stripped, int indent) implements Lexer {
     @Override
@@ -36,7 +33,7 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
                         .strip()
                         .split(" ")
                         .map(JavaString::inner)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toNativeList());
             }).orElseGet(() -> {
                 return Collections.singletonList(withType.inner());
             });

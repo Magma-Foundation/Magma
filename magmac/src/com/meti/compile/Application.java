@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 public final class Application {
     private final SourceSet source;
@@ -61,6 +60,6 @@ public final class Application {
                 throw new CompileException(e);
             }
             return target;
-        })).collect(Collectors.exceptionally(Collectors.toList()));
+        })).collect(Collectors.exceptionally(Collectors.toNativeList()));
     }
 }

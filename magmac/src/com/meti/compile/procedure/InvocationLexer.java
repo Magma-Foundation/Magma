@@ -48,7 +48,7 @@ public class InvocationLexer implements Lexer {
                     .map(JavaString::strip)
                     .filter(value -> !value.isEmpty())
                     .map(arg -> new Content(arg, 0))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
 
             return create(caller, list);
         });

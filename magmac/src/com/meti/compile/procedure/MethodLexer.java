@@ -37,7 +37,7 @@ public record MethodLexer(JavaString stripped, int indent) implements Lexer {
                     .map(JavaString::inner)
                     .map(TypeCompiler::new)
                     .map(TypeCompiler::compile)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
 
             var content = new Content(stripped.sliceFrom(contentStart).strip(), indent());
             var more = stripped.sliceBetween(paramEnd.next().$().to(contentStart).$()).strip();

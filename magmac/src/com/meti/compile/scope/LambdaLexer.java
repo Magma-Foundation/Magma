@@ -9,10 +9,6 @@ import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import static com.meti.collect.option.Options.$Option;
 
 public class LambdaLexer implements Lexer {
@@ -35,7 +31,7 @@ public class LambdaLexer implements Lexer {
                     .map(input::sliceBetween)
                     .map(args -> args.split(",").map(JavaString::strip).filter(value -> !value.isEmpty()))
                     .orElseGet(() -> Streams.from(argumentString))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toNativeList());
 
             var content = input.sliceFrom(index.next("->".length()).$()).strip();
             var contentNode = new Content(content, 0);
