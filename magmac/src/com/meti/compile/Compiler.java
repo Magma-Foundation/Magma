@@ -37,9 +37,9 @@ public record Compiler(String input) {
                 ImportLexer::new,
                 exp -> new MethodLexer(new JavaString(exp), indent),
                 exp -> new InvocationLexer(new JavaString(exp)),
+                exp -> new LambdaLexer(new JavaString(exp)),
                 exp -> new FieldLexer(new JavaString(exp)),
-                VariableLexer::new,
-                exp -> new LambdaLexer(new JavaString(exp))
+                VariableLexer::new
         ).map(constructor -> constructor.apply(line.strip())).map(Lexer::lex).flatMap(Streams::fromOption).next().into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to compile: '%s'.".formatted(line))).flatMapValue(Compiler::lexTree);
     }
 

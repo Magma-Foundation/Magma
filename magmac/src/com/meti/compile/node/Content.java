@@ -59,6 +59,6 @@ public class Content implements Node {
 
     @Override
     public boolean is(String name) {
-        throw new UnsupportedOperationException();
+        return name.equals("content");
     }
 }

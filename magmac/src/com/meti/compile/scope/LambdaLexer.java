@@ -5,6 +5,7 @@ import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
+import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
@@ -36,7 +37,9 @@ public class LambdaLexer implements Lexer {
                     .orElseGet(() -> Streams.from(argumentString))
                     .collect(Collectors.toList());
 
-            return new LambdaNode(arguments);
+            var content = input.sliceFrom(index.next("->".length()).$()).strip();
+            var contentNode = new Content(content, 0);
+            return new LambdaNode(arguments, contentNode);
         });
     }
 }
