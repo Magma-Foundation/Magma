@@ -2,6 +2,7 @@ package com.meti.collect.option;
 
 import com.meti.collect.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,4 +32,6 @@ public interface Option<T> {
     default <R> R into(Function<Option<T>, R> mapper) {
         return mapper.apply(this);
     }
+
+    void ifPresent(Consumer<T> consumer);
 }

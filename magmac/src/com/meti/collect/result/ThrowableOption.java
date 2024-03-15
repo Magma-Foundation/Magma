@@ -4,14 +4,21 @@ import com.meti.collect.Tuple;
 import com.meti.collect.option.IntentionalException;
 import com.meti.collect.option.Option;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ThrowableOption<T> implements Option<T> {
     private final Option<T> parent;
 
+
     public ThrowableOption(Option<T> parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public void ifPresent(Consumer<T> consumer) {
+        parent.ifPresent(consumer);
     }
 
     public <E extends Throwable> Result<T, E> orElseThrow(Supplier<E> supplier) {

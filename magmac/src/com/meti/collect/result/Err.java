@@ -2,6 +2,7 @@ package com.meti.collect.result;
 
 import com.meti.collect.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Err<T, E extends Throwable> implements Result<T, E> {
@@ -37,6 +38,11 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
         } catch (RuntimeException e) {
             throw new RuntimeException(value);
         }
+    }
+
+    @Override
+    public void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer) {
+        errorConsumer.accept(value);
     }
 
     @Override

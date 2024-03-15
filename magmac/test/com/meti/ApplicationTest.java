@@ -3,6 +3,7 @@ package com.meti;
 import com.meti.collect.option.Option;
 import com.meti.compile.Application;
 import com.meti.compile.CompileException;
+import com.meti.compile.Source;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,15 +21,22 @@ public class ApplicationTest {
     private static Option<Path> runWithSource() {
         try {
             Files.createFile(SOURCE);
-            return new Application(SOURCE).run();
-        } catch (IOException | CompileException e) {
+            return new Application(new Source(SOURCE)).run().map(result -> {
+                try {
+                    return result.$();
+                } catch (CompileException e) {
+                    return fail(e);
+
+                }
+            });
+        } catch (IOException e) {
             return fail(e);
         }
     }
 
     @Test
     void generatesNothing() throws IOException, CompileException {
-        new Application(SOURCE).run();
+        new Application(new Source(SOURCE)).run();
         assertFalse(Files.exists(TARGET));
     }
 

@@ -2,7 +2,11 @@ package com.meti.collect.stream;
 
 import com.meti.collect.option.Option;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -55,5 +59,9 @@ public class Streams {
                 }
             }
         };
+    }
+
+    public static <T> Stream<T> fromSet(Set<T> set) {
+        return fromList(new ArrayList<>(set));
     }
 }

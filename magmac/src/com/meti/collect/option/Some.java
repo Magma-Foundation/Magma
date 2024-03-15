@@ -2,6 +2,7 @@ package com.meti.collect.option;
 
 import com.meti.collect.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,5 +70,10 @@ public class Some<T> implements Option<T> {
     @Override
     public T $() {
         return value;
+    }
+
+    @Override
+    public void ifPresent(Consumer<T> consumer) {
+        consumer.accept(value);
     }
 }

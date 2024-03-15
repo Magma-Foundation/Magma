@@ -2,6 +2,7 @@ package com.meti.collect.result;
 
 import com.meti.collect.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface Result<T, E extends Throwable> {
@@ -14,4 +15,6 @@ public interface Result<T, E extends Throwable> {
     <R> Result<Tuple<T, R>, E> and(Result<R, E> other);
 
     <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
+
+    void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer);
 }

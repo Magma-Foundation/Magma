@@ -2,6 +2,7 @@ package com.meti.collect.result;
 
 import com.meti.collect.Tuple;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Ok<T, E extends Throwable> implements Result<T, E> {
@@ -33,6 +34,11 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     @Override
     public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Ok<>(value);
+    }
+
+    @Override
+    public void consume(Consumer<T> valueConsumer, Consumer<E> errorConsumer) {
+        valueConsumer.accept(value);
     }
 
     @Override
