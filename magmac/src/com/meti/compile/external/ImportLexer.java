@@ -18,8 +18,13 @@ public record ImportLexer(JavaString stripped) implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
-            var prefix = stripped.firstIndexOfSlice("import ").$();
-            var staticIndex = stripped.firstIndexOfSlice("import static ");
+            var prefix = stripped.firstIndexOfSlice("import ")
+                    .$()
+                    .next("import ".length())
+                    .$();
+
+            var staticIndex = stripped.firstIndexOfSlice("import static ")
+                    .flatMap(index -> index.next("import static ".length()));
 
             var content = stripped.sliceFrom(staticIndex.orElse(prefix));
 
