@@ -8,4 +8,14 @@ public class ImportTest extends CompiledTest {
     void testStatic() {
         assertCompile("import static Test.a", "import { a } from Test;\n");
     }
+
+    @Test
+    void testStaticAll() {
+        assertCompile("import static Test.*", "import Test;\n");
+    }
+
+    @Test
+    void simple() {
+        assertCompile("import parent.Child", "import { Child } from parent;\n");
+    }
 }
