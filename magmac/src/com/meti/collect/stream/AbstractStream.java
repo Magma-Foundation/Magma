@@ -6,10 +6,17 @@ import com.meti.collect.option.Option;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.meti.collect.option.None.None;
 
 public abstract class AbstractStream<T> implements Stream<T> {
+
+    @Override
+    public <R> Stream<Tuple<T, R>> cross(Supplier<Stream<R>> other) {
+        return flatMap(value -> other.get().map(otherValue -> new Tuple<>(value, otherValue)));
+    }
+
     @Override
     public <C> C foldRight(C initial, BiFunction<C, T, C> folder) {
         var current = initial;
@@ -25,6 +32,11 @@ public abstract class AbstractStream<T> implements Stream<T> {
                 return current;
             }
         }
+    }
+
+    @Override
+    public <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder) {
+        return next().and(next()).map(ttTuple -> initial.apply(ttTuple.a(), ttTuple.b())).map(initial1 -> foldRight(initial1, folder));
     }
 
     @Override

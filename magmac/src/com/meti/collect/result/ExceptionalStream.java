@@ -9,9 +9,20 @@ import com.meti.collect.stream.Stream;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<T, E>> {
     private final Stream<Result<T, E>> parent;
+
+    @Override
+    public <R> Stream<Tuple<Result<T, E>, R>> cross(Supplier<Stream<R>> other) {
+        return parent.cross(other);
+    }
+
+    @Override
+    public <C> Option<C> foldRightFromTwo(BiFunction<Result<T, E>, Result<T, E>, C> initial, BiFunction<C, Result<T, E>, C> folder) {
+        return parent.foldRightFromTwo(initial, folder);
+    }
 
     @Override
     public <R> R into(Function<Stream<Result<T, E>>, R> mapper) {

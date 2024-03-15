@@ -17,6 +17,7 @@ import com.meti.compile.string.StringLexer;
 import com.meti.java.JavaString;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.meti.collect.result.Results.$Result;
@@ -47,21 +48,37 @@ public record Compiler(String input) {
                 .flatMap(Streams::fromOption);
     }
 
-    private static Stream<Node> lexTree(Node node) {
-        var withValues = node.findValueAsNode()
-                .map(Compiler::lexContent)
-                .orElse(Streams.empty())
-                .map(content -> node.withValue(content).orElse(node));
-
-        return withValues.map(withValue -> {
-            return withValue.findChildren().map(oldChildren -> {
-                var newChildren = Streams.fromList(oldChildren)
-                        .flatMap(Compiler::lexContent)
-                        .collect(Collectors.toList());
-
-                return withValue.withChildren(newChildren).orElse(withValue);
+    public static Stream<Node> lexTree(Node node) {
+        var valuesStream = node.findValueAsNode().map(Compiler::lexContent);
+        var childrenStream = node.findChildren().map(Compiler::lexContent);
+        
+        if (valuesStream.isPresent() && childrenStream.isPresent()) {
+            return valuesStream.orElse(Streams.empty()).cross(() -> childrenStream.orElse(Streams.empty())).map(tuple -> {
+                return node.withValue(tuple.a()).orElse(node).withChildren(tuple.b()).orElse(node);
             });
-        }).flatMap(Streams::fromOption);
+        } else if (valuesStream.isPresent()) {
+            return valuesStream.orElse(Streams.empty()).map(valuePossibility -> node.withValue(valuePossibility).orElse(node));
+        } else if (childrenStream.isEmpty()) {
+            return childrenStream.orElse(Streams.empty()).map(childrenPossibilities -> node.withChildren(childrenPossibilities).orElse(node));
+        } else {
+            return Streams.from(node);
+        }
+    }
+
+    private static Stream<List<Node>> lexContent(List<? extends Node> content) {
+        List<Stream<Node>> childrenPossibilities = Streams.fromList(content)
+                .map(Compiler::lexContent)
+                .collect(Collectors.toList());
+
+        return Streams.fromList(childrenPossibilities).foldRightFromTwo((first, second) -> {
+            return Streams.crossToList(first, () -> second);
+        }, (listStream, nodeStream) -> Streams.crossListToList(listStream, () -> nodeStream)).orElseGet(() -> {
+            if (childrenPossibilities.size() == 1) {
+                return childrenPossibilities.get(0).map(Collections::singletonList);
+            } else {
+                return Streams.empty();
+            }
+        });
     }
 
     private static Stream<Node> lexContent(Node content) {
