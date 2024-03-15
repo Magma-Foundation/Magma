@@ -51,14 +51,14 @@ public record Compiler(String input) {
     public static Stream<Node> lexTree(Node node) {
         var valuesStream = node.findValueAsNode().map(Compiler::lexContent);
         var childrenStream = node.findChildren().map(Compiler::lexContent);
-        
+
         if (valuesStream.isPresent() && childrenStream.isPresent()) {
             return valuesStream.orElse(Streams.empty()).cross(() -> childrenStream.orElse(Streams.empty())).map(tuple -> {
                 return node.withValue(tuple.a()).orElse(node).withChildren(tuple.b()).orElse(node);
             });
         } else if (valuesStream.isPresent()) {
             return valuesStream.orElse(Streams.empty()).map(valuePossibility -> node.withValue(valuePossibility).orElse(node));
-        } else if (childrenStream.isEmpty()) {
+        } else if (childrenStream.isPresent()) {
             return childrenStream.orElse(Streams.empty()).map(childrenPossibilities -> node.withChildren(childrenPossibilities).orElse(node));
         } else {
             return Streams.from(node);
@@ -66,6 +66,8 @@ public record Compiler(String input) {
     }
 
     private static Stream<List<Node>> lexContent(List<? extends Node> content) {
+        if(content.isEmpty()) return Streams.from(Collections.emptyList());
+
         List<Stream<Node>> childrenPossibilities = Streams.fromList(content)
                 .map(Compiler::lexContent)
                 .collect(Collectors.toList());
@@ -127,7 +129,8 @@ public record Compiler(String input) {
         return $Result(() -> {
             var tree = new Splitter(this.input())
                     .split()
-                    .flatMap(line -> lexExpression(line, 0))
+                    .map(line -> lexExpression(line, 0).next())
+                    .flatMap(Streams::fromOption)
                     .collect(Collectors.toList());
 
             var outputTree = Streams.fromList(tree)
