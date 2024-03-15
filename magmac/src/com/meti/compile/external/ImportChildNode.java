@@ -5,10 +5,10 @@ import com.meti.collect.option.Option;
 
 import static com.meti.collect.option.Some.Some;
 
-public record ImportChildNode(String child, String parent) implements Node {
+public record ImportChildNode(com.meti.java.JavaString child, com.meti.java.JavaString parent) implements Node {
     @Override
     public Option<String> render() {
-        return Some("import { " + child() + " } from " + parent() + ";\n");
+        return Some("import { " + child.inner() + " } from " + parent.inner() + ";\n");
     }
 
     @Override

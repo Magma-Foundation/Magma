@@ -34,7 +34,7 @@ public record Compiler(String input) {
                 exp -> new DefinitionLexer(exp, indent),
                 exp -> new BlockLexer(exp, indent),
                 ObjectLexer::new,
-                ImportLexer::new,
+                exp -> new ImportLexer(new JavaString(exp)),
                 exp -> new MethodLexer(new JavaString(exp), indent),
                 exp -> new InvocationLexer(new JavaString(exp)),
                 exp -> new LambdaLexer(new JavaString(exp)),

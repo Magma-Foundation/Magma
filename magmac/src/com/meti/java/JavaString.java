@@ -114,4 +114,8 @@ public record JavaString(String inner) {
     public boolean endsWithSlice(String slice) {
         return this.inner.endsWith(slice);
     }
+
+    public boolean equalsToSlice(String slice) {
+        return this.inner.equals(slice);
+    }
 }
