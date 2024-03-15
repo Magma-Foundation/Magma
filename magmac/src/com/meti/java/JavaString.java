@@ -102,4 +102,8 @@ public record JavaString(String inner) {
             throw new RuntimeException(index + " " + this.inner);
         }
     }
+
+    public boolean isEmpty() {
+        return this.inner.isEmpty();
+    }
 }

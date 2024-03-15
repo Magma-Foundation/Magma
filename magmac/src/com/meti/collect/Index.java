@@ -12,7 +12,7 @@ public record Index(int value, int length) {
 
     public Option<Index> next(int more) {
         var next = value + more;
-        if (next < length) {
+        if (next <= length) {
             return Some(new Index(next, length));
         } else {
             return None();

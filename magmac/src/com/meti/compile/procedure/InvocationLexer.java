@@ -1,6 +1,7 @@
 package com.meti.compile.procedure;
 
 import com.meti.collect.Index;
+import com.meti.collect.Range;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
@@ -38,10 +39,16 @@ public class InvocationLexer implements Lexer {
                 return state;
             });
 
-            var prefixIndex = prefix.next("new ".length()).$();
+            var prefixIndex = prefix.next(prefix().length()).$();
             var start = furthestComputer.furthest.$();
             var caller = new Content(stripped.sliceBetween(prefixIndex.to(start).$()), 0);
-            var list = stripped.sliceBetween(start.next().$().to(end).$()).split(",").map(arg -> new Content(arg, 0)).collect(Collectors.toList());
+            var range = start.next().$().to(end).$();
+            var list = stripped.sliceBetween(range)
+                    .split(",")
+                    .map(JavaString::strip)
+                    .filter(value -> !value.isEmpty())
+                    .map(arg -> new Content(arg, 0))
+                    .collect(Collectors.toList());
 
             return new InvocationNode(caller, list);
         });

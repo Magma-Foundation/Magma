@@ -3,6 +3,8 @@ package com.meti.compile.node;
 import com.meti.collect.option.Option;
 import com.meti.java.JavaString;
 
+import java.util.Objects;
+
 import static com.meti.collect.option.Some.Some;
 
 public class Content implements Node {
@@ -17,6 +19,19 @@ public class Content implements Node {
     public Content(String value, int indent) {
         this.value = value;
         this.indent = indent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Content content = (Content) o;
+        return indent == content.indent && Objects.equals(value, content.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, indent);
     }
 
     @Override

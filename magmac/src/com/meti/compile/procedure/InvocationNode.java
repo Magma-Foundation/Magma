@@ -3,6 +3,7 @@ package com.meti.compile.procedure;
 import com.meti.collect.option.Option;
 import com.meti.compile.node.Node;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,6 +11,10 @@ import java.util.stream.Collectors;
 import static com.meti.collect.option.Some.Some;
 
 public record InvocationNode(Node caller, List<? extends Node> children) implements Node {
+    public InvocationNode(Node caller) {
+        this(caller, new ArrayList<>());
+    }
+
     @Override
     public Option<List<? extends Node>> findChildren() {
         return Some(children);
