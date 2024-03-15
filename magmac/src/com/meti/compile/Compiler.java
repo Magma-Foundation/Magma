@@ -14,6 +14,7 @@ import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
 import com.meti.compile.scope.*;
 import com.meti.compile.string.StringLexer;
+import com.meti.compile.string.TextBlockLexer;
 import com.meti.java.JavaString;
 
 import java.util.Collections;
@@ -29,11 +30,12 @@ public record Compiler(String input) {
 
     public static Stream<Node> lexHead(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
+                        exp -> new TextBlockLexer(new JavaString(exp)),
+                        exp -> new StringLexer(new JavaString(exp)),
                         exp -> new CatchLexer(new JavaString(exp), indent),
                         exp -> new ReturnLexer(new JavaString(exp), indent),
                         exp -> new TryLexer(new JavaString(exp), indent),
                         PackageLexer::new,
-                        exp -> new StringLexer(new JavaString(exp)),
                         exp -> new ObjectLexer(new JavaString(exp)),
                         exp -> new BlockLexer(exp, indent),
                         exp -> new MethodLexer(new JavaString(exp), indent),
@@ -66,7 +68,7 @@ public record Compiler(String input) {
     }
 
     private static Stream<List<Node>> lexContent(List<? extends Node> content) {
-        if(content.isEmpty()) return Streams.from(Collections.emptyList());
+        if (content.isEmpty()) return Streams.from(Collections.emptyList());
 
         List<Stream<Node>> childrenPossibilities = Streams.fromList(content)
                 .map(Compiler::lexContent)

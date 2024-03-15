@@ -19,7 +19,7 @@ class CompilerTest extends CompiledTest {
                 .collect(Collectors.toNativeList());
 
         assertIterableEquals(List.of(
-                new StringNode("var actual = new Compiler(input)"),
+                new StringNode(new JavaString("var actual = new Compiler(input)")),
                 new DefinitionNode(0, Collections.emptyList(),
                         new JavaString("actual"),
                         new Content("new Compiler(input)\"", 0))
@@ -38,7 +38,7 @@ class CompilerTest extends CompiledTest {
 
     @Test
     void lexTree0() {
-        var input = new StringNode("var actual = new Compiler(input)");
+        var input = new StringNode(new JavaString("var actual = new Compiler(input)"));
         var actual = Compiler.lexTree(input).collect(Collectors.toNativeList());
         assertIterableEquals(Collections.singletonList(input), actual);
     }

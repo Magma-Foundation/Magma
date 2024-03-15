@@ -128,4 +128,8 @@ public record JavaString(String inner) {
     public JavaString concatSlice(String other) {
         return new JavaString(this.inner + other);
     }
+
+    public Option<Index> lastIndexOfSlice(String slice) {
+        return wrapNegativeIndex(this.inner.lastIndexOf(slice));
+    }
 }
