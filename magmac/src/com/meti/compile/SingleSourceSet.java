@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
-public record SingleSource(Path source) implements Source {
+public record SingleSourceSet(Path source) implements SourceSet {
     @Override
     public Set<Path> collectSources() {
         var sources = new HashSet<Path>();

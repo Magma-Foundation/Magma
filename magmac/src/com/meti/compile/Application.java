@@ -1,6 +1,5 @@
 package com.meti.compile;
 
-import com.meti.collect.option.Some;
 import com.meti.collect.result.Err;
 import com.meti.collect.result.Result;
 import com.meti.collect.result.Results;
@@ -14,9 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 public final class Application {
-    private final Source source;
+    private final SourceSet source;
 
-    public Application(Source source1) {
+    public Application(SourceSet source1) {
         this.source = source1;
     }
 

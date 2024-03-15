@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record DirectorySource(Path directory) implements Source {
+public record DirectorySourceSet(Path directory) implements SourceSet {
     @Override
     public Set<Path> collectSources() {
         try (var stream = Files.walk(directory)) {
