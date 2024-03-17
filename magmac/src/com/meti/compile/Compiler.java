@@ -45,7 +45,8 @@ public record Compiler(String input) {
                         exp -> new InvocationLexer(new JavaString(exp)),
                         exp -> new LambdaLexer(new JavaString(exp)),
                         exp -> new FieldLexer(new JavaString(exp)),
-                        VariableLexer::new
+                        VariableLexer::new,
+                        exp -> new InterfaceLexer(new JavaString(exp))
                 ).map(constructor -> constructor.apply(line.strip()))
                 .map(Lexer::lex)
                 .flatMap(Streams::fromOption);
