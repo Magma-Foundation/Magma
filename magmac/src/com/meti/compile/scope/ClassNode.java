@@ -2,7 +2,6 @@ package com.meti.compile.scope;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
-import com.meti.collect.stream.Collectors;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
@@ -22,12 +21,7 @@ public record ClassNode(JavaList<JavaString> flags, JavaString name,
 
     @Override
     public Option<String> render() {
-        var flagsString = flags.stream()
-                .collect(Collectors.joining(new JavaString(" ")))
-                .map(value -> value.concatSlice(" "))
-                .orElse(JavaString.Empty);
-
-        return Some("\n" + flagsString + "object " + name.inner() + " = " + value.render().orElse(""));
+        return new ObjectRenderer(this).render();
     }
 
     @Override
