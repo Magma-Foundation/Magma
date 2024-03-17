@@ -1,6 +1,5 @@
 package com.meti.compile.scope;
 
-import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
@@ -9,13 +8,10 @@ import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
 
-public record ObjectLexer(JavaString stripped) implements Lexer {
+public record ClassLexer(JavaString stripped) implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
@@ -41,7 +37,7 @@ public record ObjectLexer(JavaString stripped) implements Lexer {
                 outputFlags = JavaList.from(new JavaString("export"));
             }
 
-            return new ObjectNode(outputFlags, name, contentOutput);
+            return new ClassNode(outputFlags, name, contentOutput);
         });
     }
 }

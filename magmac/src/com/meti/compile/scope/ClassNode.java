@@ -8,8 +8,8 @@ import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Some.Some;
 
-public record ObjectNode(JavaList<JavaString> flags, JavaString name,
-                         Node value) implements Node {
+public record ClassNode(JavaList<JavaString> flags, JavaString name,
+                        Node value) implements Node {
     @Override
     public Option<Node> findValueAsNode() {
         return Some(value);
@@ -17,7 +17,7 @@ public record ObjectNode(JavaList<JavaString> flags, JavaString name,
 
     @Override
     public Option<Node> withValue(Node value) {
-        return Some(new ObjectNode(flags, name, value));
+        return Some(new ClassNode(flags, name, value));
     }
 
     @Override
