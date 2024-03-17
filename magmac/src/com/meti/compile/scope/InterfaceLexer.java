@@ -1,7 +1,8 @@
 package com.meti.compile.scope;
 
-import com.meti.collect.Index;
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -19,17 +20,22 @@ public class InterfaceLexer implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
-            var keywordIndex = root.firstIndexOfSlice("interface ")
-                    .$()
-                    .next("interface ".length())
-                    .$();
+            var keywordStart = root.firstIndexOfSlice("interface ").$();
+            var keywordEnd = keywordStart.next("interface ".length()).$();
+
+            var flags = root.sliceTo(keywordStart).strip().split(" ").collect(Collectors.toList());
 
             var contentStart = root.firstIndexOfChar('{').$();
 
-            var name = root.sliceBetween(keywordIndex.to(contentStart).$()).strip();
+            var name = root.sliceBetween(keywordEnd.to(contentStart).$()).strip();
             var content = new Content(root.sliceFrom(contentStart), 0);
 
-            return new TraitNode(name, content);
+            var list = new JavaList<JavaString>();
+            if (flags.contains(new JavaString("public"))) {
+                list = list.add(new JavaString("export"));
+            }
+
+            return new TraitNode(name, content, list);
         });
     }
 }

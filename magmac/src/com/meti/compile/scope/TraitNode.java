@@ -1,18 +1,30 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
-import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
 public class TraitNode implements Node {
     private final JavaString name;
     private final Node content;
+    private final JavaList<JavaString> flags;
 
-    public TraitNode(JavaString name, Node content) {
+    public TraitNode(JavaString name, Node content, JavaList<JavaString> flags) {
         this.name = name;
         this.content = content;
+        this.flags = flags;
+    }
+
+    @Override
+    public Option<Node> withValue(Node value) {
+        return Some.Some(new TraitNode(name, value, flags));
+    }
+
+    @Override
+    public Option<Node> findValueAsNode() {
+        return Some.Some(content);
     }
 
     @Override
