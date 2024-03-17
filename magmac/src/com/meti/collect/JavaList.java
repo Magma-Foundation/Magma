@@ -51,4 +51,8 @@ public class JavaList<T> {
     public Stream<T> stream() {
         return Streams.fromList(list);
     }
+
+    public List<T> unwrap() {
+        return list;
+    }
 }

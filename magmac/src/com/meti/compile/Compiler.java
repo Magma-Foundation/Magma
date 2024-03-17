@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Stream;
@@ -8,9 +9,7 @@ import com.meti.compile.attempt.CatchLexer;
 import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
-import com.meti.compile.node.Node;
-import com.meti.compile.node.Statement;
-import com.meti.compile.node.TerminatingStatement;
+import com.meti.compile.node.*;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
 import com.meti.compile.scope.*;
@@ -53,17 +52,20 @@ public record Compiler(String input) {
     }
 
     public static Stream<Node> lexTree(Node node) {
-        var valuesStream = node.findValueAsNode().map(Compiler::lexContent);
-        var childrenStream = node.findChildren().map(Compiler::lexContent);
+        var valuesStream = node.apply("value").flatMap(Attribute::asNode).map(Compiler::lexContent);
+        var childrenStream = node.apply("children")
+                .flatMap(Attribute::asListOfNodes)
+                .<List<? extends Node>>map(JavaList::unwrap).map(Compiler::lexContent);
 
         if (valuesStream.isPresent() && childrenStream.isPresent()) {
             return valuesStream.orElse(Streams.empty()).cross(() -> childrenStream.orElse(Streams.empty())).map(tuple -> {
-                return node.withValue(tuple.a()).orElse(node).withChildren(tuple.b()).orElse(node);
+                Node node1 = node.with("value", new NodeAttribute(tuple.a())).orElse(node);
+                return node1.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) tuple.b()))).orElse(node);
             });
         } else if (valuesStream.isPresent()) {
-            return valuesStream.orElse(Streams.empty()).map(valuePossibility -> node.withValue(valuePossibility).orElse(node));
+            return valuesStream.orElse(Streams.empty()).map(valuePossibility -> node.with("value", new NodeAttribute(valuePossibility)).orElse(node));
         } else if (childrenStream.isPresent()) {
-            return childrenStream.orElse(Streams.empty()).map(childrenPossibilities -> node.withChildren(childrenPossibilities).orElse(node));
+            return childrenStream.orElse(Streams.empty()).map(childrenPossibilities -> node.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) childrenPossibilities))).orElse(node));
         } else {
             return Streams.from(node);
         }
@@ -88,23 +90,25 @@ public record Compiler(String input) {
     }
 
     private static Stream<Node> lexContent(Node content) {
-        return content.findValueAsString()
-                .and(content.findIndent())
+        return content.apply("value").flatMap(Attribute::asString).map(JavaString::inner)
+                .and(content.apply("indent").flatMap(Attribute::asInteger))
                 .map(tuple -> lexExpression(tuple.a(), tuple.b()))
                 .orElse(Streams.empty());
     }
 
     private static Node transformAST(Node tree) {
-        var withValue = tree.findValueAsNode()
+        var withValue = tree.apply("value").flatMap(Attribute::asNode)
                 .map(Compiler::transformAST)
-                .flatMap(tree::withValue)
+                .flatMap(value -> tree.with("value", new NodeAttribute(value)))
                 .orElse(tree);
 
-        var node = withValue.findChildren()
+        var node = withValue.apply("children")
+                .flatMap(Attribute::asListOfNodes)
+                .<List<? extends Node>>map(JavaList::unwrap)
                 .map(children -> Streams.fromList(children)
                         .map(Compiler::transformAST)
                         .collect(Collectors.toNativeList()))
-                .flatMap(withValue::withChildren)
+                .flatMap(children1 -> withValue.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) children1))))
                 .orElse(withValue);
 
         return transformNode(node);
@@ -112,10 +116,12 @@ public record Compiler(String input) {
 
     private static Node transformNode(Node node) {
         if (node.is("block")) {
-            var children = node.findChildren().orElse(Collections.emptyList());
+            var children = node.apply("children")
+                    .flatMap(Attribute::asListOfNodes)
+                    .<List<? extends Node>>map(JavaList::unwrap).orElse(Collections.emptyList());
             var newChildren = Streams.fromList(children)
                     .map(child -> {
-                        var realIndent = node.findIndent().orElse(0) + 1;
+                        var realIndent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0) + 1;
                         if (child.is("implementation") || child.is("try") || child.is("catch")) {
                             return new Statement(child, realIndent);
                         } else {
@@ -123,7 +129,7 @@ public record Compiler(String input) {
                         }
                     })
                     .collect(Collectors.toNativeList());
-            return node.withChildren(newChildren).orElse(node);
+            return node.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) newChildren))).orElse(node);
         } else {
             return node;
         }

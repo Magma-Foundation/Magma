@@ -34,4 +34,6 @@ public interface Option<T> {
     }
 
     void ifPresent(Consumer<T> consumer);
+
+    Option<T> orLazy(Supplier<Option<T>> other);
 }

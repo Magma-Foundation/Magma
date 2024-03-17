@@ -2,6 +2,7 @@ package com.meti.compile.magma;
 
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.compile.node.Attribute;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
@@ -11,15 +12,14 @@ public record ObjectRenderer(Node classNode) implements com.meti.compile.node.Re
     @Override
     public Option<String> render() {
         return $Option(() -> {
-            var flagsString = classNode()
-                    .findFlags().$()
+            var flagsString = this.classNode().apply("flags").flatMap(value1 -> value1.asListOfStrings()).$()
                     .stream()
                     .collect(Collectors.joining(new JavaString(" ")))
                     .map(value -> value.concatSlice(" "))
                     .orElse(JavaString.Empty);
 
-            var name = classNode().findName().$();
-            var renderedContent = classNode().findValueAsNode().$().render().$();
+            var name = this.classNode().apply("name").flatMap(Attribute::asString).$();
+            var renderedContent = this.classNode().apply("value").flatMap(Attribute::asNode).$().render().$();
 
             return "\n" + flagsString + "object " + name + " = " + renderedContent;
         });
