@@ -109,4 +109,18 @@ public class Collectors {
             }
         };
     }
+
+    public static Collector<Boolean, Boolean> allTrue() {
+        return new Collector<>() {
+            @Override
+            public Boolean initial() {
+                return true;
+            }
+
+            @Override
+            public Boolean fold(Boolean current, Boolean element) {
+                return current && element;
+            }
+        };
+    }
 }

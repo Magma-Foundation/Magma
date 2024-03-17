@@ -132,4 +132,25 @@ public record JavaString(String inner) {
     public Option<Index> lastIndexOfSlice(String slice) {
         return wrapNegativeIndex(this.inner.lastIndexOf(slice));
     }
+
+    public Index end() {
+        return new Index(this.inner.length(), this.inner.length());
+    }
+
+    public Stream<Character> stream() {
+        return new AbstractStream<>() {
+            private int counter = 0;
+
+            @Override
+            public Option<Character> next() {
+                if (counter < inner.length()) {
+                    var c = inner.charAt(counter);
+                    counter++;
+                    return Some(c);
+                } else {
+                    return None();
+                }
+            }
+        };
+    }
 }

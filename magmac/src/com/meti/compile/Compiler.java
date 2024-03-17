@@ -116,7 +116,7 @@ public record Compiler(String input) {
             var newChildren = Streams.fromList(children)
                     .map(child -> {
                         var realIndent = node.findIndent().orElse(0) + 1;
-                        if (child.is("method") || child.is("try") || child.is("catch")) {
+                        if (child.is("implementation") || child.is("try") || child.is("catch")) {
                             return new Statement(child, realIndent);
                         } else {
                             return new TerminatingStatement(child, realIndent);

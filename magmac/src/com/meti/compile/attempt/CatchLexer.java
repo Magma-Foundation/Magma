@@ -35,9 +35,9 @@ public class CatchLexer implements Lexer {
             var exceptionTypes = args.sliceTo(separator)
                     .split("\\|")
                     .map(JavaString::strip)
-                    .map(type -> new TypeCompiler(type.inner()).compile())
-                    .map(JavaString::new)
-                    .collect(Collectors.toNativeList());
+                    .map(type -> new TypeCompiler(type.inner()).compile().map(JavaString::new))
+                    .collect(Collectors.required(Collectors.toNativeList()))
+                    .$();
 
             var exceptionName = args.sliceFrom(separator.next().$());
             return new CatchNode(exceptionTypes, exceptionName, new Content(input.sliceFrom(blockStart), indent), indent);

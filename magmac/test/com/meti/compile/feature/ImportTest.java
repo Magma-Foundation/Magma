@@ -1,9 +1,9 @@
 package com.meti.compile.feature;
 
-import com.meti.compile.CompiledTest;
+import com.meti.compile.FeatureTest;
 import org.junit.jupiter.api.Test;
 
-public class ImportTest extends CompiledTest {
+public class ImportTest extends FeatureTest {
     @Test
     void testStatic() {
         assertCompile("import static Test.a", "import { a } from Test;\n");

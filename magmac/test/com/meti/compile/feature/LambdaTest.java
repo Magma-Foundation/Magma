@@ -1,10 +1,10 @@
 package com.meti.compile.feature;
 
 import com.meti.compile.CompileException;
-import com.meti.compile.CompiledTest;
+import com.meti.compile.FeatureTest;
 import org.junit.jupiter.api.Test;
 
-public class LambdaTest extends CompiledTest {
+public class LambdaTest extends FeatureTest {
     @Test
     void basic() throws CompileException {
         assertCompile("() -> {}", "() => {}");

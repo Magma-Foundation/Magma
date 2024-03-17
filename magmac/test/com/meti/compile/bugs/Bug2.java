@@ -1,9 +1,9 @@
 package com.meti.compile.bugs;
 
-import com.meti.compile.CompiledTest;
+import com.meti.compile.FeatureTest;
 import org.junit.jupiter.api.Test;
 
-public class Bug2 extends CompiledTest {
+public class Bug2 extends FeatureTest {
     @Test
     void compile() {
         assertCompile("""

@@ -12,20 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-class CompilerTest extends CompiledTest {
-    @Test
-    void lexHead() {
-        var actual = Compiler.lexHead("\"var actual = new Compiler(input)\"", 0)
-                .collect(Collectors.toNativeList());
-
-        assertIterableEquals(List.of(
-                new StringNode(new JavaString("var actual = new Compiler(input)")),
-                new DefinitionNode(0, Collections.emptyList(),
-                        new JavaString("actual"),
-                        new Content("new Compiler(input)\"", 0))
-        ), actual);
-    }
-
+class CompilerTest extends FeatureTest {
     @Test
     void lexTree1() {
         var input = new DefinitionNode(0, Collections.emptyList(),

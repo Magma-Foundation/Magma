@@ -2,7 +2,7 @@ package com.meti.compile;
 
 import org.junit.jupiter.api.Test;
 
-public class Bug1 extends CompiledTest {
+public class Bug1 extends FeatureTest {
     @Test
     void call0() throws CompileException {
         assertCompile("""

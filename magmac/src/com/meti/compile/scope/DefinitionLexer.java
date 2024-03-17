@@ -1,5 +1,6 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
@@ -21,7 +22,7 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
             var withName = stripped.sliceTo(separator).strip();
             var nameSeparator = withName.lastIndexOfChar(' ').$();
             var name = withName.sliceFrom(nameSeparator.next().$());
-            if(name.isEmpty()) {
+            if (name.isEmpty()) {
                 $$();
             }
 
@@ -33,15 +34,25 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
                         .strip()
                         .split(" ")
                         .map(JavaString::inner)
-                        .collect(Collectors.toNativeList());
+                        .collect(Collectors.toList());
             }).orElseGet(() -> {
-                return Collections.singletonList(withType.inner());
+                return new JavaList<>(Collections.singletonList(withType.inner()));
             });
 
+            var validFlags = inputFlags.stream()
+                    .map(flag -> flag.equals("public")
+                                 || flag.equals("final")
+                                 || flag.equals("var"))
+                    .collect(Collectors.allTrue());
+
+            if (!validFlags) {
+                $$();
+            }
+
             var flagsString = new ArrayList<JavaString>();
-            if(inputFlags.contains("public")) flagsString.add(new JavaString("pub"));
-            if(inputFlags.contains("final")) flagsString.add(new JavaString("const"));
-            if(inputFlags.contains("var")) flagsString.add(new JavaString("let"));
+            if (inputFlags.contains("public")) flagsString.add(new JavaString("pub"));
+            if (inputFlags.contains("final")) flagsString.add(new JavaString("const"));
+            if (inputFlags.contains("var")) flagsString.add(new JavaString("let"));
 
             var compiledValue = new Content(stripped.sliceFrom(separator.next().$()).strip(), 0);
             return new DefinitionNode(indent, flagsString, name, compiledValue);
