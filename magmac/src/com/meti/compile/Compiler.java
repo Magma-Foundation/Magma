@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
@@ -131,11 +132,13 @@ public record Compiler(String input) {
         return $Result(() -> {
             var tree = new Splitter(this.input())
                     .split()
-                    .map(line -> lexExpression(line, 0).next())
-                    .flatMap(Streams::fromOption)
-                    .collect(Collectors.toNativeList());
+                    .map(line -> lexExpression(line, 0).next()
+                            .into(ThrowableOption::new)
+                            .orElseThrow(() -> new CompileException("Failed to lex: '" + line + "'")))
+                    .collect(Collectors.exceptionally(Collectors.toList()))
+                    .$();
 
-            var outputTree = Streams.fromList(tree)
+            var outputTree = tree.stream()
                     .filter(element -> !element.is("package"))
                     .map(Compiler::transformAST)
                     .collect(Collectors.toNativeList());
