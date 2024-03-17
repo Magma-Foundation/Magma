@@ -76,4 +76,9 @@ public class Some<T> implements Option<T> {
     public void ifPresent(Consumer<T> consumer) {
         consumer.accept(value);
     }
+
+    @Override
+    public Option<T> orLazy(Supplier<Option<T>> other) {
+        return this;
+    }
 }

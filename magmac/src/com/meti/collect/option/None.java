@@ -69,4 +69,9 @@ public class None<T> implements Option<T> {
     @Override
     public void ifPresent(Consumer<T> consumer) {
     }
+
+    @Override
+    public Option<T> orLazy(Supplier<Option<T>> other) {
+        return other.get();
+    }
 }

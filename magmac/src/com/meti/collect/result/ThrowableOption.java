@@ -11,9 +11,13 @@ import java.util.function.Supplier;
 public class ThrowableOption<T> implements Option<T> {
     private final Option<T> parent;
 
-
     public ThrowableOption(Option<T> parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public Option<T> orLazy(Supplier<Option<T>> other) {
+        return parent.orLazy(other);
     }
 
     @Override
