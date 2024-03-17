@@ -1,5 +1,6 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
@@ -19,7 +20,9 @@ public record ObjectLexer(JavaString stripped) implements Lexer {
     public Option<Node> lex() {
         return $Option(() -> {
             var bodyStart = stripped.firstIndexOfChar('{').$();
-            var args = stripped.sliceTo(bodyStart)
+            var index = stripped.firstIndexOfSlice("extends ");
+
+            var args = stripped.sliceTo(index.orElse(bodyStart))
                     .strip()
                     .split(" ")
                     .collect(Collectors.toList());
