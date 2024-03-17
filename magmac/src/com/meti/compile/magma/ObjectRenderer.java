@@ -1,4 +1,4 @@
-package com.meti.compile.scope;
+package com.meti.compile.magma;
 
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
