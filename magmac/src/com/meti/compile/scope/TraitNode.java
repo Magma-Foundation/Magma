@@ -3,6 +3,7 @@ package com.meti.compile.scope;
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
+import com.meti.collect.stream.Collectors;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
@@ -29,7 +30,12 @@ public class TraitNode implements Node {
 
     @Override
     public Option<String> render() {
-        return Some.Some("trait " + name + " " + content.render().orElse(""));
+        var flagString = flags.stream()
+                .collect(Collectors.joining(new JavaString(" ")))
+                .map(value -> value + " ")
+                .orElse("");
+
+        return Some.Some(flagString + "trait " + name + " " + content.render().orElse(""));
     }
 
     @Override

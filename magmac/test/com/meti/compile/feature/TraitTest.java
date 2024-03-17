@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 public class TraitTest extends CompiledTest {
     @Test
     void public_() {
-        assertCompile("public interface Test {}", "export trait Test {}");
+        assertCompile("public interface Test {}", "export trait Test {\n}");
     }
 
     @Test
     void simple() {
-        assertCompile("interface Test {}", "trait Test {}");
+        assertCompile("interface Test {}", "trait Test {\n}");
     }
 }
