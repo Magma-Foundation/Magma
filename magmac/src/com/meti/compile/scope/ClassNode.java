@@ -20,11 +20,6 @@ public record ClassNode(JavaList<JavaString> flags, JavaString name,
     }
 
     @Override
-    public Option<String> render() {
-        return new ObjectRenderer(this).render();
-    }
-
-    @Override
     public boolean is(String name) {
         return name.equals("object");
     }

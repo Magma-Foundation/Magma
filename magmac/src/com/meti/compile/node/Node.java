@@ -2,6 +2,7 @@ package com.meti.compile.node;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
+import com.meti.compile.magma.MagmaRenderer;
 import com.meti.java.JavaString;
 
 import java.util.List;
@@ -9,7 +10,9 @@ import java.util.List;
 import static com.meti.collect.option.None.None;
 
 public interface Node {
-    Option<String> render();
+    default Option<String> render() {
+        return new MagmaRenderer(this).render();
+    }
 
     boolean is(String name);
 
