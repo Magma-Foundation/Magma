@@ -26,7 +26,7 @@ public class InterfaceLexer implements Lexer {
 
             var contentStart = root.firstIndexOfChar('{').$();
 
-            var name = root.sliceBetween(keywordIndex.to(contentStart).$());
+            var name = root.sliceBetween(keywordIndex.to(contentStart).$()).strip();
             var content = new Content(root.sliceFrom(contentStart), 0);
 
             return new TraitNode(name, content);
