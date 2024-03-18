@@ -9,7 +9,7 @@ public record MagmaRenderer(Node node) implements Renderer {
     @Override
     public Option<String> render() {
         return Streams.from(new ObjectRenderer(node),
-                        new ImplementsRenderer(node))
+                        new WithRenderer(node))
                 .map(Renderer::render)
                 .flatMap(Streams::fromOption)
                 .next();

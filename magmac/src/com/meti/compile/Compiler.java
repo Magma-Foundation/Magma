@@ -175,7 +175,7 @@ public record Compiler(String input) {
                     .$()
                     .unwrap()));
 
-            var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(new JavaString("implements"))
+            var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(new JavaString("with"))
                     .withString("type", extendsValue)
                     .complete())).orElse(children);
 

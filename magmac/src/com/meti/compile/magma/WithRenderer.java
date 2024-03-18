@@ -5,17 +5,21 @@ import com.meti.compile.node.Attribute;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.Renderer;
 
-public class ImplementsRenderer implements Renderer {
+import static com.meti.collect.option.None.None;
+
+public class WithRenderer implements Renderer {
     private final Node node;
 
-    public ImplementsRenderer(Node node) {
+    public WithRenderer(Node node) {
         this.node = node;
     }
 
     @Override
     public Option<String> render() {
+        if(!node.is("with")) return None();
+
         return node.apply("type")
                 .flatMap(Attribute::asString)
-                .map(type -> "implements " + type.inner());
+                .map(type -> "with " + type.inner());
     }
 }
