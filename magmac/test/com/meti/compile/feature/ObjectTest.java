@@ -14,7 +14,7 @@ public class ObjectTest extends FeatureTest {
         assertCompile("class IntentionalException extends Exception {}",
                 "\n" +
                 "object IntentionalException = {\n" +
-                "\timplements Exception;\n" +
+                "\twith Exception;\n" +
                 "}");
     }
 

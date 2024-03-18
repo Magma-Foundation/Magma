@@ -41,7 +41,8 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                     .withString("name", name)
                     .withNode("value", contentOutput);
 
-            var withSuperClass = extendsRange.map(stripped::sliceBetween)
+            var withSuperClass = extendsRange.flatMap(range -> range.endIndex().to(bodyStart))
+                    .map(stripped::sliceBetween)
                     .map(JavaString::strip)
                     .flatMap(superClassString -> new TypeCompiler(superClassString).compile())
                     .map(superClassName -> builder.withString("extends", superClassName))
