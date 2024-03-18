@@ -5,6 +5,7 @@ import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
+import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
@@ -37,7 +38,11 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                 outputFlags = JavaList.from(new JavaString("export"));
             }
 
-            return new ClassNode(outputFlags, name, contentOutput);
+            return MapNode.Builder(new JavaString("class"))
+                    .withListOfStrings("flags", outputFlags)
+                    .withString("name", name)
+                    .withNode("value", contentOutput)
+                    .complete();
         });
     }
 }

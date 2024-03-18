@@ -7,7 +7,7 @@ public class ObjectTest extends FeatureTest {
     @Test
     void extends_() {
         assertCompile("class IntentionalException extends Exception {}",
-                "object IntentionalException = {implements Exception;}");
+                "\nobject IntentionalException = {\n}");
     }
 
     @Test
