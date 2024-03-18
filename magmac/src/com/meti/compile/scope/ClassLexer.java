@@ -1,6 +1,7 @@
 package com.meti.compile.scope;
 
 import com.meti.collect.JavaList;
+import com.meti.collect.Range;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
@@ -19,9 +20,9 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     public Option<Node> lex() {
         return $Option(() -> {
             var bodyStart = stripped.firstIndexOfChar('{').$();
-            var extendsIndex = stripped.firstIndexOfSlice("extends ");
+            var extendsRange = stripped.firstRangeOfSlice("extends ");
 
-            var args = stripped.sliceTo(extendsIndex.orElse(bodyStart))
+            var args = stripped.sliceTo(extendsRange.map(Range::startIndex).orElse(bodyStart))
                     .strip()
                     .split(" ")
                     .collect(Collectors.toList());
@@ -40,9 +41,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                     .withString("name", name)
                     .withNode("value", contentOutput);
 
-            var withSuperClass = extendsIndex.flatMap(index -> index.next("extends ".length()))
-                    .flatMap(index -> index.to(bodyStart))
-                    .map(stripped::sliceBetween)
+            var withSuperClass = extendsRange.map(stripped::sliceBetween)
                     .map(JavaString::strip)
                     .flatMap(superClassString -> new TypeCompiler(superClassString).compile())
                     .map(superClassName -> builder.withString("extends", superClassName))

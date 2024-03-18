@@ -153,4 +153,8 @@ public record JavaString(String inner) {
             }
         };
     }
+
+    public Option<Range> firstRangeOfSlice(String slice) {
+        return firstIndexOfSlice(slice).flatMap(index -> index.extend(slice.length()));
+    }
 }

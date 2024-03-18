@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 
 public class ObjectTest extends FeatureTest {
     @Test
+    void generics() {
+        assertCompile("class Test<T>{}", "object Test<T> = {}");
+    }
+
+    @Test
     void extends_() {
         assertCompile("class IntentionalException extends Exception {}",
                 "\n" +

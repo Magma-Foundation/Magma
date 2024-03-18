@@ -12,11 +12,15 @@ public record Index(int value, int length) {
 
     public Option<Index> next(int more) {
         var next = value + more;
-        if (next <= length) {
+        if (isWithinBounds(next)) {
             return Some(new Index(next, length));
         } else {
             return None();
         }
+    }
+
+    private boolean isWithinBounds(int index) {
+        return index <= length;
     }
 
     public Option<Range> to(Index end) {
@@ -38,5 +42,14 @@ public record Index(int value, int length) {
 
     public boolean isEnd() {
         return this.value == this.length - 1;
+    }
+
+    public Option<Range> extend(int length) {
+        var next = this.value + length;
+        if(isWithinBounds(next)) {
+            return Some(new Range(this.value, next, this.length));
+        } else {
+            return None();
+        }
     }
 }
