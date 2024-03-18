@@ -1,6 +1,7 @@
 package com.meti.compile.rule;
 
 import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
 import static com.meti.compile.rule.ConjunctionRule.Join;
@@ -19,8 +20,9 @@ public class ListRule implements Rule {
     @Override
     public Stream<RuleResult> apply(JavaString input) {
         var lazy = new LazyRule();
-        var rule = Or(Empty, value, Join(value, delimiter, lazy));
+        var more = Join(value, delimiter, lazy);
+        var rule = Or(Empty, value, more);
         lazy.setCurrent(rule);
-        return rule.apply(input);
+        return Streams.reverse(rule.apply(input));
     }
 }

@@ -83,11 +83,11 @@ public record Compiler(String input) {
     private static Stream<List<Node>> lexContent(List<? extends Node> content) {
         if (content.isEmpty()) return Streams.from(Collections.emptyList());
 
-        List<Stream<Node>> childrenPossibilities = Streams.fromList(content)
+        List<Stream<Node>> childrenPossibilities = Streams.fromNativeList(content)
                 .map(Compiler::lexContent)
                 .collect(Collectors.toNativeList());
 
-        return Streams.fromList(childrenPossibilities).foldRightFromTwo((first, second) -> {
+        return Streams.fromNativeList(childrenPossibilities).foldRightFromTwo((first, second) -> {
             return Streams.crossToList(first, () -> second);
         }, (listStream, nodeStream) -> Streams.crossListToList(listStream, () -> nodeStream)).orElseGet(() -> {
             if (childrenPossibilities.size() == 1) {
@@ -119,7 +119,7 @@ public record Compiler(String input) {
             var node = withValue.apply("children")
                     .flatMap(Attribute::asListOfNodes)
                     .<List<? extends Node>>map(JavaList::unwrap)
-                    .map(children -> Streams.fromList(children)
+                    .map(children -> Streams.fromNativeList(children)
                             .map(Compiler::transformAST)
                             .collect(Collectors.exceptionally(Collectors.toList())))
                     .into(Results::invertOption)

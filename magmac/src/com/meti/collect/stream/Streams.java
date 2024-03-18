@@ -3,6 +3,7 @@ package com.meti.collect.stream;
 import com.meti.collect.option.Option;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -43,7 +44,7 @@ public class Streams {
         };
     }
 
-    public static <T> Stream<T> fromList(List<T> elements) {
+    public static <T> Stream<T> fromNativeList(List<T> elements) {
         return new AbstractStream<T>() {
             private int counter = 0;
 
@@ -61,7 +62,7 @@ public class Streams {
     }
 
     public static <T> Stream<T> fromSet(Set<T> set) {
-        return fromList(new ArrayList<>(set));
+        return fromNativeList(new ArrayList<>(set));
     }
 
     public static <T> Stream<List<T>> crossToList(Stream<T> first, Supplier<Stream<T>> other) {
@@ -97,5 +98,16 @@ public class Streams {
                 }
             });
         }
+    }
+
+    public static <T> Stream<T> reverse(Stream<T> apply) {
+        /*
+        TODO: figure out a better algorithm for this
+
+        - SirMathhman, 3/18/2024
+        */
+        var list = new ArrayList<>(apply.collect(Collectors.toNativeList()));
+        Collections.reverse(list);
+        return Streams.fromNativeList(list);
     }
 }

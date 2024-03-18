@@ -14,7 +14,7 @@ public class DisjunctionRule implements Rule {
     }
 
     public static Rule Or(Rule first, Rule... more) {
-        return Streams.from(more).foldRight(first, (rule, rule2) -> new DisjunctionRule(rule2, rule2));
+        return Streams.from(more).foldRight(first, DisjunctionRule::new);
     }
 
     @Override

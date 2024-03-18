@@ -44,7 +44,7 @@ public final class Application {
 
             var name = source.findName();
             var package1 = source.findPackage();
-            var target = Streams.fromList(package1)
+            var target = Streams.fromNativeList(package1)
                     .foldRight(root, Path::resolve)
                     .resolve(name + ".mgs");
 

@@ -60,7 +60,7 @@ public class JavaList<T> {
     }
 
     public Stream<T> stream() {
-        return Streams.fromList(elements);
+        return Streams.fromNativeList(elements);
     }
 
     public List<T> unwrap() {
@@ -71,5 +71,13 @@ public class JavaList<T> {
         var copy = new ArrayList<>(elements);
         copy.addAll(other.elements);
         return new JavaList<>(copy);
+    }
+
+    public int size() {
+        return elements.size();
+    }
+
+    public boolean isEmpty() {
+        return elements.isEmpty();
     }
 }

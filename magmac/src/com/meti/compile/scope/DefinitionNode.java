@@ -16,7 +16,7 @@ public record DefinitionNode(int indent, List<JavaString> flags, com.meti.java.J
                              Node value) implements Node {
     @Override
     public Option<String> render() {
-        var withPrefix = Streams.fromList(flags).map(JavaString::inner)
+        var withPrefix = Streams.fromNativeList(flags).map(JavaString::inner)
                 .collect(Collectors.joiningNatively(" "))
                 .map(value -> value + " ")
                 .orElse("");

@@ -37,7 +37,7 @@ public record Splitter(String input) {
         }
 
         lines.add(builder.toString());
-        return Streams.fromList(lines)
+        return Streams.fromNativeList(lines)
                 .map(String::strip)
                 .filter(line -> !line.isEmpty());
     }
