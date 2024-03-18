@@ -19,16 +19,13 @@ public class ConjunctionRule implements Rule {
 
     @Override
     public Stream<RuleResult> apply(JavaString input) {
-        return input.streamIndices()
-                .map(length -> {
-                    var left = input.sliceTo(length);
-                    var right = input.sliceFrom(length);
+        return input.streamIndices().flatMap(length -> {
+            var left = input.sliceTo(length);
+            var right = input.sliceFrom(length);
 
-                    return this.left.apply(left)
-                            .and(this.right.apply(right))
-                            .map(tuple -> MapRuleResult.merge(tuple.a(), tuple.b()));
-                })
-                .flatMap(Streams::fromOption)
-                .next();
+            return this.left.apply(left)
+                    .cross(() -> this.right.apply(right))
+                    .map(tuple -> MapRuleResult.merge(tuple.a(), tuple.b()));
+        });
     }
 }

@@ -4,6 +4,7 @@ import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.option.Some;
 import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class ListValueRule implements Rule {
 
     @Override
     public Stream<RuleResult> apply(JavaString input) {
-        return Some.Some(new MapRuleResult(new JavaMap<>(), new JavaMap<JavaString, JavaList<JavaString>>()
+        return Streams.from(new MapRuleResult(new JavaMap<>(), new JavaMap<JavaString, JavaList<JavaString>>()
                 .put(name, new JavaList<>(List.of(input)))));
     }
 }

@@ -19,6 +19,6 @@ public class DisjunctionRule implements Rule {
 
     @Override
     public Stream<RuleResult> apply(JavaString input) {
-        return left.apply(input).or(() -> right.apply(input));
+        return left.apply(input).concat(right.apply(input));
     }
 }
