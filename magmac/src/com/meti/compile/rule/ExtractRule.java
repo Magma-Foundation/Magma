@@ -18,7 +18,11 @@ public class ExtractRule implements Rule {
 
     @Override
     public Stream<RuleResult> apply(JavaString input) {
-        return Streams.from(new MapRuleResult(new JavaMap<JavaString, JavaString>()
-                .put(name, input), new JavaMap<>()));
+        if (input.isEmpty()) {
+            return Streams.empty();
+        } else {
+            return Streams.from(new MapRuleResult(new JavaMap<JavaString, JavaString>()
+                    .put(name, input), new JavaMap<>()));
+        }
     }
 }

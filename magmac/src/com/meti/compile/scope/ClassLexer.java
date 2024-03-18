@@ -21,6 +21,17 @@ import static com.meti.compile.rule.TextRule.Text;
 
 public record ClassLexer(JavaString stripped) implements Lexer {
 
+    public static final Rule FLAG_RULE = TextList("flags", " ");
+    public static final Rule EXTENDS_RULE = Join(
+            Text("extends "),
+            Extract("superclass"));
+
+    public static final Rule RULE = Join(
+            Optional(Join(FLAG_RULE, Text(" "))),
+            Text("class "),
+            Optional(EXTENDS_RULE),
+            Text("content"));
+
     private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {
             var flags = result.findTextList("flags").$();
@@ -43,19 +54,9 @@ public record ClassLexer(JavaString stripped) implements Lexer {
         });
     }
 
-    private static Rule createRule() {
-        return Join(
-                Optional(Join(TextList("flags", " "), Text(" "))),
-                Text("class "),
-                Optional(Join(
-                        Text("extends "),
-                        Extract("extends"))),
-                Text("content"));
-    }
-
     @Override
     public Stream<Node> lex() {
-        return createRule()
+        return RULE
                 .apply(stripped)
                 .map(ClassLexer::createToken)
                 .flatMap(Streams::fromOption);
