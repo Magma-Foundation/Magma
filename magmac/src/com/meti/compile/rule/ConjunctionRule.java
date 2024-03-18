@@ -14,7 +14,7 @@ public class ConjunctionRule implements Rule {
     }
 
     public static Rule Join(Rule first, Rule... more) {
-        return Streams.from(more).foldRight(first, (rule, rule2) -> new ConjunctionRule(rule2, rule2));
+        return Streams.from(more).foldRight(first, ConjunctionRule::new);
     }
 
     @Override
