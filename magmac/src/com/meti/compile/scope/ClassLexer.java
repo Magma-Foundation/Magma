@@ -9,6 +9,8 @@ import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
+import com.meti.compile.rule.InclusiveDelimiterRule;
+import com.meti.compile.rule.RuleResult;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$$;
@@ -18,11 +20,13 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     @Override
     public Option<Node> lex() {
         return $Option(() -> {
-            var bodyStart = stripped.firstIndexOfChar('{').$();
-            var bodySlices = stripped.sliceAt(bodyStart);
-            var beforeContent = bodySlices.a();
-            var content = bodySlices.b();
+            var result = new InclusiveDelimiterRule("{", "beforeContent", "content")
+                    .apply(stripped);
 
+            var beforeContent = result.text("beforeContent").$();
+            var content = result.text("content").$();
+
+            var bodyStart = stripped.firstIndexOfChar('{').$();
             var extendsRange = beforeContent.firstRangeOfSlice("extends ");
             var args = beforeContent.sliceTo(extendsRange.map(Range::startIndex).orElse(bodyStart))
                     .strip()

@@ -16,6 +16,10 @@ public class JavaMap<K, V> {
         this.inner = inner;
     }
 
+    public JavaMap() {
+        this(new HashMap<>());
+    }
+
     @Override
     public String toString() {
         return "JavaMap{" +
