@@ -11,6 +11,15 @@ import java.util.function.Supplier;
 import static com.meti.collect.option.None.None;
 
 public abstract class AbstractStream<T> implements Stream<T> {
+    @Override
+    public Stream<T> concat(Stream<T> other) {
+        return new AbstractStream<>(){
+            @Override
+            public Option<T> next() {
+                return AbstractStream.this.next().or(other::next);
+            }
+        };
+    }
 
     @Override
     public <R> Stream<Tuple<T, R>> cross(Supplier<Stream<R>> other) {

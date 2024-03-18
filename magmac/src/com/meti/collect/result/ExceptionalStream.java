@@ -39,6 +39,11 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
         return parent.extend(extender);
     }
 
+    @Override
+    public Stream<Result<T, E>> concat(Stream<Result<T, E>> other) {
+        return parent.concat(other);
+    }
+
     public ExceptionalStream(Stream<Result<T, E>> parent) {
         this.parent = parent;
     }

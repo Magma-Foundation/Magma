@@ -1,16 +1,13 @@
 package com.meti.compile.scope;
 
 import com.meti.collect.Range;
-import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
-import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
 import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
-import com.meti.compile.rule.InclusiveDelimiterRule;
-import com.meti.compile.rule.RuleResult;
+import com.meti.compile.rule.*;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$$;
@@ -23,20 +20,22 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             var result = new InclusiveDelimiterRule("{", "beforeContent", "content")
                     .apply(stripped);
 
-            var beforeContent = result.text("beforeContent").$();
-            var content = result.text("content").$();
+            var beforeContent = result.findText("beforeContent").$();
+            var content = result.findText("content").$();
 
             var extendsRange = beforeContent.firstRangeOfSlice("extends ");
-            var args = beforeContent.sliceTo(extendsRange.map(Range::startIndex).orElse(beforeContent.end()))
-                    .strip()
-                    .split(" ")
-                    .collect(Collectors.toList());
+            var end = extendsRange.map(Range::startIndex).orElse(beforeContent.end());
+            var javaString = beforeContent.sliceTo(end).strip();
 
-            var nameList = args.popLast().$();
-            var flags = nameList.b();
-            var name = nameList.a();
+            var result1 = new ExclusiveDelimiterRule(" ",
+                    new TextSplitRule("flags", " "),
+                    new ValueRule("name"))
+                    .apply(javaString);
 
-            if(!flags.contains(new JavaString("class"))) $$();
+            var flags = result1.findTextList("flags").$();
+            var name = result1.findText("name").$();
+
+            if (!flags.contains(new JavaString("class"))) $$();
 
             var contentOutput = new Content(content, 0);
 

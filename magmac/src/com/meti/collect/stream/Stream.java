@@ -30,4 +30,6 @@ public interface Stream<T> {
     <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder);
 
     <R> Stream<Tuple<T, R>> extend(Function<T, R> extender);
+
+    Stream<T> concat(Stream<T> other);
 }

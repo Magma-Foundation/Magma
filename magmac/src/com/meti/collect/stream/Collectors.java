@@ -1,6 +1,8 @@
 package com.meti.collect.stream;
 
 import com.meti.collect.JavaList;
+import com.meti.collect.JavaMap;
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 import com.meti.collect.result.Ok;
 import com.meti.collect.result.Result;
@@ -120,6 +122,20 @@ public class Collectors {
             @Override
             public Boolean fold(Boolean current, Boolean element) {
                 return current && element;
+            }
+        };
+    }
+
+    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toMap() {
+        return new Collector<>() {
+            @Override
+            public JavaMap<K, V> initial() {
+                return new JavaMap<>();
+            }
+
+            @Override
+            public JavaMap<K, V> fold(JavaMap<K, V> current, Tuple<K, V> element) {
+                return current.put(element.a(), element.b());
             }
         };
     }

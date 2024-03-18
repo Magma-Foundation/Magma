@@ -1,6 +1,8 @@
 package com.meti.collect;
 
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,10 @@ public class JavaMap<K, V> {
 
     public JavaMap(Map<K, V> inner) {
         this.inner = inner;
+    }
+
+    public Stream<Tuple<K, V>> stream() {
+        return Streams.fromSet(inner.entrySet()).map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
     }
 
     public JavaMap() {

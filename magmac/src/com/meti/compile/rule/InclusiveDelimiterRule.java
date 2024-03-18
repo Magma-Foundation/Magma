@@ -1,5 +1,6 @@
 package com.meti.compile.rule;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.java.JavaString;
 
@@ -22,7 +23,8 @@ public class InclusiveDelimiterRule implements Rule {
 
             return new MapRuleResult(new JavaMap<JavaString, JavaString>()
                     .put(new JavaString(left), leftString)
-                    .put(new JavaString(right), rightString));
+                    .put(new JavaString(right), rightString),
+                    new JavaMap<>());
         }).orElse(EmptyRuleResult.Empty);
     }
 }
