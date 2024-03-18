@@ -26,9 +26,8 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             var beforeContent = result.text("beforeContent").$();
             var content = result.text("content").$();
 
-            var bodyStart = stripped.firstIndexOfChar('{').$();
             var extendsRange = beforeContent.firstRangeOfSlice("extends ");
-            var args = beforeContent.sliceTo(extendsRange.map(Range::startIndex).orElse(bodyStart))
+            var args = beforeContent.sliceTo(extendsRange.map(Range::startIndex).orElse(beforeContent.end()))
                     .strip()
                     .split(" ")
                     .collect(Collectors.toList());
@@ -46,6 +45,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                     .withString("name", name)
                     .withNode("value", contentOutput);
 
+            var bodyStart = stripped.firstIndexOfChar('{').$();
             var withSuperClass = extendsRange.flatMap(range -> range.endIndex().to(bodyStart))
                     .map(stripped::sliceBetween)
                     .map(JavaString::strip)
