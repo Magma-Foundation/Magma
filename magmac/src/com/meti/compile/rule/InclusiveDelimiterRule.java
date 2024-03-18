@@ -18,7 +18,7 @@ public class InclusiveDelimiterRule implements Rule {
     public RuleResult apply(JavaString input) {
         return input.firstRangeOfSlice(delimiter).<RuleResult>map(range -> {
             var leftString = input.sliceTo(range.startIndex());
-            var rightString = input.sliceFrom(range.endIndex());
+            var rightString = input.sliceFrom(range.startIndex());
 
             return new MapRuleResult(new JavaMap<JavaString, JavaString>()
                     .put(new JavaString(left), leftString)
