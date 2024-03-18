@@ -2,6 +2,7 @@ package com.meti.java;
 
 import com.meti.collect.Index;
 import com.meti.collect.Range;
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.AbstractStream;
 import com.meti.collect.stream.Stream;
@@ -156,5 +157,9 @@ public record JavaString(String inner) {
 
     public Option<Range> firstRangeOfSlice(String slice) {
         return firstIndexOfSlice(slice).flatMap(index -> index.extend(slice.length()));
+    }
+
+    public Tuple<JavaString, JavaString> sliceAt(Index index) {
+        return new Tuple<>(sliceTo(index), sliceFrom(index));
     }
 }

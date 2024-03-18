@@ -1,7 +1,7 @@
 package com.meti.compile.scope;
 
-import com.meti.collect.JavaList;
 import com.meti.collect.Range;
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.compile.Lexer;
@@ -9,7 +9,6 @@ import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
-import com.meti.compile.node.StringAttribute;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$$;
@@ -20,9 +19,12 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     public Option<Node> lex() {
         return $Option(() -> {
             var bodyStart = stripped.firstIndexOfChar('{').$();
-            var extendsRange = stripped.firstRangeOfSlice("extends ");
+            var bodySlices = stripped.sliceAt(bodyStart);
+            var beforeContent = bodySlices.a();
+            var content = bodySlices.b();
 
-            var args = stripped.sliceTo(extendsRange.map(Range::startIndex).orElse(bodyStart))
+            var extendsRange = beforeContent.firstRangeOfSlice("extends ");
+            var args = beforeContent.sliceTo(extendsRange.map(Range::startIndex).orElse(bodyStart))
                     .strip()
                     .split(" ")
                     .collect(Collectors.toList());
@@ -33,7 +35,6 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
             if(!flags.contains(new JavaString("class"))) $$();
 
-            var content = stripped.sliceFrom(bodyStart);
             var contentOutput = new Content(content, 0);
 
             var builder = MapNode.Builder(new JavaString("class"))
