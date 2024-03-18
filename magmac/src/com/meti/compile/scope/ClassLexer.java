@@ -30,15 +30,28 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Whitespace,
             Extract("superclass"));
 
+    public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
     public static final Rule RULE = Join(
-            Or(Join(FLAG_RULE, Whitespace), Padding),
+            PREFIX,
             Text("class"),
             Whitespace,
             Extract("name"),
             Whitespace,
             Optional(EXTENDS_RULE),
-            Text("content"),
+            Whitespace,
+            Extract("content"),
             Padding);
+
+    /* public static final Rule RULE = Join(
+            PREFIX,
+            Text("class"),
+            Whitespace,
+            Extract("name"),
+            Whitespace,
+            Optional(EXTENDS_RULE),
+            Whitespace,
+            Extract("content"),
+            Padding);*/
 
     private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {

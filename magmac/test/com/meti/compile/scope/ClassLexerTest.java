@@ -2,20 +2,29 @@ package com.meti.compile.scope;
 
 import com.meti.collect.option.IntentionalException;
 import com.meti.collect.stream.Collectors;
-import com.meti.collect.stream.Stream;
-import com.meti.compile.node.Node;
+import com.meti.compile.rule.Rule;
 import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
 
+import static com.meti.compile.rule.ConjunctionRule.Join;
+import static com.meti.compile.rule.ExtractRule.Extract;
+import static com.meti.compile.rule.Rules.Optional;
+import static com.meti.compile.rule.TextRule.Text;
+import static com.meti.compile.rule.WhitespaceRule.Whitespace;
+import static com.meti.compile.scope.ClassLexer.EXTENDS_RULE;
+import static com.meti.compile.scope.ClassLexer.PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClassLexerTest {
+    private static void assertValid(Rule rule, String slice) {
+        assertTrue(rule.apply(new JavaString(slice)).next().isPresent());
+    }
+
     @Test
     void extendsRule() throws IntentionalException {
-        var actual = ClassLexer.EXTENDS_RULE.apply(new JavaString("extends Test"))
+        var actual = EXTENDS_RULE.apply(new JavaString("extends Test"))
                 .next()
                 .$()
                 .findText("superclass")
@@ -34,6 +43,49 @@ class ClassLexerTest {
                 .unwrap();
 
         assertIterableEquals(List.of(new JavaString("public"), new JavaString("static")), actual);
+    }
+
+    @Test
+    void prefixWithContent() {
+        assertValid(PREFIX, "public static ");
+    }
+
+    @Test
+    void prefix() {
+        assertTrue(PREFIX.apply(JavaString.Empty).next().isPresent());
+    }
+
+    @Test
+    void lex1() {
+        assertValid(Join(
+                        PREFIX,
+                        Text("class"),
+                        Whitespace),
+                "class ");
+    }
+
+    @Test
+    void lex2() {
+        assertValid(Join(
+                        PREFIX,
+                        Text("class"),
+                        Whitespace,
+                        Extract("name"),
+                        Whitespace),
+                "class IntentionalException ");
+    }
+
+    @Test
+    void lex3() {
+        assertValid(Join(
+                PREFIX,
+                Text("class"),
+                Whitespace,
+                Extract("name"),
+                Whitespace,
+                Optional(EXTENDS_RULE),
+                Whitespace),
+                "class IntentionalException extends Exception ");
     }
 
     @Test
