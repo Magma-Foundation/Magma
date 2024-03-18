@@ -190,4 +190,8 @@ public record JavaString(String inner) {
                 .orElse(Streams.empty())
                 .map(value -> new Index(value, inner.length()));
     }
+
+    public boolean isBlank() {
+        return inner.isBlank();
+    }
 }
