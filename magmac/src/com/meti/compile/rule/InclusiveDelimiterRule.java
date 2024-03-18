@@ -1,7 +1,7 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
+import com.meti.collect.stream.Stream;
 import com.meti.java.JavaString;
 
 public class InclusiveDelimiterRule implements Rule {
@@ -16,7 +16,7 @@ public class InclusiveDelimiterRule implements Rule {
     }
 
     @Override
-    public RuleResult apply(JavaString input) {
+    public Stream<RuleResult> apply(JavaString input) {
         return input.firstRangeOfSlice(delimiter).<RuleResult>map(range -> {
             var leftString = input.sliceTo(range.startIndex());
             var rightString = input.sliceFrom(range.startIndex());

@@ -5,6 +5,7 @@ import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Options;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.TypeCompiler;
@@ -19,8 +20,7 @@ import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Some.Some;
 
 public record MethodLexer(JavaString stripped, int indent) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return Options.$Option(() -> {
             var paramStart = stripped.firstIndexOfChar('(').$();
             var paramEnd = stripped.firstIndexOfChar(')').$();
@@ -77,5 +77,10 @@ public record MethodLexer(JavaString stripped, int indent) implements Lexer {
                 return new ImplementationNode(indent(), moreOutputValue, annotations, name, type, content);
             }).orElseGet(() -> new MethodNode(indent(), moreOutputValue, annotations, name, type));
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

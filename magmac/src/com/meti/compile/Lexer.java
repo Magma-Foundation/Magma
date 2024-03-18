@@ -1,8 +1,8 @@
 package com.meti.compile;
 
-import com.meti.collect.option.Option;
+import com.meti.collect.stream.Stream;
 import com.meti.compile.node.Node;
 
 public interface Lexer {
-    Option<Node> lex();
+    Stream<Node> lex();
 }

@@ -1,22 +1,16 @@
 package com.meti.compile.external;
 
-import com.meti.collect.Index;
 import com.meti.collect.option.Option;
-import com.meti.collect.option.Options;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
-import com.meti.compile.external.ImportAllNode;
-import com.meti.compile.external.ImportChildNode;
 import com.meti.compile.node.Node;
 import com.meti.java.JavaString;
 
-import static com.meti.collect.option.None.None;
-import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
-import static com.meti.collect.option.Some.Some;
 
 public record ImportLexer(JavaString stripped) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var prefix = stripped.firstIndexOfSlice("import ")
                     .$()
@@ -36,5 +30,10 @@ public record ImportLexer(JavaString stripped) implements Lexer {
                     ? new ImportAllNode(parent)
                     : new ImportChildNode(child, parent);
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

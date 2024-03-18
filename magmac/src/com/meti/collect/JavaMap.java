@@ -6,6 +6,7 @@ import com.meti.collect.stream.Streams;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -49,6 +50,16 @@ public class JavaMap<K, V> {
     public JavaMap<K, V> put(K key, V value) {
         var copy = new HashMap<>(inner);
         copy.put(key, value);
+        return new JavaMap<>(copy);
+    }
+
+    public JavaMap<K, V> merge(K key, V value, BiFunction<V, V, V> merger) {
+        var copy = new HashMap<>(inner);
+        if(copy.containsKey(key)) {
+            copy.put(key, merger.apply(copy.get(key), value));
+        } else {
+            copy.put(key, value);
+        }
         return new JavaMap<>(copy);
     }
 }

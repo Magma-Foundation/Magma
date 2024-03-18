@@ -1,42 +1,32 @@
 package com.meti.compile.scope;
 
-import com.meti.collect.Range;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
-import com.meti.compile.rule.*;
+import com.meti.compile.rule.Rule;
+import com.meti.compile.rule.RuleResult;
 import com.meti.java.JavaString;
 
-import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
+import static com.meti.compile.rule.ConjunctionRule.Join;
+import static com.meti.compile.rule.ExtractRule.Extract;
+import static com.meti.compile.rule.Rules.Optional;
+import static com.meti.compile.rule.Rules.TextList;
+import static com.meti.compile.rule.TextRule.Text;
 
 public record ClassLexer(JavaString stripped) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+
+    private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {
-            var result = new InclusiveDelimiterRule("{", "beforeContent", "content")
-                    .apply(stripped);
+            var flags = result.findTextList("flags").$();
+            var name = result.findText("name").$();
 
-            var beforeContent = result.findText("beforeContent").$();
             var content = result.findText("content").$();
-
-            var extendsRange = beforeContent.firstRangeOfSlice("extends ");
-            var end = extendsRange.map(Range::startIndex).orElse(beforeContent.end());
-            var javaString = beforeContent.sliceTo(end).strip();
-
-            var result1 = new ExclusiveDelimiterRule(" ",
-                    new TextSplitRule("flags", " "),
-                    new ValueRule("name"))
-                    .apply(javaString);
-
-            var flags = result1.findTextList("flags").$();
-            var name = result1.findText("name").$();
-
-            if (!flags.contains(new JavaString("class"))) $$();
-
             var contentOutput = new Content(content, 0);
 
             var builder = MapNode.Builder(new JavaString("class"))
@@ -44,15 +34,30 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                     .withString("name", name)
                     .withNode("value", contentOutput);
 
-            var bodyStart = stripped.firstIndexOfChar('{').$();
-            var withSuperClass = extendsRange.flatMap(range -> range.endIndex().to(bodyStart))
-                    .map(stripped::sliceBetween)
-                    .map(JavaString::strip)
+            var withSuperClass = result.findText("extends")
                     .flatMap(superClassString -> new TypeCompiler(superClassString).compile())
                     .map(superClassName -> builder.withString("extends", superClassName))
                     .orElse(builder);
 
             return withSuperClass.complete();
         });
+    }
+
+    private static Rule createRule() {
+        return Join(
+                Optional(Join(TextList("flags", " "), Text(" "))),
+                Text("class "),
+                Optional(Join(
+                        Text("extends "),
+                        Extract("extends"))),
+                Text("content"));
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return createRule()
+                .apply(stripped)
+                .map(ClassLexer::createToken)
+                .flatMap(Streams::fromOption);
     }
 }

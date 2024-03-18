@@ -20,8 +20,8 @@ public record MapRuleResult(JavaMap<JavaString, JavaString> text,
 
     public static RuleResult merge(RuleResult... results) {
         return Streams.from(results).foldRight(new MapRuleResult(), (mapRuleResult, ruleResult) -> new MapRuleResult(
-                mapRuleResult.streamTexts().concat(ruleResult.streamTexts()).collect(Collectors.toMap()),
-                mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap())
+                mapRuleResult.streamTexts().concat(ruleResult.streamTexts()).collect(Collectors.toOverridingMap()),
+                mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll))
         ));
     }
 

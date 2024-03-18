@@ -3,6 +3,8 @@ package com.meti.compile.procedure;
 import com.meti.collect.Index;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -22,8 +24,7 @@ public class InvocationLexer implements Lexer {
         this.stripped = javaString;
     }
 
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var isConstruction = stripped.startsWithSlice("new ");
             if(!stripped.endsWithSlice(")")) $$();
@@ -56,6 +57,11 @@ public class InvocationLexer implements Lexer {
 
     protected Node create(Content caller, List<Content> list) {
         return new InvocationNode(caller, list);
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 
     private record State(int depth, Option<Index> furthest) {

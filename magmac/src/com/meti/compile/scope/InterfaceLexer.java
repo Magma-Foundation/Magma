@@ -3,6 +3,8 @@ package com.meti.compile.scope;
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -17,8 +19,7 @@ public class InterfaceLexer implements Lexer {
         this.root = root;
     }
 
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var keywordStart = root.firstIndexOfSlice("interface ").$();
             var keywordEnd = keywordStart.next("interface ".length()).$();
@@ -37,5 +38,10 @@ public class InterfaceLexer implements Lexer {
 
             return new TraitNode(name, content, list);
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

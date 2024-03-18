@@ -11,14 +11,14 @@ import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
 public class JavaList<T> {
-    private final List<T> list;
+    private final List<T> elements;
 
     public JavaList() {
         this(new ArrayList<>());
     }
 
-    public JavaList(List<T> list) {
-        this.list = list;
+    public JavaList(List<T> elements) {
+        this.elements = elements;
     }
 
     @SafeVarargs
@@ -33,37 +33,43 @@ public class JavaList<T> {
     @Override
     public String toString() {
         return "JavaList{" +
-               "list=" + list +
+               "list=" + elements +
                '}';
     }
 
     public JavaList<T> add(T element) {
-        var copy = new ArrayList<>(list);
+        var copy = new ArrayList<>(elements);
         copy.add(element);
         return new JavaList<>(copy);
     }
 
     public Option<T> last() {
-        return list.isEmpty() ? None() : Some(list.get(list.size() - 1));
+        return elements.isEmpty() ? None() : Some(elements.get(elements.size() - 1));
     }
 
     public Option<Tuple<T, JavaList<T>>> popLast() {
-        if (list.isEmpty()) return None();
+        if (elements.isEmpty()) return None();
 
-        var slice = list.subList(0, list.size() - 1);
-        var lastItem = list.get(list.size() - 1);
+        var slice = elements.subList(0, elements.size() - 1);
+        var lastItem = elements.get(elements.size() - 1);
         return Some(new Tuple<>(lastItem, new JavaList<>(slice)));
     }
 
     public boolean contains(T value) {
-        return this.list.contains(value);
+        return this.elements.contains(value);
     }
 
     public Stream<T> stream() {
-        return Streams.fromList(list);
+        return Streams.fromList(elements);
     }
 
     public List<T> unwrap() {
-        return list;
+        return elements;
+    }
+
+    public JavaList<T> addAll(JavaList<T> other) {
+        var copy = new ArrayList<>(elements);
+        copy.addAll(other.elements);
+        return new JavaList<>(copy);
     }
 }

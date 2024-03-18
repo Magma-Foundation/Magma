@@ -3,6 +3,8 @@ package com.meti.compile.scope;
 import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
@@ -15,8 +17,7 @@ import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
 
 public record DefinitionLexer(JavaString stripped, int indent) implements Lexer {
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var separator = stripped.firstIndexOfChar('=').$();
             var withName = stripped.sliceTo(separator).strip();
@@ -57,5 +58,10 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
             var compiledValue = new Content(stripped.sliceFrom(separator.next().$()).strip(), 0);
             return new DefinitionNode(indent, flagsString, name, compiledValue);
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

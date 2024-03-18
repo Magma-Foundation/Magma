@@ -3,6 +3,7 @@ package com.meti.compile.scope;
 import com.meti.collect.Index;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.node.Content;
@@ -18,8 +19,7 @@ public class LambdaLexer implements Lexer {
         this.input = input;
     }
 
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var index = input.firstIndexOfSlice("->").$();
             var argumentString = input.sliceTo(index).strip();
@@ -37,5 +37,10 @@ public class LambdaLexer implements Lexer {
             var contentNode = new Content(content, 0);
             return new LambdaNode(arguments, contentNode);
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

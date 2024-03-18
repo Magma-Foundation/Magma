@@ -56,7 +56,7 @@ public record Compiler(String input) {
                         VariableLexer::new,
                         exp -> new InterfaceLexer(new JavaString(exp))
                 ).map(constructor -> constructor.apply(line.strip()))
-                .map(Lexer::lex)
+                .map(lexer -> lexer.lex().next())
                 .flatMap(Streams::fromOption);
     }
 

@@ -10,6 +10,7 @@ import com.meti.java.JavaString;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -126,7 +127,11 @@ public class Collectors {
         };
     }
 
-    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toMap() {
+    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toOverridingMap() {
+        return toMap((v, v2) -> v2);
+    }
+
+    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toMap(BiFunction<V, V, V> merger) {
         return new Collector<>() {
             @Override
             public JavaMap<K, V> initial() {
@@ -135,7 +140,7 @@ public class Collectors {
 
             @Override
             public JavaMap<K, V> fold(JavaMap<K, V> current, Tuple<K, V> element) {
-                return current.put(element.a(), element.b());
+                return current.merge(element.a(), element.b(), merger);
             }
         };
     }

@@ -2,6 +2,8 @@ package com.meti.compile.attempt;
 
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
+import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.Streams;
 import com.meti.compile.Lexer;
 import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
@@ -20,8 +22,7 @@ public class CatchLexer implements Lexer {
         this.indent = indent;
     }
 
-    @Override
-    public Option<Node> lex() {
+    private Option<Node> lex0() {
         return $Option(() -> {
             var index = input.firstIndexOfSlice("catch").$();
             if (!index.isStart()) $$();
@@ -45,5 +46,10 @@ public class CatchLexer implements Lexer {
             var exceptionName = args.sliceFrom(separator.next().$());
             return new CatchNode(exceptionTypes, exceptionName, new Content(input.sliceFrom(blockStart), indent), indent);
         });
+    }
+
+    @Override
+    public Stream<Node> lex() {
+        return Streams.fromOption(lex0());
     }
 }

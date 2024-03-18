@@ -162,4 +162,32 @@ public record JavaString(String inner) {
     public Tuple<JavaString, JavaString> sliceAt(Index index) {
         return new Tuple<>(sliceTo(index), sliceFrom(index));
     }
+
+    public Option<Stream<JavaString>> splitIntoSlices(int n) {
+        if (n <= 0) {
+            return None();
+        }
+
+        return Some(new AbstractStream<>() {
+            private int start = 0;
+
+            @Override
+            public Option<JavaString> next() {
+                if (start < inner.length()) {
+                    int end = Math.min(inner.length(), start + n);
+                    JavaString slice = new JavaString(inner.substring(start, end));
+                    start = end;
+                    return Some(slice);
+                } else {
+                    return None();
+                }
+            }
+        });
+    }
+
+    public Stream<Index> streamIndices() {
+        return Streams.range(0, inner.length())
+                .orElse(Streams.empty())
+                .map(value -> new Index(value, inner.length()));
+    }
 }

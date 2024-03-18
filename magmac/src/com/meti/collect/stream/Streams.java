@@ -77,4 +77,25 @@ public class Streams {
             return list;
         });
     }
+
+    public static Option<Stream<Integer>> range(int start, int end) {
+        if (!(start <= end)) {
+            return None();
+        } else {
+            return Some(new AbstractStream<>() {
+                private int counter = start;
+
+                @Override
+                public Option<Integer> next() {
+                    if (counter < end) {
+                        var value = counter;
+                        counter++;
+                        return Some(value);
+                    } else {
+                        return None();
+                    }
+                }
+            });
+        }
+    }
 }
