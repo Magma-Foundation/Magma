@@ -44,11 +44,11 @@ public record MethodLexer(JavaString stripped, int indent) implements Lexer {
 
             var afterTypeSeparator = typeSeparator.flatMap(Index::next);
 
-            var type = new TypeCompiler(afterTypeSeparator.map(featuresString::sliceFrom)
+            TypeCompiler typeCompiler2 = new TypeCompiler(afterTypeSeparator.map(featuresString::sliceFrom)
                     .orElse(featuresString)
                     .strip()
-                    .inner())
-                    .compile()
+                    .inner());
+            var type = typeCompiler2.compile().map(JavaString::inner)
                     .$();
 
             var annotations = typeSeparator.map(value -> featuresString.sliceTo(value).strip().split(" ")
@@ -57,16 +57,20 @@ public record MethodLexer(JavaString stripped, int indent) implements Lexer {
                     .flatMap(Streams::fromOption)
                     .map(JavaString::inner)
                     .map(TypeCompiler::new)
-                    .map(TypeCompiler::compile)
+                    .map(typeCompiler1 -> typeCompiler1.compile().map(JavaString::inner))
                     .collect(Collectors.required(Collectors.toNativeList())))
                     .orElseGet(() -> Some(new ArrayList<>()))
                     .$();
 
             var contentStart = stripped.firstIndexOfChar('{');
             var more = stripped.sliceBetween(paramEnd.next().$().to(contentStart.orElse(stripped.end())).$()).strip();
-            var moreOutputValue = more.startsWithSlice("throws ")
-                    ? Some(new TypeCompiler(more.sliceFromRaw("throws ".length()).$().inner()).compile())
-                    : None();
+            Option<?> moreOutputValue;
+            if (more.startsWithSlice("throws ")) {
+                TypeCompiler typeCompiler = new TypeCompiler(more.sliceFromRaw("throws ".length()).$().inner());
+                moreOutputValue = Some(typeCompiler.compile().map(JavaString::inner));
+            } else {
+                moreOutputValue = None();
+            }
 
             return contentStart.<Node>map(contentStartValue -> {
                 var content = new Content(stripped.sliceFrom(contentStartValue).strip(), indent());

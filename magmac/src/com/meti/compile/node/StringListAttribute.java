@@ -16,4 +16,11 @@ public class StringListAttribute implements Attribute {
     public Option<JavaList<JavaString>> asListOfStrings() {
         return Some.Some(values);
     }
+
+    @Override
+    public String toString() {
+        return "StringListAttribute{" +
+               "values=" + values +
+               '}';
+    }
 }

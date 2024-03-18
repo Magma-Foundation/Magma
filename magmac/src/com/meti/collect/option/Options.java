@@ -14,7 +14,7 @@ public class Options {
         }
     }
 
-    public static void $$() throws IntentionalException {
+    public static <T> T $$() throws IntentionalException {
         throw new IntentionalException();
     }
 }

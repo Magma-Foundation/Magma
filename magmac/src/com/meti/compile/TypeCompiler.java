@@ -1,26 +1,31 @@
 package com.meti.compile;
 
 import com.meti.collect.option.Option;
-import com.meti.collect.option.Some;
+import com.meti.java.JavaString;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.*;
 
 public record TypeCompiler(String type) {
-    public Option<String> compile() {
+    public TypeCompiler(JavaString value) {
+        this(value.inner());
+    }
+
+    public Option<JavaString> compile() {
         if(type.equals("new")) return None();
 
         if (type.equals("void")) {
-            return Some("Void");
+            return Some(new JavaString("Void"));
         } else {
             var start = type().indexOf('<');
             var end = type().lastIndexOf('>');
             if (start != -1 && end != -1 && start < end) {
                 var name = type().substring(0, start).strip();
                 var subType = type().substring(start + 1, end).strip();
-                return Some(name + "[" + new TypeCompiler(subType).compile() + "]");
+                TypeCompiler typeCompiler = new TypeCompiler(subType);
+                return Some(new JavaString(name + "[" + typeCompiler.compile().map(JavaString::inner) + "]"));
             } else {
-                return Some(type());
+                return Some(new JavaString(type));
             }
         }
     }

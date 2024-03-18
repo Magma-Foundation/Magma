@@ -13,6 +13,10 @@ import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
 public record BlockNode(int indent, List<? extends Node> children) implements Node {
+    public BlockNode(int indent, JavaList<Node> children) {
+        this(indent, children.unwrap());
+    }
+
     private Option<List<? extends Node>> findChildren() {
         return Some(children);
     }

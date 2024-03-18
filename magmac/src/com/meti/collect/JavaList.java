@@ -26,6 +26,17 @@ public class JavaList<T> {
         return new JavaList<>(new ArrayList<>(List.of(elements)));
     }
 
+    public static <T> JavaList<T> empty() {
+        return new JavaList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "JavaList{" +
+               "list=" + list +
+               '}';
+    }
+
     public JavaList<T> add(T element) {
         var copy = new ArrayList<>(list);
         copy.add(element);

@@ -1,6 +1,10 @@
 package com.meti.compile;
 
 import com.meti.collect.JavaList;
+import com.meti.collect.option.None;
+import com.meti.collect.option.Option;
+import com.meti.collect.result.Result;
+import com.meti.collect.result.Results;
 import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Stream;
@@ -17,10 +21,15 @@ import com.meti.compile.string.StringLexer;
 import com.meti.compile.string.TextBlockLexer;
 import com.meti.java.JavaString;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.meti.collect.option.Options.$$;
+import static com.meti.collect.option.Options.$Option;
+import static com.meti.collect.option.Some.Some;
+import static com.meti.collect.result.Ok.Ok;
 import static com.meti.collect.result.Results.$Result;
 
 public record Compiler(String input) {
@@ -96,46 +105,91 @@ public record Compiler(String input) {
                 .orElse(Streams.empty());
     }
 
-    private static Node transformAST(Node tree) {
-        var withValue = tree.apply("value").flatMap(Attribute::asNode)
-                .map(Compiler::transformAST)
-                .flatMap(value -> tree.with("value", new NodeAttribute(value)))
-                .orElse(tree);
+    private static Result<Node, CompileException> transformAST(Node root) {
+        return $Result(() -> {
+            var transformed = transformNode(root).$();
 
-        var node = withValue.apply("children")
-                .flatMap(Attribute::asListOfNodes)
-                .<List<? extends Node>>map(JavaList::unwrap)
-                .map(children -> Streams.fromList(children)
-                        .map(Compiler::transformAST)
-                        .collect(Collectors.toNativeList()))
-                .flatMap(children1 -> withValue.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) children1))))
-                .orElse(withValue);
+            var withValue = transformed.apply("value").flatMap(Attribute::asNode)
+                    .map(Compiler::transformAST)
+                    .into(Results::invertOption)
+                    .$()
+                    .flatMap(value -> transformed.with("value", new NodeAttribute(value)))
+                    .orElse(transformed);
 
-        return transformNode(node);
-    }
-
-    private static Node transformNode(Node node) {
-        if (node.is("block")) {
-            var children = node.apply("children")
+            var node = withValue.apply("children")
                     .flatMap(Attribute::asListOfNodes)
-                    .<List<? extends Node>>map(JavaList::unwrap).orElse(Collections.emptyList());
-            var newChildren = Streams.fromList(children)
-                    .map(child -> {
-                        var realIndent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0) + 1;
-                        if (child.is("implementation") || child.is("try") || child.is("catch")) {
-                            return new Statement(child, realIndent);
-                        } else {
-                            return new TerminatingStatement(child, realIndent);
-                        }
-                    })
-                    .collect(Collectors.toNativeList());
-            return node.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) newChildren))).orElse(node);
-        } else {
+                    .<List<? extends Node>>map(JavaList::unwrap)
+                    .map(children -> Streams.fromList(children)
+                            .map(Compiler::transformAST)
+                            .collect(Collectors.exceptionally(Collectors.toList())))
+                    .into(Results::invertOption)
+                    .$()
+                    .flatMap(children -> withValue.with("children", new NodeListAttribute(children)))
+                    .orElse(withValue);
+
             return node;
-        }
+        });
     }
 
-    String compile() throws CompileException {
+    private static Option<Result<Node, CompileException>> transformBlock(Node node) {
+        if (!node.is("block")) return None.None();
+
+        var realIndent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0) + 1;
+        var children = node.apply("children")
+                .flatMap(Attribute::asListOfNodes)
+                .orElse(JavaList.empty());
+
+        var newChildren = children.stream()
+                .map(child -> {
+                    if (child.is("implementation") || child.is("try") || child.is("catch")) {
+                        return new Statement(child, realIndent);
+                    } else {
+                        return new TerminatingStatement(child, realIndent);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return Some(Ok(node.with("children", new NodeListAttribute(newChildren)).orElse(node)));
+    }
+
+    private static Result<Node, CompileException> transformNode(Node node) {
+        return transformBlock(node).or(() -> transformClass(node)).orElse(Ok(node));
+    }
+
+    private static Option<Result<Node, CompileException>> transformClass(Node node) {
+        return $Option(() -> {
+            if (!node.is("class")) return $$();
+
+            var flags = node.apply("flags").$().asListOfStrings().$();
+            var name = node.apply("name").$().asString().$();
+
+            var outputFlags = new JavaList<JavaString>();
+            if (flags.contains(new JavaString("public"))) {
+                outputFlags = JavaList.from(new JavaString("export"));
+            }
+
+            var children = new JavaList<Node>(new ArrayList<>(node.apply("value")
+                    .flatMap(Attribute::asNode)
+                    .flatMap(value -> value.apply("children"))
+                    .flatMap(Attribute::asListOfNodes)
+                    .$()
+                    .unwrap()));
+
+            var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(new JavaString("implements"))
+                    .withString("type", extendsValue)
+                    .complete())).orElse(children);
+
+            var contentOutput = new BlockNode(0, newChildren);
+
+            return Ok(MapNode.Builder(new JavaString("object"))
+                    .withListOfStrings("flags", outputFlags)
+                    .withString("name", name)
+                    .withNode("value", contentOutput)
+                    .complete());
+        });
+    }
+
+    Result<JavaString, CompileException> compile() throws CompileException {
         return $Result(() -> {
             var tree = new Splitter(this.input())
                     .split()
@@ -148,9 +202,16 @@ public record Compiler(String input) {
             var outputTree = tree.stream()
                     .filter(element -> !element.is("package"))
                     .map(Compiler::transformAST)
-                    .collect(Collectors.toNativeList());
+                    .collect(Collectors.exceptionally(Collectors.toList()))
+                    .$();
 
-            return Streams.fromList(outputTree).map(node -> node.render().orElse("")).collect(Collectors.joiningNatively()).orElse("");
+            return outputTree.stream()
+                    .map(node -> node.render()
+                            .map(JavaString::new)
+                            .into(ThrowableOption::new)
+                            .orElseThrow(() -> new CompileException("Failed to render: '%s'".formatted(node))))
+                    .collect(Collectors.exceptionally(Collectors.joining()))
+                    .mapValue(value -> value.orElse(JavaString.Empty));
         }).$();
     }
 }

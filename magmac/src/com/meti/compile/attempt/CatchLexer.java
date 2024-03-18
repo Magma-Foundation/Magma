@@ -35,7 +35,10 @@ public class CatchLexer implements Lexer {
             var exceptionTypes = args.sliceTo(separator)
                     .split("\\|")
                     .map(JavaString::strip)
-                    .map(type -> new TypeCompiler(type.inner()).compile().map(JavaString::new))
+                    .map(type -> {
+                        TypeCompiler typeCompiler = new TypeCompiler(type.inner());
+                        return typeCompiler.compile().map(JavaString::inner).map(JavaString::new);
+                    })
                     .collect(Collectors.required(Collectors.toNativeList()))
                     .$();
 

@@ -5,6 +5,7 @@ import com.meti.collect.result.Result;
 import com.meti.collect.result.Results;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Streams;
+import com.meti.java.JavaString;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,9 +35,9 @@ public final class Application {
                     .mapErr(CompileException::new)
                     .$();
 
-            String output;
+            JavaString output;
             try {
-                output = new Compiler(input).compile();
+                output = new Compiler(input).compile().$();
             } catch (CompileException e) {
                 throw new CompileException("Failed to compile file: '" + source + "'", e);
             }
@@ -55,7 +56,7 @@ public final class Application {
                     }
                 }
 
-                Files.writeString(target, output);
+                Files.writeString(target, output.inner());
             } catch (IOException e) {
                 throw new CompileException(e);
             }

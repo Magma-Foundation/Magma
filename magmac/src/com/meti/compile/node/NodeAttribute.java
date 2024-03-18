@@ -14,4 +14,11 @@ public class NodeAttribute implements Attribute {
     public Option<Node> asNode() {
         return Some.Some(value);
     }
+
+    @Override
+    public String toString() {
+        return "NodeAttribute{" +
+               "value=" + value +
+               '}';
+    }
 }

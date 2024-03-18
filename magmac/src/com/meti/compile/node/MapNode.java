@@ -6,6 +6,7 @@ import com.meti.collect.option.Option;
 import com.meti.java.JavaString;
 
 import java.util.HashMap;
+import java.util.List;
 
 public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {
@@ -24,7 +25,8 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
 
     @Override
     public Option<Node> with(String name, Attribute attribute) {
-        return attributes.replaceValue(new JavaString(name), attribute).map(newAttributes -> new MapNode(new JavaString(name), newAttributes));
+        var ownedName = new JavaString(name);
+        return attributes.replaceValue(ownedName, attribute).map(newAttributes -> new MapNode(this.name, newAttributes));
     }
 
     public record Builder(JavaString name, JavaMap<JavaString, Attribute> attributes) {
@@ -46,6 +48,10 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
 
         public Builder withNode(String name, Node value) {
             return new Builder(this.name, attributes.put(new JavaString(name), new NodeAttribute(value)));
+        }
+
+        public Builder withListOfNodes(String name, JavaList<? extends Node> values) {
+            return new Builder(this.name, attributes.put(new JavaString(name), new NodeListAttribute(values)));
         }
     }
 }
