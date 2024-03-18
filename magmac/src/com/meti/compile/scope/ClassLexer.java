@@ -14,23 +14,31 @@ import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.compile.rule.ConjunctionRule.Join;
+import static com.meti.compile.rule.DisjunctionRule.Or;
 import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.Rules.Optional;
 import static com.meti.compile.rule.Rules.TextList;
 import static com.meti.compile.rule.TextRule.Text;
+import static com.meti.compile.rule.WhitespaceRule.Padding;
+import static com.meti.compile.rule.WhitespaceRule.Whitespace;
 
 public record ClassLexer(JavaString stripped) implements Lexer {
 
-    public static final Rule FLAG_RULE = TextList("flags", " ");
+    public static final Rule FLAG_RULE = TextList("flags", Whitespace);
     public static final Rule EXTENDS_RULE = Join(
-            Text("extends "),
+            Text("extends"),
+            Whitespace,
             Extract("superclass"));
 
     public static final Rule RULE = Join(
-            Optional(Join(FLAG_RULE, Text(" "))),
-            Text("class "),
+            Or(Join(FLAG_RULE, Whitespace), Padding),
+            Text("class"),
+            Whitespace,
+            Extract("name"),
+            Whitespace,
             Optional(EXTENDS_RULE),
-            Text("content"));
+            Text("content"),
+            Padding);
 
     private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {

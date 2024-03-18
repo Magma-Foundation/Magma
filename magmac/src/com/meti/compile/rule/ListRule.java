@@ -12,9 +12,13 @@ public class ListRule implements Rule {
     private final Rule value;
     private final Rule delimiter;
 
-    public ListRule(Rule value, Rule delimiter) {
+    private ListRule(Rule value, Rule delimiter) {
         this.value = value;
         this.delimiter = delimiter;
+    }
+
+    public static ListRule List(Rule value, Rule delimiter) {
+        return new ListRule(value, delimiter);
     }
 
     @Override
