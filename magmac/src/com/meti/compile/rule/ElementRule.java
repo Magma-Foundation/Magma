@@ -22,7 +22,7 @@ public class ElementRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return Some.Some(new MapRuleResult(new JavaMap<>(), new JavaMap<JavaString, JavaList<JavaString>>()
+        return Some.Some(new MapRuleResult(input.end(), new JavaMap<JavaString, JavaList<JavaString>>()
                 .put(name, new JavaList<>(List.of(input)))));
     }
 }

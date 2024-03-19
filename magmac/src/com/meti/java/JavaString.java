@@ -207,4 +207,8 @@ public record JavaString(String inner) {
         var after = inner.substring(1);
         return Some(new Tuple<>(first, new JavaString(after)));
     }
+
+    public Index start() {
+        return new Index(0, this.inner.length());
+    }
 }

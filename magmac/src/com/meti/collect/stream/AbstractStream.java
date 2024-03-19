@@ -33,7 +33,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
             C finalCurrent = current;
             var tuple = next()
                     .map(next -> folder.apply(finalCurrent, next))
-                    .toTuple(current);
+                    .toResolvedTuple(current);
 
             if (tuple.a()) {
                 current = tuple.b();
@@ -76,7 +76,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
 
                     var nextStream = AbstractStream.this.next()
                             .map(mapper)
-                            .toTuple(current);
+                            .toResolvedTuple(current);
 
                     if (nextStream.a()) {
                         current = nextStream.b();

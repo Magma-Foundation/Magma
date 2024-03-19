@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.meti.compile.rule.ConjunctionRule.Join;
-import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
 import static com.meti.compile.rule.Rules.Optional;
 import static com.meti.compile.rule.TextRule.Text;

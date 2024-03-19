@@ -10,7 +10,7 @@ class ExtractRuleTest {
 
     @Test
     void apply() throws IntentionalException {
-        var actual = ExtractRule.Extract("test")
+        var actual = ExtractSymbolRule.Symbol("test")
                 .apply(new JavaString("temp"))
                 .$()
                 .findText("test")

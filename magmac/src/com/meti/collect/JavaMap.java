@@ -62,4 +62,8 @@ public class JavaMap<K, V> {
         }
         return new JavaMap<>(copy);
     }
+
+    public boolean isEmpty() {
+        return this.inner.isEmpty();
+    }
 }

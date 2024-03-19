@@ -1,5 +1,6 @@
 package com.meti.collect.stream;
 
+import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.Tuple;
@@ -141,6 +142,20 @@ public class Collectors {
             @Override
             public JavaMap<K, V> fold(JavaMap<K, V> current, Tuple<K, V> element) {
                 return current.merge(element.a(), element.b(), merger);
+            }
+        };
+    }
+
+    public static Collector<Index, Option<Index>> sum() {
+        return new Collector<>() {
+            @Override
+            public Option<Index> initial() {
+                return None();
+            }
+
+            @Override
+            public Option<Index> fold(Option<Index> current, Index element) {
+                return current.flatMap(value -> value.next(element.value()));
             }
         };
     }

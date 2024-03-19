@@ -70,8 +70,8 @@ public class ThrowableOption<T> implements Option<T> {
     }
 
     @Override
-    public Tuple<Boolean, T> toTuple(T other) {
-        return parent.toTuple(other);
+    public Tuple<Boolean, T> toResolvedTuple(T other) {
+        return parent.toResolvedTuple(other);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.meti.compile.rule;
 
+import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.Tuple;
@@ -9,30 +10,35 @@ import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
-import java.util.function.BiFunction;
+public record MapRuleResult(
+        Index length, JavaMap<JavaString, JavaList<JavaString>> texts
+) implements RuleResult {
 
-public record MapRuleResult(JavaMap<JavaString, JavaString> text,
-                            JavaMap<JavaString, JavaList<JavaString>> texts) implements RuleResult {
-    public MapRuleResult() {
-        this(new JavaMap<>(), new JavaMap<>());
+    public MapRuleResult(Index length) {
+        this(length, new JavaMap<>());
     }
 
 
-    public static RuleResult merge(RuleResult... results) {
-        return Streams.from(results).foldRight(new MapRuleResult(), (mapRuleResult, ruleResult) -> new MapRuleResult(
-                mapRuleResult.streamTexts().concat(ruleResult.streamTexts()).collect(Collectors.toOverridingMap()),
-                mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll))
-        ));
+    public static RuleResult merge(RuleResult first, RuleResult... more) {
+        var length = Streams.from(first).concat(Streams.from(more))
+                .map(RuleResult::length)
+                .collect(Collectors.sum())
+                .orElse(first.length());
+
+        return Streams.from(first).foldRight(new MapRuleResult(length), (mapRuleResult, ruleResult) -> new MapRuleResult(
+                mapRuleResult.length.next(ruleResult.length().value()).orElse(mapRuleResult.length),
+                mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll)
+        )));
     }
 
     @Override
     public Option<JavaString> findText(String name) {
-        return text.apply(new JavaString(name));
+        return texts.apply(new JavaString(name)).flatMap(JavaList::first);
     }
 
     @Override
     public Stream<Tuple<JavaString, JavaString>> streamTexts() {
-        return text.stream();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -43,5 +49,15 @@ public record MapRuleResult(JavaMap<JavaString, JavaString> text,
     @Override
     public Stream<Tuple<JavaString, JavaList<JavaString>>> streamTextLists() {
         return texts.stream();
+    }
+
+    @Override
+    public Index length() {
+        return length;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return texts.isEmpty();
     }
 }

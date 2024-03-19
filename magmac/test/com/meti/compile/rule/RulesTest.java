@@ -3,7 +3,6 @@ package com.meti.compile.rule;
 import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
-import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.TextRule.Text;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,14 +17,14 @@ class RulesTest {
 
     @Test
     void presentValid() {
-        assertTrue(Rules.Optional(Extract("value"))
+        assertTrue(Rules.Optional(ExtractSymbolRule.Symbol("value"))
                 .apply(new JavaString("test"))
                 .isPresent());
     }
 
     @Test
     void empty() {
-        assertTrue(Rules.Optional(Extract("value"))
+        assertTrue(Rules.Optional(ExtractSymbolRule.Symbol("value"))
                 .apply(new JavaString(""))
                 .isPresent());
     }

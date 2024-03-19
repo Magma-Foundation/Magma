@@ -52,7 +52,7 @@ public class None<T> implements Option<T> {
     }
 
     @Override
-    public Tuple<Boolean, T> toTuple(T other) {
+    public Tuple<Boolean, T> toResolvedTuple(T other) {
         return new Tuple<>(false, other);
     }
 

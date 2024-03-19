@@ -23,7 +23,7 @@ public interface Option<T> {
 
     T orElseGet(Supplier<T> other);
 
-    Tuple<Boolean, T> toTuple(T other);
+    Tuple<Boolean, T> toResolvedTuple(T other);
 
     boolean isEmpty();
 

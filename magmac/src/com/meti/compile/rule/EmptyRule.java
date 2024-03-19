@@ -11,6 +11,6 @@ public class EmptyRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return input.isEmpty() ? Some.Some(new MapRuleResult()) : None.None();
+        return input.isEmpty() ? Some.Some(new MapRuleResult(input.end())) : None.None();
     }
 }

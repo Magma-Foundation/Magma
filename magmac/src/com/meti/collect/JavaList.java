@@ -80,4 +80,9 @@ public class JavaList<T> {
     public boolean isEmpty() {
         return elements.isEmpty();
     }
+
+    public Option<T> first() {
+        if (elements.isEmpty()) return None();
+        else return Some(elements.get(0));
+    }
 }

@@ -4,15 +4,17 @@ import com.meti.collect.option.IntentionalException;
 import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
+import static com.meti.compile.rule.TextRule.Text;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConjunctionRuleTest {
 
     @Test
     void apply() throws IntentionalException {
         var actual = ConjunctionRule.Join(
-                TextRule.Text("a"),
-                ExtractRule.Extract("value")
+                Text("a"),
+                Symbol("value")
         ).apply(new JavaString("ab")).$();
 
         var value = actual.findText("value").$().inner();

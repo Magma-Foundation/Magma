@@ -112,7 +112,7 @@ public class Streams {
     }
 
     public static Option<Stream<Integer>> range(int start, int end) {
-        if (start <= end) return None();
+        if (start > end) return None();
 
         return Some(new AbstractStream<Integer>() {
             private int counter = start;
