@@ -1,6 +1,6 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.stream.Stream;
+import com.meti.collect.option.Option;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
@@ -22,11 +22,12 @@ public class ListRule implements Rule {
     }
 
     @Override
-    public Stream<RuleResult> apply(JavaString input) {
+    public Option<RuleResult> apply(JavaString input) {
         var lazy = new LazyRule();
         var more = Join(value, delimiter, lazy);
         var rule = Or(Empty, value, more);
         lazy.setCurrent(rule);
-        return Streams.reverse(rule.apply(input));
+
+        return rule.apply(input);
     }
 }

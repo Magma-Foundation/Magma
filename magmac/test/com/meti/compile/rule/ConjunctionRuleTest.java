@@ -13,7 +13,7 @@ class ConjunctionRuleTest {
         var actual = ConjunctionRule.Join(
                 TextRule.Text("a"),
                 ExtractRule.Extract("value")
-        ).apply(new JavaString("ab")).next().$();
+        ).apply(new JavaString("ab")).$();
 
         var value = actual.findText("value").$().inner();
         assertEquals("b", value);

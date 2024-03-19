@@ -17,21 +17,17 @@ class ListRuleTest {
 
     @Test
     void applyEmpty() {
-        var actual = Rules.TextList("values", ";")
-                .apply(JavaString.Empty)
-                .collect(Collectors.toList());
+        var actual = Rules.TextList("values", ";").apply(JavaString.Empty);
         assertTrue(actual.isEmpty());
     }
 
     @Test
-    void applyOnce() {
+    void applyOnce() throws IntentionalException {
         var value = new JavaString("test");
         var actual = Rules.TextList("values", ";")
                 .apply(value)
-                .map(result -> result.findTextList("values"))
-                .flatMap(Streams::fromOption)
-                .flatMap(JavaList::stream)
-                .collect(Collectors.toNativeList());
+                .flatMap(result -> result.findTextList("values"))
+                .$().unwrap();
 
         assertIterableEquals(Collections.singletonList(value), actual);
     }
@@ -42,9 +38,7 @@ class ListRuleTest {
 
         var actual = Rules.TextList("values", ";")
                 .apply(value)
-                .map(result -> result.findTextList("values"))
-                .collect(Collectors.toNativeList())
-                .get(0)
+                .flatMap(result -> result.findTextList("values"))
                 .$()
                 .unwrap();
 

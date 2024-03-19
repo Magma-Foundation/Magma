@@ -185,8 +185,8 @@ public record JavaString(String inner) {
         });
     }
 
-    public Stream<Index> streamIndices() {
-        return Streams.range(0, inner.length())
+    public Stream<Index> streamReverseIndices() {
+        return Streams.rangeReverse(0, inner.length())
                 .orElse(Streams.empty())
                 .map(value -> new Index(value, inner.length()));
     }

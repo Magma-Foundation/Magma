@@ -77,9 +77,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
     @Override
     public Stream<Node> lex() {
-        return RULE
-                .apply(stripped)
-                .map(ClassLexer::createToken)
-                .flatMap(Streams::fromOption);
+        return Streams.fromOption(RULE.apply(stripped)
+                .flatMap(ClassLexer::createToken));
     }
 }

@@ -79,18 +79,18 @@ public class Streams {
         });
     }
 
-    public static Option<Stream<Integer>> range(int start, int end) {
+    public static Option<Stream<Integer>> rangeReverse(int start, int end) {
         if (!(start <= end)) {
             return None();
         } else {
             return Some(new AbstractStream<>() {
-                private int counter = start;
+                private int counter = end - 1;
 
                 @Override
                 public Option<Integer> next() {
-                    if (counter < end) {
+                    if (counter >= start) {
                         var value = counter;
-                        counter++;
+                        counter--;
                         return Some(value);
                     } else {
                         return None();

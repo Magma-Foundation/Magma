@@ -12,7 +12,6 @@ class ExtractRuleTest {
     void apply() throws IntentionalException {
         var actual = ExtractRule.Extract("test")
                 .apply(new JavaString("temp"))
-                .next()
                 .$()
                 .findText("test")
                 .$();

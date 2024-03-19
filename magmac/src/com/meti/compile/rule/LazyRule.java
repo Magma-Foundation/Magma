@@ -2,7 +2,6 @@ package com.meti.compile.rule;
 
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
-import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
@@ -16,7 +15,7 @@ public class LazyRule implements Rule {
     }
 
     @Override
-    public Stream<RuleResult> apply(JavaString input) {
-        return current.map(value -> value.apply(input)).orElse(Streams.empty());
+    public Option<RuleResult> apply(JavaString input) {
+        return current.flatMap(value -> value.apply(input));
     }
 }

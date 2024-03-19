@@ -16,7 +16,6 @@ class WhitespaceRuleTest {
     void apply1() throws IntentionalException {
         assertEquals(new JavaString("Test"), Join(Text("extends"), Whitespace, Extract("superclass"))
                 .apply(new JavaString("extends Test"))
-                .next()
                 .$()
                 .findText("superclass")
                 .$());
@@ -26,7 +25,6 @@ class WhitespaceRuleTest {
     void apply() {
         assertTrue(Join(Text("extends"), Whitespace)
                 .apply(new JavaString("extends \t"))
-                .next()
                 .isPresent());
     }
 }

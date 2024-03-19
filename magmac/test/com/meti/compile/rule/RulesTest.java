@@ -13,7 +13,6 @@ class RulesTest {
     void presentInvalid() {
         assertFalse(Rules.Optional(Text("test"))
                 .apply(new JavaString("tests"))
-                .next()
                 .isPresent());
     }
 
@@ -21,7 +20,6 @@ class RulesTest {
     void presentValid() {
         assertTrue(Rules.Optional(Extract("value"))
                 .apply(new JavaString("test"))
-                .next()
                 .isPresent());
     }
 
@@ -29,7 +27,6 @@ class RulesTest {
     void empty() {
         assertTrue(Rules.Optional(Extract("value"))
                 .apply(new JavaString(""))
-                .next()
                 .isPresent());
     }
 }

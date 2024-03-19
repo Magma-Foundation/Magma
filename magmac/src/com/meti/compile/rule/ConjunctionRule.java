@@ -1,6 +1,6 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.stream.Stream;
+import com.meti.collect.option.Option;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
@@ -18,14 +18,14 @@ public class ConjunctionRule implements Rule {
     }
 
     @Override
-    public Stream<RuleResult> apply(JavaString input) {
-        return input.streamIndices().flatMap(length -> {
+    public Option<RuleResult> apply(JavaString input) {
+        return input.streamReverseIndices().map(length -> {
             var left = input.sliceTo(length);
             var right = input.sliceFrom(length);
 
             return this.left.apply(left)
-                    .cross(() -> this.right.apply(right))
+                    .and(this.right.apply(right))
                     .map(tuple -> MapRuleResult.merge(tuple.a(), tuple.b()));
-        });
+        }).flatMap(Streams::fromOption).next();
     }
 }

@@ -1,6 +1,6 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.stream.Stream;
+import com.meti.collect.option.Option;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
@@ -18,7 +18,7 @@ public class DisjunctionRule implements Rule {
     }
 
     @Override
-    public Stream<RuleResult> apply(JavaString input) {
-        return left.apply(input).concat(right.apply(input));
+    public Option<RuleResult> apply(JavaString input) {
+        return left.apply(input).or(() -> right.apply(input));
     }
 }

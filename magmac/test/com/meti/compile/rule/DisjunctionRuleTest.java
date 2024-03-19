@@ -13,10 +13,9 @@ class DisjunctionRuleTest {
 
     @Test
     void apply() {
-        var list = DisjunctionRule.Or(
+        assertTrue(DisjunctionRule.Or(
                 TextRule.Text("test"),
                 ExtractRule.Extract("value")
-        ).apply(new JavaString("test")).collect(Collectors.toList());
-        assertEquals(2, list.size());
+        ).apply(new JavaString("test")).isPresent());
     }
 }

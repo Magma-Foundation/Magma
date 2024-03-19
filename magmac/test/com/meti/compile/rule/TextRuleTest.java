@@ -11,13 +11,13 @@ class TextRuleTest {
     void applyValid() {
         Assertions.assertTrue(TextRule.Text("test")
                 .apply(new JavaString("test"))
-                .next().isPresent());
+                .isPresent());
     }
 
     @Test
     void applyInvalid() {
         Assertions.assertTrue(TextRule.Text("test")
                 .apply(new JavaString("testing"))
-                .next().isEmpty());
+                .isEmpty());
     }
 }
