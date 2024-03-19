@@ -38,7 +38,7 @@ public class InvocationLexer implements Lexer {
             });
 
             var prefixIndex = isConstruction
-                    ? stripped.asIndex("new ".length()).orElse(stripped.starts())
+                    ? stripped.indexAt("new ".length()).orElse(stripped.starts())
                     : stripped.starts();
 
             var start = furthestComputer.furthest.$();

@@ -1,13 +1,14 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.option.None;
+import com.meti.collect.JavaList;
+import com.meti.collect.Range;
+import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
-import com.meti.collect.option.Some;
+import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
-import java.util.Objects;
-
 import static com.meti.collect.option.None.None;
+import static com.meti.collect.option.Options.$Option;
 import static com.meti.collect.option.Some.Some;
 
 public class ListRule implements Rule {
@@ -23,79 +24,56 @@ public class ListRule implements Rule {
         return new ListRule(value, delimiter);
     }
 
-    @Override
-    public Option<RuleResult> apply(JavaString input) {
-        var state = new State(input, new MapRuleResult(input.start()));
+    public static Option<Range> findFirstInstance(JavaString value, Rule rule) {
+        var totalLength = value.length();
+        for (int sliceLength = totalLength; sliceLength > 0; sliceLength--) {
+            for (int offset = 0; offset < (totalLength - sliceLength); offset++) {
+                var rangeOption = value.indexAt(offset)
+                        .and(value.indexAt(sliceLength + offset))
+                        .flatMap(tuple -> tuple.a().to(tuple.b()))
+                        .flatMap(range -> rule.apply(value.sliceBetween(range)).isPresent()
+                                ? Some(range)
+                                : None());
 
-        while (true) {
-            var tuple1 = value.apply(state.input)
-                    .map(state::getState)
-                    .toResolvedTuple(state);
-
-            if (tuple1.a()) {
-                state = tuple1.b();
-            } else {
-                break;
-            }
-
-            JavaString finalRemainingInput = state.input;
-            var tuple = delimiter.apply(state.input)
-                    .map(RuleResult::length)
-                    .map(finalRemainingInput::sliceFrom)
-                    .toResolvedTuple(state.input);
-
-            if (tuple.a()) {
-                state.input = tuple.b();
-            } else {
-                break;
+                if (rangeOption.isPresent()) return rangeOption;
             }
         }
 
-        return state.result.isEmpty() ? None() : Some(state.result);
+        return None();
     }
 
-    static final class State {
-        private final RuleResult result;
-        private JavaString input;
+    public static JavaList<Range> findInstances(JavaString value, Rule rule) {
+        var list = new JavaList<Range>();
+        var remaining = value;
+        while (true) {
+            JavaList<Range> finalList = list;
 
-        State(JavaString input, RuleResult result) {
-            this.input = input;
-            this.result = result;
+            var resolvedTuple = findFirstInstance(remaining, rule)
+                    .flatMap(element -> $Option(() -> {
+                        int offset = value.length() - element.length();
+                        var nextList = finalList.add(element.offsetRight(offset).$());
+                        var nextRemaining = value.sliceFrom(element.endIndex());
+                        return new Tuple<>(nextList, nextRemaining);
+                    }))
+                    .toResolvedTuple(new Tuple<>(list, remaining));
+
+            if (resolvedTuple.a()) {
+                list = resolvedTuple.b().a();
+                remaining = resolvedTuple.b().b();
+            } else {
+                break;
+            }
         }
 
-        private State getState(RuleResult valueResult) {
-            var newResult = MapRuleResult.merge(this.result, valueResult);
-            var newInput = this.input.sliceFrom(valueResult.length());
-            return new State(newInput, newResult);
-        }
+        return list;
+    }
 
-        public JavaString input() {
-            return input;
-        }
-
-        public RuleResult result() {
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (State) obj;
-            return Objects.equals(this.input, that.input) &&
-                   Objects.equals(this.result, that.result);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(input, result);
-        }
-
-        @Override
-        public String toString() {
-            return "State[" +
-                   "input=" + input + ", " +
-                   "result=" + result + ']';
-        }
+    @Override
+    public Option<RuleResult> apply(JavaString input) {
+        return input.exclude(findInstances(input, delimiter))
+                .map(input::sliceBetween)
+                .map(value::apply)
+                .flatMap(Streams::fromOption)
+                .foldRightFromTwo(MapRuleResult::merge, MapRuleResult::merge);
     }
 }

@@ -12,8 +12,20 @@ import static com.meti.collect.option.None.None;
 
 public abstract class AbstractStream<T> implements Stream<T> {
     @Override
+    public <R> Stream<R> two(BiFunction<T, T, R> mapper, Function<T, R> remaining) {
+        return new AbstractStream<R>() {
+            @Override
+            public Option<R> next() {
+                return AbstractStream.this.next().map(first -> AbstractStream.this.next()
+                        .map(second -> mapper.apply(first, second))
+                        .orElseGet(() -> remaining.apply(first)));
+            }
+        };
+    }
+
+    @Override
     public Stream<T> concat(Stream<T> other) {
-        return new AbstractStream<>(){
+        return new AbstractStream<>() {
             @Override
             public Option<T> next() {
                 return AbstractStream.this.next().or(other::next);

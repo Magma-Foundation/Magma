@@ -32,4 +32,6 @@ public interface Stream<T> {
     <R> Stream<Tuple<T, R>> extend(Function<T, R> extender);
 
     Stream<T> concat(Stream<T> other);
+
+    <R> Stream<R> two(BiFunction<T, T, R> mapper, Function<T, R> remaining);
 }

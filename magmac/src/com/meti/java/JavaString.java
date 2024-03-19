@@ -1,6 +1,7 @@
 package com.meti.java;
 
 import com.meti.collect.Index;
+import com.meti.collect.JavaList;
 import com.meti.collect.Range;
 import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
@@ -9,6 +10,7 @@ import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -59,7 +61,7 @@ public record JavaString(String inner) {
         return this.inner.startsWith(slice);
     }
 
-    public Option<Index> asIndex(int value) {
+    public Option<Index> indexAt(int value) {
         if (value <= this.inner.length()) {
             return Some(new Index(value, this.inner.length()));
         } else {
@@ -68,7 +70,7 @@ public record JavaString(String inner) {
     }
 
     public Option<JavaString> sliceFromRaw(int index) {
-        return asIndex(index).map(this::sliceFrom);
+        return indexAt(index).map(this::sliceFrom);
     }
 
     public Option<Index> firstIndexOfSlice(String slice) {
@@ -210,5 +212,18 @@ public record JavaString(String inner) {
 
     public Index start() {
         return new Index(0, this.inner.length());
+    }
+
+    public Tuple<JavaString, Option<JavaString>> sliceWithin(Range range) {
+        return new Tuple<>(sliceTo(range.startIndex()), range.endIndex().next().map(this::sliceFrom));
+    }
+
+    public Stream<Range> exclude(JavaList<Range> ranges) {
+        return Streams.concat(
+                        Streams.from(start()),
+                        ranges.stream().flatMap(Range::stream),
+                        Streams.from(end()))
+                .two(Index::to, (Function<Index, Option<Range>>) index -> None())
+                .flatMap(Streams::fromOption);
     }
 }

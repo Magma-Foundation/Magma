@@ -129,4 +129,9 @@ public class Streams {
             }
         });
     }
+
+    @SafeVarargs
+    public static <T> Stream<T> concat(Stream<T>... streams) {
+        return Streams.from(streams).flatMap(value -> value);
+    }
 }
