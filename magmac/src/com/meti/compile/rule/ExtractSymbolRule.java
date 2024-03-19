@@ -1,10 +1,13 @@
 package com.meti.compile.rule;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.Tuple;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.java.JavaString;
+
+import java.util.List;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -12,7 +15,7 @@ import static com.meti.collect.option.Some.Some;
 public class ExtractSymbolRule implements Rule {
     private final JavaString name;
 
-    private ExtractSymbolRule(String name) {
+    public ExtractSymbolRule(String name) {
         this.name = new JavaString(name);
     }
 
@@ -23,7 +26,7 @@ public class ExtractSymbolRule implements Rule {
     @Override
     public Option<RuleResult> apply(JavaString input) {
         return isSymbol(input)
-                ? Some(new MapRuleResult(new JavaMap<JavaString, JavaString>().put(name, input), new JavaMap<>()))
+                ? Some(new MapRuleResult(new JavaMap<>(), new JavaMap<JavaString, JavaList<JavaString>>().put(name, new JavaList<>(List.of(input)))))
                 : None();
     }
 
@@ -39,6 +42,6 @@ public class ExtractSymbolRule implements Rule {
     }
 
     private boolean isAlphaNumeric(char value) {
-        return Character.isAlphabetic(value) && Character.isDigit(value);
+        return Character.isAlphabetic(value) || Character.isDigit(value);
     }
 }

@@ -10,6 +10,7 @@ import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
 import com.meti.compile.rule.Rule;
 import com.meti.compile.rule.RuleResult;
+import com.meti.compile.rule.Rules;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
@@ -18,14 +19,13 @@ import static com.meti.compile.rule.DisjunctionRule.Or;
 import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
 import static com.meti.compile.rule.Rules.Optional;
-import static com.meti.compile.rule.Rules.TextList;
 import static com.meti.compile.rule.TextRule.Text;
 import static com.meti.compile.rule.WhitespaceRule.Padding;
 import static com.meti.compile.rule.WhitespaceRule.Whitespace;
 
 public record ClassLexer(JavaString stripped) implements Lexer {
 
-    public static final Rule FLAG_RULE = TextList("flags", Whitespace);
+    public static final Rule FLAG_RULE = Rules.SymbolList("flags", Whitespace);
     public static final Rule EXTENDS_RULE = Join(
             Text("extends"),
             Whitespace,
