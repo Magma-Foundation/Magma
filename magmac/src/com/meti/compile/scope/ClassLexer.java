@@ -16,6 +16,7 @@ import static com.meti.collect.option.Options.$Option;
 import static com.meti.compile.rule.ConjunctionRule.Join;
 import static com.meti.compile.rule.DisjunctionRule.Or;
 import static com.meti.compile.rule.ExtractRule.Extract;
+import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
 import static com.meti.compile.rule.Rules.Optional;
 import static com.meti.compile.rule.Rules.TextList;
 import static com.meti.compile.rule.TextRule.Text;
@@ -28,7 +29,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     public static final Rule EXTENDS_RULE = Join(
             Text("extends"),
             Whitespace,
-            Extract("superclass"));
+            Symbol("superclass"));
 
     public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
     public static final Rule RULE = Join(

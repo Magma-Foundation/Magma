@@ -1,7 +1,6 @@
 package com.meti.compile.scope;
 
 import com.meti.collect.option.IntentionalException;
-import com.meti.collect.stream.Collectors;
 import com.meti.compile.rule.Rule;
 import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import java.util.List;
 
 import static com.meti.compile.rule.ConjunctionRule.Join;
 import static com.meti.compile.rule.ExtractRule.Extract;
+import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
 import static com.meti.compile.rule.Rules.Optional;
 import static com.meti.compile.rule.TextRule.Text;
 import static com.meti.compile.rule.WhitespaceRule.Whitespace;
@@ -67,7 +67,7 @@ class ClassLexerTest {
                         PREFIX,
                         Text("class"),
                         Whitespace,
-                        Extract("name"),
+                        Symbol("name"),
                         Whitespace),
                 "class IntentionalException ");
     }
@@ -75,13 +75,13 @@ class ClassLexerTest {
     @Test
     void lex3() {
         assertValid(Join(
-                PREFIX,
-                Text("class"),
-                Whitespace,
-                Extract("name"),
-                Whitespace,
-                Optional(EXTENDS_RULE),
-                Whitespace),
+                        PREFIX,
+                        Text("class"),
+                        Whitespace,
+                        Symbol("name"),
+                        Whitespace,
+                        Optional(EXTENDS_RULE),
+                        Whitespace),
                 "class IntentionalException extends Exception ");
     }
 

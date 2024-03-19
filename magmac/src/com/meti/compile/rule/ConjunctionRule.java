@@ -19,7 +19,7 @@ public class ConjunctionRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return input.streamReverseIndices().map(length -> {
+        return input.streamIndices().map(length -> {
             var left = input.sliceTo(length);
             var right = input.sliceFrom(length);
 

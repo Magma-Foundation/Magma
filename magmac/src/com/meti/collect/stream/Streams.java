@@ -110,4 +110,23 @@ public class Streams {
         Collections.reverse(list);
         return Streams.fromNativeList(list);
     }
+
+    public static Option<Stream<Integer>> range(int start, int end) {
+        if (start <= end) return None();
+
+        return Some(new AbstractStream<Integer>() {
+            private int counter = start;
+
+            @Override
+            public Option<Integer> next() {
+                if (counter < end) {
+                    var value = counter;
+                    counter++;
+                    return Some(value);
+                } else {
+                    return None();
+                }
+            }
+        });
+    }
 }

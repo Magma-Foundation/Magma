@@ -194,4 +194,17 @@ public record JavaString(String inner) {
     public boolean isBlank() {
         return inner.isBlank();
     }
+
+    public Stream<Index> streamIndices() {
+        return Streams.range(0, inner.length())
+                .orElse(Streams.empty())
+                .map(value -> new Index(value, this.inner.length()));
+    }
+
+    public Option<Tuple<Character, JavaString>> popFirst() {
+        if (inner.isEmpty()) return None();
+        var first = inner.charAt(0);
+        var after = inner.substring(1);
+        return Some(new Tuple<>(first, new JavaString(after)));
+    }
 }
