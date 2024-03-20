@@ -42,6 +42,11 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
+    public <R> R match(Function<T, R> valueConsumer, Function<E, R> errorConsumer) {
+        return valueConsumer.apply(value);
+    }
+
+    @Override
     public <R> Result<Pair<T, R>, E> and(Result<R, E> other) {
         return other.mapValue(otherValue -> new Pair<>(value, otherValue));
     }

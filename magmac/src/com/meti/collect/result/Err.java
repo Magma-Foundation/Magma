@@ -46,6 +46,11 @@ public class Err<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
+    public <R> R match(Function<T, R> valueConsumer, Function<E, R> errorConsumer) {
+        return errorConsumer.apply(value);
+    }
+
+    @Override
     public T $() throws E {
         throw value;
     }
