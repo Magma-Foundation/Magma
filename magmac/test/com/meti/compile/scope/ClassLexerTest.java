@@ -8,6 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ClassLexerTest {
     @Test
     void rule() {
-        assertTrue(ClassLexer.RULE.apply(JavaString.from("Test {}")).isPresent());
+        assertTrue(ClassLexer.RULE.apply(JavaString.from("class Test {}")).isPresent());
     }
 }

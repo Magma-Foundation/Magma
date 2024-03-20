@@ -31,6 +31,8 @@ public record ClassLexer(JavaString stripped) implements Lexer {
 
     public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
     public static final Rule RULE = Join(
+            Text("class"),
+            Whitespace,
             Symbol("name"),
             Whitespace,
             Extract("content")
