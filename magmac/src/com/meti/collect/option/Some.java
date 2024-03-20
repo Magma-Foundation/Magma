@@ -81,4 +81,9 @@ public class Some<T> implements Option<T> {
     public Option<T> orLazy(Supplier<Option<T>> other) {
         return this;
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other) {
+        return other.get().map(value -> new Tuple<>(this.value, value));
+    }
 }

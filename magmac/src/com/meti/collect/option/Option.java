@@ -1,6 +1,7 @@
 package com.meti.collect.option;
 
 import com.meti.collect.Tuple;
+import com.meti.collect.stream.Stream;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,4 +37,6 @@ public interface Option<T> {
     void ifPresent(Consumer<T> consumer);
 
     Option<T> orLazy(Supplier<Option<T>> other);
+
+    <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other);
 }

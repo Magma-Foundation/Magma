@@ -24,7 +24,7 @@ public class ConjunctionRule implements Rule {
             var right = input.sliceFrom(length);
 
             return this.left.apply(left)
-                    .and(this.right.apply(right))
+                    .andLazy(() -> this.right.apply(right))
                     .map(tuple -> MapRuleResult.merge(tuple.a(), tuple.b()));
         });
         var next = map.flatMap(Streams::fromOption).next();

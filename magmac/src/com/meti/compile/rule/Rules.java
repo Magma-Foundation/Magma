@@ -6,7 +6,7 @@ import static com.meti.compile.rule.TextRule.Text;
 
 public class Rules {
     public static Rule Optional(Rule value) {
-        return DisjunctionRule.Or(value, EmptyRule.Empty);
+        return DisjunctionRule.Or(EmptyRule.Empty, value);
     }
 
     public static Rule SymbolList(String name, String delimiter) {

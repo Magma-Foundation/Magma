@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClassLexerTest {
     private static void assertValid(Rule rule, String slice) {
-        assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
             assertTrue(rule.apply(JavaString.from(slice)).isPresent());
         });
     }

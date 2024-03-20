@@ -74,4 +74,9 @@ public class None<T> implements Option<T> {
     public Option<T> orLazy(Supplier<Option<T>> other) {
         return other.get();
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other) {
+        return None();
+    }
 }

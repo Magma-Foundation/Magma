@@ -21,6 +21,11 @@ public class ThrowableOption<T> implements Option<T> {
     }
 
     @Override
+    public <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other) {
+        return parent.andLazy(other);
+    }
+
+    @Override
     public void ifPresent(Consumer<T> consumer) {
         parent.ifPresent(consumer);
     }
