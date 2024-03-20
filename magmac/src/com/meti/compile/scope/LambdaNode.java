@@ -67,7 +67,7 @@ public record LambdaNode(java.util.List<com.meti.java.JavaString> arguments, Nod
                 return findValueAsNode()
                         .<Attribute>map(NodeAttribute::new)
                         .orLazy(() -> findValueAsString()
-                                .map(JavaString::new)
+                                .map(JavaString::from)
                                 .map(StringAttribute::new));
             case "flags":
                 return findFlags().map(StringListAttribute::new);

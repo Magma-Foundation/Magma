@@ -63,7 +63,7 @@ public record DefinitionNode(int indent, List<JavaString> flags, com.meti.java.J
                 return findValueAsNode()
                         .<Attribute>map(NodeAttribute::new)
                         .orLazy(() -> findValueAsString()
-                                .map(JavaString::new)
+                                .map(JavaString::from)
                                 .map(StringAttribute::new));
             case "flags":
                 return findFlags().map(StringListAttribute::new);

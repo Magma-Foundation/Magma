@@ -207,7 +207,7 @@ public record Compiler(String input) {
 
             return outputTree.stream()
                     .map(node -> node.render()
-                            .map(JavaString::new)
+                            .map(JavaString::from)
                             .into(ThrowableOption::new)
                             .orElseThrow(() -> new CompileException("Failed to render: '%s'".formatted(node))))
                     .collect(Collectors.exceptionally(Collectors.joining()))

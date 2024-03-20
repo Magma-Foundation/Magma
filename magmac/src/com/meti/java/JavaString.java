@@ -53,7 +53,7 @@ public final class JavaString {
     }
 
     public Stream<JavaString> split(String regex) {
-        return Streams.fromNativeList(Arrays.asList(inner.split(regex))).map(JavaString::new);
+        return Streams.fromNativeList(Arrays.asList(inner.split(regex))).map(JavaString::from);
     }
 
     public JavaString sliceTo(Index end) {

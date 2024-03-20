@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
+import static com.meti.compile.rule.TextRule.Text;
+import static com.meti.java.JavaString.from;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ListRuleTest {
@@ -21,7 +22,7 @@ class ListRuleTest {
 
     @Test
     void applyOnce() throws IntentionalException {
-        var value = JavaString.from("test");
+        var value = from("test");
         var actual = Rules.SymbolList("values", ";")
                 .apply(value)
                 .flatMap(result -> result.findTextList("values"))
@@ -31,13 +32,14 @@ class ListRuleTest {
     }
 
     @Test
-    void applyOnceAndFindFirstInstance() {
-        ListRule.findFirstInstance(JavaString.from("test"), Symbol("values"));
+    void applyOnceAndFindFirstInstanceDelimiter() {
+        assertTrue(ListRule.findFirstInstance(from("test"), Text(";"))
+                .isEmpty());
     }
 
     @Test
     void applyMultiple() throws IntentionalException {
-        var value = JavaString.from("first;second");
+        var value = from("first;second");
 
         var actual = Rules.SymbolList("values", ";")
                 .apply(value)
@@ -46,15 +48,15 @@ class ListRuleTest {
                 .unwrap();
 
         assertIterableEquals(
-                List.of(JavaString.from("first"),
-                        JavaString.from("second")), actual);
+                List.of(from("first"),
+                        from("second")), actual);
     }
 
     @Test
     void findFirstInstance() throws IntentionalException {
         var unwrap = ListRule.findFirstInstance(
-                JavaString.from("test"),
-                TextRule.Text("es")
+                from("test"),
+                Text("es")
         ).$();
 
         assertEquals(new Range(1, 3, 4), unwrap);

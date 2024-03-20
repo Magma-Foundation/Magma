@@ -72,7 +72,7 @@ public class CatchNode implements Node {
                 return findValueAsNode()
                         .<Attribute>map(NodeAttribute::new)
                         .orLazy(() -> findValueAsString()
-                                .map(JavaString::new)
+                                .map(JavaString::from)
                                 .map(StringAttribute::new));
             case "flags":
                 return findFlags().map(StringListAttribute::new);

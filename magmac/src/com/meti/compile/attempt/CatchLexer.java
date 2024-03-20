@@ -38,7 +38,7 @@ public class CatchLexer implements Lexer {
                     .map(JavaString::strip)
                     .map(type -> {
                         TypeCompiler typeCompiler = new TypeCompiler(type.inner());
-                        return typeCompiler.compile().map(JavaString::inner).map(JavaString::new);
+                        return typeCompiler.compile().map(JavaString::inner).map(JavaString::from);
                     })
                     .collect(Collectors.required(Collectors.toNativeList()))
                     .$();

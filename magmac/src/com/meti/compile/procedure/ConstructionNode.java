@@ -68,7 +68,7 @@ public record ConstructionNode(Node caller, List<? extends Node> children) imple
                 return findValueAsNode()
                         .<Attribute>map(NodeAttribute::new)
                         .orLazy(() -> findValueAsString()
-                                .map(JavaString::new)
+                                .map(JavaString::from)
                                 .map(StringAttribute::new));
             case "flags":
                 return findFlags().map(StringListAttribute::new);
