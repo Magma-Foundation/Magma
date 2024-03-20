@@ -39,6 +39,8 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Whitespace
     ));
     public static final Rule RULE = Join(
+            Text("class"),
+            Whitespace,
             Symbol("name"),
             Whitespace,
             EXTENDS,

@@ -21,12 +21,12 @@ class ClassLexerTest {
 
     @Test
     void rule() {
-        var apply = RULE.apply(JavaString.from("Test {}"));
+        var apply = RULE.apply(JavaString.from("class Test {}"));
         assertTrue(apply.isPresent());
     }
 
     @Test
     void rule_super() {
-        assertTrue(RULE.apply(JavaString.from("Test extends Super {}")).isPresent());
+        assertTrue(RULE.apply(JavaString.from("class Test extends Super {}")).isPresent());
     }
 }
