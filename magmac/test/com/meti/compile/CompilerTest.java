@@ -4,7 +4,12 @@ import org.junit.jupiter.api.Test;
 
 class CompilerTest extends FeatureTest {
     @Test
-    void integer(){
+    void simple(){
         assertCompile("0", "0");
+    }
+
+    @Test
+    void child() {
+        assertCompile("return 0", "return 0");
     }
 }
