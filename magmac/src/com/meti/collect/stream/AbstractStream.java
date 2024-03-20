@@ -1,6 +1,6 @@
 package com.meti.collect.stream;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 
 import java.util.function.BiFunction;
@@ -34,8 +34,8 @@ public abstract class AbstractStream<T> implements Stream<T> {
     }
 
     @Override
-    public <R> Stream<Tuple<T, R>> cross(Supplier<Stream<R>> other) {
-        return flatMap(value -> other.get().map(otherValue -> new Tuple<>(value, otherValue)));
+    public <R> Stream<Pair<T, R>> cross(Supplier<Stream<R>> other) {
+        return flatMap(value -> other.get().map(otherValue -> new Pair<>(value, otherValue)));
     }
 
     @Override
@@ -47,8 +47,8 @@ public abstract class AbstractStream<T> implements Stream<T> {
                     .map(next -> folder.apply(finalCurrent, next))
                     .toResolvedTuple(current);
 
-            if (tuple.a()) {
-                current = tuple.b();
+            if (tuple.left()) {
+                current = tuple.right();
             } else {
                 return current;
             }
@@ -59,7 +59,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
     public <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder) {
         var first = next();
         var second = next();
-        return first.and(second).map(ttTuple -> initial.apply(ttTuple.a(), ttTuple.b())).map(initial1 -> foldRightFromInitial(initial1, folder));
+        return first.and(second).map(ttTuple -> initial.apply(ttTuple.left(), ttTuple.right())).map(initial1 -> foldRightFromInitial(initial1, folder));
     }
 
     @Override
@@ -68,8 +68,8 @@ public abstract class AbstractStream<T> implements Stream<T> {
     }
 
     @Override
-    public <R> Stream<Tuple<T, R>> extend(Function<T, R> extender) {
-        return map(value -> new Tuple<>(value, extender.apply(value)));
+    public <R> Stream<Pair<T, R>> extend(Function<T, R> extender) {
+        return map(value -> new Pair<>(value, extender.apply(value)));
     }
 
     @Override
@@ -97,8 +97,8 @@ public abstract class AbstractStream<T> implements Stream<T> {
                             .map(mapper)
                             .toResolvedTuple(current);
 
-                    if (nextStream.a()) {
-                        current = nextStream.b();
+                    if (nextStream.left()) {
+                        current = nextStream.right();
                     } else {
                         return None();
                     }

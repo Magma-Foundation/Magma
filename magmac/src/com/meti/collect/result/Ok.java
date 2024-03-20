@@ -1,6 +1,6 @@
 package com.meti.collect.result;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public class Ok<T, E extends Throwable> implements Result<T, E> {
     }
 
     @Override
-    public <R> Result<Tuple<T, R>, E> and(Result<R, E> other) {
-        return other.mapValue(otherValue -> new Tuple<>(value, otherValue));
+    public <R> Result<Pair<T, R>, E> and(Result<R, E> other) {
+        return other.mapValue(otherValue -> new Pair<>(value, otherValue));
     }
 }

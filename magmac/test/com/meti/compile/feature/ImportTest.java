@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 public class ImportTest extends FeatureTest {
     @Test
     void testStatic() {
-        assertCompile("import static Test.a", "import { a } from Test;\n");
+        assertCompile("import static Test.left", "import { left } from Test;\n");
     }
 
     @Test

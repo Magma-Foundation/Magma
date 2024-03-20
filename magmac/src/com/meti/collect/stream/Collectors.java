@@ -3,7 +3,7 @@ package com.meti.collect.stream;
 import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.result.Ok;
 import com.meti.collect.result.Result;
@@ -81,7 +81,7 @@ public class Collectors {
 
             @Override
             public Result<C, E> fold(Result<C, E> current, Result<T, E> element) {
-                return current.and(element).mapValue(tuple -> parent.fold(tuple.a(), tuple.b()));
+                return current.and(element).mapValue(tuple -> parent.fold(tuple.left(), tuple.right()));
             }
         };
     }
@@ -95,7 +95,7 @@ public class Collectors {
 
             @Override
             public Option<C> fold(Option<C> current, Option<T> element) {
-                return current.and(element).map(tuple -> list.fold(tuple.a(), tuple.b()));
+                return current.and(element).map(tuple -> list.fold(tuple.left(), tuple.right()));
             }
         };
     }
@@ -128,11 +128,11 @@ public class Collectors {
         };
     }
 
-    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toOverridingMap() {
+    public static <K, V> Collector<Pair<K, V>, JavaMap<K, V>> toOverridingMap() {
         return toMap((v, v2) -> v2);
     }
 
-    public static <K, V> Collector<Tuple<K, V>, JavaMap<K, V>> toMap(BiFunction<V, V, V> merger) {
+    public static <K, V> Collector<Pair<K, V>, JavaMap<K, V>> toMap(BiFunction<V, V, V> merger) {
         return new Collector<>() {
             @Override
             public JavaMap<K, V> initial() {
@@ -140,8 +140,8 @@ public class Collectors {
             }
 
             @Override
-            public JavaMap<K, V> fold(JavaMap<K, V> current, Tuple<K, V> element) {
-                return current.merge(element.a(), element.b(), merger);
+            public JavaMap<K, V> fold(JavaMap<K, V> current, Pair<K, V> element) {
+                return current.merge(element.left(), element.right(), merger);
             }
         };
     }

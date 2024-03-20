@@ -26,4 +26,8 @@ public interface Attribute {
     default Option<JavaList<JavaString>> asListOfStrings() {
         return None();
     }
+
+    default boolean is(String type) {
+        return false;
+    }
 }

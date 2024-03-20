@@ -19,8 +19,8 @@ public class JavaMap<K, V> {
         this.inner = inner;
     }
 
-    public Stream<Tuple<K, V>> stream() {
-        return Streams.fromSet(inner.entrySet()).map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
+    public Stream<Pair<K, V>> stream() {
+        return Streams.fromSet(inner.entrySet()).map(entry -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
     public JavaMap() {
@@ -65,5 +65,11 @@ public class JavaMap<K, V> {
 
     public boolean isEmpty() {
         return this.inner.isEmpty();
+    }
+
+    public JavaMap<K, V> putAll(JavaMap<K, V> other) {
+        var copy = new HashMap<>(inner);
+        copy.putAll(other.inner);
+        return new JavaMap<>(copy);
     }
 }

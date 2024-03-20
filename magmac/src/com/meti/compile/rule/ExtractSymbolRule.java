@@ -2,7 +2,7 @@ package com.meti.compile.rule;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.java.JavaString;
@@ -39,8 +39,8 @@ public class ExtractSymbolRule implements Rule {
         return input.popFirst().map(this::validatePair).orElse(false);
     }
 
-    private boolean validatePair(Tuple<Character, JavaString> tuple) {
-        return Character.isAlphabetic(tuple.a()) && tuple.b()
+    private boolean validatePair(Pair<Character, JavaString> pair) {
+        return Character.isAlphabetic(pair.left()) && pair.right()
                 .stream()
                 .map(this::isAlphaNumeric)
                 .collect(Collectors.allTrue());

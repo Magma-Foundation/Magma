@@ -19,7 +19,7 @@ public record ObjectRenderer(Node classNode) implements com.meti.compile.node.Re
                     .orElse(JavaString.Empty);
 
             var name = this.classNode().apply("name").flatMap(Attribute::asString).$();
-            var renderedContent = this.classNode().apply("value").flatMap(Attribute::asNode).$().render().$();
+            var renderedContent = this.classNode().apply("body").flatMap(Attribute::asNode).$().render().$();
 
             return "\n" + flagsString + "object " + name + " = " + renderedContent;
         });

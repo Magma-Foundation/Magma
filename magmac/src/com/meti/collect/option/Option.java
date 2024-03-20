@@ -1,7 +1,6 @@
 package com.meti.collect.option;
 
-import com.meti.collect.Tuple;
-import com.meti.collect.stream.Stream;
+import com.meti.collect.Pair;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -20,11 +19,11 @@ public interface Option<T> {
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
-    <R> Option<Tuple<T, R>> and(Option<R> other);
+    <R> Option<Pair<T, R>> and(Option<R> other);
 
     T orElseGet(Supplier<T> other);
 
-    Tuple<Boolean, T> toResolvedTuple(T other);
+    Pair<Boolean, T> toResolvedTuple(T other);
 
     boolean isEmpty();
 
@@ -38,5 +37,5 @@ public interface Option<T> {
 
     Option<T> orLazy(Supplier<Option<T>> other);
 
-    <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other);
+    <R> Option<Pair<T, R>> andLazy(Supplier<Option<R>> other);
 }

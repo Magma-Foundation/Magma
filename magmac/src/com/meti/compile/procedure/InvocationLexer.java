@@ -31,9 +31,9 @@ public class InvocationLexer implements Lexer {
 
             var end = stripped.lastIndexOfChar(')').$();
             var furthestComputer = stripped.sliceTo(end).streamReverse().extend(stripped::apply).foldRightFromInitial(new State(0, None()), (state, tuple) -> {
-                if (tuple.b() == '(' && state.isLevel()) return state.evaluate(tuple.a());
-                if (tuple.b() == ')') return state.increase();
-                if (tuple.b() == '(') return state.decrease();
+                if (tuple.right() == '(' && state.isLevel()) return state.evaluate(tuple.left());
+                if (tuple.right() == ')') return state.increase();
+                if (tuple.right() == '(') return state.decrease();
                 return state;
             });
 

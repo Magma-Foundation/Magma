@@ -3,7 +3,7 @@ package com.meti.java;
 import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.Range;
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.AbstractStream;
 import com.meti.collect.stream.Stream;
@@ -172,8 +172,8 @@ public final class JavaString {
         return firstIndexOfSlice(slice).flatMap(index -> index.extend(slice.length()));
     }
 
-    public Tuple<JavaString, JavaString> sliceAt(Index index) {
-        return new Tuple<>(sliceTo(index), sliceFrom(index));
+    public Pair<JavaString, JavaString> sliceAt(Index index) {
+        return new Pair<>(sliceTo(index), sliceFrom(index));
     }
 
     public Option<Stream<JavaString>> splitIntoSlices(int n) {
@@ -214,19 +214,19 @@ public final class JavaString {
                 .map(value -> new Index(value, this.inner.length()));
     }
 
-    public Option<Tuple<Character, JavaString>> popFirst() {
+    public Option<Pair<Character, JavaString>> popFirst() {
         if (inner.isEmpty()) return None();
         var first = inner.charAt(0);
         var after = inner.substring(1);
-        return Some(new Tuple<>(first, from(after)));
+        return Some(new Pair<>(first, from(after)));
     }
 
     public Index start() {
         return new Index(0, this.inner.length());
     }
 
-    public Tuple<JavaString, Option<JavaString>> sliceWithin(Range range) {
-        return new Tuple<>(sliceTo(range.startIndex()), range.endIndex().next().map(this::sliceFrom));
+    public Pair<JavaString, Option<JavaString>> sliceWithin(Range range) {
+        return new Pair<>(sliceTo(range.startIndex()), range.endIndex().next().map(this::sliceFrom));
     }
 
     public Stream<Range> exclude(JavaList<Range> ranges) {

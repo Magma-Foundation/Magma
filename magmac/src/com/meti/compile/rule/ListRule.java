@@ -2,7 +2,7 @@ package com.meti.compile.rule;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.Range;
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
@@ -28,14 +28,14 @@ public class ListRule implements Rule {
 
     public static Option<Range> findFirstInstance(JavaString value, Rule rule) {
         /*
-        TODO: figure out a more intuitive way to express this
+        TODO: figure out left more intuitive way to express this
          */
         var totalLength = value.length();
         for (int sliceLength = totalLength; sliceLength > 0; sliceLength--) {
             for (int offset = 0; offset < (totalLength - sliceLength); offset++) {
                 var rangeOption = value.indexAt(offset)
                         .and(value.indexAt(sliceLength + offset))
-                        .flatMap(tuple -> tuple.a().to(tuple.b()))
+                        .flatMap(tuple -> tuple.left().to(tuple.right()))
                         .flatMap(range -> rule.apply(value.sliceBetween(range)).isPresent()
                                 ? Some(range)
                                 : None());
@@ -58,13 +58,13 @@ public class ListRule implements Rule {
                         int offset = value.length() - element.length();
                         var nextList = finalList.add(element.offsetRight(offset).$());
                         var nextRemaining = value.sliceFrom(element.endIndex());
-                        return new Tuple<>(nextList, nextRemaining);
+                        return new Pair<>(nextList, nextRemaining);
                     }))
-                    .toResolvedTuple(new Tuple<>(list, remaining));
+                    .toResolvedTuple(new Pair<>(list, remaining));
 
-            if (resolvedTuple.a()) {
-                list = resolvedTuple.b().a();
-                remaining = resolvedTuple.b().b();
+            if (resolvedTuple.left()) {
+                list = resolvedTuple.right().left();
+                remaining = resolvedTuple.right().right();
             } else {
                 break;
             }

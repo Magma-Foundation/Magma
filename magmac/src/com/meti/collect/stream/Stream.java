@@ -1,6 +1,6 @@
 package com.meti.collect.stream;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 
 import java.util.function.BiFunction;
@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public interface Stream<T> {
-    <R> Stream<Tuple<T, R>> cross(Supplier<Stream<R>> other);
+    <R> Stream<Pair<T, R>> cross(Supplier<Stream<R>> other);
 
     Option<T> next();
 
@@ -31,7 +31,7 @@ public interface Stream<T> {
 
     <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder);
 
-    <R> Stream<Tuple<T, R>> extend(Function<T, R> extender);
+    <R> Stream<Pair<T, R>> extend(Function<T, R> extender);
 
     Stream<T> concat(Stream<T> other);
 

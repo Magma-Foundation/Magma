@@ -26,7 +26,7 @@ public class ConjunctionRule implements Rule {
                     .reverse();
 
             var tuple = reversed.popFirst().$();
-            return tuple.b().stream().foldRightFromInitial(tuple.a(), (left1, right1) -> new ConjunctionRule(right1, left1));
+            return tuple.right().stream().foldRightFromInitial(tuple.left(), (left1, right1) -> new ConjunctionRule(right1, left1));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -46,6 +46,6 @@ public class ConjunctionRule implements Rule {
 
         return this.left.apply(left)
                 .andLazy(() -> this.right.apply(right))
-                .map(tuple -> MapRuleResult.merge(tuple.a(), tuple.b()));
+                .map(tuple -> MapRuleResult.merge(tuple.left(), tuple.right()));
     }
 }

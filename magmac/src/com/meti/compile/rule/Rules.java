@@ -10,7 +10,7 @@ public class Rules {
         DO NOT CHANGE THIS ORDER, OTHERWISE THE ORDERING OF EVALUATION CHANGES SIGNIFICANTLY
 
         Conjunctions start with empty strings "",
-        and if an Optional is within a Conjunction, then "" will always be passed first,
+        and if an Optional is within left Conjunction, then "" will always be passed first,
         thus `value` here would never be parsed. `value` must take precedence.
          */
         return DisjunctionRule.Or(value, EmptyRule.Empty);

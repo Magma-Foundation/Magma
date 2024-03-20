@@ -1,6 +1,6 @@
 package com.meti.collect.option;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,8 +48,8 @@ public class Some<T> implements Option<T> {
     }
 
     @Override
-    public <R> Option<Tuple<T, R>> and(Option<R> other) {
-        return other.map(otherValue -> new Tuple<>(value, otherValue));
+    public <R> Option<Pair<T, R>> and(Option<R> other) {
+        return other.map(otherValue -> new Pair<>(value, otherValue));
     }
 
     @Override
@@ -58,8 +58,8 @@ public class Some<T> implements Option<T> {
     }
 
     @Override
-    public Tuple<Boolean, T> toResolvedTuple(T other) {
-        return new Tuple<>(true, value);
+    public Pair<Boolean, T> toResolvedTuple(T other) {
+        return new Pair<>(true, value);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class Some<T> implements Option<T> {
     }
 
     @Override
-    public <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other) {
-        return other.get().map(value -> new Tuple<>(this.value, value));
+    public <R> Option<Pair<T, R>> andLazy(Supplier<Option<R>> other) {
+        return other.get().map(value -> new Pair<>(this.value, value));
     }
 }

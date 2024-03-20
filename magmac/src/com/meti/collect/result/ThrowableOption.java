@@ -1,6 +1,6 @@
 package com.meti.collect.result;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.IntentionalException;
 import com.meti.collect.option.Option;
 
@@ -21,7 +21,7 @@ public class ThrowableOption<T> implements Option<T> {
     }
 
     @Override
-    public <R> Option<Tuple<T, R>> andLazy(Supplier<Option<R>> other) {
+    public <R> Option<Pair<T, R>> andLazy(Supplier<Option<R>> other) {
         return parent.andLazy(other);
     }
 
@@ -65,7 +65,7 @@ public class ThrowableOption<T> implements Option<T> {
     }
 
     @Override
-    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+    public <R> Option<Pair<T, R>> and(Option<R> other) {
         return parent.and(other);
     }
 
@@ -75,7 +75,7 @@ public class ThrowableOption<T> implements Option<T> {
     }
 
     @Override
-    public Tuple<Boolean, T> toResolvedTuple(T other) {
+    public Pair<Boolean, T> toResolvedTuple(T other) {
         return parent.toResolvedTuple(other);
     }
 

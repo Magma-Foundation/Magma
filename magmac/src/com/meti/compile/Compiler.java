@@ -1,13 +1,15 @@
 package com.meti.compile;
 
 import com.meti.collect.JavaList;
+import com.meti.collect.Pair;
 import com.meti.collect.option.None;
 import com.meti.collect.option.Option;
+import com.meti.collect.result.ExceptionalStream;
 import com.meti.collect.result.Result;
 import com.meti.collect.result.Results;
 import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
-import com.meti.collect.stream.Stream;
+import com.meti.collect.stream.PairStream;
 import com.meti.collect.stream.Streams;
 import com.meti.compile.attempt.CatchLexer;
 import com.meti.compile.attempt.TryLexer;
@@ -22,22 +24,28 @@ import com.meti.compile.string.TextBlockLexer;
 import com.meti.java.JavaString;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.collect.option.Some.Some;
+import static com.meti.collect.result.Err.Err;
 import static com.meti.collect.result.Ok.Ok;
 import static com.meti.collect.result.Results.$Result;
 
 public record Compiler(String input) {
-    public static Stream<Node> lexExpression(String line, int indent) {
-        return lexHead(line, indent).flatMap(Compiler::lexTree);
+    public static Result<JavaList<Node>, CompileException> lexExpression(JavaString line, int indent) {
+        return lexHead(line, indent)
+                .stream()
+                .map(Compiler::lexTree)
+                .into(ExceptionalStream::new)
+                .mapInner(JavaList::stream)
+                .flatMap(Results::invertStream)
+                .collect(Collectors.exceptionally(Collectors.toList()));
     }
 
-    public static Stream<Node> lexHead(String line, int indent) {
+    public static JavaList<Node> lexHead(JavaString line, int indent) {
         return Streams.<Function<String, Lexer>>from(
                         exp -> new TextBlockLexer(JavaString.from(exp)),
                         exp -> new StringLexer(JavaString.from(exp)),
@@ -55,68 +63,108 @@ public record Compiler(String input) {
                         exp -> new FieldLexer(JavaString.from(exp)),
                         VariableLexer::new,
                         exp -> new InterfaceLexer(JavaString.from(exp))
-                ).map(constructor -> constructor.apply(line.strip()))
+                ).map(constructor -> constructor.apply(line.strip().inner()))
                 .map(lexer -> lexer.lex().next())
-                .flatMap(Streams::fromOption);
+                .flatMap(Streams::fromOption)
+                .collect(Collectors.toList());
     }
 
-    public static Stream<Node> lexTree(Node node) {
-        var valuesStream = node.apply("value").flatMap(Attribute::asNode).map(Compiler::lexContent);
-        var childrenStream = node.apply("children")
-                .flatMap(Attribute::asListOfNodes)
-                .<List<? extends Node>>map(JavaList::unwrap).map(Compiler::lexContent);
+    public static Result<JavaList<Node>, CompileException> lexTree(Node node) {
+        return $Result(() -> {
+            var nodeAttributes = node.streamPairs(NodeAttribute.Type)
+                    .into(PairStream::new)
+                    .mapRight(child -> child.asNode()
+                            .into(ThrowableOption::new)
+                            .orElseThrow(() -> new CompileException("Not a node: " + child)))
+                    .map(Results::invertTupleByRight)
+                    .into(ExceptionalStream::new)
+                    .mapInner(inner -> inner.mapRight(Compiler::lexContent))
+                    .mapInner(Results::invertTupleByRight)
+                    .map(Results::flatten)
+                    .into(ExceptionalStream::new)
+                    .mapInner(pair -> pair.mapRight(list -> list.stream().<Attribute>map(NodeAttribute::new).collect(Collectors.toList())))
+                    .collectExceptionally(Collectors.toMap(JavaList::addAll))
+                    .$();
 
-        if (valuesStream.isPresent() && childrenStream.isPresent()) {
-            return valuesStream.orElse(Streams.empty()).cross(() -> childrenStream.orElse(Streams.empty())).map(tuple -> {
-                Node node1 = node.with("value", new NodeAttribute(tuple.a())).orElse(node);
-                return node1.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) tuple.b()))).orElse(node);
-            });
-        } else if (valuesStream.isPresent()) {
-            return valuesStream.orElse(Streams.empty()).map(valuePossibility -> node.with("value", new NodeAttribute(valuePossibility)).orElse(node));
-        } else if (childrenStream.isPresent()) {
-            return childrenStream.orElse(Streams.empty()).map(childrenPossibilities -> node.with("children", new NodeListAttribute(new JavaList<>((List<? extends Node>) childrenPossibilities))).orElse(node));
-        } else {
-            return Streams.from(node);
-        }
-    }
+            var nodeListAttributes = node.streamPairs(NodeListAttribute.Type)
+                    .into(PairStream::new)
+                    .mapRight(child -> child.asListOfNodes()
+                            .into(ThrowableOption::new)
+                            .orElseThrow(() -> new CompileException("Not a list of nodes: " + child)))
+                    .map(Results::invertTupleByRight)
+                    .into(ExceptionalStream::new)
+                    .mapInner(inner -> inner.mapRight(Compiler::lexContentList))
+                    .mapInner(Results::invertTupleByRight)
+                    .map(Results::flatten)
+                    .into(ExceptionalStream::new)
+                    .mapInner(pair -> pair.mapRight(list -> list.stream().<Attribute>map(NodeListAttribute::new).collect(Collectors.toList())))
+                    .collectExceptionally(Collectors.toMap(JavaList::addAll))
+                    .$();
 
-    private static Stream<List<Node>> lexContent(List<? extends Node> content) {
-        if (content.isEmpty()) return Streams.from(Collections.emptyList());
-
-        List<Stream<Node>> childrenPossibilities = Streams.fromNativeList(content)
-                .map(Compiler::lexContent)
-                .collect(Collectors.toNativeList());
-
-        return Streams.fromNativeList(childrenPossibilities).foldRightFromTwo((first, second) -> {
-            return Streams.crossToList(first, () -> second);
-        }, (listStream, nodeStream) -> Streams.crossListToList(listStream, () -> nodeStream)).orElseGet(() -> {
-            if (childrenPossibilities.size() == 1) {
-                return childrenPossibilities.get(0).map(Collections::singletonList);
-            } else {
-                return Streams.empty();
-            }
+            return nodeAttributes.putAll(nodeListAttributes)
+                    .stream()
+                    .into(PairStream::new)
+                    .map(pair -> pair.mapRight(attributes -> attributes.stream().map(attribute -> new Pair<>(pair.left(), attribute)).collect(Collectors.toList())))
+                    .into(PairStream::new)
+                    .preserveRight()
+                    .foldRight(first -> first.stream().map(JavaList::from).collect(Collectors.toList()), (javaList, pairJavaList) -> javaList.stream()
+                            .cross(pairJavaList::stream)
+                            .map(pair -> pair.left().add(pair.right()))
+                            .collect(Collectors.toList()))
+                    .orElse(JavaList.empty())
+                    .stream()
+                    .map(list -> list.stream().foldRightFromInitial(node, (node1, javaStringAttributePair) -> node1.with(javaStringAttributePair.left().inner(), javaStringAttributePair.right()).orElse(node1)))
+                    .collect(Collectors.toList());
         });
     }
 
-    private static Stream<Node> lexContent(Node content) {
-        return content.apply("value").flatMap(Attribute::asString).map(JavaString::inner)
-                .and(content.apply("indent").flatMap(Attribute::asInteger))
-                .map(tuple -> lexExpression(tuple.a(), tuple.b()))
-                .orElse(Streams.empty());
+    private static Result<JavaList<JavaList<Node>>, CompileException> lexContentList(JavaList<? extends Node> content) {
+        return content.stream()
+                .map(Compiler::lexContent)
+                .into(ExceptionalStream::new)
+                .foldRightFromInitialExceptionally(new JavaList<>(), (javaListJavaList, nodeJavaList) -> javaListJavaList.stream()
+                        .cross(nodeJavaList::stream)
+                        .map(pair -> pair.left().add(pair.right()))
+                        .collect(Collectors.toList()));
     }
+
+    private static Result<JavaList<Node>, CompileException> lexContent(Node content) {
+        if (content.is(Content.Id)) {
+            return $Result(() -> {
+                var value = content.apply("value")
+                        .flatMap(Attribute::asString)
+                        .into(ThrowableOption::new)
+                        .orElseThrow(() -> new CompileException("No value present on content."))
+                        .$();
+
+                var indent = content.apply("indent")
+                        .flatMap(Attribute::asInteger)
+                        .into(ThrowableOption::new)
+                        .orElseThrow(() -> new CompileException("No indent present on content."))
+                        .$();
+
+                return lexExpression(value, indent).$();
+            });
+        } else {
+            return Err(new CompileException("Not content: '" + content));
+        }
+    }
+
 
     private static Result<Node, CompileException> transformAST(Node root) {
         return $Result(() -> {
             var transformed = transformNode(root).$();
+            var withValues = transformed.streamPairs(NodeAttribute.Type)
+                    .map(tuple -> tuple.mapRight(Attribute::asNode))
+                    .map(tuple -> tuple.into(Pair::requireRight))
+                    .flatMap(Streams::fromOption)
+                    .map(tuple -> tuple.mapRight(Compiler::transformAST))
+                    .map(Results::invertTupleByRight)
+                    .into(ExceptionalStream::new)
+                    .foldRightFromInitialExceptionally(transformed, (node, javaStringNodeTuple) -> node.with(javaStringNodeTuple.left().inner(), new NodeAttribute(javaStringNodeTuple.right())).orElse(node))
+                    .$();
 
-            var withValue = transformed.apply("value").flatMap(Attribute::asNode)
-                    .map(Compiler::transformAST)
-                    .into(Results::invertOption)
-                    .$()
-                    .flatMap(value -> transformed.with("value", new NodeAttribute(value)))
-                    .orElse(transformed);
-
-            var node = withValue.apply("children")
+            var node = withValues.apply("children")
                     .flatMap(Attribute::asListOfNodes)
                     .<List<? extends Node>>map(JavaList::unwrap)
                     .map(children -> Streams.fromNativeList(children)
@@ -124,8 +172,8 @@ public record Compiler(String input) {
                             .collect(Collectors.exceptionally(Collectors.toList())))
                     .into(Results::invertOption)
                     .$()
-                    .flatMap(children -> withValue.with("children", new NodeListAttribute(children)))
-                    .orElse(withValue);
+                    .flatMap(children -> withValues.with("children", new NodeListAttribute(children)))
+                    .orElse(withValues);
 
             return node;
         });
@@ -168,7 +216,7 @@ public record Compiler(String input) {
                 outputFlags = JavaList.from(JavaString.from("export"));
             }
 
-            var children = new JavaList<Node>(new ArrayList<>(node.apply("value")
+            var children = new JavaList<Node>(new ArrayList<>(node.apply("body")
                     .flatMap(Attribute::asNode)
                     .flatMap(value -> value.apply("children"))
                     .flatMap(Attribute::asListOfNodes)
@@ -184,8 +232,17 @@ public record Compiler(String input) {
             return Ok(MapNode.Builder(JavaString.from("object"))
                     .withListOfStrings("flags", outputFlags)
                     .withString("name", name)
-                    .withNode("value", contentOutput)
+                    .withNode("body", contentOutput)
                     .complete());
+        });
+    }
+
+    private static Result<Result<Node, CompileException>, CompileException> getResultCompileExceptionResult(JavaString line) {
+        return $Result(() -> {
+            var list = lexExpression(line, 0).$();
+            return list.first()
+                    .into(ThrowableOption::new)
+                    .orElseThrow(() -> new CompileException("Failed to lex: '" + line + "'"));
         });
     }
 
@@ -193,9 +250,9 @@ public record Compiler(String input) {
         return $Result(() -> {
             var tree = new Splitter(this.input())
                     .split()
-                    .map(line -> lexExpression(line, 0).next()
-                            .into(ThrowableOption::new)
-                            .orElseThrow(() -> new CompileException("Failed to lex: '" + line + "'")))
+                    .map(JavaString::from)
+                    .map(Compiler::getResultCompileExceptionResult)
+                    .map(Results::flatten)
                     .collect(Collectors.exceptionally(Collectors.toList()))
                     .$();
 

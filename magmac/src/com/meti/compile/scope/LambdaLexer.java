@@ -27,7 +27,7 @@ public class LambdaLexer implements Lexer {
             var argStart = argumentString.firstIndexOfChar('(');
             var argEnd = argumentString.firstIndexOfChar(')');
             var arguments = argStart.flatMap(Index::next).and(argEnd)
-                    .flatMap(tuple -> tuple.a().to(tuple.b()))
+                    .flatMap(tuple -> tuple.left().to(tuple.right()))
                     .map(input::sliceBetween)
                     .map(args -> args.split(",").map(JavaString::strip).filter(value -> !value.isEmpty()))
                     .orElseGet(() -> Streams.from(argumentString))

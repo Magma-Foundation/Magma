@@ -1,6 +1,6 @@
 package com.meti.collect.result;
 
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collector;
 import com.meti.collect.stream.Collectors;
@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<T, E>> {
     private final Stream<Result<T, E>> parent;
 
+    public ExceptionalStream(Stream<Result<T, E>> parent) {
+        this.parent = parent;
+    }
+
     @Override
     public <C> Option<C> foldRight(Function<Result<T, E>, C> mapper, BiFunction<C, Result<T, E>, C> folder) {
         return parent.foldRight(mapper, folder);
@@ -25,7 +29,7 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
     }
 
     @Override
-    public <R> Stream<Tuple<Result<T, E>, R>> cross(Supplier<Stream<R>> other) {
+    public <R> Stream<Pair<Result<T, E>, R>> cross(Supplier<Stream<R>> other) {
         return parent.cross(other);
     }
 
@@ -45,17 +49,13 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
     }
 
     @Override
-    public <R> Stream<Tuple<Result<T, E>, R>> extend(Function<Result<T, E>, R> extender) {
+    public <R> Stream<Pair<Result<T, E>, R>> extend(Function<Result<T, E>, R> extender) {
         return parent.extend(extender);
     }
 
     @Override
     public Stream<Result<T, E>> concat(Stream<Result<T, E>> other) {
         return parent.concat(other);
-    }
-
-    public ExceptionalStream(Stream<Result<T, E>> parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -83,11 +83,25 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
         return parent.collect(collector);
     }
 
-    public <R> ExceptionalStream<R, E> mapValues(Function<T, R> mapper) {
+    public <R> ExceptionalStream<R, E> mapInner(Function<T, R> mapper) {
         return new ExceptionalStream<>(parent.map(inner -> inner.mapValue(mapper)));
     }
 
     public <C> Result<C, E> collectExceptionally(Collector<T, C> collector) {
         return parent.collect(Collectors.exceptionally(collector));
+    }
+
+    public <C> Result<C, E> foldRightFromInitialExceptionally(C initial, BiFunction<C, T, C> folder) {
+        return parent.collect(Collectors.exceptionally(new Collector<T, C>() {
+            @Override
+            public C initial() {
+                return initial;
+            }
+
+            @Override
+            public C fold(C current, T element) {
+                return folder.apply(current, element);
+            }
+        }));
     }
 }

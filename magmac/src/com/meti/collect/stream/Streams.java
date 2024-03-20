@@ -67,14 +67,14 @@ public class Streams {
 
     public static <T> Stream<List<T>> crossToList(Stream<T> first, Supplier<Stream<T>> other) {
         return first.cross(other).map(tuple -> {
-            return List.of(tuple.a(), tuple.b());
+            return List.of(tuple.left(), tuple.right());
         });
     }
 
     public static <T> Stream<List<T>> crossListToList(Stream<List<T>> stream, Supplier<Stream<T>> other) {
         return stream.cross(other).map(tuple -> {
-            var list = new ArrayList<>(tuple.a());
-            list.add(tuple.b());
+            var list = new ArrayList<>(tuple.left());
+            list.add(tuple.right());
             return list;
         });
     }
@@ -102,7 +102,7 @@ public class Streams {
 
     public static <T> Stream<T> reverse(Stream<T> apply) {
         /*
-        TODO: figure out a better algorithm for this
+        TODO: figure out left better algorithm for this
 
         - SirMathhman, 3/18/2024
         */
@@ -133,5 +133,9 @@ public class Streams {
     @SafeVarargs
     public static <T> Stream<T> concat(Stream<T>... streams) {
         return Streams.from(streams).flatMap(value -> value);
+    }
+
+    public static <T> Stream<T> crossAll(Stream<T>... streams) {
+        return null;
     }
 }

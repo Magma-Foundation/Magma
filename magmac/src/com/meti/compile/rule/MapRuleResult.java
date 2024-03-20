@@ -2,7 +2,7 @@ package com.meti.compile.rule;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
-import com.meti.collect.Tuple;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.Stream;
@@ -28,7 +28,7 @@ public record MapRuleResult(
     }
 
     @Override
-    public Stream<Tuple<JavaString, JavaString>> streamTexts() {
+    public Stream<Pair<JavaString, JavaString>> streamTexts() {
         throw new UnsupportedOperationException();
     }
 
@@ -38,7 +38,7 @@ public record MapRuleResult(
     }
 
     @Override
-    public Stream<Tuple<JavaString, JavaList<JavaString>>> streamTextLists() {
+    public Stream<Pair<JavaString, JavaList<JavaString>>> streamTextLists() {
         return texts.stream();
     }
 

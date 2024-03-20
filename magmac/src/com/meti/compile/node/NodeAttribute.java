@@ -4,6 +4,13 @@ import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
 
 public class NodeAttribute implements Attribute {
+    public static String Type = "node";
+
+    @Override
+    public boolean is(String type) {
+        return type.equals(Type);
+    }
+
     private final Node value;
 
     public NodeAttribute(Node value) {

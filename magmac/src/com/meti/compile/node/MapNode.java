@@ -2,7 +2,9 @@ package com.meti.compile.node;
 
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
+import com.meti.collect.Pair;
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Stream;
 import com.meti.java.JavaString;
 
 import java.util.HashMap;
@@ -26,6 +28,11 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
     public Option<Node> with(String name, Attribute attribute) {
         var ownedName = JavaString.from(name);
         return attributes.replaceValue(ownedName, attribute).map(newAttributes -> new MapNode(this.name, newAttributes));
+    }
+
+    @Override
+    public Stream<Pair<JavaString, Attribute>> streamPairs(String type) {
+        return attributes.stream().filter(tuple -> tuple.applyRight(attribute -> attribute.is(type)));
     }
 
     public record Builder(JavaString name, JavaMap<JavaString, Attribute> attributes) {

@@ -11,6 +11,7 @@ import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
 public class Content implements Node {
+    public static String Id = "content";
     private final String value;
     private final int indent;
 
@@ -60,7 +61,7 @@ public class Content implements Node {
 
     @Override
     public boolean is(String name) {
-        return name.equals("content");
+        return name.equals(Content.Id);
     }
 
     @Override

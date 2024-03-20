@@ -13,11 +13,11 @@ class ConjunctionRuleTest {
     @Test
     void apply() throws IntentionalException {
         var actual = ConjunctionRule.Join(
-                Match("a"),
+                Match("left"),
                 Symbol("value")
         ).apply(JavaString.from("ab")).$();
 
         var value = actual.findText("value").$().inner();
-        assertEquals("b", value);
+        assertEquals("right", value);
     }
 }

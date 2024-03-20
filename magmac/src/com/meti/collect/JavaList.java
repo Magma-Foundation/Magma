@@ -62,12 +62,12 @@ public class JavaList<T> {
         return elements.isEmpty() ? None() : Some(elements.get(elements.size() - 1));
     }
 
-    public Option<Tuple<T, JavaList<T>>> popFirst() {
+    public Option<Pair<T, JavaList<T>>> popFirst() {
         if (elements.isEmpty()) return None();
 
         var firstItem = elements.get(0);
         var slice = elements.subList(1, elements.size());
-        return Some(new Tuple<>(firstItem, new JavaList<>(slice)));
+        return Some(new Pair<>(firstItem, new JavaList<>(slice)));
     }
 
     public boolean contains(T value) {

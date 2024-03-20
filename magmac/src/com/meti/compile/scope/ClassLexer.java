@@ -1,5 +1,6 @@
 package com.meti.compile.scope;
 
+import com.meti.collect.JavaList;
 import com.meti.collect.option.Option;
 import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
@@ -26,6 +27,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     public static final Rule FLAG_RULE = Rules.SymbolList("flags", Whitespace);
 
     public static final Rule PREFIX = Optional(Join(FLAG_RULE, Whitespace));
+
     public static final Rule EXTENDS = Optional(Join(
             Match("extends"),
             Whitespace,
@@ -43,9 +45,11 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Node(JavaString.from("content"), BlockLexer.Rule)
     );
 
+
     private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {
-            var flags = result.findTextList("flags").$();
+            var flags = result.findTextList("flags").orElse(JavaList.empty());
+
             var name = result.findText("name").$();
 
             var content = result.findText("content").$();
