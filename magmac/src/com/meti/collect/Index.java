@@ -1,6 +1,7 @@
 package com.meti.collect;
 
 import com.meti.collect.option.Option;
+import com.meti.collect.stream.Stream;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -51,5 +52,9 @@ public record Index(int value, int length) {
         } else {
             return None();
         }
+    }
+
+    public Stream<Index> streamFurther() {
+        return null;
     }
 }

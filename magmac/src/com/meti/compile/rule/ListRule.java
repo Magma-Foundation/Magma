@@ -25,6 +25,9 @@ public class ListRule implements Rule {
     }
 
     public static Option<Range> findFirstInstance(JavaString value, Rule rule) {
+        /*
+        TODO: figure out a more intuitive way to express this
+         */
         var totalLength = value.length();
         for (int sliceLength = totalLength; sliceLength > 0; sliceLength--) {
             for (int offset = 0; offset < (totalLength - sliceLength); offset++) {

@@ -3,8 +3,10 @@ package com.meti.compile.scope;
 import com.meti.collect.option.IntentionalException;
 import com.meti.compile.rule.Rule;
 import com.meti.java.JavaString;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
 import static com.meti.compile.rule.ConjunctionRule.Join;
@@ -18,7 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClassLexerTest {
     private static void assertValid(Rule rule, String slice) {
-        assertTrue(rule.apply(new JavaString(slice)).isPresent());
+        assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+            assertTrue(rule.apply(new JavaString(slice)).isPresent());
+        });
     }
 
     @Test

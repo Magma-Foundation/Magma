@@ -15,6 +15,11 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
     private final Stream<Result<T, E>> parent;
 
     @Override
+    public <R> Stream<R> two(BiFunction<Result<T, E>, Result<T, E>, R> mapper, Function<Result<T, E>, R> remaining) {
+        return parent.two(mapper, remaining);
+    }
+
+    @Override
     public <R> Stream<Tuple<Result<T, E>, R>> cross(Supplier<Stream<R>> other) {
         return parent.cross(other);
     }
