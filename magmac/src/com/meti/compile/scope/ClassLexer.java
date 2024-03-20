@@ -8,7 +8,9 @@ import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
-import com.meti.compile.rule.*;
+import com.meti.compile.rule.Rule;
+import com.meti.compile.rule.RuleResult;
+import com.meti.compile.rule.Rules;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
@@ -30,11 +32,16 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Symbol("superclass"));
 
     public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
-    public static final Rule RULE = Join(
-            Text("class"),
+    public static final Rule EXTENDS = Optional(Join(
+            Text("extends"),
             Whitespace,
+            Symbol("superclass"),
+            Whitespace
+    ));
+    public static final Rule RULE = Join(
             Symbol("name"),
             Whitespace,
+            EXTENDS,
             Extract("content")
     );
 
