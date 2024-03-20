@@ -26,8 +26,16 @@ public interface Node {
     }
 
     default Stream<Pair<JavaString, Attribute>> streamPairs(String type) {
-        return apply("value").map(attribute -> {
-            return new Pair<>(JavaString.from("value"), attribute);
-        }).into(Streams::fromOption);
+        if (type.equals(NodeAttribute.Type)) {
+            return apply("value")
+                    .map(attribute -> new Pair<>(JavaString.from("value"), attribute))
+                    .into(Streams::fromOption);
+        } else if(type.equals(NodeListAttribute.Type)) {
+            return apply("children")
+                    .map(attribute -> new Pair<>(JavaString.from("children"), attribute))
+                    .into(Streams::fromOption);
+        } else {
+            return Streams.empty();
+        }
     }
 }

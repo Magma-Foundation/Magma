@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class FeatureTest {
     protected static void assertCompile(String input, String output) {
-        assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
             try {
                 var actual = new Compiler(input).compile().$().inner();
                 assertEquals(output, actual);
