@@ -7,6 +7,7 @@ import com.meti.collect.stream.Streams;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
@@ -29,6 +30,19 @@ public class JavaList<T> {
 
     public static <T> JavaList<T> empty() {
         return new JavaList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JavaList<?> javaList = (JavaList<?>) o;
+        return Objects.equals(elements, javaList.elements);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(elements);
     }
 
     @Override
@@ -96,7 +110,7 @@ public class JavaList<T> {
     public Option<T> get(int value) {
         if (value < elements.size()) {
             return Some(elements.get(value));
-        } else{
+        } else {
             return None();
         }
     }
