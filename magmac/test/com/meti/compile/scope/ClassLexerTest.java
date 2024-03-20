@@ -87,13 +87,13 @@ class ClassLexerTest {
                 "class IntentionalException extends Exception ");
     }
 
-/*    @Test
+    @Test
     void lex() throws IntentionalException {
-        var actual = new ClassLexer(new JavaString("class IntentionalException extends Exception {}"))
+        var actual = new ClassLexer(JavaString.from("class IntentionalException extends Exception {}"))
                 .lex()
                 .next()
                 .$();
 
         assertNotNull(actual);
-    }*/
+    }
 }

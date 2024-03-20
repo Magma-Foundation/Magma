@@ -8,14 +8,13 @@ import com.meti.compile.TypeCompiler;
 import com.meti.compile.node.Content;
 import com.meti.compile.node.MapNode;
 import com.meti.compile.node.Node;
-import com.meti.compile.rule.Rule;
-import com.meti.compile.rule.RuleResult;
-import com.meti.compile.rule.Rules;
+import com.meti.compile.rule.*;
 import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.compile.rule.ConjunctionRule.Join;
 import static com.meti.compile.rule.DisjunctionRule.Or;
+import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
 import static com.meti.compile.rule.Rules.Optional;
 import static com.meti.compile.rule.TextRule.Text;
@@ -39,7 +38,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Whitespace,
             Optional(EXTENDS_RULE),
             Whitespace,
-            Symbol("content"),
+            Extract("content"),
             Padding);
 
     /* public static final Rule RULE = Join(
