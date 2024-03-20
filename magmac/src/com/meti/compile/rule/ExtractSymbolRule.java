@@ -16,7 +16,7 @@ public class ExtractSymbolRule implements Rule {
     private final JavaString name;
 
     public ExtractSymbolRule(String name) {
-        this.name = new JavaString(name);
+        this.name = JavaString.from(name);
     }
 
     public static ExtractSymbolRule Symbol(String name) {

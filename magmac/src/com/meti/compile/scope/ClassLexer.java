@@ -61,7 +61,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             var content = result.findText("content").$();
             var contentOutput = new Content(content, 0);
 
-            var builder = MapNode.Builder(new JavaString("class"))
+            var builder = MapNode.Builder(JavaString.from("class"))
                     .withListOfStrings("flags", flags)
                     .withString("name", name)
                     .withNode("value", contentOutput);

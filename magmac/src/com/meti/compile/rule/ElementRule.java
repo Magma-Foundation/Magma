@@ -12,7 +12,7 @@ public class ElementRule implements Rule {
     private final JavaString name;
 
     private ElementRule(String name) {
-        this.name = new JavaString(name);
+        this.name = JavaString.from(name);
     }
 
     public static ElementRule Element(String name) {

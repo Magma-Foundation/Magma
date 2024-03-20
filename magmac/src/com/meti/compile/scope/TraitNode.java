@@ -33,7 +33,7 @@ public class TraitNode implements Node {
     @Override
     public Option<String> render() {
         var flagString = flags.stream()
-                .collect(Collectors.joining(new JavaString(" ")))
+                .collect(Collectors.joining(JavaString.from(" ")))
                 .map(value -> value + " ")
                 .orElse("");
 

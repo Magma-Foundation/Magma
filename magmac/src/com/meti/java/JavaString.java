@@ -10,13 +10,24 @@ import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Some.Some;
 
-public record JavaString(String inner) {
-    public static final JavaString Empty = new JavaString("");
+public final class JavaString {
+    public static final JavaString Empty = from("");
+    private final String inner;
+
+    private JavaString(String inner) {
+        this.inner = inner;
+    }
+
+    public static JavaString from(String inner) {
+        return new JavaString(inner);
+    }
+
 
     @Override
     public String toString() {
@@ -38,7 +49,7 @@ public record JavaString(String inner) {
     }
 
     public JavaString sliceBetween(Range range) {
-        return new JavaString(inner.substring(range.start(), range.end()));
+        return from(inner.substring(range.start(), range.end()));
     }
 
     public Stream<JavaString> split(String regex) {
@@ -46,15 +57,15 @@ public record JavaString(String inner) {
     }
 
     public JavaString sliceTo(Index end) {
-        return new JavaString(this.inner.substring(0, end.value()));
+        return from(this.inner.substring(0, end.value()));
     }
 
     public JavaString sliceFrom(Index start) {
-        return new JavaString(this.inner.substring(start.value()));
+        return from(this.inner.substring(start.value()));
     }
 
     public JavaString strip() {
-        return new JavaString(this.inner.strip());
+        return from(this.inner.strip());
     }
 
     public boolean startsWithSlice(String slice) {
@@ -125,11 +136,11 @@ public record JavaString(String inner) {
     }
 
     public JavaString concatOwned(JavaString other) {
-        return new JavaString(this.inner + other.inner);
+        return from(this.inner + other.inner);
     }
 
     public JavaString concatSlice(String other) {
-        return new JavaString(this.inner + other);
+        return from(this.inner + other);
     }
 
     public Option<Index> lastIndexOfSlice(String slice) {
@@ -177,7 +188,7 @@ public record JavaString(String inner) {
             public Option<JavaString> next() {
                 if (start < inner.length()) {
                     int end = Math.min(inner.length(), start + n);
-                    JavaString slice = new JavaString(inner.substring(start, end));
+                    JavaString slice = from(inner.substring(start, end));
                     start = end;
                     return Some(slice);
                 } else {
@@ -207,7 +218,7 @@ public record JavaString(String inner) {
         if (inner.isEmpty()) return None();
         var first = inner.charAt(0);
         var after = inner.substring(1);
-        return Some(new Tuple<>(first, new JavaString(after)));
+        return Some(new Tuple<>(first, from(after)));
     }
 
     public Index start() {
@@ -226,4 +237,22 @@ public record JavaString(String inner) {
                 .two(Index::to, (Function<Index, Option<Range>>) index -> None())
                 .flatMap(Streams::fromOption);
     }
+
+    public String inner() {
+        return inner;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (JavaString) obj;
+        return Objects.equals(this.inner, that.inner);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inner);
+    }
+
 }

@@ -6,7 +6,6 @@ import com.meti.collect.option.Option;
 import com.meti.java.JavaString;
 
 import java.util.HashMap;
-import java.util.List;
 
 public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes) implements Node {
     public static Builder Builder(JavaString name) {
@@ -20,12 +19,12 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
 
     @Override
     public Option<Attribute> apply(String name) {
-        return attributes.apply(new JavaString(name));
+        return attributes.apply(JavaString.from(name));
     }
 
     @Override
     public Option<Node> with(String name, Attribute attribute) {
-        var ownedName = new JavaString(name);
+        var ownedName = JavaString.from(name);
         return attributes.replaceValue(ownedName, attribute).map(newAttributes -> new MapNode(this.name, newAttributes));
     }
 
@@ -35,7 +34,7 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
         }
 
         public Builder withListOfStrings(String name, JavaList<JavaString> values) {
-            return new Builder(this.name, attributes.put(new JavaString(name), new StringListAttribute(values)));
+            return new Builder(this.name, attributes.put(JavaString.from(name), new StringListAttribute(values)));
         }
 
         public Node complete() {
@@ -43,15 +42,15 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
         }
 
         public Builder withString(String name, JavaString value) {
-            return new Builder(this.name, attributes.put(new JavaString(name), new StringAttribute(value)));
+            return new Builder(this.name, attributes.put(JavaString.from(name), new StringAttribute(value)));
         }
 
         public Builder withNode(String name, Node value) {
-            return new Builder(this.name, attributes.put(new JavaString(name), new NodeAttribute(value)));
+            return new Builder(this.name, attributes.put(JavaString.from(name), new NodeAttribute(value)));
         }
 
         public Builder withListOfNodes(String name, JavaList<? extends Node> values) {
-            return new Builder(this.name, attributes.put(new JavaString(name), new NodeListAttribute(values)));
+            return new Builder(this.name, attributes.put(JavaString.from(name), new NodeListAttribute(values)));
         }
     }
 }

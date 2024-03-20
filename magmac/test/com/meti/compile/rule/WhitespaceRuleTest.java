@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WhitespaceRuleTest {
     @Test
     void joinBetween() throws IntentionalException {
-        assertEquals(new JavaString("Test"), Join(Text("extends"), Whitespace, ExtractSymbolRule.Symbol("superclass"))
-                .apply(new JavaString("extends Test"))
+        assertEquals(JavaString.from("Test"), Join(Text("extends"), Whitespace, ExtractSymbolRule.Symbol("superclass"))
+                .apply(JavaString.from("extends Test"))
                 .$()
                 .findText("superclass")
                 .$());
@@ -23,7 +23,7 @@ class WhitespaceRuleTest {
     @Test
     void joinWithText() {
         assertTrue(Join(Text("extends"), Whitespace)
-                .apply(new JavaString("extends \t"))
+                .apply(JavaString.from("extends \t"))
                 .isPresent());
     }
 }

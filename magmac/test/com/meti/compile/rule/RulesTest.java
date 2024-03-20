@@ -11,21 +11,21 @@ class RulesTest {
     @Test
     void presentInvalid() {
         assertFalse(Rules.Optional(Text("test"))
-                .apply(new JavaString("tests"))
+                .apply(JavaString.from("tests"))
                 .isPresent());
     }
 
     @Test
     void presentValid() {
         assertTrue(Rules.Optional(ExtractSymbolRule.Symbol("value"))
-                .apply(new JavaString("test"))
+                .apply(JavaString.from("test"))
                 .isPresent());
     }
 
     @Test
     void empty() {
         assertTrue(Rules.Optional(ExtractSymbolRule.Symbol("value"))
-                .apply(new JavaString(""))
+                .apply(JavaString.from(""))
                 .isPresent());
     }
 }

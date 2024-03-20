@@ -24,7 +24,7 @@ public record MapRuleResult(
 
     @Override
     public Option<JavaString> findText(String name) {
-        return texts.apply(new JavaString(name)).flatMap(JavaList::first);
+        return texts.apply(JavaString.from(name)).flatMap(JavaList::first);
     }
 
     @Override
@@ -34,7 +34,7 @@ public record MapRuleResult(
 
     @Override
     public Option<JavaList<JavaString>> findTextList(String name) {
-        return texts.apply(new JavaString(name));
+        return texts.apply(JavaString.from(name));
     }
 
     @Override

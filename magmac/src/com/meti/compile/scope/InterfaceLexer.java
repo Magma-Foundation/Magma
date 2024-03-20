@@ -32,8 +32,8 @@ public class InterfaceLexer implements Lexer {
             var content = new Content(root.sliceFrom(contentStart), 0);
 
             var list = new JavaList<JavaString>();
-            if (flags.contains(new JavaString("public"))) {
-                list = list.add(new JavaString("export"));
+            if (flags.contains(JavaString.from("public"))) {
+                list = list.add(JavaString.from("export"));
             }
 
             return new TraitNode(name, content, list);

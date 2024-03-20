@@ -39,22 +39,22 @@ public record Compiler(String input) {
 
     public static Stream<Node> lexHead(String line, int indent) {
         return Streams.<Function<String, Lexer>>from(
-                        exp -> new TextBlockLexer(new JavaString(exp)),
-                        exp -> new StringLexer(new JavaString(exp)),
-                        exp -> new CatchLexer(new JavaString(exp), indent),
-                        exp -> new ReturnLexer(new JavaString(exp), indent),
-                        exp -> new TryLexer(new JavaString(exp), indent),
+                        exp -> new TextBlockLexer(JavaString.from(exp)),
+                        exp -> new StringLexer(JavaString.from(exp)),
+                        exp -> new CatchLexer(JavaString.from(exp), indent),
+                        exp -> new ReturnLexer(JavaString.from(exp), indent),
+                        exp -> new TryLexer(JavaString.from(exp), indent),
                         PackageLexer::new,
-                        exp -> new ClassLexer(new JavaString(exp)),
+                        exp -> new ClassLexer(JavaString.from(exp)),
                         exp -> new BlockLexer(exp, indent),
-                        exp -> new MethodLexer(new JavaString(exp), indent),
-                        exp -> new DefinitionLexer(new JavaString(exp), indent),
-                        exp -> new ImportLexer(new JavaString(exp)),
-                        exp -> new InvocationLexer(new JavaString(exp)),
-                        exp -> new LambdaLexer(new JavaString(exp)),
-                        exp -> new FieldLexer(new JavaString(exp)),
+                        exp -> new MethodLexer(JavaString.from(exp), indent),
+                        exp -> new DefinitionLexer(JavaString.from(exp), indent),
+                        exp -> new ImportLexer(JavaString.from(exp)),
+                        exp -> new InvocationLexer(JavaString.from(exp)),
+                        exp -> new LambdaLexer(JavaString.from(exp)),
+                        exp -> new FieldLexer(JavaString.from(exp)),
                         VariableLexer::new,
-                        exp -> new InterfaceLexer(new JavaString(exp))
+                        exp -> new InterfaceLexer(JavaString.from(exp))
                 ).map(constructor -> constructor.apply(line.strip()))
                 .map(lexer -> lexer.lex().next())
                 .flatMap(Streams::fromOption);
@@ -164,8 +164,8 @@ public record Compiler(String input) {
             var name = node.apply("name").$().asString().$();
 
             var outputFlags = new JavaList<JavaString>();
-            if (flags.contains(new JavaString("public"))) {
-                outputFlags = JavaList.from(new JavaString("export"));
+            if (flags.contains(JavaString.from("public"))) {
+                outputFlags = JavaList.from(JavaString.from("export"));
             }
 
             var children = new JavaList<Node>(new ArrayList<>(node.apply("value")
@@ -175,13 +175,13 @@ public record Compiler(String input) {
                     .$()
                     .unwrap()));
 
-            var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(new JavaString("with"))
+            var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(JavaString.from("with"))
                     .withString("type", extendsValue)
                     .complete())).orElse(children);
 
             var contentOutput = new BlockNode(0, newChildren);
 
-            return Ok(MapNode.Builder(new JavaString("object"))
+            return Ok(MapNode.Builder(JavaString.from("object"))
                     .withListOfStrings("flags", outputFlags)
                     .withString("name", name)
                     .withNode("value", contentOutput)

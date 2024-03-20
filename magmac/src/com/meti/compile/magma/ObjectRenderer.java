@@ -14,7 +14,7 @@ public record ObjectRenderer(Node classNode) implements com.meti.compile.node.Re
         return $Option(() -> {
             var flagsString = this.classNode().apply("flags").flatMap(value1 -> value1.asListOfStrings()).$()
                     .stream()
-                    .collect(Collectors.joining(new JavaString(" ")))
+                    .collect(Collectors.joining(JavaString.from(" ")))
                     .map(value -> value.concatSlice(" "))
                     .orElse(JavaString.Empty);
 

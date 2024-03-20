@@ -15,7 +15,7 @@ class ConjunctionRuleTest {
         var actual = ConjunctionRule.Join(
                 Text("a"),
                 Symbol("value")
-        ).apply(new JavaString("ab")).$();
+        ).apply(JavaString.from("ab")).$();
 
         var value = actual.findText("value").$().inner();
         assertEquals("b", value);

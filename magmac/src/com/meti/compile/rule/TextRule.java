@@ -3,7 +3,6 @@ package com.meti.compile.rule;
 import com.meti.collect.option.None;
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
-import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
 public class TextRule implements Rule {
@@ -14,7 +13,7 @@ public class TextRule implements Rule {
     }
 
     public static TextRule Text(String requiredValue) {
-        return new TextRule(new JavaString(requiredValue));
+        return new TextRule(JavaString.from(requiredValue));
     }
 
     @Override

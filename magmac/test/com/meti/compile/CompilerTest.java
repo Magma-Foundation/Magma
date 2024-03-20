@@ -8,7 +8,6 @@ import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
@@ -16,7 +15,7 @@ class CompilerTest extends FeatureTest {
     @Test
     void lexTree1() {
         var input = new DefinitionNode(0, Collections.emptyList(),
-                new JavaString("actual"),
+                JavaString.from("actual"),
                 new Content("new Compiler(input)\"", 0));
 
         var actual = Compiler.lexTree(input).collect(Collectors.toNativeList());
@@ -25,7 +24,7 @@ class CompilerTest extends FeatureTest {
 
     @Test
     void lexTree0() {
-        var input = new StringNode(new JavaString("var actual = new Compiler(input)"));
+        var input = new StringNode(JavaString.from("var actual = new Compiler(input)"));
         var actual = Compiler.lexTree(input).collect(Collectors.toNativeList());
         assertIterableEquals(Collections.singletonList(input), actual);
     }

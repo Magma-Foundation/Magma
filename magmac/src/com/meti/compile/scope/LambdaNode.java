@@ -27,7 +27,7 @@ public record LambdaNode(java.util.List<com.meti.java.JavaString> arguments, Nod
         if (arguments.size() == 1) {
             argumentsString = arguments.get(0);
         } else {
-            argumentsString = new JavaString(Streams.fromNativeList(arguments)
+            argumentsString = JavaString.from(Streams.fromNativeList(arguments)
                     .map(JavaString::inner)
                     .collect(Collectors.joiningNatively(", "))
                     .orElse("()"));

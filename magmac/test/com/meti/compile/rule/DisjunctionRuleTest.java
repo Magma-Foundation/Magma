@@ -12,6 +12,6 @@ class DisjunctionRuleTest {
         assertTrue(DisjunctionRule.Or(
                 TextRule.Text("test"),
                 ExtractSymbolRule.Symbol("value")
-        ).apply(new JavaString("test")).isPresent());
+        ).apply(JavaString.from("test")).isPresent());
     }
 }

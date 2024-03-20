@@ -15,7 +15,7 @@ public record TypeCompiler(String type) {
         if(type.equals("new")) return None();
 
         if (type.equals("void")) {
-            return Some(new JavaString("Void"));
+            return Some(JavaString.from("Void"));
         } else {
             var start = type().indexOf('<');
             var end = type().lastIndexOf('>');
@@ -23,9 +23,9 @@ public record TypeCompiler(String type) {
                 var name = type().substring(0, start).strip();
                 var subType = type().substring(start + 1, end).strip();
                 TypeCompiler typeCompiler = new TypeCompiler(subType);
-                return Some(new JavaString(name + "[" + typeCompiler.compile().map(JavaString::inner) + "]"));
+                return Some(JavaString.from(name + "[" + typeCompiler.compile().map(JavaString::inner) + "]"));
             } else {
-                return Some(new JavaString(type));
+                return Some(JavaString.from(type));
             }
         }
     }

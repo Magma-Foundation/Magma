@@ -11,27 +11,27 @@ class ExtractSymbolRuleTest {
     @Test
     void empty() {
         assertTrue(new ExtractSymbolRule("test")
-                .apply(new JavaString(""))
+                .apply(JavaString.from(""))
                 .isEmpty());
     }
 
     @Test
     void badChar() {
         assertTrue(new ExtractSymbolRule("test")
-                .apply(new JavaString(";"))
+                .apply(JavaString.from(";"))
                 .isEmpty());
     }
 
     @Test
     void valid() throws IntentionalException {
         var actual = new ExtractSymbolRule("test")
-                .apply(new JavaString("test123"))
+                .apply(JavaString.from("test123"))
                 .$()
                 .findTextList("test")
                 .$()
                 .unwrap()
                 .get(0);
 
-        assertEquals(new JavaString("test123"), actual);
+        assertEquals(JavaString.from("test123"), actual);
     }
 }

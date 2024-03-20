@@ -11,10 +11,10 @@ class ExtractRuleTest {
     @Test
     void apply() throws IntentionalException {
         var actual = ExtractSymbolRule.Symbol("test")
-                .apply(new JavaString("temp"))
+                .apply(JavaString.from("temp"))
                 .$()
                 .findText("test")
                 .$();
-        assertEquals(new JavaString("temp"), actual);
+        assertEquals(JavaString.from("temp"), actual);
     }
 }

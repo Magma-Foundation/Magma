@@ -3,7 +3,6 @@ package com.meti.compile.scope;
 import com.meti.collect.option.IntentionalException;
 import com.meti.compile.rule.Rule;
 import com.meti.java.JavaString;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -21,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClassLexerTest {
     private static void assertValid(Rule rule, String slice) {
         assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
-            assertTrue(rule.apply(new JavaString(slice)).isPresent());
+            assertTrue(rule.apply(JavaString.from(slice)).isPresent());
         });
     }
 
     @Test
     void extendsRule() throws IntentionalException {
-        var actual = EXTENDS_RULE.apply(new JavaString("extends Test"))
+        var actual = EXTENDS_RULE.apply(JavaString.from("extends Test"))
                 .$()
                 .findText("superclass")
                 .$();
@@ -36,13 +35,13 @@ class ClassLexerTest {
 
     @Test
     void flagRule() throws IntentionalException {
-        var actual = ClassLexer.FLAG_RULE.apply(new JavaString("public static"))
+        var actual = ClassLexer.FLAG_RULE.apply(JavaString.from("public static"))
                 .$()
                 .findTextList("flags")
                 .$()
                 .unwrap();
 
-        assertIterableEquals(List.of(new JavaString("public"), new JavaString("static")), actual);
+        assertIterableEquals(List.of(JavaString.from("public"), JavaString.from("static")), actual);
     }
 
     @Test

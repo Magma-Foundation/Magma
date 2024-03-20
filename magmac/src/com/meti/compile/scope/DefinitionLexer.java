@@ -51,9 +51,9 @@ public record DefinitionLexer(JavaString stripped, int indent) implements Lexer 
             }
 
             var flagsString = new ArrayList<JavaString>();
-            if (inputFlags.contains("public")) flagsString.add(new JavaString("pub"));
-            if (inputFlags.contains("final")) flagsString.add(new JavaString("const"));
-            if (inputFlags.contains("var")) flagsString.add(new JavaString("let"));
+            if (inputFlags.contains("public")) flagsString.add(JavaString.from("pub"));
+            if (inputFlags.contains("final")) flagsString.add(JavaString.from("const"));
+            if (inputFlags.contains("var")) flagsString.add(JavaString.from("let"));
 
             var compiledValue = new Content(stripped.sliceFrom(separator.next().$()).strip(), 0);
             return new DefinitionNode(indent, flagsString, name, compiledValue);

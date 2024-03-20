@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class InvocationLexerTest {
     @Test
     void test() {
-        Lexer lexer = new InvocationLexer(new JavaString("runWithSource()"));
+        Lexer lexer = new InvocationLexer(JavaString.from("runWithSource()"));
         var actual = lexer.lex().next().orElseNull();
         assertEquals(new InvocationNode(new Content("runWithSource", 0)), actual);
     }
