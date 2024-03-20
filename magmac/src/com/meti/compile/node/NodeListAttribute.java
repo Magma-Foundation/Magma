@@ -15,6 +15,11 @@ public class NodeListAttribute implements Attribute {
     }
 
     @Override
+    public boolean is(String type) {
+        return type.equals(Type);
+    }
+
+    @Override
     public Option<JavaList<? extends Node>> asListOfNodes() {
         return Some.Some(values);
     }
