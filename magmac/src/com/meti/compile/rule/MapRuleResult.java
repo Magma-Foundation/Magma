@@ -19,7 +19,7 @@ public record MapRuleResult(
 
 
     public static RuleResult merge(RuleResult first, RuleResult... more) {
-        return Streams.from(more).foldRight(first, (mapRuleResult, ruleResult) -> new MapRuleResult(mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll))));
+        return Streams.from(more).foldRightFromInitial(first, (mapRuleResult, ruleResult) -> new MapRuleResult(mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll))));
     }
 
     @Override

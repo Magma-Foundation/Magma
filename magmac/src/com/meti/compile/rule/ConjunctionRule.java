@@ -1,7 +1,6 @@
 package com.meti.compile.rule;
 
 import com.meti.collect.option.Option;
-import com.meti.collect.stream.Stream;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
@@ -15,7 +14,7 @@ public class ConjunctionRule implements Rule {
     }
 
     public static Rule Join(Rule first, Rule... more) {
-        return Streams.from(more).foldRight(first, ConjunctionRule::new);
+        return Streams.from(more).foldRightFromInitial(first, ConjunctionRule::new);
     }
 
     @Override

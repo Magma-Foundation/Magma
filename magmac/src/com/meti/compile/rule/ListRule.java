@@ -7,6 +7,8 @@ import com.meti.collect.option.Option;
 import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
+import java.util.function.Function;
+
 import static com.meti.collect.option.None.None;
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.collect.option.Some.Some;
@@ -77,6 +79,6 @@ public class ListRule implements Rule {
                 .map(input::sliceBetween)
                 .map(value::apply)
                 .flatMap(Streams::fromOption)
-                .foldRightFromTwo(MapRuleResult::merge, MapRuleResult::merge);
+                .foldRight(Function.identity(), MapRuleResult::merge);
     }
 }

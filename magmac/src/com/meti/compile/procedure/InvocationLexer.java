@@ -30,7 +30,7 @@ public class InvocationLexer implements Lexer {
             if(!stripped.endsWithSlice(")")) $$();
 
             var end = stripped.lastIndexOfChar(')').$();
-            var furthestComputer = stripped.sliceTo(end).streamReverse().extend(stripped::apply).foldRight(new State(0, None()), (state, tuple) -> {
+            var furthestComputer = stripped.sliceTo(end).streamReverse().extend(stripped::apply).foldRightFromInitial(new State(0, None()), (state, tuple) -> {
                 if (tuple.b() == '(' && state.isLevel()) return state.evaluate(tuple.a());
                 if (tuple.b() == ')') return state.increase();
                 if (tuple.b() == '(') return state.decrease();

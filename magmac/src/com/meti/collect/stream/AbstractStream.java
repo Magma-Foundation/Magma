@@ -39,7 +39,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
     }
 
     @Override
-    public <C> C foldRight(C initial, BiFunction<C, T, C> folder) {
+    public <C> C foldRightFromInitial(C initial, BiFunction<C, T, C> folder) {
         var current = initial;
         while (true) {
             C finalCurrent = current;
@@ -57,7 +57,14 @@ public abstract class AbstractStream<T> implements Stream<T> {
 
     @Override
     public <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder) {
-        return next().and(next()).map(ttTuple -> initial.apply(ttTuple.a(), ttTuple.b())).map(initial1 -> foldRight(initial1, folder));
+        var first = next();
+        var second = next();
+        return first.and(second).map(ttTuple -> initial.apply(ttTuple.a(), ttTuple.b())).map(initial1 -> foldRightFromInitial(initial1, folder));
+    }
+
+    @Override
+    public <C> Option<C> foldRight(Function<T, C> mapper, BiFunction<C, T, C> folder) {
+        return next().map(head -> foldRightFromInitial(mapper.apply(head), folder));
     }
 
     @Override
@@ -67,7 +74,7 @@ public abstract class AbstractStream<T> implements Stream<T> {
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
-        return foldRight(collector.initial(), collector::fold);
+        return foldRightFromInitial(collector.initial(), collector::fold);
     }
 
     @Override

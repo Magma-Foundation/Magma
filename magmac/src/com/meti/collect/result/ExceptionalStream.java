@@ -15,6 +15,11 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
     private final Stream<Result<T, E>> parent;
 
     @Override
+    public <C> Option<C> foldRight(Function<Result<T, E>, C> mapper, BiFunction<C, Result<T, E>, C> folder) {
+        return parent.foldRight(mapper, folder);
+    }
+
+    @Override
     public <R> Stream<R> two(BiFunction<Result<T, E>, Result<T, E>, R> mapper, Function<Result<T, E>, R> remaining) {
         return parent.two(mapper, remaining);
     }
@@ -35,8 +40,8 @@ public class ExceptionalStream<T, E extends Throwable> implements Stream<Result<
     }
 
     @Override
-    public <C> C foldRight(C initial, BiFunction<C, Result<T, E>, C> folder) {
-        return parent.foldRight(initial, folder);
+    public <C> C foldRightFromInitial(C initial, BiFunction<C, Result<T, E>, C> folder) {
+        return parent.foldRightFromInitial(initial, folder);
     }
 
     @Override

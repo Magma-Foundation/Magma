@@ -25,7 +25,9 @@ public interface Stream<T> {
         return mapper.apply(this);
     }
 
-    <C> C foldRight(C initial, BiFunction<C, T, C> folder);
+    <C> C foldRightFromInitial(C initial, BiFunction<C, T, C> folder);
+
+    <C> Option<C> foldRight(Function<T, C> mapper, BiFunction<C, T, C> folder);
 
     <C> Option<C> foldRightFromTwo(BiFunction<T, T, C> initial, BiFunction<C, T, C> folder);
 
