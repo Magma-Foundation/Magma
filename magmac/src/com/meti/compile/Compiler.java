@@ -57,9 +57,16 @@ public record Compiler(String input) {
     }
 
     public static Result<JavaList<Node>, CompileException> lexTree(Node node) {
-        return $Result(() -> {
-            return JavaList.from(node);
-        });
+        return node.apply("value")
+                .flatMap(Attribute::asNode)
+                .map(Compiler::lexContent)
+                .map(result -> result.mapValue(values1 -> {
+                    return values1.stream()
+                            .map(NodeAttribute::new)
+                            .map(value -> node.with("value", value).orElse(node))
+                            .collect(Collectors.toList());
+                }))
+                .orElse(Ok(JavaList.from(node)));
     }
 
     private static JavaList<Pair<JavaString, Attribute>> createPairs(Pair<JavaString, JavaList<Attribute>> pair, JavaList<Attribute> attributes) {
@@ -176,13 +183,41 @@ public record Compiler(String input) {
         });
     }
 
+    private static Result<JavaString, CompileException> renderExpression(Node node) {
+        return $Result(() -> {
+            var root = node.apply("value")
+                    .flatMap(Attribute::asNode)
+                    .map(Compiler::renderExpression)
+                    .map(result -> result.mapValue(value -> node.with("value", new NodeAttribute(new Content(value, 0))).orElse(node)))
+                    .orElse(Ok(node))
+                    .$();
+
+            return root.render()
+                    .map(JavaString::from)
+                    .into(ThrowableOption::new)
+                    .orElseThrow(() -> new CompileException("Failed to render: '%s'".formatted(node)))
+                    .$();
+        });
+    }
+
     Result<JavaString, CompileException> compile() throws CompileException {
         return $Result(() -> {
-            var tree = new Splitter(this.input()).split().map(JavaString::from).map(Compiler::getResultCompileExceptionResult).map(Results::flatten).collect(Collectors.exceptionally(Collectors.toList())).$();
+            var tree = new Splitter(this.input())
+                    .split()
+                    .map(JavaString::from)
+                    .map(Compiler::getResultCompileExceptionResult)
+                    .map(Results::flatten)
+                    .collect(Collectors.exceptionally(Collectors.toList())).$();
 
-            var outputTree = tree.stream().filter(element -> !element.is("package")).map(Compiler::transformAST).collect(Collectors.exceptionally(Collectors.toList())).$();
+            var outputTree = tree.stream()
+                    .filter(element -> !element.is("package"))
+                    .map(Compiler::transformAST)
+                    .collect(Collectors.exceptionally(Collectors.toList()))
+                    .$();
 
-            return outputTree.stream().map(node -> node.render().map(JavaString::from).into(ThrowableOption::new).orElseThrow(() -> new CompileException("Failed to render: '%s'".formatted(node)))).collect(Collectors.exceptionally(Collectors.joining())).mapValue(value -> value.orElse(JavaString.Empty));
+            return outputTree.stream()
+                    .map(Compiler::renderExpression)
+                    .collect(Collectors.exceptionally(Collectors.joining())).mapValue(value -> value.orElse(JavaString.Empty));
         }).$();
     }
 }

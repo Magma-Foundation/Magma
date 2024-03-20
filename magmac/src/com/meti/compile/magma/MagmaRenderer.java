@@ -9,6 +9,7 @@ public record MagmaRenderer(Node node) implements Renderer {
     @Override
     public Option<String> render() {
         return Streams.from(
+                        new ReturnRenderer(node),
                         new IntegerRenderer(node),
                         new ObjectRenderer(node),
                         new WithRenderer(node))
