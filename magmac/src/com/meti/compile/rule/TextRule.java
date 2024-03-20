@@ -19,6 +19,6 @@ public class TextRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return input.equals(requiredValue) ? Some.Some(new MapRuleResult(input.end())) : None.None();
+        return input.equals(requiredValue) ? Some.Some(new MapRuleResult()) : None.None();
     }
 }

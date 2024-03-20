@@ -16,7 +16,5 @@ public interface RuleResult {
 
     Stream<Tuple<JavaString, JavaList<JavaString>>> streamTextLists();
 
-    Index length();
-
     boolean isEmpty();
 }

@@ -12,6 +12,6 @@ public class WhitespaceRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return input.isBlank() ? Some.Some(new MapRuleResult(input.end())) : None.None();
+        return input.isBlank() ? Some.Some(new MapRuleResult()) : None.None();
     }
 }

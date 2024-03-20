@@ -4,7 +4,6 @@ import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
-import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
 import java.util.List;
@@ -22,7 +21,7 @@ public class ElementRule implements Rule {
 
     @Override
     public Option<RuleResult> apply(JavaString input) {
-        return Some.Some(new MapRuleResult(input.end(), new JavaMap<JavaString, JavaList<JavaString>>()
+        return Some.Some(new MapRuleResult(new JavaMap<JavaString, JavaList<JavaString>>()
                 .put(name, new JavaList<>(List.of(input)))));
     }
 }

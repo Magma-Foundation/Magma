@@ -1,6 +1,5 @@
 package com.meti.compile.rule;
 
-import com.meti.collect.Index;
 import com.meti.collect.JavaList;
 import com.meti.collect.JavaMap;
 import com.meti.collect.Tuple;
@@ -11,24 +10,16 @@ import com.meti.collect.stream.Streams;
 import com.meti.java.JavaString;
 
 public record MapRuleResult(
-        Index length, JavaMap<JavaString, JavaList<JavaString>> texts
+        JavaMap<JavaString, JavaList<JavaString>> texts
 ) implements RuleResult {
 
-    public MapRuleResult(Index length) {
-        this(length, new JavaMap<>());
+    public MapRuleResult() {
+        this(new JavaMap<>());
     }
 
 
     public static RuleResult merge(RuleResult first, RuleResult... more) {
-        var length = Streams.from(first).concat(Streams.from(more))
-                .map(RuleResult::length)
-                .collect(Collectors.sum())
-                .orElse(first.length());
-
-        return Streams.from(first).foldRight(new MapRuleResult(length), (mapRuleResult, ruleResult) -> new MapRuleResult(
-                mapRuleResult.length.next(ruleResult.length().value()).orElse(mapRuleResult.length),
-                mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll)
-        )));
+        return Streams.from(more).foldRight(first, (mapRuleResult, ruleResult) -> new MapRuleResult(mapRuleResult.streamTextLists().concat(ruleResult.streamTextLists()).collect(Collectors.toMap(JavaList::addAll))));
     }
 
     @Override
@@ -49,11 +40,6 @@ public record MapRuleResult(
     @Override
     public Stream<Tuple<JavaString, JavaList<JavaString>>> streamTextLists() {
         return texts.stream();
-    }
-
-    @Override
-    public Index length() {
-        return length;
     }
 
     @Override
