@@ -10,7 +10,7 @@ class DisjunctionRuleTest {
     @Test
     void apply() {
         assertTrue(DisjunctionRule.Or(
-                TextRule.Text("test"),
+                Match.Match("test"),
                 ExtractSymbolRule.Symbol("value")
         ).apply(JavaString.from("test")).isPresent());
     }

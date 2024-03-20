@@ -15,12 +15,10 @@ import com.meti.java.JavaString;
 
 import static com.meti.collect.option.Options.$Option;
 import static com.meti.compile.rule.ConjunctionRule.Join;
-import static com.meti.compile.rule.DisjunctionRule.Or;
-import static com.meti.compile.rule.ExtractRule.Extract;
 import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
+import static com.meti.compile.rule.Match.Match;
+import static com.meti.compile.rule.NodeRule.Node;
 import static com.meti.compile.rule.Rules.Optional;
-import static com.meti.compile.rule.TextRule.Text;
-import static com.meti.compile.rule.WhitespaceRule.Padding;
 import static com.meti.compile.rule.WhitespaceRule.Whitespace;
 
 public record ClassLexer(JavaString stripped) implements Lexer {
@@ -28,21 +26,21 @@ public record ClassLexer(JavaString stripped) implements Lexer {
     public static final Rule FLAG_RULE = Rules.SymbolList("flags", Whitespace);
 
     public static final Rule PREFIX = Optional(Join(FLAG_RULE, Whitespace));
-
     public static final Rule EXTENDS = Optional(Join(
-            Text("extends"),
+            Match("extends"),
             Whitespace,
             Symbol("superclass"),
             Whitespace
     ));
+
     public static final Rule RULE = Join(
             PREFIX,
-            Text("class"),
+            Match("class"),
             Whitespace,
             Symbol("name"),
             Whitespace,
             EXTENDS,
-            Extract("content")
+            Node(JavaString.from("content"), BlockLexer.Rule)
     );
 
     private static Option<Node> createToken(RuleResult result) {
@@ -58,9 +56,9 @@ public record ClassLexer(JavaString stripped) implements Lexer {
                     .withString("name", name)
                     .withNode("body", contentOutput);
 
-            var withSuperClass = result.findText("extends")
+            var withSuperClass = result.findText("superclass")
                     .flatMap(superClassString -> new TypeCompiler(superClassString).compile())
-                    .map(superClassName -> builder.withString("extends", superClassName))
+                    .map(superClassName -> builder.withString("superclass", superClassName))
                     .orElse(builder);
 
             return withSuperClass.complete();

@@ -5,15 +5,15 @@ import com.meti.collect.option.Option;
 import com.meti.collect.option.Some;
 import com.meti.java.JavaString;
 
-public class TextRule implements Rule {
+public class Match implements Rule {
     private final JavaString requiredValue;
 
-    private TextRule(JavaString requiredValue) {
+    private Match(JavaString requiredValue) {
         this.requiredValue = requiredValue;
     }
 
-    public static TextRule Text(String requiredValue) {
-        return new TextRule(JavaString.from(requiredValue));
+    public static Match Match(String requiredValue) {
+        return new Match(JavaString.from(requiredValue));
     }
 
     @Override

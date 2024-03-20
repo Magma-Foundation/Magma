@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.meti.compile.rule.TextRule.Text;
+import static com.meti.compile.rule.Match.Match;
 import static com.meti.java.JavaString.from;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +33,7 @@ class ListRuleTest {
 
     @Test
     void applyOnceAndFindFirstInstanceDelimiter() {
-        assertTrue(ListRule.findFirstInstance(from("test"), Text(";"))
+        assertTrue(ListRule.findFirstInstance(from("test"), Match(";"))
                 .isEmpty());
     }
 
@@ -56,7 +56,7 @@ class ListRuleTest {
     void findFirstInstance() throws IntentionalException {
         var unwrap = ListRule.findFirstInstance(
                 from("test"),
-                Text("es")
+                Match("es")
         ).$();
 
         assertEquals(new Range(1, 3, 4), unwrap);

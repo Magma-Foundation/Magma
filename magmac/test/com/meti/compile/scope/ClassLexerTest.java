@@ -66,7 +66,7 @@ class ClassLexerTest {
 
     @Test
     void apply() throws IntentionalException {
-        var actual = new ClassLexer(JavaString.from("public static class Test extends Super {foobar}"))
+        var actual = new ClassLexer(JavaString.from("public static class Test extends Super {}"))
                 .lex()
                 .next()
                 .$();
@@ -76,7 +76,7 @@ class ClassLexerTest {
 
         assertEquals(JavaString.from("Test"), actual.apply("name").$().asString().$());
         assertEquals(JavaString.from("Super"), actual.apply("superclass").$().asString().$());
-        assertEquals(JavaString.from("{fooBar}"), actual.apply("body").$().asNode().$()
+        assertEquals(JavaString.from("{}"), actual.apply("body").$().asNode().$()
                 .apply("value")
                 .$()
                 .asString()

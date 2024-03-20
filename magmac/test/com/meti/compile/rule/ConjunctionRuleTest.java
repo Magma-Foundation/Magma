@@ -5,7 +5,7 @@ import com.meti.java.JavaString;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.compile.rule.ExtractSymbolRule.Symbol;
-import static com.meti.compile.rule.TextRule.Text;
+import static com.meti.compile.rule.Match.Match;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConjunctionRuleTest {
@@ -13,7 +13,7 @@ class ConjunctionRuleTest {
     @Test
     void apply() throws IntentionalException {
         var actual = ConjunctionRule.Join(
-                Text("a"),
+                Match("a"),
                 Symbol("value")
         ).apply(JavaString.from("ab")).$();
 
