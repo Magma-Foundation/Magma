@@ -30,7 +30,11 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Symbol("superclass"));
 
     public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
-    public static final Rule RULE = Join(Extract("content"));
+    public static final Rule RULE = Join(
+            Symbol("name"),
+            Whitespace,
+            Extract("content")
+    );
 
     /* public static final Rule RULE = Join(
             PREFIX,
