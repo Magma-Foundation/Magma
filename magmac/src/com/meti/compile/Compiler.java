@@ -16,6 +16,7 @@ import com.meti.compile.attempt.CatchLexer;
 import com.meti.compile.attempt.TryLexer;
 import com.meti.compile.external.ImportLexer;
 import com.meti.compile.external.PackageLexer;
+import com.meti.compile.java.IntegerLexer;
 import com.meti.compile.node.*;
 import com.meti.compile.procedure.InvocationLexer;
 import com.meti.compile.procedure.MethodLexer;
@@ -37,26 +38,27 @@ import static com.meti.collect.result.Results.$Result;
 
 public record Compiler(String input) {
     public static Result<JavaList<Node>, CompileException> lexExpression(JavaString line, int indent) {
-        return lexHead(line, indent).stream().map(Compiler::lexTree).into(ExceptionalStream::new).mapInner(JavaList::stream).flatMap(Results::invertStream).collect(Collectors.exceptionally(Collectors.toList()));
+        return lexHead(line, indent)
+                .stream()
+                .map(Compiler::lexTree)
+                .into(ExceptionalStream::new)
+                .mapInner(JavaList::stream)
+                .flatMap(Results::invertStream)
+                .collect(Collectors.exceptionally(Collectors.toList()));
     }
 
     public static JavaList<Node> lexHead(JavaString line, int indent) {
-        return Streams.<Function<String, Lexer>>from(exp -> new TextBlockLexer(JavaString.from(exp)), exp -> new StringLexer(JavaString.from(exp)), exp -> new CatchLexer(JavaString.from(exp), indent), exp -> new ReturnLexer(JavaString.from(exp), indent), exp -> new TryLexer(JavaString.from(exp), indent), PackageLexer::new, exp -> new ClassLexer(JavaString.from(exp)), exp -> new BlockLexer(exp, indent), exp -> new MethodLexer(JavaString.from(exp), indent), exp -> new DefinitionLexer(JavaString.from(exp), indent), exp -> new ImportLexer(JavaString.from(exp)), exp -> new InvocationLexer(JavaString.from(exp)), exp -> new LambdaLexer(JavaString.from(exp)), exp -> new FieldLexer(JavaString.from(exp)), VariableLexer::new, exp -> new InterfaceLexer(JavaString.from(exp))).map(constructor -> constructor.apply(line.strip().inner())).map(lexer -> lexer.lex().next()).flatMap(Streams::fromOption).collect(Collectors.toList());
+        return Streams.<Function<String, Lexer>>from(
+                exp -> new IntegerLexer(JavaString.from(exp)),
+                exp -> new TextBlockLexer(JavaString.from(exp)),
+                exp -> new StringLexer(JavaString.from(exp)),
+                exp -> new CatchLexer(JavaString.from(exp), indent),
+                exp -> new ReturnLexer(JavaString.from(exp), indent), exp -> new TryLexer(JavaString.from(exp), indent), PackageLexer::new, exp -> new ClassLexer(JavaString.from(exp)), exp -> new BlockLexer(exp, indent), exp -> new MethodLexer(JavaString.from(exp), indent), exp -> new DefinitionLexer(JavaString.from(exp), indent), exp -> new ImportLexer(JavaString.from(exp)), exp -> new InvocationLexer(JavaString.from(exp)), exp -> new LambdaLexer(JavaString.from(exp)), exp -> new FieldLexer(JavaString.from(exp)), VariableLexer::new, exp -> new InterfaceLexer(JavaString.from(exp))).map(constructor -> constructor.apply(line.strip().inner())).map(lexer -> lexer.lex().next()).flatMap(Streams::fromOption).collect(Collectors.toList());
     }
 
     public static Result<JavaList<Node>, CompileException> lexTree(Node node) {
         return $Result(() -> {
-            var nodeAttributes = findNodes(node);
-            var nodeListAttributes = lexNodeLists(node).$();
-
-            var javaListJavaList = nodeAttributes.putAll(nodeListAttributes)
-                    .stream().into(PairStream::new)
-                    .map(pair -> pair.mapRight(attributes -> createPairs(pair, attributes)))
-                    .into(PairStream::new)
-                    .preserveRight()
-                    .foldRight(Compiler::getCollect, (javaList, pairJavaList) -> javaList.stream().cross(pairJavaList::stream).map(pair -> pair.left().add(pair.right())).collect(Collectors.toList())).orElse(JavaList.empty());
-
-            return javaListJavaList.stream().map(list -> list.stream().foldRightFromInitial(node, (node1, javaStringAttributePair) -> node1.with(javaStringAttributePair.left().inner(), javaStringAttributePair.right()).orElse(node1))).collect(Collectors.toList());
+            return JavaList.from(node);
         });
     }
 

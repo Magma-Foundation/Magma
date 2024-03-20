@@ -8,7 +8,9 @@ import com.meti.compile.node.Renderer;
 public record MagmaRenderer(Node node) implements Renderer {
     @Override
     public Option<String> render() {
-        return Streams.from(new ObjectRenderer(node),
+        return Streams.from(
+                        new IntegerRenderer(node),
+                        new ObjectRenderer(node),
                         new WithRenderer(node))
                 .map(Renderer::render)
                 .flatMap(Streams::fromOption)

@@ -59,5 +59,9 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
         public Builder withListOfNodes(String name, JavaList<? extends Node> values) {
             return new Builder(this.name, attributes.put(JavaString.from(name), new NodeListAttribute(values)));
         }
+
+        public Builder withInteger(String name, int value) {
+            return new Builder(this.name, attributes.put(JavaString.from(name), new IntegerAttribute(value)));
+        }
     }
 }
