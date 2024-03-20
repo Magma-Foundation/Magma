@@ -10,6 +10,11 @@ public class ConjunctionRule implements Rule {
     private final Rule left;
     private final Rule right;
 
+    @Override
+    public String toString() {
+        return left.toString() + " " + right.toString();
+    }
+
     public ConjunctionRule(Rule left, Rule right) {
         this.left = left;
         this.right = right;

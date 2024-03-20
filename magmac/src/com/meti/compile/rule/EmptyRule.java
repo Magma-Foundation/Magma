@@ -10,6 +10,11 @@ public class EmptyRule implements Rule {
     public static final Rule Empty = new EmptyRule();
 
     @Override
+    public String toString() {
+        return "\"\"";
+    }
+
+    @Override
     public Option<RuleResult> apply(JavaString input) {
         return input.isEmpty() ? Some.Some(new MapRuleResult()) : None.None();
     }

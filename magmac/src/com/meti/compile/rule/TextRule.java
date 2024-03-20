@@ -17,6 +17,11 @@ public class TextRule implements Rule {
     }
 
     @Override
+    public String toString() {
+        return "\"" + requiredValue + "\"";
+    }
+
+    @Override
     public Option<RuleResult> apply(JavaString input) {
         return input.equals(requiredValue) ? Some.Some(new MapRuleResult()) : None.None();
     }

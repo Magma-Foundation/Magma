@@ -26,12 +26,9 @@ import static com.meti.compile.rule.WhitespaceRule.Whitespace;
 public record ClassLexer(JavaString stripped) implements Lexer {
 
     public static final Rule FLAG_RULE = Rules.SymbolList("flags", Whitespace);
-    public static final Rule EXTENDS_RULE = Join(
-            Text("extends"),
-            Whitespace,
-            Symbol("superclass"));
 
-    public static final Rule PREFIX = Or(Join(FLAG_RULE, Whitespace), Padding);
+    public static final Rule PREFIX = Optional(Join(FLAG_RULE, Whitespace));
+
     public static final Rule EXTENDS = Optional(Join(
             Text("extends"),
             Whitespace,
@@ -39,6 +36,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             Whitespace
     ));
     public static final Rule RULE = Join(
+            PREFIX,
             Text("class"),
             Whitespace,
             Symbol("name"),
@@ -46,17 +44,6 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             EXTENDS,
             Extract("content")
     );
-
-    /* public static final Rule RULE = Join(
-            PREFIX,
-            Text("class"),
-            Whitespace,
-            Extract("name"),
-            Whitespace,
-            Optional(EXTENDS_RULE),
-            Whitespace,
-            Extract("content"),
-            Padding);*/
 
     private static Option<Node> createToken(RuleResult result) {
         return $Option(() -> {
@@ -69,7 +56,7 @@ public record ClassLexer(JavaString stripped) implements Lexer {
             var builder = MapNode.Builder(JavaString.from("class"))
                     .withListOfStrings("flags", flags)
                     .withString("name", name)
-                    .withNode("value", contentOutput);
+                    .withNode("body", contentOutput);
 
             var withSuperClass = result.findText("extends")
                     .flatMap(superClassString -> new TypeCompiler(superClassString).compile())

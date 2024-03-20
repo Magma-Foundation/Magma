@@ -74,6 +74,11 @@ public class ListRule implements Rule {
     }
 
     @Override
+    public String toString() {
+        return "[" + value.toString() + "] / " + delimiter.toString();
+    }
+
+    @Override
     public Option<RuleResult> apply(JavaString input) {
         return input.exclude(findInstances(input, delimiter))
                 .map(input::sliceBetween)

@@ -24,6 +24,11 @@ public class ExtractSymbolRule implements Rule {
     }
 
     @Override
+    public String toString() {
+        return "<" + name + ">";
+    }
+
+    @Override
     public Option<RuleResult> apply(JavaString input) {
         return isSymbol(input)
                 ? Some(new MapRuleResult(new JavaMap<JavaString, JavaList<JavaString>>().put(name, new JavaList<>(List.of(input)))))

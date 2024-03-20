@@ -41,8 +41,10 @@ class ClassLexerTest {
     }
 
     @Test
-    void extendsPresent() {
-        assertTrue(EXTENDS.apply(JavaString.from("extends Super ")).isPresent());
+    void extendsPresent() throws IntentionalException {
+        var extendsSuper = EXTENDS.apply(JavaString.from("extends Super ")).$();
+        var actual = extendsSuper.findText("superclass").$();
+        assertEquals(JavaString.from("Super"), actual);
     }
 
     @Test
@@ -51,7 +53,33 @@ class ClassLexerTest {
     }
 
     @Test
-    void rule_super() {
-        assertTrue(RULE.apply(JavaString.from("class Test extends Super {}")).isPresent());
+    void ruleWithFlags() {
+        assertTrue(RULE.apply(JavaString.from("public static class Test {}")).isPresent());
+    }
+
+    @Test
+    void rule_super() throws IntentionalException {
+        var apply = RULE.apply(JavaString.from("class Test extends Super {}")).$();
+        var actual = apply.findText("superclass").$();
+        assertEquals(JavaString.from("Super"), actual);
+    }
+
+    @Test
+    void apply() throws IntentionalException {
+        var actual = new ClassLexer(JavaString.from("public static class Test extends Super {foobar}"))
+                .lex()
+                .next()
+                .$();
+
+        assertEquals(JavaList.from(JavaString.from("public"), JavaString.from("static")),
+                actual.apply("flags").$().asListOfStrings().$());
+
+        assertEquals(JavaString.from("Test"), actual.apply("name").$().asString().$());
+        assertEquals(JavaString.from("Super"), actual.apply("superclass").$().asString().$());
+        assertEquals(JavaString.from("{fooBar}"), actual.apply("body").$().asNode().$()
+                .apply("value")
+                .$()
+                .asString()
+                .$());
     }
 }
