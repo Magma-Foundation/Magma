@@ -8,6 +8,7 @@ import com.meti.compile.node.Node;
 import com.meti.compile.node.Renderer;
 import com.meti.java.JavaString;
 
+import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
 
 public class StatementRenderer implements Renderer {
@@ -20,6 +21,8 @@ public class StatementRenderer implements Renderer {
     @Override
     public Option<String> render() {
         return $Option(() -> {
+            if(!node.is("statement") && !node.is("terminating-statement")) return $$();
+
             var value = node.apply("value").$()
                     .asNode().$()
                     .apply("value").$()
@@ -35,7 +38,7 @@ public class StatementRenderer implements Renderer {
                 suffix = "";
             }
 
-            return "\t".repeat(indent) + value + suffix;
+            return "\n" + "\t".repeat(indent) + value + suffix;
         });
     }
 }
