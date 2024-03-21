@@ -40,9 +40,15 @@ public class TransformingStage {
 
         var newChildren = children.stream().map(child -> {
             if (child.is("implementation") || child.is("try") || child.is("catch")) {
-                return new Statement(child, realIndent);
+                return MapNode.Builder(JavaString.from("statement"))
+                        .withNode("value", child)
+                        .withInteger("indent", realIndent)
+                        .complete();
             } else {
-                return new TerminatingStatement(child, realIndent);
+                return MapNode.Builder(JavaString.from("terminating-statement"))
+                        .withNode("value", child)
+                        .withInteger("indent", realIndent)
+                        .complete();
             }
         }).collect(Collectors.toList());
 

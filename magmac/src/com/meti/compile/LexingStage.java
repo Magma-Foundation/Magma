@@ -55,7 +55,7 @@ public class LexingStage {
                 .flatMap(Attribute::asListOfNodes)
                 .map(this::lexListOfContent)
                 .map(result -> result.mapValue(list -> applyChoicesToNode(withNode, list)))
-                .orElse(Ok(JavaList.empty()));
+                .orElse(Ok(JavaList.from(withNode)));
     }
 
     private Result<JavaList<JavaList<Node>>, CompileException> lexListOfContent(JavaList<? extends Node> children) {
@@ -69,11 +69,15 @@ public class LexingStage {
         return node.apply("value")
                 .flatMap(Attribute::asNode)
                 .map(this::lexContent)
-                .map(result -> result.mapValue(values1 -> values1.stream()
-                        .map(NodeAttribute::new)
-                        .map(value -> node.with("value", value).orElse(node))
-                        .collect(Collectors.toList())))
+                .map(result -> result.mapValue(values1 -> applyValuesToNode(node, values1)))
                 .orElse(Ok(JavaList.from(node)));
+    }
+
+    private static JavaList<Node> applyValuesToNode(Node node, JavaList<Node> values) {
+        return values.stream()
+                .map(NodeAttribute::new)
+                .map(value -> node.with("value", value).orElse(node))
+                .collect(Collectors.toList());
     }
 
     Result<JavaList<Node>, CompileException> lexContent(Node content) {
