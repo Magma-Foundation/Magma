@@ -12,22 +12,13 @@ import com.meti.collect.result.ThrowableOption;
 import com.meti.collect.stream.Collectors;
 import com.meti.collect.stream.PairStream;
 import com.meti.collect.stream.Streams;
-import com.meti.compile.attempt.CatchLexer;
-import com.meti.compile.attempt.TryLexer;
-import com.meti.compile.external.ImportLexer;
-import com.meti.compile.external.PackageLexer;
-import com.meti.compile.java.IntegerLexer;
+import com.meti.compile.java.JavaLexer;
 import com.meti.compile.node.*;
-import com.meti.compile.procedure.InvocationLexer;
-import com.meti.compile.procedure.MethodLexer;
 import com.meti.compile.scope.*;
-import com.meti.compile.string.StringLexer;
-import com.meti.compile.string.TextBlockLexer;
 import com.meti.java.JavaString;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import static com.meti.collect.option.Options.$$;
 import static com.meti.collect.option.Options.$Option;
@@ -38,22 +29,12 @@ import static com.meti.collect.result.Results.$Result;
 
 public record Compiler(String input) {
     public static Result<JavaList<Node>, CompileException> lexExpression(JavaString line, int indent) {
-        return lexHead(line, indent)
-                .stream()
+        return new JavaLexer(line, indent).lex()
                 .map(Compiler::lexTree)
                 .into(ExceptionalStream::new)
                 .mapInner(JavaList::stream)
                 .flatMap(Results::invertStream)
                 .collect(Collectors.exceptionally(Collectors.toList()));
-    }
-
-    public static JavaList<Node> lexHead(JavaString line, int indent) {
-        return Streams.<Function<String, Lexer>>from(
-                exp -> new IntegerLexer(JavaString.from(exp)),
-                exp -> new TextBlockLexer(JavaString.from(exp)),
-                exp -> new StringLexer(JavaString.from(exp)),
-                exp -> new CatchLexer(JavaString.from(exp), indent),
-                exp -> new ReturnLexer(JavaString.from(exp), indent), exp -> new TryLexer(JavaString.from(exp), indent), PackageLexer::new, exp -> new ClassLexer(JavaString.from(exp)), exp -> new BlockLexer(exp, indent), exp -> new MethodLexer(JavaString.from(exp), indent), exp -> new DefinitionLexer(JavaString.from(exp), indent), exp -> new ImportLexer(JavaString.from(exp)), exp -> new InvocationLexer(JavaString.from(exp)), exp -> new LambdaLexer(JavaString.from(exp)), exp -> new FieldLexer(JavaString.from(exp)), VariableLexer::new, exp -> new InterfaceLexer(JavaString.from(exp))).map(constructor -> constructor.apply(line.strip().inner())).map(lexer -> lexer.lex().next()).flatMap(Streams::fromOption).collect(Collectors.toList());
     }
 
     public static Result<JavaList<Node>, CompileException> lexTree(Node node) {

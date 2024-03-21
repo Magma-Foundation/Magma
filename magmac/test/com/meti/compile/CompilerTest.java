@@ -12,4 +12,9 @@ class CompilerTest extends FeatureTest {
     void child() {
         assertCompile("return 0", "return 0");
     }
+
+    @Test
+    void children() {
+        assertCompile("{return 0;}", "{return 0;}");
+    }
 }
