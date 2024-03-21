@@ -12,22 +12,25 @@ import com.meti.compile.node.Content;
 import com.meti.compile.node.Node;
 import com.meti.compile.node.NodeAttribute;
 import com.meti.java.JavaString;
+import org.jetbrains.annotations.NotNull;
 
 import static com.meti.collect.result.Err.Err;
 import static com.meti.collect.result.Ok.Ok;
 import static com.meti.collect.result.Results.$Result;
 
 public class LexingStage {
-    public static Result<JavaList<Node>, CompileException> lexExpression(JavaString line, int indent) {
-        return new JavaLexer(line, indent).lex()
-                .map(LexingStage::lexTree)
-                .into(ExceptionalStream::new)
-                .mapInner(JavaList::stream)
-                .flatMap(Results::invertStream)
-                .collect(Collectors.exceptionally(Collectors.toList()));
+    public Result<JavaList<Node>, CompileException> lexTree(Node node) {
+        return node.apply("value")
+                .flatMap(Attribute::asNode)
+                .map(this::lexContent)
+                .map(result -> result.mapValue(values1 -> values1.stream()
+                        .map(NodeAttribute::new)
+                        .map(value -> node.with("value", value).orElse(node))
+                        .collect(Collectors.toList())))
+                .orElse(Ok(JavaList.from(node)));
     }
 
-    static Result<JavaList<Node>, CompileException> lexContent(Node content) {
+    Result<JavaList<Node>, CompileException> lexContent(Node content) {
         if (content.is(Content.Id)) {
             return $Result(() -> {
                 var value = content.apply("value").flatMap(Attribute::asString).into(ThrowableOption::new).orElseThrow(() -> new CompileException("No value present on content.")).$();
@@ -39,18 +42,17 @@ public class LexingStage {
         }
     }
 
-    static Result<JavaList<JavaList<Node>>, CompileException> lexContentList(JavaList<? extends Node> content) {
-        return content.stream().map(LexingStage::lexContent).into(ExceptionalStream::new).foldRightFromInitialExceptionally(new JavaList<>(), (javaListJavaList, nodeJavaList) -> javaListJavaList.stream().cross(nodeJavaList::stream).map(pair -> pair.left().add(pair.right())).collect(Collectors.toList()));
+    public Result<JavaList<Node>, CompileException> lexExpression(JavaString line1, int indent1) {
+        return createRootLexer(line1, indent1).lex()
+                .map(node -> new LexingStage().lexTree(node))
+                .into(ExceptionalStream::new)
+                .mapInner(JavaList::stream)
+                .flatMap(Results::invertStream)
+                .collect(Collectors.exceptionally(Collectors.toList()));
     }
 
-    public static Result<JavaList<Node>, CompileException> lexTree(Node node) {
-        return node.apply("value")
-                .flatMap(Attribute::asNode)
-                .map(LexingStage::lexContent)
-                .map(result -> result.mapValue(values1 -> values1.stream()
-                        .map(NodeAttribute::new)
-                        .map(value -> node.with("value", value).orElse(node))
-                        .collect(Collectors.toList())))
-                .orElse(Ok(JavaList.from(node)));
+    @NotNull
+    JavaLexer createRootLexer(JavaString line1, int indent1) {
+        return new JavaLexer(line1, indent1);
     }
 }

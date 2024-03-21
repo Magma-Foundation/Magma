@@ -10,8 +10,8 @@ import static com.meti.collect.result.Results.$Result;
 
 public record Compiler(String input) {
 
-    private static Result<Node, CompileException> compileLine(JavaString line) {
-        return $Result(() -> LexingStage.lexExpression(line, 0)
+    private static Result<Node, CompileException> compileLine(LexingStage stage, JavaString line) {
+        return $Result(() -> stage.lexExpression(line, 0)
                 .$()
                 .first()
                 .into(ThrowableOption::new)
@@ -24,7 +24,7 @@ public record Compiler(String input) {
             var tree = new Splitter(this.input())
                     .split()
                     .map(JavaString::from)
-                    .map(Compiler::compileLine)
+                    .map(line -> compileLine(new LexingStage(), line))
                     .collect(Collectors.exceptionally(Collectors.toList()))
                     .$();
 
