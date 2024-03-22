@@ -6,7 +6,17 @@ import org.junit.jupiter.api.Test;
 
 public class DeclarationTest extends FeatureTest {
     @Test
-    void complex() throws CompileException {
+    void symbol0() {
+        assertCompile("input", "input");
+    }
+
+    @Test
+    void symbol1() {
+        assertCompile("new Compiler(input)", "Compiler(input)");
+    }
+
+    @Test
+    void complex() {
         assertCompile("var actual = new Compiler(input)", "let actual = Compiler(input)");
     }
 
