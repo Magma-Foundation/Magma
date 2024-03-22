@@ -9,7 +9,6 @@ import com.meti.collect.stream.Collectors;
 import com.meti.compile.java.JavaLexer;
 import com.meti.compile.node.*;
 import com.meti.java.JavaString;
-import org.jetbrains.annotations.NotNull;
 
 import static com.meti.collect.result.Err.Err;
 import static com.meti.collect.result.Ok.Ok;
@@ -36,6 +35,13 @@ public class LexingStage {
     private static JavaList<JavaList<Node>> crossChildrenCombinations(JavaList<JavaList<Node>> previousChildrenCombinations, JavaList<Node> childOptions) {
         return previousChildrenCombinations.stream().cross(childOptions::stream)
                 .map(pair -> pair.left().add(pair.right()))
+                .collect(Collectors.toList());
+    }
+
+    private static JavaList<Node> applyValuesToNode(Node node, JavaList<Node> values) {
+        return values.stream()
+                .map(NodeAttribute::new)
+                .map(value -> node.with("value", value).orElse(node))
                 .collect(Collectors.toList());
     }
 
@@ -73,13 +79,6 @@ public class LexingStage {
                 .orElse(Ok(JavaList.from(node)));
     }
 
-    private static JavaList<Node> applyValuesToNode(Node node, JavaList<Node> values) {
-        return values.stream()
-                .map(NodeAttribute::new)
-                .map(value -> node.with("value", value).orElse(node))
-                .collect(Collectors.toList());
-    }
-
     Result<JavaList<Node>, CompileException> lexContent(Node content) {
         if (content.is(Content.Id)) {
             return $Result(() -> {
@@ -101,7 +100,6 @@ public class LexingStage {
                 .collect(Collectors.exceptionally(Collectors.toList()));
     }
 
-    @NotNull
     JavaLexer createRootLexer(JavaString line1, int indent1) {
         return new JavaLexer(line1, indent1);
     }
