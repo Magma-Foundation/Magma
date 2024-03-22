@@ -1,6 +1,2 @@
-/.gradle
 /.idea
-/.run
-/build
-/Magma.iml
-/target
+/out
