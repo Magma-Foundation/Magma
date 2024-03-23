@@ -28,6 +28,8 @@ public class Compiler {
             return "import " + childString + " from " + parentName + ";";
         } else if (input.isEmpty()) {
             return "";
+        } else if(input.startsWith("package ")) {
+            return "";
         } else {
             throw new CompileException("Invalid input: " + input);
         }

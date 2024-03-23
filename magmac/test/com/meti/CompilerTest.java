@@ -16,6 +16,11 @@ class CompilerTest {
     }
 
     @Test
+    void discardPackage() {
+        assertCompile("package test;", "");
+    }
+
+    @Test
     void importStatic() {
         assertCompile("import static parent.Child", "import { Child } from parent;");
     }
