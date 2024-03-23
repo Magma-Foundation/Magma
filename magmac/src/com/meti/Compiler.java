@@ -14,7 +14,7 @@ public class Compiler {
     }
 
     private static String compileLine(String input) throws CompileException {
-        var classResult = compileClass(input);
+        var classResult = compileClass(input, 0);
         if (classResult.isPresent()) return classResult.get();
 
         var importResult = compileImport(input);
@@ -31,10 +31,24 @@ public class Compiler {
         throw new CompileException("Invalid input: " + input);
     }
 
-    private static Optional<String> compileClass(String input) {
-        if (input.startsWith("class ")) {
+    private static Optional<String> compileClass(String input, int indent) {
+        var bodyEnd = input.lastIndexOf('}');
+        if (input.startsWith("class ") && bodyEnd == input.length() - 1) {
             var name = input.substring("class ".length(), input.indexOf('{')).strip();
-            return Optional.of("class def " + name + "() => {}");
+            var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
+
+            Optional<String> compiledBody;
+            if (body.isEmpty()) {
+                compiledBody = Optional.of("");
+            } else {
+                compiledBody = compileClass(body, indent + 1);
+                if (compiledBody.isEmpty()) {
+                    return Optional.empty();
+                }
+            }
+
+            var bodyString = body.isEmpty() ? "{}" : "{\n" + compiledBody.get() + "\n" + "\t".repeat(indent) + "}";
+            return Optional.of("\t".repeat(indent) + "class def " + name + "() => " + bodyString);
         } else {
             return Optional.empty();
         }

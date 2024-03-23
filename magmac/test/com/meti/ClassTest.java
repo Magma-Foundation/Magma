@@ -13,4 +13,11 @@ public class ClassTest extends FeatureTest {
     void name() {
         assertCompile("class Foo {}", "class def Foo() => {}");
     }
+
+    @Test
+    void body() {
+        assertCompile("class Foo {class Bar {}}", "class def Foo() => {\n" +
+                                                  "\tclass def Bar() => {}\n" +
+                                                  "}");
+    }
 }
