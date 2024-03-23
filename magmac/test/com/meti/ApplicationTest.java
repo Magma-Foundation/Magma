@@ -17,7 +17,10 @@ public class ApplicationTest {
     private static void run() {
         try {
             if (Files.exists(SOURCE)) {
-                Files.createFile(TARGET);
+                var fileName = SOURCE.getFileName().toString();
+                var separator = fileName.indexOf('.');
+                var nameWithoutExtension = fileName.substring(0, separator);
+                Files.createFile(SOURCE.resolveSibling(nameWithoutExtension + ".mgs"));
             }
         } catch (IOException e) {
             fail(e);
