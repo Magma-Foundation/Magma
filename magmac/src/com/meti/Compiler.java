@@ -32,8 +32,9 @@ public class Compiler {
     }
 
     private static Optional<String> compileClass(String input) {
-        if (input.startsWith("class Test {}")) {
-            return Optional.of("class def Test() => {}");
+        if (input.startsWith("class ")) {
+            var name = input.substring("class ".length(), input.indexOf('{')).strip();
+            return Optional.of("class def " + name + "() => {}");
         } else {
             return Optional.empty();
         }

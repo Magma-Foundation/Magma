@@ -8,4 +8,9 @@ public class ClassTest extends FeatureTest {
         assertCompile("class Test {}",
                 "class def Test() => {}");
     }
+
+    @Test
+    void name() {
+        assertCompile("class Foo {}", "class def Foo() => {}");
+    }
 }
