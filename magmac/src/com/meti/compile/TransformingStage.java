@@ -71,7 +71,12 @@ public class TransformingStage {
                 outputFlags = JavaList.from(JavaString.from("export"));
             }
 
-            var children = new JavaList<Node>(new ArrayList<>(node.apply("body").flatMap(Attribute::asNode).flatMap(value -> value.apply("children")).flatMap(Attribute::asListOfNodes).$().unwrap()));
+            var children = new JavaList<Node>(new ArrayList<>(node.apply("body")
+                    .flatMap(Attribute::asNode)
+                    .flatMap(value -> value.apply("children"))
+                    .flatMap(Attribute::asListOfNodes)
+                    .$()
+                    .unwrap()));
 
             var newChildren = node.apply("extends").flatMap(Attribute::asString).map(extendsValue -> children.add(MapNode.Builder(JavaString.from("with")).withString("type", extendsValue).complete())).orElse(children);
 
