@@ -21,7 +21,11 @@ public class Compiler {
             var parentName = input.substring(parentStart, separator);
 
             var childName = input.substring(separator + 1);
-            return "import { " + childName + " } from " + parentName + ";";
+            var childString = isStatic && childName.equals("*")
+                    ? "*"
+                    : "{ " + childName + " }";
+
+            return "import " + childString + " from " + parentName + ";";
         } else if (input.isEmpty()) {
             return "";
         } else {

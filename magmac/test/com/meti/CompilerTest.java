@@ -21,6 +21,11 @@ class CompilerTest {
     }
 
     @Test
+    void importStaticAll() {
+        assertCompile("import static parent.*", "import * from parent;");
+    }
+
+    @Test
     void importName() {
         assertCompile("import org.junit.jupiter.api.Test;", "import { Test } from org.junit.jupiter.api;");
     }
