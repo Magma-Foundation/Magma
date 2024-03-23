@@ -48,10 +48,7 @@ public class Content implements Node {
 
     @Override
     public String toString() {
-        return "Content{" +
-               "value='" + value + '\'' +
-               ", indent=" + indent +
-               '}';
+        return "new Content(\"" + value + "\", " + indent + ")";
     }
 
     @Override

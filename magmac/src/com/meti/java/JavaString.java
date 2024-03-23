@@ -31,7 +31,7 @@ public final class JavaString {
 
     @Override
     public String toString() {
-        return inner;
+        return "JavaString.from(\"" + inner + "\")";
     }
 
     public Option<Index> firstIndexOfChar(char c) {

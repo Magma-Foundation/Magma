@@ -15,6 +15,11 @@ public record MapNode(JavaString name, JavaMap<JavaString, Attribute> attributes
     }
 
     @Override
+    public String toString() {
+        return "new MapNode(" + name + ", " + attributes + ")";
+    }
+
+    @Override
     public boolean is(String name) {
         return this.name.equalsToSlice(name);
     }

@@ -9,4 +9,9 @@ public record StringAttribute(JavaString value) implements Attribute {
     public Option<JavaString> asString() {
         return Some.Some(value);
     }
+
+    @Override
+    public String toString() {
+        return "new StringAttribute(" + value.toString() + ")";
+    }
 }
