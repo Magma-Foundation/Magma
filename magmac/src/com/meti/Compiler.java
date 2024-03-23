@@ -14,8 +14,12 @@ public class Compiler {
 
     private static String compileLine(String input) throws CompileException {
         if (input.startsWith("import ")) {
+            var isStatic = input.startsWith("import static ");
             var separator = input.lastIndexOf('.');
-            var parentName = input.substring("import ".length(), separator);
+
+            var parentStart = isStatic ? "import static ".length() : "import ".length();
+            var parentName = input.substring(parentStart, separator);
+
             var childName = input.substring(separator + 1);
             return "import { " + childName + " } from " + parentName + ";";
         } else if (input.isEmpty()) {
