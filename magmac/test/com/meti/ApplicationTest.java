@@ -18,14 +18,7 @@ public class ApplicationTest {
         try {
             if (Files.exists(SOURCE)) {
                 var input = Files.readString(SOURCE);
-                String output;
-                if (input.equals("import org.junit.jupiter.api.AfterEach;")) {
-                    output = "import { AfterEach } from org.junit.jupiter.api;";
-                } else if (input.isEmpty()) {
-                    output = "";
-                } else {
-                    throw new CompileException("Invalid input: " + input);
-                }
+                var output = Compiler.compile(input);
 
                 var fileName = SOURCE.getFileName().toString();
                 var separator = fileName.indexOf('.');
@@ -39,8 +32,7 @@ public class ApplicationTest {
 
     @Test
     void compileImport() throws IOException {
-        Files.writeString(SOURCE, "import org.junit.jupiter.api.AfterEach;");
-        run();
+        runWithSource("import org.junit.jupiter.api.AfterEach;");
         var actual = Files.readString(TARGET);
         assertEquals("import { AfterEach } from org.junit.jupiter.api;", actual);
     }
@@ -59,8 +51,12 @@ public class ApplicationTest {
 
     @Test
     void generatesTarget() throws IOException {
-        Files.createFile(SOURCE);
-        run();
+        runWithSource("");
         assertTrue(Files.exists(TARGET));
+    }
+
+    private static void runWithSource(String csq) throws IOException {
+        Files.writeString(SOURCE, csq);
+        run();
     }
 }
