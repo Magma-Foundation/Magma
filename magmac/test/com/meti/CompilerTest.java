@@ -31,4 +31,11 @@ class CompilerTest {
                 "import { Second } from first;\n" +
                 "import { Fourth } from third;");
     }
+
+    @Test
+    void multipleWithWhitespace() {
+        assertCompile("import first.Second;\n\nimport third.Fourth",
+                "import { Second } from first;\n" +
+                "import { Fourth } from third;");
+    }
 }

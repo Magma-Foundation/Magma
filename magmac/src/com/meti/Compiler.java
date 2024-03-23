@@ -6,7 +6,7 @@ public class Compiler {
     static String compile(String input) throws CompileException {
         var output = new ArrayList<String>();
         for (var line : input.split(";")) {
-            output.add(compileLine(line));
+            output.add(compileLine(line.strip()));
         }
 
         return String.join("\n", output);
