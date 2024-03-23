@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -13,6 +14,21 @@ public class Compiler {
     }
 
     private static String compileLine(String input) throws CompileException {
+        var childString = compileImport(input);
+        if (childString.isPresent()) return childString.get();
+
+        if (input.isEmpty()) {
+            return "";
+        }
+
+        if (input.startsWith("package ")) {
+            return "";
+        }
+
+        throw new CompileException("Invalid input: " + input);
+    }
+
+    private static Optional<String> compileImport(String input) {
         if (input.startsWith("import ")) {
             var isStatic = input.startsWith("import static ");
             var separator = input.lastIndexOf('.');
@@ -25,13 +41,8 @@ public class Compiler {
                     ? "*"
                     : "{ " + childName + " }";
 
-            return "import " + childString + " from " + parentName + ";";
-        } else if (input.isEmpty()) {
-            return "";
-        } else if(input.startsWith("package ")) {
-            return "";
-        } else {
-            throw new CompileException("Invalid input: " + input);
+            return Optional.of("import " + childString + " from " + parentName + ";");
         }
+        return Optional.empty();
     }
 }
