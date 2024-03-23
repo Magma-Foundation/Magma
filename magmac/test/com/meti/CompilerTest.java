@@ -24,4 +24,11 @@ class CompilerTest {
     void importParent() {
         assertCompile("import parent.Child;", "import { Child } from parent;");
     }
+
+    @Test
+    void multipleImports() {
+        assertCompile("import first.Second;import third.Fourth",
+                "import { Second } from first;\n" +
+                "import { Fourth } from third;");
+    }
 }
