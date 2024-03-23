@@ -2,42 +2,10 @@ package com.meti;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-class CompilerTest {
-    private static void assertCompile(String input, String expected) {
-        try {
-            var actual = Compiler.compile(input);
-            assertEquals(expected, actual);
-        } catch (CompileException e) {
-            fail(e);
-        }
-    }
-
+class CompilerTest extends FeatureTest {
     @Test
     void discardPackage() {
         assertCompile("package test;", "");
-    }
-
-    @Test
-    void importStatic() {
-        assertCompile("import static parent.Child", "import { Child } from parent;");
-    }
-
-    @Test
-    void importStaticAll() {
-        assertCompile("import static parent.*", "import * from parent;");
-    }
-
-    @Test
-    void importName() {
-        assertCompile("import org.junit.jupiter.api.Test;", "import { Test } from org.junit.jupiter.api;");
-    }
-
-    @Test
-    void importParent() {
-        assertCompile("import parent.Child;", "import { Child } from parent;");
     }
 
     @Test
