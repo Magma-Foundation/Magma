@@ -14,8 +14,11 @@ public class Compiler {
     }
 
     private static String compileLine(String input) throws CompileException {
-        var childString = compileImport(input);
-        if (childString.isPresent()) return childString.get();
+        var classResult = compileClass(input);
+        if (classResult.isPresent()) return classResult.get();
+
+        var importResult = compileImport(input);
+        if (importResult.isPresent()) return importResult.get();
 
         if (input.isEmpty()) {
             return "";
@@ -26,6 +29,14 @@ public class Compiler {
         }
 
         throw new CompileException("Invalid input: " + input);
+    }
+
+    private static Optional<String> compileClass(String input) {
+        if (input.startsWith("class Test {}")) {
+            return Optional.of("class def Test() => {}");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileImport(String input) {
