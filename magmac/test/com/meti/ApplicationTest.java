@@ -17,14 +17,32 @@ public class ApplicationTest {
     private static void run() {
         try {
             if (Files.exists(SOURCE)) {
+                var input = Files.readString(SOURCE);
+                String output;
+                if (input.equals("import org.junit.jupiter.api.AfterEach;")) {
+                    output = "import { AfterEach } from org.junit.jupiter.api;";
+                } else if (input.isEmpty()) {
+                    output = "";
+                } else {
+                    throw new CompileException("Invalid input: " + input);
+                }
+
                 var fileName = SOURCE.getFileName().toString();
                 var separator = fileName.indexOf('.');
                 var nameWithoutExtension = fileName.substring(0, separator);
-                Files.createFile(SOURCE.resolveSibling(nameWithoutExtension + ".mgs"));
+                Files.writeString(SOURCE.resolveSibling(nameWithoutExtension + ".mgs"), output);
             }
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             fail(e);
         }
+    }
+
+    @Test
+    void compileImport() throws IOException {
+        Files.writeString(SOURCE, "import org.junit.jupiter.api.AfterEach;");
+        run();
+        var actual = Files.readString(TARGET);
+        assertEquals("import { AfterEach } from org.junit.jupiter.api;", actual);
     }
 
     @AfterEach
