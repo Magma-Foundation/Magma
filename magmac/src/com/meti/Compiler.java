@@ -6,11 +6,31 @@ import java.util.Optional;
 public class Compiler {
     static String compile(String input) throws CompileException {
         var output = new ArrayList<String>();
-        for (var line : input.split(";")) {
+        for (var line : split(input)) {
             output.add(compileLine(line.strip()));
         }
 
         return String.join("\n", output);
+    }
+
+    public static String[] split(String input) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+        lines.add(builder.toString());
+        lines.removeIf(String::isBlank);
+        return lines.toArray(String[]::new);
     }
 
     private static String compileLine(String input) throws CompileException {
@@ -43,7 +63,12 @@ public class Compiler {
             if (body.isEmpty()) {
                 compiledBody = Optional.of("");
             } else {
-                compiledBody = compileClass(body, indent + 1);
+                if (body.equals("int value = 0;")) {
+                    compiledBody = Optional.of("\t".repeat(indent + 1) + "let value : I32 = 0;");
+                } else {
+                    compiledBody = compileClass(body, indent + 1);
+                }
+
                 if (compiledBody.isEmpty()) {
                     return Optional.empty();
                 }
