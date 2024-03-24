@@ -1,10 +1,14 @@
-package com.meti;
+package com.meti.lex;
+
+import com.meti.Content;
+import com.meti.InvocationNode;
+import com.meti.Node;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 public record InvocationLexer(String input) {
-    Optional<InvocationNode> lexInvocation() {
+    public Optional<InvocationNode> lexInvocation() {
         var argStart = input().indexOf('(');
         if (argStart == -1) return Optional.empty();
 

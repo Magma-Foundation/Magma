@@ -1,9 +1,12 @@
-package com.meti;
+package com.meti.lex;
+
+import com.meti.Content;
+import com.meti.FieldNode;
 
 import java.util.Optional;
 
 public record FieldLexer(String value) {
-    Optional<FieldNode> lexField() {
+    public Optional<FieldNode> lexField() {
         var separator = value().indexOf('.');
         if (separator == -1) return Optional.empty();
 

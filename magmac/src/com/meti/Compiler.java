@@ -1,5 +1,10 @@
 package com.meti;
 
+import com.meti.lex.ClassLexer;
+import com.meti.lex.DefinitionLexer;
+import com.meti.lex.FieldLexer;
+import com.meti.lex.InvocationLexer;
+
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;

@@ -1,11 +1,14 @@
-package com.meti;
+package com.meti.lex;
+
+import com.meti.ClassNode;
+import com.meti.Content;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
 public record ClassLexer(String input, int indent1) {
-    Optional<ClassNode> lex() {
+    public Optional<ClassNode> lex() {
         var bodyEnd = input().lastIndexOf('}');
         var classIndex = input().indexOf("class ");
 

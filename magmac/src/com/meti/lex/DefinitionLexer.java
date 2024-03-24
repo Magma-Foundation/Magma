@@ -1,11 +1,15 @@
-package com.meti;
+package com.meti.lex;
+
+import com.meti.Content;
+import com.meti.DefinitionNode;
+import com.meti.TypeCompiler;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public record DefinitionLexer(String body) {
 
-    Optional<DefinitionNode> lex() {
+    public Optional<DefinitionNode> lex() {
         var valueSeparator = body().indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 

@@ -1,7 +1,7 @@
 package com.meti;
 
 public record TypeCompiler(String type) {
-    String compile() {
+    public String compile() {
         String outputType;
         if(type.equals("String")) {
             return "String";
