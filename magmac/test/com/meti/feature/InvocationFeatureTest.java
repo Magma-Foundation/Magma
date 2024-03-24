@@ -19,6 +19,11 @@ public class InvocationFeatureTest extends FeatureTest {
         assertInvocation("test(1)", "test(1)");
     }
 
+    @Test
+    void twoParameters() {
+        assertInvocation("test(1, 2)", "test(1, 2)");
+    }
+
     private static void assertInvocation(String input, String output) {
         assertCompile("class Test {String value=" + input + "}",
                 "class def Test() => {\n" +

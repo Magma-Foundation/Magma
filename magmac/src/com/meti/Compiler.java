@@ -1,7 +1,9 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -152,8 +154,14 @@ public class Compiler {
         if (argEnd == -1) return Optional.empty();
 
         var name = value.substring(0, argStart).strip();
-        var argument = value.substring(argStart + 1, argEnd).strip();
-        return Optional.of(name + "(" + argument + ")");
+        var argument = Arrays.stream(value.substring(argStart + 1, argEnd)
+                        .strip()
+                        .split(","))
+                .map(String::strip)
+                .filter(argString -> !argString.isEmpty())
+                .collect(Collectors.toList());
+
+        return Optional.of(name + "(" + String.join(", ", argument) + ")");
     }
 
     private static Optional<String> compileString(String value) {
