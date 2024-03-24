@@ -168,7 +168,7 @@ public class Compiler {
 
     private static Optional<String> compileInvocation(String input) {
         return new InvocationLexer(input)
-                .lexInvocation()
+                .lex()
                 .flatMap(node -> node.mapCaller(Compiler::compileContentToNode))
                 .flatMap(node -> node.mapArguments(Compiler::compileContentListToNodes))
                 .flatMap(InvocationNode::render);
