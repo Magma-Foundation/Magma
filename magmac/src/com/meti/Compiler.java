@@ -55,33 +55,42 @@ public class Compiler {
         var bodyEnd = input.lastIndexOf('}');
         var classIndex = input.indexOf("class ");
 
-        if (classIndex != -1 && bodyEnd == input.length() - 1) {
-            var name = input.substring(classIndex + "class ".length(), input.indexOf('{')).strip();
-            var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
+        if (classIndex == -1 || bodyEnd != input.length() - 1) return Optional.empty();
+        var name = input.substring(classIndex + "class ".length(), input.indexOf('{')).strip();
+        var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
 
-            Optional<String> compiledBody;
-            if (body.isEmpty()) {
-                compiledBody = Optional.of("");
-            } else {
-                if (body.equals("int value = 0;")) {
-                    compiledBody = Optional.of("\t".repeat(indent + 1) + "let value : I32 = 0;");
-                } else {
-                    compiledBody = compileClass(body, indent + 1);
-                }
+        var compiledBody = compileClassBody(indent, body);
+        if (compiledBody.isEmpty()) return Optional.empty();
 
-                if (compiledBody.isEmpty()) {
-                    return Optional.empty();
-                }
-            }
+        var isPublic = input.startsWith("public ");
+        var flagString = isPublic ? "export " : "";
 
-            var isPublic = input.startsWith("public ");
-            var flagString = isPublic ? "export " : "";
+        var bodyString = body.isEmpty() ? "{}" : "{\n" + compiledBody.get() + "\n" + "\t".repeat(indent) + "}";
+        return Optional.of("\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
+    }
 
-            var bodyString = body.isEmpty() ? "{}" : "{\n" + compiledBody.get() + "\n" + "\t".repeat(indent) + "}";
-            return Optional.of("\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
+    private static Optional<String> compileClassBody(int indent, String body) {
+        if (body.isEmpty()) {
+            return Optional.of("");
         } else {
-            return Optional.empty();
+            var definitionString = compileDefinition(indent, body);
+            if (definitionString.isPresent()) return definitionString;
+
+            return compileClass(body, indent + 1);
         }
+    }
+
+    private static Optional<String> compileDefinition(int indent, String body) {
+        var valueSeparator = body.indexOf('=');
+        if (valueSeparator == -1) return Optional.empty();
+
+        var before = body.substring(0, valueSeparator).strip();
+
+        var nameSeparator = before.lastIndexOf(' ');
+        if (nameSeparator == -1) return Optional.empty();
+
+        var name = before.substring(nameSeparator + 1).strip();
+        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : I32 = 0;");
     }
 
     private static Optional<String> compileImport(String input) {
