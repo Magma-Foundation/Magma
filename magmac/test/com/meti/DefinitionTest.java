@@ -34,4 +34,9 @@ public class DefinitionTest extends FeatureTest {
     void finalKeyword() {
         assertDefinition("final int value = 100;", "const value : I32 = 100;");
     }
+
+    @Test
+    void publicKeyword() {
+        assertDefinition("public final int value = 100;", "pub const value : I32 = 100;");
+    }
 }
