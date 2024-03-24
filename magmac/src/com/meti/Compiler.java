@@ -33,8 +33,10 @@ public class Compiler {
 
     private static Optional<String> compileClass(String input, int indent) {
         var bodyEnd = input.lastIndexOf('}');
-        if (input.startsWith("class ") && bodyEnd == input.length() - 1) {
-            var name = input.substring("class ".length(), input.indexOf('{')).strip();
+        var classIndex = input.indexOf("class ");
+
+        if (classIndex != -1 && bodyEnd == input.length() - 1) {
+            var name = input.substring(classIndex + "class ".length(), input.indexOf('{')).strip();
             var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
 
             Optional<String> compiledBody;
@@ -47,8 +49,11 @@ public class Compiler {
                 }
             }
 
+            var isPublic = input.startsWith("public ");
+            var flagString = isPublic ? "export " : "";
+
             var bodyString = body.isEmpty() ? "{}" : "{\n" + compiledBody.get() + "\n" + "\t".repeat(indent) + "}";
-            return Optional.of("\t".repeat(indent) + "class def " + name + "() => " + bodyString);
+            return Optional.of("\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
         } else {
             return Optional.empty();
         }

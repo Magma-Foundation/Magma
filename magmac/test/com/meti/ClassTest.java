@@ -21,4 +21,9 @@ public class ClassTest extends FeatureTest {
                 \tclass def Bar() => {}
                 }""");
     }
+
+    @Test
+    void modifierPublic() {
+        assertCompile("public class Foo {}", "export class def Foo() => {}");
+    }
 }
