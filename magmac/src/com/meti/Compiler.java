@@ -139,8 +139,17 @@ public class Compiler {
     }
 
     private static Optional<String> compileValue(Node value) {
-        return compileInteger(value.findValue())
+        return compileInvocation(value.findValue())
+                .or(() -> compileInteger(value.findValue()))
                 .or(() -> compileString(value.findValue()));
+    }
+
+    private static Optional<String> compileInvocation(String value) {
+        if(value.equals("empty()")) {
+            return Optional.of("empty()");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileString(String value) {
