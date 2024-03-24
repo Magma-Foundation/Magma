@@ -145,12 +145,15 @@ public class Compiler {
     }
 
     private static Optional<String> compileInvocation(String value) {
-        if(value.endsWith("()")) {
-            var name = value.substring(0, value.indexOf('(')).strip();
-            return Optional.of(name + "()");
-        } else {
-            return Optional.empty();
-        }
+        var argStart = value.indexOf('(');
+        if (argStart == -1) return Optional.empty();
+
+        var argEnd = value.indexOf(')');
+        if (argEnd == -1) return Optional.empty();
+
+        var name = value.substring(0, argStart).strip();
+        var argument = value.substring(argStart + 1, argEnd).strip();
+        return Optional.of(name + "(" + argument + ")");
     }
 
     private static Optional<String> compileString(String value) {
