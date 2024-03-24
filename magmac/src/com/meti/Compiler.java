@@ -155,15 +155,10 @@ public class Compiler {
     }
 
     private static Optional<String> compileField(String value) {
-        var nodeOptional = new FieldLexer(value).lexField();
-        if (nodeOptional.isEmpty()) return Optional.empty();
-
-        var parentOption = compileValue(nodeOptional.get().parentOutput());
-        if (parentOption.isEmpty()) return Optional.empty();
-        var parentOutput = new Content(parentOption.get(), 0);
-        var fieldNode = nodeOptional.get().withParent(parentOutput);
-
-        return fieldNode.render();
+        return new FieldLexer(value)
+                .lex()
+                .flatMap(node -> node.mapParent(Compiler::compileContentToNode))
+                .flatMap(FieldNode::render);
     }
 
     private static Optional<String> compileInvocation(String input) {
