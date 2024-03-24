@@ -141,9 +141,21 @@ public class Compiler {
     }
 
     private static Optional<String> compileValue(Node value) {
-        return compileInvocation(value.findValue())
-                .or(() -> compileInteger(value.findValue()))
-                .or(() -> compileString(value.findValue()));
+        var value1 = value.findValue();
+        return compileField(value1)
+                .or(() -> compileInvocation(value1))
+                .or(() -> compileInteger(value1))
+                .or(() -> compileString(value1));
+    }
+
+    private static Optional<String> compileField(String value) {
+        var separator = value.indexOf('.');
+        if (separator == -1) return Optional.empty();
+
+        var parent = value.substring(0, separator).strip();
+        var member = value.substring(separator + 1).strip();
+
+        return Optional.of(parent + "." + member);
     }
 
     private static Optional<String> compileInvocation(String value) {
