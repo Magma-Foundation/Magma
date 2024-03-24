@@ -82,20 +82,20 @@ public class Compiler {
     private static Optional<String> compileStatement(int indent, String body) {
         if (body.isEmpty()) return Optional.of("");
 
-        var definitionString = new DefinitionCompiler(body).compileDefinition();
-        if (definitionString.isPresent()) return definitionString;
-
-        var methodString = compileMethod(body);
+        var methodString = compileMethod(indent, body);
         if (methodString.isPresent()) return methodString;
+
+        var definitionString = new DefinitionCompiler(body).compile();
+        if (definitionString.isPresent()) return definitionString;
 
         return compileClass(body, indent + 1);
     }
 
-    private static Optional<String> compileMethod(String body) {
-        var paramStart = body.indexOf('(');
+    private static Optional<String> compileMethod(int indent, String input) {
+        var paramStart = input.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
-        var keys = body.substring(0, paramStart).strip();
+        var keys = input.substring(0, paramStart).strip();
         var space = keys.lastIndexOf(' ');
         if (space == -1) return Optional.empty();
 
@@ -104,6 +104,23 @@ public class Compiler {
 
         var type = new TypeCompiler(typeString).compile();
 
-        return Optional.of("def " + name + "() : " + type + " => {}");
+        var bodyStart = input.indexOf('{');
+        if(bodyStart == -1) return Optional.empty();
+
+        var bodyEnd = input.lastIndexOf('}');
+        if(bodyEnd == -1) return Optional.empty();
+
+        var body = input.substring(bodyStart + 1, bodyEnd).strip();
+        String actualBody;
+        if(body.isEmpty()) {
+            actualBody = "";
+        } else {
+            var compile = new DefinitionCompiler(body.substring(0, body.length() - 1)).compile();
+            if(compile.isEmpty()) return Optional.empty();
+            actualBody = "\n" + "\t".repeat(indent + 2) + compile.get();
+        }
+
+        var wrappedBody = actualBody.isEmpty() ? "{}" : "{" + actualBody + "\n" + "\t".repeat(indent + 1) + "}";
+        return Optional.of("def " + name + "() : " + type + " => " + wrappedBody);
     }
 }

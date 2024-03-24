@@ -24,4 +24,12 @@ public class MethodTest extends FeatureTest {
     void name() {
         assertMethod("void test(){}", "def test() : Void => {}");
     }
+
+    @Test
+    void body() {
+        assertMethod("void test(){int temp = 0;}", """
+                def test() : Void => {
+                \t\tlet temp : I32 = 0;
+                \t}""");
+    }
 }

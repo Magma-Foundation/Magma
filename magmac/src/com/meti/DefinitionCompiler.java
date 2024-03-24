@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public record DefinitionCompiler(String body) {
-    Optional<String> compileDefinition() {
+    Optional<String> compile() {
         var valueSeparator = body().indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
