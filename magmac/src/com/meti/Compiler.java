@@ -97,6 +97,9 @@ public class Compiler {
 
         var keys = body.substring(0, paramStart).strip();
         var space = keys.lastIndexOf(' ');
-        if (space == -1) return Optional.empty();"def " + name + "() : Void => {}");
+        if (space == -1) return Optional.empty();
+
+        var name = keys.substring(space + 1).strip();
+        return Optional.of("def " + name + "() : Void => {}");
     }
 }
