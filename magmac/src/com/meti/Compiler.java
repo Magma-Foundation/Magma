@@ -159,7 +159,6 @@ public class Compiler {
 
         var parentOption = compileValue(nodeOptional.get().parentOutput());
         if(parentOption.isEmpty()) return Optional.empty();
-
         var parentOutput = new Content(parentOption.get(), 0);
         var fieldNode = nodeOptional.get().withParent(parentOutput);
 
@@ -173,6 +172,7 @@ public class Compiler {
         var compiledCaller = compileValue(invocationNode.get().caller());
         if (compiledCaller.isEmpty()) return Optional.empty();
         var caller = new Content(compiledCaller.get(), 0);
+        var withCaller = invocationNode.get().withCaller(caller);
 
         var arguments = invocationNode.get().arguments()
                 .stream()
@@ -180,7 +180,7 @@ public class Compiler {
                 .flatMap(Optional::stream)
                 .<Node>map(value -> new Content(value, 0))
                 .collect(Collectors.toList());
-
-        return new InvocationNode(caller, arguments).render();
+        var withArguments = withCaller.withArguments(arguments);
+        return withArguments.render();
     }
 }

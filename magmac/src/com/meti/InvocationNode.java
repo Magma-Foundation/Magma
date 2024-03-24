@@ -13,4 +13,12 @@ public record InvocationNode(Node caller, List<Node> arguments) {
 
         return Optional.of("%s(%s)".formatted(caller.findValue(), String.join(", ", argumentString)));
     }
+
+    public InvocationNode withCaller(Node caller) {
+        return new InvocationNode(caller, arguments);
+    }
+
+    public InvocationNode withArguments(List<Node> arguments) {
+        return new InvocationNode(caller, arguments);
+    }
 }
