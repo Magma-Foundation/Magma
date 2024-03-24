@@ -9,6 +9,11 @@ public class InvocationFeatureTest extends FeatureTest {
         assertInvocation("empty()", "empty()");
     }
 
+    @Test
+    void caller(){
+        assertInvocation("test()", "test()");
+    }
+
     private static void assertInvocation(String input, String output) {
         assertCompile("class Test {String value=" + input + "}",
                 "class def Test() => {\n" +

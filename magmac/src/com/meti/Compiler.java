@@ -145,8 +145,9 @@ public class Compiler {
     }
 
     private static Optional<String> compileInvocation(String value) {
-        if(value.equals("empty()")) {
-            return Optional.of("empty()");
+        if(value.endsWith("()")) {
+            var name = value.substring(0, value.indexOf('(')).strip();
+            return Optional.of(name + "()");
         } else {
             return Optional.empty();
         }
