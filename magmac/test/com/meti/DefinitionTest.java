@@ -11,6 +11,13 @@ public class DefinitionTest extends FeatureTest {
     }
 
     @Test
+    void multiple() {
+        assertDefinition("int first = 1; int second = 2;",
+                "let first : I32 = 1;\n" +
+                "\tlet second : I32 = 2;");
+    }
+
+    @Test
     void simple() {
         assertDefinition("int value = 0;", "let value : I32 = 0;");
     }

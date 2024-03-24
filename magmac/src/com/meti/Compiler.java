@@ -60,16 +60,23 @@ public class Compiler {
         var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
 
         var compiledBody = compileClassBody(indent, body);
-        if (compiledBody.isEmpty()) return Optional.empty();
-
         var isPublic = input.startsWith("public ");
         var flagString = isPublic ? "export " : "";
 
-        var bodyString = body.isEmpty() ? "{}" : "{\n" + compiledBody.get() + "\n" + "\t".repeat(indent) + "}";
-        return Optional.of("\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
+        var bodyString = body.isEmpty() ? "{}" : "{" + compiledBody + "\n" + "\t".repeat(indent) + "}";
+        return Optional.of(flagString + "class def " + name + "() => " + bodyString);
     }
 
-    private static Optional<String> compileClassBody(int indent, String body) {
+    private static String compileClassBody(int indent, String body) {
+        var builder = new StringBuilder();
+        for (String s : split(body)) {
+            builder.append("\n").append("\t".repeat(indent + 1)).append(compileStatement(indent, s).orElse(""));
+        }
+
+        return builder.toString();
+    }
+
+    private static Optional<String> compileStatement(int indent, String body) {
         if (body.isEmpty()) {
             return Optional.of("");
         } else {
@@ -85,7 +92,7 @@ public class Compiler {
         if (valueSeparator == -1) return Optional.empty();
 
         var before = body.substring(0, valueSeparator).strip();
-        var after = body.substring(valueSeparator + 1, body.length() - 1).strip();
+        var after = body.substring(valueSeparator + 1).strip();
 
         var nameSeparator = before.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
@@ -105,7 +112,7 @@ public class Compiler {
         }
 
         var outputFlags = new ArrayList<String>();
-        if(inputFlags.contains("public")) {
+        if (inputFlags.contains("public")) {
             outputFlags.add("pub");
         }
 
@@ -124,7 +131,7 @@ public class Compiler {
 
         var name = before.substring(nameSeparator + 1).strip();
         var flagsString = String.join(" ", outputFlags);
-        return Optional.of("\t".repeat(indent + 1) + flagsString + " " + name + " : " + outputType + " = " + after + ";");
+        return Optional.of(flagsString + " " + name + " : " + outputType + " = " + after + ";");
     }
 
     private static Optional<String> compileImport(String input) {
