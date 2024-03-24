@@ -89,8 +89,16 @@ public class Compiler {
         var nameSeparator = before.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
 
+        var type = before.substring(0, nameSeparator).strip();
+        String outputType;
+        if (type.equals("long")) {
+            outputType = "I64";
+        } else {
+            outputType = "I32";
+        }
+
         var name = before.substring(nameSeparator + 1).strip();
-        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : I32 = 0;");
+        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : " + outputType + " = 0;");
     }
 
     private static Optional<String> compileImport(String input) {

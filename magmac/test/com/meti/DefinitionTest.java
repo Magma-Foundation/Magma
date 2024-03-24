@@ -13,6 +13,11 @@ public class DefinitionTest extends FeatureTest {
         assertDefinition("int test = 0;", "let test : I32 = 0;");
     }
 
+    @Test
+    void type() {
+        assertDefinition("long value = 0;", "let value : I64 = 0;");
+    }
+
     private static void assertDefinition(String input, String output) {
         assertCompile("class Test {" + input + "}",
                 "class def Test() => {\n" +
