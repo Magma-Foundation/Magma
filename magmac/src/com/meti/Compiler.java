@@ -6,6 +6,7 @@ import com.meti.lex.FieldLexer;
 import com.meti.lex.InvocationLexer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -155,10 +156,10 @@ public class Compiler {
 
     private static Optional<String> compileField(String value) {
         var nodeOptional = new FieldLexer(value).lexField();
-        if(nodeOptional.isEmpty()) return Optional.empty();
+        if (nodeOptional.isEmpty()) return Optional.empty();
 
         var parentOption = compileValue(nodeOptional.get().parentOutput());
-        if(parentOption.isEmpty()) return Optional.empty();
+        if (parentOption.isEmpty()) return Optional.empty();
         var parentOutput = new Content(parentOption.get(), 0);
         var fieldNode = nodeOptional.get().withParent(parentOutput);
 
@@ -166,21 +167,28 @@ public class Compiler {
     }
 
     private static Optional<String> compileInvocation(String input) {
-        var invocationNode = new InvocationLexer(input).lexInvocation();
-        if (invocationNode.isEmpty()) return Optional.empty();
+        return new InvocationLexer(input)
+                .lexInvocation()
+                .flatMap(node -> node.mapCaller(Compiler::compileContentToNode))
+                .flatMap(node -> node.mapArguments(Compiler::compileContentListToNodes))
+                .flatMap(InvocationNode::render);
+    }
 
-        var compiledCaller = compileValue(invocationNode.get().caller());
-        if (compiledCaller.isEmpty()) return Optional.empty();
-        var caller = new Content(compiledCaller.get(), 0);
-        var withCaller = invocationNode.get().withCaller(caller);
+    private static Optional<List<Node>> compileContentListToNodes(List<Node> arguments) {
+        var list = arguments.stream()
+                .map(Compiler::compileContentToNode)
+                .toList();
 
-        var arguments = invocationNode.get().arguments()
-                .stream()
-                .map(Compiler::compileValue)
+        if (list.stream().anyMatch(Optional::isEmpty)) return Optional.empty();
+
+        var flattened = list.stream()
                 .flatMap(Optional::stream)
-                .<Node>map(value -> new Content(value, 0))
                 .collect(Collectors.toList());
-        var withArguments = withCaller.withArguments(arguments);
-        return withArguments.render();
+
+        return Optional.of(flattened);
+    }
+
+    private static Optional<Node> compileContentToNode(Node node) {
+        return compileValue(node).map(inner -> new Content(inner, 0));
     }
 }
