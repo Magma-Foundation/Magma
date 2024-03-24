@@ -3,6 +3,13 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 public class DefinitionTest extends FeatureTest {
+    private static void assertDefinition(String input, String output) {
+        assertCompile("class Test {" + input + "}",
+                "class def Test() => {\n" +
+                "\t" + output + "\n" +
+                "}");
+    }
+
     @Test
     void simple() {
         assertDefinition("int value = 0;", "let value : I32 = 0;");
@@ -18,10 +25,8 @@ public class DefinitionTest extends FeatureTest {
         assertDefinition("long value = 0;", "let value : I64 = 0;");
     }
 
-    private static void assertDefinition(String input, String output) {
-        assertCompile("class Test {" + input + "}",
-                "class def Test() => {\n" +
-                "\t" + output + "\n" +
-                "}");
+    @Test
+    void value() {
+        assertDefinition("int value = 100;", "let value : I32 = 100;");
     }
 }

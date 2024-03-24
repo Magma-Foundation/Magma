@@ -85,6 +85,7 @@ public class Compiler {
         if (valueSeparator == -1) return Optional.empty();
 
         var before = body.substring(0, valueSeparator).strip();
+        var after = body.substring(valueSeparator + 1, body.length() - 1).strip();
 
         var nameSeparator = before.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
@@ -98,7 +99,7 @@ public class Compiler {
         }
 
         var name = before.substring(nameSeparator + 1).strip();
-        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : " + outputType + " = 0;");
+        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : " + outputType + " = " + after + ";");
     }
 
     private static Optional<String> compileImport(String input) {
