@@ -16,7 +16,7 @@ public class ClassTest extends FeatureTest {
 
     @Test
     void body() {
-        assertCompile("classK Foo {class Bar {}}", """
+        assertCompile("class Foo {class Bar {}}", """
                 class def Foo() => {
                 \tclass def Bar() => {}
                 }""");
