@@ -11,6 +11,11 @@ public class MethodTest extends FeatureTest {
     }
 
     @Test
+    void type() {
+        assertMethod("int empty(){}", "def empty() : I32 => {}");
+    }
+
+    @Test
     void simple() {
         assertMethod("void empty(){}", "def empty() : Void => {}");
     }

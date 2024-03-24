@@ -100,6 +100,10 @@ public class Compiler {
         if (space == -1) return Optional.empty();
 
         var name = keys.substring(space + 1).strip();
-        return Optional.of("def " + name + "() : Void => {}");
+        var typeString = keys.substring(0, space).strip();
+
+        var type = new TypeCompiler(typeString).compile();
+
+        return Optional.of("def " + name + "() : " + type + " => {}");
     }
 }

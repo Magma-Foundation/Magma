@@ -39,15 +39,11 @@ public record DefinitionCompiler(String body) {
             outputFlags.add("let");
         }
 
-        String outputType;
-        if (type.equals("long")) {
-            outputType = "I64";
-        } else {
-            outputType = "I32";
-        }
+        var outputType = new TypeCompiler(type).compile();
 
         var name = before.substring(nameSeparator + 1).strip();
         var flagsString = String.join(" ", outputFlags);
         return Optional.of(flagsString + " " + name + " : " + outputType + " = " + after + ";");
     }
+
 }
