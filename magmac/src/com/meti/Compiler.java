@@ -1,7 +1,7 @@
 package com.meti;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -90,7 +90,31 @@ public class Compiler {
         var nameSeparator = before.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
 
-        var type = before.substring(0, nameSeparator).strip();
+        var keys = before.substring(0, nameSeparator).strip();
+        var typeSeparator = keys.lastIndexOf(' ');
+        var type = typeSeparator == -1 ? keys : keys.substring(typeSeparator + 1).strip();
+
+        Set<String> inputFlags;
+        if (typeSeparator == -1) {
+            inputFlags = Collections.emptySet();
+        } else {
+            inputFlags = Arrays.stream(keys.substring(0, typeSeparator).strip().split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .collect(Collectors.toSet());
+        }
+
+        var outputFlags = new ArrayList<String>();
+        if(inputFlags.contains("public")) {
+            outputFlags.add("pub");
+        }
+
+        if (inputFlags.contains("final")) {
+            outputFlags.add("const");
+        } else {
+            outputFlags.add("let");
+        }
+
         String outputType;
         if (type.equals("long")) {
             outputType = "I64";
@@ -99,7 +123,8 @@ public class Compiler {
         }
 
         var name = before.substring(nameSeparator + 1).strip();
-        return Optional.of("\t".repeat(indent + 1) + "let " + name + " : " + outputType + " = " + after + ";");
+        var flagsString = String.join(" ", outputFlags);
+        return Optional.of("\t".repeat(indent + 1) + flagsString + " " + name + " : " + outputType + " = " + after + ";");
     }
 
     private static Optional<String> compileImport(String input) {
