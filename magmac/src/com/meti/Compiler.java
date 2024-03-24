@@ -85,7 +85,7 @@ public class Compiler {
         var methodString = compileMethod(indent, body);
         if (methodString.isPresent()) return methodString;
 
-        var definitionString = new DefinitionCompiler(body).compile();
+        var definitionString = compileDefinition(body);
         if (definitionString.isPresent()) return definitionString;
 
         return compileClass(body, indent + 1);
@@ -105,22 +105,57 @@ public class Compiler {
         var type = new TypeCompiler(typeString).compile();
 
         var bodyStart = input.indexOf('{');
-        if(bodyStart == -1) return Optional.empty();
+        if (bodyStart == -1) return Optional.empty();
 
         var bodyEnd = input.lastIndexOf('}');
-        if(bodyEnd == -1) return Optional.empty();
+        if (bodyEnd == -1) return Optional.empty();
 
         var body = input.substring(bodyStart + 1, bodyEnd).strip();
         String actualBody;
-        if(body.isEmpty()) {
+        if (body.isEmpty()) {
             actualBody = "";
         } else {
-            var compile = new DefinitionCompiler(body.substring(0, body.length() - 1)).compile();
-            if(compile.isEmpty()) return Optional.empty();
-            actualBody = "\n" + "\t".repeat(indent + 2) + compile.get();
+            var substring = body.substring(0, body.length() - 1);
+            var s = compileDefinition(substring);
+            if (s.isEmpty()) return Optional.empty();
+            actualBody = "\n" + "\t".repeat(indent + 2) + s.get();
         }
 
         var wrappedBody = actualBody.isEmpty() ? "{}" : "{" + actualBody + "\n" + "\t".repeat(indent + 1) + "}";
         return Optional.of("def " + name + "() : " + type + " => " + wrappedBody);
+    }
+
+    private static Optional<String> compileDefinition(String substring) {
+        var compile = new DefinitionLexer(substring).lex();
+        if (compile.isEmpty()) return Optional.empty();
+
+        var node = compile.get();
+        var value = node.findValue();
+        var outputValue = compileValue(value);
+        if (outputValue.isEmpty()) return Optional.empty();
+
+        var withValue = node.withValue(new Content(value.findIndent(), outputValue.get()));
+        return withValue.render();
+    }
+
+    private static Optional<String> compileValue(Node value) {
+        return compileInteger(value.findValue())
+                .or(() -> compileString(value.findValue()));
+    }
+
+    private static Optional<String> compileString(String value) {
+        if (value.startsWith("\"") && value.endsWith("\"")) {
+            return Optional.of("\"" + value.substring(1, value.length() - 1) + "\"");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileInteger(String value) {
+        try {
+            return Optional.of(String.valueOf(Integer.parseInt(value)));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 }

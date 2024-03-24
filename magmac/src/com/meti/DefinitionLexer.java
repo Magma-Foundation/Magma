@@ -3,8 +3,9 @@ package com.meti;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public record DefinitionCompiler(String body) {
-    Optional<String> compile() {
+public record DefinitionLexer(String body) {
+
+    Optional<DefinitionNode> lex() {
         var valueSeparator = body().indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
@@ -42,8 +43,7 @@ public record DefinitionCompiler(String body) {
         var outputType = new TypeCompiler(type).compile();
 
         var name = before.substring(nameSeparator + 1).strip();
-        var flagsString = String.join(" ", outputFlags);
-        return Optional.of(flagsString + " " + name + " : " + outputType + " = " + after + ";");
+        return Optional.of(new DefinitionNode(outputFlags, name, outputType, new Content(0, after)));
     }
 
 }
