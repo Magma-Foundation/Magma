@@ -1,6 +1,6 @@
 package com.meti;
 
-public record Content(int indent, String value) implements Node {
+public record Content(String value, int indent) implements Node {
     @Override
     public String findValue() {
         return value;

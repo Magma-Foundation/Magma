@@ -43,7 +43,7 @@ public record DefinitionLexer(String body) {
         var outputType = new TypeCompiler(type).compile();
 
         var name = before.substring(nameSeparator + 1).strip();
-        return Optional.of(new DefinitionNode(outputFlags, name, outputType, new Content(0, after)));
+        return Optional.of(new DefinitionNode(outputFlags, name, outputType, new Content(after, 0)));
     }
 
 }

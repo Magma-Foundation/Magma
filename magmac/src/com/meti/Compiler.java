@@ -65,7 +65,7 @@ public class Compiler {
         var indent1 = body2.findIndent();
 
         var compiledBody = compileStatements(indent1, value);
-        return node.withBody(new Content(indent1, compiledBody));
+        return node.withBody(new Content(compiledBody, indent1));
     }
 
     private static String compileStatements(int indent, String statementsString) {
@@ -135,7 +135,7 @@ public class Compiler {
         var outputValue = compileValue(value);
         if (outputValue.isEmpty()) return Optional.empty();
 
-        var withValue = node.withValue(new Content(value.findIndent(), outputValue.get()));
+        var withValue = node.withValue(new Content(outputValue.get(), value.findIndent()));
         return withValue.render();
     }
 
@@ -149,13 +149,16 @@ public class Compiler {
     }
 
     private static Optional<String> compileField(String value) {
-        var separator = value.indexOf('.');
-        if (separator == -1) return Optional.empty();
+        var nodeOptional = new FieldLexer(value).lexField();
+        if(nodeOptional.isEmpty()) return Optional.empty();
 
-        var parent = value.substring(0, separator).strip();
-        var member = value.substring(separator + 1).strip();
+        var parentOption = compileValue(nodeOptional.get().parentOutput());
+        if(parentOption.isEmpty()) return Optional.empty();
 
-        return Optional.of(parent + "." + member);
+        var parentOutput = new Content(parentOption.get(), 0);
+        var fieldNode = nodeOptional.get().withParent(parentOutput);
+
+        return fieldNode.render();
     }
 
     private static Optional<String> compileInvocation(String input) {
@@ -164,13 +167,13 @@ public class Compiler {
 
         var compiledCaller = compileValue(invocationNode.get().caller());
         if (compiledCaller.isEmpty()) return Optional.empty();
-        var caller = new Content(0, compiledCaller.get());
+        var caller = new Content(compiledCaller.get(), 0);
 
         var arguments = invocationNode.get().arguments()
                 .stream()
                 .map(Compiler::compileValue)
                 .flatMap(Optional::stream)
-                .<Node>map(value -> new Content(0, value))
+                .<Node>map(value -> new Content(value, 0))
                 .collect(Collectors.toList());
 
         return new InvocationNode(caller, arguments).render();

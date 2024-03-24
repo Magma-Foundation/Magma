@@ -13,7 +13,7 @@ public record ClassLexer(String input, int indent1) {
         var name = input().substring(classIndex + "class ".length(), input().indexOf('{')).strip();
         var body = input().substring(input().indexOf('{') + 1, bodyEnd).strip();
 
-        var body1 = new Content(indent1(), body);
+        var body1 = new Content(body, indent1());
         var isPublic = input().startsWith("public ");
         var inputFlags = isPublic ? Set.of("public") : Collections.<String>emptySet();
 
