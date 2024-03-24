@@ -85,6 +85,10 @@ public class Compiler {
         var definitionString = new DefinitionCompiler(body).compileDefinition();
         if (definitionString.isPresent()) return definitionString;
 
+        if(body.equals("void empty(){}")) {
+            return Optional.of("def empty() : Void => {}");
+        }
+
         return compileClass(body, indent + 1);
     }
 }
