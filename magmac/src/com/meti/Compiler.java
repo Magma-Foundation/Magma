@@ -1,7 +1,7 @@
 package com.meti;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -37,7 +37,7 @@ public class Compiler {
         var classResult = compileClass(input, 0);
         if (classResult.isPresent()) return classResult.get();
 
-        var importResult = compileImport(input);
+        var importResult = new ImportCompiler(input).compileImport();
         if (importResult.isPresent()) return importResult.get();
 
         if (input.isEmpty()) {
@@ -52,103 +52,39 @@ public class Compiler {
     }
 
     private static Optional<String> compileClass(String input, int indent) {
-        var bodyEnd = input.lastIndexOf('}');
-        var classIndex = input.indexOf("class ");
-
-        if (classIndex == -1 || bodyEnd != input.length() - 1) return Optional.empty();
-        var name = input.substring(classIndex + "class ".length(), input.indexOf('{')).strip();
-        var body = input.substring(input.indexOf('{') + 1, bodyEnd).strip();
-
-        var compiledBody = compileClassBody(indent, body);
-        var isPublic = input.startsWith("public ");
-        var flagString = isPublic ? "export " : "";
-
-        var bodyString = body.isEmpty() ? "{}" : "{" + compiledBody + "\n" + "\t".repeat(indent) + "}";
-        return Optional.of(flagString + "class def " + name + "() => " + bodyString);
+        return new ClassLexer(input, indent)
+                .lex()
+                .map(Compiler::lexClassAST)
+                .flatMap(ClassNode::render);
     }
 
-    private static String compileClassBody(int indent, String body) {
+    private static ClassNode lexClassAST(ClassNode node) {
+        var body2 = node.findBody();
+        var value = body2.findValue();
+        var indent1 = body2.findIndent();
+
+        var compiledBody = compileStatements(indent1, value);
+        return node.withBody(new Content(indent1, compiledBody));
+    }
+
+    private static String compileStatements(int indent, String statementsString) {
         var builder = new StringBuilder();
-        for (String s : split(body)) {
-            builder.append("\n").append("\t".repeat(indent + 1)).append(compileStatement(indent, s).orElse(""));
+        for (var statement : split(statementsString)) {
+            var statementOptional = compileStatement(indent, statement);
+            builder.append("\n")
+                    .append("\t".repeat(indent + 1))
+                    .append(statementOptional.orElse(""));
         }
 
         return builder.toString();
     }
 
     private static Optional<String> compileStatement(int indent, String body) {
-        if (body.isEmpty()) {
-            return Optional.of("");
-        } else {
-            var definitionString = compileDefinition(indent, body);
-            if (definitionString.isPresent()) return definitionString;
+        if (body.isEmpty()) return Optional.of("");
 
-            return compileClass(body, indent + 1);
-        }
-    }
+        var definitionString = new DefinitionCompiler(body).compileDefinition();
+        if (definitionString.isPresent()) return definitionString;
 
-    private static Optional<String> compileDefinition(int indent, String body) {
-        var valueSeparator = body.indexOf('=');
-        if (valueSeparator == -1) return Optional.empty();
-
-        var before = body.substring(0, valueSeparator).strip();
-        var after = body.substring(valueSeparator + 1).strip();
-
-        var nameSeparator = before.lastIndexOf(' ');
-        if (nameSeparator == -1) return Optional.empty();
-
-        var keys = before.substring(0, nameSeparator).strip();
-        var typeSeparator = keys.lastIndexOf(' ');
-        var type = typeSeparator == -1 ? keys : keys.substring(typeSeparator + 1).strip();
-
-        Set<String> inputFlags;
-        if (typeSeparator == -1) {
-            inputFlags = Collections.emptySet();
-        } else {
-            inputFlags = Arrays.stream(keys.substring(0, typeSeparator).strip().split(" "))
-                    .map(String::strip)
-                    .filter(value -> !value.isEmpty())
-                    .collect(Collectors.toSet());
-        }
-
-        var outputFlags = new ArrayList<String>();
-        if (inputFlags.contains("public")) {
-            outputFlags.add("pub");
-        }
-
-        if (inputFlags.contains("final")) {
-            outputFlags.add("const");
-        } else {
-            outputFlags.add("let");
-        }
-
-        String outputType;
-        if (type.equals("long")) {
-            outputType = "I64";
-        } else {
-            outputType = "I32";
-        }
-
-        var name = before.substring(nameSeparator + 1).strip();
-        var flagsString = String.join(" ", outputFlags);
-        return Optional.of(flagsString + " " + name + " : " + outputType + " = " + after + ";");
-    }
-
-    private static Optional<String> compileImport(String input) {
-        if (input.startsWith("import ")) {
-            var isStatic = input.startsWith("import static ");
-            var separator = input.lastIndexOf('.');
-
-            var parentStart = isStatic ? "import static ".length() : "import ".length();
-            var parentName = input.substring(parentStart, separator);
-
-            var childName = input.substring(separator + 1);
-            var childString = isStatic && childName.equals("*")
-                    ? "*"
-                    : "{ " + childName + " }";
-
-            return Optional.of("import " + childString + " from " + parentName + ";");
-        }
-        return Optional.empty();
+        return compileClass(body, indent + 1);
     }
 }

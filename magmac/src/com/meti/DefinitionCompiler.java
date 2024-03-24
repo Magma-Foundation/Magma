@@ -1,0 +1,53 @@
+package com.meti;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public record DefinitionCompiler(String body) {
+    Optional<String> compileDefinition() {
+        var valueSeparator = body().indexOf('=');
+        if (valueSeparator == -1) return Optional.empty();
+
+        var before = body().substring(0, valueSeparator).strip();
+        var after = body().substring(valueSeparator + 1).strip();
+
+        var nameSeparator = before.lastIndexOf(' ');
+        if (nameSeparator == -1) return Optional.empty();
+
+        var keys = before.substring(0, nameSeparator).strip();
+        var typeSeparator = keys.lastIndexOf(' ');
+        var type = typeSeparator == -1 ? keys : keys.substring(typeSeparator + 1).strip();
+
+        Set<String> inputFlags;
+        if (typeSeparator == -1) {
+            inputFlags = Collections.emptySet();
+        } else {
+            inputFlags = Arrays.stream(keys.substring(0, typeSeparator).strip().split(" "))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .collect(Collectors.toSet());
+        }
+
+        var outputFlags = new ArrayList<String>();
+        if (inputFlags.contains("public")) {
+            outputFlags.add("pub");
+        }
+
+        if (inputFlags.contains("final")) {
+            outputFlags.add("const");
+        } else {
+            outputFlags.add("let");
+        }
+
+        String outputType;
+        if (type.equals("long")) {
+            outputType = "I64";
+        } else {
+            outputType = "I32";
+        }
+
+        var name = before.substring(nameSeparator + 1).strip();
+        var flagsString = String.join(" ", outputFlags);
+        return Optional.of(flagsString + " " + name + " : " + outputType + " = " + after + ";");
+    }
+}
