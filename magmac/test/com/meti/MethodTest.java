@@ -3,11 +3,20 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 public class MethodTest extends FeatureTest {
-    @Test
-    void test() {
-        assertCompile("class Test {void empty(){}}",
+    private static void assertMethod(String input, String output) {
+        assertCompile("class Test {" + input + "}",
                 "class def Test() => {\n" +
-                "\tdef empty() : Void => {}\n" +
+                "\t" + output + "\n" +
                 "}");
+    }
+
+    @Test
+    void simple() {
+        assertMethod("void empty(){}", "def empty() : Void => {}");
+    }
+
+    @Test
+    void name() {
+        assertMethod("void test(){}", "def test() : Void => {}");
     }
 }

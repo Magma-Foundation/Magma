@@ -85,10 +85,18 @@ public class Compiler {
         var definitionString = new DefinitionCompiler(body).compileDefinition();
         if (definitionString.isPresent()) return definitionString;
 
-        if(body.equals("void empty(){}")) {
-            return Optional.of("def empty() : Void => {}");
-        }
+        var methodString = compileMethod(body);
+        if (methodString.isPresent()) return methodString;
 
         return compileClass(body, indent + 1);
+    }
+
+    private static Optional<String> compileMethod(String body) {
+        var paramStart = body.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
+
+        var keys = body.substring(0, paramStart).strip();
+        var space = keys.lastIndexOf(' ');
+        if (space == -1) return Optional.empty();"def " + name + "() : Void => {}");
     }
 }
