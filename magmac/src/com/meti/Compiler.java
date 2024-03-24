@@ -1,7 +1,6 @@
 package com.meti;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -144,8 +143,9 @@ public class Compiler {
         var value1 = value.findValue();
         return compileField(value1)
                 .or(() -> compileInvocation(value1))
-                .or(() -> compileInteger(value1))
-                .or(() -> compileString(value1));
+                .or(() -> new IntegerCompiler(value1).compileInteger())
+                .or(() -> new StringCompiler(value1).compileString())
+                .or(() -> Optional.of(value1));
     }
 
     private static Optional<String> compileField(String value) {
@@ -158,37 +158,21 @@ public class Compiler {
         return Optional.of(parent + "." + member);
     }
 
-    private static Optional<String> compileInvocation(String value) {
-        var argStart = value.indexOf('(');
-        if (argStart == -1) return Optional.empty();
+    private static Optional<String> compileInvocation(String input) {
+        var invocationNode = new InvocationLexer(input).lexInvocation();
+        if (invocationNode.isEmpty()) return Optional.empty();
 
-        var argEnd = value.indexOf(')');
-        if (argEnd == -1) return Optional.empty();
+        var compiledCaller = compileValue(invocationNode.get().caller());
+        if (compiledCaller.isEmpty()) return Optional.empty();
+        var caller = new Content(0, compiledCaller.get());
 
-        var name = value.substring(0, argStart).strip();
-        var argument = Arrays.stream(value.substring(argStart + 1, argEnd)
-                        .strip()
-                        .split(","))
-                .map(String::strip)
-                .filter(argString -> !argString.isEmpty())
+        var arguments = invocationNode.get().arguments()
+                .stream()
+                .map(Compiler::compileValue)
+                .flatMap(Optional::stream)
+                .<Node>map(value -> new Content(0, value))
                 .collect(Collectors.toList());
 
-        return Optional.of(name + "(" + String.join(", ", argument) + ")");
-    }
-
-    private static Optional<String> compileString(String value) {
-        if (value.startsWith("\"") && value.endsWith("\"")) {
-            return Optional.of("\"" + value.substring(1, value.length() - 1) + "\"");
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private static Optional<String> compileInteger(String value) {
-        try {
-            return Optional.of(String.valueOf(Integer.parseInt(value)));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
+        return new InvocationNode(caller, arguments).render();
     }
 }
