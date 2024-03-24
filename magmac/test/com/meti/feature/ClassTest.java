@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.feature;
 
+import com.meti.FeatureTest;
 import org.junit.jupiter.api.Test;
 
 public class ClassTest extends FeatureTest {
