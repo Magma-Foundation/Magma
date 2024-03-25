@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.stage;
 
 import com.meti.node.Node;
 
@@ -31,7 +31,7 @@ public abstract class Stage<I, O> {
 
     protected abstract I createInput(Node node);
 
-    Optional<O> apply(I root) {
+    public Optional<O> apply(I root) {
         return onEnter(root)
                 .map(node -> node.mapNodes(this::applyToNode).orElse(node))
                 .map(node -> node.mapNodeLists(this::applyToNodeList).orElse(node))

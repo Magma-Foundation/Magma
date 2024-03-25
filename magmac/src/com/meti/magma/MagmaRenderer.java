@@ -1,6 +1,8 @@
-package com.meti;
+package com.meti.magma;
 
+import com.meti.*;
 import com.meti.node.Node;
+import com.meti.stage.Rendererer;
 
 import java.util.Optional;
 import java.util.stream.Stream;

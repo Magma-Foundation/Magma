@@ -1,5 +1,6 @@
-package com.meti;
+package com.meti.stage;
 
+import com.meti.JavaLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
