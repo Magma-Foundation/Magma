@@ -6,7 +6,7 @@ import com.meti.node.Node;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public record JavaLexer(String value) implements Lexer {
+public record JavaValueLexer(String value) implements Lexer {
     @Override
     public Optional<Node> lex() {
         return Stream.of(

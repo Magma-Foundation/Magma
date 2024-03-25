@@ -1,18 +1,19 @@
 package com.meti.stage;
 
-import com.meti.JavaLexer;
+import com.meti.lex.Lexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
 
 import java.util.Optional;
 
-public class LexingStage extends Stage<String, Node> {
-
+public abstract class LexingStage extends Stage<String, Node> {
     @Override
     public Optional<Node> onEnter(String value) {
-        return new JavaLexer(value).lex();
+        return createLexer(value).lex();
     }
+
+    protected abstract Lexer createLexer(String value);
 
     @Override
     protected Node createOutput(Node o) {

@@ -2,10 +2,12 @@ package com.meti;
 
 import com.meti.lex.ClassLexer;
 import com.meti.lex.DefinitionLexer;
+import com.meti.lex.Lexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
 import com.meti.stage.LexingStage;
+import com.meti.stage.LexingStageImpl;
 import com.meti.stage.RenderingStage;
 
 import java.util.ArrayList;
@@ -140,7 +142,10 @@ public class Compiler {
         var node = compile.get();
         var value = node.findValue();
         var value1 = value.apply("value").flatMap(Attribute::asString).orElseThrow();
-        var outputValue = new LexingStage().apply(value1).flatMap(Compiler::render);
+        var outputValue = new LexingStageImpl(JavaValueLexer::new)
+                .apply(value1)
+                .flatMap(Compiler::render);
+
         if (outputValue.isEmpty()) return Optional.empty();
 
         var withValue = node.withValue(new Content(outputValue.get(), value.apply("indent").flatMap(Attribute::asInt).orElseThrow()));
