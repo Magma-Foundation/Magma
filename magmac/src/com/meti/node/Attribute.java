@@ -11,4 +11,12 @@ public interface Attribute {
     default Optional<Integer> asInt() {
         return Optional.empty();
     }
+
+    default Optional<Node> asNode() {
+        return Optional.empty();
+    }
+
+    default boolean is(String id) {
+        return false;
+    }
 }

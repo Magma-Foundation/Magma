@@ -1,9 +1,8 @@
 package com.meti.lex;
 
-import com.meti.node.Content;
-import com.meti.FieldNode;
-import com.meti.node.Node;
+import com.meti.node.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 public record FieldLexer(String value) implements Lexer {
@@ -15,7 +14,9 @@ public record FieldLexer(String value) implements Lexer {
         var parent = value().substring(0, separator).strip();
         var member = value().substring(separator + 1).strip();
         var parentNode = new Content(parent, 0);
-        var node = new FieldNode(parentNode, member);
+        var node = (Node) new MapNode(Map.of(
+                "parent", new NodeAttribute(parentNode),
+                "member", new StringAttribute(member)));
         return Optional.of(node);
     }
 }
