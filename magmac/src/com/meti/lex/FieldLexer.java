@@ -6,7 +6,8 @@ import com.meti.Node;
 
 import java.util.Optional;
 
-public record FieldLexer(String value) {
+public record FieldLexer(String value) implements Lexer {
+    @Override
     public Optional<Node> lex() {
         var separator = value().indexOf('.');
         if (separator == -1) return Optional.empty();

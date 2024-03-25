@@ -7,8 +7,9 @@ import com.meti.Node;
 import java.util.Arrays;
 import java.util.Optional;
 
-public record InvocationLexer(String input) {
-    public Optional<InvocationNode> lex() {
+public record InvocationLexer(String input) implements Lexer {
+    @Override
+    public Optional<Node> lex() {
         var argStart = input().indexOf('(');
         if (argStart == -1) return Optional.empty();
 
