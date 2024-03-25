@@ -148,26 +148,32 @@ public class Compiler {
 
     private static Optional<String> compileValue(Node value) {
         var value1 = value.apply("value").flatMap(Attribute::asString).orElseThrow();
-        return compileInvocation(value1)
-                .or(() -> new IntegerCompiler(value1).compileInteger())
-                .or(() -> new StringCompiler(value1).compileString())
-                .or(() -> Optional.of(value1));
+        return compileImpl(value1);
     }
 
     private static Optional<Node> lexImpl(String value) {
-        return Stream.<Lexer>of(
+        return Stream.of(
                         new FieldLexer(value),
-                        new InvocationLexer(value))
+                        new InvocationLexer(value),
+                        new IntegerLexer(value),
+                        new StringLexer(value))
                 .map(Lexer::lex)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
 
-    private static Optional<String> compileInvocation(String input) {
+    private static Optional<String> compileImpl(String input) {
         return lexImpl(input)
                 .map(node -> node.mapNodes(Compiler::compileContentToNode).orElse(node))
                 .map(node -> node.mapNodeLists(Compiler::compileContentListToNodes).orElse(node))
-                .flatMap(Node::render);
+                .flatMap(node1 -> {
+                    if(node1.is(IntegerLexer.Id)) {
+                        return node1.apply(IntegerLexer.VALUE)
+                                .flatMap(Attribute::asInt)
+                                .map(String::valueOf);
+                    }
+                    throw new UnsupportedOperationException("Cannot render: " + node1);
+                });
     }
 
     private static Optional<List<Node>> compileContentListToNodes(List<Node> arguments) {

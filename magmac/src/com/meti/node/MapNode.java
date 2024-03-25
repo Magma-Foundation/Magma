@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 
 public class MapNode implements Node {
     private final Map<String, Attribute> attributes;
+    private final String name;
 
-    public MapNode(Map<String, Attribute> attributes) {
+    public MapNode(String name, Map<String, Attribute> attributes) {
         this.attributes = attributes;
+        this.name = name;
     }
 
     private static AbstractMap.SimpleImmutableEntry<String, Optional<Attribute>> applyMapperToNodePair(Map.Entry<String, Attribute> pair, Function<Node, Optional<Node>> mapper) {
@@ -62,10 +64,23 @@ public class MapNode implements Node {
                     .flatMap(Optional::stream)
                     .collect(Collectors.toMap(AbstractMap.SimpleImmutableEntry::getKey, AbstractMap.SimpleImmutableEntry::getValue));
 
-            return Optional.of(new MapNode(newEntries));
+            return Optional.of(new MapNode(name, newEntries));
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public boolean is(String id) {
+        return this.name.equals(id);
+    }
+
+    @Override
+    public String toString() {
+        return "MapNode{" +
+               "name='" + name + '\'' + ", " +
+               "attributes=" + attributes +
+               '}';
     }
 
     @Override

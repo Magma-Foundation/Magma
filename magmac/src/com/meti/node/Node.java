@@ -9,15 +9,15 @@ public interface Node {
         return Optional.empty();
     }
 
-    default Optional<String> render() {
-        return Optional.empty();
-    }
-
     default Optional<Node> mapNodes(Function<Node, Optional<Node>> mapper) {
         return Optional.empty();
     }
 
     default Optional<Node> mapNodeLists(Function<List<Node>, Optional<List<Node>>> mapper) {
         return Optional.empty();
+    }
+
+    default boolean is(String id) {
+        return false;
     }
 }

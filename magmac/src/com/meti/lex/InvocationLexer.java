@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public record InvocationLexer(String input) implements Lexer {
+
+    public static final String ID = "invoke";
+    public static final String CALLER = "caller";
+    public static final String ARGUMENTS = "arguments";
+
     @Override
     public Optional<Node> lex() {
         var argStart = input().indexOf('(');
@@ -25,9 +30,9 @@ public record InvocationLexer(String input) implements Lexer {
                 .<Node>map(value -> new Content(value, 0))
                 .toList();
 
-        var invocationNode = (Node) new MapNode(Map.of(
-                "caller", new NodeAttribute(value1),
-                "arguments", new NodeListAttribute(collect)
+        var invocationNode = (Node) new MapNode(ID, Map.of(
+                CALLER, new NodeAttribute(value1),
+                ARGUMENTS, new NodeListAttribute(collect)
         ));
         return Optional.of(invocationNode);
     }
