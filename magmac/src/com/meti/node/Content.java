@@ -3,6 +3,8 @@ package com.meti.node;
 import java.util.Optional;
 
 public record Content(String value, int indent) implements Node {
+    public static final String VALUE = "value";
+
     private String findValue1() {
         return value;
     }
@@ -29,8 +31,8 @@ public record Content(String value, int indent) implements Node {
 
     @Override
     public Optional<Attribute> apply(String name) {
-        if(name.equals("value")) return findValue().map(StringAttribute::new);
-        if(name.equals("indent")) return findIndent().map(IntAttribute::new);
+        if (name.equals("value")) return findValue().map(StringAttribute::new);
+        if (name.equals("indent")) return findIndent().map(IntAttribute::new);
         return Optional.empty();
     }
 }

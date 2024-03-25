@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-public record InvocationLexer(String input) implements Lexer {
+public record InvokeLexer(String input) implements Lexer {
 
     public static final String ID = "invoke";
     public static final String CALLER = "caller";

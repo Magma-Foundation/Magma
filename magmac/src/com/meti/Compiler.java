@@ -1,15 +1,13 @@
 package com.meti;
 
-import com.meti.lex.*;
+import com.meti.lex.ClassLexer;
+import com.meti.lex.DefinitionLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -139,58 +137,15 @@ public class Compiler {
 
         var node = compile.get();
         var value = node.findValue();
-        var outputValue = compileValue(value);
+        var value1 = value.apply("value").flatMap(Attribute::asString).orElseThrow();
+        var outputValue = new LexingStage().apply(value1).flatMap(Compiler::render);
         if (outputValue.isEmpty()) return Optional.empty();
 
         var withValue = node.withValue(new Content(outputValue.get(), value.apply("indent").flatMap(Attribute::asInt).orElseThrow()));
         return withValue.render();
     }
 
-    private static Optional<String> compileValue(Node value) {
-        var value1 = value.apply("value").flatMap(Attribute::asString).orElseThrow();
-        return compileImpl(value1);
-    }
-
-    private static Optional<Node> lexImpl(String value) {
-        return Stream.of(
-                        new FieldLexer(value),
-                        new InvocationLexer(value),
-                        new IntegerLexer(value),
-                        new StringLexer(value))
-                .map(Lexer::lex)
-                .flatMap(Optional::stream)
-                .findFirst();
-    }
-
-    private static Optional<String> compileImpl(String input) {
-        return lexImpl(input)
-                .map(node -> node.mapNodes(Compiler::compileContentToNode).orElse(node))
-                .map(node -> node.mapNodeLists(Compiler::compileContentListToNodes).orElse(node))
-                .flatMap(node1 -> {
-                    if(node1.is(IntegerLexer.Id)) {
-                        return node1.apply(IntegerLexer.VALUE)
-                                .flatMap(Attribute::asInt)
-                                .map(String::valueOf);
-                    }
-                    throw new UnsupportedOperationException("Cannot render: " + node1);
-                });
-    }
-
-    private static Optional<List<Node>> compileContentListToNodes(List<Node> arguments) {
-        var list = arguments.stream()
-                .map(Compiler::compileContentToNode)
-                .toList();
-
-        if (list.stream().anyMatch(Optional::isEmpty)) return Optional.empty();
-
-        var flattened = list.stream()
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
-
-        return Optional.of(flattened);
-    }
-
-    private static Optional<Node> compileContentToNode(Node node) {
-        return compileValue(node).map(inner -> new Content(inner, 0));
+    private static Optional<String> render(Node node1) {
+        return new RenderingStage().apply(node1);
     }
 }
