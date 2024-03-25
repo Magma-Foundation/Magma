@@ -1,13 +1,16 @@
 package com.meti.magma;
 
-import com.meti.*;
+import com.meti.FieldRenderer;
+import com.meti.IntegerRenderer;
+import com.meti.InvokeRenderer;
+import com.meti.StringRenderer;
 import com.meti.node.Node;
-import com.meti.stage.Rendererer;
+import com.meti.stage.Renderer;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class MagmaRenderer implements Rendererer {
+public class MagmaRenderer implements Renderer {
     private final Node node;
 
     public MagmaRenderer(Node node) {
@@ -17,11 +20,14 @@ public class MagmaRenderer implements Rendererer {
     @Override
     public Optional<String> render() {
         return Stream.of(
+                        new ClassRenderer(node),
                         new FieldRenderer(node),
+                        new ImportRenderer(node),
                         new IntegerRenderer(node),
                         new InvokeRenderer(node),
+                        new MethodRenderer(node),
                         new StringRenderer(node))
-                .map(Rendererer::render)
+                .map(Renderer::render)
                 .flatMap(Optional::stream)
                 .findFirst();
     }

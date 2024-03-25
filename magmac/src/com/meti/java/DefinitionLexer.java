@@ -1,15 +1,16 @@
-package com.meti.lex;
+package com.meti.java;
 
-import com.meti.node.Content;
-import com.meti.DefinitionNode;
 import com.meti.TypeCompiler;
+import com.meti.node.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public record DefinitionLexer(String body) {
+public record DefinitionLexer(String body) implements Lexer {
+    public static final String ID = "definition";
 
-    public Optional<DefinitionNode> lex() {
+    @Override
+    public Optional<Node> lex() {
         var valueSeparator = body().indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
@@ -47,7 +48,13 @@ public record DefinitionLexer(String body) {
         var outputType = new TypeCompiler(type).compile();
 
         var name = before.substring(nameSeparator + 1).strip();
-        return Optional.of(new DefinitionNode(outputFlags, name, outputType, new Content(after, 0)));
-    }
+        var value = new Content("value", after, 0);
 
+        return Optional.of(new MapNode("definition", Map.of(
+                "flags", new StringListAttribute(outputFlags),
+                "name", new StringAttribute(name),
+                "type", new StringAttribute(outputType),
+                "value", new NodeAttribute(value)
+        )));
+    }
 }

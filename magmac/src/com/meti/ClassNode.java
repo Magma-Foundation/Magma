@@ -1,11 +1,8 @@
 package com.meti;
 
-import com.meti.node.Attribute;
-import com.meti.node.Node;
+import com.meti.node.*;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public final class ClassNode {
     private final int indent;
@@ -13,7 +10,7 @@ public final class ClassNode {
     private final String name;
     private final Node body;
 
-    public ClassNode(int indent, Set<String> flags, String name, Node body) {
+    private ClassNode(int indent, Set<String> flags, String name, Node body) {
         this.indent = indent;
         this.flags = flags;
         this.name = name;
@@ -72,7 +69,12 @@ public final class ClassNode {
         return body;
     }
 
-    public ClassNode withBody(Node body) {
-        return new ClassNode(indent, flags, name, body);
+    public MapNode withBody(Node body) {
+        return new MapNode("class", Map.of(
+                "indent", new IntAttribute(indent),
+                "flags", new StringListAttribute((List<String>) flags),
+                "name", new StringAttribute(name),
+                "body", new NodeAttribute(body)
+        ));
     }
 }

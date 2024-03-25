@@ -2,6 +2,6 @@ package com.meti.stage;
 
 import java.util.Optional;
 
-public interface Rendererer {
+public interface Renderer {
     Optional<String> render();
 }

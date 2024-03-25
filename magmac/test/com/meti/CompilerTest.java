@@ -8,7 +8,7 @@ class CompilerTest extends FeatureTest {
     @Test
     void split() {
         var expected = new String[]{"class Test {int value = 0;}"};
-        var actual = Compiler.split("class Test {int value = 0;}");
+        var actual = new Splitter("class Test {int value = 0;}").split();
         assertArrayEquals(expected, actual);
     }
 

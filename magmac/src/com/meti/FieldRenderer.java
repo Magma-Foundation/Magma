@@ -1,14 +1,14 @@
 package com.meti;
 
-import com.meti.lex.FieldLexer;
+import com.meti.java.FieldLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
-import com.meti.stage.Rendererer;
+import com.meti.stage.Renderer;
 
 import java.util.Optional;
 
-public class FieldRenderer implements Rendererer {
+public class FieldRenderer implements Renderer {
     private final Node node;
 
     public FieldRenderer(Node node) {

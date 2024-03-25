@@ -1,15 +1,15 @@
 package com.meti;
 
-import com.meti.lex.InvokeLexer;
+import com.meti.java.InvokeLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
-import com.meti.stage.Rendererer;
+import com.meti.stage.Renderer;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class InvokeRenderer implements Rendererer {
+public class InvokeRenderer implements Renderer {
     private final Node node;
 
     public InvokeRenderer(Node node) {

@@ -1,6 +1,5 @@
-package com.meti.lex;
+package com.meti.java;
 
-import com.meti.lex.Lexer;
 import com.meti.node.IntAttribute;
 import com.meti.node.MapNode;
 import com.meti.node.Node;
