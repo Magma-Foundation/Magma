@@ -20,6 +20,7 @@ public class MagmaRenderer implements Renderer {
     @Override
     public Optional<String> render() {
         return Stream.of(
+                        new DefinitionRenderer(node),
                         new ClassRenderer(node),
                         new FieldRenderer(node),
                         new ImportRenderer(node),

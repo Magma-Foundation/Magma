@@ -28,8 +28,10 @@ public record MethodRenderer(Node root) implements Renderer {
                     .flatMap(Attribute::asString)
                     .orElseThrow();
 
-            wrappedBody = "{" + bodyContent + "\n" + "\t".repeat(indent + 1) + "}";
+            wrappedBody = "{" + bodyContent + "\n" + "\t".repeat(indent) + "}";
         }
-        return Optional.of("def " + name + "() : " + type + " => " + wrappedBody);
+
+
+        return Optional.of("\n" + "\t".repeat(indent) + "def " + name + "() : " + type + " => " + wrappedBody);
     }
 }

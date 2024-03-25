@@ -38,7 +38,7 @@ public record MethodLexer(int indent, String input) implements Lexer {
 
         if (!body.isEmpty()) {
             var substring = body.substring(0, body.length() - 1);
-            map.put("body", new NodeAttribute(new Content("definition", substring, 0)));
+            map.put("body", new NodeAttribute(new Content("method-statements", substring, indent + 1)));
         }
 
         var method = new MapNode("method", map);

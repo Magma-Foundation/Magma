@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record ClassLexer(String input, int indent1) implements Lexer {
+public record ClassLexer(String input, int indent) implements Lexer {
     public static final String ID = "class";
     public static final String FLAGS = "flags";
     public static final String INDENT = "indent";
@@ -26,17 +26,17 @@ public record ClassLexer(String input, int indent1) implements Lexer {
         var isPublic = input().startsWith("public ");
         var inputFlags = isPublic ? List.of("public") : Collections.<String>emptyList();
 
-        var indent = new java.util.HashMap<>(Map.of(
-                INDENT, new IntAttribute(this.indent1()),
+        var attributes = new java.util.HashMap<>(Map.of(
+                INDENT, new IntAttribute(this.indent),
                 FLAGS, new StringListAttribute(inputFlags),
                 NAME, new StringAttribute(name)
         ));
 
         if (!body.isEmpty()) {
-            var body1 = new Content("definition", body, indent1());
-            indent.put(BODY, new NodeAttribute(body1));
+            var body1 = new Content("class-member", body, indent + 1);
+            attributes.put(BODY, new NodeAttribute(body1));
         }
 
-        return Optional.of(new MapNode("class", indent));
+        return Optional.of(new MapNode("class", attributes));
     }
 }

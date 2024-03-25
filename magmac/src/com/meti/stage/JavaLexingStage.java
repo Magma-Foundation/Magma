@@ -20,7 +20,13 @@ public class JavaLexingStage extends LexingStage {
             /*
             TODO: statements
              */
-            case DefinitionLexer.ID -> new DefinitionLexer(innerValue);
+            case "class-member" -> new CompoundLexer(List.of(
+                    () -> new MethodLexer(value.indent(), value.value()),
+                    () -> new DefinitionLexer(value.value(), value.indent()),
+                    () -> new ClassLexer(value.value(), value.indent())
+            ));
+
+            case "method-statements" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
                     () -> new FieldLexer(innerValue),
                     () -> new InvokeLexer(innerValue),

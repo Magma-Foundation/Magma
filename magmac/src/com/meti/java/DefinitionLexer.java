@@ -6,7 +6,7 @@ import com.meti.node.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public record DefinitionLexer(String body) implements Lexer {
+public record DefinitionLexer(String body, int indent) implements Lexer {
     public static final String ID = "definition";
 
     @Override
@@ -51,6 +51,7 @@ public record DefinitionLexer(String body) implements Lexer {
         var value = new Content("value", after, 0);
 
         return Optional.of(new MapNode("definition", Map.of(
+                "indent", new IntAttribute(indent),
                 "flags", new StringListAttribute(outputFlags),
                 "name", new StringAttribute(name),
                 "type", new StringAttribute(outputType),
