@@ -1,6 +1,5 @@
 package com.meti.magma;
 
-import com.meti.ClassNode;
 import com.meti.java.ClassLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
@@ -18,7 +17,7 @@ public class ClassRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if(!node.is(ClassLexer.ID)) return Optional.empty();
+        if (!node.is(ClassLexer.ID)) return Optional.empty();
 
         var flags = node.apply(ClassLexer.FLAGS).flatMap(Attribute::asListOfStrings).orElseThrow();
         var body = node.apply(ClassLexer.BODY).flatMap(Attribute::asNode)
