@@ -1,14 +1,12 @@
 package com.meti;
 
-import com.meti.lex.ClassLexer;
-import com.meti.lex.DefinitionLexer;
-import com.meti.lex.FieldLexer;
-import com.meti.lex.InvocationLexer;
+import com.meti.lex.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Compiler {
     static String compile(String input) throws CompileException {
@@ -147,25 +145,25 @@ public class Compiler {
 
     private static Optional<String> compileValue(Node value) {
         var value1 = value.findValue().orElseThrow();
-        return compileField(value1)
-                .or(() -> compileInvocation(value1))
+        return compileInvocation(value1)
                 .or(() -> new IntegerCompiler(value1).compileInteger())
                 .or(() -> new StringCompiler(value1).compileString())
                 .or(() -> Optional.of(value1));
     }
 
-    private static Optional<String> compileField(String value) {
-        return new FieldLexer(value)
-                .lex()
-                .flatMap(node -> node.mapParent(Compiler::compileContentToNode))
-                .flatMap(Node::render);
+    private static Optional<Node> lexImpl(String value) {
+        return Stream.<Lexer>of(new FieldLexer(value),
+                        new InvocationLexer(value))
+                .map(Lexer::lex)
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private static Optional<String> compileInvocation(String input) {
-        return new InvocationLexer(input)
-                .lex()
-                .flatMap(node -> node.mapCaller(Compiler::compileContentToNode))
-                .flatMap(node -> node.mapArguments(Compiler::compileContentListToNodes))
+        return lexImpl(input)
+                .map(node -> node.mapCaller(Compiler::compileContentToNode).orElse(node))
+                .map(node -> node.mapArguments(Compiler::compileContentListToNodes).orElse(node))
+                .map(node -> node.mapParent(Compiler::compileContentToNode).orElse(node))
                 .flatMap(Node::render);
     }
 
