@@ -11,11 +11,6 @@ public class NodeAttribute implements Attribute {
     }
 
     @Override
-    public boolean is(String id) {
-        return Id.equals(id);
-    }
-
-    @Override
     public Optional<Node> asNode() {
         return Optional.of(value);
     }

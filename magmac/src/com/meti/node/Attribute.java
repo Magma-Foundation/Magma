@@ -1,5 +1,6 @@
 package com.meti.node;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface Attribute {
@@ -16,7 +17,7 @@ public interface Attribute {
         return Optional.empty();
     }
 
-    default boolean is(String id) {
-        return false;
+    default Optional<List<Node>> asListOfNodes() {
+        return Optional.empty();
     }
 }
