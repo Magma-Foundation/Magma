@@ -1,7 +1,13 @@
 package com.meti;
 
-public interface Node {
-    String findValue();
+import java.util.Optional;
 
-    int findIndent();
+public interface Node {
+    default Optional<String> findValue() {
+        return Optional.empty();
+    }
+
+    default Optional<Integer> findIndent() {
+        return Optional.empty();
+    }
 }

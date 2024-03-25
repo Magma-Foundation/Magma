@@ -20,10 +20,10 @@ public final class ClassNode {
     Optional<String> render() {
         var flagString = flags().contains("public") ? "export " : "";
         String bodyString;
-        if (body.findValue().isEmpty()) {
+        if (body.findValue().orElseThrow().isEmpty()) {
             bodyString = "{}";
         } else {
-            bodyString = "{" + body.findValue() + "\n" + "\t".repeat(indent()) + "}";
+            bodyString = "{" + body.findValue().orElseThrow() + "\n" + "\t".repeat(indent()) + "}";
         }
         return Optional.of(flagString + "class def " + name() + "() => " + bodyString);
     }

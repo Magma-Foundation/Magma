@@ -6,7 +6,7 @@ import java.util.Optional;
 public record DefinitionNode(List<String> flags, String name, String type, Node value) {
     Optional<String> render() {
         var flagsString = String.join(" ", flags());
-        return Optional.of(flagsString + " " + name() + " : " + type() + " = " + value().findValue() + ";");
+        return Optional.of(flagsString + " " + name() + " : " + type() + " = " + this.value().findValue().orElseThrow() + ";");
     }
 
     public Node findValue() {

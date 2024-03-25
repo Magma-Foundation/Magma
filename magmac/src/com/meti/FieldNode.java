@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public record FieldNode(Node parentOutput, String member) {
     Optional<String> render() {
-        return Optional.of(parentOutput().findValue() + "." + member());
+        return Optional.of(this.parentOutput().findValue().orElseThrow() + "." + member());
     }
 
     public FieldNode withParent(Node parent) {

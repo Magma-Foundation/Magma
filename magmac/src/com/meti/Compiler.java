@@ -67,8 +67,8 @@ public class Compiler {
 
     private static ClassNode lexClassAST(ClassNode node) {
         var body2 = node.findBody();
-        var value = body2.findValue();
-        var indent1 = body2.findIndent();
+        var value = body2.findValue().orElseThrow();
+        var indent1 = (int) body2.findIndent().orElseThrow();
 
         var compiledBody = compileStatements(indent1, value);
         return node.withBody(new Content(compiledBody, indent1));
@@ -141,12 +141,12 @@ public class Compiler {
         var outputValue = compileValue(value);
         if (outputValue.isEmpty()) return Optional.empty();
 
-        var withValue = node.withValue(new Content(outputValue.get(), value.findIndent()));
+        var withValue = node.withValue(new Content(outputValue.get(), value.findIndent().orElseThrow()));
         return withValue.render();
     }
 
     private static Optional<String> compileValue(Node value) {
-        var value1 = value.findValue();
+        var value1 = value.findValue().orElseThrow();
         return compileField(value1)
                 .or(() -> compileInvocation(value1))
                 .or(() -> new IntegerCompiler(value1).compileInteger())

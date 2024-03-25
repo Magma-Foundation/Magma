@@ -9,10 +9,10 @@ public record InvocationNode(Node caller, List<Node> arguments) {
     Optional<String> render() {
         var argumentString = arguments()
                 .stream()
-                .map(Node::findValue)
+                .map(node -> node.findValue().orElseThrow())
                 .collect(Collectors.joining(", "));
 
-        return Optional.of("%s(%s)".formatted(caller.findValue(), String.join(", ", argumentString)));
+        return Optional.of("%s(%s)".formatted(caller.findValue().orElseThrow(), String.join(", ", argumentString)));
     }
 
     public InvocationNode withCaller(Node caller) {
