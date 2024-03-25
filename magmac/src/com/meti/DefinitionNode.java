@@ -1,12 +1,15 @@
 package com.meti;
 
+import com.meti.node.Attribute;
+import com.meti.node.Node;
+
 import java.util.List;
 import java.util.Optional;
 
 public record DefinitionNode(List<String> flags, String name, String type, Node value) {
     Optional<String> render() {
         var flagsString = String.join(" ", flags());
-        return Optional.of(flagsString + " " + name() + " : " + type() + " = " + this.value().findValue().orElseThrow() + ";");
+        return Optional.of(flagsString + " " + name() + " : " + type() + " = " + this.value().apply("value").flatMap(Attribute::asString).orElseThrow() + ";");
     }
 
     public Node findValue() {

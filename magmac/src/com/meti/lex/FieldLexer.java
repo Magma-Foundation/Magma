@@ -1,8 +1,8 @@
 package com.meti.lex;
 
-import com.meti.Content;
+import com.meti.node.Content;
 import com.meti.FieldNode;
-import com.meti.Node;
+import com.meti.node.Node;
 
 import java.util.Optional;
 

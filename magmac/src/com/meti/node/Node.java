@@ -1,15 +1,11 @@
-package com.meti;
+package com.meti.node;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 public interface Node {
-    default Optional<String> findValue() {
-        return Optional.empty();
-    }
-
-    default Optional<Integer> findIndent() {
+    default Optional<Attribute> apply(String name) {
         return Optional.empty();
     }
 

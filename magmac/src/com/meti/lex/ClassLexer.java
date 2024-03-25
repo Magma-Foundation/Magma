@@ -1,7 +1,7 @@
 package com.meti.lex;
 
 import com.meti.ClassNode;
-import com.meti.Content;
+import com.meti.node.Content;
 
 import java.util.Collections;
 import java.util.Optional;

@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.node.Attribute;
+import com.meti.node.Node;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -20,10 +23,10 @@ public final class ClassNode {
     Optional<String> render() {
         var flagString = flags().contains("public") ? "export " : "";
         String bodyString;
-        if (body.findValue().orElseThrow().isEmpty()) {
+        if (body.apply("value").flatMap(Attribute::asString).orElseThrow().isEmpty()) {
             bodyString = "{}";
         } else {
-            bodyString = "{" + body.findValue().orElseThrow() + "\n" + "\t".repeat(indent()) + "}";
+            bodyString = "{" + body.apply("value").flatMap(Attribute::asString).orElseThrow() + "\n" + "\t".repeat(indent()) + "}";
         }
         return Optional.of(flagString + "class def " + name() + "() => " + bodyString);
     }

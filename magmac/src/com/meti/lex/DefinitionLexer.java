@@ -1,6 +1,6 @@
 package com.meti.lex;
 
-import com.meti.Content;
+import com.meti.node.Content;
 import com.meti.DefinitionNode;
 import com.meti.TypeCompiler;
 

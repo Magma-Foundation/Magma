@@ -1,6 +1,9 @@
 package com.meti;
 
 import com.meti.lex.*;
+import com.meti.node.Attribute;
+import com.meti.node.Content;
+import com.meti.node.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +68,8 @@ public class Compiler {
 
     private static ClassNode lexClassAST(ClassNode node) {
         var body2 = node.findBody();
-        var value = body2.findValue().orElseThrow();
-        var indent1 = (int) body2.findIndent().orElseThrow();
+        var value = body2.apply("value").flatMap(Attribute::asString).orElseThrow();
+        var indent1 = (int) body2.apply("indent").flatMap(Attribute::asInt).orElseThrow();
 
         var compiledBody = compileStatements(indent1, value);
         return node.withBody(new Content(compiledBody, indent1));
@@ -139,12 +142,12 @@ public class Compiler {
         var outputValue = compileValue(value);
         if (outputValue.isEmpty()) return Optional.empty();
 
-        var withValue = node.withValue(new Content(outputValue.get(), value.findIndent().orElseThrow()));
+        var withValue = node.withValue(new Content(outputValue.get(), value.apply("indent").flatMap(Attribute::asInt).orElseThrow()));
         return withValue.render();
     }
 
     private static Optional<String> compileValue(Node value) {
-        var value1 = value.findValue().orElseThrow();
+        var value1 = value.apply("value").flatMap(Attribute::asString).orElseThrow();
         return compileInvocation(value1)
                 .or(() -> new IntegerCompiler(value1).compileInteger())
                 .or(() -> new StringCompiler(value1).compileString())
@@ -152,7 +155,8 @@ public class Compiler {
     }
 
     private static Optional<Node> lexImpl(String value) {
-        return Stream.<Lexer>of(new FieldLexer(value),
+        return Stream.<Lexer>of(
+                        new FieldLexer(value),
                         new InvocationLexer(value))
                 .map(Lexer::lex)
                 .flatMap(Optional::stream)
