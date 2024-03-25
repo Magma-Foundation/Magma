@@ -17,15 +17,11 @@ public interface Node {
         return Optional.empty();
     }
 
-    default Optional<Node> mapParent(Function<Node, Optional<Node>> mapper) {
+    default Optional<Node> mapNodes(Function<Node, Optional<Node>> mapper) {
         return Optional.empty();
     }
 
-    default Optional<Node> mapCaller(Function<Node, Optional<Node>> mapper) {
-        return Optional.empty();
-    }
-
-    default Optional<Node> mapArguments(Function<List<Node>, Optional<List<Node>>> mapper) {
+    default Optional<Node> mapNodeLists(Function<List<Node>, Optional<List<Node>>> mapper) {
         return Optional.empty();
     }
 }

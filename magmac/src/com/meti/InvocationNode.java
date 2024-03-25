@@ -17,12 +17,12 @@ public record InvocationNode(Node caller, List<Node> arguments) implements Node 
     }
 
     @Override
-    public Optional<Node> mapCaller(Function<Node, Optional<Node>> mapper) {
+    public Optional<Node> mapNodes(Function<Node, Optional<Node>> mapper) {
         return mapper.apply(caller).map(applied -> new InvocationNode(applied, arguments));
     }
 
     @Override
-    public Optional<Node> mapArguments(Function<List<Node>, Optional<List<Node>>> mapper) {
+    public Optional<Node> mapNodeLists(Function<List<Node>, Optional<List<Node>>> mapper) {
         return mapper.apply(arguments).map(applied -> new InvocationNode(caller, applied));
     }
 }

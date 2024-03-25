@@ -161,9 +161,8 @@ public class Compiler {
 
     private static Optional<String> compileInvocation(String input) {
         return lexImpl(input)
-                .map(node -> node.mapCaller(Compiler::compileContentToNode).orElse(node))
-                .map(node -> node.mapArguments(Compiler::compileContentListToNodes).orElse(node))
-                .map(node -> node.mapParent(Compiler::compileContentToNode).orElse(node))
+                .map(node -> node.mapNodes(Compiler::compileContentToNode).orElse(node))
+                .map(node -> node.mapNodeLists(Compiler::compileContentListToNodes).orElse(node))
                 .flatMap(Node::render);
     }
 

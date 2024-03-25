@@ -10,7 +10,7 @@ public record FieldNode(Node parentOutput, String member) implements Node {
     }
 
     @Override
-    public Optional<Node> mapParent(Function<Node, Optional<Node>> mapper) {
+    public Optional<Node> mapNodes(Function<Node, Optional<Node>> mapper) {
         return mapper.apply(parentOutput).map(parent -> new FieldNode(parent, member));
     }
 }
