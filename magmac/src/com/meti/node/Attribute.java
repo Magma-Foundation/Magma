@@ -23,4 +23,8 @@ public interface Attribute {
     default Optional<List<String>> asListOfStrings() {
         return Optional.empty();
     }
+
+    default Optional<Attribute> merge(Attribute value) {
+        return Optional.of(this);
+    }
 }
