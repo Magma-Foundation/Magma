@@ -23,15 +23,20 @@ public record ClassLexer(String input, int indent1) implements Lexer {
         var name = input().substring(classIndex + "class ".length(), input().indexOf('{')).strip();
         var body = input().substring(input().indexOf('{') + 1, bodyEnd).strip();
 
-        var body1 = new Content("definition", body, indent1());
         var isPublic = input().startsWith("public ");
         var inputFlags = isPublic ? List.of("public") : Collections.<String>emptyList();
 
-        return Optional.of(new MapNode("class", Map.of(
+        var indent = new java.util.HashMap<>(Map.of(
                 INDENT, new IntAttribute(this.indent1()),
                 FLAGS, new StringListAttribute(inputFlags),
-                NAME, new StringAttribute(name),
-                BODY, new NodeAttribute(body1)
-        )));
+                NAME, new StringAttribute(name)
+        ));
+
+        if (!body.isEmpty()) {
+            var body1 = new Content("definition", body, indent1());
+            indent.put(BODY, new NodeAttribute(body1));
+        }
+
+        return Optional.of(new MapNode("class", indent));
     }
 }
