@@ -30,6 +30,7 @@ public class Compiler {
                 .orElseThrow();
 
         return new RenderingStage().apply(tree)
-                .orElseThrow(() -> new CompileException("Cannot render: " + tree));
+                .orElseThrow(() -> new CompileException("Cannot render: " + tree))
+                .strip();
     }
 }

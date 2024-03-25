@@ -1,11 +1,11 @@
 package com.meti.java;
 
+import com.meti.Splitter;
 import com.meti.node.*;
+import org.w3c.dom.NodeList;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public record ClassLexer(String input, int indent) implements Lexer {
     public static final String ID = "class";
@@ -33,8 +33,13 @@ public record ClassLexer(String input, int indent) implements Lexer {
         ));
 
         if (!body.isEmpty()) {
-            var body1 = new Content("class-member", body, indent + 1);
-            attributes.put(BODY, new NodeAttribute(body1));
+            var members = Arrays.stream(new Splitter(body).split())
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .<Node>map(child -> new Content("class-member", child, indent + 1))
+                    .collect(Collectors.toList());
+
+            attributes.put(BODY, new NodeListAttribute(members));
         }
 
         return Optional.of(new MapNode("class", attributes));

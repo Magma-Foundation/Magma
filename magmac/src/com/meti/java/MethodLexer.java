@@ -1,11 +1,14 @@
 package com.meti.java;
 
+import com.meti.Splitter;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record MethodLexer(int indent, String input) implements Lexer {
     @Override
@@ -37,8 +40,11 @@ public record MethodLexer(int indent, String input) implements Lexer {
         ));
 
         if (!body.isEmpty()) {
-            var substring = body.substring(0, body.length() - 1);
-            map.put("body", new NodeAttribute(new Content("method-statements", substring, indent + 1)));
+            var lines = Arrays.stream(new Splitter(body.substring(0, body.length() - 1)).split())
+                    .<Node>map(input -> new Content("method-statement", input, indent + 1))
+                    .collect(Collectors.toList());
+
+            map.put("body", new NodeListAttribute(lines));
         }
 
         var method = new MapNode("method", map);

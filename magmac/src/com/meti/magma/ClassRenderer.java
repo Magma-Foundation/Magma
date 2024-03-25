@@ -7,6 +7,7 @@ import com.meti.node.Node;
 import com.meti.stage.Renderer;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ClassRenderer implements Renderer {
     private final Node node;
@@ -20,20 +21,22 @@ public class ClassRenderer implements Renderer {
         if (!node.is(ClassLexer.ID)) return Optional.empty();
 
         var flags = node.apply(ClassLexer.FLAGS).flatMap(Attribute::asListOfStrings).orElseThrow();
-        var body = node.apply(ClassLexer.BODY).flatMap(Attribute::asNode)
-                .flatMap(node -> node.apply(Content.VALUE))
-                .flatMap(Attribute::asString);
+        var body = node.apply(ClassLexer.BODY).flatMap(Attribute::asListOfNodes)
+                .map(node -> node.stream().map(element -> element.apply(Content.VALUE)
+                                .flatMap(Attribute::asString))
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.toList()));
 
         var name = node.apply(ClassLexer.NAME).flatMap(Attribute::asString).orElseThrow();
-        var indent = node.apply(ClassLexer.INDENT).flatMap(Attribute::asInt).orElseThrow();
+        int indent = node.apply(ClassLexer.INDENT).flatMap(Attribute::asInt).orElseThrow();
 
         var flagString = flags.contains("public") ? "export " : "";
         String bodyString;
         if (body.isEmpty()) {
             bodyString = "{}";
         } else {
-            bodyString = "{" + body.orElseThrow() + "\n" + "\t".repeat(indent) + "}";
+            bodyString = "{" + String.join("",  body.orElseThrow()) + "\n" + "\t".repeat(indent) + "}";
         }
-        return Optional.of(flagString + "class def " + name + "() => " + bodyString);
+        return Optional.of("\n" + "\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
     }
 }

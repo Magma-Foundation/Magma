@@ -26,12 +26,12 @@ public class JavaLexingStage extends LexingStage {
                     () -> new ClassLexer(value.value(), value.indent())
             ));
 
-            case "method-statements" -> new DefinitionLexer(innerValue, value.indent());
+            case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
+                    () -> new StringLexer(innerValue),
                     () -> new FieldLexer(innerValue),
                     () -> new InvokeLexer(innerValue),
-                    () -> new IntegerLexer(innerValue),
-                    () -> new StringLexer(innerValue)));
+                    () -> new IntegerLexer(innerValue)));
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };
     }
