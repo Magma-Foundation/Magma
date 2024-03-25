@@ -158,7 +158,7 @@ public class Compiler {
         return new FieldLexer(value)
                 .lex()
                 .flatMap(node -> node.mapParent(Compiler::compileContentToNode))
-                .flatMap(FieldNode::render);
+                .flatMap(Node::render);
     }
 
     private static Optional<String> compileInvocation(String input) {
@@ -166,7 +166,7 @@ public class Compiler {
                 .lex()
                 .flatMap(node -> node.mapCaller(Compiler::compileContentToNode))
                 .flatMap(node -> node.mapArguments(Compiler::compileContentListToNodes))
-                .flatMap(InvocationNode::render);
+                .flatMap(Node::render);
     }
 
     private static Optional<List<Node>> compileContentListToNodes(List<Node> arguments) {

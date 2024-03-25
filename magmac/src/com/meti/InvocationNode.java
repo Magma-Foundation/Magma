@@ -5,8 +5,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record InvocationNode(Node caller, List<Node> arguments) {
-    Optional<String> render() {
+public record InvocationNode(Node caller, List<Node> arguments) implements Node {
+    @Override
+    public Optional<String> render() {
         var argumentString = arguments()
                 .stream()
                 .map(node -> node.findValue().orElseThrow())
@@ -15,19 +16,13 @@ public record InvocationNode(Node caller, List<Node> arguments) {
         return Optional.of("%s(%s)".formatted(caller.findValue().orElseThrow(), String.join(", ", argumentString)));
     }
 
-    public InvocationNode withCaller(Node caller) {
-        return new InvocationNode(caller, arguments);
-    }
-
-    public InvocationNode withArguments(List<Node> arguments) {
-        return new InvocationNode(caller, arguments);
-    }
-
-    public Optional<InvocationNode> mapCaller(Function<Node, Optional<Node>> mapper) {
+    @Override
+    public Optional<Node> mapCaller(Function<Node, Optional<Node>> mapper) {
         return mapper.apply(caller).map(applied -> new InvocationNode(applied, arguments));
     }
 
-    public Optional<InvocationNode> mapArguments(Function<List<Node>, Optional<List<Node>>> mapper) {
+    @Override
+    public Optional<Node> mapArguments(Function<List<Node>, Optional<List<Node>>> mapper) {
         return mapper.apply(arguments).map(applied -> new InvocationNode(caller, applied));
     }
 }
