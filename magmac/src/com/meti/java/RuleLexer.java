@@ -11,7 +11,7 @@ public class RuleLexer implements Lexer {
     private final String value;
     private final String id;
 
-    public RuleLexer(Rule rule, String value, String id) {
+    public RuleLexer(String id, Rule rule, String value) {
         this.rule = rule;
         this.value = value;
         this.id = id;

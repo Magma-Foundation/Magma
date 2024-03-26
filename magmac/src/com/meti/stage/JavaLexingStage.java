@@ -3,15 +3,19 @@ package com.meti.stage;
 import com.meti.ImportLexer;
 import com.meti.java.*;
 import com.meti.node.Content;
-import com.meti.rule.RequireRule;
-import com.meti.rule.Rules;
-import com.meti.rule.TextRule;
+import com.meti.rule.*;
 
 import java.util.List;
 
 import static com.meti.rule.AndRule.And;
 
 public class JavaLexingStage extends LexingStage {
+    public static final Rule STRING = And(new RequireRule("\""),
+            new TextRule("value", Rules.Any),
+            new RequireRule("\""));
+
+    public static final TextRule INT = new TextRule("value", new ListRule(new RangeRule('0', '9')));
+
     @Override
     protected Lexer createLexer(Content value) {
         var innerValue = value.value();
@@ -33,12 +37,10 @@ public class JavaLexingStage extends LexingStage {
 
             case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
-                    () -> new RuleLexer(And(new RequireRule("\""),
-                            new TextRule("value", Rules.Any),
-                            new RequireRule("\"")), innerValue, "string"),
+                    () -> new RuleLexer("string", STRING, innerValue),
                     () -> new FieldLexer(innerValue),
                     () -> new InvokeLexer(innerValue),
-                    () -> new IntegerLexer(innerValue)));
+                    () -> new RuleLexer("int", INT, innerValue)));
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };
     }

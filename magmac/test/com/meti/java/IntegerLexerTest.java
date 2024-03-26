@@ -1,5 +1,8 @@
 package com.meti.java;
 
+import com.meti.rule.ListRule;
+import com.meti.rule.RangeRule;
+import com.meti.rule.TextRule;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class IntegerLexerTest {
     @Test
     void valid(){
-        assertTrue(new IntegerLexer("123")
+        assertTrue(((Lexer) new RuleLexer("int", new TextRule("value", new ListRule(new RangeRule('0', '9'))), "123"))
                 .lex()
                 .isPresent());
     }
 
     @Test
     void invalid() {
-        assertFalse(new IntegerLexer("test")
+        assertFalse(((Lexer) new RuleLexer("int", new TextRule("value", new ListRule(new RangeRule('0', '9'))), "test"))
                 .lex()
                 .isPresent());
     }
