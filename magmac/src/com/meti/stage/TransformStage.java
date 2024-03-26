@@ -47,7 +47,11 @@ public class TransformStage extends Stage<Node, Node> {
         }
 
         if (node.is("method")) {
-            var indent = node.apply("indent").flatMap(Attribute::asInt).orElseThrow();
+            /*
+            TODO: implement stack logic
+             */
+            var indent = node.apply("indent").flatMap(Attribute::asInt).orElse(0);
+
             var body = node.apply("body").flatMap(Attribute::asListOfNodes).orElse(Collections.emptyList());
 
             var newBody = body.stream()
