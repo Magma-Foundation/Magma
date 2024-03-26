@@ -27,7 +27,7 @@ public class AndRule implements Rule {
 
     private Optional<Map<String, Attribute>> apply1(String input) {
         if (input.isEmpty()) {
-            if (left.lex(input).map(tuple1 -> tuple1.b()).isPresent() && right.lex(input).map(tuple -> tuple.b()).isPresent()) {
+            if (left.lex(input).map(Tuple::b).isPresent() && right.lex(input).map(Tuple::b).isPresent()) {
                 return Optional.of(Collections.emptyMap());
             } else {
                 return Optional.empty();
@@ -38,15 +38,13 @@ public class AndRule implements Rule {
             var left = input.substring(0, i);
             var right = input.substring(i);
 
-            var leftOptional = this.left.lex(left).map(tuple1 -> tuple1.b());
+            var leftOptional = this.left.lex(left).map(Tuple::b);
             if (leftOptional.isPresent()) {
-                var rightOptional = this.right.lex(right).map(tuple -> tuple.b());
+                var rightOptional = this.right.lex(right).map(Tuple::b);
 
                 if (rightOptional.isPresent()) {
                     var stringAttributeMap = new HashMap<>(leftOptional.get());
-                    rightOptional.get().forEach((key, value) -> {
-                        stringAttributeMap.merge(key, value, Attribute::merge);
-                    });
+                    rightOptional.get().forEach((key, value) -> stringAttributeMap.merge(key, value, Attribute::merge));
 
                     return Optional.of(stringAttributeMap);
                 }
