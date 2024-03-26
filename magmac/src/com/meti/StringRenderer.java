@@ -1,6 +1,5 @@
 package com.meti;
 
-import com.meti.java.StringLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Node;
 import com.meti.stage.Renderer;
@@ -16,8 +15,8 @@ public class StringRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if(node.is(StringLexer.ID)) {
-            return node.apply(StringLexer.VALUE)
+        if(node.is("string")) {
+            return node.apply("value")
                     .flatMap(Attribute::asString)
                     .map(value -> "\"" + value + "\"");
         } else {

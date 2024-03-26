@@ -3,8 +3,13 @@ package com.meti.stage;
 import com.meti.ImportLexer;
 import com.meti.java.*;
 import com.meti.node.Content;
+import com.meti.rule.RequireRule;
+import com.meti.rule.Rules;
+import com.meti.rule.TextRule;
 
 import java.util.List;
+
+import static com.meti.rule.AndRule.And;
 
 public class JavaLexingStage extends LexingStage {
     @Override
@@ -28,7 +33,9 @@ public class JavaLexingStage extends LexingStage {
 
             case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
-                    () -> new StringLexer(innerValue),
+                    () -> new RuleLexer(And(new RequireRule("\""),
+                            new TextRule("value", Rules.Any),
+                            new RequireRule("\"")), innerValue, "string"),
                     () -> new FieldLexer(innerValue),
                     () -> new InvokeLexer(innerValue),
                     () -> new IntegerLexer(innerValue)));
