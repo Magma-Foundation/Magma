@@ -107,11 +107,8 @@ public class JavaLexingStage extends LexingStage {
                     () -> new RuleLexer("class", value.value(), CLASS_RULE),
                     () -> new NamedLexer(value.value(), IMPORT_RULE)
             ));
-            case "class" -> new RuleLexer("class", innerValue, CLASS_RULE);
 
-            /*
-            TODO: statements
-             */
+            case "class" -> new RuleLexer("class", innerValue, CLASS_RULE);
             case "class-member" -> new NamedLexer(innerValue, CLASS_MEMBER);
 
             case "method-statement" -> new NamedLexer(innerValue, METHOD_STATEMENT);
