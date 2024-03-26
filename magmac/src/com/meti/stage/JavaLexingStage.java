@@ -51,6 +51,19 @@ public class JavaLexingStage extends LexingStage {
     public static final Rule METHOD_STATEMENT = OrRule.Or(
             new NamedRule("definition", DEFINITION_RULE)
     );
+    public static final Rule METHOD = And(
+            new NodeRule("type", new NamedRule("type", new ExtractTextRule("value", Rules.Enum(
+                    "String",
+                    "void",
+                    "long",
+                    "int"
+            )))),
+            WHITESPACE,
+            Rules.ExtractSymbol("name"),
+            new RequireRule("(){"),
+            new ListDelimitingRule(new RequireRule(";"), new NodeElementRule("body", METHOD_STATEMENT)),
+            new RequireRule("}")
+    );
 
     @Override
     protected Lexer createLexer(Content value) {
@@ -66,7 +79,7 @@ public class JavaLexingStage extends LexingStage {
             TODO: statements
              */
             case "class-member" -> new CompoundLexer(List.of(
-                    () -> MethodLexer.createMethodLexer(value.value()),
+                    () -> new RuleLexer("method", value.value(), METHOD),
                     () -> new RuleLexer("definition", value.value(), DEFINITION_RULE),
                     () -> new ClassLexer(value.value(), value.indent())
             ));

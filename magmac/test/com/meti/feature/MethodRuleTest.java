@@ -2,14 +2,14 @@ package com.meti.feature;
 
 import com.meti.FeatureTest;
 import com.meti.Tuple;
-import com.meti.java.MethodLexer;
+import com.meti.stage.JavaLexingStage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MethodRuleTest extends FeatureTest {
     private static void assertMethod(String input) {
-        assertTrue(MethodLexer.RULE.apply(input).map(Tuple::b).isPresent());
+        assertTrue(JavaLexingStage.METHOD.apply(input).map(Tuple::b).isPresent());
     }
 
     @Test
