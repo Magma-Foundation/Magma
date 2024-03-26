@@ -3,10 +3,7 @@ package com.meti.stage;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ParsingStage extends TransformingStage {
@@ -24,7 +21,7 @@ public class ParsingStage extends TransformingStage {
     }
 
     @Override
-    protected Optional<Node> onExit(Node node) {
+    protected Optional<Node> onExit(Node node, Stack<Node> b) {
         if(node.is("type")) {
             var value = node.apply("value").flatMap(Attribute::asString).orElseThrow();
             var result = new TypeCompiler(value).compile();

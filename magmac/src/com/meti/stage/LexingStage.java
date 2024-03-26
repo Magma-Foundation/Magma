@@ -5,6 +5,7 @@ import com.meti.node.Content;
 import com.meti.node.Node;
 
 import java.util.Optional;
+import java.util.Stack;
 
 public abstract class LexingStage extends Stage<Content, Node> {
     @Override
@@ -15,12 +16,12 @@ public abstract class LexingStage extends Stage<Content, Node> {
     protected abstract Lexer createLexer(Content value);
 
     @Override
-    protected Optional<Node> onExit(Node node) {
+    protected Optional<Node> onExit(Node node, Stack<Node> b) {
         return Optional.of(node);
     }
 
     @Override
-    public Optional<Node> applyToNode(Node node) {
+    public Optional<Node> applyToNode(Node node, Stack<Node> b) {
         if (node instanceof Content result) {
             return apply(result);
         } else {
