@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-public class NodeListRule implements Rule {
+public class ExtractNodeElementRule implements Rule {
     private final String nodeType;
     private final String attributeName;
     private final int indent;
 
-    public NodeListRule(String attributeName, String nodeType, int indent) {
+    public ExtractNodeElementRule(String attributeName, String nodeType, int indent) {
         this.nodeType = nodeType;
         this.attributeName = attributeName;
         this.indent = indent;

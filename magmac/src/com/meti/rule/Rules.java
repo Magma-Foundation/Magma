@@ -18,8 +18,8 @@ public class Rules {
     };
     public static Rule Any = input -> Optional.of(new HashMap<>());
 
-    public static Rule Symbol(String name) {
-        return new TextRule(name, new AndRule(ALPHABETIC, new ListRule(ALPHANUMERIC)));
+    public static Rule ExtractSymbol(String name) {
+        return new ExtractTextRule(name, new AndRule(ALPHABETIC, new ListRule(ALPHANUMERIC)));
     }
 
     public static Rule Enum(String first, String... more) {

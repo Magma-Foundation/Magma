@@ -6,11 +6,11 @@ import com.meti.node.StringAttribute;
 import java.util.Map;
 import java.util.Optional;
 
-public class TextRule implements Rule {
+public class ExtractTextRule implements Rule {
     private final Rule required;
     private final String name;
 
-    public TextRule(String name, Rule required) {
+    public ExtractTextRule(String name, Rule required) {
         this.required = required;
         this.name = name;
     }

@@ -3,7 +3,7 @@ package com.meti.feature;
 import com.meti.FeatureTest;
 import org.junit.jupiter.api.Test;
 
-public class MethodTest extends FeatureTest {
+public class MethodFeatureTest extends FeatureTest {
     private static void assertMethod(String input, String output) {
         assertCompile("class Test {" + input + "}",
                 "class def Test() => {\n" +

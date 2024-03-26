@@ -3,6 +3,7 @@ package com.meti.java;
 import com.meti.Splitter;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
+import com.meti.rule.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +12,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record MethodLexer(int indent, String input) implements Lexer {
+
+    public static final Rule RULE = AndRule.And(
+            Rules.ExtractSymbol("type"),
+            WhitespaceRule.WHITESPACE,
+            Rules.ExtractSymbol("name"),
+            new RequireRule("(){"),
+            new ListRule(new ExtractNodeElementRule("body", "statement", 0)),
+            new RequireRule("}")
+    );
+
+    public static Lexer createMethodLexer(int indent, String value) {
+        return new RuleLexer("method", value, RULE);
+    }
+
     @Override
     public Optional<Node> lex() {
         var paramStart = input().indexOf('(');

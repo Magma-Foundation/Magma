@@ -11,22 +11,22 @@ import static com.meti.rule.AndRule.And;
 
 public class JavaLexingStage extends LexingStage {
     public static final Rule STRING = And(new RequireRule("\""),
-            new TextRule("value", Rules.Any),
+            new ExtractTextRule("value", Rules.Any),
             new RequireRule("\""));
 
-    public static final TextRule INT = new TextRule("value", new ListRule(new RangeRule('0', '9')));
+    public static final ExtractTextRule INT = new ExtractTextRule("value", new ListRule(new RangeRule('0', '9')));
 
     public static final Rule INVOKE = And(
-            new NodeRule("caller", "value", 0),
+            new ContentRule("caller", "value", 0),
             new RequireRule("("),
-            new ListRule(new NodeListRule("arguments", "value", 0)),
+            new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
             new RequireRule(")")
     );
 
     private final Rule FIELD = And(
-            new NodeRule("parent", "value", 0),
+            new ContentRule("parent", "value", 0),
             new RequireRule("."),
-            Rules.Symbol("member")
+            Rules.ExtractSymbol("member")
     );
 
     @Override
@@ -43,7 +43,7 @@ public class JavaLexingStage extends LexingStage {
             TODO: statements
              */
             case "class-member" -> new CompoundLexer(List.of(
-                    () -> new MethodLexer(value.indent(), value.value()),
+                    () -> MethodLexer.createMethodLexer(value.indent(), value.value()),
                     () -> DefinitionLexer.createDefinitionLexer(value.value(), value.indent()),
                     () -> new ClassLexer(value.value(), value.indent())
             ));

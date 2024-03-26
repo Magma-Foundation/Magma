@@ -7,8 +7,7 @@ class ListDelimitingRuleTest {
     @Test
     void empty() {
         var apply = new ListDelimitingRule(
-                new RequireRule("final"),
-                new RequireRule(" ")
+                new RequireRule(" "), new RequireRule("final")
         ).apply("").isPresent();
         Assertions.assertTrue(apply);
     }
@@ -16,8 +15,7 @@ class ListDelimitingRuleTest {
     @Test
     void once() {
         var apply = new ListDelimitingRule(
-                new RequireRule("final"),
-                new RequireRule(" ")
+                new RequireRule(" "), new RequireRule("final")
         ).apply("final").isPresent();
         Assertions.assertTrue(apply);
     }
@@ -25,8 +23,7 @@ class ListDelimitingRuleTest {
     @Test
     void twice() {
         var apply = new ListDelimitingRule(
-                new RequireRule("final"),
-                new RequireRule(" ")
+                new RequireRule(" "), new RequireRule("final")
         ).apply("final final").isPresent();
         Assertions.assertTrue(apply);
     }

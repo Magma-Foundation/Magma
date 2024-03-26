@@ -24,34 +24,34 @@ public class InvocationRuleTest extends FeatureTest {
 
     @Test
     void simple0() {
-        assertValid("empty", new NodeRule("caller", "value", 0));
+        assertValid("empty", new ContentRule("caller", "value", 0));
     }
 
     @Test
     void simple1() {
         assertValid("empty(", And(
-                new NodeRule("caller", "value", 0),
+                new ContentRule("caller", "value", 0),
                 new RequireRule("(")));
     }
 
     @Test
     void simple2() {
         assertValid("empty(", And(
-                new NodeRule("caller", "value", 0),
+                new ContentRule("caller", "value", 0),
                 new RequireRule("("),
-                new ListRule(new NodeListRule("arguments", "value", 0))));
+                new ListRule(new ExtractNodeElementRule("arguments", "value", 0))));
     }
 
     @Test
     void simple3() {
-        assertValid("", new ListRule(new NodeListRule("arguments", "value", 0)));
+        assertValid("", new ListRule(new ExtractNodeElementRule("arguments", "value", 0)));
     }
 
     @Test
     void simple4() {
         assertValid("(", And(
                 new RequireRule("("),
-                new ListRule(new NodeListRule("arguments", "value", 0))));
+                new ListRule(new ExtractNodeElementRule("arguments", "value", 0))));
     }
 
     @Test

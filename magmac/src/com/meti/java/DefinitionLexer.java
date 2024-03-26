@@ -27,15 +27,15 @@ public final class DefinitionLexer implements Lexer {
 
     public static Lexer createDefinitionLexer(String value, int indent) {
         RULE = AndRule.And(
-                new ListDelimitingRule(new StringListRule("flags", Rules.Enum("public", "final")), WHITESPACE),
+                new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
                 PADDING,
-                Rules.Symbol(TYPE),
+                Rules.ExtractSymbol(TYPE),
                 WHITESPACE,
-                Rules.Symbol(NAME),
+                Rules.ExtractSymbol(NAME),
                 PADDING,
                 new RequireRule("="),
                 PADDING,
-                new NodeRule(VALUE, "value", indent)
+                new ContentRule(VALUE, "value", indent)
         );
 
         return new RuleLexer(ID, value, RULE);

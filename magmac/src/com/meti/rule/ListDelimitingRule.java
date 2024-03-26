@@ -3,7 +3,7 @@ package com.meti.rule;
 public class ListDelimitingRule extends ListRule {
     private final Rule delimiter;
 
-    public ListDelimitingRule(Rule value, Rule delimiter) {
+    public ListDelimitingRule(Rule delimiter, Rule value) {
         super(value);
         this.delimiter = delimiter;
     }
