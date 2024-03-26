@@ -3,6 +3,7 @@ package com.meti.stage;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,12 @@ public class TransformStage extends Stage<Node, Node> {
 
     @Override
     protected Optional<Node> onExit(Node node) {
+        if(node.is("type")) {
+            var value = node.apply("value").flatMap(Attribute::asString).orElseThrow();
+            var result = new TypeCompiler(value).compile();
+            return Optional.of(node.replace("value", new StringAttribute(result)));
+        }
+
         if (node.is("class")) {
             var indent = node.apply("indent").flatMap(Attribute::asInt).orElseThrow();
             var body = node.apply("body").flatMap(Attribute::asListOfNodes).orElse(Collections.emptyList());

@@ -14,16 +14,21 @@ import java.util.stream.Collectors;
 public record MethodLexer(int indent, String input) implements Lexer {
 
     public static final Rule RULE = AndRule.And(
-            Rules.ExtractSymbol("type"),
+            new NodeRule("type", new NamedRule("type", new ExtractTextRule("value", Rules.Enum(
+                    "String",
+                    "void",
+                    "long",
+                    "int"
+            )))),
             WhitespaceRule.WHITESPACE,
             Rules.ExtractSymbol("name"),
             new RequireRule("(){"),
-            new ListRule(new ExtractNodeElementRule("body", "statement", 0)),
+            new ListRule(new ExtractNodeElementRule("body", "method-statement", 0)),
             new RequireRule("}")
     );
 
-    public static Lexer createMethodLexer(int indent, String value) {
-        return new MethodLexer(indent, value);
+    public static Lexer createMethodLexer(String value) {
+        return new RuleLexer("method", value, RULE);
     }
 
     @Override

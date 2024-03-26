@@ -20,7 +20,11 @@ public record MethodRenderer(Node root) implements Renderer {
         var indent = root().apply("indent").flatMap(Attribute::asInt).orElse(0);
 
         var name = root().apply("name").flatMap(Attribute::asString).orElseThrow();
-        var type = root().apply("type").flatMap(Attribute::asString).orElseThrow();
+        var type = root.apply("type")
+                .flatMap(Attribute::asNode)
+                .flatMap(node -> node.apply("value"))
+                .flatMap(Attribute::asString)
+                .orElseThrow();
 
         String wrappedBody;
         if (actualBody.isEmpty()) {
