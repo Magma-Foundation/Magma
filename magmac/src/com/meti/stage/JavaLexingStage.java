@@ -109,9 +109,6 @@ public class JavaLexingStage extends LexingStage {
             ));
 
             case "class" -> new RuleLexer("class", innerValue, CLASS_RULE);
-            case "class-member" -> new NamedLexer(innerValue, CLASS_MEMBER);
-
-            case "method-statement" -> new NamedLexer(innerValue, METHOD_STATEMENT);
             case "value" -> new NamedLexer(innerValue, VALUE_NODE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
