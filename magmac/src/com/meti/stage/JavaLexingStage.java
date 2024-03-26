@@ -54,6 +54,7 @@ public class JavaLexingStage extends LexingStage {
                     () -> new RuleLexer("field", innerValue, FIELD),
                     () -> new RuleLexer("invoke", innerValue, INVOKE),
                     () -> new RuleLexer("int", innerValue, INT)));
+
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };
     }

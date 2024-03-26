@@ -23,7 +23,7 @@ public record MethodLexer(int indent, String input) implements Lexer {
     );
 
     public static Lexer createMethodLexer(int indent, String value) {
-        return new RuleLexer("method", value, RULE);
+        return new MethodLexer(indent, value);
     }
 
     @Override
