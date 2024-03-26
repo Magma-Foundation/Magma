@@ -12,7 +12,7 @@ public record IntegerRenderer(Node node1) implements Renderer {
     public Optional<String> render() {
         if(node1().is(IntegerLexer.Id)) {
             return node1().apply(IntegerLexer.VALUE)
-                    .flatMap(Attribute::asInt)
+                    .flatMap(Attribute::asString)
                     .map(String::valueOf);
         }
         return Optional.empty();
