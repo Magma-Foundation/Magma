@@ -29,7 +29,7 @@ public class JavaLexingStage extends LexingStage {
             Rules.ExtractSymbol("member")
     );
 
-    private static final Rule VALUE = OrRule.Or(
+    public static final Rule VALUE_NODE = OrRule.Or(
             new NamedRule("string", STRING),
             new NamedRule("field", FIELD),
             new NamedRule("invoke", INVOKE),
@@ -56,7 +56,7 @@ public class JavaLexingStage extends LexingStage {
             ));
 
             case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue, value.indent());
-            case "value" -> new NamedLexer(innerValue, VALUE);
+            case "value" -> new NamedLexer(innerValue, VALUE_NODE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };

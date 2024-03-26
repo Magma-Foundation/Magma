@@ -15,21 +15,16 @@ public abstract class LexingStage extends Stage<Content, Node> {
     protected abstract Lexer createLexer(Content value);
 
     @Override
-    protected Node createOutput(Node o) {
-        return o;
-    }
-
-    @Override
     protected Optional<Node> onExit(Node node) {
         return Optional.of(node);
     }
 
     @Override
-    protected Content createInput(Node node) {
-        if (node instanceof Content) {
-            return (Content) node;
+    public Optional<Node> applyToNode(Node node) {
+        if (node instanceof Content result) {
+            return apply(result);
         } else {
-            throw new UnsupportedOperationException();
+            return Optional.of(node);
         }
     }
 }

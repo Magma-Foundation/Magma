@@ -11,13 +11,11 @@ public abstract class MagmaRenderingStage extends Stage<Node, String> {
         return Optional.of(value);
     }
 
-    @Override
-    protected Node createOutput(String o) {
+    private Node createOutput(String o) {
         return new Content("?", o, 0);
     }
 
-    @Override
-    protected Node createInput(Node node) {
+    private Node createInput(Node node) {
         return node;
     }
 
@@ -27,4 +25,9 @@ public abstract class MagmaRenderingStage extends Stage<Node, String> {
     }
 
     protected abstract Renderer createRenderer(Node node);
+
+    @Override
+    public Optional<Node> applyToNode(Node node) {
+        return apply(createInput(node)).map(this::createOutput);
+    }
 }

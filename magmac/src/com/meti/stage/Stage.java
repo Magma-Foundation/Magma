@@ -23,13 +23,7 @@ public abstract class Stage<I, O> {
         return Optional.of(flattened);
     }
 
-    public Optional<Node> applyToNode(Node node) {
-        return apply(createInput(node)).map(this::createOutput);
-    }
-
-    protected abstract Node createOutput(O o);
-
-    protected abstract I createInput(Node node);
+    public abstract Optional<Node> applyToNode(Node node);
 
     public Optional<O> apply(I root) {
         return onEnter(root)

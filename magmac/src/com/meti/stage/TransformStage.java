@@ -23,13 +23,11 @@ public class TransformStage extends Stage<Node, Node> {
         return Optional.of(value);
     }
 
-    @Override
-    protected Node createOutput(Node o) {
+    private Node createOutput(Node o) {
         return o;
     }
 
-    @Override
-    protected Node createInput(Node node) {
+    private Node createInput(Node node) {
         return node;
     }
 
@@ -85,5 +83,10 @@ public class TransformStage extends Stage<Node, Node> {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Node> applyToNode(Node node) {
+        return apply(createInput(node)).map(this::createOutput);
     }
 }

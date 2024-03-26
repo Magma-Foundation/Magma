@@ -3,11 +3,13 @@ package com.meti.java;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
 import com.meti.rule.*;
+import com.meti.stage.JavaLexingStage;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.meti.rule.WhitespaceRule.*;
+import static com.meti.rule.WhitespaceRule.PADDING;
+import static com.meti.rule.WhitespaceRule.WHITESPACE;
 
 public final class DefinitionLexer implements Lexer {
     public static final String ID = "definition";
@@ -35,7 +37,7 @@ public final class DefinitionLexer implements Lexer {
                 PADDING,
                 new RequireRule("="),
                 PADDING,
-                new ContentRule(VALUE, "value", indent)
+                new NodeRule("value", JavaLexingStage.VALUE_NODE)
         );
 
         return new RuleLexer(ID, value, RULE);
