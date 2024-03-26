@@ -2,10 +2,7 @@ package com.meti.java;
 
 import com.meti.node.MapNode;
 import com.meti.node.Node;
-import com.meti.rule.ListRule;
-import com.meti.rule.OrRule;
-import com.meti.rule.RequireRule;
-import com.meti.rule.Rule;
+import com.meti.rule.*;
 
 import java.util.Optional;
 

@@ -24,7 +24,7 @@ public interface Attribute {
         return Optional.empty();
     }
 
-    default Optional<Attribute> merge(Attribute value) {
-        return Optional.of(this);
+    default Attribute merge(Attribute value) {
+        return this;
     }
 }

@@ -2,12 +2,11 @@ package com.meti.rule;
 
 import com.meti.node.Attribute;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 public class ListRule implements Rule {
-    private final Rule value;
+    protected final Rule value;
 
     public ListRule(Rule value) {
         this.value = value;
@@ -15,8 +14,13 @@ public class ListRule implements Rule {
 
     @Override
     public Optional<Map<String, Attribute>> apply(String input) {
-        if (input.isEmpty()) return Optional.of(Collections.emptyMap());
+        var lazy = new LazyRule();
+        var root = OrRule.Or(Rules.Empty, value, createAnd(lazy));
+        lazy.setValue(root);
+        return root.apply(input);
+    }
 
-        return value.apply(input);
+    protected Rule createAnd(LazyRule lazy) {
+        return new AndRule(value, lazy);
     }
 }
