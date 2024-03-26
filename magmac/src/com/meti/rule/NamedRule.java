@@ -16,7 +16,12 @@ public class NamedRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
-        return inner.apply(input).map(value -> value.replaceLeft(Optional.of(name)));
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return inner.lex(input).map(value -> value.replaceLeft(Optional.of(name)));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

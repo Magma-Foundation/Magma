@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MethodRuleTest extends FeatureTest {
     private static void assertMethod(String input) {
-        assertTrue(JavaLexingStage.METHOD_RULE.apply(input).map(Tuple::b).isPresent());
+        assertTrue(JavaLexingStage.METHOD_RULE.lex(input).map(Tuple::b).isPresent());
     }
 
     @Test

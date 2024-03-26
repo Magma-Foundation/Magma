@@ -17,6 +17,6 @@ public class NamedLexer implements Lexer {
 
     @Override
     public Optional<Node> lex() {
-        return rule.apply(input).map(tuple -> new MapNode(tuple.a().orElseThrow(), tuple.b()));
+        return rule.lex(input).map(tuple -> new MapNode(tuple.a().orElseThrow(), tuple.b()));
     }
 }

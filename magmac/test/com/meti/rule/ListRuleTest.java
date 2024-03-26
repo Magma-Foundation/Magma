@@ -8,35 +8,35 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ListRuleTest {
     @Test
     void empty() {
-        var present = new ListRule(new RequireRule("test")).apply("").map(tuple -> tuple.b())
+        var present = new ListRule(new RequireRule("test")).lex("").map(tuple -> tuple.b())
                 .isPresent();
         assertTrue(present);
     }
 
     @Test
     void once() {
-        var present = new ListRule(new RequireRule("test")).apply("test").map(tuple -> tuple.b())
+        var present = new ListRule(new RequireRule("test")).lex("test").map(tuple -> tuple.b())
                 .isPresent();
         assertTrue(present);
     }
 
     @Test
     void twice() {
-        var present = new ListRule(new RequireRule("00")).apply("0000").map(tuple -> tuple.b())
+        var present = new ListRule(new RequireRule("00")).lex("0000").map(tuple -> tuple.b())
                 .isPresent();
         assertTrue(present);
     }
 
     @Test
     void thrice() {
-        var present = new ListRule(new RequireRule("000000")).apply("000000").map(tuple -> tuple.b())
+        var present = new ListRule(new RequireRule("000000")).lex("000000").map(tuple -> tuple.b())
                 .isPresent();
         assertTrue(present);
     }
 
     @Test
     void invalid() {
-        assertFalse(new ListRule(new RequireRule("0")).apply("test").map(tuple -> tuple.b())
+        assertFalse(new ListRule(new RequireRule("0")).lex("test").map(tuple -> tuple.b())
                 .isPresent());
     }
 }

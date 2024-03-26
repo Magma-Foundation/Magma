@@ -21,7 +21,12 @@ public class OrRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
-        return first.apply(input).or(() -> second.apply(input));
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return first.lex(input).or(() -> second.lex(input));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -7,5 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface Rule {
-    Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input);
+    Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input);
+
+    Optional<String> render(Map<String, Attribute> attributes);
 }

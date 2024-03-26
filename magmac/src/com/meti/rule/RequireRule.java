@@ -20,7 +20,12 @@ public class RequireRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -10,11 +10,11 @@ import static com.meti.rule.AndRule.And;
 
 public class InvocationRuleTest extends FeatureTest {
     private static void assertInvocation(String input) {
-        Assertions.assertTrue(JavaLexingStage.INVOKE.apply(input).map(tuple -> tuple.b()).isPresent());
+        Assertions.assertTrue(JavaLexingStage.INVOKE.lex(input).map(tuple -> tuple.b()).isPresent());
     }
 
     private static void assertValid(String value, Rule rule) {
-        Assertions.assertTrue(rule.apply(value).map(tuple -> tuple.b()).isPresent());
+        Assertions.assertTrue(rule.lex(value).map(tuple -> tuple.b()).isPresent());
     }
 
     @Test

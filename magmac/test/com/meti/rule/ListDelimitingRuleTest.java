@@ -9,7 +9,7 @@ class ListDelimitingRuleTest {
         Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
         );
-        var apply = rule.apply("").map(tuple -> tuple.b()).isPresent();
+        var apply = rule.lex("").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 
@@ -18,7 +18,7 @@ class ListDelimitingRuleTest {
         Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
         );
-        var apply = rule.apply("final").map(tuple -> tuple.b()).isPresent();
+        var apply = rule.lex("final").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 
@@ -27,7 +27,7 @@ class ListDelimitingRuleTest {
         Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
         );
-        var apply = rule.apply("final final").map(tuple -> tuple.b()).isPresent();
+        var apply = rule.lex("final final").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 }

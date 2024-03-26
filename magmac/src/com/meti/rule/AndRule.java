@@ -27,7 +27,7 @@ public class AndRule implements Rule {
 
     private Optional<Map<String, Attribute>> apply1(String input) {
         if (input.isEmpty()) {
-            if (left.apply(input).map(tuple1 -> tuple1.b()).isPresent() && right.apply(input).map(tuple -> tuple.b()).isPresent()) {
+            if (left.lex(input).map(tuple1 -> tuple1.b()).isPresent() && right.lex(input).map(tuple -> tuple.b()).isPresent()) {
                 return Optional.of(Collections.emptyMap());
             } else {
                 return Optional.empty();
@@ -38,9 +38,9 @@ public class AndRule implements Rule {
             var left = input.substring(0, i);
             var right = input.substring(i);
 
-            var leftOptional = this.left.apply(left).map(tuple1 -> tuple1.b());
+            var leftOptional = this.left.lex(left).map(tuple1 -> tuple1.b());
             if (leftOptional.isPresent()) {
-                var rightOptional = this.right.apply(right).map(tuple -> tuple.b());
+                var rightOptional = this.right.lex(right).map(tuple -> tuple.b());
 
                 if (rightOptional.isPresent()) {
                     var stringAttributeMap = new HashMap<>(leftOptional.get());
@@ -57,7 +57,12 @@ public class AndRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

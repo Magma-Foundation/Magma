@@ -19,6 +19,6 @@ public class RuleLexer implements Lexer {
 
     @Override
     public Optional<Node> lex() {
-        return rule.apply(value).map(tuple -> tuple.b()).map(attributes -> new MapNode(id, attributes));
+        return rule.lex(value).map(tuple -> tuple.b()).map(attributes -> new MapNode(id, attributes));
     }
 }

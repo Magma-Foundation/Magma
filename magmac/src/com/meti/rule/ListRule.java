@@ -17,7 +17,7 @@ public class ListRule implements Rule {
         var lazy = new LazyRule();
         var root = OrRule.Or(Rules.EMPTY, value, createAnd(lazy));
         lazy.set(root);
-        return root.apply(input).map(tuple -> tuple.b());
+        return root.lex(input).map(tuple -> tuple.b());
     }
 
     protected Rule createAnd(LazyRule lazy) {
@@ -25,7 +25,12 @@ public class ListRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

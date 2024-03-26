@@ -17,7 +17,7 @@ public class ExtractTextRule implements Rule {
     }
 
     private Optional<Map<String, Attribute>> apply1(String input) {
-        if (required.apply(input).map(tuple -> tuple.b()).isPresent()) {
+        if (required.lex(input).map(tuple -> tuple.b()).isPresent()) {
             return Optional.of(Map.of(name, new StringAttribute(input)));
         } else {
             return Optional.empty();
@@ -25,7 +25,12 @@ public class ExtractTextRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

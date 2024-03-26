@@ -14,11 +14,16 @@ public class LazyRule implements Rule {
     }
 
     private Optional<Map<String, Attribute>> apply1(String input) {
-        return value.flatMap(internal -> internal.apply(input).map(tuple -> tuple.b()));
+        return value.flatMap(internal -> internal.lex(input).map(tuple -> tuple.b()));
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }
