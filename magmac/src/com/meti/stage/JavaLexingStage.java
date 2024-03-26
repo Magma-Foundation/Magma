@@ -23,10 +23,17 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule(")")
     );
 
-    private final Rule FIELD = And(
+    private static final Rule FIELD = And(
             new ContentRule("parent", "value", 0),
             new RequireRule("."),
             Rules.ExtractSymbol("member")
+    );
+
+    private static final Rule VALUE = OrRule.Or(
+            new NamedRule("string", STRING),
+            new NamedRule("field", FIELD),
+            new NamedRule("invoke", INVOKE),
+            new NamedRule("int", INT)
     );
 
     @Override
@@ -49,12 +56,7 @@ public class JavaLexingStage extends LexingStage {
             ));
 
             case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue, value.indent());
-            case "value" -> new WrappedLexer(innerValue, OrRule.Or(
-                    new NodeRule("value", "string", STRING),
-                    new NodeRule("value", "field", FIELD),
-                    new NodeRule("value", "invoke", INVOKE),
-                    new NodeRule("value", "int", INT)
-            ));
+            case "value" -> new NamedLexer(innerValue, VALUE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };
