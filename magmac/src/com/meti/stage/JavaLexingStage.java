@@ -40,7 +40,7 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule("."),
             Rules.ExtractSymbol("member")
     );
-    public static final Rule VALUE_NODE = OrRule.Or(
+    public static final Rule VALUE_RULE = OrRule.Or(
             new NamedRule("string", STRING),
             new NamedRule("field", FIELD),
             new NamedRule("invoke", INVOKE),
@@ -55,7 +55,7 @@ public class JavaLexingStage extends LexingStage {
             PADDING,
             new RequireRule("="),
             PADDING,
-            new NodeRule("value", VALUE_NODE)
+            new NodeRule("value", VALUE_RULE)
     );
     public static final Rule METHOD_STATEMENT = OrRule.Or(
             new NamedRule("definition", DEFINITION_RULE)
