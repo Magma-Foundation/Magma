@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class WhitespaceRule implements Rule {
     public static final Rule WHITESPACE = new WhitespaceRule();
-    public static final Rule PADDING = new OrRule(Rules.EMPTY, WHITESPACE);
+    public static final Rule PADDING = new OrRule(EmptyRule.EMPTY, WHITESPACE);
 
     private WhitespaceRule() {
     }

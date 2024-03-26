@@ -13,7 +13,7 @@ import static com.meti.rule.WhitespaceRule.WHITESPACE;
 
 public class JavaLexingStage extends LexingStage {
     public static final Rule STRING = And(new RequireRule("\""),
-            new ExtractTextRule("value", Rules.Any),
+            new ExtractTextRule("value", AnyRule.Any),
             new RequireRule("\""));
 
     public static final ExtractTextRule INT = new ExtractTextRule("value", new ListRule(new RangeRule('0', '9')));
