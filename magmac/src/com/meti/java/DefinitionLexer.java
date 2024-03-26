@@ -18,7 +18,17 @@ public final class DefinitionLexer implements Lexer {
     public static final String NAME = "name";
     public static final String TYPE = "type";
     public static final String VALUE = "value";
-    private static Rule RULE;
+    private static Rule DEFINITION_RULE = AndRule.And(
+            new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
+            PADDING,
+            Rules.ExtractSymbol(TYPE),
+            WHITESPACE,
+            Rules.ExtractSymbol(NAME),
+            PADDING,
+            new RequireRule("="),
+            PADDING,
+            new NodeRule("value", JavaLexingStage.VALUE_NODE)
+    );
     private final String body;
     private final int indent;
 
@@ -27,20 +37,8 @@ public final class DefinitionLexer implements Lexer {
         this.indent = indent;
     }
 
-    public static Lexer createDefinitionLexer(String value, int indent) {
-        RULE = AndRule.And(
-                new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
-                PADDING,
-                Rules.ExtractSymbol(TYPE),
-                WHITESPACE,
-                Rules.ExtractSymbol(NAME),
-                PADDING,
-                new RequireRule("="),
-                PADDING,
-                new NodeRule("value", JavaLexingStage.VALUE_NODE)
-        );
-
-        return new RuleLexer(ID, value, RULE);
+    public static Lexer createDefinitionLexer(String value) {
+        return new RuleLexer(ID, value, DEFINITION_RULE);
     }
 
     @Override

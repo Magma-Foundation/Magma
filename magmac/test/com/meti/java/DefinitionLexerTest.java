@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 public class DefinitionLexerTest extends FeatureTest {
     private static void assertDefinition(String input) {
-        Assertions.assertTrue(DefinitionLexer.createDefinitionLexer(input, 0).lex().isPresent());
+        Assertions.assertTrue(DefinitionLexer.createDefinitionLexer(input).lex().isPresent());
     }
 
     @Test

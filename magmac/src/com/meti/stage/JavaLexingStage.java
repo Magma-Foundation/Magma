@@ -51,11 +51,11 @@ public class JavaLexingStage extends LexingStage {
              */
             case "class-member" -> new CompoundLexer(List.of(
                     () -> MethodLexer.createMethodLexer(value.indent(), value.value()),
-                    () -> DefinitionLexer.createDefinitionLexer(value.value(), value.indent()),
+                    () -> DefinitionLexer.createDefinitionLexer(value.value()),
                     () -> new ClassLexer(value.value(), value.indent())
             ));
 
-            case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue, value.indent());
+            case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue);
             case "value" -> new NamedLexer(innerValue, VALUE_NODE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
