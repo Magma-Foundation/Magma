@@ -1,9 +1,8 @@
-package com.meti.java;
+package com.meti.lex;
 
 import com.meti.node.Node;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 

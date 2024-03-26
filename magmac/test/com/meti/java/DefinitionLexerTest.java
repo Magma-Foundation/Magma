@@ -1,6 +1,8 @@
 package com.meti.java;
 
 import com.meti.FeatureTest;
+import com.meti.lex.Lexer;
+import com.meti.lex.RuleLexer;
 import com.meti.stage.JavaLexingStage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

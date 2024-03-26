@@ -1,5 +1,7 @@
 package com.meti.java;
 
+import com.meti.lex.Lexer;
+import com.meti.lex.RuleLexer;
 import com.meti.rule.ListRule;
 import com.meti.rule.RangeRule;
 import com.meti.rule.ExtractTextRule;

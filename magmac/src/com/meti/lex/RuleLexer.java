@@ -1,4 +1,4 @@
-package com.meti.java;
+package com.meti.lex;
 
 import com.meti.node.MapNode;
 import com.meti.node.Node;

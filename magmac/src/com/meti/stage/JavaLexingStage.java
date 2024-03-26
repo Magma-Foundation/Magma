@@ -1,7 +1,7 @@
 package com.meti.stage;
 
-import com.meti.java.Lexer;
-import com.meti.java.NamedLexer;
+import com.meti.lex.Lexer;
+import com.meti.lex.NamedLexer;
 import com.meti.node.Content;
 import com.meti.rule.*;
 
