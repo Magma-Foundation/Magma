@@ -1,12 +1,13 @@
 package com.meti.java;
 
 import com.meti.FeatureTest;
+import com.meti.stage.JavaLexingStage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class DefinitionLexerTest extends FeatureTest {
     private static void assertDefinition(String input) {
-        Assertions.assertTrue(DefinitionLexer.createDefinitionLexer(input).lex().isPresent());
+        Assertions.assertTrue(((Lexer) new RuleLexer("definition", input, JavaLexingStage.DEFINITION_RULE)).lex().isPresent());
     }
 
     @Test

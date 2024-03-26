@@ -8,6 +8,8 @@ import com.meti.rule.*;
 import java.util.List;
 
 import static com.meti.rule.AndRule.And;
+import static com.meti.rule.WhitespaceRule.PADDING;
+import static com.meti.rule.WhitespaceRule.WHITESPACE;
 
 public class JavaLexingStage extends LexingStage {
     public static final Rule STRING = And(new RequireRule("\""),
@@ -35,6 +37,17 @@ public class JavaLexingStage extends LexingStage {
             new NamedRule("invoke", INVOKE),
             new NamedRule("int", INT)
     );
+    public static final Rule DEFINITION_RULE = And(
+            new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
+            PADDING,
+            Rules.ExtractSymbol("type"),
+            WHITESPACE,
+            Rules.ExtractSymbol("name"),
+            PADDING,
+            new RequireRule("="),
+            PADDING,
+            new NodeRule("value", VALUE_NODE)
+    );
 
     @Override
     protected Lexer createLexer(Content value) {
@@ -51,11 +64,11 @@ public class JavaLexingStage extends LexingStage {
              */
             case "class-member" -> new CompoundLexer(List.of(
                     () -> MethodLexer.createMethodLexer(value.indent(), value.value()),
-                    () -> DefinitionLexer.createDefinitionLexer(value.value()),
+                    () -> new RuleLexer("definition", value.value(), DEFINITION_RULE),
                     () -> new ClassLexer(value.value(), value.indent())
             ));
 
-            case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue);
+            case "method-statement" -> (Lexer) new RuleLexer("definition", innerValue, DEFINITION_RULE);
             case "value" -> new NamedLexer(innerValue, VALUE_NODE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());

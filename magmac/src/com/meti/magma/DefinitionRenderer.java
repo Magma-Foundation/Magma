@@ -1,6 +1,5 @@
 package com.meti.magma;
 
-import com.meti.java.DefinitionLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
@@ -17,7 +16,7 @@ public class DefinitionRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if (!node.is(DefinitionLexer.ID)) return Optional.empty();
+        if (!node.is("definition")) return Optional.empty();
 
         var indent = node.apply("indent").flatMap(Attribute::asInt).orElseThrow();
         var flags = node.apply("flags").flatMap(Attribute::asListOfStrings).orElseThrow();
