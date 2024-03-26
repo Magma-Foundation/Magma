@@ -17,7 +17,7 @@ public class NamedRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
-        return inner.lex(input).map(value -> value.replaceLeft(Optional.of(name)));
+        return inner.lex(input).map(value ->    value.replaceLeft(Optional.of(name)));
     }
 
     @Override

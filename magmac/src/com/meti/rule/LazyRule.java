@@ -13,13 +13,9 @@ public class LazyRule implements Rule {
         this.value = Optional.ofNullable(value);
     }
 
-    private Optional<Map<String, Attribute>> apply1(String input) {
-        return value.flatMap(internal -> internal.lex(input).map(tuple -> tuple.b()));
-    }
-
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
-        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+        return value.flatMap(internal -> internal.lex(input));
     }
 
     @Override

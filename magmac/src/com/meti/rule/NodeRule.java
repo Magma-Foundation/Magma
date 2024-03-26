@@ -18,12 +18,17 @@ public class NodeRule implements Rule {
         this.nodeRule = nodeRule;
     }
 
+    private static RuntimeException getRuntimeException(String input) {
+        return new RuntimeException("Failed to find name for input: " + input);
+    }
+
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         if (input.isBlank()) return Optional.empty();
 
         return nodeRule.lex(input).<Map<String, Attribute>>map(stringAttributeMap -> {
-            var node = new MapNode(stringAttributeMap.a().orElseThrow(), stringAttributeMap.b());
+            var name = stringAttributeMap.a().orElseThrow(() -> getRuntimeException(input));
+            var node = new MapNode(name, stringAttributeMap.b());
             var attribute = new NodeAttribute(node);
             return Collections.singletonMap(attributeName, attribute);
         }).map(attributes -> new Tuple<>(Optional.empty(), attributes));
