@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MethodRuleTest extends FeatureTest {
     private static void assertMethod(String input) {
-        assertTrue(MethodLexer.RULE.apply(input).isPresent());
+        assertTrue(MethodLexer.RULE.apply(input).map(tuple -> tuple.b()).isPresent());
     }
 
     @Test

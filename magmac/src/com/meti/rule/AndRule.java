@@ -1,5 +1,6 @@
 package com.meti.rule;
 
+import com.meti.Tuple;
 import com.meti.node.Attribute;
 
 import java.util.*;
@@ -24,10 +25,9 @@ public class AndRule implements Rule {
                 (left1, right1) -> new AndRule(right1, left1));
     }
 
-    @Override
-    public Optional<Map<String, Attribute>> apply(String input) {
+    private Optional<Map<String, Attribute>> apply1(String input) {
         if (input.isEmpty()) {
-            if (left.apply(input).isPresent() && right.apply(input).isPresent()) {
+            if (left.apply(input).map(tuple1 -> tuple1.b()).isPresent() && right.apply(input).map(tuple -> tuple.b()).isPresent()) {
                 return Optional.of(Collections.emptyMap());
             } else {
                 return Optional.empty();
@@ -38,9 +38,9 @@ public class AndRule implements Rule {
             var left = input.substring(0, i);
             var right = input.substring(i);
 
-            var leftOptional = this.left.apply(left);
+            var leftOptional = this.left.apply(left).map(tuple1 -> tuple1.b());
             if (leftOptional.isPresent()) {
-                var rightOptional = this.right.apply(right);
+                var rightOptional = this.right.apply(right).map(tuple -> tuple.b());
 
                 if (rightOptional.isPresent()) {
                     var stringAttributeMap = new HashMap<>(leftOptional.get());
@@ -54,5 +54,10 @@ public class AndRule implements Rule {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 }

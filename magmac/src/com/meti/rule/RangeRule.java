@@ -1,5 +1,6 @@
 package com.meti.rule;
 
+import com.meti.Tuple;
 import com.meti.node.Attribute;
 
 import java.util.Collections;
@@ -15,8 +16,7 @@ public class RangeRule implements Rule {
         this.endInclusive = endInclusive;
     }
 
-    @Override
-    public Optional<Map<String, Attribute>> apply(String input) {
+    private Optional<Map<String, Attribute>> apply1(String input) {
         if (input.length() == 1) {
             var first = input.charAt(0);
             if (start <= first && first <= endInclusive) {
@@ -25,5 +25,10 @@ public class RangeRule implements Rule {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 }

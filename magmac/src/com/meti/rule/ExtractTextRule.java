@@ -1,5 +1,6 @@
 package com.meti.rule;
 
+import com.meti.Tuple;
 import com.meti.node.Attribute;
 import com.meti.node.StringAttribute;
 
@@ -15,12 +16,16 @@ public class ExtractTextRule implements Rule {
         this.name = name;
     }
 
-    @Override
-    public Optional<Map<String, Attribute>> apply(String input) {
-        if (required.apply(input).isPresent()) {
+    private Optional<Map<String, Attribute>> apply1(String input) {
+        if (required.apply(input).map(tuple -> tuple.b()).isPresent()) {
             return Optional.of(Map.of(name, new StringAttribute(input)));
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 }

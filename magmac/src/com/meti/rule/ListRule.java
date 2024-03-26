@@ -1,5 +1,6 @@
 package com.meti.rule;
 
+import com.meti.Tuple;
 import com.meti.node.Attribute;
 
 import java.util.Map;
@@ -12,15 +13,19 @@ public class ListRule implements Rule {
         this.value = value;
     }
 
-    @Override
-    public Optional<Map<String, Attribute>> apply(String input) {
+    private Optional<Map<String, Attribute>> apply1(String input) {
         var lazy = new LazyRule();
         var root = OrRule.Or(Rules.EMPTY, value, createAnd(lazy));
         lazy.setValue(root);
-        return root.apply(input);
+        return root.apply(input).map(tuple -> tuple.b());
     }
 
     protected Rule createAnd(LazyRule lazy) {
         return new AndRule(value, lazy);
+    }
+
+    @Override
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> apply(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 }

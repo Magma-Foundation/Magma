@@ -6,25 +6,28 @@ import org.junit.jupiter.api.Test;
 class ListDelimitingRuleTest {
     @Test
     void empty() {
-        var apply = new ListDelimitingRule(
+        Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
-        ).apply("").isPresent();
+        );
+        var apply = rule.apply("").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 
     @Test
     void once() {
-        var apply = new ListDelimitingRule(
+        Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
-        ).apply("final").isPresent();
+        );
+        var apply = rule.apply("final").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 
     @Test
     void twice() {
-        var apply = new ListDelimitingRule(
+        Rule rule = new ListDelimitingRule(
                 new RequireRule(" "), new RequireRule("final")
-        ).apply("final final").isPresent();
+        );
+        var apply = rule.apply("final final").map(tuple -> tuple.b()).isPresent();
         Assertions.assertTrue(apply);
     }
 }

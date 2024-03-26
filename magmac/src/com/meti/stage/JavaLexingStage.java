@@ -49,11 +49,12 @@ public class JavaLexingStage extends LexingStage {
             ));
 
             case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue, value.indent());
-            case "value" -> new CompoundLexer(List.of(
-                    () -> new RuleLexer("string", innerValue, STRING),
-                    () -> new RuleLexer("field", innerValue, FIELD),
-                    () -> new RuleLexer("invoke", innerValue, INVOKE),
-                    () -> new RuleLexer("int", innerValue, INT)));
+            case "value" -> new WrappedLexer(innerValue, OrRule.Or(
+                    new NodeRule("value", "string", STRING),
+                    new NodeRule("value", "field", FIELD),
+                    new NodeRule("value", "invoke", INVOKE),
+                    new NodeRule("value", "int", INT)
+            ));
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };

@@ -1,5 +1,7 @@
 package com.meti.rule;
 
+import com.meti.Tuple;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,10 +15,11 @@ public class Rules {
     public static final Rule ALPHANUMERIC = new OrRule(ALPHABETIC, DIGIT);
 
     public static Rule EMPTY = input -> {
-        if (input.isEmpty()) return Optional.of(Collections.emptyMap());
+        if (input.isEmpty()) return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
         else return Optional.empty();
     };
-    public static Rule Any = input -> Optional.of(new HashMap<>());
+
+    public static Rule Any = input -> Optional.of(new Tuple<>(Optional.empty(), new HashMap<>()));
 
     public static Rule ExtractSymbol(String name) {
         return new ExtractTextRule(name, new AndRule(ALPHABETIC, new ListRule(ALPHANUMERIC)));
