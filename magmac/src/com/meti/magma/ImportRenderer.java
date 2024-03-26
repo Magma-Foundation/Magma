@@ -1,7 +1,5 @@
 package com.meti.magma;
 
-import com.meti.FieldRenderer;
-import com.meti.ImportLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Node;
 import com.meti.stage.Renderer;
@@ -18,16 +16,19 @@ public class ImportRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if(!node.is(ImportLexer.ID)) return Optional.empty();
+        if (!node.is("import")) return Optional.empty();
 
-        var parentName = node.apply(ImportLexer.PARENT)
-                .flatMap(Attribute::asString)
+        var segments = node.apply("segment")
+                .flatMap(Attribute::asListOfStrings)
                 .orElseThrow();
 
-        var childString = node.apply(ImportLexer.CHILD)
-                .flatMap(Attribute::asString)
-                .orElseThrow();
+        var parentName = String.join(".", segments.subList(0, segments.size() - 1));
+        var childString = segments.get(segments.size() - 1);
 
-        return Optional.of("import " + childString + " from " + parentName + ";");
+        var s = (node.apply("static").isPresent() && childString.equals("*"))
+                ? "*"
+                : "{ " + childString + " }";
+
+        return Optional.of("import " + s + " from " + parentName + ";");
     }
 }

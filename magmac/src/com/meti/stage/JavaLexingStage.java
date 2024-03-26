@@ -1,6 +1,5 @@
 package com.meti.stage;
 
-import com.meti.ImportLexer;
 import com.meti.java.*;
 import com.meti.node.Content;
 import com.meti.rule.*;
@@ -8,6 +7,8 @@ import com.meti.rule.*;
 import java.util.List;
 
 import static com.meti.rule.AndRule.And;
+import static com.meti.rule.OrRule.Or;
+import static com.meti.rule.Rules.Optional;
 import static com.meti.rule.WhitespaceRule.PADDING;
 import static com.meti.rule.WhitespaceRule.WHITESPACE;
 
@@ -24,6 +25,17 @@ public class JavaLexingStage extends LexingStage {
             new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
             new RequireRule(")")
     );
+    public static final NamedRule IMPORT_RULE = new NamedRule("import", And(
+            new RequireRule("import"),
+            Optional(And(
+                    WHITESPACE,
+                    new ExtractTextRule("static", new RequireRule("static"))
+            )),
+            WHITESPACE,
+            new ListDelimitingRule(
+                    new RequireRule("."),
+                    new StringListRule("segment", Or(Rules.SYMBOL, new RequireRule("*"))))
+    ));
 
     private static final Rule FIELD = And(
             new ContentRule("parent", "value", 0),
@@ -71,7 +83,7 @@ public class JavaLexingStage extends LexingStage {
         return switch (value.name()) {
             case "top" -> new CompoundLexer(List.of(
                     () -> new ClassLexer(value.value(), value.indent()),
-                    () -> new ImportLexer(value.value())
+                    () -> new NamedLexer(value.value(), IMPORT_RULE)
             ));
             case "class" -> new ClassLexer(innerValue, value.indent());
 

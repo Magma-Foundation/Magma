@@ -13,6 +13,7 @@ public class Rules {
     public static final Rule ALPHABETIC_UPPER = new RangeRule('A', 'Z');
     public static final Rule ALPHABETIC = new OrRule(ALPHABETIC_LOWER, ALPHABETIC_UPPER);
     public static final Rule ALPHANUMERIC = new OrRule(ALPHABETIC, DIGIT);
+    public static final Rule SYMBOL = new AndRule(ALPHABETIC, new ListRule(ALPHANUMERIC));
 
     public static Rule EMPTY = input -> {
         if (input.isEmpty()) return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
@@ -22,7 +23,7 @@ public class Rules {
     public static Rule Any = input -> Optional.of(new Tuple<>(Optional.empty(), new HashMap<>()));
 
     public static Rule ExtractSymbol(String name) {
-        return new ExtractTextRule(name, new AndRule(ALPHABETIC, new ListRule(ALPHANUMERIC)));
+        return new ExtractTextRule(name, SYMBOL);
     }
 
     public static Rule Enum(String first, String... more) {
@@ -30,5 +31,9 @@ public class Rules {
                 .map(RequireRule::new)
                 .toList()
                 .toArray(RequireRule[]::new));
+    }
+
+    public static Rule Optional(Rule rule) {
+        return new OrRule(EMPTY, rule);
     }
 }
