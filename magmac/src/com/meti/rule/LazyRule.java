@@ -9,7 +9,7 @@ import java.util.Optional;
 public class LazyRule implements Rule {
     private Optional<Rule> value = Optional.empty();
 
-    public void setValue(Rule value) {
+    public void set(Rule value) {
         this.value = Optional.ofNullable(value);
     }
 

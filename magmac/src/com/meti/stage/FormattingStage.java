@@ -1,6 +1,5 @@
 package com.meti.stage;
 
-import com.meti.java.ClassLexer;
 import com.meti.node.IntAttribute;
 import com.meti.node.MapNode;
 import com.meti.node.Node;
@@ -22,7 +21,7 @@ public class FormattingStage extends TransformingStage {
     protected Optional<Node> onExit(Node node, Stack<Node> b) {
         var indent = b.size() + 1;
         if (node.is("class")) {
-            return Optional.of(node.mapNodeList(ClassLexer.BODY, list -> wrapInStatements(list, indent)));
+            return Optional.of(node.mapNodeList("body", list -> wrapInStatements(list, indent)));
         }
 
         if(node.is("method")) {

@@ -30,7 +30,9 @@ public class Compiler {
 
         var tree = new JavaLexingStage()
                 .apply(new Content("top", input, 0))
-                .orElseThrow();
+                .orElseThrow(() -> {
+                    return new CompileException("Failed to lex: " + input);
+                });
 
         var transformed = new ParsingStage().apply(tree).orElseThrow();
         var formatted = new FormattingStage().apply(transformed).orElseThrow();

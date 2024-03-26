@@ -29,11 +29,10 @@ public class ParsingStage extends TransformingStage {
         }
 
         if (node.is("class")) {
-            var indent = node.apply("indent").flatMap(Attribute::asInt).orElseThrow();
             var body = node.apply("body").flatMap(Attribute::asListOfNodes).orElse(Collections.emptyList());
 
             var newBody = body.stream()
-                    .map(element -> cleanDefinition(element, indent).orElse(element))
+                    .map(element -> cleanDefinition(element).orElse(element))
                     .collect(Collectors.toList());
 
             return Optional.ofNullable(node.replace("body", new NodeListAttribute(newBody)));
@@ -48,7 +47,7 @@ public class ParsingStage extends TransformingStage {
             var body = node.apply("body").flatMap(Attribute::asListOfNodes).orElse(Collections.emptyList());
 
             var newBody = body.stream()
-                    .map(element -> cleanDefinition(element, indent).orElse(element))
+                    .map(element -> cleanDefinition(element).orElse(element))
                     .collect(Collectors.toList());
 
             return Optional.ofNullable(node.replace("body", new NodeListAttribute(newBody)));
@@ -57,7 +56,7 @@ public class ParsingStage extends TransformingStage {
         return Optional.of(node);
     }
 
-    private Optional<Node> cleanDefinition(Node element, int indent) {
+    private Optional<Node> cleanDefinition(Node element) {
         if (element.is("definition")) {
             var previousFlags = element.apply("flags").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
             List<String> newFlags = new ArrayList<>();
@@ -73,7 +72,6 @@ public class ParsingStage extends TransformingStage {
 
             return Optional.ofNullable(element
                     .map("type", ParsingStage::compileType)
-                    .replace("indent", new IntAttribute(indent + 1))
                     .replace("flags", new StringListAttribute(newFlags)));
         }
 

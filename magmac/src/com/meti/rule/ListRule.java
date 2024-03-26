@@ -16,7 +16,7 @@ public class ListRule implements Rule {
     private Optional<Map<String, Attribute>> apply1(String input) {
         var lazy = new LazyRule();
         var root = OrRule.Or(Rules.EMPTY, value, createAnd(lazy));
-        lazy.setValue(root);
+        lazy.set(root);
         return root.apply(input).map(tuple -> tuple.b());
     }
 
