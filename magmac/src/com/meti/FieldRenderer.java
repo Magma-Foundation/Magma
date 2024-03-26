@@ -1,6 +1,5 @@
 package com.meti;
 
-import com.meti.java.FieldLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
@@ -17,14 +16,14 @@ public class FieldRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if (node.is(FieldLexer.ID)) {
-            var parentString = node.apply(FieldLexer.PARENT)
+        if (node.is("field")) {
+            var parentString = node.apply("parent")
                     .flatMap(Attribute::asNode)
                     .flatMap(parent -> parent.apply(Content.VALUE))
                     .flatMap(Attribute::asString)
                     .orElseThrow();
 
-            var memberString = node.apply(FieldLexer.MEMBER)
+            var memberString = node.apply("member")
                     .flatMap(Attribute::asString)
                     .orElseThrow();
 

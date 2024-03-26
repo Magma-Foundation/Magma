@@ -21,6 +21,11 @@ public class JavaLexingStage extends LexingStage {
             new ListRule(new ElementRule("arguments", "value", 0)),
             new RequireRule(")")
     );
+    private final Rule FIELD = And(
+            new NodeRule("parent", "value", 0),
+            new RequireRule("."),
+            Rules.Symbol("member")
+    );
 
     @Override
     protected Lexer createLexer(Content value) {
@@ -44,7 +49,7 @@ public class JavaLexingStage extends LexingStage {
             case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
                     () -> new RuleLexer("string", innerValue, STRING),
-                    () -> new FieldLexer(innerValue),
+                    () -> new RuleLexer("field", innerValue, FIELD),
                     () -> new RuleLexer("invoke", innerValue, INVOKE),
                     () -> new RuleLexer("int", innerValue, INT)));
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
