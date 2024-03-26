@@ -63,6 +63,6 @@ public class AndRule implements Rule {
 
     @Override
     public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+        return left.render(attributes).flatMap(leftValue -> right.render(attributes).map(rightValue -> leftValue + rightValue));
     }
 }
