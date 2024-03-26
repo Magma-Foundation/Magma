@@ -32,4 +32,8 @@ public interface Node {
     default Node map(String name, Function<Attribute, Attribute> mapper) {
         return this;
     }
+
+    default Node mapNodeList(String name, Function<List<Node>, List<Node>> mapper) {
+        return map(name, attribute -> new NodeListAttribute(mapper.apply(attribute.asListOfNodes().orElseThrow())));
+    }
 }

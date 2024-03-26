@@ -45,6 +45,6 @@ public record MethodRenderer(Node root) implements Renderer {
         }
 
 
-        return Optional.of("\n" + "\t".repeat(indent) + "def " + name + "() : " + type + " => " + wrappedBody);
+        return Optional.of( "def " + name + "() : " + type + " => " + wrappedBody);
     }
 }

@@ -1,9 +1,11 @@
 package com.meti;
 
 import com.meti.node.Content;
+import com.meti.node.Node;
+import com.meti.stage.FormattingStage;
 import com.meti.stage.JavaLexingStage;
 import com.meti.stage.RenderingStage;
-import com.meti.stage.TransformStage;
+import com.meti.stage.ParsingStage;
 
 import java.util.ArrayList;
 
@@ -30,9 +32,10 @@ public class Compiler {
                 .apply(new Content("top", input, 0))
                 .orElseThrow();
 
-        var transformed = new TransformStage().apply(tree).orElseThrow();
+        var transformed = new ParsingStage().apply(tree).orElseThrow();
+        var formatted = new FormattingStage().apply(transformed).orElseThrow();
 
-        return new RenderingStage().apply(transformed)
+        return new RenderingStage().apply(formatted)
                 .orElseThrow(() -> new CompileException("Cannot render: " + tree))
                 .strip();
     }

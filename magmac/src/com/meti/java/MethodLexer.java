@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.meti.stage.JavaLexingStage.METHOD_STATEMENT;
+
 public record MethodLexer(int indent, String input) implements Lexer {
 
     public static final Rule RULE = AndRule.And(
@@ -23,7 +25,7 @@ public record MethodLexer(int indent, String input) implements Lexer {
             WhitespaceRule.WHITESPACE,
             Rules.ExtractSymbol("name"),
             new RequireRule("(){"),
-            new ListRule(new ExtractNodeElementRule("body", "method-statement", 0)),
+            new ListDelimitingRule(new RequireRule(";"), new NodeElementRule("body", METHOD_STATEMENT)),
             new RequireRule("}")
     );
 

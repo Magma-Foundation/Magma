@@ -42,6 +42,6 @@ public class ClassRenderer implements Renderer {
                 bodyString = "{" + String.join("", bodyArray) + "\n" + "\t".repeat(indent) + "}";
             }
         }
-        return Optional.of("\n" + "\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
+        return Optional.of( flagString + "class def " + name + "() => " + bodyString);
     }
 }

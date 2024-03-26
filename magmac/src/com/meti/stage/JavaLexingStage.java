@@ -37,7 +37,6 @@ public class JavaLexingStage extends LexingStage {
             new NamedRule("invoke", INVOKE),
             new NamedRule("int", INT)
     );
-
     public static final Rule DEFINITION_RULE = And(
             new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
             PADDING,
@@ -48,6 +47,9 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule("="),
             PADDING,
             new NodeRule("value", VALUE_NODE)
+    );
+    public static final Rule METHOD_STATEMENT = OrRule.Or(
+            new NamedRule("definition", DEFINITION_RULE)
     );
 
     @Override
@@ -69,7 +71,7 @@ public class JavaLexingStage extends LexingStage {
                     () -> new ClassLexer(value.value(), value.indent())
             ));
 
-            case "method-statement" -> new RuleLexer("definition", innerValue, DEFINITION_RULE);
+            case "method-statement" -> new NamedLexer(innerValue, METHOD_STATEMENT);
             case "value" -> new NamedLexer(innerValue, VALUE_NODE);
 
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());

@@ -3,14 +3,13 @@ package com.meti.stage;
 import com.meti.TypeCompiler;
 import com.meti.node.*;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class TransformStage extends Stage<Node, Node> {
+public class ParsingStage extends TransformingStage {
     private static StringAttribute compileType(Attribute type) {
         return type.asString()
                 .map(TypeCompiler::new)
@@ -22,14 +21,6 @@ public class TransformStage extends Stage<Node, Node> {
     @Override
     public Optional<Node> onEnter(Node value) {
         return Optional.of(value);
-    }
-
-    private Node createOutput(Node o) {
-        return o;
-    }
-
-    private Node createInput(Node node) {
-        return node;
     }
 
     @Override
@@ -84,16 +75,11 @@ public class TransformStage extends Stage<Node, Node> {
             }
 
             return Optional.ofNullable(element
-                    .map("type", TransformStage::compileType)
+                    .map("type", ParsingStage::compileType)
                     .replace("indent", new IntAttribute(indent + 1))
                     .replace("flags", new StringListAttribute(newFlags)));
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<Node> applyToNode(Node node) {
-        return apply(createInput(node)).map(this::createOutput);
     }
 }

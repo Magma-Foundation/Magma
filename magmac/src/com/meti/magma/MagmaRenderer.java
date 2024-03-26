@@ -27,6 +27,7 @@ public class MagmaRenderer implements Renderer {
                         new IntegerRenderer(node),
                         new InvokeRenderer(node),
                         new MethodRenderer(node),
+                        new StatementRenderer(node),
                         new StringRenderer(node))
                 .map(Renderer::render)
                 .flatMap(Optional::stream)

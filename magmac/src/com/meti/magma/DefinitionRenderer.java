@@ -18,7 +18,6 @@ public class DefinitionRenderer implements Renderer {
     public Optional<String> render() {
         if (!node.is("definition")) return Optional.empty();
 
-        var indent = node.apply("indent").flatMap(Attribute::asInt).orElseThrow();
         var flags = node.apply("flags").flatMap(Attribute::asListOfStrings).orElseThrow();
         var name = node.apply("name").flatMap(Attribute::asString).orElseThrow();
         var type = node.apply("type").flatMap(Attribute::asString).orElseThrow();
@@ -28,6 +27,6 @@ public class DefinitionRenderer implements Renderer {
                 .orElseThrow()
                 .strip();
 
-        return Optional.of("\n" + "\t".repeat(indent) + String.join(" ", flags) + " " + name + " : " + type + " = " + value + ";");
+        return Optional.of(String.join(" ", flags) + " " + name + " : " + type + " = " + value + ";");
     }
 }
