@@ -2,12 +2,44 @@ package com.meti.java;
 
 import com.meti.TypeCompiler;
 import com.meti.node.*;
+import com.meti.rule.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public record DefinitionLexer(String body, int indent) implements Lexer {
+import static com.meti.rule.WhitespaceRule.*;
+
+public final class DefinitionLexer implements Lexer {
     public static final String ID = "definition";
+    public static final String INDENT = "indent";
+    public static final String FLAGS = "flags";
+    public static final String NAME = "name";
+    public static final String TYPE = "type";
+    public static final String VALUE = "value";
+    private static Rule RULE;
+    private final String body;
+    private final int indent;
+
+    private DefinitionLexer(String body, int indent) {
+        this.body = body;
+        this.indent = indent;
+    }
+
+    public static Lexer createDefinitionLexer(String value, int indent) {
+        RULE = AndRule.And(
+                new ListDelimitingRule(Rules.Enum("public", "final"), WHITESPACE),
+                PADDING,
+                Rules.Symbol(TYPE),
+                WHITESPACE,
+                Rules.Symbol(NAME),
+                PADDING,
+                new RequireRule("="),
+                PADDING,
+                new NodeRule(VALUE, "value", indent)
+        );
+
+        return new RuleLexer(ID, value, RULE);
+    }
 
     @Override
     public Optional<Node> lex() {
@@ -48,14 +80,44 @@ public record DefinitionLexer(String body, int indent) implements Lexer {
         var outputType = new TypeCompiler(type).compile();
 
         var name = before.substring(nameSeparator + 1).strip();
-        var value = new Content("value", after, 0);
+        var value = new Content(VALUE, after, 0);
 
         return Optional.of(new MapNode("definition", Map.of(
-                "indent", new IntAttribute(indent),
-                "flags", new StringListAttribute(outputFlags),
-                "name", new StringAttribute(name),
-                "type", new StringAttribute(outputType),
-                "value", new NodeAttribute(value)
+                INDENT, new IntAttribute(indent),
+                FLAGS, new StringListAttribute(outputFlags),
+                NAME, new StringAttribute(name),
+                TYPE, new StringAttribute(outputType),
+                VALUE, new NodeAttribute(value)
         )));
     }
+
+    public String body() {
+        return body;
+    }
+
+    public int indent() {
+        return indent;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (DefinitionLexer) obj;
+        return Objects.equals(this.body, that.body) &&
+               this.indent == that.indent;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body, indent);
+    }
+
+    @Override
+    public String toString() {
+        return "DefinitionLexer[" +
+               "body=" + body + ", " +
+               "indent=" + indent + ']';
+    }
+
 }

@@ -18,7 +18,7 @@ public class JavaLexingStage extends LexingStage {
     public static final Rule INVOKE = And(
             new NodeRule("caller", "value", 0),
             new RequireRule("("),
-            new ListRule(new ElementRule("arguments", "value", 0)),
+            new ListRule(new NodeListRule("arguments", "value", 0)),
             new RequireRule(")")
     );
     private final Rule FIELD = And(
@@ -42,11 +42,11 @@ public class JavaLexingStage extends LexingStage {
              */
             case "class-member" -> new CompoundLexer(List.of(
                     () -> new MethodLexer(value.indent(), value.value()),
-                    () -> new DefinitionLexer(value.value(), value.indent()),
+                    () -> DefinitionLexer.createDefinitionLexer(value.value(), value.indent()),
                     () -> new ClassLexer(value.value(), value.indent())
             ));
 
-            case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
+            case "method-statement" -> DefinitionLexer.createDefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
                     () -> new RuleLexer("string", innerValue, STRING),
                     () -> new RuleLexer("field", innerValue, FIELD),

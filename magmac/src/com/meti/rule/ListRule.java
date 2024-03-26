@@ -15,7 +15,7 @@ public class ListRule implements Rule {
     @Override
     public Optional<Map<String, Attribute>> apply(String input) {
         var lazy = new LazyRule();
-        var root = OrRule.Or(Rules.Empty, value, createAnd(lazy));
+        var root = OrRule.Or(Rules.EMPTY, value, createAnd(lazy));
         lazy.setValue(root);
         return root.apply(input);
     }

@@ -2,10 +2,7 @@ package com.meti.rule;
 
 import com.meti.node.Attribute;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class AndRule implements Rule {
     private final Rule left;
@@ -22,6 +19,14 @@ public class AndRule implements Rule {
 
     @Override
     public Optional<Map<String, Attribute>> apply(String input) {
+        if (input.isEmpty()) {
+            if (left.apply(input).isPresent() && right.apply(input).isPresent()) {
+                return Optional.of(Collections.emptyMap());
+            } else {
+                return Optional.empty();
+            }
+        }
+
         for (int i = 0; i < input.length(); i++) {
             var left = input.substring(0, i);
             var right = input.substring(i);
