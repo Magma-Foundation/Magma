@@ -1,6 +1,5 @@
 package com.meti;
 
-import com.meti.java.InvokeLexer;
 import com.meti.node.Attribute;
 import com.meti.node.Content;
 import com.meti.node.Node;
@@ -18,15 +17,15 @@ public class InvokeRenderer implements Renderer {
 
     @Override
     public Optional<String> render() {
-        if (node.is(InvokeLexer.ID)) {
-            var callerOptional = node.apply(InvokeLexer.CALLER)
+        if (node.is("invoke")) {
+            var callerOptional = node.apply("caller")
                     .flatMap(Attribute::asNode)
                     .flatMap(node -> node.apply(Content.VALUE))
                     .flatMap(Attribute::asString);
             if (callerOptional.isEmpty()) return Optional.empty();
             var caller = callerOptional.get();
 
-            var argumentsOptional = node.apply(InvokeLexer.ARGUMENTS)
+            var argumentsOptional = node.apply("arguments")
                     .flatMap(Attribute::asListOfNodes)
                     .map(list -> {
                         return list.stream()

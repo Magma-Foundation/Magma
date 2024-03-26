@@ -15,6 +15,12 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule("\""));
 
     public static final TextRule INT = new TextRule("value", new ListRule(new RangeRule('0', '9')));
+    public static final Rule INVOKE = And(
+            new NodeRule("caller", "value", 0),
+            new RequireRule("("),
+            new ListRule(new ElementRule("arguments", "value", 0)),
+            new RequireRule(")")
+    );
 
     @Override
     protected Lexer createLexer(Content value) {
@@ -37,10 +43,10 @@ public class JavaLexingStage extends LexingStage {
 
             case "method-statement" -> new DefinitionLexer(innerValue, value.indent());
             case "value" -> new CompoundLexer(List.of(
-                    () -> new RuleLexer("string", STRING, innerValue),
+                    () -> new RuleLexer("string", innerValue, STRING),
                     () -> new FieldLexer(innerValue),
-                    () -> new InvokeLexer(innerValue),
-                    () -> new RuleLexer("int", INT, innerValue)));
+                    () -> new RuleLexer("invoke", innerValue, INVOKE),
+                    () -> new RuleLexer("int", innerValue, INT)));
             default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
         };
     }

@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class IntegerLexerTest {
     @Test
     void valid(){
-        assertTrue(((Lexer) new RuleLexer("int", new TextRule("value", new ListRule(new RangeRule('0', '9'))), "123"))
+        assertTrue(((Lexer) new RuleLexer("int", "123", new TextRule("value", new ListRule(new RangeRule('0', '9')))))
                 .lex()
                 .isPresent());
     }
 
     @Test
     void invalid() {
-        assertFalse(((Lexer) new RuleLexer("int", new TextRule("value", new ListRule(new RangeRule('0', '9'))), "test"))
+        assertFalse(((Lexer) new RuleLexer("int", "test", new TextRule("value", new ListRule(new RangeRule('0', '9')))))
                 .lex()
                 .isPresent());
     }
