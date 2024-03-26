@@ -1,13 +1,9 @@
 package com.meti.stage;
 
-import com.meti.java.CompoundLexer;
 import com.meti.java.Lexer;
 import com.meti.java.NamedLexer;
-import com.meti.java.RuleLexer;
 import com.meti.node.Content;
 import com.meti.rule.*;
-
-import java.util.List;
 
 import static com.meti.rule.AndRule.And;
 import static com.meti.rule.OrRule.Or;
@@ -94,6 +90,10 @@ public class JavaLexingStage extends LexingStage {
             new ListDelimitingRule(new RequireRule(";"), new NodeElementRule("body", CLASS_MEMBER)),
             new RequireRule("}")
     );
+    public static final Rule ROOT_RULE = Or(
+            new NamedRule("class", CLASS_RULE),
+            new NamedRule("import", IMPORT_RULE)
+    );
 
     static {
         VOLATILE_CLASS_RULE.set(CLASS_RULE);
@@ -101,17 +101,6 @@ public class JavaLexingStage extends LexingStage {
 
     @Override
     protected Lexer createLexer(Content value) {
-        var innerValue = value.value();
-        return switch (value.name()) {
-            case "top" -> new CompoundLexer(List.of(
-                    () -> new RuleLexer("class", value.value(), CLASS_RULE),
-                    () -> new NamedLexer(value.value(), IMPORT_RULE)
-            ));
-
-            case "class" -> new RuleLexer("class", innerValue, CLASS_RULE);
-            case "value" -> new NamedLexer(innerValue, VALUE_NODE);
-
-            default -> throw new UnsupportedOperationException("Unknown node name: " + value.name());
-        };
+        return new NamedLexer(value.value(), ROOT_RULE);
     }
 }
