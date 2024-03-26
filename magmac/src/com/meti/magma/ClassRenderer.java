@@ -35,7 +35,12 @@ public class ClassRenderer implements Renderer {
         if (body.isEmpty()) {
             bodyString = "{}";
         } else {
-            bodyString = "{" + String.join("",  body.orElseThrow()) + "\n" + "\t".repeat(indent) + "}";
+            var bodyArray = body.orElseThrow();
+            if (bodyArray.isEmpty()) {
+                bodyString = "{}";
+            } else {
+                bodyString = "{" + String.join("", bodyArray) + "\n" + "\t".repeat(indent) + "}";
+            }
         }
         return Optional.of("\n" + "\t".repeat(indent) + flagString + "class def " + name + "() => " + bodyString);
     }

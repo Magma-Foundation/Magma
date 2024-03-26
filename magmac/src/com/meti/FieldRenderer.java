@@ -21,7 +21,8 @@ public class FieldRenderer implements Renderer {
                     .flatMap(Attribute::asNode)
                     .flatMap(parent -> parent.apply(Content.VALUE))
                     .flatMap(Attribute::asString)
-                    .orElseThrow();
+                    .orElseThrow()
+                    .strip();
 
             var memberString = node.apply("member")
                     .flatMap(Attribute::asString)

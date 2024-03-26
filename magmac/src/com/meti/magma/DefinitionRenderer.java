@@ -26,7 +26,8 @@ public class DefinitionRenderer implements Renderer {
         var value = node.apply("value").flatMap(Attribute::asNode)
                 .flatMap(valueNode -> valueNode.apply(Content.VALUE))
                 .flatMap(Attribute::asString)
-                .orElseThrow();
+                .orElseThrow()
+                .strip();
 
         return Optional.of("\n" + "\t".repeat(indent) + String.join(" ", flags) + " " + name + " : " + type + " = " + value + ";");
     }

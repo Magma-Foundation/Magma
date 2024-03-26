@@ -27,7 +27,7 @@ public final class DefinitionLexer implements Lexer {
 
     public static Lexer createDefinitionLexer(String value, int indent) {
         RULE = AndRule.And(
-                new ListDelimitingRule(Rules.Enum("public", "final"), WHITESPACE),
+                new ListDelimitingRule(new StringListRule("flags", Rules.Enum("public", "final")), WHITESPACE),
                 PADDING,
                 Rules.Symbol(TYPE),
                 WHITESPACE,

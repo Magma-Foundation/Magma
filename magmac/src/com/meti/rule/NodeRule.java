@@ -21,6 +21,7 @@ public class NodeRule implements Rule {
 
     @Override
     public Optional<Map<String, Attribute>> apply(String input) {
+        if(input.isBlank()) return Optional.empty();
         return Optional.of(Collections.singletonMap(attributeName, new NodeAttribute(new Content(nodeType, input, indent))));
     }
 }

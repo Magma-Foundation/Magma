@@ -14,7 +14,14 @@ public class AndRule implements Rule {
     }
 
     public static Rule And(Rule first, Rule second, Rule... more) {
-        return Arrays.stream(more).reduce(new AndRule(first, second), AndRule::new);
+        var list = new ArrayList<>(List.of(first, second));
+        list.addAll(Arrays.asList(more));
+
+        var firstSlice = new ArrayList<>(list.subList(0, list.size() - 2));
+        Collections.reverse(firstSlice);
+
+        return firstSlice.stream().reduce(new AndRule(list.get(list.size() - 2), list.get(list.size() - 1)),
+                (left1, right1) -> new AndRule(right1, left1));
     }
 
     @Override
@@ -27,7 +34,7 @@ public class AndRule implements Rule {
             }
         }
 
-        for (int i = 0; i < input.length(); i++) {
+        for (int i = 0; i <= input.length(); i++) {
             var left = input.substring(0, i);
             var right = input.substring(i);
 

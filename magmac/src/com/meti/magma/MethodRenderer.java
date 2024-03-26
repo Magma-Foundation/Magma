@@ -24,15 +24,18 @@ public record MethodRenderer(Node root) implements Renderer {
         if (actualBody.isEmpty()) {
             wrappedBody = "{}";
         } else {
-            var bodyContent = actualBody.get().asListOfNodes()
-                    .map(list -> list.stream()
-                            .map(element -> element.apply(Content.VALUE))
-                            .map(option -> option.flatMap(Attribute::asString))
-                            .flatMap(Optional::stream)
-                            .collect(Collectors.joining()))
-                    .orElseThrow();
+            var actualList = actualBody.get().asListOfNodes().orElseThrow();
+            if(actualList.isEmpty()) {
+                wrappedBody = "{}";
+            } else {
+                var bodyContent = actualList.stream()
+                        .map(element -> element.apply(Content.VALUE))
+                        .map(option -> option.flatMap(Attribute::asString))
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.joining());
 
-            wrappedBody = "{" + bodyContent + "\n" + "\t".repeat(indent) + "}";
+                wrappedBody = "{" + bodyContent + "\n" + "\t".repeat(indent) + "}";
+            }
         }
 
 

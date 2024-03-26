@@ -20,4 +20,16 @@ public interface Node {
     default boolean is(String id) {
         return false;
     }
+
+    default Node replace(String name, Attribute attribute) {
+        return this;
+    }
+
+    default Node ensure(String name, Attribute attribute) {
+        return this;
+    }
+
+    default Node map(String name, Function<Attribute, Attribute> mapper) {
+        return this;
+    }
 }

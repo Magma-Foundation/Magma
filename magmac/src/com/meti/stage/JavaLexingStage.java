@@ -15,12 +15,14 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule("\""));
 
     public static final TextRule INT = new TextRule("value", new ListRule(new RangeRule('0', '9')));
+
     public static final Rule INVOKE = And(
             new NodeRule("caller", "value", 0),
             new RequireRule("("),
             new ListRule(new NodeListRule("arguments", "value", 0)),
             new RequireRule(")")
     );
+
     private final Rule FIELD = And(
             new NodeRule("parent", "value", 0),
             new RequireRule("."),

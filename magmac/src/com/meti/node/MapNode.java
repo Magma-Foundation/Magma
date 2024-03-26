@@ -1,9 +1,6 @@
 package com.meti.node;
 
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +36,27 @@ public class MapNode implements Node {
             Map.Entry<String, Attribute> pair,
             Function<List<Node>, Optional<List<Node>>> mapper) {
         return applyMapperToPair(pair, Attribute::asListOfNodes, mapper, NodeListAttribute::new);
+    }
+
+    @Override
+    public Node replace(String name, Attribute attribute) {
+        var copy = new HashMap<>(attributes);
+        copy.put(name, attribute);
+        return new MapNode(this.name, copy);
+    }
+
+    @Override
+    public Node map(String name, Function<Attribute, Attribute> mapper) {
+        if (!attributes.containsKey(name)) return this;
+
+        var newAttribute = mapper.apply(attributes.get(name));
+        return replace(name, newAttribute);
+    }
+
+    @Override
+    public Node ensure(String name, Attribute attribute) {
+        if (attributes.containsKey(name)) return this;
+        else return replace(name, attribute);
     }
 
     @Override
