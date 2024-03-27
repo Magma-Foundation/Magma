@@ -6,7 +6,6 @@ import com.meti.node.Attribute;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class AnyRule implements Rule {
     public static Rule Any = new AnyRule();
@@ -21,7 +20,7 @@ public class AnyRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
         var result = lex(input);
         return result;
     }

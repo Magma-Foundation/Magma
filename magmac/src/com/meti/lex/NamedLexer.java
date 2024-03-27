@@ -5,7 +5,6 @@ import com.meti.node.Node;
 import com.meti.rule.Rule;
 
 import java.util.Optional;
-import java.util.Stack;
 
 public class NamedLexer implements Lexer {
     private final Rule rule;
@@ -18,6 +17,6 @@ public class NamedLexer implements Lexer {
 
     @Override
     public Optional<Node> lex() {
-        return rule.lex(input, new Stack<>()).map(tuple -> new MapNode(tuple.a().orElseThrow(), tuple.b()));
+        return rule.lexImpl(input).map(tuple -> new MapNode(tuple.a().orElseThrow(), tuple.b()));
     }
 }

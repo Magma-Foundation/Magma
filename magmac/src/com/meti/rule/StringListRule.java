@@ -7,7 +7,6 @@ import com.meti.node.StringListAttribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class StringListRule implements Rule {
     private final Rule required;
@@ -24,9 +23,9 @@ public class StringListRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
         Optional<Map<String, Attribute>> result1;
-        if (required.lex(input, stack).map(tuple -> tuple.b()).isPresent()) {
+        if (required.lexImpl(input).map(tuple -> tuple.b()).isPresent()) {
             result1 = Optional.of(Map.of(name, new StringListAttribute(Collections.singletonList(input))));
         } else {
             result1 = Optional.empty();

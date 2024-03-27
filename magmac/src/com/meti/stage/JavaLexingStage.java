@@ -78,6 +78,7 @@ public class JavaLexingStage extends LexingStage {
     );
     private static final LazyRule VOLATILE_CLASS_RULE = new LazyRule();
     public static final Rule CLASS_MEMBER = OrRule.Or(
+            PADDING,
             new NamedRule("method", METHOD_RULE),
             new NamedRule("definition", DEFINITION_RULE),
             new NamedRule("class", VOLATILE_CLASS_RULE)

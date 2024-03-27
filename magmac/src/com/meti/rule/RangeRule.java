@@ -6,7 +6,6 @@ import com.meti.node.Attribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class RangeRule implements Rule {
     private final char start;
@@ -38,7 +37,7 @@ public class RangeRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
 var result = lex(input);
         return result;
     }

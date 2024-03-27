@@ -8,7 +8,6 @@ import com.meti.node.NodeAttribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class ContentRule implements Rule {
     private final String nodeType;
@@ -36,7 +35,7 @@ public class ContentRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
 var result = lex(input);
         return result;
     }

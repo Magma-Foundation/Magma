@@ -31,8 +31,8 @@ public class OrRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        var result = first.lex(input, stack).or(() -> second.lex(input, stack));
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
+        var result = first.lexImpl(input).or(() -> second.lexImpl(input));
         return result;
     }
 }

@@ -13,7 +13,7 @@ public class MethodRuleTest extends FeatureTest {
     private static final Stack<String> stack = new Stack<>();
 
     private static void assertMethod(String input) {
-        assertTrue(JavaLexingStage.METHOD_RULE.lex(input, stack).map(Tuple::b).isPresent());
+        assertTrue(JavaLexingStage.METHOD_RULE.lexImpl(input).map(Tuple::b).isPresent());
     }
 
     @Test

@@ -11,31 +11,31 @@ class RangeRuleTest {
 
     @Test
     void simple() {
-        assertTrue(((Rule) new RangeRule('a', 'z')).lex("b", stack).map(tuple -> tuple.b())
+        assertTrue(((Rule) new RangeRule('a', 'z')).lexImpl("b").map(tuple -> tuple.b())
                 .isPresent());
     }
 
     @Test
     void left() {
-        assertTrue(((Rule) new RangeRule('a', 'z')).lex("a", stack).map(tuple -> tuple.b())
+        assertTrue(((Rule) new RangeRule('a', 'z')).lexImpl("a").map(tuple -> tuple.b())
                 .isPresent());
     }
 
     @Test
     void right() {
-        assertTrue(((Rule) new RangeRule('a', 'z')).lex("z", stack).map(tuple -> tuple.b())
+        assertTrue(((Rule) new RangeRule('a', 'z')).lexImpl("z").map(tuple -> tuple.b())
                 .isPresent());
     }
 
     @Test
     void outsideLeft() {
-        assertTrue(((Rule) new RangeRule('4', '8')).lex("3", stack).map(tuple -> tuple.b())
+        assertTrue(((Rule) new RangeRule('4', '8')).lexImpl("3").map(tuple -> tuple.b())
                 .isEmpty());
     }
 
     @Test
     void outsideRight() {
-        assertTrue(((Rule) new RangeRule('4', '8')).lex("9", stack).map(tuple -> tuple.b())
+        assertTrue(((Rule) new RangeRule('4', '8')).lexImpl("9").map(tuple -> tuple.b())
                 .isEmpty());
     }
 }

@@ -6,7 +6,6 @@ import com.meti.node.Attribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 class EmptyRule implements Rule {
     public static Rule EMPTY = new EmptyRule();
@@ -22,7 +21,7 @@ class EmptyRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
 var result = lex(input);
         return result;
     }
