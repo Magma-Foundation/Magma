@@ -17,7 +17,7 @@ public class JavaLexingStage extends LexingStage {
             new ExtractTextRule("value", AnyRule.Any),
             new RequireRule("\""));
 
-    public static final ExtractTextRule INT = new ExtractTextRule("value", new ListRule(new RangeRule('0', '9')));
+    public static final ExtractTextRule INT_RULE = new ExtractTextRule("value", new ListRule(new RangeRule('0', '9')));
     public static final NamedRule IMPORT_RULE = new NamedRule("import", And(
             new RequireRule("import"),
             Optional(And(
@@ -31,7 +31,6 @@ public class JavaLexingStage extends LexingStage {
     ));
     public static final LazyRule VOLATILE_VALUE_RULE = new LazyRule();
     public static final Rule INVOKE = And(
-            // new ContentRule("caller", "value", 0),
             new NodeRule("caller", new NamedRule("value", VOLATILE_VALUE_RULE)),
             new RequireRule("("),
             new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
@@ -65,18 +64,18 @@ public class JavaLexingStage extends LexingStage {
     );
     public static final Rule SYMBOL_TOKEN = new ExtractTextRule("value", SYMBOL);
     public static final Rule FIELD = And(
-            new ContentRule("parent", "value", 0),
+            new NodeRule("parent", new NamedRule("value", VOLATILE_VALUE_RULE)),
             new RequireRule("."),
             Rules.ExtractSymbol("member")
     );
     public static final Rule VALUE_RULE = OrRule.Or(
             new NamedRule("string", STRING),
-            new NamedRule("int", INT),
+            new NamedRule("int", INT_RULE),
             new NamedRule("symbol", SYMBOL_TOKEN),
             new NamedRule("field", FIELD),
             new NamedRule("invoke", INVOKE)
     );
-    private static final LazyRule VOLATILE_CLASS_RULE = new LazyRule();
+    public static final LazyRule VOLATILE_CLASS_RULE = new LazyRule();
     public static final Rule CLASS_MEMBER = OrRule.Or(
             PADDING,
             new NamedRule("method", METHOD_RULE),

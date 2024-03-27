@@ -1,28 +1,14 @@
 package com.meti.bug;
 
 import com.meti.rule.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
 
 import static com.meti.rule.AndRule.And;
 import static com.meti.rule.WhitespaceRule.PADDING;
 import static com.meti.rule.WhitespaceRule.WHITESPACE;
 import static com.meti.stage.JavaLexingStage.*;
 
-public class Bug0 {
-
-    private static void assertValid(String input, Rule rule) {
-        Assertions.assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
-            var present = rule
-                    .lexImpl(input)
-                    .isPresent();
-
-            Assertions.assertTrue(present);
-        });
-    }
-
+public class Bug0 extends RuleTest {
     @Test
     void empty() {
         assertValid("", new ListDelimitingRule(new RequireRule(";"), new NodeElementRule("body", CLASS_MEMBER)));
@@ -65,7 +51,7 @@ public class Bug0 {
     void noEnd10() {
         var rule = new LazyRule();
         rule.set(OrRule.Or(
-                new NamedRule("int", INT),
+                new NamedRule("int", INT_RULE),
                 new NamedRule("invoke", new NodeRule("caller", new NamedRule("value", rule)))
         ));
 
@@ -120,12 +106,12 @@ public class Bug0 {
     @Test
     void noEnd3() {
         assertValid("1;1",
-                new ListDelimitingRule(new RequireRule(";"), INT));
+                new ListDelimitingRule(new RequireRule(";"), INT_RULE));
     }
 
     @Test
     void noEnd5() {
         assertValid("1;1", new ListDelimitingRule(new RequireRule(";"),
-                new NodeElementRule("int", new NamedRule("int", INT))));
+                new NodeElementRule("int", new NamedRule("int", INT_RULE))));
     }
 }
