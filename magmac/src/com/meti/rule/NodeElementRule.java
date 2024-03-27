@@ -30,7 +30,11 @@ public class NodeElementRule implements Rule {
             result = Optional.empty();
         } else {
             result = nodeRule.lexImpl(input).<Map<String, Attribute>>map(stringAttributeMap -> {
-                var node = new MapNode(stringAttributeMap.a().orElseThrow(), stringAttributeMap.b());
+                var node = new MapNode(stringAttributeMap.a().orElseThrow(() -> {
+                    var format = "Rule '%s' was valid for input '%s' but no name was provided.";
+                    var message = format.formatted(nodeRule.getClass().toString(), input);
+                    return new RuntimeException(message);
+                }), stringAttributeMap.b());
                 var attribute = new NodeListAttribute(Collections.singletonList(node));
                 return Collections.singletonMap(attributeName, attribute);
             }).map(attributes -> new Tuple<>(Optional.empty(), attributes));
