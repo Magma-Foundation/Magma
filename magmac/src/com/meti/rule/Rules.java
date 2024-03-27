@@ -14,8 +14,8 @@ public class Rules {
         return new ExtractTextRule(name, SYMBOL);
     }
 
-    public static Rule Enum(String first, String... more) {
-        return OrRule.Or(new RequireRule(first), Arrays.stream(more)
+    public static Rule Enum(String first, String second, String... more) {
+        return OrRule.Or(new RequireRule(first), new RequireRule(second), Arrays.stream(more)
                 .map(RequireRule::new)
                 .toList()
                 .toArray(RequireRule[]::new));

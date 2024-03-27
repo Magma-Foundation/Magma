@@ -31,8 +31,8 @@ public class JavaLexingStage extends LexingStage {
     ));
     public static final LazyRule VOLATILE_VALUE_RULE = new LazyRule();
     public static final Rule INVOKE = And(
-            new ContentRule("caller", "value", 0),
-            // new NodeRule("caller", new NamedRule("value", VOLATILE_VALUE_RULE)),
+            // new ContentRule("caller", "value", 0),
+            new NodeRule("caller", new NamedRule("value", VOLATILE_VALUE_RULE)),
             new RequireRule("("),
             new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
             new RequireRule(")")
@@ -48,9 +48,8 @@ public class JavaLexingStage extends LexingStage {
             PADDING,
             new NodeRule("value", VOLATILE_VALUE_RULE)
     );
-    public static final Rule METHOD_STATEMENT = OrRule.Or(
-            new NamedRule("definition", DEFINITION_RULE)
-    );
+
+    public static final Rule METHOD_STATEMENT = new NamedRule("definition", DEFINITION_RULE);
     public static final Rule METHOD_RULE = And(
             new NodeRule("type", new NamedRule("type", new ExtractTextRule("value", Rules.Enum(
                     "String",
@@ -65,7 +64,7 @@ public class JavaLexingStage extends LexingStage {
             new RequireRule("}")
     );
     public static final Rule SYMBOL_TOKEN = new ExtractTextRule("value", SYMBOL);
-    private static final Rule FIELD = And(
+    public static final Rule FIELD = And(
             new ContentRule("parent", "value", 0),
             new RequireRule("."),
             Rules.ExtractSymbol("member")

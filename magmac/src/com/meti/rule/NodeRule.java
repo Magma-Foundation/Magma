@@ -8,6 +8,7 @@ import com.meti.node.NodeAttribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 public class NodeRule implements Rule {
     private final String attributeName;
@@ -23,19 +24,24 @@ public class NodeRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
-        if (input.isBlank()) return Optional.empty();
-
-        return nodeRule.lex(input).<Map<String, Attribute>>map(stringAttributeMap -> {
-            var name = stringAttributeMap.a().orElseThrow(() -> getRuntimeException(input));
-            var node = new MapNode(name, stringAttributeMap.b());
-            var attribute = new NodeAttribute(node);
-            return Collections.singletonMap(attributeName, attribute);
-        }).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+        Optional<Tuple<Optional<String>, Map<String, Attribute>>> result;
+        if (input.isBlank()) {
+            result = Optional.empty();
+        } else {
+            result = nodeRule.lex(input, stack).<Map<String, Attribute>>map(stringAttributeMap -> {
+                var name = stringAttributeMap.a().orElseThrow(() -> getRuntimeException(input));
+                var node = new MapNode(name, stringAttributeMap.b());
+                var attribute = new NodeAttribute(node);
+                return Collections.singletonMap(attributeName, attribute);
+            }).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+        }
+
+        return result;
     }
 }

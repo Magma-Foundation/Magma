@@ -1,10 +1,12 @@
 package com.meti.lex;
 
+import com.meti.Tuple;
 import com.meti.node.MapNode;
 import com.meti.node.Node;
 import com.meti.rule.Rule;
 
 import java.util.Optional;
+import java.util.Stack;
 
 public class RuleLexer implements Lexer {
     private final Rule rule;
@@ -19,6 +21,8 @@ public class RuleLexer implements Lexer {
 
     @Override
     public Optional<Node> lex() {
-        return rule.lex(value).map(tuple -> tuple.b()).map(attributes -> new MapNode(id, attributes));
+        return rule.lex(value, new Stack<>())
+                .map(Tuple::b)
+                .map(attributes -> new MapNode(id, attributes));
     }
 }

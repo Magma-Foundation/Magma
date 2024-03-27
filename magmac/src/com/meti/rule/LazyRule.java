@@ -5,6 +5,7 @@ import com.meti.node.Attribute;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 public class LazyRule implements Rule {
     private Optional<Rule> value = Optional.empty();
@@ -14,12 +15,12 @@ public class LazyRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
-        return value.flatMap(internal -> internal.lex(input));
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+        return value.flatMap(internal -> internal.lex(input, stack));
     }
 }
