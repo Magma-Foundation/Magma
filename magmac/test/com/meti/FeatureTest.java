@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FeatureTest {
     protected static void assertCompile(String input, String expected) {
-        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
+        assertTimeoutPreemptively(Duration.ofSeconds(4), () -> {
 
             try {
                 var actual = Compiler.compile(input);

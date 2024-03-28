@@ -8,7 +8,7 @@ import java.util.*;
 public class AndRule implements Rule {
     private final Rule left;
     private final Rule right;
-    private final Stack<String> stack = new Stack<>();
+    private final Stack<Tuple<String, String>> stack = new Stack<>();
 
     public AndRule(Rule left, Rule right) {
         this.left = left;
@@ -33,42 +33,34 @@ public class AndRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        Optional<Map<String, Attribute>> result1 = Optional.empty();
-        boolean finished = false;
+        System.out.println("And: '" + input + "': " + this.stack);
+
         if (input.isEmpty()) {
             if (left.lex(input, stack).map(Tuple::b).isPresent() && right.lex(input, stack).map(Tuple::b).isPresent()) {
-                result1 = Optional.of(Collections.emptyMap());
-            } else {
-                result1 = Optional.empty();
+                return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
             }
-            finished = true;
         }
 
-        if (!finished) {
-            for (int i = 0; i <= input.length(); i++) {
-                var left1 = input.substring(0, i);
-                var right1 = input.substring(i);
+        Optional<Map<String, Attribute>> result1 = Optional.empty();
+        for (int i = 0; i <= input.length(); i++) {
+            var left1 = input.substring(0, i);
+            var right1 = input.substring(i);
 
-                var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
-                if (leftOptional.isPresent()) {
-                    var rightOptional = this.right.lex(right1, stack).map(Tuple::b);
+            this.stack.push(new Tuple<>(left1, right1));
 
-                    if (rightOptional.isPresent()) {
-                        var stringAttributeMap = new HashMap<>(leftOptional.get());
-                        rightOptional.get().forEach((key, value) -> stringAttributeMap.merge(key, value, Attribute::merge));
+            var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
+            if (leftOptional.isPresent()) {
+                var rightOptional = this.right.lex(right1, stack).map(Tuple::b);
 
-                        result1 = Optional.of(stringAttributeMap);
-                        finished = true;
-                    }
-                }
+                if (rightOptional.isPresent()) {
+                    var stringAttributeMap = new HashMap<>(leftOptional.get());
+                    rightOptional.get().forEach((key, value) -> stringAttributeMap.merge(key, value, Attribute::merge));
 
-                if(finished) {
-                    break;
+                    result1 = Optional.of(stringAttributeMap);
                 }
             }
-            if (!finished) {
-                result1 = Optional.empty();
-            }
+
+            this.stack.pop();
         }
 
         return result1.map(attributes -> new Tuple<>(Optional.empty(), attributes));
