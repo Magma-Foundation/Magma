@@ -8,7 +8,6 @@ import java.util.*;
 public class OrRule implements Rule {
     private final Rule first;
     private final Rule second;
-    private final Stack<String> stack = new Stack<>();
 
     public OrRule(Rule first, Rule second) {
         this.first = first;
@@ -31,13 +30,15 @@ public class OrRule implements Rule {
         throw new UnsupportedOperationException();
     }
 
+    private final Stack<String> stack = new Stack<>();
+
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        if (this.stack.contains(input)) return Optional.empty();
+        if(this.stack.contains(input)) return Optional.empty();
 
-        this.stack.push(input);
+        stack.push(input);
         var or = first.lex(input, stack).or(() -> second.lex(input, stack));
-        this.stack.pop();
+        stack.pop();
 
         return or;
     }
