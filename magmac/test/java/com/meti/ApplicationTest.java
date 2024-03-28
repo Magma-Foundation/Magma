@@ -18,7 +18,7 @@ public class ApplicationTest {
     @Test
     void generatesSomething() throws IOException {
         Files.createFile(SOURCE);
-        new Application(new SingleSourceSet(SOURCE)).run();
+        new Application(new SingleSourceSet(SOURCE), Paths.get(".")).run();
         assertTrue(Files.exists(TARGET));
     }
 
@@ -30,7 +30,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        new Application(new SingleSourceSet(SOURCE)).run();
+        new Application(new SingleSourceSet(SOURCE), Paths.get(".")).run();
         assertFalse(Files.exists(TARGET));
     }
 }
