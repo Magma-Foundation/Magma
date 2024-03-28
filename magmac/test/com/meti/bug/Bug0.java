@@ -63,16 +63,13 @@ public class Bug0 {
 
     @Test
     void noEnd10() {
-        var rule = new LazyRule();
-        rule.set(OrRule.Or(
-                new NamedRule("int", INT),
-                new NamedRule("invoke", new NodeRule("caller", new NamedRule("value", rule)))
-        ));
-
         assertValid("first 1;first 2", new ListDelimitingRule(new RequireRule(";"), And(
                 Rules.ExtractSymbol("name"),
                 PADDING,
-                new NodeRule("value", rule)
+                new NodeRule("value", OrRule.Or(
+                        new NamedRule("int", INT),
+                        new NamedRule("invoke", new NodeRule("caller", new NamedRule("value", VOLATILE_VALUE_RULE)))
+                ))
         )));
     }
 

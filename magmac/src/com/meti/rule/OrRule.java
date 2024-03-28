@@ -14,8 +14,6 @@ public class OrRule implements Rule {
         this.second = second;
     }
 
-    private final Stack<String> stack = new Stack<>();
-
     public static Rule Or(Rule first, Rule second, Rule... more) {
         var list = new ArrayList<>(List.of(first, second));
         list.addAll(Arrays.asList(more));
@@ -34,11 +32,7 @@ public class OrRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
-        if(stack.contains(input)) return Optional.empty();
-
-        stack.push(input);
         var result = first.lexImpl(input).or(() -> second.lexImpl(input));
-        stack.pop();
         return result;
     }
 }
