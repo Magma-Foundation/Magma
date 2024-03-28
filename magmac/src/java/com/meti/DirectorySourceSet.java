@@ -8,16 +8,18 @@ import java.util.stream.Collectors;
 
 public class DirectorySourceSet implements SourceSet {
     private final Path root;
+    private final String extension;
 
-    public DirectorySourceSet(Path root) {
+    public DirectorySourceSet(Path root, String extension) {
         this.root = root;
+        this.extension = extension;
     }
 
     private Set<Path> collect1() throws IOException {
         try (var stream = Files.walk(root)) {
             return stream
                     .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".java"))
+                    .filter(path -> path.getFileName().toString().endsWith(extension))
                     .collect(Collectors.toSet());
         }
     }

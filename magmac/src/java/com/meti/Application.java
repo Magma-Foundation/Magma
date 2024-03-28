@@ -8,10 +8,12 @@ import java.util.Objects;
 public final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
+    private final String targetExtension;
 
-    public Application(SourceSet sourceSet, Path targetRoot) {
+    public Application(SourceSet sourceSet, Path targetRoot, String targetExtension) {
         this.sourceSet = sourceSet;
         this.targetRoot = targetRoot;
+        this.targetExtension = targetExtension;
     }
 
     void run() throws IOException {
@@ -23,13 +25,11 @@ public final class Application {
 
             var target = package_.stream()
                     .reduce(targetRoot, Path::resolve, (path1, path2) -> path2)
-                    .resolve(name + ".mgs");
+                    .resolve(name + targetExtension);
 
             var parent = target.getParent();
-            if(!Files.exists(parent)) Files.createDirectories(parent);
-
-            Files.createFile(target);
-
+            if (!Files.exists(parent)) Files.createDirectories(parent);
+            if (!Files.exists(target)) Files.createFile(target);
         }
     }
 
