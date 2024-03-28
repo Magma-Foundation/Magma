@@ -1,7 +1,6 @@
 package com.meti;
 
 import com.meti.node.Content;
-import com.meti.node.Node;
 import com.meti.stage.FormattingStage;
 import com.meti.stage.JavaLexingStage;
 import com.meti.stage.RenderingStage;
@@ -10,7 +9,7 @@ import com.meti.stage.ParsingStage;
 import java.util.ArrayList;
 
 public class Compiler {
-    static String compile(String input) throws CompileException {
+    public static String compile(String input) throws CompileException {
         var output = new ArrayList<String>();
         for (var line : new Splitter(input).split()) {
             output.add(compileLine(line.strip()));
@@ -19,7 +18,7 @@ public class Compiler {
         return String.join("\n", output);
     }
 
-    private static String compileLine(String input) throws CompileException {
+    public static String compileLine(String input) throws CompileException {
         if (input.isEmpty()) {
             return "";
         }

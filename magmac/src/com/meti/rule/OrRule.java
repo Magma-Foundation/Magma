@@ -30,9 +30,16 @@ public class OrRule implements Rule {
         throw new UnsupportedOperationException();
     }
 
+    private final Stack<String> stack = new Stack<>();
+
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        var result = first.lex(input, stack).or(() -> second.lex(input, stack));
-        return result;
+        if(this.stack.contains(input)) return Optional.empty();
+
+        stack.push(input);
+        var or = first.lex(input, stack).or(() -> second.lex(input, stack));
+        stack.pop();
+
+        return or;
     }
 }

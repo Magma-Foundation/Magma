@@ -19,8 +19,15 @@ public class LazyRule implements Rule {
         throw new UnsupportedOperationException();
     }
 
+    private final Stack<String> stack = new Stack<>();
+
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        return value.flatMap(internal -> internal.lex(input, stack));
+        if(this.stack.contains(input)) return Optional.empty();
+
+        this.stack.push(input);
+        var optionalMapTuple = value.flatMap(internal -> internal.lex(input, stack));
+        this.stack.pop();
+        return optionalMapTuple;
     }
 }
