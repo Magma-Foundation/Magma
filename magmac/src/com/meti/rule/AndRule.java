@@ -49,6 +49,12 @@ public class AndRule implements Rule {
             for (int i = 0; i <= input.length(); i++) {
                 var left1 = input.substring(0, i);
                 var right1 = input.substring(i);
+                if(this.stack.contains(new Tuple<>(left1, right1))) {
+                    return Optional.empty();
+                }
+
+                this.stack.push(new Tuple<>(left1, right1));
+
                 var leftOptional = this.left.lexImpl(left1).map(Tuple::b);
                 if (leftOptional.isPresent()) {
                     var rightOptional = this.right.lexImpl(right1).map(Tuple::b);
@@ -61,6 +67,8 @@ public class AndRule implements Rule {
                         finished = true;
                     }
                 }
+
+                this.stack.pop();
                 if(finished) {
                     break;
                 }
