@@ -15,15 +15,6 @@ public class RequireRule implements Rule {
         this.requiredValue = requiredValue;
     }
 
-    private Optional<Map<String, Attribute>> apply1(String input) {
-        if (input.equals(requiredValue)) return Optional.of(Collections.emptyMap());
-        else return Optional.empty();
-    }
-
-    private Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
-        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
-    }
-
     @Override
     public Optional<String> render(Map<String, Attribute> attributes) {
         throw new UnsupportedOperationException();
@@ -31,7 +22,16 @@ public class RequireRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-var result = lex(input);
-        return result;
+        Optional<Map<String, Attribute>> result;
+        if (input.equals(requiredValue)) result = Optional.of(Collections.emptyMap());
+        else result = Optional.empty();
+        return result.map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public String toString() {
+        return "RequireRule{" +
+               "requiredValue='" + requiredValue + '\'' +
+               '}';
     }
 }
