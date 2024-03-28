@@ -144,7 +144,7 @@ class JavaLexingStageTest {
         var rule = new LazyRule();
         rule.set(OrRule.Or(
                 new NamedRule("string", JavaLexingStage.STRING),
-                new NamedRule("int", JavaLexingStage.INT_RULE),
+                new NamedRule("int", JavaLexingStage.INT),
                 new NamedRule("symbol", JavaLexingStage.SYMBOL_TOKEN),
                 new NamedRule("field", JavaLexingStage.FIELD),
                 new NamedRule("invoke", JavaLexingStage.INVOKE)
@@ -214,7 +214,7 @@ class JavaLexingStageTest {
     void test8() {
         var rule = new LazyRule();
         rule.set(
-                new NamedRule("int", JavaLexingStage.INT_RULE)
+                new NamedRule("int", JavaLexingStage.INT)
         );
 
         Rule rule1 = And(
