@@ -59,9 +59,19 @@ public class Bug0 {
         assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
             var inner = new LazyRule();
             inner.set(OrRule.Or(
-                    JavaLexingStage.INT,
-                    And(inner, new RequireRule(".")),
-                    And(inner, new RequireRule("("))
+                    new NamedRule("int", JavaLexingStage.INT),
+                    new NamedRule("field", And(
+                            new NodeRule("parent", new NamedRule("value", inner)),
+                            new RequireRule("."),
+                            Rules.ExtractSymbol("member")
+                    )),
+                    new NamedRule("invoke", And(
+                            // new ContentRule("caller", "value", 0),
+                            new NodeRule("caller", new NamedRule("value", inner)),
+                            new RequireRule("("),
+                            new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
+                            new RequireRule(")")
+                    ))
             ));
 
             var present = new ListDelimitingRule(new RequireRule(";"),
