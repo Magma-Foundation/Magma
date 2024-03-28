@@ -36,8 +36,6 @@ public class AndRule implements Rule {
         if (input.isEmpty()) {
             if (left.lex(input, stack).map(Tuple::b).isPresent() && right.lex(input, stack).map(Tuple::b).isPresent()) {
                 return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
-            } else {
-                return Optional.empty();
             }
         }
 
@@ -45,6 +43,8 @@ public class AndRule implements Rule {
         for (int i = 0; i <= input.length(); i++) {
             var left1 = input.substring(0, i);
             var right1 = input.substring(i);
+
+            this.stack.push(new Tuple<>(left1, right1));
 
             var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
             if (leftOptional.isPresent()) {
@@ -57,6 +57,8 @@ public class AndRule implements Rule {
                     result1 = Optional.of(stringAttributeMap);
                 }
             }
+
+            this.stack.pop();
         }
 
         return result1.map(attributes -> new Tuple<>(Optional.empty(), attributes));

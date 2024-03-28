@@ -57,24 +57,18 @@ public class Bug0 {
     @Test
     void unwrapLazy() {
         assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
-            var recursive = new LazyRule();
-            recursive.set(OrRule.Or(
+            var inner = new LazyRule();
+            inner.set(OrRule.Or(
                     JavaLexingStage.INT,
-                    And(
-                            recursive,
-                            new RequireRule(".")
-                    ),
-                    And(
-                            recursive,
-                            new RequireRule("(")
-                    )
+                    And(inner, new RequireRule(".")),
+                    And(inner, new RequireRule("("))
             ));
 
-            var present = new ListDelimitingRule(new RequireRule(";"), And(
-                    Rules.ExtractSymbol("name"),
+            var present = And(
+                    new AndRule(Rules.ALPHABETIC, Rules.ALPHANUMERIC),
                     PADDING,
-                    new NodeRule("value", recursive)
-            )).lex("first 1;second 2;", new Stack<>()).isPresent();
+                    inner
+            ).lex("first 1;second 2", new Stack<>()).isPresent();
 
             assertTrue(present);
         });
