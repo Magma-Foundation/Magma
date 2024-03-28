@@ -65,7 +65,7 @@ public class JavaLexingStage extends LexingStage {
     );
     public static final Rule SYMBOL_TOKEN = new ExtractTextRule("value", SYMBOL);
     public static final Rule FIELD = And(
-            new NodeRule("parent", new NamedRule("value", VOLATILE_VALUE_RULE)),
+            new ContentRule("parent", "value", 0),
             new RequireRule("."),
             Rules.ExtractSymbol("member")
     );
