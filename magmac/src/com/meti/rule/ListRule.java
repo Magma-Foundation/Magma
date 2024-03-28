@@ -9,9 +9,13 @@ import java.util.Stack;
 
 public class ListRule implements Rule {
     protected final Rule value;
+    private final LazyRule lazy = new LazyRule();
+    private final Rule root;
 
     public ListRule(Rule value) {
         this.value = value;
+        root = OrRule.Or(EmptyRule.EMPTY, value, new AndRule(this.value, lazy));
+        lazy.set(root);
     }
 
     protected Rule createAnd(LazyRule lazy) {
@@ -25,10 +29,6 @@ public class ListRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        var lazy = new LazyRule();
-        var root = OrRule.Or(EmptyRule.EMPTY, value, createAnd(lazy));
-        lazy.set(root);
-        var result = root.lex(input, stack).map(tuple -> tuple.b()).<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
-        return result;
+        return root.lex(input, stack);
     }
 }

@@ -33,8 +33,6 @@ public class AndRule implements Rule {
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        System.out.println("And: '" + input + "': " + this.stack);
-
         if (input.isEmpty()) {
             if (left.lex(input, stack).map(Tuple::b).isPresent() && right.lex(input, stack).map(Tuple::b).isPresent()) {
                 return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
