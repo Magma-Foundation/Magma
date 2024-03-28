@@ -5,6 +5,7 @@ import com.meti.node.Attribute;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 public class ListRule implements Rule {
     protected final Rule value;
@@ -23,11 +24,11 @@ public class ListRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
         var lazy = new LazyRule();
         var root = OrRule.Or(EmptyRule.EMPTY, value, createAnd(lazy));
         lazy.set(root);
-        var result = root.lexImpl(input).map(tuple -> tuple.b()).<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
+        var result = root.lex(input, stack).map(tuple -> tuple.b()).<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
         return result;
     }
 }

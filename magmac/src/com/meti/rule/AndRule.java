@@ -33,11 +33,11 @@ public class AndRule implements Rule {
     private final Stack<Tuple<String, String>> stack = new Stack<>();
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
         Optional<Map<String, Attribute>> result1 = Optional.empty();
         boolean finished = false;
         if (input.isEmpty()) {
-            if (left.lexImpl(input).map(Tuple::b).isPresent() && right.lexImpl(input).map(Tuple::b).isPresent()) {
+            if (left.lex(input, stack).map(Tuple::b).isPresent() && right.lex(input, stack).map(Tuple::b).isPresent()) {
                 result1 = Optional.of(Collections.emptyMap());
             } else {
                 result1 = Optional.empty();
@@ -55,9 +55,9 @@ public class AndRule implements Rule {
 
                 this.stack.push(new Tuple<>(left1, right1));
 
-                var leftOptional = this.left.lexImpl(left1).map(Tuple::b);
+                var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
                 if (leftOptional.isPresent()) {
-                    var rightOptional = this.right.lexImpl(right1).map(Tuple::b);
+                    var rightOptional = this.right.lex(right1, stack).map(Tuple::b);
 
                     if (rightOptional.isPresent()) {
                         var stringAttributeMap = new HashMap<>(leftOptional.get());

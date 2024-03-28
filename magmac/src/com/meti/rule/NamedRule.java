@@ -5,6 +5,7 @@ import com.meti.node.Attribute;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 public class NamedRule implements Rule {
     private final Rule inner;
@@ -21,8 +22,8 @@ public class NamedRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
-        var result = inner.lexImpl(input).map(value -> value.replaceLeft(Optional.of(name)));
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
+        var result = inner.lex(input, stack).map(value -> value.replaceLeft(Optional.of(name)));
         return result;
     }
 }

@@ -17,7 +17,7 @@ class JavaLexingStageTest {
 
     @Test
     void test1() {
-        var present = ((Rule) new NodeRule("value", VOLATILE_VALUE_RULE)).lexImpl("0")
+        var present = ((Rule) new NodeRule("value", VOLATILE_VALUE_RULE)).lex("0", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -35,7 +35,7 @@ class JavaLexingStageTest {
                 new RequireRule("="),
                 PADDING
         );
-        var present = rule.lexImpl("int x = ")
+        var present = rule.lex("int x = ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -47,7 +47,7 @@ class JavaLexingStageTest {
                 new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
                 PADDING
         );
-        var present = rule.lexImpl("")
+        var present = rule.lex("", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -62,7 +62,7 @@ class JavaLexingStageTest {
                 Rules.ExtractSymbol("type"),
                 WHITESPACE
         );
-        var present = rule.lexImpl("int ")
+        var present = rule.lex("int ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -74,7 +74,7 @@ class JavaLexingStageTest {
                 Rules.ExtractSymbol("type"),
                 WHITESPACE
         );
-        var present = rule.lexImpl("int ")
+        var present = rule.lex("int ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -88,7 +88,7 @@ class JavaLexingStageTest {
                 new RequireRule("="),
                 PADDING
         );
-        var present = rule.lexImpl("x = ")
+        var present = rule.lex("x = ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -101,7 +101,7 @@ class JavaLexingStageTest {
                 new RequireRule("="),
                 PADDING
         );
-        var present = rule.lexImpl(" = ")
+        var present = rule.lex(" = ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -113,7 +113,7 @@ class JavaLexingStageTest {
                 new RequireRule("="),
                 PADDING
         );
-        var present = rule.lexImpl("= ")
+        var present = rule.lex("= ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -122,7 +122,7 @@ class JavaLexingStageTest {
     @Test
     void test12() {
         Rule rule = PADDING;
-        var present = rule.lexImpl(" ")
+        var present = rule.lex(" ", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -134,7 +134,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", VOLATILE_VALUE_RULE)
         );
-        var present = rule.lexImpl(" 0").isPresent();
+        var present = rule.lex(" 0", stack).isPresent();
 
         assertTrue(present);
     }
@@ -154,7 +154,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" 0").isPresent();
+        var present = rule1.lex(" 0", stack).isPresent();
 
         assertTrue(present);
     }
@@ -170,7 +170,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" 0").isPresent();
+        var present = rule1.lex(" 0", stack).isPresent();
 
         assertFalse(present);
     }
@@ -186,14 +186,14 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" 0").isPresent();
+        var present = rule1.lex(" 0", stack).isPresent();
 
         assertFalse(present);
     }
 
     @Test
     void invoke() {
-        assertTrue(JavaLexingStage.INVOKE.lexImpl("test()").isPresent());
+        assertTrue(JavaLexingStage.INVOKE.lex("test()", new Stack<>()).isPresent());
     }
 
     @Test
@@ -205,7 +205,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" test()").isPresent();
+        var present = rule1.lex(" test()", stack).isPresent();
 
         assertTrue(present);
     }
@@ -221,7 +221,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" 0").isPresent();
+        var present = rule1.lex(" 0", stack).isPresent();
 
         assertTrue(present);
     }
@@ -237,7 +237,7 @@ class JavaLexingStageTest {
                 WHITESPACE,
                 new NodeRule("value", rule)
         );
-        var present = rule1.lexImpl(" 0").isPresent();
+        var present = rule1.lex(" 0", stack).isPresent();
 
         assertFalse(present);
     }
@@ -249,14 +249,14 @@ class JavaLexingStageTest {
                 PADDING,
                 new NodeRule("value", VOLATILE_VALUE_RULE)
         );
-        var present = rule.lexImpl(" 0").isPresent();
+        var present = rule.lex(" 0", stack).isPresent();
 
         assertTrue(present);
     }
 
     @Test
     void test3() {
-        var present = JavaLexingStage.DEFINITION_RULE.lexImpl("int x = 0")
+        var present = JavaLexingStage.DEFINITION_RULE.lex("int x = 0", stack)
                 .isPresent();
 
         assertTrue(present);
@@ -264,7 +264,7 @@ class JavaLexingStageTest {
 
     @Test
     void test() {
-        var present = JavaLexingStage.DEFINITION_RULE.lexImpl("int x = 0")
+        var present = JavaLexingStage.DEFINITION_RULE.lex("int x = 0", stack)
                 .isPresent();
 
         assertTrue(present);

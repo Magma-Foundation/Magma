@@ -8,6 +8,7 @@ import com.meti.node.NodeListAttribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 public class NodeElementRule implements Rule {
     private final String attributeName;
@@ -24,12 +25,12 @@ public class NodeElementRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexImpl(String input) {
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
         Optional<Tuple<Optional<String>, Map<String, Attribute>>> result;
         if (input.isBlank()) {
             result = Optional.empty();
         } else {
-            result = nodeRule.lexImpl(input).<Map<String, Attribute>>map(stringAttributeMap -> {
+            result = nodeRule.lex(input, stack).<Map<String, Attribute>>map(stringAttributeMap -> {
                 var node = new MapNode(stringAttributeMap.a().orElseThrow(), stringAttributeMap.b());
                 var attribute = new NodeListAttribute(Collections.singletonList(node));
                 return Collections.singletonMap(attributeName, attribute);
