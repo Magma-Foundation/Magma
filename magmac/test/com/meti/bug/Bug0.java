@@ -64,14 +64,11 @@ public class Bug0 {
                     And(inner, new RequireRule("("))
             ));
 
-            var present = new ListDelimitingRule(new RequireRule(";"),
-                    And(
-                            Rules.ExtractSymbol("name"),
-                            PADDING,
-                            inner
-                    ))
-                    .lex("first 1;second 2;", new Stack<>())
-                    .isPresent();
+            var present = And(
+                    Rules.ExtractSymbol("name"),
+                    PADDING,
+                    inner
+            ).lex("first 1;second 2", new Stack<>()).isPresent();
 
             assertTrue(present);
         });
