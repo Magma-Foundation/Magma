@@ -65,7 +65,7 @@ public class Bug0 {
             ));
 
             var present = And(
-                    Rules.ExtractSymbol("name"),
+                    new AndRule(Rules.ALPHABETIC, Rules.ALPHANUMERIC),
                     PADDING,
                     inner
             ).lex("first 1;second 2", new Stack<>()).isPresent();
