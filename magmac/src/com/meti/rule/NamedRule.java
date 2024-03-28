@@ -5,7 +5,6 @@ import com.meti.node.Attribute;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class NamedRule implements Rule {
     private final Rule inner;
@@ -17,13 +16,12 @@ public class NamedRule implements Rule {
     }
 
     @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return inner.lex(input).map(value ->    value.replaceLeft(Optional.of(name)));
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        var result = inner.lex(input, stack).map(value -> value.replaceLeft(Optional.of(name)));
-        return result;
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

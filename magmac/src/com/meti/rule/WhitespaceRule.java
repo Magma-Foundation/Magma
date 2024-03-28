@@ -6,7 +6,6 @@ import com.meti.node.Attribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class WhitespaceRule implements Rule {
     public static final Rule WHITESPACE = new WhitespaceRule();
@@ -15,17 +14,18 @@ public class WhitespaceRule implements Rule {
     private WhitespaceRule() {
     }
 
-    @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    private Optional<Map<String, Attribute>> apply1(String input) {
+        if (input.isBlank()) return Optional.of(Collections.emptyMap());
+        else return Optional.empty();
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        Optional<Map<String, Attribute>> result1;
-        if (!input.isEmpty() && input.isBlank()) result1 = Optional.of(Collections.emptyMap());
-        else result1 = Optional.empty();
-        var result = result1.<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
-        return result;
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

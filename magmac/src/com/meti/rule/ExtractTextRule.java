@@ -6,7 +6,6 @@ import com.meti.node.StringAttribute;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class ExtractTextRule implements Rule {
     private final Rule required;
@@ -17,17 +16,21 @@ public class ExtractTextRule implements Rule {
         this.name = name;
     }
 
-    @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    private Optional<Map<String, Attribute>> apply1(String input) {
+        if (required.lex(input).map(tuple -> tuple.b()).isPresent()) {
+            return Optional.of(Map.of(name, new StringAttribute(input)));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        Optional<Tuple<Optional<String>, Map<String, Attribute>>> result1;
-        if (required.lex(input, stack).isPresent())
-            result1 = Optional.<Tuple<Optional<String>, Map<String, Attribute>>>of(new Tuple<>(Optional.empty(), Map.of(name, new StringAttribute(input))));
-        else result1 = Optional.<Tuple<Optional<String>, Map<String, Attribute>>>empty();
-        return result1;
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -5,7 +5,6 @@ import com.meti.node.Attribute;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class ListRule implements Rule {
     protected final Rule value;
@@ -14,21 +13,24 @@ public class ListRule implements Rule {
         this.value = value;
     }
 
+    private Optional<Map<String, Attribute>> apply1(String input) {
+        var lazy = new LazyRule();
+        var root = OrRule.Or(EmptyRule.EMPTY, value, createAnd(lazy));
+        lazy.set(root);
+        return root.lex(input).map(tuple -> tuple.b());
+    }
+
     protected Rule createAnd(LazyRule lazy) {
         return new AndRule(value, lazy);
     }
 
     @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        var lazy = new LazyRule();
-        var root = OrRule.Or(EmptyRule.EMPTY, value, createAnd(lazy));
-        lazy.set(root);
-        var result = root.lex(input, stack).map(tuple -> tuple.b()).<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
-        return result;
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }

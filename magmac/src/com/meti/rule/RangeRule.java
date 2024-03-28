@@ -6,7 +6,6 @@ import com.meti.node.Attribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class RangeRule implements Rule {
     private final char start;
@@ -28,18 +27,13 @@ public class RangeRule implements Rule {
         return Optional.empty();
     }
 
-    private Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+    @Override
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
         return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
     }
 
     @Override
     public Optional<String> render(Map<String, Attribute> attributes) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-var result = lex(input);
-        return result;
     }
 }

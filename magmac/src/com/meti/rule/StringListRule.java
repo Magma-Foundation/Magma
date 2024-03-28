@@ -7,7 +7,6 @@ import com.meti.node.StringListAttribute;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public class StringListRule implements Rule {
     private final Rule required;
@@ -18,20 +17,21 @@ public class StringListRule implements Rule {
         this.name = name;
     }
 
-    @Override
-    public Optional<String> render(Map<String, Attribute> attributes) {
-        throw new UnsupportedOperationException();
+    private Optional<Map<String, Attribute>> apply1(String input) {
+        if (required.lex(input).map(tuple -> tuple.b()).isPresent()) {
+            return Optional.of(Map.of(name, new StringListAttribute(Collections.singletonList(input))));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        Optional<Map<String, Attribute>> result1;
-        if (required.lex(input, stack).map(tuple -> tuple.b()).isPresent()) {
-            result1 = Optional.of(Map.of(name, new StringListAttribute(Collections.singletonList(input))));
-        } else {
-            result1 = Optional.empty();
-        }
-        var result = result1.<Tuple<Optional<String>, Map<String, Attribute>>>map(attributes -> new Tuple<>(Optional.empty(), attributes));
-        return result;
+    public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input) {
+        return apply1(input).map(attributes -> new Tuple<>(Optional.empty(), attributes));
+    }
+
+    @Override
+    public Optional<String> render(Map<String, Attribute> attributes) {
+        throw new UnsupportedOperationException();
     }
 }
