@@ -70,11 +70,11 @@ public class Bug0 {
                     )
             ));
 
-            var present = new ListRule(And(
+            var present = new ListDelimitingRule(new RequireRule(";"), And(
                     Rules.ExtractSymbol("name"),
                     PADDING,
-                    recursive
-            )).lex("first 1second 2", new Stack<>()).isPresent();
+                    new NodeRule("value", recursive)
+            )).lex("first 1;second 2;", new Stack<>()).isPresent();
 
             assertTrue(present);
         });
