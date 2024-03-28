@@ -8,6 +8,7 @@ import java.util.*;
 public class AndRule implements Rule {
     private final Rule left;
     private final Rule right;
+    private final Stack<String> stack = new Stack<>();
 
     public AndRule(Rule left, Rule right) {
         this.left = left;
@@ -30,8 +31,6 @@ public class AndRule implements Rule {
         return left.render(attributes).flatMap(leftValue -> right.render(attributes).map(rightValue -> leftValue + rightValue));
     }
 
-    private final Stack<Tuple<String, String>> stack = new Stack<>();
-
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
         Optional<Map<String, Attribute>> result1 = Optional.empty();
@@ -49,11 +48,6 @@ public class AndRule implements Rule {
             for (int i = 0; i <= input.length(); i++) {
                 var left1 = input.substring(0, i);
                 var right1 = input.substring(i);
-                if(this.stack.contains(new Tuple<>(left1, right1))) {
-                    return Optional.empty();
-                }
-
-                this.stack.push(new Tuple<>(left1, right1));
 
                 var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
                 if (leftOptional.isPresent()) {
@@ -68,7 +62,6 @@ public class AndRule implements Rule {
                     }
                 }
 
-                this.stack.pop();
                 if(finished) {
                     break;
                 }
