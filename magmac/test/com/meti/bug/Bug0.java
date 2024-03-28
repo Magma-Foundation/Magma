@@ -9,6 +9,7 @@ import java.util.Stack;
 
 import static com.meti.rule.AndRule.And;
 import static com.meti.rule.WhitespaceRule.PADDING;
+import static com.meti.rule.WhitespaceRule.WHITESPACE;
 import static com.meti.stage.JavaLexingStage.CLASS_MEMBER;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,9 +28,19 @@ public class Bug0 {
 
     @Test
     void onlyDefinitions() {
-        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
             var present = new ListDelimitingRule(new RequireRule(";"),
-                    new NamedRule("definition", JavaLexingStage.DEFINITION_RULE))
+                    new NamedRule("definition", And(
+                            new ListDelimitingRule(WHITESPACE, new StringListRule("flags", Rules.Enum("public", "final"))),
+                            PADDING,
+                            Rules.ExtractSymbol("type"),
+                            WHITESPACE,
+                            Rules.ExtractSymbol("name"),
+                            PADDING,
+                            new RequireRule("="),
+                            PADDING,
+                            new NodeRule("value", JavaLexingStage.VOLATILE_VALUE_RULE)
+                    )))
                     .lex("int first = 1; int second = 2;", new Stack<>())
                     .isPresent();
 

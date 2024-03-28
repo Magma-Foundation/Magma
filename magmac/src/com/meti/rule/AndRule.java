@@ -6,59 +6,55 @@ import com.meti.node.Attribute;
 import java.util.*;
 
 public class AndRule implements Rule {
-    private final Rule left;
-    private final Rule right;
-    private final Stack<Tuple<String, String>> stack = new Stack<>();
+    private final List<Rule> rules;
 
-    public AndRule(Rule left, Rule right) {
-        this.left = left;
-        this.right = right;
+    public AndRule(Rule... rules) {
+        this.rules = new ArrayList<>(List.of(rules));
     }
 
-    public static Rule And(Rule first, Rule second, Rule... more) {
-        var list = new ArrayList<>(List.of(first, second));
-        list.addAll(Arrays.asList(more));
-
-        var firstSlice = new ArrayList<>(list.subList(0, list.size() - 2));
-        Collections.reverse(firstSlice);
-
-        return firstSlice.stream().reduce(new AndRule(list.get(list.size() - 2), list.get(list.size() - 1)),
-                (left1, right1) -> new AndRule(right1, left1));
+    public static Rule And(Rule... rules) {
+        return new AndRule(rules);
     }
 
     @Override
     public Optional<String> render(Map<String, Attribute> attributes) {
-        return left.render(attributes).flatMap(leftValue -> right.render(attributes).map(rightValue -> leftValue + rightValue));
+        return rules.stream()
+                .map(rule -> rule.render(attributes))
+                .reduce(Optional.of(""), (acc, optional) ->
+                        acc.flatMap(accStr -> optional.map(accStr::concat)));
     }
 
     @Override
     public Optional<Tuple<Optional<String>, Map<String, Attribute>>> lex(String input, Stack<String> stack) {
-        if (input.isEmpty()) {
-            if (left.lex(input, stack).map(Tuple::b).isPresent() && right.lex(input, stack).map(Tuple::b).isPresent()) {
-                return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
-            } else {
-                return Optional.empty();
-            }
+        if (rules.isEmpty()) {
+            return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
         }
 
-        Optional<Map<String, Attribute>> result1 = Optional.empty();
+        return lexRecursively(input, stack, 0);
+    }
+
+    private Optional<Tuple<Optional<String>, Map<String, Attribute>>> lexRecursively(
+            String input, Stack<String> stack, int index) {
+        if (index >= rules.size()) {
+            return Optional.of(new Tuple<>(Optional.empty(), Collections.emptyMap()));
+        }
+
+        Rule currentRule = rules.get(index);
         for (int i = 0; i <= input.length(); i++) {
-            var left1 = input.substring(0, i);
-            var right1 = input.substring(i);
+            String leftPart = input.substring(0, i);
+            String rightPart = input.substring(i);
 
-            var leftOptional = this.left.lex(left1, stack).map(Tuple::b);
-            if (leftOptional.isPresent()) {
-                var rightOptional = this.right.lex(right1, stack).map(Tuple::b);
-
-                if (rightOptional.isPresent()) {
-                    var stringAttributeMap = new HashMap<>(leftOptional.get());
-                    rightOptional.get().forEach((key, value) -> stringAttributeMap.merge(key, value, Attribute::merge));
-
-                    result1 = Optional.of(stringAttributeMap);
+            Optional<Tuple<Optional<String>, Map<String, Attribute>>> leftResult = currentRule.lex(leftPart, stack);
+            if (leftResult.isPresent()) {
+                Optional<Tuple<Optional<String>, Map<String, Attribute>>> rightResult = lexRecursively(rightPart, stack, index + 1);
+                if (rightResult.isPresent()) {
+                    Map<String, Attribute> combinedAttributes = new HashMap<>(leftResult.get().b());
+                    combinedAttributes.putAll(rightResult.get().b());
+                    return Optional.of(new Tuple<>(Optional.empty(), combinedAttributes));
                 }
             }
         }
 
-        return result1.map(attributes -> new Tuple<>(Optional.empty(), attributes));
+        return Optional.empty();
     }
 }
