@@ -15,19 +15,10 @@ public class ApplicationTest {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 
-    private static void run() throws IOException {
-        if (Files.exists(SOURCE)) {
-            var name = SOURCE.getFileName().toString();
-            var separator = name.indexOf('.');
-            var withoutExtension = name.substring(0, separator);
-            Files.createFile(SOURCE.resolveSibling(withoutExtension + ".mgs"));
-        }
-    }
-
     @Test
     void generatesSomething() throws IOException {
         Files.createFile(SOURCE);
-        run();
+        new Application(new SingleSourceSet(SOURCE)).run();
         assertTrue(Files.exists(TARGET));
     }
 
@@ -39,7 +30,7 @@ public class ApplicationTest {
 
     @Test
     void generatesNothing() throws IOException {
-        run();
+        new Application(new SingleSourceSet(SOURCE)).run();
         assertFalse(Files.exists(TARGET));
     }
 }
