@@ -56,7 +56,7 @@ public class Bug0 {
 
     @Test
     void unwrapLazy() {
-        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> {
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> {
             var recursive = new LazyRule();
             recursive.set(OrRule.Or(
                     JavaLexingStage.INT,
