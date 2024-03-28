@@ -60,8 +60,18 @@ public class Bug0 {
             var inner = new LazyRule();
             inner.set(OrRule.Or(
                     new NamedRule("int", JavaLexingStage.INT),
-                    new NamedRule("field", JavaLexingStage.FIELD),
-                    new NamedRule("invoke", JavaLexingStage.INVOKE)
+                    new NamedRule("field", And(
+                            new NodeRule("parent", new NamedRule("value", inner)),
+                            new RequireRule("."),
+                            Rules.ExtractSymbol("member")
+                    )),
+                    new NamedRule("invoke", And(
+                            // new ContentRule("caller", "value", 0),
+                            new NodeRule("caller", new NamedRule("value", inner)),
+                            new RequireRule("("),
+                            new ListRule(new ExtractNodeElementRule("arguments", "value", 0)),
+                            new RequireRule(")")
+                    ))
             ));
 
             var present = new ListDelimitingRule(new RequireRule(";"),
