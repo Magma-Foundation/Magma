@@ -65,11 +65,11 @@ public class Bug0 {
             ));
 
             var present = new ListDelimitingRule(new RequireRule(";"),
-                    new NamedRule("definition", And(
+                    And(
                             Rules.ExtractSymbol("name"),
                             PADDING,
                             inner
-                    )))
+                    ))
                     .lex("first 1;second 2;", new Stack<>())
                     .isPresent();
 
