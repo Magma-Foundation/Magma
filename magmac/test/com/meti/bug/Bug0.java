@@ -63,11 +63,12 @@ public class Bug0 {
 
     @Test
     void noEnd10() {
-        assertValid("first 1;second 1", new ListDelimitingRule(new RequireRule(";"), And(
-                Rules.ExtractSymbol("name"),
-                PADDING,
-                new NodeRule("value", VOLATILE_VALUE_RULE)
-        )));
+        assertValid("first 1;second 1",
+                new ListDelimitingRule(new RequireRule(";"), And(
+                        Rules.ExtractSymbol("name"),
+                        PADDING,
+                        new NodeRule("value", VOLATILE_VALUE_RULE)
+                )));
     }
 
     @Test
