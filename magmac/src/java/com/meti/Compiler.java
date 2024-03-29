@@ -44,7 +44,7 @@ public record Compiler(String input, String sourceExtension, String targetExtens
         return Optional.empty();
     }
 
-    private static Optional<MethodState> compileMethod(String slice, String targetExtension) {
+    private static Optional<MethodState> compileMethod(String slice, String targetExtension, String className) {
         var paramStart = slice.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
@@ -61,9 +61,9 @@ public record Compiler(String input, String sourceExtension, String targetExtens
 
         var functionBody = slice.substring(bodyStart, bodyEnd + 1).strip();
 
-        if (targetExtension.equals(".js")) {
+        if (targetExtension.equals(".c") || targetExtension.equals(".js")) {
             var indicator = slice.indexOf("def");
-            if(indicator == -1) return Optional.empty();
+            if (indicator == -1) return Optional.empty();
 
             var start = indicator + "def".length();
             var endIndex = slice.indexOf('(');
@@ -72,26 +72,55 @@ public record Compiler(String input, String sourceExtension, String targetExtens
             var name = slice.substring(start, endIndex).strip();
             var flags = splitFlags(slice.substring(0, indicator).strip());
 
-            Optional<String> export_;
-            if (flags.contains("pub")) {
-                export_ = Optional.of(name);
+            if (targetExtension.equals(".c")) {
+                var type = slice.substring(slice.indexOf(':', slice.indexOf(')')) + 1, slice.indexOf("=>")).strip();
+                var compiledType = compileType(type);
+
+
+                var newParams = Arrays.stream(paramSlice)
+                        .map(pSlice -> {
+                            var separator = pSlice.indexOf(':');
+                            if (separator == -1) return Optional.<String>empty();
+
+                            var paramName = pSlice.substring(0, separator).strip();
+                            var paramType = compileType(pSlice.substring(separator + 1).strip());
+                            return Optional.of(paramType + " " + paramName);
+                        })
+                        .flatMap(Optional::stream)
+                        .toList();
+
+                var copy = new ArrayList<String>();
+                copy.add("struct " + className + "* __self__");
+                copy.addAll(newParams);
+
+                var paramString = copy.stream().collect(Collectors.joining(", ", "(", ")"));
+
+                return Optional.of(new MethodState(Optional.empty(), Optional.empty(),
+                        Optional.of("\n" + compiledType + " " + name + paramString + functionBody)));
             } else {
-                export_ = Optional.empty();
+                Optional<String> export_;
+                if (flags.contains("pub")) {
+                    export_ = Optional.of(name);
+                } else {
+                    export_ = Optional.empty();
+                }
+
+                var newParams = Arrays.stream(paramSlice)
+                        .map(pSlice -> {
+                            var separator = pSlice.indexOf(':');
+                            if (separator == -1) return Optional.<String>empty();
+
+                            var paramName = pSlice.substring(0, separator).strip();
+                            return Optional.of(paramName);
+                        })
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.joining(", ", "(", ")"));
+
+                return Optional.of(new MethodState(Optional.of("\n\tfunction " + name + newParams + functionBody), export_, export_));
             }
+        }
 
-            var newParams = Arrays.stream(paramSlice)
-                    .map(pSlice -> {
-                        var separator = pSlice.indexOf(':');
-                        if (separator == -1) return Optional.<String>empty();
-
-                        var paramName = pSlice.substring(0, separator).strip();
-                        return Optional.of(paramName);
-                    })
-                    .flatMap(Optional::stream)
-                    .collect(Collectors.joining(", ", "(", ")"));
-
-            return Optional.of(new MethodState("\n\tfunction " + name + newParams + functionBody, export_));
-        } else if (targetExtension.equals(".mgs")) {
+        if (targetExtension.equals(".mgs")) {
             var paramStrings = Arrays.stream(paramSlice)
                     .map(Compiler::compileJavaParameter)
                     .flatMap(Optional::stream)
@@ -112,10 +141,14 @@ public record Compiler(String input, String sourceExtension, String targetExtens
             var outputType = compileType(inputType);
 
             var flagsString = flags.contains("public") ? "pub " : "";
-            return Optional.of(new MethodState("\n\t" + flagsString + "def " + name + "(" + paramStrings + ") : " + outputType + " => " + functionBody, Optional.empty()));
-        } else {
-            return Optional.empty();
+            var format = "\n\t%sdef %s(%s) : %s => %s";
+            return Optional.of(new MethodState(
+                    Optional.of(format.formatted(flagsString, name, paramStrings, outputType, functionBody)),
+                    Optional.empty(),
+                    Optional.empty()
+            ));
         }
+        return Optional.empty();
     }
 
     private static List<String> splitFlags(String slice) {
@@ -147,13 +180,15 @@ public record Compiler(String input, String sourceExtension, String targetExtens
         String outputType;
         if (inputType.equals("void")) {
             outputType = "Void";
+        } else if (inputType.equals("Void")) {
+            outputType = "void";
         } else {
             outputType = inputType;
         }
         return outputType;
     }
 
-    List<Application.State> compile() {
+    List<ApplicationState> compile() {
         var lines = split(input());
 
         if (sourceExtension().equals(".java")) {
@@ -167,47 +202,66 @@ public record Compiler(String input, String sourceExtension, String targetExtens
                 .collect(Collectors.toList());
     }
 
-    private Application.State compileLine(String line) {
+    private ApplicationState compileLine(String line) {
         var compiled = compileImport(line, sourceExtension(), targetExtension());
-        if (compiled.isPresent()) return new Application.State("", Optional.empty(), compiled);
+        if (compiled.isPresent())
+            return new StateBuilder().setValue("").setExports(Optional.empty()).setImportString(compiled).createState();
 
         var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
         var bodyString = split(body);
-
-        List<String> exports = new ArrayList<>();
-        StringBuilder newBody = new StringBuilder();
-        for (String s : bodyString) {
-            var state = compileMethod(s, targetExtension).orElse(new MethodState(s, Optional.empty()));
-            newBody.append(state.value);
-
-            state.export.ifPresent(exports::add);
-        }
-        var bodyString1 = newBody.toString();
 
         if (line.startsWith("export class def ")) {
             var paramStart = line.indexOf('(');
             var name = line.substring("export class def ".length(), paramStart).strip();
 
+            List<String> functions = new ArrayList<>();
+            List<String> exports = new ArrayList<>();
+            StringBuilder newBody = new StringBuilder();
+            for (String s : bodyString) {
+                var state = compileMethod(s, targetExtension, name)
+                        .orElse(new MethodState(Optional.of(s), Optional.empty(), Optional.empty()));
+
+                state.value.ifPresent(newBody::append);
+
+                state.export.ifPresent(exports::add);
+                state.function.ifPresent(functions::add);
+            }
+            var bodyString1 = newBody.toString();
             if (targetExtension().equals(".js")) {
                 var exportsString = String.join("", exports);
-                return new Application.State("\nfunction " + name + "(){" + bodyString1 + "\n\treturn {" + exportsString + "};\n}", Optional.of(name));
+                return new StateBuilder()
+                        .setValue("\nfunction " + name + "(){" + bodyString1 + "\n\treturn {" + exportsString + "};\n}")
+                        .setExports(Optional.of(name)).setFunctions(functions).createState();
             }
 
             if (targetExtension().equals(".h")) {
-                return new Application.State("\nvoid " + name + "();", Optional.empty(),
-                        Optional.of("\nstruct " + name + " {}"));
+                return new StateBuilder().setValue("\nvoid " + name + "();").setExports(Optional.empty()).setImportString(Optional.of("\nstruct " + name + " {}")).createState();
             } else if (targetExtension().equals(".c")) {
-                return new Application.State("\nstruct " + name + " " + name + "(){" + body +
-                                             "\n\tstruct " + name + " " + "this" + " = {};" +
-                                             "\n\treturn this;" +
-                                             "\n}", Optional.empty());
+                return new StateBuilder().setValue("\nstruct " + name + " " + name + "(){" + bodyString1 +
+                                                   "\n\tstruct " + name + " " + "this" + " = {};" +
+                                                   "\n\treturn this;" +
+                                                   "\n}").setExports(Optional.empty()).setFunctions(functions).createState();
             }
         } else if (line.startsWith("public class ")) {
             var name = line.substring("public class ".length(), line.indexOf('{')).strip();
-            return new Application.State("\nexport class def " + name + "() => {" + newBody + "\n}", Optional.empty());
+
+            List<String> functions = new ArrayList<>();
+            List<String> exports = new ArrayList<>();
+            StringBuilder newBody = new StringBuilder();
+            for (String s : bodyString) {
+                var state = compileMethod(s, targetExtension, name)
+                        .orElse(new MethodState(Optional.of(s), Optional.empty(), Optional.empty()));
+
+                state.value.ifPresent(newBody::append);
+
+                state.export.ifPresent(exports::add);
+                state.function.ifPresent(functions::add);
+            }
+
+            return new StateBuilder().setValue("\nexport class def " + name + "() => {" + newBody + "\n}").setExports(Optional.empty()).setFunctions(functions).createState();
         }
 
-        return new Application.State(line, Optional.empty());
+        return new StateBuilder().createState();
     }
 
     private ArrayList<String> split(String input) {
@@ -236,7 +290,6 @@ public record Compiler(String input, String sourceExtension, String targetExtens
         return lines;
     }
 
-    record MethodState(String value, Optional<String> export) {
-
+    record MethodState(Optional<String> value, Optional<String> export, Optional<String> function) {
     }
 }

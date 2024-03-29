@@ -1,6 +1,6 @@
 const { IOException } = require("java.io");
 const { Path } = require("java.nio.file");
-const { Paths } = require("java.nio.file");
+const { Paths } = require("java.nio.file");main
 function Main(){
 	function main(args){
         try {

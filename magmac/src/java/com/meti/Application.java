@@ -3,7 +3,10 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class Application {
@@ -36,8 +39,13 @@ public final class Application {
                 var states = new Compiler(input, sourceSet.findExtension(), targetExtension).compile();
                 var main = states.stream().map(state -> state.value).collect(Collectors.joining());
 
+                var functions = states.stream()
+                        .map(state -> state.functions)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.joining());
+
                 var imports = states.stream()
-                        .map(state -> state.importString)
+                        .map(state -> state.import_)
                         .flatMap(Optional::stream)
                         .collect(Collectors.joining());
 
@@ -62,7 +70,7 @@ public final class Application {
                     exportString = "\nmodule.exports = {" + joinedExports + "\n};";
                 }
 
-                String tempOutput = imports + structs + main + exportString;
+                String tempOutput = imports + structs + functions + main + exportString;
                 String output;
                 if (targetExtension.equals(".h")) {
                     output = "#ifndef " + name + "_H\n#define " + name + "_H" + tempOutput + "\n#endif";
@@ -99,33 +107,4 @@ public final class Application {
                "sourceSet=" + sourceSet + ']';
     }
 
-    static final class State {
-        private final Optional<String> importString;
-        private final String value;
-        private final Optional<String> exports;
-        private final Optional<String> structs;
-
-        State(String value, Optional<String> exports) {
-            this(value, exports, Optional.empty());
-        }
-
-        State(String value, Optional<String> exports, Optional<String> importString) {
-            this(importString, value, exports, Optional.empty());
-        }
-
-        State(Optional<String> importString, String value, Optional<String> exports, Optional<String> structs) {
-            this.importString = importString;
-            this.value = value;
-            this.exports = exports;
-            this.structs = structs;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        public Optional<String> exports() {
-            return exports;
-        }
-    }
 }

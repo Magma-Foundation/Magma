@@ -1,6 +1,5 @@
 #include "Main.c"
-struct Main Main(){
-	pub def main(args : String[]) : Void => {
+void main(struct Main* __self__, String[] args){
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();
             var magmaSource = Paths.get(".", "magmac", "src", "magma").toAbsolutePath();
@@ -23,10 +22,10 @@ struct Main Main(){
             throw new RuntimeException(e);
         }
     }
-	def runImpl(javaSource : Path, magmaSource : Path, sourceExtension : String, ...destinationExtension : String) : Void => {
+void runImpl(struct Main* __self__, Path javaSource, Path magmaSource, String sourceExtension, String ...destinationExtension){
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
-
+struct Main Main(){
 	struct Main this = {};
 	return this;
 }
