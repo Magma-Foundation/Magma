@@ -1,6 +1,24 @@
 package com.meti;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
-public record PathSource(Path location) {
+public record PathSource(Path root, Path location) {
+    String findName() {
+        var name = location().getFileName().toString();
+        var index = name.indexOf('.');
+        return name.substring(0, index);
+    }
+
+    public List<String> findNamespace() {
+        var list = new ArrayList<String>();
+        var relativeLocation = root.relativize(location);
+        var namespaceLength = relativeLocation.getNameCount() - 1;
+        for (int i = 0; i < namespaceLength; i++) {
+            var nameSegment = relativeLocation.getName(i).toString();
+            list.add(nameSegment);
+        }
+        return list;
+    }
 }

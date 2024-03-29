@@ -18,7 +18,7 @@ public record SingleSourceSet(Path source) implements SourceSet {
     public Set<PathSource> collect() throws IOException {
         return collect1()
                 .stream()
-                .map(PathSource::new)
+                .map((Path root) -> new PathSource(root.getParent(), root))
                 .collect(Collectors.toSet());
     }
 }

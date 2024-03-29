@@ -13,17 +13,15 @@ public class DirectorySourceSet implements SourceSet {
         this.root = root;
     }
 
-    private Set<Path> collect1() throws IOException {
-        try (var stream = Files.walk(root)) {
-            return stream.collect(Collectors.toSet());
-        }
-    }
-
     @Override
     public Set<PathSource> collect() throws IOException {
-        return collect1()
+        Set<Path> result;
+        try (var stream = Files.walk(root)) {
+            result = stream.collect(Collectors.toSet());
+        }
+        return result
                 .stream()
-                .map(PathSource::new)
+                .map((Path child) -> new PathSource(root, child))
                 .collect(Collectors.toSet());
     }
 }
