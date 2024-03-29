@@ -1,10 +1,5 @@
 #ifndef Application_H
-#define Application_H
-#include <java.io.h>
-#include <java.nio.file.h>
-#include <java.nio.file.h>
-#include <java.util.h>
-#include <java.util.stream.h>public final class Application {
+#define Application_Himport { IOException }import { Files }import { Path }import { * }import { Collectors }from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.util.streampublic final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final List<String> targetExtensions;

@@ -1,11 +1,5 @@
 #ifndef PathSource_H
-#define PathSource_H
-#include <java.io.h>
-#include <java.nio.file.h>
-#include <java.nio.file.h>
-#include <java.util.h>
-#include <java.util.h>
-#include <java.util.h>public record PathSource(Path root, Path path) {
+#define PathSource_Himport { IOException }import { Files }import { Path }import { ArrayList }import { Collections }import { List }from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.utilfrom java.utilpublic record PathSource(Path root, Path path) {
     public List<String> findPackage() {
         var list = new ArrayList<String>();
         var parent = root.toAbsolutePath().relativize(path.toAbsolutePath()).getParent();

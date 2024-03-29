@@ -1,7 +1,5 @@
 #ifndef SourceSet_H
-#define SourceSet_H
-#include <java.io.h>
-#include <java.util.h>public interface SourceSet {
+#define SourceSet_Himport { IOException }import { Set }from java.iofrom java.utilpublic interface SourceSet {
     Set<PathSource> collect() throws IOException;
 
     String findExtension();

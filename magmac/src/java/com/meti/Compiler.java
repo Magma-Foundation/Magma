@@ -84,9 +84,14 @@ public record Compiler(String input, String sourceExtension, String targetExtens
 
         if (line.startsWith("public class ")) {
             var name = line.substring("public class ".length(), line.indexOf('{')).strip();
-            var body = line.substring(line.indexOf('{'), line.lastIndexOf('}') + 1).strip();
+            var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')).strip();
+            var bodyString = split(body);
+            String newBody = "";
+            for (String s : bodyString) {
+                newBody += "\n\tdef test() => {}";
+            }
 
-            return new Application.State("\nexport class def " + name + "() => " + body, Optional.empty());
+            return new Application.State("\nexport class def " + name + "() => {" + newBody + "\n}", Optional.empty());
         }
 
         return new Application.State(line, Optional.empty());

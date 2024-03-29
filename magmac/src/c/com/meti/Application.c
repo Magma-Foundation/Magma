@@ -1,4 +1,4 @@
-#include "Application.c"public final class Application {
+#include "Application.c"from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.util.streampublic final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final List<String> targetExtensions;

@@ -8,25 +8,9 @@ import { Paths } from java.nio.file;
 import { assertFalse } from static org.junit.jupiter.api.Assertions;
 import { assertTrue } from static org.junit.jupiter.api.Assertions;
 export class def ApplicationTest() => {
-    public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
-    public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
-
-    @Test
-    void generatesSomething() throws IOException {
-        Files.createFile(SOURCE);
-        new Application(new SingleSourceSet(SOURCE), Paths.get("."), ".mgs").run();
-        assertTrue(Files.exists(TARGET));
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        Files.deleteIfExists(SOURCE);
-        Files.deleteIfExists(TARGET);
-    }
-
-    @Test
-    void generatesNothing() throws IOException {
-        new Application(new SingleSourceSet(SOURCE), Paths.get("."), ".mgs").run();
-        assertFalse(Files.exists(TARGET));
-    }
+	def test() => {}
+	def test() => {}
+	def test() => {}
+	def test() => {}
+	def test() => {}
 }
