@@ -1,5 +1,5 @@
 
-function Main(){
+void main(){
     public static void main(String[] args) {
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();
@@ -28,6 +28,3 @@ function Main(){
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
 }
-module.exports = {
-	Main
-};

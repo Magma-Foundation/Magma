@@ -1,5 +1,5 @@
 
-function ApplicationTest(){
+void main(){
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 
@@ -22,6 +22,3 @@ function ApplicationTest(){
         assertFalse(Files.exists(TARGET));
     }
 }
-module.exports = {
-	ApplicationTest
-};

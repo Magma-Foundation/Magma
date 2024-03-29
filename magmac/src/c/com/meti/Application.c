@@ -32,7 +32,7 @@ public final class Application {
             lines.removeIf(line -> line.startsWith("package"));
         }
 
-        var collect = lines.stream()
+        return lines.stream()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
@@ -43,7 +43,14 @@ public final class Application {
                         var paramStart = line.indexOf('(');
                         var name = line.substring("export class def ".length(), paramStart).strip();
                         var body = line.substring(line.indexOf('{'), line.lastIndexOf('}') + 1);
-                        return new State("\nfunction " + name + "()" + body, Optional.of(name));
+
+                        if (targetExtension.equals(".js")) {
+                            return new State("\nfunction " + name + "()" + body, Optional.of(name));
+                        } else if (targetExtension.equals(".h")) {
+                            return new State("\nvoid main();", Optional.empty());
+                        } else if (targetExtension.equals(".c")) {
+                            return new State("\nvoid main()" + body, Optional.empty());
+                        }
                     }
 
                     if (line.startsWith("public class ")) {
@@ -56,7 +63,6 @@ public final class Application {
                     return new State(line, Optional.empty());
                 })
                 .collect(Collectors.toList());
-        return collect;
     }
 
     private Optional<String> compileImport(String line, String sourceExtension, String targetExtension) {

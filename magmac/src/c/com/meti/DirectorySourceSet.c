@@ -1,5 +1,5 @@
 
-function DirectorySourceSet implements SourceSet(){
+void main(){
     private final Path root;
     private final String extension;
 
@@ -29,6 +29,3 @@ function DirectorySourceSet implements SourceSet(){
                 .collect(Collectors.toSet());
     }
 }
-module.exports = {
-	DirectorySourceSet implements SourceSet
-};
