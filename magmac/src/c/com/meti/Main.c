@@ -1,4 +1,4 @@
-public class Main {
+export class def Main() => {
     public static void main(String[] args) {
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();

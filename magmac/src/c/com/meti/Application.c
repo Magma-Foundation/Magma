@@ -68,6 +68,11 @@ public final class Application {
                         } else {
                             return line;
                         }
+                    } else if (line.startsWith("public class ")) {
+                        var name = line.substring("public class ".length(), line.indexOf('{')).strip();
+                        var body = line.substring(line.indexOf('{'), line.lastIndexOf('}') + 1).strip();
+
+                        return "\nexport class def " + name + "() => " + body;
                     } else {
                         return line;
                     }

@@ -1,7 +1,8 @@
 
 import { IOException } from java.io;
 import { Path } from java.nio.file;
-import { Paths } from java.nio.file;public class Main {
+import { Paths } from java.nio.file;
+export class def Main() => {
     public static void main(String[] args) {
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();

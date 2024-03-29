@@ -1,4 +1,4 @@
-public class DirectorySourceSet implements SourceSet {
+export class def DirectorySourceSet implements SourceSet() => {
     private final Path root;
     private final String extension;
 

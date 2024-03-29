@@ -6,7 +6,7 @@
 #include <java.nio.file.h>
 #include <java.nio.file.h>
 #include <static org.junit.jupiter.api.Assertions.h>
-#include <static org.junit.jupiter.api.Assertions.h>public class ApplicationTest {
+#include <static org.junit.jupiter.api.Assertions.h>export class def ApplicationTest() => {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 

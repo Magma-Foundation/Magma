@@ -6,7 +6,7 @@ const { Files } = require("java.nio.file");
 const { Path } = require("java.nio.file");
 const { Paths } = require("java.nio.file");
 const { assertFalse } = require("static org.junit.jupiter.api.Assertions");
-const { assertTrue } = require("static org.junit.jupiter.api.Assertions");public class ApplicationTest {
+const { assertTrue } = require("static org.junit.jupiter.api.Assertions");export class def ApplicationTest() => {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 

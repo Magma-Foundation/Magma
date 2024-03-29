@@ -6,7 +6,8 @@ import { Files } from java.nio.file;
 import { Path } from java.nio.file;
 import { Paths } from java.nio.file;
 import { assertFalse } from static org.junit.jupiter.api.Assertions;
-import { assertTrue } from static org.junit.jupiter.api.Assertions;public class ApplicationTest {
+import { assertTrue } from static org.junit.jupiter.api.Assertions;
+export class def ApplicationTest() => {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 
