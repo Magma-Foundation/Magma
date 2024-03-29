@@ -25,17 +25,34 @@ public class Application {
         }
     }
 
-    private static String compile(String input, List<String> namespace) throws CompileException {
+    static String compile(String input, List<String> namespace) throws CompileException {
+        var segments = input.split(";");
+        var hasPackage = false;
+        for (String segment : segments) {
+            var aPackage = isPackage(segment, namespace);
+            if (aPackage) {
+                if (hasPackage) {
+                    throw new CompileException("Input has too many packages!");
+                } else {
+                    hasPackage = true;
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private static boolean isPackage(String input, List<String> namespace) throws CompileException {
         if (input.isEmpty()) {
-            return "";
+            return false;
         } else if (input.startsWith("package ")) {
-            var segments = input.substring("package ".length(), input.lastIndexOf(';'))
+            var segments = input.substring("package ".length())
                     .strip()
                     .split("\\.");
 
             var expectedNamespace = Arrays.asList(segments);
             if (namespace.equals(expectedNamespace)) {
-                return "";
+                return true;
             } else {
                 var format = "Expected a namespace of '%s' but was actually '%s'.";
                 var message = format.formatted(expectedNamespace, namespace);
