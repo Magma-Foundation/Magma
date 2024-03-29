@@ -1,5 +1,7 @@
 package com.meti;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,5 +26,9 @@ public record PathSource(Path root, Path location) {
             list.add(nameSegment);
         }
         return list;
+    }
+
+    public String read() throws IOException {
+        return Files.readString(location);
     }
 }

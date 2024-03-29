@@ -17,7 +17,7 @@ public class SingleApplicationTest {
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
     @Test
-    void generatesNoTarget() throws IOException {
+    void generatesNoTarget() throws IOException, CompileException {
         Application.run(new SingleSourceSet(SOURCE), ROOT, ".mgs");
         assertFalse(Files.exists(TARGET));
     }
@@ -29,7 +29,7 @@ public class SingleApplicationTest {
     }
 
     @Test
-    void generatesTarget() throws IOException {
+    void generatesTarget() throws IOException, CompileException {
         Files.createFile(SOURCE);
         Application.run(new SingleSourceSet(SOURCE), ROOT, ".mgs");
         assertTrue(Files.exists(TARGET));
