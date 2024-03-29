@@ -8,6 +8,10 @@ public record PathSource(Path root, Path location) {
     String findName() {
         var name = location().getFileName().toString();
         var index = name.indexOf('.');
+        if (index == -1) {
+            throw new IllegalStateException("Location '" + location + "' does not have a name?");
+        }
+
         return name.substring(0, index);
     }
 

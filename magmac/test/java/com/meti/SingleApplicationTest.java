@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ApplicationTest {
+public class SingleApplicationTest {
     public static final Path ROOT = Paths.get(".");
     public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");

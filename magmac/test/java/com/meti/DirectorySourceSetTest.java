@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 class DirectorySourceSetTest {
@@ -14,19 +15,7 @@ class DirectorySourceSetTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        Files.walkFileTree(ROOT, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.deleteIfExists(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.deleteIfExists(dir);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        Files.walkFileTree(ROOT, new DeletingVisitor());
     }
 
     @Test
@@ -36,9 +25,11 @@ class DirectorySourceSetTest {
         var child = ROOT.resolve("test.txt");
         Files.createFile(child);
 
-        var collected = new DirectorySourceSet(ROOT).collect().stream().map(value -> {
-            return value.location();
-        }).collect(Collectors.toSet());
-        Assertions.assertTrue(collected.contains(child));
+        Assertions.assertTrue(new DirectorySourceSet(ROOT)
+                .collect()
+                .stream()
+                .map(PathSource::location)
+                .collect(Collectors.toSet())
+                .contains(child));
     }
 }

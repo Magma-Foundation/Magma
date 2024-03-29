@@ -17,7 +17,9 @@ public class DirectorySourceSet implements SourceSet {
     public Set<PathSource> collect() throws IOException {
         Set<Path> result;
         try (var stream = Files.walk(root)) {
-            result = stream.collect(Collectors.toSet());
+            result = stream
+                    .filter(Files::isRegularFile)
+                    .collect(Collectors.toSet());
         }
         return result
                 .stream()
