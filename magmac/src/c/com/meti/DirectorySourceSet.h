@@ -3,7 +3,8 @@
 #include <java.nio.file.h>
 #include <java.nio.file.h>
 #include <java.util.h>
-#include <java.util.stream.h>export class def DirectorySourceSet implements SourceSet() => {
+#include <java.util.stream.h>
+function DirectorySourceSet implements SourceSet(){
     private final Path root;
     private final String extension;
 

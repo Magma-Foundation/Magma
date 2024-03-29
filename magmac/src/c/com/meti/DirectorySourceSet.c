@@ -1,4 +1,5 @@
-export class def DirectorySourceSet implements SourceSet() => {
+
+function DirectorySourceSet implements SourceSet(){
     private final Path root;
     private final String extension;
 

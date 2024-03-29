@@ -1,7 +1,8 @@
 
 #include <java.io.h>
 #include <java.nio.file.h>
-#include <java.nio.file.h>export class def Main() => {
+#include <java.nio.file.h>
+function Main(){
     public static void main(String[] args) {
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();
