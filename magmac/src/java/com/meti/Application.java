@@ -46,21 +46,25 @@ public class Application {
         if (input.isEmpty()) {
             return false;
         } else if (input.startsWith("package ")) {
-            var segments = input.substring("package ".length())
-                    .strip()
-                    .split("\\.");
-
-            var expectedNamespace = Arrays.asList(segments);
-            if (namespace.equals(expectedNamespace)) {
-                return true;
-            } else {
-                var format = "Expected a namespace of '%s' but was actually '%s'.";
-                var message = format.formatted(expectedNamespace, namespace);
-                throw new CompileException(message);
-            }
+            return compilePackage(input, namespace);
         } else {
             var format = "Unknown content: '%s'.";
             var message = format.formatted(input);
+            throw new CompileException(message);
+        }
+    }
+
+    private static boolean compilePackage(String input, List<String> namespace) throws CompileException {
+        var segments = input.substring("package ".length())
+                .strip()
+                .split("\\.");
+
+        var expectedNamespace = Arrays.asList(segments);
+        if (namespace.equals(expectedNamespace)) {
+            return true;
+        } else {
+            var format = "Expected a namespace of '%s' but was actually '%s'.";
+            var message = format.formatted(expectedNamespace, namespace);
             throw new CompileException(message);
         }
     }
