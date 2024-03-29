@@ -1,5 +1,5 @@
-
-void main(){
+#include "ApplicationTest.c"
+struct ApplicationTest ApplicationTest(){
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 

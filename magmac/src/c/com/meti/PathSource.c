@@ -1,4 +1,4 @@
-public record PathSource(Path root, Path path) {
+#include "PathSource.c"public record PathSource(Path root, Path path) {
     public List<String> findPackage() {
         var list = new ArrayList<String>();
         var parent = root.toAbsolutePath().relativize(path.toAbsolutePath()).getParent();

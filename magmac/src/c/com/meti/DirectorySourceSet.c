@@ -1,5 +1,5 @@
-
-void main(){
+#include "DirectorySourceSet.c"
+struct DirectorySourceSet implements SourceSet DirectorySourceSet implements SourceSet(){
     private final Path root;
     private final String extension;
 

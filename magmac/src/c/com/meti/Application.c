@@ -1,4 +1,4 @@
-public final class Application {
+#include "Application.c"public final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final List<String> targetExtensions;
@@ -37,7 +37,7 @@ public final class Application {
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
                     var compiled = compileImport(line, sourceExtension, targetExtension);
-                    if (compiled.isPresent()) return new State(compiled.get(), Optional.empty());
+                    if (compiled.isPresent()) return new State("", Optional.empty(), compiled);
 
                     if (line.startsWith("export class def ")) {
                         var paramStart = line.indexOf('(');
@@ -46,10 +46,13 @@ public final class Application {
 
                         if (targetExtension.equals(".js")) {
                             return new State("\nfunction " + name + "()" + body, Optional.of(name));
-                        } else if (targetExtension.equals(".h")) {
-                            return new State("\nvoid main();", Optional.empty());
+                        }
+
+                        if (targetExtension.equals(".h")) {
+                            return new State("\nvoid " + name + "();", Optional.empty(),
+                                    Optional.of("\nstruct " + name + " {}"));
                         } else if (targetExtension.equals(".c")) {
-                            return new State("\nvoid main()" + body, Optional.empty());
+                            return new State("\nstruct " + name + " " + name + "()" + body, Optional.empty());
                         }
                     }
 
@@ -118,10 +121,20 @@ public final class Application {
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
 
-                var results = compile(input, sourceSet.findExtension(), targetExtension);
-                var main = results.stream().map(state -> state.value).collect(Collectors.joining());
+                var states = compile(input, sourceSet.findExtension(), targetExtension);
+                var main = states.stream().map(state -> state.value).collect(Collectors.joining());
 
-                var exports = results.stream()
+                var imports = states.stream()
+                        .map(state -> state.importString)
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.joining());
+
+                var structs = states.stream()
+                        .map(state -> state.structs)
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.joining());
+
+                var exports = states.stream()
                         .map(state -> state.exports)
                         .flatMap(Optional::stream)
                         .toList();
@@ -137,7 +150,15 @@ public final class Application {
                     exportString = "\nmodule.exports = {" + joinedExports + "\n};";
                 }
 
-                String output = main + exportString;
+                String tempOutput = imports + structs + main + exportString;
+                String output;
+                if (targetExtension.equals(".h")) {
+                    output = "#ifndef " + name + "_H\n#define " + name + "_H" + tempOutput + "\n#endif";
+                } else if (targetExtension.equals(".c")) {
+                    output = "#include \"" + name + ".c" + "\"" + tempOutput;
+                } else {
+                    output = tempOutput;
+                }
                 Files.writeString(target, output);
             }
         }
@@ -166,7 +187,33 @@ public final class Application {
                "sourceSet=" + sourceSet + ']';
     }
 
-    record State(String value, Optional<String> exports) {
-    }
+    static final class State {
+        private final Optional<String> importString;
+        private final String value;
+        private final Optional<String> exports;
+        private final Optional<String> structs;
 
+        State(String value, Optional<String> exports) {
+            this(value, exports, Optional.empty());
+        }
+
+        State(String value, Optional<String> exports, Optional<String> importString) {
+            this(importString, value, exports, Optional.empty());
+        }
+
+        State(Optional<String> importString, String value, Optional<String> exports, Optional<String> structs) {
+            this.importString = importString;
+            this.value = value;
+            this.exports = exports;
+            this.structs = structs;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        public Optional<String> exports() {
+            return exports;
+        }
+    }
 }
