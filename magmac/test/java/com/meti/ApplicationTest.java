@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ApplicationTest {
     @Test
     void noMultiplePackage() {
-        assertThrows(CompileException.class, () -> new Unit(Collections.singletonList("test")).compile("package test;package test;"
-        ));
+        assertThrows(CompileException.class, () -> new Unit(Collections.singletonList("test"))
+                .compile("package test;package test;"));
     }
 }
