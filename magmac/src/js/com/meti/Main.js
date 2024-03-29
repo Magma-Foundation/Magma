@@ -2,7 +2,7 @@ const { IOException } = require("java.io");
 const { Path } = require("java.nio.file");
 const { Paths } = require("java.nio.file");
 function Main(){
-	function main(){
+	function main(args){
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();
             var magmaSource = Paths.get(".", "magmac", "src", "magma").toAbsolutePath();
@@ -25,7 +25,7 @@ function Main(){
             throw new RuntimeException(e);
         }
     }
-	function runImpl(){
+	function runImpl(javaSource, magmaSource, sourceExtension, ...destinationExtension){
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
 	return {main};

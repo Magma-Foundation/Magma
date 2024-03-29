@@ -43,6 +43,8 @@
         var paramEnd = slice.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
+        var paramSlice = slice.substring(paramStart + 1, paramEnd).split(",");
+
         var bodyStart = slice.indexOf('{');
         if (bodyStart == -1) return Optional.empty();
 
@@ -69,9 +71,20 @@
                 export_ = Optional.empty();
             }
 
-            return Optional.of(new MethodState("\n\tfunction " + name + "()" + functionBody, export_));
+            var newParams = Arrays.stream(paramSlice)
+                    .map(pSlice -> {
+                        var separator = pSlice.indexOf(':');
+                        if (separator == -1) return Optional.<String>empty();
+
+                        var paramName = pSlice.substring(0, separator).strip();
+                        return Optional.of(paramName);
+                    })
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.joining(", ", "(", ")"));
+
+            return Optional.of(new MethodState("\n\tfunction " + name + newParams + functionBody, export_));
         } else if (targetExtension.equals(".mgs")) {
-            var paramStrings = Arrays.stream(slice.substring(paramStart + 1, paramEnd).split(","))
+            var paramStrings = Arrays.stream(paramSlice)
                     .map(Compiler::compileJavaParameter)
                     .flatMap(Optional::stream)
                     .collect(Collectors.joining(", "));
