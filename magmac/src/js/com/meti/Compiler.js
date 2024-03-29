@@ -36,6 +36,73 @@ import { ArrayList }import { Arrays }import { List }import { Optional }import { 
         return Optional.empty();
     }
 
+    private static Optional<String> compileMethod(String slice, StringBuilder newBody) {
+        var paramStart = slice.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
+
+        var paramEnd = slice.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var paramStrings = Arrays.stream(slice.substring(paramStart + 1, paramEnd).split(","))
+                .map(line -> {
+                    var separator = line.lastIndexOf(' ');
+                    if (separator == -1) return Optional.<String>empty();
+
+                    var typeString = line.substring(0, separator).strip();
+                    boolean isVarArgs;
+                    String actualType;
+                    if (typeString.endsWith("...")) {
+                        isVarArgs = true;
+                        actualType = typeString.substring(0, typeString.length() - "...".length());
+                    } else {
+                        isVarArgs = false;
+                        actualType = typeString;
+                    }
+
+                    var nameString = line.substring(separator + 1).strip();
+                    var prefix = isVarArgs ? "..." : "";
+
+                    return Optional.of(prefix + nameString + " : " + compileType(actualType));
+                })
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining(", "));
+
+        var before = slice.substring(0, paramStart);
+        var nameSeparator = before.lastIndexOf(' ');
+        if (nameSeparator == -1) return Optional.empty();
+
+        var name = before.substring(nameSeparator + 1).strip();
+
+        var keyString = before.substring(0, nameSeparator).strip();
+        var typeSeparator = keyString.lastIndexOf(' ');
+        if (typeSeparator == -1) return Optional.empty();
+
+        var flags = Arrays.asList(keyString.substring(0, typeSeparator).strip().split(" "));
+        var inputType = keyString.substring(typeSeparator + 1).strip();
+        var outputType = compileType(inputType);
+
+        var bodyStart = slice.indexOf('{');
+        if (bodyStart == -1) return Optional.empty();
+
+        var bodyEnd = slice.lastIndexOf('}');
+        if (bodyEnd == -1) return Optional.empty();
+
+        var functionBody = slice.substring(bodyStart, bodyEnd + 1).strip();
+
+        var flagsString = flags.contains("public") ? "pub " : "";
+        return Optional.of("\n\t" + flagsString + "def " + name + "(" + paramStrings + ") : " + outputType + " => " + functionBody);
+    }
+
+    private static String compileType(String inputType) {
+        String outputType;
+        if (inputType.equals("void")) {
+            outputType = "Void";
+        } else {
+            outputType = inputType;
+        }
+        return outputType;
+    }
+
     List<Application.State> compile() {
         var lines = split(input());
 
@@ -78,9 +145,9 @@ import { ArrayList }import { Arrays }import { List }import { Optional }import { 
             var name = line.substring("public class ".length(), line.indexOf('{')).strip();
             var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')).strip();
             var bodyString = split(body);
-            String newBody = "";
+            StringBuilder newBody = new StringBuilder();
             for (String s : bodyString) {
-                newBody += "\n\tdef test() => {}";
+                newBody.append(compileMethod(s, newBody).orElse(s));
             }
 
             return new Application.State("\nexport class def " + name + "() => {" + newBody + "\n}", Optional.empty());
