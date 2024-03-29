@@ -55,8 +55,6 @@ public class MultipleApplicationTest {
 
     @Test
     void withInvalidPackage() {
-        assertThrows(CompileException.class, () -> {
-            runWithContent("package test;");
-        });
+        assertThrows(CompileException.class, () -> runWithContent("package test;"));
     }
 }
