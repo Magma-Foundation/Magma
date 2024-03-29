@@ -1,4 +1,9 @@
-import { IOException } from java.ioimport { Files } from java.nio.fileimport { Path } from java.nio.fileimport { Set } from java.utilimport { Collectors } from java.util.streampublic class DirectorySourceSet implements SourceSet {
+
+const { IOException } = require("java.io");
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { Set } = require("java.util");
+const { Collectors } = require("java.util.stream");public class DirectorySourceSet implements SourceSet {
     private final Path root;
     private final String extension;
 

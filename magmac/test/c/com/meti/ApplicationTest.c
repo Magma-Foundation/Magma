@@ -1,4 +1,12 @@
-import { AfterEach } from org.junit.jupiter.apiimport { Test } from org.junit.jupiter.apiimport { IOException } from java.ioimport { Files } from java.nio.fileimport { Path } from java.nio.fileimport { Paths } from java.nio.fileimport { assertFalse } from static org.junit.jupiter.api.Assertionsimport { assertTrue } from static org.junit.jupiter.api.Assertionspublic class ApplicationTest {
+
+const { AfterEach } = require("org.junit.jupiter.api");
+const { Test } = require("org.junit.jupiter.api");
+const { IOException } = require("java.io");
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { Paths } = require("java.nio.file");
+const { assertFalse } = require("static org.junit.jupiter.api.Assertions");
+const { assertTrue } = require("static org.junit.jupiter.api.Assertions");public class ApplicationTest {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 

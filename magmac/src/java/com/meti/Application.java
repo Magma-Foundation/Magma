@@ -46,9 +46,13 @@ public final class Application {
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
-                    if (extension.equals(".java")) {
-                        if (line.startsWith("import ")) {
-                            var segmentString = line.substring("import ".length()).strip();
+                    if (line.startsWith("import ")) {
+                        var segmentString = line.substring("import ".length()).strip();
+
+                        var childStart = segmentString.indexOf('{');
+                        var childEnd = segmentString.indexOf('}');
+
+                        if (extension.equals(".java")) {
                             var arrays = Arrays.asList(segmentString.split("\\."));
                             if (arrays.isEmpty()) return line;
                             if (arrays.size() == 1) return "import " + arrays.get(0);
@@ -57,12 +61,16 @@ public final class Application {
                             var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
                             return "\nimport { %s } from %s;".formatted(child, parent);
                         } else {
-                            return line;
+                            var child = segmentString.substring(childStart + 1, childEnd).strip();
+                            var fromIndex = segmentString.indexOf("from ", childEnd);
+                            if(fromIndex == -1) return line;
+
+                            var parent = segmentString.substring(fromIndex + "from ".length()).strip();
+                            return "\nconst { " + child + " } = require(\"" + parent + "\");";
                         }
                     } else {
                         return line;
                     }
-
                 })
                 .collect(Collectors.joining());
     }

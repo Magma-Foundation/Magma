@@ -1,4 +1,11 @@
-import { IOException } from java.ioimport { Files } from java.nio.fileimport { Path } from java.nio.fileimport { ArrayList } from java.utilimport { Arrays } from java.utilimport { Objects } from java.utilimport { Collectors } from java.util.streampublic final class Application {
+
+const { IOException } = require("java.io");
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { ArrayList } = require("java.util");
+const { Arrays } = require("java.util");
+const { Objects } = require("java.util");
+const { Collectors } = require("java.util.stream");public final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final String[] targetExtensions;
@@ -36,9 +43,13 @@ import { IOException } from java.ioimport { Files } from java.nio.fileimport { P
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
-                    if (extension.equals(".java")) {
-                        if (line.startsWith("import ")) {
-                            var segmentString = line.substring("import ".length()).strip();
+                    if (line.startsWith("import ")) {
+                        var segmentString = line.substring("import ".length()).strip();
+
+                        var childStart = segmentString.indexOf('{');
+                        var childEnd = segmentString.indexOf('}');
+
+                        if (extension.equals(".java")) {
                             var arrays = Arrays.asList(segmentString.split("\\."));
                             if (arrays.isEmpty()) return line;
                             if (arrays.size() == 1) return "import " + arrays.get(0);
@@ -47,12 +58,16 @@ import { IOException } from java.ioimport { Files } from java.nio.fileimport { P
                             var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
                             return "\nimport { %s } from %s;".formatted(child, parent);
                         } else {
-                            return line;
+                            var child = segmentString.substring(childStart + 1, childEnd).strip();
+                            var fromIndex = segmentString.indexOf("from ", childEnd);
+                            if(fromIndex == -1) return line;
+
+                            var parent = segmentString.substring(fromIndex + "from ".length()).strip();
+                            return "\nconst { " + child + " } = require(\"" + parent + "\");";
                         }
                     } else {
                         return line;
                     }
-
                 })
                 .collect(Collectors.joining());
     }
