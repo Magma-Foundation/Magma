@@ -15,6 +15,11 @@ public class DirectorySourceSet implements SourceSet {
         this.extension = extension;
     }
 
+    @Override
+    public String findExtension() {
+        return extension;
+    }
+
     private Set<Path> collect1() throws IOException {
         try (var stream = Files.walk(root)) {
             return stream

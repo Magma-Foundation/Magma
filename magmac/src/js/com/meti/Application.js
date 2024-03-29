@@ -18,7 +18,7 @@ public final class Application {
         this.targetExtensions = targetExtensions;
     }
 
-    private static String compile(String input) {
+    private static String compile(String input, String extension) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -37,7 +37,9 @@ public final class Application {
         lines.add(builder.toString());
         lines.removeIf(String::isBlank);
 
-        lines.removeIf(line -> line.startsWith("package"));
+        if (extension.equals(".java")) {
+            lines.removeIf(line -> line.startsWith("package"));
+        }
 
         return lines.stream()
                 .filter(value -> !value.isEmpty())
@@ -59,7 +61,8 @@ public final class Application {
 
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
-                var output = compile(input);
+                String output;
+                output = compile(input, sourceSet.findExtension());
                 Files.writeString(target, output);
             }
         }

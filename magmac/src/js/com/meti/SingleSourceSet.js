@@ -16,6 +16,11 @@ public record SingleSourceSet(Path source) implements SourceSet {
     }
 
     @Override
+    public String findExtension() {
+        return ".java";
+    }
+
+    @Override
     public Set<PathSource> collect() {
         return collect1()
                 .stream()
