@@ -3,10 +3,7 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Application {
@@ -20,7 +17,7 @@ public final class Application {
         this.targetExtensions = List.of(targetExtensions);
     }
 
-    private String compile(String input, String sourceExtension, String targetExtension) {
+    private List<State> compile(String input, String sourceExtension, String targetExtension) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -43,57 +40,68 @@ public final class Application {
             lines.removeIf(line -> line.startsWith("package"));
         }
 
-        return lines.stream()
+        var collect = lines.stream()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
-                    if (line.startsWith("import ")) {
-                        var segmentString = line.substring("import ".length()).strip();
+                    var compiled = compileImport(line, sourceExtension, targetExtension);
+                    if (compiled.isPresent()) return new State(compiled.get(), Optional.empty());
 
-                        var childStart = segmentString.indexOf('{');
-                        var childEnd = segmentString.indexOf('}');
-
-                        if (sourceExtension.equals(".java")) {
-                            var arrays = Arrays.asList(segmentString.split("\\."));
-                            if (arrays.isEmpty()) return line;
-                            if (arrays.size() == 1) return "import " + arrays.get(0);
-
-                            var child = arrays.get(arrays.size() - 1);
-                            var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
-                            return "\nimport { %s } from %s;".formatted(child, parent);
-                        } else if (targetExtension.equals(".js")) {
-                            var child = segmentString.substring(childStart + 1, childEnd).strip();
-                            var fromIndex = segmentString.indexOf("from ", childEnd);
-                            if (fromIndex == -1) return line;
-
-                            var parent = segmentString.substring(fromIndex + "from ".length()).strip();
-                            return "\nconst { " + child + " } = require(\"" + parent + "\");";
-                        } else if (targetExtension.equals(".c")) {
-                            return "";
-                        } else if (targetExtension.equals(".h")) {
-                            var fromIndex = segmentString.indexOf("from ", childEnd);
-                            if (fromIndex == -1) return line;
-
-                            var parent = segmentString.substring(fromIndex + "from ".length()).strip();
-                            return "\n#include <" + parent + ".h>";
-                        } else {
-                            return line;
-                        }
-                    } else if (line.startsWith("export class def ")) {
+                    if (line.startsWith("export class def ")) {
                         var paramStart = line.indexOf('(');
                         var name = line.substring("export class def ".length(), paramStart).strip();
                         var body = line.substring(line.indexOf('{'), line.lastIndexOf('}') + 1);
-                        return "\nfunction " + name + "()" + body;
-                    } else if (line.startsWith("public class ")) {
+                        return new State("\nfunction " + name + "()" + body, Optional.of(name));
+                    }
+
+                    if (line.startsWith("public class ")) {
                         var name = line.substring("public class ".length(), line.indexOf('{')).strip();
                         var body = line.substring(line.indexOf('{'), line.lastIndexOf('}') + 1).strip();
 
-                        return "\nexport class def " + name + "() => " + body;
-                    } else {
-                        return line;
+                        return new State("\nexport class def " + name + "() => " + body, Optional.empty());
                     }
+
+                    return new State(line, Optional.empty());
                 })
-                .collect(Collectors.joining());
+                .collect(Collectors.toList());
+        return collect;
+    }
+
+    private Optional<String> compileImport(String line, String sourceExtension, String targetExtension) {
+        if (line.startsWith("import ")) {
+            var segmentString = line.substring("import ".length()).strip();
+
+            var childStart = segmentString.indexOf('{');
+            var childEnd = segmentString.indexOf('}');
+
+            if (sourceExtension.equals(".java")) {
+                var arrays = Arrays.asList(segmentString.split("\\."));
+                if (arrays.isEmpty()) return Optional.of(line);
+                if (arrays.size() == 1) return Optional.of("import " + arrays.get(0));
+
+                var child = arrays.get(arrays.size() - 1);
+                var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
+                return Optional.ofNullable("\nimport { %s } from %s;".formatted(child, parent));
+            } else if (targetExtension.equals(".js")) {
+                var child = segmentString.substring(childStart + 1, childEnd).strip();
+                var fromIndex = segmentString.indexOf("from ", childEnd);
+                if (fromIndex == -1) return Optional.of(line);
+
+                var parent = segmentString.substring(fromIndex + "from ".length()).strip();
+                return Optional.of("\nconst { " + child + " } = require(\"" + parent + "\");");
+            } else if (targetExtension.equals(".c")) {
+                return Optional.of("");
+            } else if (targetExtension.equals(".h")) {
+                var fromIndex = segmentString.indexOf("from ", childEnd);
+                if (fromIndex == -1) return Optional.of(line);
+
+                var parent = segmentString.substring(fromIndex + "from ".length()).strip();
+                return Optional.of("\n#include <" + parent + ".h>");
+            } else {
+                return Optional.of(line);
+            }
+        }
+        return Optional.empty();
     }
 
     void run() throws IOException {
@@ -111,8 +119,27 @@ public final class Application {
 
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
-                String output;
-                output = compile(input, sourceSet.findExtension(), targetExtension);
+
+                var results = compile(input, sourceSet.findExtension(), targetExtension);
+                var main = results.stream().map(state -> state.value).collect(Collectors.joining());
+
+                var exports = results.stream()
+                        .map(state -> state.exports)
+                        .flatMap(Optional::stream)
+                        .toList();
+
+                var joinedExports = exports.stream()
+                        .map(value -> "\n\t" + value)
+                        .collect(Collectors.joining(""));
+
+                String exportString;
+                if (joinedExports.isEmpty()) {
+                    exportString = "";
+                } else {
+                    exportString = "\nmodule.exports = {" + joinedExports + "\n};";
+                }
+
+                String output = main + exportString;
                 Files.writeString(target, output);
             }
         }
@@ -139,6 +166,9 @@ public final class Application {
     public String toString() {
         return "Application[" +
                "sourceSet=" + sourceSet + ']';
+    }
+
+    record State(String value, Optional<String> exports) {
     }
 
 }

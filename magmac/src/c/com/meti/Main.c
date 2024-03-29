@@ -28,3 +28,6 @@ function Main(){
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
 }
+module.exports = {
+	Main
+};

@@ -22,3 +22,6 @@ function ApplicationTest(){
         assertFalse(Files.exists(TARGET));
     }
 }
+module.exports = {
+	ApplicationTest
+};

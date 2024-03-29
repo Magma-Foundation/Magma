@@ -34,3 +34,6 @@ function DirectorySourceSet implements SourceSet(){
                 .collect(Collectors.toSet());
     }
 }
+module.exports = {
+	DirectorySourceSet implements SourceSet
+};
