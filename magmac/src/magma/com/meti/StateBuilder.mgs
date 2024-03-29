@@ -1,0 +1,33 @@
+import { ArrayList } from java.util;
+import { List } from java.util;
+import { Optional } from java.util;
+export class def StateBuilder() => {
+    private String value = ""
+    private Optional<String> exports = Optional.empty()
+    private List<String> functions = new ArrayList<>()
+    private Optional<String> importString = Optional.empty()
+    private Optional<String> structs = Optional.empty()
+	pub def setValue(value : String) : StateBuilder => {
+        this.value = value;
+        return this;
+    }
+	pub def setExports(exports : Optional<String>) : StateBuilder => {
+        this.exports = exports;
+        return this;
+    }
+	pub def setFunctions(functions : List<String>) : StateBuilder => {
+        this.functions = functions;
+        return this;
+    }
+	pub def setImportString(importString : Optional<String>) : StateBuilder => {
+        this.importString = importString;
+        return this;
+    }
+	pub def setStructs(structs : Optional<String>) : StateBuilder => {
+        this.structs = structs;
+        return this;
+    }
+	pub def createState() : ApplicationState => {
+        return new ApplicationState(importString, value, exports, structs, functions);
+    }
+}
