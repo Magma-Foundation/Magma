@@ -1,12 +1,10 @@
-package com.meti;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-public record Compiler(String input, String sourceExtension, String targetExtension) {
+#ifndef Compiler_H
+#define Compiler_H
+#include <java.util.h>
+#include <java.util.h>
+#include <java.util.h>
+#include <java.util.h>
+#include <java.util.stream.h>public record Compiler(String input, String sourceExtension, String targetExtension) {
     static Optional<String> compileImport(String line, String sourceExtension, String targetExtension) {
         if (line.startsWith("import ")) {
             var segmentString = line.substring("import ".length()).strip();
@@ -106,3 +104,4 @@ public record Compiler(String input, String sourceExtension, String targetExtens
                 .collect(Collectors.toList());
     }
 }
+#endif

@@ -29,6 +29,7 @@ function ApplicationTest(){
         new Application(new SingleSourceSet(SOURCE), Paths.get("."), ".mgs").run();
         assertFalse(Files.exists(TARGET));
     }
+	return {};
 }
 module.exports = {
 	ApplicationTest

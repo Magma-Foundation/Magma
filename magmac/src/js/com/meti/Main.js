@@ -30,6 +30,7 @@ function Main(){
     private static void runImpl(Path javaSource, Path magmaSource, String sourceExtension, String... destinationExtension) throws IOException {
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
+	return {};
 }
 module.exports = {
 	Main

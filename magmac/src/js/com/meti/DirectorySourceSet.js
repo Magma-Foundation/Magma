@@ -33,6 +33,7 @@ function DirectorySourceSet implements SourceSet(){
                 .map((Path child) -> new PathSource(root, child))
                 .collect(Collectors.toSet());
     }
+	return {};
 }
 module.exports = {
 	DirectorySourceSet implements SourceSet

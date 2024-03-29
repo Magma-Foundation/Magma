@@ -28,4 +28,7 @@ struct DirectorySourceSet implements SourceSet DirectorySourceSet implements Sou
                 .map((Path child) -> new PathSource(root, child))
                 .collect(Collectors.toSet());
     }
+
+	struct DirectorySourceSet implements SourceSet this = {};
+	return this;
 }

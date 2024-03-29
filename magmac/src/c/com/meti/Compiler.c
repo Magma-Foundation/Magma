@@ -1,12 +1,4 @@
-package com.meti;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-public record Compiler(String input, String sourceExtension, String targetExtension) {
+#include "Compiler.c"public record Compiler(String input, String sourceExtension, String targetExtension) {
     static Optional<String> compileImport(String line, String sourceExtension, String targetExtension) {
         if (line.startsWith("import ")) {
             var segmentString = line.substring("import ".length()).strip();

@@ -21,4 +21,7 @@ struct ApplicationTest ApplicationTest(){
         new Application(new SingleSourceSet(SOURCE), Paths.get("."), ".mgs").run();
         assertFalse(Files.exists(TARGET));
     }
+
+	struct ApplicationTest this = {};
+	return this;
 }
