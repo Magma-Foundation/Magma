@@ -20,6 +20,7 @@ public final class Application {
         var set = this.sourceSet().collect();
 
         for (var path : set) {
+            var input = path.read();
             var package_ = path.findPackage();
             var name = path.findName();
 
@@ -30,7 +31,7 @@ public final class Application {
 
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
-                if (!Files.exists(target)) Files.createFile(target);
+                Files.writeString(target, input);
             }
         }
     }
