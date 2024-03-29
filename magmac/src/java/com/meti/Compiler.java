@@ -231,7 +231,8 @@ public record Compiler(String input, String sourceExtension, String targetExtens
                 var exportsString = String.join("", exports);
                 return new StateBuilder()
                         .setValue("\nfunction " + name + "(){" + bodyString1 + "\n\treturn {" + exportsString + "};\n}")
-                        .setExports(Optional.of(name)).setFunctions(functions).createState();
+                        .setExports(Optional.of(name))
+                        .createState();
             }
 
             if (targetExtension().equals(".h")) {

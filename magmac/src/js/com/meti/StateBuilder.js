@@ -1,6 +1,6 @@
 const { ArrayList } = require("java.util");
 const { List } = require("java.util");
-const { Optional } = require("java.util");setExportssetFunctionssetImportStringsetStructscreateState
+const { Optional } = require("java.util");
 function StateBuilder(){
     private String value = ""
     private Optional<String> exports = Optional.empty()

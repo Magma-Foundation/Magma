@@ -70,6 +70,10 @@ public final class Application {
                     exportString = "\nmodule.exports = {" + joinedExports + "\n};";
                 }
 
+                if(targetExtension.equals(".js")) {
+                    System.out.println("stop");
+                }
+
                 String tempOutput = imports + structs + functions + main + exportString;
                 String output;
                 if (targetExtension.equals(".h")) {
