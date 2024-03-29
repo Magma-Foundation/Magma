@@ -1,31 +1,43 @@
 package com.meti;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public record Unit(List<String> namespace) {
+    public Unit() {
+        this(Collections.emptyList());
+    }
+
     String compile(String input) throws CompileException {
         var segments = input.split(";");
         var hasPackage = false;
+        var builder = new StringBuilder();
         for (String segment : segments) {
-            var aPackage = isPackage(segment);
-            if (aPackage) {
+            var result = compileSegment(segment);
+            if (result.isPackage) {
                 if (hasPackage) {
                     throw new CompileException("Input has too many packages!");
                 } else {
                     hasPackage = true;
                 }
             }
+
+            result.output.ifPresent(builder::append);
         }
 
-        return "";
+        return builder.toString();
     }
 
-    boolean isPackage(String input) throws CompileException {
+    Result compileSegment(String input) throws CompileException {
         if (input.isEmpty()) {
-            return false;
+            return new Result(false, Optional.empty());
+        } else if(input.startsWith("import ")) {
+            var name = input.substring("import ".length()).strip();
+            return new Result(false, Optional.of("import " + name + ";"));
         } else if (input.startsWith("package ")) {
-            return compilePackage(input);
+            return new Result(compilePackage(input), Optional.empty());
         } else {
             var format = "Unknown content: '%s'.";
             var message = format.formatted(input);
@@ -46,5 +58,8 @@ public record Unit(List<String> namespace) {
             var message = format.formatted(expectedNamespace, namespace());
             throw new CompileException(message);
         }
+    }
+
+    record Result(boolean isPackage, Optional<String> output) {
     }
 }
