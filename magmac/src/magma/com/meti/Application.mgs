@@ -1,4 +1,3 @@
-
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Path } from java.nio.file;
@@ -68,7 +67,7 @@ import { Collectors } from java.util.stream;public final class Application {
                 } else {
                     output = tempOutput;
                 }
-                Files.writeString(target, output);
+                Files.writeString(target, output.strip());
             }
         }
     }

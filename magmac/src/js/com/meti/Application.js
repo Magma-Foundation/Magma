@@ -1,4 +1,8 @@
-import { IOException }import { Files }import { Path }import { * }import { Collectors }from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.util.streampublic final class Application {
+const { IOException } = require("java.io");
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { * } = require("java.util");
+const { Collectors } = require("java.util.stream");public final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final List<String> targetExtensions;
@@ -63,7 +67,7 @@ import { IOException }import { Files }import { Path }import { * }import { Collec
                 } else {
                     output = tempOutput;
                 }
-                Files.writeString(target, output);
+                Files.writeString(target, output.strip());
             }
         }
     }

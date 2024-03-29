@@ -1,5 +1,8 @@
 #ifndef Main_H
-#define Main_Himport { IOException }import { Path }import { Paths }
-struct Main {}from java.iofrom java.nio.filefrom java.nio.file
+#define Main_H
+#include <java.io.h>
+#include <java.nio.file.h>
+#include <java.nio.file.h>
+struct Main {}
 void Main();
 #endif

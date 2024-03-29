@@ -1,6 +1,8 @@
-import { IOException }import { Path }import { Paths }from java.iofrom java.nio.filefrom java.nio.file
+const { IOException } = require("java.io");
+const { Path } = require("java.nio.file");
+const { Paths } = require("java.nio.file");
 function Main(){
-	pub def main(args : String[]) : Void => {
+	function main(){
         try {
             var javaSource = Paths.get(".", "magmac", "src", "java").toAbsolutePath();
             var magmaSource = Paths.get(".", "magmac", "src", "magma").toAbsolutePath();
@@ -23,10 +25,10 @@ function Main(){
             throw new RuntimeException(e);
         }
     }
-	def runImpl(javaSource : Path, magmaSource : Path, sourceExtension : String, ...destinationExtension : String) : Void => {
+	function runImpl(){
         new Application(new DirectorySourceSet(javaSource, sourceExtension), magmaSource, destinationExtension).run();
     }
-	return {};
+	return {main};
 }
 module.exports = {
 	Main

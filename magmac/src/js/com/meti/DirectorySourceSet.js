@@ -1,15 +1,20 @@
-import { IOException }import { Files }import { Path }import { Set }import { Collectors }from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.util.stream
-function DirectorySourceSet implements SourceSet(){private final Path root
+const { IOException } = require("java.io");
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { Set } = require("java.util");
+const { Collectors } = require("java.util.stream");
+function DirectorySourceSet implements SourceSet(){
+    private final Path root
     private final String extension
 
     public DirectorySourceSet(Path root, String extension) {
         this.root = root;
         this.extension = extension;
     }
-	pub def findExtension() : String => {
+	function findExtension(){
         return extension;
     }
-	def collect1() : Set<Path> => {
+	function collect1(){
         try (var stream = Files.walk(root)) {
             return stream
                     .filter(Files::isRegularFile)
@@ -17,12 +22,12 @@ function DirectorySourceSet implements SourceSet(){private final Path root
                     .collect(Collectors.toSet());
         }
     }
-	pub def collect() : Set<PathSource> => {
+	function collect(){
         return collect1().stream()
                 .map((Path child) -> new PathSource(root, child))
                 .collect(Collectors.toSet());
     }
-	return {};
+	return {findExtensioncollect};
 }
 module.exports = {
 	DirectorySourceSet implements SourceSet

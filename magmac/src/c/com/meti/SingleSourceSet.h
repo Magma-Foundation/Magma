@@ -1,5 +1,10 @@
 #ifndef SingleSourceSet_H
-#define SingleSourceSet_Himport { Files }import { Path }import { HashSet }import { Set }import { Collectors }from java.nio.filefrom java.nio.filefrom java.utilfrom java.utilfrom java.util.streampublic record SingleSourceSet(Path source) implements SourceSet {
+#define SingleSourceSet_H
+#include <java.nio.file.h>
+#include <java.nio.file.h>
+#include <java.util.h>
+#include <java.util.h>
+#include <java.util.stream.h>public record SingleSourceSet(Path source) implements SourceSet {
     private Set<Path> collect1() {
         var set = new HashSet<Path>();
         if (Files.exists(source())) {

@@ -1,4 +1,4 @@
-#include "SourceSet.c"from java.iofrom java.utilpublic interface SourceSet {
+#include "SourceSet.c"public interface SourceSet {
     Set<PathSource> collect() throws IOException;
 
     String findExtension();

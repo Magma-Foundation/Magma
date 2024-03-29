@@ -1,4 +1,3 @@
-
 import { ArrayList } from java.util;
 import { Arrays } from java.util;
 import { List } from java.util;
@@ -41,50 +40,12 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
         return Optional.empty();
     }
 
-    private static Optional<String> compileMethod(String slice, StringBuilder newBody) {
+    private static Optional<MethodState> compileMethod(String slice, String targetExtension) {
         var paramStart = slice.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
         var paramEnd = slice.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
-
-        var paramStrings = Arrays.stream(slice.substring(paramStart + 1, paramEnd).split(","))
-                .map(line -> {
-                    var separator = line.lastIndexOf(' ');
-                    if (separator == -1) return Optional.<String>empty();
-
-                    var typeString = line.substring(0, separator).strip();
-                    boolean isVarArgs;
-                    String actualType;
-                    if (typeString.endsWith("...")) {
-                        isVarArgs = true;
-                        actualType = typeString.substring(0, typeString.length() - "...".length());
-                    } else {
-                        isVarArgs = false;
-                        actualType = typeString;
-                    }
-
-                    var nameString = line.substring(separator + 1).strip();
-                    var prefix = isVarArgs ? "..." : "";
-
-                    return Optional.of(prefix + nameString + " : " + compileType(actualType));
-                })
-                .flatMap(Optional::stream)
-                .collect(Collectors.joining(", "));
-
-        var before = slice.substring(0, paramStart);
-        var nameSeparator = before.lastIndexOf(' ');
-        if (nameSeparator == -1) return Optional.empty();
-
-        var name = before.substring(nameSeparator + 1).strip();
-
-        var keyString = before.substring(0, nameSeparator).strip();
-        var typeSeparator = keyString.lastIndexOf(' ');
-        if (typeSeparator == -1) return Optional.empty();
-
-        var flags = Arrays.asList(keyString.substring(0, typeSeparator).strip().split(" "));
-        var inputType = keyString.substring(typeSeparator + 1).strip();
-        var outputType = compileType(inputType);
 
         var bodyStart = slice.indexOf('{');
         if (bodyStart == -1) return Optional.empty();
@@ -94,8 +55,75 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
 
         var functionBody = slice.substring(bodyStart, bodyEnd + 1).strip();
 
-        var flagsString = flags.contains("public") ? "pub " : "";
-        return Optional.of("\n\t" + flagsString + "def " + name + "(" + paramStrings + ") : " + outputType + " => " + functionBody);
+        if (targetExtension.equals(".js")) {
+            var indicator = slice.indexOf("def");
+            if(indicator == -1) return Optional.empty();
+
+            var start = indicator + "def".length();
+            var endIndex = slice.indexOf('(');
+            if (!(start < endIndex)) return Optional.empty();
+
+            var name = slice.substring(start, endIndex).strip();
+            var flags = splitFlags(slice.substring(0, indicator).strip());
+
+            Optional<String> export_;
+            if (flags.contains("pub")) {
+                export_ = Optional.of(name);
+            } else {
+                export_ = Optional.empty();
+            }
+
+            return Optional.of(new MethodState("\n\tfunction " + name + "()" + functionBody, export_));
+        } else if (targetExtension.equals(".mgs")) {
+            var paramStrings = Arrays.stream(slice.substring(paramStart + 1, paramEnd).split(","))
+                    .map(Compiler::compileJavaParameter)
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.joining(", "));
+
+            var before = slice.substring(0, paramStart);
+            var nameSeparator = before.lastIndexOf(' ');
+            if (nameSeparator == -1) return Optional.empty();
+
+            var name = before.substring(nameSeparator + 1).strip();
+
+            var keyString = before.substring(0, nameSeparator).strip();
+            var typeSeparator = keyString.lastIndexOf(' ');
+            if (typeSeparator == -1) return Optional.empty();
+
+            var flags = splitFlags(keyString.substring(0, typeSeparator));
+            var inputType = keyString.substring(typeSeparator + 1).strip();
+            var outputType = compileType(inputType);
+
+            var flagsString = flags.contains("public") ? "pub " : "";
+            return Optional.of(new MethodState("\n\t" + flagsString + "def " + name + "(" + paramStrings + ") : " + outputType + " => " + functionBody, Optional.empty()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static List<String> splitFlags(String slice) {
+        return Arrays.asList(slice.strip().split(" "));
+    }
+
+    private static Optional<String> compileJavaParameter(String line) {
+        var separator = line.lastIndexOf(' ');
+        if (separator == -1) return Optional.empty();
+
+        var typeString = line.substring(0, separator).strip();
+        boolean isVarArgs;
+        String actualType;
+        if (typeString.endsWith("...")) {
+            isVarArgs = true;
+            actualType = typeString.substring(0, typeString.length() - "...".length());
+        } else {
+            isVarArgs = false;
+            actualType = typeString;
+        }
+
+        var nameString = line.substring(separator + 1).strip();
+        var prefix = isVarArgs ? "..." : "";
+
+        return Optional.of(prefix + nameString + " : " + compileType(actualType));
     }
 
     private static String compileType(String inputType) {
@@ -126,13 +154,26 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
         var compiled = compileImport(line, sourceExtension(), targetExtension());
         if (compiled.isPresent()) return new Application.State("", Optional.empty(), compiled);
 
+        var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+        var bodyString = split(body);
+
+        List<String> exports = new ArrayList<>();
+        StringBuilder newBody = new StringBuilder();
+        for (String s : bodyString) {
+            var state = compileMethod(s, targetExtension).orElse(new MethodState(s, Optional.empty()));
+            newBody.append(state.value);
+
+            state.export.ifPresent(exports::add);
+        }
+        var bodyString1 = newBody.toString();
+
         if (line.startsWith("export class def ")) {
             var paramStart = line.indexOf('(');
             var name = line.substring("export class def ".length(), paramStart).strip();
-            var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 
             if (targetExtension().equals(".js")) {
-                return new Application.State("\nfunction " + name + "(){" + body + "\treturn {};\n}", Optional.of(name));
+                var exportsString = String.join("", exports);
+                return new Application.State("\nfunction " + name + "(){" + bodyString1 + "\n\treturn {" + exportsString + "};\n}", Optional.of(name));
             }
 
             if (targetExtension().equals(".h")) {
@@ -144,17 +185,8 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
                                              "\n\treturn this;" +
                                              "\n}", Optional.empty());
             }
-        }
-
-        if (line.startsWith("public class ")) {
+        } else if (line.startsWith("public class ")) {
             var name = line.substring("public class ".length(), line.indexOf('{')).strip();
-            var body = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')).strip();
-            var bodyString = split(body);
-            StringBuilder newBody = new StringBuilder();
-            for (String s : bodyString) {
-                newBody.append(compileMethod(s, newBody).orElse(s));
-            }
-
             return new Application.State("\nexport class def " + name + "() => {" + newBody + "\n}", Optional.empty());
         }
 
@@ -170,7 +202,7 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
+            } else if (c == '}' && depth == 1 && !builder.toString().strip().startsWith("import ")) {
                 builder.append(c);
                 depth--;
                 lines.add(builder.toString());
@@ -185,5 +217,9 @@ import { Collectors } from java.util.stream;public record Compiler(String input,
         lines.add(builder.toString());
         lines.removeIf(String::isBlank);
         return lines;
+    }
+
+    record MethodState(String value, Optional<String> export) {
+
     }
 }

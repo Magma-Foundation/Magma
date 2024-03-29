@@ -1,10 +1,10 @@
-
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Path } from java.nio.file;
 import { Set } from java.util;
 import { Collectors } from java.util.stream;
-export class def DirectorySourceSet implements SourceSet() => {private final Path root
+export class def DirectorySourceSet implements SourceSet() => {
+    private final Path root
     private final String extension
 
     public DirectorySourceSet(Path root, String extension) {

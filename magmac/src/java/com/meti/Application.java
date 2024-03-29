@@ -71,7 +71,7 @@ public final class Application {
                 } else {
                     output = tempOutput;
                 }
-                Files.writeString(target, output);
+                Files.writeString(target, output.strip());
             }
         }
     }

@@ -1,4 +1,4 @@
-#include "Main.c"from java.iofrom java.nio.filefrom java.nio.file
+#include "Main.c"
 struct Main Main(){
 	pub def main(args : String[]) : Void => {
         try {

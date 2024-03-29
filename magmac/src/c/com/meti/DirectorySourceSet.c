@@ -1,5 +1,6 @@
-#include "DirectorySourceSet.c"from java.iofrom java.nio.filefrom java.nio.filefrom java.utilfrom java.util.stream
-struct DirectorySourceSet implements SourceSet DirectorySourceSet implements SourceSet(){private final Path root
+#include "DirectorySourceSet.c"
+struct DirectorySourceSet implements SourceSet DirectorySourceSet implements SourceSet(){
+    private final Path root
     private final String extension
 
     public DirectorySourceSet(Path root, String extension) {

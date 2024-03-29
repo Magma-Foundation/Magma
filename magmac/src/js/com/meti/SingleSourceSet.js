@@ -1,4 +1,8 @@
-import { Files }import { Path }import { HashSet }import { Set }import { Collectors }from java.nio.filefrom java.nio.filefrom java.utilfrom java.utilfrom java.util.streampublic record SingleSourceSet(Path source) implements SourceSet {
+const { Files } = require("java.nio.file");
+const { Path } = require("java.nio.file");
+const { HashSet } = require("java.util");
+const { Set } = require("java.util");
+const { Collectors } = require("java.util.stream");public record SingleSourceSet(Path source) implements SourceSet {
     private Set<Path> collect1() {
         var set = new HashSet<Path>();
         if (Files.exists(source())) {

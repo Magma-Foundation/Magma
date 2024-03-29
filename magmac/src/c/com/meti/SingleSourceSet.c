@@ -1,4 +1,4 @@
-#include "SingleSourceSet.c"from java.nio.filefrom java.nio.filefrom java.utilfrom java.utilfrom java.util.streampublic record SingleSourceSet(Path source) implements SourceSet {
+#include "SingleSourceSet.c"public record SingleSourceSet(Path source) implements SourceSet {
     private Set<Path> collect1() {
         var set = new HashSet<Path>();
         if (Files.exists(source())) {
