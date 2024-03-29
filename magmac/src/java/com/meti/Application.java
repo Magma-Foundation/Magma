@@ -13,7 +13,7 @@ public class Application {
         for (var source : set) {
             var namespace = source.findNamespace();
 
-            var output = compile(source, namespace);
+            var output = compile(source.read(), namespace);
 
             var without = source.findName();
 
@@ -25,11 +25,9 @@ public class Application {
         }
     }
 
-    private static String compile(PathSource source, List<String> namespace) throws IOException, CompileException {
-        var input = source.read();
-        String output;
+    private static String compile(String input, List<String> namespace) throws CompileException {
         if (input.isEmpty()) {
-            output = "";
+            return "";
         } else if (input.startsWith("package ")) {
             var segments = input.substring("package ".length(), input.lastIndexOf(';'))
                     .strip()
@@ -37,7 +35,7 @@ public class Application {
 
             var expectedNamespace = Arrays.asList(segments);
             if (namespace.equals(expectedNamespace)) {
-                output = "";
+                return "";
             } else {
                 var format = "Expected a namespace of '%s' but was actually '%s'.";
                 var message = format.formatted(expectedNamespace, namespace);
@@ -48,6 +46,5 @@ public class Application {
             var message = format.formatted(input);
             throw new CompileException(message);
         }
-        return output;
     }
 }
