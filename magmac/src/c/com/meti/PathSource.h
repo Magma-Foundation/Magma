@@ -1,11 +1,11 @@
-package com.meti;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.ArrayList
+import java.util.Collections
+import java.util.List
 
 public record PathSource(Path root, Path path) {
     public List<String> findPackage() {

@@ -1,9 +1,11 @@
-package com.meti;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
+
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.ArrayList
+import java.util.Objects
+import java.util.stream.Collectors
 
 public final class Application {
     private final SourceSet sourceSet;
@@ -14,6 +16,32 @@ public final class Application {
         this.sourceSet = sourceSet;
         this.targetRoot = targetRoot;
         this.targetExtensions = targetExtensions;
+    }
+
+    private static String compile(String input) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+        lines.removeIf(String::isBlank);
+
+        lines.removeIf(line -> line.startsWith("package"));
+
+        return lines.stream()
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.joining());
     }
 
     void run() throws IOException {
@@ -31,7 +59,8 @@ public final class Application {
 
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
-                Files.writeString(target, input);
+                var output = compile(input);
+                Files.writeString(target, output);
             }
         }
     }

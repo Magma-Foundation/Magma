@@ -1,10 +1,10 @@
-package com.meti;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.Set
+import java.util.stream.Collectors
 
 public class DirectorySourceSet implements SourceSet {
     private final Path root;
