@@ -16,19 +16,22 @@ public class ApplicationTest {
     public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
-    private static void run(Path source, String extension) throws IOException {
-        if (Files.exists(source)) {
-            var name = source.getFileName().toString();
-            var index = name.indexOf('.');
-            var without = name.substring(0, index);
-            var target = source.resolveSibling(without + extension);
-            if (!Files.exists(target)) Files.createFile(target);
+    private static void run(SourceSet sourceSet, String extension) throws IOException {
+        var set = sourceSet.collect();
+        for (var source : set) {
+            if (Files.exists(source)) {
+                var name = source.getFileName().toString();
+                var index = name.indexOf('.');
+                var without = name.substring(0, index);
+                var target = source.resolveSibling(without + extension);
+                if (!Files.exists(target)) Files.createFile(target);
+            }
         }
     }
 
     @Test
     void generatesNoTarget() throws IOException {
-        run(SOURCE, ".mgs");
+        run(new SingleSourceSet(SOURCE), ".mgs");
         assertFalse(Files.exists(TARGET));
     }
 
@@ -41,7 +44,7 @@ public class ApplicationTest {
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(SOURCE);
-        run(SOURCE, ".mgs");
+        run(new SingleSourceSet(SOURCE), ".mgs");
         assertTrue(Files.exists(TARGET));
     }
 }
