@@ -1,9 +1,4 @@
-
-const { IOException } = require("java.io");
-const { Files } = require("java.nio.file");
-const { Path } = require("java.nio.file");
-const { Set } = require("java.util");
-const { Collectors } = require("java.util.stream");public class DirectorySourceSet implements SourceSet {
+public class DirectorySourceSet implements SourceSet {
     private final Path root;
     private final String extension;
 

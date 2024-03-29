@@ -5,21 +5,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
-    private final String[] targetExtensions;
+    private final List<String> targetExtensions;
 
     public Application(SourceSet sourceSet, Path targetRoot, String... targetExtensions) {
         this.sourceSet = sourceSet;
         this.targetRoot = targetRoot;
-        this.targetExtensions = targetExtensions;
+        this.targetExtensions = List.of(targetExtensions);
     }
 
-    private static String compile(String input, String extension) {
+    private String compile(String input, String sourceExtension, String targetExtension) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -38,7 +39,7 @@ public final class Application {
         lines.add(builder.toString());
         lines.removeIf(String::isBlank);
 
-        if (extension.equals(".java")) {
+        if (sourceExtension.equals(".java")) {
             lines.removeIf(line -> line.startsWith("package"));
         }
 
@@ -52,7 +53,7 @@ public final class Application {
                         var childStart = segmentString.indexOf('{');
                         var childEnd = segmentString.indexOf('}');
 
-                        if (extension.equals(".java")) {
+                        if (sourceExtension.equals(".java")) {
                             var arrays = Arrays.asList(segmentString.split("\\."));
                             if (arrays.isEmpty()) return line;
                             if (arrays.size() == 1) return "import " + arrays.get(0);
@@ -60,13 +61,23 @@ public final class Application {
                             var child = arrays.get(arrays.size() - 1);
                             var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
                             return "\nimport { %s } from %s;".formatted(child, parent);
-                        } else {
+                        } else if (targetExtension.equals(".js")) {
                             var child = segmentString.substring(childStart + 1, childEnd).strip();
                             var fromIndex = segmentString.indexOf("from ", childEnd);
-                            if(fromIndex == -1) return line;
+                            if (fromIndex == -1) return line;
 
                             var parent = segmentString.substring(fromIndex + "from ".length()).strip();
                             return "\nconst { " + child + " } = require(\"" + parent + "\");";
+                        } else if (targetExtension.equals(".c")) {
+                            return "";
+                        } else if (targetExtension.equals(".h")) {
+                            var fromIndex = segmentString.indexOf("from ", childEnd);
+                            if (fromIndex == -1) return line;
+
+                            var parent = segmentString.substring(fromIndex + "from ".length()).strip();
+                            return "\n#include <" + parent + ".h>";
+                        } else {
+                            return line;
                         }
                     } else {
                         return line;
@@ -91,7 +102,7 @@ public final class Application {
                 var parent = target.getParent();
                 if (!Files.exists(parent)) Files.createDirectories(parent);
                 String output;
-                output = compile(input, sourceSet.findExtension());
+                output = compile(input, sourceSet.findExtension(), targetExtension);
                 Files.writeString(target, output);
             }
         }
