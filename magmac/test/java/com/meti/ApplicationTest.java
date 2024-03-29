@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,7 +18,9 @@ public class ApplicationTest {
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
     private static void run(SourceSet sourceSet, String extension) throws IOException {
-        var set = sourceSet.collect();
+        var set = sourceSet.collect().stream().map(value -> {
+            return value.location();
+        }).collect(Collectors.toSet());
         for (var source : set) {
             if (Files.exists(source)) {
                 var name = source.getFileName().toString();

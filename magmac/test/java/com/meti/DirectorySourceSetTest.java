@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Collectors;
 
 class DirectorySourceSetTest {
     public static final Path ROOT = Paths.get(".", "temp");
@@ -35,7 +36,9 @@ class DirectorySourceSetTest {
         var child = ROOT.resolve("test.txt");
         Files.createFile(child);
 
-        var collected = new DirectorySourceSet(ROOT).collect();
+        var collected = new DirectorySourceSet(ROOT).collect().stream().map(value -> {
+            return value.location();
+        }).collect(Collectors.toSet());
         Assertions.assertTrue(collected.contains(child));
     }
 }
