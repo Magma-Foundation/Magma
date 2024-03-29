@@ -1,9 +1,6 @@
 
-
-import java.io.IOException
-import java.util.Set
-
-public interface SourceSet {
+import { IOException } from java.io;
+import { Set } from java.util;public interface SourceSet {
     Set<PathSource> collect() throws IOException;
 
     String findExtension();

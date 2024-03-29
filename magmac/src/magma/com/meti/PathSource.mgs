@@ -1,13 +1,10 @@
 
-
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.ArrayList
-import java.util.Collections
-import java.util.List
-
-public record PathSource(Path root, Path path) {
+import { IOException } from java.io;
+import { Files } from java.nio.file;
+import { Path } from java.nio.file;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
+import { List } from java.util;public record PathSource(Path root, Path path) {
     public List<String> findPackage() {
         var list = new ArrayList<String>();
         var parent = root.toAbsolutePath().relativize(path.toAbsolutePath()).getParent();

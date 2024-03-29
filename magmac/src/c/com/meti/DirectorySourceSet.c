@@ -1,12 +1,4 @@
-
-
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Set
-import java.util.stream.Collectors
-
-public class DirectorySourceSet implements SourceSet {
+import { IOException } from java.ioimport { Files } from java.nio.fileimport { Path } from java.nio.fileimport { Set } from java.utilimport { Collectors } from java.util.streampublic class DirectorySourceSet implements SourceSet {
     private final Path root;
     private final String extension;
 

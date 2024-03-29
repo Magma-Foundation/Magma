@@ -1,13 +1,4 @@
-
-
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.ArrayList
-import java.util.Objects
-import java.util.stream.Collectors
-
-public final class Application {
+import { IOException } from java.ioimport { Files } from java.nio.fileimport { Path } from java.nio.fileimport { ArrayList } from java.utilimport { Arrays } from java.utilimport { Objects } from java.utilimport { Collectors } from java.util.streampublic final class Application {
     private final SourceSet sourceSet;
     private final Path targetRoot;
     private final String[] targetExtensions;
@@ -42,7 +33,27 @@ public final class Application {
         }
 
         return lines.stream()
+                .map(String::strip)
                 .filter(value -> !value.isEmpty())
+                .map(line -> {
+                    if (extension.equals(".java")) {
+                        if (line.startsWith("import ")) {
+                            var segmentString = line.substring("import ".length()).strip();
+                            var arrays = Arrays.asList(segmentString.split("\\."));
+                            if (arrays.isEmpty()) return line;
+                            if (arrays.size() == 1) return "import " + arrays.get(0);
+
+                            var child = arrays.get(arrays.size() - 1);
+                            var parent = String.join(".", arrays.subList(0, arrays.size() - 1));
+                            return "\nimport { %s } from %s;".formatted(child, parent);
+                        } else {
+                            return line;
+                        }
+                    } else {
+                        return line;
+                    }
+
+                })
                 .collect(Collectors.joining());
     }
 

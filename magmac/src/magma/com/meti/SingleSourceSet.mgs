@@ -1,12 +1,9 @@
 
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.HashSet
-import java.util.Set
-import java.util.stream.Collectors
-
-public record SingleSourceSet(Path source) implements SourceSet {
+import { Files } from java.nio.file;
+import { Path } from java.nio.file;
+import { HashSet } from java.util;
+import { Set } from java.util;
+import { Collectors } from java.util.stream;public record SingleSourceSet(Path source) implements SourceSet {
     private Set<Path> collect1() {
         var set = new HashSet<Path>();
         if (Files.exists(source())) {

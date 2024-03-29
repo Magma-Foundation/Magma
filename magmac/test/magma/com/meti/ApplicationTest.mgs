@@ -1,17 +1,12 @@
 
-
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
-
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-
-import static org.junit.jupiter.api.Assertions.assertFalse
-import static org.junit.jupiter.api.Assertions.assertTrue
-
-public class ApplicationTest {
+import { AfterEach } from org.junit.jupiter.api;
+import { Test } from org.junit.jupiter.api;
+import { IOException } from java.io;
+import { Files } from java.nio.file;
+import { Path } from java.nio.file;
+import { Paths } from java.nio.file;
+import { assertFalse } from static org.junit.jupiter.api.Assertions;
+import { assertTrue } from static org.junit.jupiter.api.Assertions;public class ApplicationTest {
     public static final Path SOURCE = Paths.get(".", "ApplicationTest.java");
     public static final Path TARGET = Paths.get(".", "ApplicationTest.mgs");
 
