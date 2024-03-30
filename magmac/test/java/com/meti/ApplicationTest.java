@@ -17,12 +17,14 @@ public class ApplicationTest {
     public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
-    private static void run() throws IOException {
-        if (Files.exists(SOURCE)) {
-            var name = SOURCE.getFileName().toString();
+    private static void run(SourceSet sourceSet) throws IOException {
+        var set = sourceSet.collect();
+
+        for (var path : set) {
+            var name = path.getFileName().toString();
             var separator = name.indexOf('.');
             var withoutExtension = name.substring(0, separator);
-            Files.createFile(SOURCE.resolveSibling(withoutExtension + ".mgs"));
+            Files.createFile(path.resolveSibling(withoutExtension + ".mgs"));
         }
     }
 
@@ -35,13 +37,13 @@ public class ApplicationTest {
     @Test
     void generatesTarget() throws IOException {
         Files.createFile(SOURCE);
-        run();
+        run(new SingleSourceSet(SOURCE));
         assertTrue(Files.exists(TARGET));
     }
 
     @Test
     void test() throws IOException {
-        run();
+        run(new SingleSourceSet(SOURCE));
         assertFalse(Files.exists(TARGET));
     }
 }
