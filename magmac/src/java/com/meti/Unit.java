@@ -1,9 +1,7 @@
 package com.meti;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import javax.swing.text.html.Option;
+import java.util.*;
 
 public record Unit(List<String> namespace) {
     public Unit() {
@@ -13,6 +11,8 @@ public record Unit(List<String> namespace) {
     String compile(String input) throws CompileException {
         var segments = input.split(";");
         var hasPackage = false;
+        var imports = new HashSet<String>();
+
         var builder = new StringBuilder();
         for (String segment : segments) {
             var result = compileSegment(segment);
@@ -24,6 +24,15 @@ public record Unit(List<String> namespace) {
                 }
             }
 
+            if(result.imports.isPresent()) {
+                var importString = result.imports.get();
+                if(imports.contains(importString)) {
+                    throw new CompileException("Duplicate imports.");
+                } else {
+                    imports.add(importString);
+                }
+            }
+
             result.output.ifPresent(builder::append);
         }
 
@@ -32,12 +41,12 @@ public record Unit(List<String> namespace) {
 
     Result compileSegment(String input) throws CompileException {
         if (input.isEmpty()) {
-            return new Result(false, Optional.empty());
+            return new Result(false, Optional.empty(), Optional.empty());
         } else if(input.startsWith("import ")) {
             var name = input.substring("import ".length()).strip();
-            return new Result(false, Optional.of("import " + name + ";"));
+            return new Result(false, Optional.of("import " + name + ";"), Optional.of(name));
         } else if (input.startsWith("package ")) {
-            return new Result(compilePackage(input), Optional.empty());
+            return new Result(compilePackage(input), Optional.empty(), Optional.empty());
         } else {
             var format = "Unknown content: '%s'.";
             var message = format.formatted(input);
@@ -60,6 +69,6 @@ public record Unit(List<String> namespace) {
         }
     }
 
-    record Result(boolean isPackage, Optional<String> output) {
+    record Result(boolean isPackage, Optional<String> output, Optional<String> imports) {
     }
 }
