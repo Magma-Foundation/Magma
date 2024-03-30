@@ -24,7 +24,7 @@ class ApplicationTest {
 
     @Test
     void simple() {
-        assertValid("import test;", "import test;");
+        assertValid("import test;", "extern import test;");
     }
 
     private static void assertValid(String input, String output) {
@@ -37,7 +37,7 @@ class ApplicationTest {
 
     @Test
     void name() {
-        assertValid("import first;", "import first;");
+        assertValid("import first;", "extern import first;");
     }
 
     @Test

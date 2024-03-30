@@ -44,7 +44,7 @@ public record Unit(List<String> namespace) {
             return new Result(false, Optional.empty(), Optional.empty());
         } else if(input.startsWith("import ")) {
             var name = input.substring("import ".length()).strip();
-            return new Result(false, Optional.of("import " + name + ";"), Optional.of(name));
+            return new Result(false, Optional.of("extern import " + name + ";"), Optional.of(name));
         } else if (input.startsWith("package ")) {
             return new Result(compilePackage(input), Optional.empty(), Optional.empty());
         } else {
