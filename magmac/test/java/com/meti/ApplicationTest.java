@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationTest {
     private static void assertInvalid(String input) {
@@ -24,15 +23,25 @@ class ApplicationTest {
     }
 
     @Test
-    void simple() throws CompileException {
-        var actual = new Unit().compile("import test;");
-        assertEquals("import test;", actual);
+    void simple() {
+        assertValid("import test;", "import test;");
+    }
+
+    private static void assertValid(String input, String output) {
+        try {
+            assertEquals(output, new Unit().compile(input));
+        } catch (CompileException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void name() {
+        assertValid("import first;", "import first;");
     }
 
     @Test
     void repeat() {
         assertInvalid("import test;import test;");
     }
-
-
 }
