@@ -1,6 +1,5 @@
 package com.meti;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 public record Unit(List<String> namespace) {
@@ -24,9 +23,9 @@ public record Unit(List<String> namespace) {
                 }
             }
 
-            if(result.imports.isPresent()) {
+            if (result.imports.isPresent()) {
                 var importString = result.imports.get();
-                if(imports.contains(importString)) {
+                if (imports.contains(importString)) {
                     throw new CompileException("Duplicate imports.");
                 } else {
                     imports.add(importString);
@@ -42,9 +41,18 @@ public record Unit(List<String> namespace) {
     Result compileSegment(String input) throws CompileException {
         if (input.isEmpty()) {
             return new Result(false, Optional.empty(), Optional.empty());
-        } else if(input.startsWith("import ")) {
-            var name = input.substring("import ".length()).strip();
-            return new Result(false, Optional.of("extern import " + name + ";"), Optional.of(name));
+        } else if (input.startsWith("import ")) {
+            var fullName = input.substring("import ".length()).strip();
+            var separator = fullName.indexOf('.');
+            String value;
+            if (separator == -1) {
+                value = "extern import " + fullName + ";";
+            } else {
+                var parent = fullName.substring(0, separator).strip();
+                var child = fullName.substring(separator + 1).strip();
+                value = "extern import { " + child + " } from " + parent + ";";
+            }
+            return new Result(false, Optional.of(value), Optional.of(fullName));
         } else if (input.startsWith("package ")) {
             return new Result(compilePackage(input), Optional.empty(), Optional.empty());
         } else {

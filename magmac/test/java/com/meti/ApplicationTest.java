@@ -17,6 +17,14 @@ class ApplicationTest {
                 .compile(input));
     }
 
+    private static void assertValid(String input, String output) {
+        try {
+            assertEquals(output, new Unit().compile(input));
+        } catch (CompileException e) {
+            fail(e);
+        }
+    }
+
     @Test
     void noMultiplePackage() {
         assertInvalid("package test;package test;");
@@ -27,14 +35,6 @@ class ApplicationTest {
         assertValid("import test;", "extern import test;");
     }
 
-    private static void assertValid(String input, String output) {
-        try {
-            assertEquals(output, new Unit().compile(input));
-        } catch (CompileException e) {
-            fail(e);
-        }
-    }
-
     @Test
     void name() {
         assertValid("import first;", "extern import first;");
@@ -43,5 +43,10 @@ class ApplicationTest {
     @Test
     void repeat() {
         assertInvalid("import test;import test;");
+    }
+
+    @Test
+    void parent() {
+        assertValid("import parent.Child", "extern import { Child } from parent;");
     }
 }
