@@ -1,7 +1,4 @@
-package com.meti;
-
-import com.meti.java.IOException;
-import com.meti.java.Option;
+package com.meti.core;
 
 public class Options {
     public static <T extends Throwable> void panic(Option<T> option) {

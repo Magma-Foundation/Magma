@@ -1,37 +1,35 @@
 package com.meti;
 
-import com.meti.java.JavaApplication;
+import com.meti.app.Application;
+import com.meti.core.Options;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Files;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-
     private static void runImpl() {
-        JavaApplication.run().ifPresent(Assertions::fail);
+        Application.run().ifPresent(Assertions::fail);
     }
 
     @AfterEach
     void tearDown() {
-        new JavaPath(JavaApplication.TARGET).deleteIfExists();
-        new JavaPath(JavaApplication.SOURCE).deleteIfExists();
+        Application.TARGET.deleteIfExists();
+        Application.SOURCE.deleteIfExists();
     }
 
     @Test
     void generatesTarget() {
-        assertDoesNotThrow(() -> JavaApplication.createSource().consume(Options::panic));
+        assertDoesNotThrow(() -> Application.SOURCE.createFile().consume(Options::panic));
 
         runImpl();
-        assertTrue(JavaApplication.exists());
+        assertTrue(Application.TARGET.exists());
     }
 
     @Test
     void generatesNoTarget() {
         runImpl();
-        assertFalse(JavaApplication.exists());
+        assertFalse(Application.TARGET.exists());
     }
 }

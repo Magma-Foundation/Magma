@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.core;
 
 public class Err<T, E> implements Result<T, E> {
     private final E value;
