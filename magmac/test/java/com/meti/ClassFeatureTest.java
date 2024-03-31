@@ -1,7 +1,6 @@
 package com.meti;
 
 import com.meti.java.JavaClassNodeBuilder;
-import com.meti.java.JavaLang;
 import com.meti.magma.MagmaClassNodeBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +14,7 @@ public class ClassFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleClasses(String name) {
-        assertCompile(JavaLang.renderJavaClass(name, ""), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
+        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(name).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
     }
 
     @Test
@@ -25,7 +24,7 @@ public class ClassFeatureTest {
 
     @Test
     void testBody() {
-        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
+        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(FeatureTest.TEST_SYMBOL).setContent(TEST_BODY).createJavaClassNode().renderJavaClass(),
                 new MagmaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render());
     }
 }

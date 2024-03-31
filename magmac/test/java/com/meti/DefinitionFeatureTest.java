@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.meti.java.JavaClassNodeBuilder;
 import com.meti.magma.DeclarationNodeBuilder;
 import com.meti.magma.MagmaClassNodeBuilder;
 import com.meti.magma.MagmaDefinitionBuilder;
@@ -10,7 +11,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.CompiledTest.assertCompile;
 import static com.meti.FeatureTest.TEST_SYMBOL;
-import static com.meti.java.JavaLang.renderJavaClass;
 
 public class DefinitionFeatureTest {
 
@@ -65,11 +65,12 @@ public class DefinitionFeatureTest {
     @ValueSource(strings = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
     void testStatic(String className) {
         String content = new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render();
-        assertCompile(renderJavaClass(className, DEFAULT_BUILDER
+        String content1 = DEFAULT_BUILDER
                         .withValue(TEST_VALUE)
                         .withFlagString("static ")
                         .build()
-                        .render()),
+                        .render();
+        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(className).setContent(content1).createJavaClassNode().renderJavaClass(),
                 new ObjectNode("", className, content).render()
                 + "\n\n"
                 + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());
