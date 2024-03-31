@@ -7,17 +7,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static com.meti.CompiledTest.assertCompile;
 
 public class ClassFeatureTest {
-
     public static final String TEST_NAME = "Test";
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleClasses(String name) {
-        assertCompile(Compiler.renderJavaClass(name), Compiler.renderMagmaClass(name));
+        assertCompile(Compiler.renderJavaClass("", name), Compiler.renderMagmaClass(name));
     }
 
     @Test
     void testPublicKeyword() {
-        assertCompile(Compiler.renderPublicJavaClass(TEST_NAME), Compiler.renderExportedMagmaClass(TEST_NAME));
+        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, TEST_NAME), Compiler.renderExportedMagmaClass(TEST_NAME));
     }
 }

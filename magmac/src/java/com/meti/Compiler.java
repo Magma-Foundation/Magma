@@ -76,15 +76,7 @@ public class Compiler {
         return prefix + CLASS_KEYWORD + "def " + name + "() => {}";
     }
 
-    static String renderJavaClass(String name) {
-        return renderJavaClass("", name);
-    }
-
-    static String renderPublicJavaClass(String name) {
-        return renderJavaClass(PUBLIC_KEYWORD, name);
-    }
-
-    private static String renderJavaClass(String prefix, String name) {
+    static String renderJavaClass(String prefix, String name) {
         return prefix + CLASS_KEYWORD + name + " {}";
     }
 }
