@@ -15,6 +15,9 @@ public class Compiler {
     public static final String I32 = "I32";
     public static final String LONG = "long";
     public static final String INT = "int";
+    public static final String CONST_KEYWORD = "const ";
+    public static final String LET_KEYWORD = "let ";
+    public static final String FINAL_KEYWORD = "final";
 
     static String compile(String input) {
         var args = split(input);
@@ -99,7 +102,7 @@ public class Compiler {
         var name = beforeSlice.substring(nameSeparator + 1);
         var value = inputContent.substring(valueSeparator + 1, inputContent.length() - 1).strip();
 
-        var mutabilityString = flags.contains("final") ? "const " : "let ";
+        var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
 
         return Optional.of(renderMagmaDefinition("", mutabilityString, name, outputType, value));
     }
@@ -164,7 +167,7 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String name, String type, String value, String flagString) {
-        return renderMagmaDefinition(flagString, "let ", name, type, value);
+        return renderMagmaDefinition(flagString, LET_KEYWORD, name, type, value);
     }
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {

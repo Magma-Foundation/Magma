@@ -34,7 +34,7 @@ public class DefinitionFeatureTest {
     @Test
     void testFinal() {
         assertWithinClass(
-                renderDefinition("final ", TEST_SYMBOL, INT, "100"),
-                renderMagmaDefinition("", "const ", TEST_SYMBOL, I32, "100"));
+                renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, "100"),
+                renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, "100"));
     }
 }
