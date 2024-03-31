@@ -61,17 +61,24 @@ public class Compiler {
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
 
-        String outputContent;
-        if (inputContent.startsWith("int ")) {
-            var definitionName = inputContent.substring("int ".length(), inputContent.indexOf(" = 0;"));
-            outputContent = renderMagmaDefinition(definitionName);
-        } else {
-            outputContent = inputContent;
-        }
+        var outputContent = compileDefinition(inputContent).orElse(inputContent);
 
         return Optional.of(isPublic
                 ? renderExportedMagmaClass(name, outputContent)
                 : renderMagmaClass(name, outputContent));
+    }
+
+    private static Optional<String> compileDefinition(String inputContent) {
+        var valueSeparator = inputContent.indexOf('=');
+        if (valueSeparator == -1) return Optional.empty();
+
+        var typeAndName = inputContent.substring(0, valueSeparator).strip();
+        var nameSeparator = typeAndName.indexOf(' ');
+        var inputType = typeAndName.substring(0, nameSeparator);
+        var outputType = inputType.equals("long") ? "I64" : "I32";
+
+        var definitionName = typeAndName.substring(nameSeparator + 1);
+        return Optional.of(renderMagmaDefinition(definitionName, outputType));
     }
 
     private static Optional<String> compileImport(String input) {
@@ -125,11 +132,7 @@ public class Compiler {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
     }
 
-    static String renderMagmaDefinition(String name) {
-        return "let " + name + " : I16 = 0;";
-    }
-
-    static String renderJavaDefinition(String name) {
-        return "int " + name + " = 0;";
+    static String renderMagmaDefinition(String name, String type) {
+        return "let " + name + " : " + type + " = 0;";
     }
 }

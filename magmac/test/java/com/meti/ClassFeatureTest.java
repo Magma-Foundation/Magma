@@ -17,12 +17,12 @@ public class ClassFeatureTest {
 
     @Test
     void testPublicKeyword() {
-        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_NAME, ""), Compiler.renderExportedMagmaClass(FeatureTest.TEST_NAME));
+        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderExportedMagmaClass(FeatureTest.TEST_SYMBOL));
     }
 
     @Test
     void testBody() {
-        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_NAME, TEST_BODY),
-                Compiler.renderMagmaClass(FeatureTest.TEST_NAME, TEST_BODY));
+        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
+                Compiler.renderMagmaClass(FeatureTest.TEST_SYMBOL, TEST_BODY));
     }
 }
