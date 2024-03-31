@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,17 +76,32 @@ public class Compiler {
         var valueSeparator = inputContent.indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
-        var typeAndName = inputContent.substring(0, valueSeparator).strip();
-        var nameSeparator = typeAndName.indexOf(' ');
-        var inputType = typeAndName.substring(0, nameSeparator);
+        var beforeSlice = inputContent.substring(0, valueSeparator).strip();
+        var nameSeparator = beforeSlice.lastIndexOf(' ');
+        var flagsAndType = beforeSlice.substring(0, nameSeparator);
+        var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+        List<String> flags;
+        String inputType;
+        if (typeSeparator == -1) {
+            flags = Collections.emptyList();
+            inputType = flagsAndType;
+        } else {
+            flags = List.of(flagsAndType.substring(0, typeSeparator).split(" "));
+            inputType = flagsAndType.substring(typeSeparator + 1).strip();
+        }
+
         String outputType;
         if (inputType.equals(LONG)) outputType = I64;
         else if (inputType.equals(INT)) outputType = I32;
         else outputType = inputType;
 
-        var name = typeAndName.substring(nameSeparator + 1);
+        var name = beforeSlice.substring(nameSeparator + 1);
         var value = inputContent.substring(valueSeparator + 1, inputContent.length() - 1).strip();
-        return Optional.of(renderMagmaDefinition(name, outputType, value));
+
+        var mutabilityString = flags.contains("final") ? "const " : "let ";
+
+        return Optional.of(renderMagmaDefinition("", mutabilityString, name, outputType, value));
     }
 
     private static Optional<String> compileImport(String input) {
@@ -144,6 +160,14 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String name, String type, String value) {
-        return "let " + name + " : " + type + " = " + value + ";";
+        return renderMagmaDefinition(name, type, value, "");
+    }
+
+    static String renderMagmaDefinition(String name, String type, String value, String flagString) {
+        return renderMagmaDefinition(flagString, "let ", name, type, value);
+    }
+
+    static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
+        return flagString + mutabilityString + name + " : " + type + " = " + value + ";";
     }
 }
