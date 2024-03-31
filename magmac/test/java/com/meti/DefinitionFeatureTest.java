@@ -12,16 +12,18 @@ import static com.meti.JavaLang.renderDefinition;
 import static com.meti.JavaLang.renderJavaClass;
 
 public class DefinitionFeatureTest {
+    private static void assertWithinClass(String input, String output) {
+        assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void testSimpleDefinition(String name) {
-        assertCompile(renderJavaClass(TEST_SYMBOL, renderDefinition(name, "int")),
-                renderMagmaClass(TEST_SYMBOL, renderMagmaDefinition(name, "I32")));
+        assertWithinClass(renderDefinition(name, "int"), renderMagmaDefinition(name, "I32"));
     }
 
     @Test
     void testType() {
-        assertCompile(renderJavaClass(TEST_SYMBOL, renderDefinition(TEST_SYMBOL, "long")),
-                renderMagmaClass(TEST_SYMBOL, renderMagmaDefinition(TEST_SYMBOL, "I64")));
+        assertWithinClass(renderDefinition(TEST_SYMBOL, "long"), renderMagmaDefinition(TEST_SYMBOL, "I64"));
     }
 }
