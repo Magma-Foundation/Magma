@@ -4,10 +4,10 @@ extern import { renderJavaClass } from com.meti.JavaLang;
 
 export object FeatureTest = {
 	pub const TEST_SYMBOL : String = "Test";
+	def assertWithinClass() : Void => {
+        assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
+    }
 }
 
 export class def FeatureTest() => {
-	def assertWithinClass() : static void => {
-        assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
-    }
 }

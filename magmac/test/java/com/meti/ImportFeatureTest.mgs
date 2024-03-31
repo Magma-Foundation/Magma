@@ -9,15 +9,15 @@ extern import { renderMagmaImportForAllChildren } from com.meti.Compiler;
 export object ImportFeatureTest = {
 	pub const TEST_PARENT : String = "org.junit.jupiter.api";
 	pub const TEST_NAME : String = "Test";
+	def renderJavaImport() : String => {
+        return renderJavaImport("", parent, child);
+    }
+	def renderJavaImport() : String => {
+        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
+    }
 }
 
 export class def ImportFeatureTest() => {
-	def renderJavaImport() : private static String => {
-        return renderJavaImport("", parent, child);
-    }
-	def renderJavaImport() : private static String => {
-        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
-    }
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
 	def testMultipleImports() : Void => {

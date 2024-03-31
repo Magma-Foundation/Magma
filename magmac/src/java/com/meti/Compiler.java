@@ -149,8 +149,19 @@ public class Compiler {
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
         var name = before.substring(separator + 1).strip();
-        var inputType = before.substring(0, separator).strip();
-        var outputType = compileType(inputType);
+
+        var flagsAndType = before.substring(0, separator).strip();
+        var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+        List<String> inputFlags;
+        String outputType;
+        if (typeSeparator == -1) {
+            inputFlags = Collections.emptyList();
+            outputType = compileType(flagsAndType);
+        } else {
+            inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
+            outputType = compileType(flagsAndType.substring(typeSeparator + 1).strip());
+        }
 
         var annotationsString = annotations.stream()
                 .map(Compiler::renderAnnotation)
@@ -176,7 +187,9 @@ public class Compiler {
             result = renderMagmaMethodWithException(annotationsString, name, outputType, content, exceptionName);
         }
 
-        return Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
+        return inputFlags.contains("static")
+                ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
+                : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
     }
 
     static String renderMagmaMethodWithException(String annotationsString, String name, String type, String content, String exceptionName) {
