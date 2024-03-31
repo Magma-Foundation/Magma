@@ -7,11 +7,12 @@ extern import { Stream } from java.util.stream;
 
 export class def DirectorySourceSet() => {
 	@Override
-	def collect() : Set<Path> ? IOException => {
+	def collect() : Set<PathSource> ? IOException => {
         try (var stream = Files.walk(root)) {
             return stream
                     .filter(Files::isRegularFile)
                     .filter(file -> file.toString().endsWith(".java"))
+                    .map(file -> new PathSource(root, file))
                     .collect(Collectors.toSet());
         }
     }

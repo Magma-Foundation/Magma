@@ -18,12 +18,12 @@ export class def ApplicationTest() => {
 	@Test
 	def generateSomething() : Void ? IOException => {
         Files.createFile(SOURCE);
-        Main.run(new SingleSourceSet(SOURCE));
+        Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
         assertTrue(Files.exists(TARGET));
     }
 	@Test
 	def generatesNothing() : Void ? IOException => {
-        Main.run(new SingleSourceSet(SOURCE));
+        Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
         assertFalse(Files.exists(TARGET));
     }
 }

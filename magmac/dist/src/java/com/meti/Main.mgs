@@ -1,12 +1,10 @@
-package com.meti;
+extern import { IOException } from java.io;
+extern import { Files } from java.nio.file;
+extern import { Path } from java.nio.file;
+extern import { Paths } from java.nio.file;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class Main {
-    public static void main(String[] args) {
+export object Main = {
+	def main() : Void => {
         try {
             run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/src/java")), Paths.get("./Personal/Magma/magmac/dist/src/java"));
             run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/test/java")), Paths.get("./Personal/Magma/magmac/dist/test/java"));
@@ -15,8 +13,7 @@ public class Main {
             e.printStackTrace();
         }
     }
-
-    static void run(SourceSet sourceSet, Path targetDirectory) throws IOException {
+	def run() : Void ? IOException => {
         var set = sourceSet.collect();
 
         for (var source1 : set) {
@@ -33,4 +30,7 @@ public class Main {
             Files.writeString(target, output);
         }
     }
+}
+
+export class def Main() => {
 }

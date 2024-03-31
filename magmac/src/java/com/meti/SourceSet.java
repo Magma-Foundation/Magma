@@ -5,5 +5,5 @@ import java.nio.file.Path;
 import java.util.Set;
 
 public interface SourceSet {
-    Set<Path> collect() throws IOException;
+    Set<PathSource> collect() throws IOException;
 }

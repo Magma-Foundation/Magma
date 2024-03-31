@@ -7,10 +7,10 @@ import java.util.Set;
 
 public record SingleSourceSet(Path source) implements SourceSet {
     @Override
-    public Set<Path> collect() {
+    public Set<PathSource> collect() {
         var source = source();
-        var set = new HashSet<Path>();
-        if (Files.exists(source)) set.add(source);
+        var set = new HashSet<PathSource>();
+        if (Files.exists(source)) set.add(new PathSource(source.getParent(), source));
         return set;
     }
 }
