@@ -24,7 +24,7 @@ export class def RecordNode implements com.meti.node.Renderable() => {
         return body;
     }
 	@Override
-	def equals() : boolean => {
+	def equals() : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (RecordNode) obj;

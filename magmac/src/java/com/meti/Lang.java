@@ -19,5 +19,5 @@ public class Lang {
     public static final String INTERFACE_KEYWORD = "interface ";
     public static final String RECORD_KEYWORD = "record ";
     public static final String CAMEL_BOOL = "Bool";
-    public static final String BOOL = "bool";
+    public static final String BOOL = "boolean";
 }

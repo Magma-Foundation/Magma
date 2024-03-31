@@ -23,7 +23,7 @@ export class def JavaClassNode() => {
         return content;
     }
 	@Override
-	def equals() : boolean => {
+	def equals() : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (JavaClassNode) obj;

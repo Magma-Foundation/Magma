@@ -3,7 +3,7 @@ export object Lang = {
 	pub const I32 : String = "I32";
 	pub const LONG : String = "long";
 	pub const INT : String = "int";
-	pub const BOOL : String = "bool";
+	pub const BOOL : String = "boolean";
 }
 
 export class def Lang() => {

@@ -5,7 +5,7 @@ class def SplittingState() => {
 	const list : List<String>;
 	let builder : StringBuilder;
 	let depth : I32;
-	let isInSingleQuotes : boolean = false;
+	let isInSingleQuotes : Bool = false;
 
     SplittingState(List<String> list, StringBuilder builder, int depth) {
         this.list = list;
@@ -15,10 +15,10 @@ class def SplittingState() => {
 	def SplittingState() : public => {
         this(new ArrayList<>(), new StringBuilder(), 0);
     }
-	def isLevel() : boolean => {
+	def isLevel() : Bool => {
         return this.depth == 0;
     }
-	def isShallow() : boolean => {
+	def isShallow() : Bool => {
         return this.depth == 1;
     }
 	def append() : Void => {
