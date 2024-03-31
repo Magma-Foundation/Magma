@@ -40,4 +40,11 @@ public class DefinitionFeatureTest {
                 renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
                 renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
+
+    @Test
+    void testStatic() {
+        assertCompile(
+                renderJavaClass(TEST_SYMBOL, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
+                renderObject(TEST_SYMBOL, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE)));
+    }
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Compiler {
     public static final String IMPORT_KEYWORD = "import ";
@@ -21,11 +23,19 @@ public class Compiler {
 
     static String compile(String input) {
         var args = split(input);
-        var list = new ArrayList<String>();
+        var values = new ArrayList<String>();
+        var more = new ArrayList<String>();
+
         for (String arg : args) {
-            list.add(compileRootStatement(arg.strip()));
+            var state = compileRootStatement(arg.strip());
+            state.value.ifPresent(values::add);
+            state.more.ifPresent(more::add);
         }
-        return String.join("", list);
+
+        return Stream.of(values, more)
+                .filter(list -> !list.isEmpty())
+                .map(list -> String.join("", list))
+                .collect(Collectors.joining("\n"));
     }
 
     private static List<String> split(String input) {
@@ -50,13 +60,13 @@ public class Compiler {
         return state.unwrap();
     }
 
-    private static String compileRootStatement(String input) {
+    private static State compileRootStatement(String input) {
         return compileImport(input)
                 .or(() -> compileClass(input))
-                .orElse("");
+                .orElse(new State(Optional.empty(), Optional.empty()));
     }
 
-    private static Optional<String> compileClass(String input) {
+    private static Optional<State> compileClass(String input) {
         if (!input.contains(CLASS_KEYWORD)) return Optional.empty();
         var isPublic = input.startsWith(PUBLIC_KEYWORD);
         var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
@@ -68,14 +78,17 @@ public class Compiler {
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
 
-        var outputContent = compileDefinition(inputContent).orElse(inputContent);
+        var outputContent = compileDefinition(inputContent)
+                .orElse(new State(Optional.of(inputContent), Optional.empty()));
 
-        return Optional.of(isPublic
-                ? renderExportedMagmaClass(name, outputContent)
-                : renderMagmaClass(name, outputContent));
+        var renderedClass = outputContent.value.map(value -> isPublic
+                ? renderExportedMagmaClass(name, value)
+                : renderMagmaClass(name, value));
+
+        return Optional.of(new State(renderedClass, outputContent.more));
     }
 
-    private static Optional<String> compileDefinition(String inputContent) {
+    private static Optional<State> compileDefinition(String inputContent) {
         var valueSeparator = inputContent.indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
@@ -104,10 +117,18 @@ public class Compiler {
 
         var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
 
-        return Optional.of(renderMagmaDefinition("", mutabilityString, name, outputType, value));
+        var rendered = renderMagmaDefinition("", mutabilityString, name, outputType, value);
+        var rendered1 = flags.contains("static")
+                ? new State(Optional.empty(), Optional.of(renderObject("Test", rendered)))
+                : new State(Optional.of(rendered), Optional.empty());
+        return Optional.of(rendered1);
     }
 
-    private static Optional<String> compileImport(String input) {
+    static String renderObject(String name, String content) {
+        return "object " + name + " {" + content + "}";
+    }
+
+    private static Optional<State> compileImport(String input) {
         if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
         var isStatic = input.startsWith(IMPORT_STATIC);
         var importKeyword = isStatic ? IMPORT_STATIC : IMPORT_KEYWORD;
@@ -117,9 +138,9 @@ public class Compiler {
         var parent = segmentsString.substring(0, separator);
         var child = segmentsString.substring(separator + 1);
 
-        return Optional.of(child.equals("*")
+        return Optional.of(new State(Optional.of(child.equals("*")
                 ? renderMagmaImportForAllChildren(parent)
-                : renderMagmaImport(parent, child));
+                : renderMagmaImport(parent, child)), Optional.empty()));
     }
 
     static String renderMagmaImport(String parent, String child) {
@@ -172,5 +193,8 @@ public class Compiler {
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
         return flagString + mutabilityString + name + " : " + type + " = " + value + ";";
+    }
+
+    record State(Optional<String> value, Optional<String> more) {
     }
 }
