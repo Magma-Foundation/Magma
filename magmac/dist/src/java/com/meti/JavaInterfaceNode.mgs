@@ -1,5 +1,0 @@
-export class def JavaInterfaceNode() => {
-	def renderJavaInterface() : String => {
-        return prefixString() + Compiler.INTERFACE_KEYWORD + name() + " {}";
-    }
-}

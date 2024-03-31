@@ -1,5 +1,0 @@
-export class def MagmaTraitNode() => {
-	def render() : String => {
-        return prefixString() + "trait " + name() + " " + content();
-    }
-}

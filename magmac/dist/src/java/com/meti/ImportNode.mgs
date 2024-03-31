@@ -1,5 +1,0 @@
-export class def ImportNode() => {
-	def render() : String => {
-        return "extern " + Compiler.IMPORT_KEYWORD + childString() + parent() + ";";
-    }
-}

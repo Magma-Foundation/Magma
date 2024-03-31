@@ -1,5 +1,0 @@
-export class def ObjectNode() => {
-	def renderObject() : String => {
-        return flagString() + "object " + name() + " = {" + content() + "\n}";
-    }
-}
