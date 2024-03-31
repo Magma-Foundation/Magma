@@ -5,10 +5,13 @@ class def SplittingState() => {
     private final List<String> list
     private StringBuilder builder
     private int depth
-	let this.list :  = list;
+	let isInSingleQuotes : boolean = false;
+
+    SplittingState(List<String> list, StringBuilder builder, int depth) {
+        this.list = list;
         this.builder = builder;
         this.depth = depth;
-    };
+    }
 	def SplittingState() : public => {
         this(new ArrayList<>(), new StringBuilder(), 0);
     }
@@ -36,5 +39,8 @@ class def SplittingState() => {
     }
 	def unwrap() : List<String> => {
         return list;
+    }
+	def toggleSingleQuotes() : Void => {
+        this.isInSingleQuotes = !isInSingleQuotes;
     }
 }

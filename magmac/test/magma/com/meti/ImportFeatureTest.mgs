@@ -6,8 +6,6 @@ extern import { Collectors } from java.util.stream;
 extern import { IntStream } from java.util.stream;
 
 export object ImportFeatureTest = {
-	pub const TEST_PARENT : String = "org.junit.jupiter.api";
-	pub const TEST_NAME : String = "Test";
 	def renderJavaImport() : String => {
         return renderJavaImport("", parent, child);
     }
@@ -17,6 +15,8 @@ export object ImportFeatureTest = {
 }
 
 export class def ImportFeatureTest() => {
+    public static final String TEST_PARENT = "org.junit.jupiter.api"
+    public static final String TEST_NAME = "Test"
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
 	def testMultipleImports() : Void => {

@@ -5,6 +5,7 @@ import com.meti.magma.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Compiler {
@@ -33,15 +34,22 @@ public class Compiler {
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == ';' && state.isLevel()) {
-                state.advance();
-            } else if (c == '}' && state.isShallow()) {
-                state.append('}');
-                state.descend();
-                state.advance();
+            if(c == '\'') {
+                state.toggleSingleQuotes();
+                state.append(c);
+            } else if(!state.isInSingleQuotes) {
+                if (c == ';' && state.isLevel()) {
+                    state.advance();
+                } else if (c == '}' && state.isShallow()) {
+                    state.append('}');
+                    state.descend();
+                    state.advance();
+                } else {
+                    if (c == '{' || c == '(') state.ascend();
+                    if (c == '}' || c == ')') state.descend();
+                    state.append(c);
+                }
             } else {
-                if (c == '{' || c == '(') state.ascend();
-                if (c == '}' || c == ')') state.descend();
                 state.append(c);
             }
         }
@@ -150,8 +158,8 @@ public class Compiler {
         return new MembersResult(outputMore, value);
     }
 
-    private static Optional<State> compileMethod(String classMember) {
-        var lines = Arrays.stream(classMember.split("\n")).toList();
+    private static Optional<State> compileMethod(String input) {
+        var lines = Arrays.stream(input.split("\n")).toList();
 
         var annotations = lines.stream()
                 .map(String::strip)
@@ -172,6 +180,8 @@ public class Compiler {
         if (separator == -1) return Optional.empty();
 
         var name = before.substring(separator + 1).strip();
+        if (!isSymbol(name)) return Optional.empty();
+
         var flagsAndType = before.substring(0, separator).strip();
         var typeSeparator = flagsAndType.lastIndexOf(' ');
 
@@ -182,7 +192,13 @@ public class Compiler {
             outputType = compileType(flagsAndType);
         } else {
             inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
-            outputType = compileType(flagsAndType.substring(typeSeparator + 1).strip());
+
+            try {
+                var typeString = flagsAndType.substring(typeSeparator + 1).strip();
+                outputType = compileType(typeString);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to compile type string for input: " + input, e);
+            }
         }
 
         var annotationsString = annotations.stream()
@@ -227,6 +243,17 @@ public class Compiler {
         }
     }
 
+    private static boolean isSymbol(String name) {
+        if (name.isEmpty()) return false;
+        var first = name.charAt(0);
+        var slice = name.substring(1);
+        return Character.isLetter(first) &&
+               IntStream.range(0, slice.length())
+                       .mapToObj(slice::charAt)
+                       .allMatch(Character::isLetterOrDigit);
+
+    }
+
     private static Optional<String> compileAnnotation(String line) {
         var paramStart = line.indexOf('(');
         var paramEnd = line.lastIndexOf(')');
@@ -249,15 +276,18 @@ public class Compiler {
         }
     }
 
-    private static Optional<State> compileDefinition(String inputContent) {
-        var valueSeparator = inputContent.indexOf('=');
+    private static Optional<State> compileDefinition(String input) {
+        var valueSeparator = input.indexOf('=');
         if (valueSeparator == -1) return Optional.empty();
 
-        var beforeSlice = inputContent.substring(0, valueSeparator).strip();
+        var beforeSlice = input.substring(0, valueSeparator).strip();
         var nameSeparator = beforeSlice.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
 
-        var flagsAndType = beforeSlice.substring(0, nameSeparator);
+        var name = beforeSlice.substring(nameSeparator + 1);
+        if(!isSymbol(name)) return Optional.empty();
+
+        var flagsAndType = beforeSlice.substring(0, nameSeparator).strip();
         var typeSeparator = flagsAndType.lastIndexOf(' ');
 
         List<String> flags;
@@ -270,10 +300,16 @@ public class Compiler {
             inputType = flagsAndType.substring(typeSeparator + 1).strip();
         }
 
-        var outputType = compileType(inputType);
+        String outputType;
+        try {
+            outputType = compileType(inputType);
+        } catch (Exception e) {
+            var format = "Failed to compile input type '%s' for input: %s";
+            var message = format.formatted(inputType, input);
+            throw new RuntimeException(message, e);
+        }
 
-        var name = beforeSlice.substring(nameSeparator + 1);
-        var value = inputContent.substring(valueSeparator + 1).strip();
+        var value = input.substring(valueSeparator + 1).strip();
 
         var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
@@ -292,12 +328,25 @@ public class Compiler {
     }
 
     private static String compileType(String inputType) {
-        return switch (inputType) {
-            case Lang.LONG -> Lang.I64;
-            case Lang.INT -> Lang.I32;
-            case Lang.LOWER_VOID -> Lang.CAMEL_VOID;
-            default -> inputType;
-        };
+        if (inputType.equals(Lang.LONG)) {
+            return Lang.I64;
+        } else if (inputType.equals(Lang.INT)) {
+            return Lang.I32;
+        } else if (inputType.equals(Lang.LOWER_VOID)) {
+            return Lang.CAMEL_VOID;
+        } else if (isSymbol(inputType)) return inputType;
+
+        var genericStart = inputType.indexOf('<');
+        var genericStop = inputType.lastIndexOf('>');
+        if (genericStart != -1 && genericStop != -1) {
+            var parent = inputType.substring(0, genericStart).strip();
+            var genericString = inputType.substring(genericStart + 1, genericStop).strip();
+            var child = compileType(genericString);
+            return parent + "<" + child + ">";
+        }
+
+
+        throw new UnsupportedOperationException("Unknown type: " + inputType);
     }
 
     private static Optional<State> compileImport(String input) {

@@ -5,11 +5,8 @@ extern import { ParameterizedTest } from org.junit.jupiter.params;
 extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { assertCompile } from com.meti.CompiledTest;
 
-export object ClassFeatureTest = {
-	pub const TEST_BODY : String = "0";
-}
-
 export class def ClassFeatureTest() => {
+    public static final String TEST_BODY = "0"
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
 	def testSimpleClasses() : Void => {

@@ -9,11 +9,9 @@ extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { assertCompile } from com.meti.CompiledTest;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 
-export object DefinitionFeatureTest = {
-	pub const TEST_VALUE : String = "100";
-}
-
 export class def DefinitionFeatureTest() => {
+
+    public static final String TEST_VALUE = "100"
 	DeclarationNodeBuilder : () => Void;
 	@ParameterizedTest
 	@ValueSource(strings = ["first", "second"])

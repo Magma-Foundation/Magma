@@ -7,6 +7,7 @@ final class SplittingState {
     private final List<String> list;
     private StringBuilder builder;
     private int depth;
+    boolean isInSingleQuotes = false;
 
     SplittingState(List<String> list, StringBuilder builder, int depth) {
         this.list = list;
@@ -49,5 +50,9 @@ final class SplittingState {
 
     public List<String> unwrap() {
         return list;
+    }
+
+    public void toggleSingleQuotes() {
+        this.isInSingleQuotes = !isInSingleQuotes;
     }
 }
