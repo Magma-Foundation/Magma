@@ -1,6 +1,8 @@
 package com.meti.magma;
 
-public class MagmaMethodBuilder {
+import com.meti.java.RenderableBuilder;
+
+public class MagmaMethodBuilder implements RenderableBuilder {
     private String prefix;
     private String name;
     private String type;

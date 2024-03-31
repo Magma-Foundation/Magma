@@ -126,7 +126,12 @@ public class Compiler {
         var membersResult = compileMembers(inputContent);
         var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
 
-        var renderedClass = new MagmaClassNodeBuilder().withPrefix(flagString).withName(name).withContent(membersResult.value()).build().render();
+        var renderedClass = new MagmaClassNodeBuilder()
+                .withPrefix(flagString)
+                .withName(name)
+                .withContent(membersResult.value())
+                .build()
+                .render();
 
         Optional<String> renderedMore;
         if (membersResult.outputMore().isEmpty()) {
@@ -202,7 +207,7 @@ public class Compiler {
         }
 
         var annotationsString = annotations.stream()
-                .map(name1 -> new Annotation(name1, "").renderAnnotation())
+                .map(name1 -> new Annotation(name1, "").render())
                 .collect(Collectors.joining());
 
         var paramEnd = methodString.indexOf(')');

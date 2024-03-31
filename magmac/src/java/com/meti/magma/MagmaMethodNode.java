@@ -1,8 +1,10 @@
 package com.meti.magma;
 
+import com.meti.node.Renderable;
+
 import java.util.Objects;
 
-public final class MagmaMethodNode {
+public final class MagmaMethodNode implements Renderable {
     private final String prefix;
     private final String name;
     private final String type;

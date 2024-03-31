@@ -1,7 +1,7 @@
 package com.meti;
 
 public record Annotation(String name, String valueString) {
-    String renderAnnotation() {
+    String render() {
         return "\n\t@" + name() + valueString();
     }
 }
