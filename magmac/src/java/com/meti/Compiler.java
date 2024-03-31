@@ -110,7 +110,7 @@ public class Compiler {
 
     private static Optional<? extends State> compileMethod(String classMember) {
         if (classMember.equals("void empty(){}")) {
-            return Optional.of(new State(Optional.of(renderMagmaMethod("", "empty", "Void", "{}")), Optional.empty()));
+            return Optional.of(new State(Optional.of(renderMagmaMethodWithType("", "empty", "Void", "{}")), Optional.empty()));
         } else {
             return Optional.empty();
         }
@@ -201,6 +201,10 @@ public class Compiler {
 
     static String renderMagmaMethod(String prefix, String name, String content) {
         return renderMagmaMethod(prefix, name, "", content);
+    }
+
+    static String renderMagmaMethodWithType(String prefix, String name, String type, String content) {
+        return prefix + "def " + name + "() : " + type + " => {" + content + "\n}";
     }
 
     static String renderMagmaMethod(String prefix, String name, String typeString, String content) {

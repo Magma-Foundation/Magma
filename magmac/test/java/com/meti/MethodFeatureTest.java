@@ -8,7 +8,7 @@ public class MethodFeatureTest {
     @Test
     void test() {
         assertWithinClass("void empty(){}",
-                Compiler.renderMagmaMethod("", "empty", "{}"));
+                Compiler.renderMagmaMethodWithType("", "empty", "Void", "{}"));
 
     }
 }
