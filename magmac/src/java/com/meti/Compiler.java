@@ -77,7 +77,7 @@ public class Compiler {
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
-        var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
+        var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd), name);
 
         var rendered = new MagmaClassNodeBuilder()
                 .withPrefix(isPublic ? Lang.EXPORT_KEYWORD : "")
@@ -101,9 +101,9 @@ public class Compiler {
             if (contentEnd == -1) return Optional.empty();
 
             var content = input.substring(contentStart, contentEnd + 1);
-            var membersResult = compileMembers(content.substring(1, content.length() - 1));
-
             var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
+            var membersResult = compileMembers(content.substring(1, content.length() - 1), name);
+
             var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}")
                     .render();
 
@@ -123,7 +123,7 @@ public class Compiler {
 
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
-        var membersResult = compileMembers(inputContent);
+        var membersResult = compileMembers(inputContent, name);
         var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
 
         var renderedClass = new MagmaClassNodeBuilder()
@@ -144,14 +144,14 @@ public class Compiler {
         return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
     }
 
-    private static MembersResult compileMembers(String inputContent) {
+    private static MembersResult compileMembers(String inputContent, String name) {
         var splitContent = split(inputContent);
 
         var outputValues = new ArrayList<String>();
         var outputMore = new ArrayList<String>();
 
         for (var classMember : splitContent) {
-            var compiledClassMember = compileMethod(classMember)
+            var compiledClassMember = compileMethod(classMember, name)
                     .or(() -> compileDefinition(classMember))
                     .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
 
@@ -163,7 +163,7 @@ public class Compiler {
         return new MembersResult(outputMore, value);
     }
 
-    private static Optional<State> compileMethod(String input) {
+    private static Optional<State> compileMethod(String input, String parentName) {
         var lines = Arrays.stream(input.split("\n")).toList();
 
         var annotations = lines.stream()
@@ -182,27 +182,38 @@ public class Compiler {
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        if (separator == -1) return Optional.empty();
 
-        var name = before.substring(separator + 1).strip();
-        if (!isSymbol(name)) return Optional.empty();
-
-        var flagsAndType = before.substring(0, separator).strip();
-        var typeSeparator = flagsAndType.lastIndexOf(' ');
-
+        String name;
         List<String> inputFlags;
-        String outputType;
-        if (typeSeparator == -1) {
-            inputFlags = Collections.emptyList();
-            outputType = compileType(flagsAndType);
+        Optional<String> outputType;
+        if (separator == -1) {
+            if (!before.equals(parentName)) {
+                return Optional.empty();
+            } else {
+/*                name = "__constructor__";
+                inputFlags = Collections.emptyList();
+                outputType = Optional.empty();*/
+                return Optional.of(new State(Optional.empty(), Optional.of(""), Optional.empty()));
+            }
         } else {
-            inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
+            name = before.substring(separator + 1).strip();
+            if (!isSymbol(name)) return Optional.empty();
 
-            try {
-                var typeString = flagsAndType.substring(typeSeparator + 1).strip();
-                outputType = compileType(typeString);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to compile type string for input: " + input, e);
+            var flagsAndType = before.substring(0, separator).strip();
+            var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+            if (typeSeparator == -1) {
+                inputFlags = Collections.emptyList();
+                outputType = Optional.ofNullable(compileType(flagsAndType));
+            } else {
+                inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
+
+                try {
+                    var typeString = flagsAndType.substring(typeSeparator + 1).strip();
+                    outputType = Optional.ofNullable(compileType(typeString));
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to compile type string for input: " + input, e);
+                }
             }
         }
 
@@ -222,11 +233,14 @@ public class Compiler {
             var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
 
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
-            var builder = new MagmaMethodBuilder()
+            var magmaMethodBuilder = new MagmaMethodBuilder()
                     .withPrefix(annotationsString)
                     .withName(name)
-                    .withType(outputType)
                     .withContent(content);
+
+            var builder = outputType
+                    .map(magmaMethodBuilder::withType)
+                    .orElse(magmaMethodBuilder);
 
             MagmaMethodBuilder result;
             if (throwsString.isEmpty()) {
@@ -343,7 +357,7 @@ public class Compiler {
             return Lang.I32;
         } else if (inputType.equals(Lang.LOWER_VOID)) {
             return Lang.CAMEL_VOID;
-        } else if(inputType.equals(Lang.BOOL)) {
+        } else if (inputType.equals(Lang.BOOL)) {
             return Lang.CAMEL_BOOL;
         } else if (isSymbol(inputType)) return inputType;
 

@@ -2,18 +2,20 @@ package com.meti.magma;
 
 import com.meti.java.RenderableBuilder;
 
+import java.util.Optional;
+
 public class MagmaMethodBuilder implements RenderableBuilder {
     private String prefix;
     private String name;
-    private String type;
+    private Optional<String> type;
     private String content;
     private String exceptionString;
 
     public MagmaMethodBuilder() {
-        this("", "", "", "", "");
+        this("", "", Optional.empty(), "", "");
     }
 
-    public MagmaMethodBuilder(String prefix, String name, String type, String content, String exceptionString) {
+    public MagmaMethodBuilder(String prefix, String name, Optional<String> type, String content, String exceptionString) {
         this.prefix = prefix;
         this.name = name;
         this.type = type;
@@ -30,7 +32,7 @@ public class MagmaMethodBuilder implements RenderableBuilder {
     }
 
     public MagmaMethodBuilder withType(String type) {
-        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
+        return new MagmaMethodBuilder(prefix, name, Optional.of(type), content, exceptionString);
     }
 
     public MagmaMethodBuilder withContent(String content) {
