@@ -21,7 +21,7 @@ public class MethodFeatureTest {
                         .withContent(";")
                         .build()
                         .render(),
-                new MagmaDeclaration("", "", TEST_SYMBOL, "() => Void") + ";");
+                new MagmaDeclaration("", "", TEST_SYMBOL, "() => Void").render() + ";");
     }
 
     @ParameterizedTest

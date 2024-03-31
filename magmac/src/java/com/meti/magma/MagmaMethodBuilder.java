@@ -9,29 +9,36 @@ public class MagmaMethodBuilder implements RenderableBuilder {
     private String content;
     private String exceptionString;
 
-    public MagmaMethodBuilder withPrefix(String prefix) {
+    public MagmaMethodBuilder() {
+        this("", "", "", "", "");
+    }
+
+    public MagmaMethodBuilder(String prefix, String name, String type, String content, String exceptionString) {
         this.prefix = prefix;
-        return this;
+        this.name = name;
+        this.type = type;
+        this.content = content;
+        this.exceptionString = exceptionString;
+    }
+
+    public MagmaMethodBuilder withPrefix(String prefix) {
+        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
     }
 
     public MagmaMethodBuilder withName(String name) {
-        this.name = name;
-        return this;
+        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
     }
 
     public MagmaMethodBuilder withType(String type) {
-        this.type = type;
-        return this;
+        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
     }
 
     public MagmaMethodBuilder withContent(String content) {
-        this.content = content;
-        return this;
+        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
     }
 
     public MagmaMethodBuilder withExceptionString(String exceptionString) {
-        this.exceptionString = exceptionString;
-        return this;
+        return new MagmaMethodBuilder(prefix, name, type, content, exceptionString);
     }
 
     public MagmaMethodNode build() {
