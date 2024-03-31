@@ -338,6 +338,8 @@ public class Compiler {
             return Lang.I32;
         } else if (inputType.equals(Lang.LOWER_VOID)) {
             return Lang.CAMEL_VOID;
+        } else if(inputType.equals(Lang.BOOL)) {
+            return Lang.CAMEL_BOOL;
         } else if (isSymbol(inputType)) return inputType;
 
         var genericStart = inputType.indexOf('<');

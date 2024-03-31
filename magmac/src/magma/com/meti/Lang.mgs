@@ -3,6 +3,7 @@ export object Lang = {
 	pub const I32 : String = "I32";
 	pub const LONG : String = "long";
 	pub const INT : String = "int";
+	pub const BOOL : String = "bool";
 }
 
 export class def Lang() => {
@@ -19,4 +20,5 @@ export class def Lang() => {
     public static final String EXPORT_KEYWORD = "export "
     public static final String INTERFACE_KEYWORD = "interface "
     public static final String RECORD_KEYWORD = "record "
+    public static final String CAMEL_BOOL = "Bool"
 }
