@@ -13,11 +13,11 @@ export object ImportFeatureTest = {
 
 export class def ImportFeatureTest() => {
 		def renderJavaImport() : private static String => {
-        return renderJavaImport("", parent, child);
-    }
+return renderJavaImport("", parent, child);
+}
 		def renderJavaImport() : private static String => {
-        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
-    }
+return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
+}
 	let @ValueSource(ints :  = {2, 3})
     void testMultipleImports(int count) {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
@@ -29,8 +29,8 @@ export class def ImportFeatureTest() => {
     };
 	@Test
 	def testWhitespace() : Void => {
-        CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
-    }
+CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
+}
 	let @ValueSource(strings :  = {"AfterEach", "Test"})
     void testSimpleImports(String name) {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
@@ -40,6 +40,6 @@ export class def ImportFeatureTest() => {
     };
 	@Test
 	def testImportsForAll() : Void => {
-        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
-    }
+CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
+}
 }

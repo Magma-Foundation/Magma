@@ -139,10 +139,9 @@ public class Compiler {
                 })
                 .toList();
 
-        var methodStrings = lines.stream().filter(line -> !line.startsWith("@")).toList();
-        if (methodStrings.isEmpty()) return Optional.empty();
-
-        var methodString = methodStrings.get(0);
+        var methodString = lines.stream()
+                .filter(line -> !line.startsWith("@"))
+                .collect(Collectors.joining("\n"));
 
         var paramStart = methodString.indexOf('(');
         if (paramStart == -1) return Optional.empty();

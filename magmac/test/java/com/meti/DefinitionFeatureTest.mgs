@@ -23,18 +23,18 @@ export class def DefinitionFeatureTest() => {
     };
 	@Test
 	def testType() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
-    }
+FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
+}
 	@Test
 	def testValue() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
-    }
+FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
+}
 	@Test
 	def testFinal() : Void => {
-        FeatureTest.assertWithinClass(
-                renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
-                renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
-    }
+FeatureTest.assertWithinClass(
+renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
+renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+}
 	let @ValueSource(strings :  = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
     void testStatic(String className) {
         assertCompile(
@@ -45,8 +45,8 @@ export class def DefinitionFeatureTest() => {
     };
 	@Test
 	def testPublic() : Void => {
-        FeatureTest.assertWithinClass(
-                renderDefinition("public ", TEST_SYMBOL, INT, TEST_VALUE),
-                renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
-    }
+FeatureTest.assertWithinClass(
+renderDefinition("public ", TEST_SYMBOL, INT, TEST_VALUE),
+renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+}
 }

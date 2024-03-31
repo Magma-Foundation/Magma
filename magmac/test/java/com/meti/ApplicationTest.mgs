@@ -15,18 +15,18 @@ export object ApplicationTest = {
 export class def ApplicationTest() => {
 	@AfterEach
 	def tearDown() : Void ? IOException => {
-        Files.deleteIfExists(TARGET);
-        Files.deleteIfExists(SOURCE);
-    }
+Files.deleteIfExists(TARGET);
+Files.deleteIfExists(SOURCE);
+}
 	@Test
 	def generateSomething() : Void ? IOException => {
-        Files.createFile(SOURCE);
-        Main.run(new SingleSourceSet(SOURCE));
-        assertTrue(Files.exists(TARGET));
-    }
+Files.createFile(SOURCE);
+Main.run(new SingleSourceSet(SOURCE));
+assertTrue(Files.exists(TARGET));
+}
 	@Test
 	def generatesNothing() : Void ? IOException => {
-        Main.run(new SingleSourceSet(SOURCE));
-        assertFalse(Files.exists(TARGET));
-    }
+Main.run(new SingleSourceSet(SOURCE));
+assertFalse(Files.exists(TARGET));
+}
 }

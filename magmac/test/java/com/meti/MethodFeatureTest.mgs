@@ -1,28 +1,39 @@
+extern import { Test } from org.junit.jupiter.api;
 extern import { ParameterizedTest } from org.junit.jupiter.params;
 extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import com.meti.Compiler;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 extern import { assertWithinClass } from com.meti.FeatureTest;
 
 export class def MethodFeatureTest() => {
 		def renderJavaMethod() : private static String => {
-        return renderJavaMethod(prefix, name, "");
-    }
+return renderJavaMethod(prefix, name, "");
+}
 		def renderJavaMethod() : private static String => {
-        return prefix + "void " + name + "()" + throwsString + "{}";
-    }
+return prefix + "void " + name + "()" + throwsString + "{}";
+}
 	let @ValueSource(strings :  = {"first", "second"})
     void testSimpleMethod(String name) {
         assertWithinClass(renderJavaMethod("", name),
-                Compiler.renderMagmaMethodWithType("", name, "Void", "{}"));
+                renderMagmaMethodWithType("", name, "Void", "{}"));
     };
 	let @ValueSource(strings :  = {"First", "Second"})
     void testAnnotation(String name) {
-        assertWithinClass(renderJavaMethod(Compiler.renderAnnotation(name), TEST_SYMBOL),
-                Compiler.renderMagmaMethodWithType(Compiler.renderAnnotation(name), TEST_SYMBOL, "Void", "{}"));
+        assertWithinClass(renderJavaMethod(renderAnnotation(name), TEST_SYMBOL),
+                renderMagmaMethodWithType(renderAnnotation(name), TEST_SYMBOL, "Void", "{}"));
     };
 	let @ValueSource(strings :  = {"First", "Second"})
     void testException(String name) {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, " throws " + name + " "),
-                Compiler.renderMagmaMethodWithException("", TEST_SYMBOL, "Void", "{}", name));
+                renderMagmaMethodWithException("", TEST_SYMBOL, "Void", "{}", name));
+    };
+	let @ValueSource(ints :  = {2, 3})
+    void testMultipleAnnotations(int count) {
+        var rendered = renderAnnotation("First").repeat(count);
+        assertWithinClass(renderJavaMethod(rendered, TEST_SYMBOL),
+                renderMagmaMethodWithType(rendered, TEST_SYMBOL, "Void", "{}"));
+    };
+	let "(ints : assertWithinClass(renderJavaMethod(renderAnnotation("First", = {2, 3})"), TEST_SYMBOL),
+                renderMagmaMethodWithType(renderAnnotation("First", "(ints = [2, 3])"), TEST_SYMBOL, "Void", "{}"));
     };
 }

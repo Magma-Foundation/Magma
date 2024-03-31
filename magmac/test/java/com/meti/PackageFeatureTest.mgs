@@ -3,6 +3,6 @@ extern import { Test } from org.junit.jupiter.api;
 export class def PackageFeatureTest() => {
 	@Test
 	def testPackageRemoval() : Void => {
-        CompiledTest.assertCompile("package test;", "");
-    }
+CompiledTest.assertCompile("package test;", "");
+}
 }
