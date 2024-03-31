@@ -9,10 +9,10 @@ export class def InterfaceFeatureTest() => {
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
 	def testSimpleInterface() : Void => {
-        assertEquals(renderMagmaTrait(name), compile(renderJavaInterface(name)));
+        assertEquals(renderMagmaTrait("", name, "{\n}"), compile(renderJavaInterface(name)));
     }
 	@Test
 	def testPublic() : Void => {
-        assertEquals(renderMagmaTrait(EXPORT_KEYWORD, TEST_SYMBOL, "{}"), compile(renderJavaInterface(PUBLIC_KEYWORD, TEST_SYMBOL)));
+        assertEquals(renderMagmaTrait(EXPORT_KEYWORD, TEST_SYMBOL, "{\n}"), compile(renderJavaInterface(PUBLIC_KEYWORD, TEST_SYMBOL)));
     }
 }
