@@ -7,6 +7,6 @@ import static com.meti.CompiledTest.assertCompile;
 public class ClassFeatureTest {
     @Test
     void simpleClass() {
-        assertCompile("class Test {}", "class def Test() => {}");
+        assertCompile(Compiler.renderJavaClass(), Compiler.renderMagmaClass());
     }
 }
