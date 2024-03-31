@@ -8,11 +8,10 @@ export object ClassFeatureTest = {
 }
 
 export class def ClassFeatureTest() => {
-	let @ValueSource(strings :  = {"First", "Second"};
-	@
-	def testSimpleClasses() : Void ? stSimpleClasses(String name) => {
+	let @ValueSource(strings :  = {"First", "Second"})
+    void testSimpleClasses(String name) {
         assertCompile(JavaLang.renderJavaClass(name, ""), Compiler.renderMagmaClass(name, ""));
-    }
+    };
 	@Test
 	def testPublicKeyword() : Void => {
         assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));

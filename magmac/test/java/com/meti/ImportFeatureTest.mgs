@@ -18,8 +18,9 @@ export class def ImportFeatureTest() => {
 		def renderJavaImport() : private static String => {
         return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
     }
-	let @ValueSource(ints :  = {2, 3};
-	let input : var = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
+	let @ValueSource(ints :  = {2, 3})
+    void testMultipleImports(int count) {
+        var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
                 .mapToObj(_i -> renderMagmaImport(TEST_PARENT, TEST_NAME))
                 .collect(Collectors.joining("\n"));
@@ -30,11 +31,10 @@ export class def ImportFeatureTest() => {
 	def testWhitespace() : Void => {
         CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
     }
-	let @ValueSource(strings :  = {"AfterEach", "Test"};
-	@
-	def testSimpleImports() : Void ? stSimpleImports(String name) => {
+	let @ValueSource(strings :  = {"AfterEach", "Test"})
+    void testSimpleImports(String name) {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
-    }
+    };
 	let otherParent : var = "Parent";
         CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), renderMagmaImport(otherParent, TEST_NAME));
     };

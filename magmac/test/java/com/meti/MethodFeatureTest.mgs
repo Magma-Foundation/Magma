@@ -10,22 +10,19 @@ export class def MethodFeatureTest() => {
 		def renderJavaMethod() : private static String => {
         return prefix + "void " + name + "()" + throwsString + "{}";
     }
-	let @ValueSource(strings :  = {"first", "second"};
-	@
-	def testSimpleMethod() : Void ? stSimpleMethod(String name) => {
+	let @ValueSource(strings :  = {"first", "second"})
+    void testSimpleMethod(String name) {
         assertWithinClass(renderJavaMethod("", name),
                 Compiler.renderMagmaMethodWithType("", name, "Void", "{}"));
-    }
-	let @ValueSource(strings :  = {"First", "Second"};
-	@
-	def testAnnotation() : Void ? stAnnotation(String name) => {
+    };
+	let @ValueSource(strings :  = {"First", "Second"})
+    void testAnnotation(String name) {
         assertWithinClass(renderJavaMethod(Compiler.renderAnnotation(name), TEST_SYMBOL),
                 Compiler.renderMagmaMethodWithType(Compiler.renderAnnotation(name), TEST_SYMBOL, "Void", "{}"));
-    }
-	let @ValueSource(strings :  = {"First", "Second"};
-	@
-	def testException() : Void ? stException(String name) => {
+    };
+	let @ValueSource(strings :  = {"First", "Second"})
+    void testException(String name) {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, " throws " + name + " "),
                 Compiler.renderMagmaMethodWithException("", TEST_SYMBOL, "Void", "{}", name));
-    }
+    };
 }

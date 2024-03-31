@@ -34,16 +34,11 @@ public class Compiler {
             state.staticValue.ifPresent(objects::add);
         }
 
-        var importString = imports.stream()
-                .collect(Collectors.joining("\n"))
-                .strip();
+        var importString = imports.stream().collect(Collectors.joining("\n")).strip();
 
         var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
 
-        return Stream.concat(importStream, Stream.of(objects, classes)
-                        .filter(list -> !list.isEmpty())
-                        .map(list -> String.join("", list).strip()))
-                .collect(Collectors.joining("\n\n"));
+        return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));
     }
 
     private static List<String> split(String input) {
@@ -58,8 +53,8 @@ public class Compiler {
                 state.descend();
                 state.advance();
             } else {
-                if (c == '{') state.ascend();
-                if (c == '}') state.descend();
+                if (c == '{' || c == '(') state.ascend();
+                if (c == '}' || c == ')') state.descend();
                 state.append(c);
             }
         }
@@ -70,9 +65,7 @@ public class Compiler {
     }
 
     private static State compileRootStatement(String input) {
-        return compileImport(input)
-                .or(() -> compileClass(input))
-                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+        return compileImport(input).or(() -> compileClass(input)).orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileClass(String input) {
@@ -92,9 +85,7 @@ public class Compiler {
         var outputMore = new ArrayList<String>();
 
         for (var classMember : splitContent) {
-            var compiledClassMember = compileDefinition(classMember)
-                    .or(() -> compileMethod(classMember))
-                    .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
+            var compiledClassMember = compileDefinition(classMember).or(() -> compileMethod(classMember)).orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
 
             compiledClassMember.instanceValue.ifPresent(outputValues::add);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
@@ -117,55 +108,71 @@ public class Compiler {
     }
 
     private static Optional<? extends State> compileMethod(String classMember) {
-        var paramStart = classMember.indexOf('(');
+        var lines = Arrays.stream(classMember.split("\n"))
+                .map(String::strip)
+                .filter(line -> !line.isEmpty())
+                .toList();
+
+        var annotations = lines.stream()
+                .filter(line -> line.startsWith("@"))
+                .map(line -> line.substring(1))
+                .map(line -> {
+                    var paramStart = line.indexOf('(');
+                    var paramEnd = line.lastIndexOf(')');
+
+                    if (paramStart == -1 || paramEnd == -1) {
+                        return line;
+                    } else {
+                        var annotationName = line.substring(0, paramStart).strip();
+                        var arg = line.substring(paramStart + 1, paramEnd)
+                                .strip();
+
+                        var separator = arg.indexOf('=');
+                        var name = arg.substring(0, separator).strip();
+                        var right = arg.substring(separator + 1).strip();
+
+                        var contentStart = right.indexOf('{');
+                        var contentEnd = right.lastIndexOf('}');
+
+                        return annotationName + "(" + name + " = [" + right.substring(contentStart + 1, contentEnd) + "])";
+                    }
+                })
+                .toList();
+
+        var methodStrings = lines.stream().filter(line -> !line.startsWith("@")).toList();
+        if (methodStrings.isEmpty()) return Optional.empty();
+
+        var methodString = methodStrings.get(0);
+
+        var paramStart = methodString.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
-        var before = classMember.substring(0, paramStart).strip();
+        var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        if (separator == -1) return Optional.empty();
-
         var name = before.substring(separator + 1).strip();
-        var annotationsAndType = before.substring(0, separator).strip();
-        var typeSeparator = annotationsAndType.lastIndexOf('\n');
-        List<String> annotations;
-        String type;
-        if (typeSeparator == -1) {
-            annotations = Collections.emptyList();
-            type = compileType(annotationsAndType);
-        } else {
-            var asList = Arrays.stream(annotationsAndType.split("\n"))
-                    .map(String::strip)
-                    .filter(value -> !value.isEmpty())
-                    .toList();
+        var inputType = before.substring(0, separator).strip();
+        var outputType = compileType(inputType);
 
-            annotations = asList.subList(0, asList.size() - 1).stream()
-                    .map(element -> element.substring(1))
-                    .collect(Collectors.toList());
-            type = compileType(asList.get(asList.size() - 1));
-        }
+        var annotationsString = annotations.stream().map(Compiler::renderAnnotation).collect(Collectors.joining());
 
-        var annotationsString = annotations.stream()
-                .map(Compiler::renderAnnotation)
-                .collect(Collectors.joining());
-
-        var paramEnd = classMember.indexOf(')');
+        var paramEnd = methodString.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
-        var contentStart = classMember.indexOf('{');
+        var contentStart = methodString.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var throwsString = classMember.substring(paramEnd + 1, contentStart).strip();
+        var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
         String result;
 
-        var contentEnd = classMember.lastIndexOf('}');
+        var contentEnd = methodString.lastIndexOf('}');
         if (contentEnd == -1) return Optional.empty();
 
-        var content = classMember.substring(contentStart, contentEnd + 1).strip();
+        var content = methodString.substring(contentStart, contentEnd + 1).strip();
         if (throwsString.isEmpty()) {
-            result = renderMagmaMethodWithType(annotationsString, name, type, content, "");
+            result = renderMagmaMethodWithType(annotationsString, name, outputType, content, "");
         } else {
             var exceptionName = throwsString.substring("throws ".length()).strip();
-            result = renderMagmaMethodWithException(annotationsString, name, type, content, exceptionName);
+            result = renderMagmaMethodWithException(annotationsString, name, outputType, content, exceptionName);
         }
 
         return Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
@@ -181,6 +188,8 @@ public class Compiler {
 
         var beforeSlice = inputContent.substring(0, valueSeparator).strip();
         var nameSeparator = beforeSlice.lastIndexOf(' ');
+        if (nameSeparator == -1) return Optional.empty();
+
         var flagsAndType = beforeSlice.substring(0, nameSeparator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
 
@@ -203,9 +212,7 @@ public class Compiler {
         var flagString = flags.contains("public") ? "pub " : "";
         var rendered = renderMagmaDefinition(flagString, mutabilityString, name, outputType, value);
 
-        return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
-                : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+        return Optional.of(flags.contains("static") ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered)) : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -235,9 +242,7 @@ public class Compiler {
         var parent = segmentsString.substring(0, separator);
         var child = segmentsString.substring(separator + 1);
 
-        return Optional.of(new State(Optional.of(child.equals("*")
-                ? renderMagmaImportForAllChildren(parent)
-                : renderMagmaImport(parent, child)), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.of(child.equals("*") ? renderMagmaImportForAllChildren(parent) : renderMagmaImport(parent, child)), Optional.empty(), Optional.empty()));
     }
 
     static String renderMagmaImport(String parent, String child) {
@@ -257,7 +262,7 @@ public class Compiler {
     }
 
     static String renderMagmaClass(String prefix, String name, String content) {
-        return prefix + CLASS_KEYWORD + "def " + name + "() " + "" + "=> {" + content + "\n}";
+        return prefix + CLASS_KEYWORD + "def " + name + "() " + "=> {" + content + "\n}";
     }
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content) {
@@ -285,12 +290,13 @@ public class Compiler {
     }
 
     static String renderAnnotation(String name) {
-        return "@" + name + "\n";
+        return renderAnnotation(name, "");
     }
 
-    record State(
-            Optional<String> importValue,
-            Optional<String> instanceValue,
-            Optional<String> staticValue) {
+    static String renderAnnotation(String name, String valueString) {
+        return "@" + name + valueString + "\n";
+    }
+
+    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue) {
     }
 }

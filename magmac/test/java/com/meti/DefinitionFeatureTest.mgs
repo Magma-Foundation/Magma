@@ -12,17 +12,15 @@ export object DefinitionFeatureTest = {
 }
 
 export class def DefinitionFeatureTest() => {
-	let @ValueSource(strings :  = {"first", "second"};
-	@
-	def testSimpleDefinition() : Void ? stSimpleDefinition(String name) => {
+	let @ValueSource(strings :  = {"first", "second"})
+    void testSimpleDefinition(String name) {
         FeatureTest.assertWithinClass(renderDefinition(name, INT), renderMagmaDefinition(name, I32));
-    }
-	let @ValueSource(ints :  = {2, 3};
-	@
-	def testMultipleDefinitions() : Void ? stMultipleDefinitions(int count) => {
+    };
+	let @ValueSource(ints :  = {2, 3})
+    void testMultipleDefinitions(int count) {
         FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT).repeat(count),
                 renderMagmaDefinition(TEST_SYMBOL, I32).repeat(count));
-    }
+    };
 	@Test
 	def testType() : Void => {
         FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
@@ -37,15 +35,14 @@ export class def DefinitionFeatureTest() => {
                 renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
                 renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
-	let @ValueSource(strings :  = {TEST_SYMBOL, TEST_SYMBOL + "_more"};
-	@
-	def testStatic() : Void ? stStatic(String className) => {
+	let @ValueSource(strings :  = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
+    void testStatic(String className) {
         assertCompile(
                 renderJavaClass(className, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
                 renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE))
                 + "\n\n"
                 + renderMagmaClass(className, ""));
-    }
+    };
 	@Test
 	def testPublic() : Void => {
         FeatureTest.assertWithinClass(
