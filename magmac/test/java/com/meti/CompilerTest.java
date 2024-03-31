@@ -26,37 +26,37 @@ public class CompilerTest {
     }
 
     @Test
-    void noPackage() {
+    void testPackageRemoval() {
         assertCompile("package test;", "");
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
-    void multipleImports(int count) {
+    void testMultipleImports(int count) {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = renderMagmaImport(TEST_PARENT, TEST_NAME).repeat(count);
         assertCompile(input, output);
     }
 
     @Test
-    void whitespace() {
+    void testWhitespace() {
         assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"AfterEach", "Test"})
-    void simpleImport(String name) {
+    void testSimpleImports(String name) {
         assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
     }
 
     @Test
-    void parentImport() {
+    void testImportsWithParent() {
         var otherParent = "Parent";
         assertCompile(renderJavaImport(otherParent, TEST_NAME), renderMagmaImport(otherParent, TEST_NAME));
     }
 
     @Test
-    void allImport() {
+    void testImportsForAll() {
         assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, CompilerTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
     }
 }
