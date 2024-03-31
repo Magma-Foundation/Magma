@@ -193,26 +193,31 @@ public class Compiler {
         if (paramEnd == -1) return Optional.empty();
 
         var contentStart = methodString.indexOf('{');
-        if (contentStart == -1) return Optional.empty();
-
-        if (!(paramEnd < contentStart)) return Optional.empty();
-        var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
-        String result;
 
         var contentEnd = methodString.lastIndexOf('}');
-        if (contentEnd == -1) return Optional.empty();
 
-        var content = methodString.substring(contentStart, contentEnd + 1).strip();
-        if (throwsString.isEmpty()) {
-            result = renderMagmaMethodWithType(annotationsString, name, outputType, content, "");
+        if (contentStart != -1 && contentEnd != -1) {
+            if (!(paramEnd < contentStart)) return Optional.empty();
+            var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
+            String result;
+
+            var content = methodString.substring(contentStart, contentEnd + 1).strip();
+            if (throwsString.isEmpty()) {
+                result = renderMagmaMethodWithType(annotationsString, name, outputType, content, "");
+            } else {
+                var exceptionName = throwsString.substring("throws ".length()).strip();
+                result = renderMagmaMethodWithException(annotationsString, name, outputType, content, exceptionName);
+            }
+
+            return inputFlags.contains("static")
+                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
+                    : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
+        } else if(contentStart == -1 && contentEnd == -1) {
+            var rendered = renderMagmaDefinitionHeader("", "", name, "() => Void") + ";";
+            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else {
-            var exceptionName = throwsString.substring("throws ".length()).strip();
-            result = renderMagmaMethodWithException(annotationsString, name, outputType, content, exceptionName);
+            return Optional.empty();
         }
-
-        return inputFlags.contains("static")
-                ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
-                : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
     }
 
     private static Optional<String> compileAnnotation(String line) {
@@ -345,7 +350,11 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
-        return "\n\t" + flagString + mutabilityString + name + " : " + type + " = " + value + ";";
+        return renderMagmaDefinitionHeader(flagString, mutabilityString, name, type) + " = " + value + ";";
+    }
+
+    static String renderMagmaDefinitionHeader(String flagString, String mutabilityString, String name, String type) {
+        return "\n\t" + flagString + mutabilityString + name + " : " + type;
     }
 
     static String renderAnnotation(String name) {

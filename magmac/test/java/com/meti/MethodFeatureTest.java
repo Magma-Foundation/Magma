@@ -11,32 +11,38 @@ import static com.meti.FeatureTest.assertWithinClass;
 import static com.meti.JavaLang.renderJavaClass;
 
 public class MethodFeatureTest {
-    private static String renderJavaMethod(String prefix, String name) {
-        return renderJavaMethod(prefix, "", name, "");
+    private static String renderJavaMethod(String prefix, String name, String content) {
+        return renderJavaMethod(prefix, "", name, "", content);
     }
 
-    private static String renderJavaMethod(String annotations, String flagsString, String name, String throwsString) {
-        return annotations + "\n" + flagsString + "void " + name + "()" + throwsString + "{}";
+    private static String renderJavaMethod(String annotations, String flagsString, String name, String throwsString, String content) {
+        return annotations + "\n" + flagsString + "void " + name + "()" + throwsString + content;
+    }
+
+    @Test
+    void testWithNoBody() {
+        assertWithinClass(renderJavaMethod("", TEST_SYMBOL, ";"),
+                renderMagmaDefinitionHeader("", "", TEST_SYMBOL, "() => Void") + ";");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void testSimpleMethod(String name) {
-        assertWithinClass(renderJavaMethod("", name),
+        assertWithinClass(renderJavaMethod("", name, "{}"),
                 renderMagmaMethodWithType("", name, "Void", "{}"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testAnnotation(String name) {
-        assertWithinClass(renderJavaMethod(renderAnnotation(name), TEST_SYMBOL),
+        assertWithinClass(renderJavaMethod(renderAnnotation(name), TEST_SYMBOL, "{}"),
                 renderMagmaMethodWithType(renderAnnotation(name), TEST_SYMBOL, "Void", "{}"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testException(String name) {
-        assertWithinClass(renderJavaMethod("", "", TEST_SYMBOL, " throws " + name + " "),
+        assertWithinClass(renderJavaMethod("", "", TEST_SYMBOL, " throws " + name + " ", "{}"),
                 renderMagmaMethodWithException("", TEST_SYMBOL, "Void", "{}", name));
     }
 
@@ -44,13 +50,13 @@ public class MethodFeatureTest {
     @ValueSource(ints = {2, 3})
     void testMultipleAnnotations(int count) {
         var rendered = renderAnnotation("First").repeat(count);
-        assertWithinClass(renderJavaMethod(rendered, TEST_SYMBOL),
+        assertWithinClass(renderJavaMethod(rendered, TEST_SYMBOL, "{}"),
                 renderMagmaMethodWithType(rendered, TEST_SYMBOL, "Void", "{}"));
     }
 
     @Test
     void testAnnotationWithValues() {
-        assertWithinClass(renderJavaMethod(renderAnnotation("First", "(ints = {2, 3})"), TEST_SYMBOL),
+        assertWithinClass(renderJavaMethod(renderAnnotation("First", "(ints = {2, 3})"), TEST_SYMBOL, "{}"),
                 renderMagmaMethodWithType(renderAnnotation("First", "(ints = [2, 3])"), TEST_SYMBOL, "Void", "{}"));
     }
 
@@ -58,7 +64,7 @@ public class MethodFeatureTest {
     @ValueSource(strings = {"Foo", "Bar"})
     void testStatic(String className) {
         assertCompile(
-                renderJavaClass(className, renderJavaMethod("", "static ", TEST_SYMBOL, "")),
+                renderJavaClass(className, renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")),
                 renderObject(className, renderMagmaMethodWithType("", TEST_SYMBOL, "Void", "{}"))
                 + "\n\n"
                 + renderMagmaClass(className, ""));
