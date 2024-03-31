@@ -1,6 +1,8 @@
 package com.meti.magma;
 
-public class MagmaDefinitionBuilder {
+import com.meti.java.RenderableBuilder;
+
+public class MagmaDefinitionBuilder implements RenderableBuilder {
     private String flagString;
     private String mutabilityString;
     private String name;
@@ -39,6 +41,7 @@ public class MagmaDefinitionBuilder {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
+    @Override
     public MagmaDefinition build() {
         return new MagmaDefinition(flagString, mutabilityString, name, type, value);
     }

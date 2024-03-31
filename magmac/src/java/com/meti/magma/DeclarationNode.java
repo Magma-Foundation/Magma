@@ -1,63 +1,14 @@
 package com.meti.magma;
 
-import java.util.Objects;
+import com.meti.node.Renderable;
 
-public final class DeclarationNode {
-    private final String flagString;
-    private final String name;
-    private final String type;
-    private final String value;
+import java.util.Optional;
 
-    public DeclarationNode(String flagString, String name, String type, String value) {
-        this.flagString = flagString;
-        this.name = name;
-        this.type = type;
-        this.value = value;
-    }
-
+public record DeclarationNode(String flagString, String name, String type,
+                              Optional<String> value) implements Renderable {
+    @Override
     public String render() {
-        return flagString() + type() + " " + name() + " = " + value() + ";";
+        var renderedValue = value.map(inner -> " = " + inner).orElse("");
+        return flagString + type + " " + name + renderedValue + ";";
     }
-
-    public String flagString() {
-        return flagString;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public String type() {
-        return type;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (DeclarationNode) obj;
-        return Objects.equals(this.flagString, that.flagString) &&
-               Objects.equals(this.name, that.name) &&
-               Objects.equals(this.type, that.type) &&
-               Objects.equals(this.value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(flagString, name, type, value);
-    }
-
-    @Override
-    public String toString() {
-        return "DeclarationNode[" +
-               "flagString=" + flagString + ", " +
-               "name=" + name + ", " +
-               "type=" + type + ", " +
-               "value=" + value + ']';
-    }
-
 }

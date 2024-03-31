@@ -1,15 +1,14 @@
 package com.meti.magma;
 
-public record DeclarationNodeBuilder(String flagString, String name, String type, String value) {
-    public DeclarationNodeBuilder() {
-        this("", "", "", "");
-    }
+import com.meti.java.RenderableBuilder;
+import com.meti.node.Renderable;
 
-    public DeclarationNodeBuilder(String flagString, String name, String type, String value) {
-        this.flagString = flagString;
-        this.name = name;
-        this.type = type;
-        this.value = value;
+import java.util.Optional;
+
+public record DeclarationNodeBuilder(String flagString, String name, String type,
+                                     Optional<String> value) implements RenderableBuilder {
+    public DeclarationNodeBuilder() {
+        this("", "", "", Optional.empty());
     }
 
     public DeclarationNodeBuilder withFlagString(String flagString) {
@@ -20,15 +19,16 @@ public record DeclarationNodeBuilder(String flagString, String name, String type
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
 
-    public DeclarationNodeBuilder setType(String type) {
+    public DeclarationNodeBuilder withType(String type) {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
 
     public DeclarationNodeBuilder withValue(String value) {
-        return new DeclarationNodeBuilder(flagString, name, type, value);
+        return new DeclarationNodeBuilder(flagString, name, type, Optional.of(value));
     }
 
-    public DeclarationNode build() {
+    @Override
+    public Renderable build() {
         return new DeclarationNode(flagString, name, type, value);
     }
 }
