@@ -12,17 +12,17 @@ public class ClassFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleClasses(String name) {
-        assertCompile(JavaLang.renderJavaClass(name, ""), Compiler.renderMagmaClass(name, ""));
+        assertCompile(JavaLang.renderJavaClass(name, ""), new MagmaClassNodeBuilder().setPrefix("").setName(name).setContent("").createMagmaClassNode().render());
     }
 
     @Test
     void testPublicKeyword() {
-        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));
+        assertCompile(new JavaClassNodeBuilder().setPrefix(Compiler.PUBLIC_KEYWORD).setName(FeatureTest.TEST_SYMBOL).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().setPrefix("export ").setName(FeatureTest.TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 
     @Test
     void testBody() {
         assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
-                Compiler.renderMagmaClass(FeatureTest.TEST_SYMBOL, TEST_BODY));
+                new MagmaClassNodeBuilder().setPrefix("").setName(FeatureTest.TEST_SYMBOL).setContent(TEST_BODY).createMagmaClassNode().render());
     }
 }

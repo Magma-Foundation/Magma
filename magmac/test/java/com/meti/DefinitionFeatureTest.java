@@ -61,14 +61,15 @@ public class DefinitionFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
     void testStatic(String className) {
+        String content = new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render();
         assertCompile(renderJavaClass(className, DEFAULT_BUILDER
                         .withValue(TEST_VALUE)
                         .withFlagString("static ")
                         .build()
                         .render()),
-                renderObject(className, new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render())
+                new ObjectNode("", className, content).renderObject()
                 + "\n\n"
-                + renderMagmaClass(className, ""));
+                + new MagmaClassNodeBuilder().setPrefix("").setName(className).setContent("").createMagmaClassNode().render());
     }
 
     @Test

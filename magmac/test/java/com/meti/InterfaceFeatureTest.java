@@ -12,11 +12,11 @@ public class InterfaceFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleInterface(String name) {
-        assertEquals(renderMagmaTrait("", name, "{\n}"), compile(renderJavaInterface(name)));
+        assertEquals(new MagmaTraitNode("", name, "{\n}").render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
     }
 
     @Test
     void testPublic() {
-        assertEquals(renderMagmaTrait(EXPORT_KEYWORD, TEST_SYMBOL, "{\n}"), compile(renderJavaInterface(PUBLIC_KEYWORD, TEST_SYMBOL)));
+        assertEquals(new MagmaTraitNode(EXPORT_KEYWORD, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
     }
 }

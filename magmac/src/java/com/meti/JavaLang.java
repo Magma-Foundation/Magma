@@ -2,7 +2,7 @@ package com.meti;
 
 public class JavaLang {
     static String renderJavaClass(String name, String content) {
-        return Compiler.renderJavaClass("", name, content);
+        return new JavaClassNodeBuilder().setPrefix("").setName(name).setContent(content).createJavaClassNode().renderJavaClass();
     }
 
     static String renderRecord(String name) {

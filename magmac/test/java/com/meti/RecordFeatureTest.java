@@ -15,17 +15,17 @@ public class RecordFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleRecords(String name) {
-        assertCompile(renderRecord(name), renderMagmaClass(name, ""));
+        assertCompile(renderRecord(name), new MagmaClassNodeBuilder().setPrefix("").setName(name).setContent("").createMagmaClassNode().render());
     }
 
     @Test
     void testPublicKeyword() {
-        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), renderMagmaClass(EXPORT_KEYWORD, TEST_SYMBOL, ""));
+        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), new MagmaClassNodeBuilder().setPrefix(EXPORT_KEYWORD).setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 
     @Test
     void testBody() {
         assertCompile(renderRecord("", TEST_SYMBOL, "{}"),
-                renderMagmaClass(TEST_SYMBOL, ""));
+                new MagmaClassNodeBuilder().setPrefix("").setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 }

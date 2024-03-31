@@ -7,9 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.meti.Compiler.renderMagmaImport;
-import static com.meti.Compiler.renderMagmaImportForAllChildren;
-
 public class ImportFeatureTest {
     public static final String TEST_PARENT = "org.junit.jupiter.api";
     public static final String TEST_NAME = "Test";
@@ -27,7 +24,7 @@ public class ImportFeatureTest {
     void testMultipleImports(int count) {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
-                .mapToObj(_i -> renderMagmaImport(TEST_PARENT, TEST_NAME))
+                .mapToObj(_i -> new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render())
                 .collect(Collectors.joining("\n"));
 
         CompiledTest.assertCompile(input, output);
@@ -35,23 +32,24 @@ public class ImportFeatureTest {
 
     @Test
     void testWhitespace() {
-        CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
+        CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"AfterEach", "Test"})
     void testSimpleImports(String name) {
-        CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
+        CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), new ImportNode(TEST_PARENT, "{ " + name + " } from ").render());
     }
 
     @Test
     void testImportsWithParent() {
         var otherParent = "Parent";
-        CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), renderMagmaImport(otherParent, TEST_NAME));
+        CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), new ImportNode(otherParent, "{ " + TEST_NAME + " } from ").render());
     }
 
     @Test
     void testImportsForAll() {
-        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
+        ImportNode importNode = new ImportNode(TEST_PARENT, "");
+        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), importNode.render());
     }
 }

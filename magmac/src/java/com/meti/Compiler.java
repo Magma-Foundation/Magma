@@ -86,7 +86,7 @@ public class Compiler {
         var bodyEnd = input.lastIndexOf('}');
         var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
 
-        var rendered = renderMagmaClass(isPublic ? EXPORT_KEYWORD : "", name, membersString.value);
+        var rendered = new MagmaClassNodeBuilder().setPrefix(isPublic ? EXPORT_KEYWORD : "").setName(name).setContent(membersString.value).createMagmaClassNode().render();
 
         return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
@@ -106,27 +106,11 @@ public class Compiler {
             var membersResult = compileMembers(content.substring(1, content.length() - 1));
 
             var name = input.substring(index + INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}");
+            var rendered = new MagmaTraitNode(isPublic ? EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}").render();
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
-    }
-
-    static String renderMagmaTrait(String name) {
-        return renderMagmaTrait("", name, "{}");
-    }
-
-    static String renderMagmaTrait(String prefixString, String name, String content) {
-        return prefixString + "trait " + name + " " + content;
-    }
-
-    static String renderJavaInterface(String name) {
-        return renderJavaInterface("", name);
-    }
-
-    static String renderJavaInterface(String prefixString, String name) {
-        return prefixString + INTERFACE_KEYWORD + name + " {}";
     }
 
     private static Optional<State> compileClass(String input) {
@@ -143,14 +127,14 @@ public class Compiler {
         var membersResult = compileMembers(inputContent);
         var flagString = isPublic ? EXPORT_KEYWORD : "";
 
-        var renderedClass = renderMagmaClass(flagString, name, membersResult.value());
+        var renderedClass = new MagmaClassNodeBuilder().setPrefix(flagString).setName(name).setContent(membersResult.value()).createMagmaClassNode().render();
 
         Optional<String> renderedMore;
         if (membersResult.outputMore().isEmpty()) {
             renderedMore = Optional.empty();
         } else {
             String content = String.join("", membersResult.outputMore());
-            renderedMore = Optional.of(renderObject(flagString, name, content));
+            renderedMore = Optional.of(new ObjectNode(flagString, name, content).renderObject());
         }
 
         return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
@@ -211,7 +195,7 @@ public class Compiler {
         }
 
         var annotationsString = annotations.stream()
-                .map(Compiler::renderAnnotation)
+                .map(name1 -> new Annotation(name1, "").renderAnnotation())
                 .collect(Collectors.joining());
 
         var paramEnd = methodString.indexOf(')');
@@ -228,10 +212,10 @@ public class Compiler {
 
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
             if (throwsString.isEmpty()) {
-                result = renderMagmaMethodWithType(annotationsString, name, outputType, content, "");
+                result = new MagmaMethodBuilder().setPrefix(annotationsString).setName(name).setType(outputType).setContent(content).setExceptionString("").createMagmaMethodNode().render();
             } else {
                 var exceptionName = throwsString.substring("throws ".length()).strip();
-                result = renderMagmaMethodWithException(annotationsString, name, outputType, content, exceptionName);
+                result = new MagmaMethodBuilder().setPrefix(annotationsString).setName(name).setType(outputType).setContent(content).setExceptionString(" ? " + exceptionName).createMagmaMethodNode().render();
             }
 
             return inputFlags.contains("static")
@@ -265,10 +249,6 @@ public class Compiler {
 
             return Optional.of(annotationName + "(" + name + " = [" + right.substring(contentStart + 1, contentEnd) + "])");
         }
-    }
-
-    static String renderMagmaMethodWithException(String annotationsString, String name, String type, String content, String exceptionName) {
-        return renderMagmaMethodWithType(annotationsString, name, type, content, " ? " + exceptionName);
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -313,14 +293,6 @@ public class Compiler {
         };
     }
 
-    static String renderObject(String name, String content) {
-        return renderObject("", name, content);
-    }
-
-    static String renderObject(String flagString, String name, String content) {
-        return flagString + "object " + name + " = {" + content + "\n}";
-    }
-
     private static Optional<State> compileImport(String input) {
         if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
         var isStatic = input.startsWith(IMPORT_STATIC);
@@ -331,47 +303,8 @@ public class Compiler {
         var parent = segmentsString.substring(0, separator);
         var child = segmentsString.substring(separator + 1);
 
-        return Optional.of(new State(Optional.of(child.equals("*") ? renderMagmaImportForAllChildren(parent) : renderMagmaImport(parent, child)), Optional.empty(), Optional.empty()));
-    }
-
-    static String renderMagmaImport(String parent, String child) {
-        return renderMagmaImportWithChildString(parent, "{ " + child + " } from ");
-    }
-
-    static String renderMagmaImportForAllChildren(String parent) {
-        return renderMagmaImportWithChildString(parent, "");
-    }
-
-    private static String renderMagmaImportWithChildString(String parent, String childString) {
-        return "extern " + IMPORT_KEYWORD + childString + parent + ";";
-    }
-
-    static String renderMagmaClass(String name, String content) {
-        return renderMagmaClass("", name, content);
-    }
-
-    static String renderMagmaClass(String prefix, String name, String content) {
-        return prefix + CLASS_KEYWORD + "def " + name + "() " + "=> {" + content + "\n}";
-    }
-
-    static String renderMagmaMethodWithType(String prefix, String name, String type, String content) {
-        return renderMagmaMethodWithType(prefix, name, type, content, "");
-    }
-
-    static String renderMagmaMethodWithType(String prefix, String name, String type, String content, String exceptionString) {
-        return prefix + "\n\tdef " + name + "() : " + type + exceptionString + " => " + content;
-    }
-
-    static String renderJavaClass(String prefix, String name, String content) {
-        return prefix + CLASS_KEYWORD + name + " {" + content + "}";
-    }
-
-    static String renderAnnotation(String name) {
-        return renderAnnotation(name, "");
-    }
-
-    static String renderAnnotation(String name, String valueString) {
-        return "\n\t@" + name + valueString;
+        ImportNode importNode = new ImportNode(parent, "");
+        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty()));
     }
 
     private record MembersResult(ArrayList<String> outputMore, String value) {
