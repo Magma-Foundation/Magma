@@ -20,8 +20,9 @@ public class ApplicationTest {
 
         var input = Files.readString(SOURCE);
         String output;
-        if (input.equals("import org.junit.jupiter.api.AfterEach;")) {
-            output = "import { AfterEach } from org.junit.jupiter.api;";
+        if (input.startsWith("import org.junit.jupiter.api.")) {
+            var child = input.substring("import org.junit.jupiter.api.".length(), input.length() - 1);
+            output = "import { " + child + " } from org.junit.jupiter.api;";
         } else {
             output = "";
         }
@@ -46,6 +47,11 @@ public class ApplicationTest {
     @Test
     void simpleImport() throws IOException {
         assertCompile("import org.junit.jupiter.api.AfterEach;", "import { AfterEach } from org.junit.jupiter.api;");
+    }
+
+    @Test
+    void importChild() throws IOException {
+        assertCompile("import org.junit.jupiter.api.Test;", "import { Test } from org.junit.jupiter.api;");
     }
 
     @AfterEach
