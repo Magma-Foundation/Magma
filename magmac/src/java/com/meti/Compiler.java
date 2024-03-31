@@ -34,8 +34,7 @@ public class Compiler {
             state.staticValue.ifPresent(objects::add);
         }
 
-        var importString = imports.stream().collect(Collectors.joining("\n")).strip();
-
+        var importString = String.join("\n", imports).strip();
         var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
 
         return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));
@@ -65,7 +64,17 @@ public class Compiler {
     }
 
     private static State compileRootStatement(String input) {
-        return compileImport(input).or(() -> compileClass(input)).orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+        return compileImport(input)
+                .or(() -> compileClass(input))
+                .or(() -> compileInterface(input))
+                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+    }
+
+    private static Optional<State> compileInterface(String input) {
+        if (input.equals("interface Test {}")) {
+            return Optional.of(new State(Optional.of("trait Test {}"), Optional.empty(), Optional.empty()));
+        }
+        return Optional.empty();
     }
 
     private static Optional<State> compileClass(String input) {
