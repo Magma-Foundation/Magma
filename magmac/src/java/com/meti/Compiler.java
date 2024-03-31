@@ -6,6 +6,9 @@ public class Compiler {
     public static final String IMPORT_KEYWORD = "import ";
     public static final String STATIC_KEYWORD = "static ";
     public static final String IMPORT_STATIC = IMPORT_KEYWORD + STATIC_KEYWORD;
+    public static final String PUBLIC_KEYWORD = "public ";
+    public static final String EXPORT_KEYWORD = "export ";
+    public static final String CLASS_KEYWORD = "class ";
 
     static String compile(String input) {
         var args = input.split(";");
@@ -29,9 +32,13 @@ public class Compiler {
             return child.equals("*")
                     ? renderMagmaImportForAllChildren(parent)
                     : renderMagmaImport(parent, child);
-        } else if (input.startsWith("class ")) {
-            var name = input.substring("class ".length(), input.indexOf(" {}"));
-            return renderMagmaClass(name);
+        } else if (input.contains(CLASS_KEYWORD)) {
+            var isPublic = input.startsWith(PUBLIC_KEYWORD);
+            var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
+            var name = input.substring(nameStart, input.indexOf(" {}"));
+            return isPublic
+                    ? renderExportedMagmaClass(name)
+                    : renderMagmaClass(name);
         } else {
             return "";
         }
@@ -50,10 +57,27 @@ public class Compiler {
     }
 
     static String renderMagmaClass(String name) {
-        return "class def " + name + "() => {}";
+        return renderMagmaClass("", name);
+    }
+
+    static String renderExportedMagmaClass(String name) {
+        return renderMagmaClass(EXPORT_KEYWORD, name);
+    }
+
+
+    private static String renderMagmaClass(String prefix, String name) {
+        return prefix + CLASS_KEYWORD + "def " + name + "() => {}";
     }
 
     static String renderJavaClass(String name) {
-        return "class " + name + " {}";
+        return renderJavaClass("", name);
+    }
+
+    static String renderPublicJavaClass(String name) {
+        return renderJavaClass(PUBLIC_KEYWORD, name);
+    }
+
+    private static String renderJavaClass(String prefix, String name) {
+        return prefix + CLASS_KEYWORD + name + " {}";
     }
 }
