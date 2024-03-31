@@ -5,3 +5,27 @@ extern import { Files } from java.nio.file;
 extern import { Path } from java.nio.file;
 extern import { Paths } from java.nio.file;
 extern import org.junit.jupiter.api.Assertions;
+export class def ApplicationTest() => {
+    public static final Path ROOT = Paths.get(".");
+    public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
+    public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Files.deleteIfExists(TARGET);
+        Files.deleteIfExists(SOURCE);
+    }
+
+    @Test
+    void generateSomething() throws IOException {
+        Files.createFile(SOURCE);
+        Main.run(SOURCE);
+        assertTrue(Files.exists(TARGET));
+    }
+
+    @Test
+    void generatesNothing() throws IOException {
+        Main.run(SOURCE);
+        assertFalse(Files.exists(TARGET));
+    }
+}

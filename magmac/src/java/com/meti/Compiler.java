@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Compiler {
@@ -12,12 +13,34 @@ public class Compiler {
     public static final String CLASS_KEYWORD = "class ";
 
     static String compile(String input) {
-        var args = input.split(";");
+        var args = split(input);
         var list = new ArrayList<String>();
         for (String arg : args) {
             list.add(compileRootStatement(arg.strip()));
         }
         return String.join("", list);
+    }
+
+    private static List<String> split(String input) {
+        var state = new State();
+
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && state.depth == 0) {
+                state.advance();
+            } else if (c == '}' && state.depth == 1) {
+                state.builder.append('}');
+                state.descend();
+                state.advance();
+            } else {
+                if (c == '{') state.ascend();
+                if (c == '}') state.descend();
+                state.builder.append(c);
+            }
+        }
+
+        state.clean();
+        return state.unwrap();
     }
 
     private static String compileRootStatement(String input) {
@@ -33,6 +56,7 @@ public class Compiler {
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
+        if (bodyEnd == -1) return Optional.empty();
 
         var name = input.substring(nameStart, bodyStart).strip();
         var content = input.substring(bodyStart + 1, bodyEnd);
@@ -90,5 +114,42 @@ public class Compiler {
 
     static String renderJavaClass(String prefix, String name, String content) {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
+    }
+
+    static final class State {
+        private final List<String> list;
+        private StringBuilder builder;
+        private int depth;
+
+        State(List<String> list, StringBuilder builder, int depth) {
+            this.list = list;
+            this.builder = builder;
+            this.depth = depth;
+        }
+
+        public State() {
+            this(new ArrayList<>(), new StringBuilder(), 0);
+        }
+
+        private void clean() {
+            this.list.removeIf(String::isBlank);
+        }
+
+        private void descend() {
+            this.depth = this.depth - 1;
+        }
+
+        private void advance() {
+            this.list.add(this.builder.toString());
+            this.builder = new StringBuilder();
+        }
+
+        private void ascend() {
+            this.depth = this.depth + 1;
+        }
+
+        public List<String> unwrap() {
+            return list;
+        }
     }
 }
