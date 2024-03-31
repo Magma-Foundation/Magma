@@ -17,7 +17,7 @@ public class ClassFeatureTest {
 
     @Test
     void testPublicKeyword() {
-        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderExportedMagmaClass(FeatureTest.TEST_SYMBOL, ""));
+        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));
     }
 
     @Test

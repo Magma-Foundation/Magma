@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.Compiler.renderMagmaImport;
 import static com.meti.Compiler.renderMagmaImportForAllChildren;
 
@@ -23,7 +26,10 @@ public class ImportFeatureTest {
     @ValueSource(ints = {2, 3})
     void testMultipleImports(int count) {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
-        var output = renderMagmaImport(TEST_PARENT, TEST_NAME).repeat(count);
+        var output = IntStream.range(0, count)
+                .mapToObj(_i -> renderMagmaImport(TEST_PARENT, TEST_NAME))
+                .collect(Collectors.joining("\n"));
+
         CompiledTest.assertCompile(input, output);
     }
 

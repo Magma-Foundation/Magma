@@ -22,18 +22,27 @@ public class Compiler {
 
     static String compile(String input) {
         var args = split(input);
-        var values = new ArrayList<String>();
-        var more = new ArrayList<String>();
+
+        var imports = new ArrayList<String>();
+        var objects = new ArrayList<String>();
+        var classes = new ArrayList<String>();
 
         for (String arg : args) {
             var state = compileRootStatement(arg.strip());
-            state.value.ifPresent(values::add);
-            state.more.ifPresent(more::add);
+            state.importValue.ifPresent(imports::add);
+            state.instanceValue.ifPresent(classes::add);
+            state.staticValue.ifPresent(objects::add);
         }
 
-        return Stream.of(values, more)
-                .filter(list -> !list.isEmpty())
-                .map(list -> String.join("", list))
+        var importString = imports.stream()
+                .collect(Collectors.joining("\n"))
+                .strip();
+
+        var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
+
+        return Stream.concat(importStream, Stream.of(objects, classes)
+                        .filter(list -> !list.isEmpty())
+                        .map(list -> String.join("", list).strip()))
                 .collect(Collectors.joining("\n\n"));
     }
 
@@ -63,7 +72,7 @@ public class Compiler {
     private static State compileRootStatement(String input) {
         return compileImport(input)
                 .or(() -> compileClass(input))
-                .orElse(new State(Optional.empty(), Optional.empty()));
+                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileClass(String input) {
@@ -85,10 +94,10 @@ public class Compiler {
         for (var classMember : splitContent) {
             var compiledClassMember = compileDefinition(classMember)
                     .or(() -> compileMethod(classMember))
-                    .orElse(new State(Optional.of(classMember), Optional.empty()));
+                    .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
 
-            compiledClassMember.value.ifPresent(outputValues::add);
-            compiledClassMember.more.ifPresent(outputMore::add);
+            compiledClassMember.instanceValue.ifPresent(outputValues::add);
+            compiledClassMember.staticValue.ifPresent(outputMore::add);
         }
 
         var value = String.join("", outputValues);
@@ -104,7 +113,7 @@ public class Compiler {
             renderedMore = Optional.of(renderObject(flagString, name, content));
         }
 
-        return Optional.of(new State(Optional.of(renderedClass), renderedMore));
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
     }
 
     private static Optional<? extends State> compileMethod(String classMember) {
@@ -159,7 +168,7 @@ public class Compiler {
             result = renderMagmaMethodWithException(annotationsString, name, type, content, exceptionName);
         }
 
-        return Optional.of(new State(Optional.of(result), Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
     }
 
     static String renderMagmaMethodWithException(String annotationsString, String name, String type, String content, String exceptionName) {
@@ -195,8 +204,8 @@ public class Compiler {
         var rendered = renderMagmaDefinition(flagString, mutabilityString, name, outputType, value);
 
         return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.of(rendered))
-                : new State(Optional.of(rendered), Optional.empty()));
+                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
+                : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -213,7 +222,7 @@ public class Compiler {
     }
 
     static String renderObject(String flagString, String name, String content) {
-        return flagString + "object " + name + " {" + content + "\n}";
+        return flagString + "object " + name + " = {" + content + "\n}";
     }
 
     private static Optional<State> compileImport(String input) {
@@ -228,7 +237,7 @@ public class Compiler {
 
         return Optional.of(new State(Optional.of(child.equals("*")
                 ? renderMagmaImportForAllChildren(parent)
-                : renderMagmaImport(parent, child)), Optional.empty()));
+                : renderMagmaImport(parent, child)), Optional.empty(), Optional.empty()));
     }
 
     static String renderMagmaImport(String parent, String child) {
@@ -240,23 +249,15 @@ public class Compiler {
     }
 
     private static String renderMagmaImportWithChildString(String parent, String childString) {
-        return "extern " + IMPORT_KEYWORD + childString + parent + ";\n";
+        return "extern " + IMPORT_KEYWORD + childString + parent + ";";
     }
 
     static String renderMagmaClass(String name, String content) {
         return renderMagmaClass("", name, content);
     }
 
-    static String renderExportedMagmaClass(String name, String content) {
-        return renderMagmaClass("export ", name, content);
-    }
-
-    private static String renderMagmaClass(String prefix, String name, String content) {
-        return renderMagmaMethod(prefix + CLASS_KEYWORD, name, content);
-    }
-
-    static String renderMagmaMethod(String prefix, String name, String content) {
-        return renderMagmaMethod(prefix, name, "", content);
+    static String renderMagmaClass(String prefix, String name, String content) {
+        return prefix + CLASS_KEYWORD + "def " + name + "() " + "" + "=> {" + content + "\n}";
     }
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content) {
@@ -265,10 +266,6 @@ public class Compiler {
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content, String exceptionString) {
         return "\n\t" + prefix + "\tdef " + name + "() : " + type + exceptionString + " => " + content;
-    }
-
-    static String renderMagmaMethod(String prefix, String name, String typeString, String content) {
-        return prefix + "def " + name + "() " + typeString + "=> {" + content + "\n}";
     }
 
     static String renderJavaClass(String prefix, String name, String content) {
@@ -291,6 +288,9 @@ public class Compiler {
         return "@" + name + "\n";
     }
 
-    record State(Optional<String> value, Optional<String> more) {
+    record State(
+            Optional<String> importValue,
+            Optional<String> instanceValue,
+            Optional<String> staticValue) {
     }
 }
