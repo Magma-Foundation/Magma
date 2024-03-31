@@ -1,17 +1,2 @@
-export object JavaLang = {
-	def renderJavaClass() : String => {
-        return new JavaClassNodeBuilder().setPrefix("").setName(name).setContent(content).createJavaClassNode().renderJavaClass();
-    }
-	def renderRecord() : String => {
-        return renderRecord("", name);
-    }
-	def renderRecord() : String => {
-        return renderRecord(prefix, name, "{}");
-    }
-	def renderRecord() : String => {
-        return prefix + "record " + name + "()" + body;
-    }
-}
-
 export class def JavaLang() => {
 }

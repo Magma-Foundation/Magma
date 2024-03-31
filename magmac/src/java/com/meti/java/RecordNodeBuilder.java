@@ -25,7 +25,7 @@ public class RecordNodeBuilder implements RenderableBuilder {
         return new RecordNodeBuilder(prefix, name, body);
     }
 
-    public RenderableBuilder withBody(String body) {
+    public RecordNodeBuilder withBody(String body) {
         return new RecordNodeBuilder(prefix, name, body);
     }
 

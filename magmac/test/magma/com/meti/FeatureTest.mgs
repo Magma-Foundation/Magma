@@ -1,11 +1,11 @@
+extern import { JavaClassNodeBuilder } from com.meti.java;
 extern import { MagmaClassNodeBuilder } from com.meti.magma;
 extern import { assertCompile } from com.meti.CompiledTest;
-extern import { renderJavaClass } from com.meti.java.JavaLang;
 
 export object FeatureTest = {
 	pub const TEST_SYMBOL : String = "Test";
 	def assertWithinClass() : Void => {
-        assertCompile(renderJavaClass(TEST_SYMBOL, input), new MagmaClassNodeBuilder().withPrefix("").withName(TEST_SYMBOL).withContent(output).build().render());
+        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(TEST_SYMBOL).setContent(input).createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().withPrefix("").withName(TEST_SYMBOL).withContent(output).build().render());
     }
 }
 

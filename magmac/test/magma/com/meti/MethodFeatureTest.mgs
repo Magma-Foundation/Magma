@@ -1,3 +1,4 @@
+extern import { JavaClassNodeBuilder } from com.meti.java;
 extern import { MagmaClassNodeBuilder } from com.meti.magma;
 extern import { MagmaDefinitionHeader } from com.meti.magma;
 extern import { MagmaMethodBuilder } from com.meti.magma;
@@ -8,7 +9,6 @@ extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { assertCompile } from com.meti.CompiledTest;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 extern import { assertWithinClass } from com.meti.FeatureTest;
-extern import { renderJavaClass } from com.meti.java.JavaLang;
 
 export object MethodFeatureTest = {
 	def renderJavaMethod() : String => {
@@ -60,7 +60,7 @@ export class def MethodFeatureTest() => {
 	def testStatic() : Void => {
         String content = new MagmaMethodBuilder().withPrefix("").withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render();
         assertCompile(
-                renderJavaClass(className, renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")),
+                new JavaClassNodeBuilder().setPrefix("").setName(className).setContent(renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")).createJavaClassNode().renderJavaClass(),
                 new ObjectNode("", className, content).render()
                 + "\n\n"
                 + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());
