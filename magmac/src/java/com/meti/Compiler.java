@@ -84,9 +84,10 @@ public class Compiler {
             if (contentEnd == -1) return Optional.empty();
 
             var content = input.substring(contentStart, contentEnd + 1);
+            var membersResult = compileMembers(content.substring(1, content.length() - 1));
 
             var name = input.substring(index + INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, content);
+            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, "{" +  membersResult.value + "\n}");
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
@@ -120,6 +121,23 @@ public class Compiler {
 
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
+        var membersResult = compileMembers(inputContent);
+        var flagString = isPublic ? EXPORT_KEYWORD : "";
+
+        var renderedClass = renderMagmaClass(flagString, name, membersResult.value());
+
+        Optional<String> renderedMore;
+        if (membersResult.outputMore().isEmpty()) {
+            renderedMore = Optional.empty();
+        } else {
+            String content = String.join("", membersResult.outputMore());
+            renderedMore = Optional.of(renderObject(flagString, name, content));
+        }
+
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
+    }
+
+    private static MembersResult compileMembers(String inputContent) {
         var splitContent = split(inputContent);
 
         var outputValues = new ArrayList<String>();
@@ -135,19 +153,10 @@ public class Compiler {
         }
 
         var value = String.join("", outputValues);
-        var flagString = isPublic ? EXPORT_KEYWORD : "";
+        return new MembersResult(outputMore, value);
+    }
 
-        var renderedClass = renderMagmaClass(flagString, name, value);
-
-        Optional<String> renderedMore;
-        if (outputMore.isEmpty()) {
-            renderedMore = Optional.empty();
-        } else {
-            String content = String.join("", outputMore);
-            renderedMore = Optional.of(renderObject(flagString, name, content));
-        }
-
-        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
+    private record MembersResult(ArrayList<String> outputMore, String value) {
     }
 
     private static Optional<State> compileMethod(String classMember) {

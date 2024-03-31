@@ -2,5 +2,5 @@ extern import { IOException } from java.io;
 extern import { Path } from java.nio.file;
 extern import { Set } from java.util;
 export trait SourceSet {
-    Set<Path> collect() throws IOException;
+	collect : () => Void;
 }
