@@ -17,7 +17,6 @@ public class InterfaceFeatureTest {
 
     @Test
     void testPublic() {
-        assertEquals(renderMagmaTrait("export ", TEST_SYMBOL),
-                compile(renderJavaInterface("public ", TEST_SYMBOL)));
+        assertEquals(renderMagmaTrait(EXPORT_KEYWORD, TEST_SYMBOL, "{}"), compile(renderJavaInterface(PUBLIC_KEYWORD, TEST_SYMBOL)));
     }
 }

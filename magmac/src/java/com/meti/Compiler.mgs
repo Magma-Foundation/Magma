@@ -17,6 +17,8 @@ export object Compiler = {
 	pub const FINAL_KEYWORD : String = "final";
 	pub const LOWER_VOID : String = "void";
 	pub const CAMEL_VOID : String = "Void";
+	pub const EXPORT_KEYWORD : String = "export ";
+	pub const INTERFACE_KEYWORD : String = "interface ";
 	def compile() : String => {
         var args = split(input);
 
@@ -31,8 +33,7 @@ export object Compiler = {
             state.staticValue.ifPresent(objects::add);
         }
 
-        var importString = imports.stream().collect(Collectors.joining("\n")).strip();
-
+        var importString = String.join("\n", imports).strip();
         var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
 
         return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));

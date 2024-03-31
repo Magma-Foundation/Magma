@@ -77,8 +77,16 @@ public class Compiler {
         if (index != -1) {
             var isPublic = input.startsWith(PUBLIC_KEYWORD);
 
-            var name = input.substring(index + INTERFACE_KEYWORD.length(), input.indexOf('{')).strip();
-            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name);
+            var contentStart = input.indexOf('{');
+            if (contentStart == -1) return Optional.empty();
+
+            var contentEnd = input.lastIndexOf('}');
+            if (contentEnd == -1) return Optional.empty();
+
+            var content = input.substring(contentStart, contentEnd + 1);
+
+            var name = input.substring(index + INTERFACE_KEYWORD.length(), contentStart).strip();
+            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, content);
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
@@ -86,11 +94,11 @@ public class Compiler {
     }
 
     static String renderMagmaTrait(String name) {
-        return renderMagmaTrait("", name);
+        return renderMagmaTrait("", name, "{}");
     }
 
-    static String renderMagmaTrait(String prefixString, String name) {
-        return prefixString + "trait " + name + " {}";
+    static String renderMagmaTrait(String prefixString, String name, String content) {
+        return prefixString + "trait " + name + " " + content;
     }
 
     static String renderJavaInterface(String name) {
