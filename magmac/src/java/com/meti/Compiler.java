@@ -77,15 +77,28 @@ public class Compiler {
 
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
+        var splitContent = split(inputContent);
 
-        var outputContent = compileDefinition(inputContent)
-                .orElse(new State(Optional.of(inputContent), Optional.empty()));
+        var outputValues = new ArrayList<String>();
+        var outputMore = new ArrayList<String >();
 
-        var renderedClass = outputContent.value.map(value -> isPublic
+        for (var classMember : splitContent) {
+            var compiledClassMember = compileDefinition(classMember)
+                    .orElse(new State(Optional.of(classMember), Optional.empty()));
+
+            compiledClassMember.value.ifPresent(outputValues::add);
+            compiledClassMember.more.ifPresent(outputMore::add);
+        }
+
+        var value = String.join("", outputValues);
+        var renderedClass = outputValues.isEmpty() ? Optional.<String>empty() : Optional.of(isPublic
                 ? renderExportedMagmaClass(name, value)
                 : renderMagmaClass(name, value));
 
-        var renderedMore = outputContent.more.map(more -> renderObject(name, more));
+        var renderedMore = outputMore.isEmpty()
+                ? Optional.<String>empty()
+                : Optional.of(renderObject(name, String.join("", outputMore)));
+
         return Optional.of(new State(renderedClass, renderedMore));
     }
 
@@ -114,7 +127,7 @@ public class Compiler {
         else outputType = inputType;
 
         var name = beforeSlice.substring(nameSeparator + 1);
-        var value = inputContent.substring(valueSeparator + 1, inputContent.length() - 1).strip();
+        var value = inputContent.substring(valueSeparator + 1).strip();
 
         var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
@@ -156,16 +169,8 @@ public class Compiler {
         return "extern " + IMPORT_KEYWORD + childString + parent + ";\n";
     }
 
-    static String renderMagmaClass(String name) {
-        return renderMagmaClass(name, "");
-    }
-
     static String renderMagmaClass(String name, String content) {
         return renderMagmaClass("", name, content);
-    }
-
-    static String renderExportedMagmaClass(String name) {
-        return renderExportedMagmaClass(name, "");
     }
 
     static String renderExportedMagmaClass(String name, String content) {
@@ -185,11 +190,7 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String name, String type, String value) {
-        return renderMagmaDefinition(name, type, value, "");
-    }
-
-    static String renderMagmaDefinition(String name, String type, String value, String flagString) {
-        return renderMagmaDefinition(flagString, LET_KEYWORD, name, type, value);
+        return renderMagmaDefinition("", LET_KEYWORD, name, type, value);
     }
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {

@@ -24,6 +24,13 @@ public class DefinitionFeatureTest {
         assertWithinClass(renderDefinition(name, INT), renderMagmaDefinition(name, I32));
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void testMultipleDefinitions(int count) {
+        assertWithinClass(renderDefinition(TEST_SYMBOL, INT).repeat(count),
+                renderMagmaDefinition(TEST_SYMBOL, I32).repeat(count));
+    }
+
     @Test
     void testType() {
         assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
