@@ -22,20 +22,20 @@ public class Compiler {
     }
 
     private static List<String> split(String input) {
-        var state = new State();
+        var state = new SplittingState();
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == ';' && state.depth == 0) {
+            if (c == ';' && state.isLevel()) {
                 state.advance();
-            } else if (c == '}' && state.depth == 1) {
-                state.builder.append('}');
+            } else if (c == '}' && state.isShallow()) {
+                state.append('}');
                 state.descend();
                 state.advance();
             } else {
                 if (c == '{') state.ascend();
                 if (c == '}') state.descend();
-                state.builder.append(c);
+                state.append(c);
             }
         }
 
@@ -114,42 +114,5 @@ public class Compiler {
 
     static String renderJavaClass(String prefix, String name, String content) {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
-    }
-
-    static final class State {
-        private final List<String> list;
-        private StringBuilder builder;
-        private int depth;
-
-        State(List<String> list, StringBuilder builder, int depth) {
-            this.list = list;
-            this.builder = builder;
-            this.depth = depth;
-        }
-
-        public State() {
-            this(new ArrayList<>(), new StringBuilder(), 0);
-        }
-
-        private void clean() {
-            this.list.removeIf(String::isBlank);
-        }
-
-        private void descend() {
-            this.depth = this.depth - 1;
-        }
-
-        private void advance() {
-            this.list.add(this.builder.toString());
-            this.builder = new StringBuilder();
-        }
-
-        private void ascend() {
-            this.depth = this.depth + 1;
-        }
-
-        public List<String> unwrap() {
-            return list;
-        }
     }
 }
