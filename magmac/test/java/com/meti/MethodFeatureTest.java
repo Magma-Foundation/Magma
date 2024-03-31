@@ -1,5 +1,9 @@
 package com.meti;
 
+import com.meti.magma.MagmaClassNodeBuilder;
+import com.meti.magma.MagmaDefinitionHeader;
+import com.meti.magma.MagmaMethodBuilder;
+import com.meti.magma.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -7,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static com.meti.CompiledTest.assertCompile;
 import static com.meti.FeatureTest.TEST_SYMBOL;
 import static com.meti.FeatureTest.assertWithinClass;
-import static com.meti.JavaLang.renderJavaClass;
+import static com.meti.java.JavaLang.renderJavaClass;
 
 public class MethodFeatureTest {
     private static String renderJavaMethod(String prefix, String name, String content) {
@@ -28,21 +32,21 @@ public class MethodFeatureTest {
     @ValueSource(strings = {"first", "second"})
     void testSimpleMethod(String name) {
         assertWithinClass(renderJavaMethod("", name, "{}"),
-                new MagmaMethodBuilder().setPrefix("").setName(name).setType("Void").setContent("{}").setExceptionString("").createMagmaMethodNode().render());
+                new MagmaMethodBuilder().withPrefix("").withName(name).withType("Void").withContent("{}").withExceptionString("").build().render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testAnnotation(String name) {
         assertWithinClass(renderJavaMethod(new Annotation(name, "").renderAnnotation(), TEST_SYMBOL, "{}"),
-                new MagmaMethodBuilder().setPrefix(new Annotation(name, "").renderAnnotation()).setName(TEST_SYMBOL).setType("Void").setContent("{}").setExceptionString("").createMagmaMethodNode().render());
+                new MagmaMethodBuilder().withPrefix(new Annotation(name, "").renderAnnotation()).withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testException(String name) {
         assertWithinClass(renderJavaMethod("", "", TEST_SYMBOL, " throws " + name + " ", "{}"),
-                new MagmaMethodBuilder().setPrefix("").setName(TEST_SYMBOL).setType("Void").setContent("{}").setExceptionString(" ? " + name).createMagmaMethodNode().render());
+                new MagmaMethodBuilder().withPrefix("").withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString(" ? " + name).build().render());
     }
 
     @ParameterizedTest
@@ -50,23 +54,23 @@ public class MethodFeatureTest {
     void testMultipleAnnotations(int count) {
         var rendered = new Annotation("First", "").renderAnnotation().repeat(count);
         assertWithinClass(renderJavaMethod(rendered, TEST_SYMBOL, "{}"),
-                new MagmaMethodBuilder().setPrefix(rendered).setName(TEST_SYMBOL).setType("Void").setContent("{}").setExceptionString("").createMagmaMethodNode().render());
+                new MagmaMethodBuilder().withPrefix(rendered).withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render());
     }
 
     @Test
     void testAnnotationWithValues() {
         assertWithinClass(renderJavaMethod(new Annotation("First", "(ints = {2, 3})").renderAnnotation(), TEST_SYMBOL, "{}"),
-                new MagmaMethodBuilder().setPrefix(new Annotation("First", "(ints = [2, 3])").renderAnnotation()).setName(TEST_SYMBOL).setType("Void").setContent("{}").setExceptionString("").createMagmaMethodNode().render());
+                new MagmaMethodBuilder().withPrefix(new Annotation("First", "(ints = [2, 3])").renderAnnotation()).withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"Foo", "Bar"})
     void testStatic(String className) {
-        String content = new MagmaMethodBuilder().setPrefix("").setName(TEST_SYMBOL).setType("Void").setContent("{}").setExceptionString("").createMagmaMethodNode().render();
+        String content = new MagmaMethodBuilder().withPrefix("").withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render();
         assertCompile(
                 renderJavaClass(className, renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")),
-                new ObjectNode("", className, content).renderObject()
+                new ObjectNode("", className, content).render()
                 + "\n\n"
-                + new MagmaClassNodeBuilder().setPrefix("").setName(className).setContent("").createMagmaClassNode().render());
+                + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());
     }
 }

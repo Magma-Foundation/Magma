@@ -1,20 +1,22 @@
-package com.meti;
+package com.meti.magma;
+
+import com.meti.Lang;
 
 import java.util.Objects;
 
-public final class JavaClassNode {
+public final class MagmaClassNode {
     private final String prefix;
     private final String name;
     private final String content;
 
-    public JavaClassNode(String prefix, String name, String content) {
+    public MagmaClassNode(String prefix, String name, String content) {
         this.prefix = prefix;
         this.name = name;
         this.content = content;
     }
 
-    String renderJavaClass() {
-        return prefix() + Lang.CLASS_KEYWORD + name() + " {" + content() + "}";
+    public String render() {
+        return prefix() + Lang.CLASS_KEYWORD + "def " + name() + "() " + "=> {" + content() + "\n}";
     }
 
     public String prefix() {
@@ -33,7 +35,7 @@ public final class JavaClassNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (JavaClassNode) obj;
+        var that = (MagmaClassNode) obj;
         return Objects.equals(this.prefix, that.prefix) &&
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.content, that.content);
@@ -46,7 +48,7 @@ public final class JavaClassNode {
 
     @Override
     public String toString() {
-        return "JavaClassNode[" +
+        return "MagmaClassNode[" +
                "prefix=" + prefix + ", " +
                "name=" + name + ", " +
                "content=" + content + ']';

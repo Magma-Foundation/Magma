@@ -1,11 +1,10 @@
-package com.meti;
+package com.meti.io;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public record DirectorySourceSet(Path root) implements SourceSet {
     @Override

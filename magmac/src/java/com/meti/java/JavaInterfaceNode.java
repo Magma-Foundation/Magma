@@ -1,7 +1,9 @@
-package com.meti;
+package com.meti.java;
+
+import com.meti.Lang;
 
 public record JavaInterfaceNode(String prefixString, String name) {
-    String renderJavaInterface() {
+    public String renderJavaInterface() {
         return prefixString() + Lang.INTERFACE_KEYWORD + name() + " {}";
     }
 }

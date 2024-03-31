@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.magma;
 
 import java.util.Objects;
 
@@ -17,7 +17,7 @@ public final class MagmaMethodNode {
         this.exceptionString = exceptionString;
     }
 
-    String render() {
+    public String render() {
         return prefix() + "\n\tdef " + name() + "() : " + type() + exceptionString() + " => " + content();
     }
 

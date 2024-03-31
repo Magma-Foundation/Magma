@@ -1,26 +1,26 @@
-package com.meti;
+package com.meti.magma;
 
 public class MagmaClassNodeBuilder {
     private String prefix;
     private String name;
     private String content;
 
-    public MagmaClassNodeBuilder setPrefix(String prefix) {
+    public MagmaClassNodeBuilder withPrefix(String prefix) {
         this.prefix = prefix;
         return this;
     }
 
-    public MagmaClassNodeBuilder setName(String name) {
+    public MagmaClassNodeBuilder withName(String name) {
         this.name = name;
         return this;
     }
 
-    public MagmaClassNodeBuilder setContent(String content) {
+    public MagmaClassNodeBuilder withContent(String content) {
         this.content = content;
         return this;
     }
 
-    public MagmaClassNode createMagmaClassNode() {
+    public MagmaClassNode build() {
         return new MagmaClassNode(prefix, name, content);
     }
 }

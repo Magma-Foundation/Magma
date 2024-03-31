@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.magma;
 
 public class MagmaMethodBuilder {
     private String prefix;
@@ -7,32 +7,32 @@ public class MagmaMethodBuilder {
     private String content;
     private String exceptionString;
 
-    public MagmaMethodBuilder setPrefix(String prefix) {
+    public MagmaMethodBuilder withPrefix(String prefix) {
         this.prefix = prefix;
         return this;
     }
 
-    public MagmaMethodBuilder setName(String name) {
+    public MagmaMethodBuilder withName(String name) {
         this.name = name;
         return this;
     }
 
-    public MagmaMethodBuilder setType(String type) {
+    public MagmaMethodBuilder withType(String type) {
         this.type = type;
         return this;
     }
 
-    public MagmaMethodBuilder setContent(String content) {
+    public MagmaMethodBuilder withContent(String content) {
         this.content = content;
         return this;
     }
 
-    public MagmaMethodBuilder setExceptionString(String exceptionString) {
+    public MagmaMethodBuilder withExceptionString(String exceptionString) {
         this.exceptionString = exceptionString;
         return this;
     }
 
-    public MagmaMethodNode createMagmaMethodNode() {
+    public MagmaMethodNode build() {
         return new MagmaMethodNode(prefix, name, type, content, exceptionString);
     }
 }

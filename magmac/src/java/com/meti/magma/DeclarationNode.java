@@ -1,32 +1,26 @@
-package com.meti;
+package com.meti.magma;
 
 import java.util.Objects;
 
-public final class MagmaDefinition {
+public final class DeclarationNode {
     private final String flagString;
-    private final String mutabilityString;
     private final String name;
     private final String type;
     private final String value;
 
-    public MagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
+    public DeclarationNode(String flagString, String name, String type, String value) {
         this.flagString = flagString;
-        this.mutabilityString = mutabilityString;
         this.name = name;
         this.type = type;
         this.value = value;
     }
 
-    String render() {
-        return new MagmaDefinitionHeader(flagString(), mutabilityString(), name(), type()).render() + " = " + value() + ";";
+    public String render() {
+        return flagString() + type() + " " + name() + " = " + value() + ";";
     }
 
     public String flagString() {
         return flagString;
-    }
-
-    public String mutabilityString() {
-        return mutabilityString;
     }
 
     public String name() {
@@ -45,9 +39,8 @@ public final class MagmaDefinition {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (MagmaDefinition) obj;
+        var that = (DeclarationNode) obj;
         return Objects.equals(this.flagString, that.flagString) &&
-               Objects.equals(this.mutabilityString, that.mutabilityString) &&
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.type, that.type) &&
                Objects.equals(this.value, that.value);
@@ -55,14 +48,13 @@ public final class MagmaDefinition {
 
     @Override
     public int hashCode() {
-        return Objects.hash(flagString, mutabilityString, name, type, value);
+        return Objects.hash(flagString, name, type, value);
     }
 
     @Override
     public String toString() {
-        return "MagmaDefinition[" +
+        return "DeclarationNode[" +
                "flagString=" + flagString + ", " +
-               "mutabilityString=" + mutabilityString + ", " +
                "name=" + name + ", " +
                "type=" + type + ", " +
                "value=" + value + ']';

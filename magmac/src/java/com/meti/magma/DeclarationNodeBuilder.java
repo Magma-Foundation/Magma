@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.magma;
 
 public record DeclarationNodeBuilder(String flagString, String name, String type, String value) {
     public DeclarationNodeBuilder() {
@@ -16,7 +16,7 @@ public record DeclarationNodeBuilder(String flagString, String name, String type
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
 
-    public DeclarationNodeBuilder setName(String name) {
+    public DeclarationNodeBuilder withName(String name) {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
 

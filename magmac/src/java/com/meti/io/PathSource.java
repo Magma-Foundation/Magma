@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.io;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record PathSource(Path root, Path child) {
-    String findName() {
+    public String findName() {
         var fileName = child.getFileName().toString();
         var separator = fileName.indexOf('.');
         return fileName.substring(0, separator);
     }
 
-    List<String> findNamespace() {
+    public List<String> findNamespace() {
         var list = new ArrayList<String>();
         var relative = root.relativize(child);
         for (int i = 0; i < relative.getNameCount() - 1; i++) {

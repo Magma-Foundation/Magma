@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.java.ImportNode;
+import com.meti.magma.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,7 +71,12 @@ public class Compiler {
         var bodyEnd = input.lastIndexOf('}');
         var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
 
-        var rendered = new MagmaClassNodeBuilder().setPrefix(isPublic ? Lang.EXPORT_KEYWORD : "").setName(name).setContent(membersString.value).createMagmaClassNode().render();
+        var rendered = new MagmaClassNodeBuilder()
+                .withPrefix(isPublic ? Lang.EXPORT_KEYWORD : "")
+                .withName(name)
+                .withContent(membersString.value)
+                .build()
+                .render();
 
         return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
@@ -88,7 +96,8 @@ public class Compiler {
             var membersResult = compileMembers(content.substring(1, content.length() - 1));
 
             var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}").render();
+            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}")
+                    .render();
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
@@ -109,14 +118,14 @@ public class Compiler {
         var membersResult = compileMembers(inputContent);
         var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
 
-        var renderedClass = new MagmaClassNodeBuilder().setPrefix(flagString).setName(name).setContent(membersResult.value()).createMagmaClassNode().render();
+        var renderedClass = new MagmaClassNodeBuilder().withPrefix(flagString).withName(name).withContent(membersResult.value()).build().render();
 
         Optional<String> renderedMore;
         if (membersResult.outputMore().isEmpty()) {
             renderedMore = Optional.empty();
         } else {
             String content = String.join("", membersResult.outputMore());
-            renderedMore = Optional.of(new ObjectNode(flagString, name, content).renderObject());
+            renderedMore = Optional.of(new ObjectNode(flagString, name, content).render());
         }
 
         return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
@@ -190,19 +199,26 @@ public class Compiler {
         if (contentStart != -1 && contentEnd != -1) {
             if (!(paramEnd < contentStart)) return Optional.empty();
             var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
-            String result;
 
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
+            var builder = new MagmaMethodBuilder()
+                    .withPrefix(annotationsString)
+                    .withName(name)
+                    .withType(outputType)
+                    .withContent(content);
+
+            MagmaMethodBuilder result;
             if (throwsString.isEmpty()) {
-                result = new MagmaMethodBuilder().setPrefix(annotationsString).setName(name).setType(outputType).setContent(content).setExceptionString("").createMagmaMethodNode().render();
+                result = builder.withExceptionString("");
             } else {
                 var exceptionName = throwsString.substring("throws ".length()).strip();
-                result = new MagmaMethodBuilder().setPrefix(annotationsString).setName(name).setType(outputType).setContent(content).setExceptionString(" ? " + exceptionName).createMagmaMethodNode().render();
+                result = builder.withExceptionString(" ? " + exceptionName);
             }
 
+            var rendered = result.build().render();
             return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
-                    : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
+                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered)))
+                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDefinitionHeader("", "", name, "() => Void").render() + ";";
             return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
@@ -261,9 +277,18 @@ public class Compiler {
 
         var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
-        var rendered = new MagmaDefinitionBuilder().setFlagString(flagString).setMutabilityString(mutabilityString).setName(name).setType(outputType).setValue(value).createMagmaDefinition().render();
+        var rendered = new MagmaDefinitionBuilder()
+                .withFlags(flagString)
+                .withMutability(mutabilityString)
+                .withName(name)
+                .withType(outputType)
+                .withValue(value)
+                .build()
+                .render();
 
-        return Optional.of(flags.contains("static") ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered)) : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+        return Optional.of(flags.contains("static")
+                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
+                : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
 
     private static String compileType(String inputType) {

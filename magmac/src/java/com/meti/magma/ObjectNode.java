@@ -1,7 +1,7 @@
-package com.meti;
+package com.meti.magma;
 
 public record ObjectNode(String flagString, String name, String content) {
-    String renderObject() {
+    public String render() {
         return flagString() + "object " + name() + " = {" + content() + "\n}";
     }
 }

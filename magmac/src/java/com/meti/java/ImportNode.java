@@ -1,8 +1,10 @@
-package com.meti;
+package com.meti.java;
+
+import com.meti.Lang;
 
 public record ImportNode(String parent, String childString) {
 
-    String render() {
+    public String render() {
         return "extern " + Lang.IMPORT_KEYWORD + childString() + parent() + ";";
     }
 }

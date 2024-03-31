@@ -1,7 +1,7 @@
-package com.meti;
+package com.meti.magma;
 
 public record MagmaDefinitionHeader(String flagString, String mutabilityString, String name, String type) {
-    String render() {
+    public String render() {
         return "\n\t" + flagString() + mutabilityString() + name() + " : " + type();
     }
 }

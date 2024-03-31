@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.java;
 
 public class JavaClassNodeBuilder {
     private String prefix;

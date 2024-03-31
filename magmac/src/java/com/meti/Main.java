@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.io.DirectorySourceSet;
+import com.meti.io.SourceSet;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +22,11 @@ public class Main {
     static void run(SourceSet sourceSet, Path targetDirectory) throws IOException {
         var set = sourceSet.collect();
 
-        for (var source1 : set) {
-            var namespace = source1.findNamespace();
-            var name = source1.findName();
+        for (var source : set) {
+            var namespace = source.findNamespace();
+            var name = source.findName();
 
-            var input = source1.read();
+            var input = source.read();
             var output = Compiler.compile(input);
 
             var parent = namespace.stream().reduce(targetDirectory, Path::resolve, (path, path2) -> path2);
