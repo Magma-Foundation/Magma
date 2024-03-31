@@ -1,6 +1,8 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,18 +12,18 @@ public class CompilerTest {
         assertEquals(expected, actual);
     }
 
+    private static String renderJavaImport(String child) {
+        return Compiler.IMPORT_PREFIX + child + ";";
+    }
+
     @Test
     void noPackage() {
         assertCompile("package test;", "");
     }
 
-    @Test
-    void simpleImport() {
-        assertCompile("import org.junit.jupiter.api.AfterEach;", "import { AfterEach } from org.junit.jupiter.api;");
-    }
-
-    @Test
-    void importChild() {
-        assertCompile("import org.junit.jupiter.api.Test;", "import { Test } from org.junit.jupiter.api;");
+    @ParameterizedTest
+    @ValueSource(strings = {"AfterEach", "Test"})
+    void simpleImport(String name) {
+        assertCompile(renderJavaImport(name), Compiler.renderMagmaImport(name));
     }
 }
