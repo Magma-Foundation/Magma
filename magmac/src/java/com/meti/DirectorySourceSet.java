@@ -13,6 +13,7 @@ public record DirectorySourceSet(Path root) implements SourceSet {
         try (var stream = Files.walk(root)) {
             return stream
                     .filter(Files::isRegularFile)
+                    .filter(file -> file.toString().endsWith(".java"))
                     .collect(Collectors.toSet());
         }
     }

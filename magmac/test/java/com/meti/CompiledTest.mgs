@@ -1,2 +1,10 @@
-class def def CompiledTest() =>() => {
+extern import { Assertions } from org.junit.jupiter.api;
+
+export object CompiledTest = {
+	let actual : var = Compiler.compile(input);
+        Assertions.assertEquals(expected, actual);
+    };
+}
+
+export class def CompiledTest() => {
 }
