@@ -68,8 +68,18 @@ public class Compiler {
     private static State compileRootStatement(String input) {
         return compileImport(input)
                 .or(() -> compileClass(input))
+                .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
                 .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+    }
+
+    private static Optional< State> compileRecord(String input) {
+        if (input.startsWith("record ")) {
+            var name = input.substring("record ".length(), input.indexOf('(')).strip();
+            return Optional.of(new State(Optional.empty(), Optional.of(renderMagmaClass(name, "")), Optional.empty()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<State> compileInterface(String input) {
@@ -87,7 +97,7 @@ public class Compiler {
             var membersResult = compileMembers(content.substring(1, content.length() - 1));
 
             var name = input.substring(index + INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, "{" +  membersResult.value + "\n}");
+            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}");
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
@@ -156,9 +166,6 @@ public class Compiler {
         return new MembersResult(outputMore, value);
     }
 
-    private record MembersResult(ArrayList<String> outputMore, String value) {
-    }
-
     private static Optional<State> compileMethod(String classMember) {
         var lines = Arrays.stream(classMember.split("\n")).toList();
 
@@ -221,7 +228,7 @@ public class Compiler {
             return inputFlags.contains("static")
                     ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
                     : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
-        } else if(contentStart == -1 && contentEnd == -1) {
+        } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = renderMagmaDefinitionHeader("", "", name, "() => Void") + ";";
             return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else {
@@ -372,6 +379,9 @@ public class Compiler {
 
     static String renderAnnotation(String name, String valueString) {
         return "\n\t@" + name + valueString;
+    }
+
+    private record MembersResult(ArrayList<String> outputMore, String value) {
     }
 
     record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue) {

@@ -16,4 +16,8 @@ public class JavaLang {
     static String renderDefinition(String flagString, String name, String type, String value) {
         return flagString + type + " " + name + " = " + value + ";";
     }
+
+    static String renderRecord(String name) {
+        return "record " + name + "(){}";
+    }
 }
