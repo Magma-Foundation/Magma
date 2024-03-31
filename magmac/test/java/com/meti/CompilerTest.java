@@ -13,7 +13,7 @@ public class CompilerTest {
     }
 
     private static String renderJavaImport(String child) {
-        return Compiler.IMPORT_PREFIX + child + ";";
+        return Compiler.IMPORT_WITH_PARENT + child + ";";
     }
 
     @Test
