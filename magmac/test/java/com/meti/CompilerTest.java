@@ -21,6 +21,12 @@ public class CompilerTest {
         assertCompile("package test;", "");
     }
 
+    @Test
+    void twoImports() {
+        assertCompile(renderJavaImport("First") + renderJavaImport("second"),
+                Compiler.renderMagmaImport("First") + Compiler.renderMagmaImport("second"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"AfterEach", "Test"})
     void simpleImport(String name) {
