@@ -48,4 +48,11 @@ public class DefinitionFeatureTest {
                 renderJavaClass(className, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
                 renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE)));
     }
+
+    @Test
+    void testPublic() {
+        assertWithinClass(
+                renderDefinition("public ", TEST_SYMBOL, INT, TEST_VALUE),
+                renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+    }
 }

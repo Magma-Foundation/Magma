@@ -86,7 +86,6 @@ public class Compiler {
                 : renderMagmaClass(name, value));
 
         var renderedMore = outputContent.more.map(more -> renderObject(name, more));
-
         return Optional.of(new State(renderedClass, renderedMore));
     }
 
@@ -118,12 +117,12 @@ public class Compiler {
         var value = inputContent.substring(valueSeparator + 1, inputContent.length() - 1).strip();
 
         var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
+        var flagString = flags.contains("public") ? "pub " : "";
+        var rendered = renderMagmaDefinition(flagString, mutabilityString, name, outputType, value);
 
-        var rendered = renderMagmaDefinition("", mutabilityString, name, outputType, value);
-        var rendered1 = flags.contains("static")
+        return Optional.of(flags.contains("static")
                 ? new State(Optional.empty(), Optional.of(rendered))
-                : new State(Optional.of(rendered), Optional.empty());
-        return Optional.of(rendered1);
+                : new State(Optional.of(rendered), Optional.empty()));
     }
 
     static String renderObject(String name, String content) {
