@@ -109,11 +109,15 @@ public class Compiler {
     }
 
     private static Optional<? extends State> compileMethod(String classMember) {
-        if (classMember.equals("void empty(){}")) {
-            return Optional.of(new State(Optional.of(renderMagmaMethodWithType("", "empty", "Void", "{}")), Optional.empty()));
-        } else {
-            return Optional.empty();
-        }
+        var paramStart = classMember.indexOf('(');
+        if(paramStart == -1) return Optional.empty();
+
+        var before = classMember.substring(0, paramStart).strip();
+        var separator = before.lastIndexOf(' ');
+        if(separator == -1) return Optional.empty();
+
+        var name = before.substring(separator + 1).strip();
+        return Optional.of(new State(Optional.of(renderMagmaMethodWithType("", name, "Void", "{}")), Optional.empty()));
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
