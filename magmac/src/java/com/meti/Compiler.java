@@ -85,7 +85,9 @@ public class Compiler {
                 ? renderExportedMagmaClass(name, value)
                 : renderMagmaClass(name, value));
 
-        return Optional.of(new State(renderedClass, outputContent.more));
+        var renderedMore = outputContent.more.map(more -> renderObject(name, more));
+
+        return Optional.of(new State(renderedClass, renderedMore));
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -119,7 +121,7 @@ public class Compiler {
 
         var rendered = renderMagmaDefinition("", mutabilityString, name, outputType, value);
         var rendered1 = flags.contains("static")
-                ? new State(Optional.empty(), Optional.of(renderObject("Test", rendered)))
+                ? new State(Optional.empty(), Optional.of(rendered))
                 : new State(Optional.of(rendered), Optional.empty());
         return Optional.of(rendered1);
     }

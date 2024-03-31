@@ -41,10 +41,11 @@ public class DefinitionFeatureTest {
                 renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
 
-    @Test
-    void testStatic() {
+    @ParameterizedTest
+    @ValueSource(strings = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
+    void testStatic(String className) {
         assertCompile(
-                renderJavaClass(TEST_SYMBOL, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
-                renderObject(TEST_SYMBOL, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE)));
+                renderJavaClass(className, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
+                renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE)));
     }
 }
