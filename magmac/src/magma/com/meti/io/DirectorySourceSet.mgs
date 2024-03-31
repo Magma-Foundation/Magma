@@ -1,0 +1,18 @@
+extern import { IOException } from java.io;
+extern import { Files } from java.nio.file;
+extern import { Path } from java.nio.file;
+extern import { Set } from java.util;
+extern import { Collectors } from java.util.stream;
+
+export class def DirectorySourceSet() => {
+	@Override
+	def collect() : Set<PathSource> ? IOException => {
+        try (var stream = Files.walk(root)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.toString().endsWith(".java"))
+                    .map(file -> new PathSource(root, file))
+                    .collect(Collectors.toSet());
+        }
+    }
+}

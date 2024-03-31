@@ -1,0 +1,20 @@
+extern import { JavaInterfaceNode } from com.meti.java;
+extern import { MagmaTraitNode } from com.meti.magma;
+extern import { Test } from org.junit.jupiter.api;
+extern import { ParameterizedTest } from org.junit.jupiter.params;
+extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import com.meti.Compiler;
+extern import { TEST_SYMBOL } from com.meti.FeatureTest;
+extern import { assertEquals } from org.junit.jupiter.api.Assertions;
+
+export class def InterfaceFeatureTest() => {
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testSimpleInterface() : Void => {
+        assertEquals(new MagmaTraitNode("", name, "{\n}").render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
+    }
+	@Test
+	def testPublic() : Void => {
+        assertEquals(new MagmaTraitNode(Lang.EXPORT_KEYWORD, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
+    }
+}

@@ -1,0 +1,28 @@
+extern import { JavaClassNodeBuilder } from com.meti.java;
+extern import { JavaLang } from com.meti.java;
+extern import { MagmaClassNodeBuilder } from com.meti.magma;
+extern import { Test } from org.junit.jupiter.api;
+extern import { ParameterizedTest } from org.junit.jupiter.params;
+extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import { assertCompile } from com.meti.CompiledTest;
+
+export object ClassFeatureTest = {
+	pub const TEST_BODY : String = "0";
+}
+
+export class def ClassFeatureTest() => {
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testSimpleClasses() : Void => {
+        assertCompile(JavaLang.renderJavaClass(name, ""), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
+    }
+	@Test
+	def testPublicKeyword() : Void => {
+        assertCompile(new JavaClassNodeBuilder().setPrefix(Lang.PUBLIC_KEYWORD).setName(FeatureTest.TEST_SYMBOL).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().withPrefix("export ").withName(FeatureTest.TEST_SYMBOL).withContent("").build().render());
+    }
+	@Test
+	def testBody() : Void => {
+        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
+                new MagmaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render());
+    }
+}

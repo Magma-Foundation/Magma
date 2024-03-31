@@ -1,0 +1,22 @@
+export object Lang = {
+	pub const IMPORT_KEYWORD : String = "import ";
+	pub const STATIC_KEYWORD : String = "static ";
+	pub const IMPORT_STATIC : String = IMPORT_KEYWORD + STATIC_KEYWORD;
+	pub const PUBLIC_KEYWORD : String = "public ";
+	pub const CLASS_KEYWORD : String = "class ";
+	pub const I64 : String = "I64";
+	pub const I32 : String = "I32";
+	pub const LONG : String = "long";
+	pub const INT : String = "int";
+	pub const CONST_KEYWORD : String = "const ";
+	pub const LET_KEYWORD : String = "let ";
+	pub const FINAL_KEYWORD : String = "final";
+	pub const LOWER_VOID : String = "void";
+	pub const CAMEL_VOID : String = "Void";
+	pub const EXPORT_KEYWORD : String = "export ";
+	pub const INTERFACE_KEYWORD : String = "interface ";
+	pub const RECORD_KEYWORD : String = "record ";
+}
+
+export class def Lang() => {
+}

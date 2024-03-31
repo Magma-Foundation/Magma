@@ -1,0 +1,30 @@
+extern import { SingleSourceSet } from com.meti.io;
+extern import { AfterEach } from org.junit.jupiter.api;
+extern import { Test } from org.junit.jupiter.api;
+extern import { IOException } from java.io;
+extern import { Files } from java.nio.file;
+extern import { Path } from java.nio.file;
+extern import { Paths } from java.nio.file;
+extern import org.junit.jupiter.api.Assertions;
+
+export class def ApplicationTest() => {
+	Paths.get : () => Void;
+	ROOT.resolve : () => Void;
+	ROOT.resolve : () => Void;
+	@AfterEach
+	def tearDown() : Void ? IOException => {
+        Files.deleteIfExists(TARGET);
+        Files.deleteIfExists(SOURCE);
+    }
+	@Test
+	def generateSomething() : Void ? IOException => {
+        Files.createFile(SOURCE);
+        Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
+        assertTrue(Files.exists(TARGET));
+    }
+	@Test
+	def generatesNothing() : Void ? IOException => {
+        Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
+        assertFalse(Files.exists(TARGET));
+    }
+}

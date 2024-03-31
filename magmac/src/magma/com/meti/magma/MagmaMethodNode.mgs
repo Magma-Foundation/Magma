@@ -1,0 +1,58 @@
+extern import { Objects } from java.util;
+
+export class def MagmaMethodNode() => {
+    private final String prefix
+    private final String name
+    private final String type
+    private final String content
+    private final String exceptionString
+	def MagmaMethodNode() : public => {
+        this.prefix = prefix;
+        this.name = name;
+        this.type = type;
+        this.content = content;
+        this.exceptionString = exceptionString;
+    }
+	def render() : String => {
+        return prefix() + "\n\tdef " + name() + "() : " + type() + exceptionString() + " => " + content();
+    }
+	def prefix() : String => {
+        return prefix;
+    }
+	def name() : String => {
+        return name;
+    }
+	def type() : String => {
+        return type;
+    }
+	def content() : String => {
+        return content;
+    }
+	def exceptionString() : String => {
+        return exceptionString;
+    }
+	@Override
+	def equals() : boolean => {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (MagmaMethodNode) obj;
+        return Objects.equals(this.prefix, that.prefix) &&
+               Objects.equals(this.name, that.name) &&
+               Objects.equals(this.type, that.type) &&
+               Objects.equals(this.content, that.content) &&
+               Objects.equals(this.exceptionString, that.exceptionString);
+    }
+	@Override
+	def hashCode() : I32 => {
+        return Objects.hash(prefix, name, type, content, exceptionString);
+    }
+	@Override
+	def toString() : String => {
+        return "MagmaMethodNode[" +
+               "prefix=" + prefix + ", " +
+               "name=" + name + ", " +
+               "type=" + type + ", " +
+               "content=" + content + ", " +
+               "exceptionString=" + exceptionString + ']';
+    }
+}

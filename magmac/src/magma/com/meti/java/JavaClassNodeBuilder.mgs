@@ -1,0 +1,20 @@
+export class def JavaClassNodeBuilder() => {
+    private String prefix
+    private String name
+    private String content
+	def setPrefix() : JavaClassNodeBuilder => {
+        this.prefix = prefix;
+        return this;
+    }
+	def setName() : JavaClassNodeBuilder => {
+        this.name = name;
+        return this;
+    }
+	def setContent() : JavaClassNodeBuilder => {
+        this.content = content;
+        return this;
+    }
+	def createJavaClassNode() : JavaClassNode => {
+        return new JavaClassNode(prefix, name, content);
+    }
+}

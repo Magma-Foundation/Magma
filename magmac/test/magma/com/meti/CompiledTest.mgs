@@ -1,0 +1,11 @@
+extern import { Assertions } from org.junit.jupiter.api;
+
+export object CompiledTest = {
+	def assertCompile() : Void => {
+        var actual = Compiler.compile(input);
+        Assertions.assertEquals(expected, actual);
+    }
+}
+
+export class def CompiledTest() => {
+}

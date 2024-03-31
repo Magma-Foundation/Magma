@@ -1,0 +1,28 @@
+extern import { MagmaClassNodeBuilder } from com.meti.magma;
+extern import { Test } from org.junit.jupiter.api;
+extern import { ParameterizedTest } from org.junit.jupiter.params;
+extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import { assertCompile } from com.meti.CompiledTest;
+extern import { TEST_SYMBOL } from com.meti.FeatureTest;
+extern import com.meti.java.JavaLang;
+
+export object RecordFeatureTest = {
+	pub const TEST_BODY : String = "0";
+}
+
+export class def RecordFeatureTest() => {
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testSimpleRecords() : Void => {
+        assertCompile(renderRecord(name), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
+    }
+	@Test
+	def testPublicKeyword() : Void => {
+        assertCompile(renderRecord(Lang.PUBLIC_KEYWORD, TEST_SYMBOL), new MagmaClassNodeBuilder().withPrefix(Lang.EXPORT_KEYWORD).withName(TEST_SYMBOL).withContent("").build().render());
+    }
+	@Test
+	def testBody() : Void => {
+        assertCompile(renderRecord("", TEST_SYMBOL, "{}"),
+                new MagmaClassNodeBuilder().withPrefix("").withName(TEST_SYMBOL).withContent("").build().render());
+    }
+}

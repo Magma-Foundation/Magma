@@ -1,0 +1,7 @@
+extern import { Lang } from com.meti;
+
+export class def ImportNode() => {
+	def render() : String => {
+        return "extern " + Lang.IMPORT_KEYWORD + childString() + parent() + ";";
+    }
+}

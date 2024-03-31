@@ -1,0 +1,30 @@
+export class def MagmaMethodBuilder() => {
+    private String prefix
+    private String name
+    private String type
+    private String content
+    private String exceptionString
+	def withPrefix() : MagmaMethodBuilder => {
+        this.prefix = prefix;
+        return this;
+    }
+	def withName() : MagmaMethodBuilder => {
+        this.name = name;
+        return this;
+    }
+	def withType() : MagmaMethodBuilder => {
+        this.type = type;
+        return this;
+    }
+	def withContent() : MagmaMethodBuilder => {
+        this.content = content;
+        return this;
+    }
+	def withExceptionString() : MagmaMethodBuilder => {
+        this.exceptionString = exceptionString;
+        return this;
+    }
+	def build() : MagmaMethodNode => {
+        return new MagmaMethodNode(prefix, name, type, content, exceptionString);
+    }
+}

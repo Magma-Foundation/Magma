@@ -1,0 +1,14 @@
+extern import { Files } from java.nio.file;
+extern import { Path } from java.nio.file;
+extern import { HashSet } from java.util;
+extern import { Set } from java.util;
+
+export class def SingleSourceSet() => {
+	@Override
+	def collect() : Set<PathSource> => {
+        var source = source();
+        var set = new HashSet<PathSource>();
+        if (Files.exists(source)) set.add(new PathSource(source.getParent(), source));
+        return set;
+    }
+}
