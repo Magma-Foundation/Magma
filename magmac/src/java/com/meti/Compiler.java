@@ -140,19 +140,23 @@ public class Compiler {
                 .collect(Collectors.joining());
 
         var paramEnd = classMember.indexOf(')');
-        if(paramEnd == -1) return Optional.empty();
+        if (paramEnd == -1) return Optional.empty();
 
         var contentStart = classMember.indexOf('{');
-        if(contentStart == -1) return Optional.empty();
+        if (contentStart == -1) return Optional.empty();
 
         var throwsString = classMember.substring(paramEnd + 1, contentStart).strip();
         String result;
 
-        if(throwsString.isEmpty()) {
-            result = renderMagmaMethodWithType(annotationsString, name, type, "{}", "");
+        var contentEnd = classMember.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var content = classMember.substring(contentStart, contentEnd + 1).strip();
+        if (throwsString.isEmpty()) {
+            result = renderMagmaMethodWithType(annotationsString, name, type, content, "");
         } else {
             var exceptionName = throwsString.substring("throws ".length()).strip();
-            result = renderMagmaMethodWithException(annotationsString, name, type, "{}", exceptionName);
+            result = renderMagmaMethodWithException(annotationsString, name, type, content, exceptionName);
         }
 
         return Optional.of(new State(Optional.of(result), Optional.empty()));
@@ -260,7 +264,7 @@ public class Compiler {
     }
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content, String exceptionString) {
-        return prefix + "def " + name + "() : " + type + exceptionString + " => {" + content + "\n}";
+        return "\n\t" + prefix + "\tdef " + name + "() : " + type + exceptionString + " => " + content;
     }
 
     static String renderMagmaMethod(String prefix, String name, String typeString, String content) {
