@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.meti.Compiler.renderMagmaImport;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CompilerTest {
@@ -21,15 +22,18 @@ public class CompilerTest {
         assertCompile("package test;", "");
     }
 
-    @Test
-    void twoImports() {
-        assertCompile(renderJavaImport("First") + renderJavaImport("second"),
-                Compiler.renderMagmaImport("First") + Compiler.renderMagmaImport("second"));
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void multipleImports(int count) {
+        var name = "Test";
+        var input = renderJavaImport(name).repeat(count);
+        var output = renderMagmaImport(name).repeat(count);
+        assertCompile(input, output);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"AfterEach", "Test"})
     void simpleImport(String name) {
-        assertCompile(renderJavaImport(name), Compiler.renderMagmaImport(name));
+        assertCompile(renderJavaImport(name), renderMagmaImport(name));
     }
 }
