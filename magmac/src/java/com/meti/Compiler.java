@@ -59,10 +59,18 @@ public class Compiler {
         if (bodyEnd == -1) return Optional.empty();
 
         var name = input.substring(nameStart, bodyStart).strip();
-        var content = input.substring(bodyStart + 1, bodyEnd);
+        var inputContent = input.substring(bodyStart + 1, bodyEnd);
+
+        String outputContent;
+        if (inputContent.equals(renderJavaDefinition())) {
+            outputContent = renderMagmaDefinition();
+        } else {
+            outputContent = inputContent;
+        }
+
         return Optional.of(isPublic
-                ? renderExportedMagmaClass(name, content)
-                : renderMagmaClass(name, content));
+                ? renderExportedMagmaClass(name, outputContent)
+                : renderMagmaClass(name, outputContent));
     }
 
     private static Optional<String> compileImport(String input) {
@@ -114,5 +122,13 @@ public class Compiler {
 
     static String renderJavaClass(String prefix, String name, String content) {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
+    }
+
+    static String renderMagmaDefinition() {
+        return "let root : I16 = 0;";
+    }
+
+    static String renderJavaDefinition() {
+        return "int root = 0;";
     }
 }

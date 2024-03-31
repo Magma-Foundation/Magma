@@ -30,4 +30,10 @@ public class ClassFeatureTest {
         assertCompile(renderJavaClass(TEST_NAME, TEST_BODY),
                 Compiler.renderMagmaClass(TEST_NAME, TEST_BODY));
     }
+
+    @Test
+    void testBodyContent() {
+        assertCompile(renderJavaClass(TEST_NAME, Compiler.renderJavaDefinition()),
+                Compiler.renderMagmaClass(TEST_NAME, Compiler.renderMagmaDefinition()));
+    }
 }
