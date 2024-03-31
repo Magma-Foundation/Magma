@@ -81,10 +81,11 @@ public class Compiler {
         var splitContent = split(inputContent);
 
         var outputValues = new ArrayList<String>();
-        var outputMore = new ArrayList<String >();
+        var outputMore = new ArrayList<String>();
 
         for (var classMember : splitContent) {
             var compiledClassMember = compileDefinition(classMember)
+                    .or(() -> compileMethod(classMember))
                     .orElse(new State(Optional.of(classMember), Optional.empty()));
 
             compiledClassMember.value.ifPresent(outputValues::add);
@@ -105,6 +106,14 @@ public class Compiler {
         }
 
         return Optional.of(new State(Optional.of(renderedClass), renderedMore));
+    }
+
+    private static Optional<? extends State> compileMethod(String classMember) {
+        if (classMember.equals("void empty(){}")) {
+            return Optional.of(new State(Optional.of(renderMagmaMethod("", "empty", "Void", "{}")), Optional.empty()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -187,7 +196,15 @@ public class Compiler {
     }
 
     private static String renderMagmaClass(String prefix, String name, String content) {
-        return prefix + CLASS_KEYWORD + "def " + name + "() => {" + content + "\n}";
+        return renderMagmaMethod(prefix + CLASS_KEYWORD, name, content);
+    }
+
+    static String renderMagmaMethod(String prefix, String name, String content) {
+        return renderMagmaMethod(prefix, name, "", content);
+    }
+
+    static String renderMagmaMethod(String prefix, String name, String typeString, String content) {
+        return prefix + "def " + name + "() " + typeString + "=> {" + content + "\n}";
     }
 
     static String renderJavaClass(String prefix, String name, String content) {

@@ -14,36 +14,32 @@ public class DefinitionFeatureTest {
 
     public static final String TEST_VALUE = "100";
 
-    private static void assertWithinClass(String input, String output) {
-        assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void testSimpleDefinition(String name) {
-        assertWithinClass(renderDefinition(name, INT), renderMagmaDefinition(name, I32));
+        FeatureTest.assertWithinClass(renderDefinition(name, INT), renderMagmaDefinition(name, I32));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void testMultipleDefinitions(int count) {
-        assertWithinClass(renderDefinition(TEST_SYMBOL, INT).repeat(count),
+        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT).repeat(count),
                 renderMagmaDefinition(TEST_SYMBOL, I32).repeat(count));
     }
 
     @Test
     void testType() {
-        assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
+        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
     }
 
     @Test
     void testValue() {
-        assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
+        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
     }
 
     @Test
     void testFinal() {
-        assertWithinClass(
+        FeatureTest.assertWithinClass(
                 renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
                 renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
@@ -59,7 +55,7 @@ public class DefinitionFeatureTest {
 
     @Test
     void testPublic() {
-        assertWithinClass(
+        FeatureTest.assertWithinClass(
                 renderDefinition("public ", TEST_SYMBOL, INT, TEST_VALUE),
                 renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
