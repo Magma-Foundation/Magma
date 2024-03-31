@@ -1,10 +1,11 @@
 package com.meti.java;
 
 import com.meti.Lang;
+import com.meti.node.Renderable;
 
 import java.util.Objects;
 
-public final class JavaClassNode {
+public final class JavaClassNode implements Renderable {
     private final String prefix;
     private final String name;
     private final String content;
