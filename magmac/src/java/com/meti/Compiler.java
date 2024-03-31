@@ -148,8 +148,9 @@ public class Compiler {
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        var name = before.substring(separator + 1).strip();
+        if(separator == -1) return Optional.empty();
 
+        var name = before.substring(separator + 1).strip();
         var flagsAndType = before.substring(0, separator).strip();
         var typeSeparator = flagsAndType.lastIndexOf(' ');
 
@@ -173,6 +174,7 @@ public class Compiler {
         var contentStart = methodString.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
+        if(!(paramEnd < contentStart)) return Optional.empty();
         var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
         String result;
 

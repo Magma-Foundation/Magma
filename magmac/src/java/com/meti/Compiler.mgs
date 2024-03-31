@@ -1,0 +1,59 @@
+extern import java.util;
+extern import { Collectors } from java.util.stream;
+extern import { Stream } from java.util.stream;
+
+export object Compiler = {
+	pub const IMPORT_KEYWORD : String = "import ";
+	pub const STATIC_KEYWORD : String = "static ";
+	pub const IMPORT_STATIC : String = IMPORT_KEYWORD + STATIC_KEYWORD;
+	pub const PUBLIC_KEYWORD : String = "public ";
+	pub const CLASS_KEYWORD : String = "class ";
+	pub const I64 : String = "I64";
+	pub const I32 : String = "I32";
+	pub const LONG : String = "long";
+	pub const INT : String = "int";
+	pub const CONST_KEYWORD : String = "const ";
+	pub const LET_KEYWORD : String = "let ";
+	pub const FINAL_KEYWORD : String = "final";
+	pub const LOWER_VOID : String = "void";
+	pub const CAMEL_VOID : String = "Void";
+	def compile() : String => {
+        var args = split(input);
+
+        var imports = new ArrayList<String>();
+        var objects = new ArrayList<String>();
+        var classes = new ArrayList<String>();
+
+        for (String arg : args) {
+            var state = compileRootStatement(arg.strip());
+            state.importValue.ifPresent(imports::add);
+            state.instanceValue.ifPresent(classes::add);
+            state.staticValue.ifPresent(objects::add);
+        }
+
+        var importString = imports.stream().collect(Collectors.joining("\n")).strip();
+
+        var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
+
+        return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));
+    }
+	def split() : List<String> => {
+        var state = new SplittingState();
+
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && state.isLevel()) {
+                state.advance();
+            } else if (c == '}' && state.isShallow()) {
+                state.append('}');
+                state.descend();
+                state.advance();
+            }
+}
+
+export class def Compiler() => {
+	let (c : if = = '{' || c == '(') state.ascend();
+                if (c == '}' || c == ')') state.descend();
+                state.append(c);
+            };
+}

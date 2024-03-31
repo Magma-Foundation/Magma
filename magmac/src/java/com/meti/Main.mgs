@@ -1,11 +1,9 @@
-package com.meti;
+extern import { IOException } from java.io;
+extern import { Files } from java.nio.file;
+extern import { Paths } from java.nio.file;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-public class Main {
-    public static void main(String[] args) {
+export object Main = {
+	def main() : Void => {
         try {
             run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/src/java")));
             run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/test/java")));
@@ -14,8 +12,7 @@ public class Main {
             e.printStackTrace();
         }
     }
-
-    static void run(SourceSet sourceSet) throws IOException {
+	def run() : Void ? IOException => {
         var set = sourceSet.collect();
 
         for (var source1 : set) {
@@ -28,4 +25,7 @@ public class Main {
             Files.writeString(source1.resolveSibling(fileNameWithoutExtension + ".mgs"), output);
         }
     }
+}
+
+export class def Main() => {
 }

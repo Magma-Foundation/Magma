@@ -1,0 +1,17 @@
+export object JavaLang = {
+	def renderJavaClass() : String => {
+        return Compiler.renderJavaClass("", name, content);
+    }
+	def renderDefinition() : String => {
+        return renderDefinition(name, type, "0");
+    }
+	def renderDefinition() : String => {
+        return renderDefinition("", name, type, value);
+    }
+	def renderDefinition() : String => {
+        return flagString + type + " " + name + " = " + value + ";";
+    }
+}
+
+export class def JavaLang() => {
+}
