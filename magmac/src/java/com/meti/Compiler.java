@@ -29,8 +29,9 @@ public class Compiler {
             return child.equals("*")
                     ? renderMagmaImportForAllChildren(parent)
                     : renderMagmaImport(parent, child);
-        } else if (input.equals(renderJavaClass())) {
-            return renderMagmaClass();
+        } else if (input.startsWith("class ")) {
+            var name = input.substring("class ".length(), input.indexOf(" {}"));
+            return renderMagmaClass(name);
         } else {
             return "";
         }
@@ -48,11 +49,11 @@ public class Compiler {
         return "extern " + IMPORT_KEYWORD + childString + parent + ";\n";
     }
 
-    static String renderMagmaClass() {
-        return "class def Test() => {}";
+    static String renderMagmaClass(String name) {
+        return "class def " + name + "() => {}";
     }
 
-    static String renderJavaClass() {
-        return "class Test {}";
+    static String renderJavaClass(String name) {
+        return "class " + name + " {}";
     }
 }
