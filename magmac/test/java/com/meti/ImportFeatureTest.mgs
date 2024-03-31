@@ -1,0 +1,45 @@
+extern import { Test } from org.junit.jupiter.api;
+extern import { ParameterizedTest } from org.junit.jupiter.params;
+extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import { Collectors } from java.util.stream;
+extern import { IntStream } from java.util.stream;
+extern import { renderMagmaImport } from com.meti.Compiler;
+extern import { renderMagmaImportForAllChildren } from com.meti.Compiler;
+
+export object ImportFeatureTest = {
+	pub const TEST_PARENT : String = "org.junit.jupiter.api";
+	pub const TEST_NAME : String = "Test";
+}
+
+export class def ImportFeatureTest() => {
+		def renderJavaImport() : private static String => {
+        return renderJavaImport("", parent, child);
+    }
+		def renderJavaImport() : private static String => {
+        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
+    }
+	let @ValueSource(ints :  = {2, 3};
+	let input : var = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
+        var output = IntStream.range(0, count)
+                .mapToObj(_i -> renderMagmaImport(TEST_PARENT, TEST_NAME))
+                .collect(Collectors.joining("\n"));
+
+        CompiledTest.assertCompile(input, output);
+    };
+	@Test
+	def testWhitespace() : Void => {
+        CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
+    }
+	let @ValueSource(strings :  = {"AfterEach", "Test"};
+	@
+	def testSimpleImports() : Void ? stSimpleImports(String name) => {
+        CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
+    }
+	let otherParent : var = "Parent";
+        CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), renderMagmaImport(otherParent, TEST_NAME));
+    };
+	@Test
+	def testImportsForAll() : Void => {
+        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
+    }
+}
