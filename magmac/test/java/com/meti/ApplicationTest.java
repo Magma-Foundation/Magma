@@ -16,6 +16,15 @@ public class ApplicationTest {
     public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
     public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
+    private static void run() throws IOException {
+        if (Files.exists(SOURCE)) {
+            var fileName = SOURCE.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var fileNameWithoutExtension = fileName.substring(0, separator);
+            Files.createFile(SOURCE.resolveSibling(fileNameWithoutExtension + ".mgs"));
+        }
+    }
+
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(TARGET);
@@ -27,12 +36,6 @@ public class ApplicationTest {
         Files.createFile(SOURCE);
         run();
         assertTrue(Files.exists(TARGET));
-    }
-
-    private static void run() throws IOException {
-        if (Files.exists(SOURCE)) {
-            Files.createFile(TARGET);
-        }
     }
 
     @Test
