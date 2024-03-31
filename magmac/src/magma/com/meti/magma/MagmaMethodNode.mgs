@@ -1,11 +1,11 @@
 extern import { Objects } from java.util;
 
 export class def MagmaMethodNode() => {
-    private final String prefix
-    private final String name
-    private final String type
-    private final String content
-    private final String exceptionString
+	const prefix : String;
+	const name : String;
+	const type : String;
+	const content : String;
+	const exceptionString : String;
 	def MagmaMethodNode() : public => {
         this.prefix = prefix;
         this.name = name;

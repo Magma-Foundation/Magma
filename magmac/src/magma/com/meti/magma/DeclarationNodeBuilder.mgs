@@ -1,12 +1,10 @@
+extern import { RenderableBuilder } from com.meti.java;
+extern import { Renderable } from com.meti.node;
+extern import { Optional } from java.util;
+
 export class def DeclarationNodeBuilder() => {
 	def DeclarationNodeBuilder() : public => {
-        this("", "", "", "");
-    }
-	def DeclarationNodeBuilder() : public => {
-        this.flagString = flagString;
-        this.name = name;
-        this.type = type;
-        this.value = value;
+        this("", "", "", Optional.empty());
     }
 	def withFlagString() : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
@@ -14,13 +12,14 @@ export class def DeclarationNodeBuilder() => {
 	def withName() : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	def setType() : DeclarationNodeBuilder => {
+	def withType() : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
 	def withValue() : DeclarationNodeBuilder => {
-        return new DeclarationNodeBuilder(flagString, name, type, value);
+        return new DeclarationNodeBuilder(flagString, name, type, Optional.of(value));
     }
-	def build() : DeclarationNode => {
+	@Override
+	def build() : Renderable => {
         return new DeclarationNode(flagString, name, type, value);
     }
 }

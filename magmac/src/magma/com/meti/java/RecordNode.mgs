@@ -2,9 +2,9 @@ extern import { Renderable } from com.meti.node;
 extern import { Objects } from java.util;
 
 export class def RecordNode implements com.meti.node.Renderable() => {
-    private final String prefix
-    private final String name
-    private final String body
+	const prefix : String;
+	const name : String;
+	const body : String;
 	def RecordNode() : public => {
         this.prefix = prefix;
         this.name = name;

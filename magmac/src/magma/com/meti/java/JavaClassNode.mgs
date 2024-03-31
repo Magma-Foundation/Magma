@@ -2,15 +2,15 @@ extern import { Lang } from com.meti;
 extern import { Objects } from java.util;
 
 export class def JavaClassNode() => {
-    private final String prefix
-    private final String name
-    private final String content
+	const prefix : String;
+	const name : String;
+	const content : String;
 	def JavaClassNode() : public => {
         this.prefix = prefix;
         this.name = name;
         this.content = content;
     }
-	def renderJavaClass() : String => {
+	def render() : String => {
         return prefix() + Lang.CLASS_KEYWORD + name() + " {" + content() + "}";
     }
 	def prefix() : String => {

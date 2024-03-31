@@ -2,9 +2,9 @@ extern import { ArrayList } from java.util;
 extern import { List } from java.util;
 
 class def SplittingState() => {
-    private final List<String> list
-    private StringBuilder builder
-    private int depth
+	const list : List<String>;
+	let builder : StringBuilder;
+	let depth : I32;
 	let isInSingleQuotes : boolean = false;
 
     SplittingState(List<String> list, StringBuilder builder, int depth) {

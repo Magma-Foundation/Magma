@@ -3,9 +3,9 @@ extern import { Renderable } from com.meti.node;
 extern import { Objects } from java.util;
 
 export class def MagmaClassNode implements Renderable() => {
-    private final String prefix
-    private final String name
-    private final String content
+	const prefix : String;
+	const name : String;
+	const content : String;
 	def MagmaClassNode() : public => {
         this.prefix = prefix;
         this.name = name;

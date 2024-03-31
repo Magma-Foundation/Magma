@@ -1,9 +1,9 @@
 export class def MagmaMethodBuilder() => {
-    private String prefix
-    private String name
-    private String type
-    private String content
-    private String exceptionString
+	let prefix : String;
+	let name : String;
+	let type : String;
+	let content : String;
+	let exceptionString : String;
 	def withPrefix() : MagmaMethodBuilder => {
         this.prefix = prefix;
         return this;

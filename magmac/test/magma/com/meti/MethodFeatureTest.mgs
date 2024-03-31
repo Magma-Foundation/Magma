@@ -1,6 +1,6 @@
 extern import { JavaClassNodeBuilder } from com.meti.java;
 extern import { MagmaClassNodeBuilder } from com.meti.magma;
-extern import { MagmaDefinitionHeader } from com.meti.magma;
+extern import { MagmaDeclaration } from com.meti.magma;
 extern import { MagmaMethodBuilder } from com.meti.magma;
 extern import { ObjectNode } from com.meti.magma;
 extern import { Test } from org.junit.jupiter.api;
@@ -23,7 +23,7 @@ export class def MethodFeatureTest() => {
 	@Test
 	def testWithNoBody() : Void => {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, ";"),
-                new MagmaDefinitionHeader("", "", TEST_SYMBOL, "() => Void").render() + ";");
+                new MagmaDeclaration("", "", TEST_SYMBOL, "() => Void").render() + ";");
     }
 	@ParameterizedTest
 	@ValueSource(strings = ["first", "second"])
@@ -60,7 +60,7 @@ export class def MethodFeatureTest() => {
 	def testStatic() : Void => {
         String content = new MagmaMethodBuilder().withPrefix("").withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render();
         assertCompile(
-                new JavaClassNodeBuilder().setPrefix("").setName(className).setContent(renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")).createJavaClassNode().renderJavaClass(),
+                new JavaClassNodeBuilder().withPrefix("").withName(className).withContent(renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")).build().render(),
                 new ObjectNode("", className, content).render()
                 + "\n\n"
                 + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());

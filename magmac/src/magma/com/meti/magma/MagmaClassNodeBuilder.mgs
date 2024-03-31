@@ -1,9 +1,9 @@
 extern import { RenderableBuilder } from com.meti.java;
 
 export class def MagmaClassNodeBuilder implements RenderableBuilder() => {
-    private String prefix
-    private String name
-    private String content
+	let prefix : String;
+	let name : String;
+	let content : String;
 	def MagmaClassNodeBuilder() : public => {
         this("", "", "");
     }

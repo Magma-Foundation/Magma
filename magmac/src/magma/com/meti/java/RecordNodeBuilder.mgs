@@ -1,9 +1,9 @@
 extern import { Renderable } from com.meti.node;
 
 export class def RecordNodeBuilder implements RenderableBuilder() => {
-    private String prefix
-    private String name
-    private String body
+	let prefix : String;
+	let name : String;
+	let body : String;
 	def RecordNodeBuilder() : public => {
         this("", "", "");
     }
