@@ -16,7 +16,7 @@ import static com.meti.FeatureTest.assertWithinClass;
 public class MethodFeatureTest {
     @Test
     void testWithNoBody() {
-        assertWithinClass(new JavaMethodBuilder()
+        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withName(TEST_SYMBOL)
                         .withContent(";")
                         .build()
@@ -28,6 +28,7 @@ public class MethodFeatureTest {
     @ValueSource(strings = {"first", "second"})
     void testSimpleMethod(String name) {
         assertWithinClass(new JavaMethodBuilder()
+                        .withReturnType("void")
                         .withName(name)
                         .withContent("{}"),
                 new MagmaMethodBuilder()
@@ -40,7 +41,7 @@ public class MethodFeatureTest {
     @ValueSource(strings = {"First", "Second"})
     void testAnnotation(String name) {
         String prefix = new Annotation(name, "").render();
-        assertWithinClass(new JavaMethodBuilder()
+        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(prefix)
                         .withName(TEST_SYMBOL)
                         .withContent("{}"),
@@ -54,7 +55,7 @@ public class MethodFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testException(String name) {
-        assertWithinClass(new JavaMethodBuilder()
+        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withName(TEST_SYMBOL)
                         .withThrows(" throws " + name + " ")
                         .withContent("{}"),
@@ -69,7 +70,7 @@ public class MethodFeatureTest {
     @ValueSource(ints = {2, 3})
     void testMultipleAnnotations(int count) {
         var rendered = new Annotation("First", "").render().repeat(count);
-        assertWithinClass(new JavaMethodBuilder()
+        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(rendered)
                         .withName(TEST_SYMBOL)
                         .withContent("{}"),
@@ -83,7 +84,7 @@ public class MethodFeatureTest {
     @Test
     void testAnnotationWithValues() {
         String prefix = new Annotation("First", "(ints = {2, 3})").render();
-        assertWithinClass(new JavaMethodBuilder()
+        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(prefix)
                         .withName(TEST_SYMBOL)
                         .withContent("{}"),
@@ -102,7 +103,7 @@ public class MethodFeatureTest {
                 .build()
                 .render();
 
-        var rendered = new JavaMethodBuilder()
+        var rendered = new JavaMethodBuilder().withReturnType("void")
                 .withFlagsString("static ")
                 .withName(TEST_SYMBOL)
                 .withContent("{}")

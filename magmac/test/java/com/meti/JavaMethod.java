@@ -3,6 +3,7 @@ package com.meti;
 import com.meti.node.Renderable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public final class JavaMethod implements Renderable {
     private final String annotations;
@@ -10,18 +11,21 @@ public final class JavaMethod implements Renderable {
     private final String name;
     private final String throwsString;
     private final String content;
+    private final Optional<String> returnType;
 
-    public JavaMethod(String annotations, String flagsString, String name, String throwsString, String content) {
+    public JavaMethod(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content) {
         this.annotations = annotations;
         this.flagsString = flagsString;
         this.name = name;
         this.throwsString = throwsString;
         this.content = content;
+        this.returnType = returnType;
     }
 
     @Override
     public String render() {
-        return annotations() + "\n" + flagsString() + "void " + name() + "()" + throwsString() + content();
+        var returnsString = returnType.map(value -> value + " ").orElse("");
+        return annotations() + "\n" + flagsString() + returnsString + name() + "()" + throwsString() + content();
     }
 
     public String annotations() {

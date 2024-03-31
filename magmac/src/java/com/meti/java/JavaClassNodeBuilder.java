@@ -1,9 +1,9 @@
 package com.meti.java;
 
 public class JavaClassNodeBuilder implements RenderableBuilder {
-    private String prefix;
-    private String name;
-    private String content;
+    private final String prefix;
+    private final String name;
+    private final String content;
 
     public JavaClassNodeBuilder() {
         this("", "", "");
@@ -29,5 +29,9 @@ public class JavaClassNodeBuilder implements RenderableBuilder {
 
     public JavaClassNode build() {
         return new JavaClassNode(prefix, name, content);
+    }
+
+    public JavaClassNodeBuilder withContent(RenderableBuilder builder) {
+        return withContent(builder.build().render());
     }
 }
