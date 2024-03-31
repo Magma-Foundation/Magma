@@ -23,14 +23,14 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .setName(name)
                 .build()
-                .render(), renderMagmaDefinition(name, I32));
+                .render(), new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(name).setType(I32).setValue("0").createMagmaDefinition().render());
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void testMultipleDefinitions(int count) {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER.build().render().repeat(count),
-                renderMagmaDefinition(TEST_SYMBOL, I32).repeat(count));
+                new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue("0").createMagmaDefinition().render().repeat(count));
     }
 
     @Test
@@ -38,7 +38,7 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .setType(LONG)
                 .build()
-                .render(), renderMagmaDefinition(TEST_SYMBOL, I64));
+                .render(), new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I64).setValue("0").createMagmaDefinition().render());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .withValue(TEST_VALUE)
                 .build()
-                .render(), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
+                .render(), new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class DefinitionFeatureTest {
                 .withFlagString(FINAL_KEYWORD + " ")
                 .withValue(TEST_VALUE)
                 .build()
-                .render(), renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+                .render(), new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(CONST_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render());
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ public class DefinitionFeatureTest {
                         .withFlagString("static ")
                         .build()
                         .render()),
-                renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE))
+                renderObject(className, new MagmaDefinitionBuilder().setFlagString("").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render())
                 + "\n\n"
                 + renderMagmaClass(className, ""));
     }
@@ -77,6 +77,6 @@ public class DefinitionFeatureTest {
                         .withValue(TEST_VALUE)
                         .build()
                         .render(),
-                renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+                new MagmaDefinitionBuilder().setFlagString("pub ").setMutabilityString(LET_KEYWORD).setName(TEST_SYMBOL).setType(I32).setValue(TEST_VALUE).createMagmaDefinition().render());
     }
 }

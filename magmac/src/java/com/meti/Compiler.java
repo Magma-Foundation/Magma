@@ -238,7 +238,7 @@ public class Compiler {
                     ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
                     : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
-            var rendered = renderMagmaDefinitionHeader("", "", name, "() => Void") + ";";
+            var rendered = new MagmaDefinitionHeader("", "", name, "() => Void").render() + ";";
             return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else {
             return Optional.empty();
@@ -299,7 +299,7 @@ public class Compiler {
 
         var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
-        var rendered = renderMagmaDefinition(flagString, mutabilityString, name, outputType, value);
+        var rendered = new MagmaDefinitionBuilder().setFlagString(flagString).setMutabilityString(mutabilityString).setName(name).setType(outputType).setValue(value).createMagmaDefinition().render();
 
         return Optional.of(flags.contains("static") ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered)) : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
@@ -364,22 +364,6 @@ public class Compiler {
 
     static String renderJavaClass(String prefix, String name, String content) {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
-    }
-
-    static String renderMagmaDefinition(String name, String type) {
-        return renderMagmaDefinition(name, type, "0");
-    }
-
-    static String renderMagmaDefinition(String name, String type, String value) {
-        return renderMagmaDefinition("", LET_KEYWORD, name, type, value);
-    }
-
-    static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
-        return renderMagmaDefinitionHeader(flagString, mutabilityString, name, type) + " = " + value + ";";
-    }
-
-    static String renderMagmaDefinitionHeader(String flagString, String mutabilityString, String name, String type) {
-        return "\n\t" + flagString + mutabilityString + name + " : " + type;
     }
 
     static String renderAnnotation(String name) {

@@ -22,7 +22,7 @@ public class MethodFeatureTest {
     @Test
     void testWithNoBody() {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, ";"),
-                renderMagmaDefinitionHeader("", "", TEST_SYMBOL, "() => Void") + ";");
+                new MagmaDefinitionHeader("", "", TEST_SYMBOL, "() => Void").render() + ";");
     }
 
     @ParameterizedTest
