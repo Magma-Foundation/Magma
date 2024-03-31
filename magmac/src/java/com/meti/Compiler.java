@@ -127,7 +127,7 @@ public class Compiler {
             var asList = Arrays.stream(annotationsAndType.split("\n"))
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
-                    .collect(Collectors.toList());
+                    .toList();
 
             annotations = asList.subList(0, asList.size() - 1).stream()
                     .map(element -> element.substring(1))
@@ -136,10 +136,30 @@ public class Compiler {
         }
 
         var annotationsString = annotations.stream()
-                .map(annotation -> "@" + annotation + "\n")
+                .map(Compiler::renderAnnotation)
                 .collect(Collectors.joining());
 
-        return Optional.of(new State(Optional.of(renderMagmaMethodWithType(annotationsString, name, type, "{}")), Optional.empty()));
+        var paramEnd = classMember.indexOf(')');
+        if(paramEnd == -1) return Optional.empty();
+
+        var contentStart = classMember.indexOf('{');
+        if(contentStart == -1) return Optional.empty();
+
+        var throwsString = classMember.substring(paramEnd + 1, contentStart).strip();
+        String result;
+
+        if(throwsString.isEmpty()) {
+            result = renderMagmaMethodWithType(annotationsString, name, type, "{}", "");
+        } else {
+            var exceptionName = throwsString.substring("throws ".length()).strip();
+            result = renderMagmaMethodWithException(annotationsString, name, type, "{}", exceptionName);
+        }
+
+        return Optional.of(new State(Optional.of(result), Optional.empty()));
+    }
+
+    static String renderMagmaMethodWithException(String annotationsString, String name, String type, String content, String exceptionName) {
+        return renderMagmaMethodWithType(annotationsString, name, type, content, " ? " + exceptionName);
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -176,12 +196,12 @@ public class Compiler {
     }
 
     private static String compileType(String inputType) {
-        String outputType;
-        if (inputType.equals(LONG)) outputType = I64;
-        else if (inputType.equals(INT)) outputType = I32;
-        else if(inputType.equals(LOWER_VOID)) outputType = CAMEL_VOID;
-        else outputType = inputType;
-        return outputType;
+        return switch (inputType) {
+            case LONG -> I64;
+            case INT -> I32;
+            case LOWER_VOID -> CAMEL_VOID;
+            default -> inputType;
+        };
     }
 
     static String renderObject(String name, String content) {
@@ -236,7 +256,11 @@ public class Compiler {
     }
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content) {
-        return prefix + "def " + name + "() : " + type + " => {" + content + "\n}";
+        return renderMagmaMethodWithType(prefix, name, type, content, "");
+    }
+
+    static String renderMagmaMethodWithType(String prefix, String name, String type, String content, String exceptionString) {
+        return prefix + "def " + name + "() : " + type + exceptionString + " => {" + content + "\n}";
     }
 
     static String renderMagmaMethod(String prefix, String name, String typeString, String content) {
@@ -257,6 +281,10 @@ public class Compiler {
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
         return "\n\t" + flagString + mutabilityString + name + " : " + type + " = " + value + ";";
+    }
+
+    static String renderAnnotation(String name) {
+        return "@" + name + "\n";
     }
 
     record State(Optional<String> value, Optional<String> more) {
