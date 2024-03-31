@@ -7,7 +7,7 @@ export object FeatureTest = {
 }
 
 export class def FeatureTest() => {
-		def assertWithinClass() : static void => {
-assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
-}
+	def assertWithinClass() : static void => {
+        assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
+    }
 }

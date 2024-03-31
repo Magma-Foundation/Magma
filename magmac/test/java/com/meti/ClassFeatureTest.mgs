@@ -8,17 +8,18 @@ export object ClassFeatureTest = {
 }
 
 export class def ClassFeatureTest() => {
-	let @ValueSource(strings :  = {"First", "Second"})
-    void testSimpleClasses(String name) {
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testSimpleClasses() : Void => {
         assertCompile(JavaLang.renderJavaClass(name, ""), Compiler.renderMagmaClass(name, ""));
-    };
+    }
 	@Test
 	def testPublicKeyword() : Void => {
-assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));
-}
+        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));
+    }
 	@Test
 	def testBody() : Void => {
-assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
-Compiler.renderMagmaClass(FeatureTest.TEST_SYMBOL, TEST_BODY));
-}
+        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
+                Compiler.renderMagmaClass(FeatureTest.TEST_SYMBOL, TEST_BODY));
+    }
 }

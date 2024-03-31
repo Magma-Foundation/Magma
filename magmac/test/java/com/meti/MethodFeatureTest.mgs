@@ -6,34 +6,40 @@ extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 extern import { assertWithinClass } from com.meti.FeatureTest;
 
 export class def MethodFeatureTest() => {
-		def renderJavaMethod() : private static String => {
-return renderJavaMethod(prefix, name, "");
-}
-		def renderJavaMethod() : private static String => {
-return prefix + "void " + name + "()" + throwsString + "{}";
-}
-	let @ValueSource(strings :  = {"first", "second"})
-    void testSimpleMethod(String name) {
+	def renderJavaMethod() : private static String => {
+        return renderJavaMethod(prefix, name, "");
+    }
+	def renderJavaMethod() : private static String => {
+        return prefix + "void " + name + "()" + throwsString + "{}";
+    }
+	@ParameterizedTest
+	@ValueSource(strings = ["first", "second"])
+	def testSimpleMethod() : Void => {
         assertWithinClass(renderJavaMethod("", name),
                 renderMagmaMethodWithType("", name, "Void", "{}"));
-    };
-	let @ValueSource(strings :  = {"First", "Second"})
-    void testAnnotation(String name) {
+    }
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testAnnotation() : Void => {
         assertWithinClass(renderJavaMethod(renderAnnotation(name), TEST_SYMBOL),
                 renderMagmaMethodWithType(renderAnnotation(name), TEST_SYMBOL, "Void", "{}"));
-    };
-	let @ValueSource(strings :  = {"First", "Second"})
-    void testException(String name) {
+    }
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testException() : Void => {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, " throws " + name + " "),
                 renderMagmaMethodWithException("", TEST_SYMBOL, "Void", "{}", name));
-    };
-	let @ValueSource(ints :  = {2, 3})
-    void testMultipleAnnotations(int count) {
+    }
+	@ParameterizedTest
+	@ValueSource(ints = [2, 3])
+	def testMultipleAnnotations() : Void => {
         var rendered = renderAnnotation("First").repeat(count);
         assertWithinClass(renderJavaMethod(rendered, TEST_SYMBOL),
                 renderMagmaMethodWithType(rendered, TEST_SYMBOL, "Void", "{}"));
-    };
-	let "(ints : assertWithinClass(renderJavaMethod(renderAnnotation("First", = {2, 3})"), TEST_SYMBOL),
+    }
+	@Test
+	def testAnnotationWithValues() : Void => {
+        assertWithinClass(renderJavaMethod(renderAnnotation("First", "(ints = {2, 3})"), TEST_SYMBOL),
                 renderMagmaMethodWithType(renderAnnotation("First", "(ints = [2, 3])"), TEST_SYMBOL, "Void", "{}"));
-    };
+    }
 }

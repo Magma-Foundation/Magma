@@ -12,34 +12,38 @@ export object ImportFeatureTest = {
 }
 
 export class def ImportFeatureTest() => {
-		def renderJavaImport() : private static String => {
-return renderJavaImport("", parent, child);
-}
-		def renderJavaImport() : private static String => {
-return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
-}
-	let @ValueSource(ints :  = {2, 3})
-    void testMultipleImports(int count) {
+	def renderJavaImport() : private static String => {
+        return renderJavaImport("", parent, child);
+    }
+	def renderJavaImport() : private static String => {
+        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
+    }
+	@ParameterizedTest
+	@ValueSource(ints = [2, 3])
+	def testMultipleImports() : Void => {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
                 .mapToObj(_i -> renderMagmaImport(TEST_PARENT, TEST_NAME))
                 .collect(Collectors.joining("\n"));
 
         CompiledTest.assertCompile(input, output);
-    };
+    }
 	@Test
 	def testWhitespace() : Void => {
-CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
-}
-	let @ValueSource(strings :  = {"AfterEach", "Test"})
-    void testSimpleImports(String name) {
+        CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
+    }
+	@ParameterizedTest
+	@ValueSource(strings = ["AfterEach", "Test"])
+	def testSimpleImports() : Void => {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
-    };
-	let otherParent : var = "Parent";
+    }
+	@Test
+	def testImportsWithParent() : Void => {
+        var otherParent = "Parent";
         CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), renderMagmaImport(otherParent, TEST_NAME));
-    };
+    }
 	@Test
 	def testImportsForAll() : Void => {
-CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
-}
+        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
+    }
 }

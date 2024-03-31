@@ -14,7 +14,7 @@ public class MethodFeatureTest {
     }
 
     private static String renderJavaMethod(String prefix, String name, String throwsString) {
-        return prefix + "void " + name + "()" + throwsString + "{}";
+        return prefix + "\nvoid " + name + "()" + throwsString + "{}";
     }
 
     @ParameterizedTest

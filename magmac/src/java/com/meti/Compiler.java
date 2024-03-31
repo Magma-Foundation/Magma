@@ -85,7 +85,9 @@ public class Compiler {
         var outputMore = new ArrayList<String>();
 
         for (var classMember : splitContent) {
-            var compiledClassMember = compileDefinition(classMember).or(() -> compileMethod(classMember)).orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
+            var compiledClassMember = compileMethod(classMember)
+                    .or(() -> compileDefinition(classMember))
+                    .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
 
             compiledClassMember.instanceValue.ifPresent(outputValues::add);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
@@ -107,13 +109,11 @@ public class Compiler {
         return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
     }
 
-    private static Optional<? extends State> compileMethod(String classMember) {
-        var lines = Arrays.stream(classMember.split("\n"))
-                .map(String::strip)
-                .filter(line -> !line.isEmpty())
-                .toList();
+    private static Optional<State> compileMethod(String classMember) {
+        var lines = Arrays.stream(classMember.split("\n")).toList();
 
         var annotations = lines.stream()
+                .map(String::strip)
                 .filter(line -> line.startsWith("@"))
                 .map(line -> line.substring(1))
                 .map(line -> {
@@ -140,7 +140,7 @@ public class Compiler {
                 .toList();
 
         var methodString = lines.stream()
-                .filter(line -> !line.startsWith("@"))
+                .filter(line -> !line.strip().startsWith("@"))
                 .collect(Collectors.joining("\n"));
 
         var paramStart = methodString.indexOf('(');
@@ -152,7 +152,9 @@ public class Compiler {
         var inputType = before.substring(0, separator).strip();
         var outputType = compileType(inputType);
 
-        var annotationsString = annotations.stream().map(Compiler::renderAnnotation).collect(Collectors.joining());
+        var annotationsString = annotations.stream()
+                .map(Compiler::renderAnnotation)
+                .collect(Collectors.joining());
 
         var paramEnd = methodString.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
@@ -269,7 +271,7 @@ public class Compiler {
     }
 
     static String renderMagmaMethodWithType(String prefix, String name, String type, String content, String exceptionString) {
-        return "\n\t" + prefix + "\tdef " + name + "() : " + type + exceptionString + " => " + content;
+        return prefix + "\n\tdef " + name + "() : " + type + exceptionString + " => " + content;
     }
 
     static String renderJavaClass(String prefix, String name, String content) {
@@ -293,7 +295,7 @@ public class Compiler {
     }
 
     static String renderAnnotation(String name, String valueString) {
-        return "@" + name + valueString + "\n";
+        return "\n\t@" + name + valueString;
     }
 
     record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue) {
