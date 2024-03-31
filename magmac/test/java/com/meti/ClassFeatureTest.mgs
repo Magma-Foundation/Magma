@@ -1,0 +1,13 @@
+class def def ClassFeatureTest() =>() => {
+	let : : @ValueSource(strings = {"First", "Second"};
+	let name) : stSimpleClasses(String = > {
+        assertCompile(JavaLang.renderJavaClass(name, ""), Compiler.renderMagmaClass(name, ""));
+    };
+	let Void : : = > {
+        assertCompile(Compiler.renderJavaClass(Compiler.PUBLIC_KEYWORD, FeatureTest.TEST_SYMBOL, ""), Compiler.renderMagmaClass("export ", FeatureTest.TEST_SYMBOL, ""));
+    };
+	let Void : : = > {
+        assertCompile(JavaLang.renderJavaClass(FeatureTest.TEST_SYMBOL, TEST_BODY),
+                Compiler.renderMagmaClass(FeatureTest.TEST_SYMBOL, TEST_BODY));
+    };
+}

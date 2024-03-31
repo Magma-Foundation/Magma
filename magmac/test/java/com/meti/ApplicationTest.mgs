@@ -1,32 +1,15 @@
-extern import { AfterEach } from org.junit.jupiter.api;
-extern import { Test } from org.junit.jupiter.api;
-extern import { IOException } from java.io;
-extern import { Files } from java.nio.file;
-extern import { Path } from java.nio.file;
-extern import { Paths } from java.nio.file;
-extern import org.junit.jupiter.api.Assertions;
-
-export object ApplicationTest = {
-	pub const ROOT : Path = Paths.get(".");
-	pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");
-	pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
-}
-
-export class def ApplicationTest() => {
-	@AfterEach
-	def tearDown() : Void ? IOException => {
+class def def ApplicationTest() =>() => {
+	let IOException : ? = > {
         Files.deleteIfExists(TARGET);
         Files.deleteIfExists(SOURCE);
-    }
-	@Test
-	def generateSomething() : Void ? IOException => {
+    };
+	let IOException : ? = > {
         Files.createFile(SOURCE);
-        Main.run(SOURCE);
+        Main.run(new SingleSourceSet(SOURCE));
         assertTrue(Files.exists(TARGET));
-    }
-	@Test
-	def generatesNothing() : Void ? IOException => {
-        Main.run(SOURCE);
+    };
+	let IOException : ? = > {
+        Main.run(new SingleSourceSet(SOURCE));
         assertFalse(Files.exists(TARGET));
-    }
+    };
 }

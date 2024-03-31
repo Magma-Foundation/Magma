@@ -2,28 +2,29 @@ package com.meti;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            run(Paths.get("./Personal/Magma/magmac/test/java/com/meti/ApplicationTest.java"));
+            run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/test/java")));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    static void run(Path source) throws IOException {
-        if (!Files.exists(source)) return;
+    static void run(SourceSet sourceSet) throws IOException {
+        var set = sourceSet.collect();
 
-        var input = Files.readString(source);
-        var output = Compiler.compile(input);
+        for (var source1 : set) {
+            var input = Files.readString(source1);
+            var output = Compiler.compile(input);
 
-        var fileName = source.getFileName().toString();
-        var separator = fileName.indexOf('.');
-        var fileNameWithoutExtension = fileName.substring(0, separator);
-        Files.writeString(source.resolveSibling(fileNameWithoutExtension + ".mgs"), output);
+            var fileName = source1.getFileName().toString();
+            var separator = fileName.indexOf('.');
+            var fileNameWithoutExtension = fileName.substring(0, separator);
+            Files.writeString(source1.resolveSibling(fileNameWithoutExtension + ".mgs"), output);
+        }
     }
 }

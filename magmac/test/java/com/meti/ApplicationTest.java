@@ -24,13 +24,13 @@ public class ApplicationTest {
     @Test
     void generateSomething() throws IOException {
         Files.createFile(SOURCE);
-        Main.run(SOURCE);
+        Main.run(new SingleSourceSet(SOURCE));
         assertTrue(Files.exists(TARGET));
     }
 
     @Test
     void generatesNothing() throws IOException {
-        Main.run(SOURCE);
+        Main.run(new SingleSourceSet(SOURCE));
         assertFalse(Files.exists(TARGET));
     }
 }
