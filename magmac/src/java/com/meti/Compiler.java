@@ -34,10 +34,10 @@ public class Compiler {
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(c == '\'') {
+            if (c == '\'') {
                 state.toggleSingleQuotes();
                 state.append(c);
-            } else if(!state.isInSingleQuotes) {
+            } else if (!state.isInSingleQuotes) {
                 if (c == ';' && state.isLevel()) {
                     state.advance();
                 } else if (c == '}' && state.isShallow()) {
@@ -236,7 +236,7 @@ public class Compiler {
                     ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered)))
                     : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
-            var rendered = new MagmaDefinitionHeader("", "", name, "() => Void").render() + ";";
+            var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
             return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
         } else {
             return Optional.empty();
@@ -278,14 +278,14 @@ public class Compiler {
 
     private static Optional<State> compileDefinition(String input) {
         var valueSeparator = input.indexOf('=');
-        if (valueSeparator == -1) return Optional.empty();
 
-        var beforeSlice = input.substring(0, valueSeparator).strip();
+        var beforeEnd = valueSeparator == -1 ? input.length() : valueSeparator;
+        var beforeSlice = input.substring(0, beforeEnd).strip();
         var nameSeparator = beforeSlice.lastIndexOf(' ');
         if (nameSeparator == -1) return Optional.empty();
 
         var name = beforeSlice.substring(nameSeparator + 1);
-        if(!isSymbol(name)) return Optional.empty();
+        if (!isSymbol(name)) return Optional.empty();
 
         var flagsAndType = beforeSlice.substring(0, nameSeparator).strip();
         var typeSeparator = flagsAndType.lastIndexOf(' ');
@@ -309,19 +309,23 @@ public class Compiler {
             throw new RuntimeException(message, e);
         }
 
-        var value = input.substring(valueSeparator + 1).strip();
-
         var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
-        var rendered = new MagmaDefinitionBuilder()
+        var withDeclaration = new MagmaDefinitionBuilder()
                 .withFlags(flagString)
                 .withMutability(mutabilityString)
                 .withName(name)
-                .withType(outputType)
-                .withValue(value)
-                .build()
-                .render();
+                .withType(outputType);
 
+        MagmaDefinitionBuilder withValue;
+        if (valueSeparator == -1) {
+            withValue = withDeclaration;
+        } else {
+            var value = input.substring(valueSeparator + 1).strip();
+            withValue = withDeclaration.withValue(value);
+        }
+
+        var rendered = withValue.build().render();
         return Optional.of(flags.contains("static")
                 ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
                 : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));

@@ -2,21 +2,13 @@ package com.meti.magma;
 
 import com.meti.node.Renderable;
 
+import java.util.Optional;
+
 public record MagmaDefinition(String flagString, String mutabilityString, String name, String type,
-                              String value) implements Renderable {
+                              Optional<String> value) implements Renderable {
     @Override
     public String render() {
-        return new MagmaDefinitionHeader(flagString(), mutabilityString(), name(), type()).render() + " = " + value() + ";";
+        var valueString = value.map(inner -> " = " + inner).orElse("");
+        return new MagmaDeclaration(flagString, mutabilityString, name, type).render() + valueString + ";";
     }
-
-    @Override
-    public String toString() {
-        return "MagmaDefinition[" +
-               "flagString=" + flagString + ", " +
-               "mutabilityString=" + mutabilityString + ", " +
-               "name=" + name + ", " +
-               "type=" + type + ", " +
-               "value=" + value + ']';
-    }
-
 }

@@ -2,7 +2,7 @@ package com.meti;
 
 import com.meti.java.JavaClassNodeBuilder;
 import com.meti.magma.MagmaClassNodeBuilder;
-import com.meti.magma.MagmaDefinitionHeader;
+import com.meti.magma.MagmaDeclaration;
 import com.meti.magma.MagmaMethodBuilder;
 import com.meti.magma.ObjectNode;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ public class MethodFeatureTest {
     @Test
     void testWithNoBody() {
         assertWithinClass(renderJavaMethod("", TEST_SYMBOL, ";"),
-                new MagmaDefinitionHeader("", "", TEST_SYMBOL, "() => Void").render() + ";");
+                new MagmaDeclaration("", "", TEST_SYMBOL, "() => Void").render() + ";");
     }
 
     @ParameterizedTest

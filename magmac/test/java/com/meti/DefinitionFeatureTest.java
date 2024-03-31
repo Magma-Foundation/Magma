@@ -16,17 +16,19 @@ import static com.meti.FeatureTest.assertWithinClass;
 public class DefinitionFeatureTest {
     public static final String TEST_VALUE = "100";
     public static final DeclarationNodeBuilder DEFAULT_INPUT = new DeclarationNodeBuilder()
-            .withValue("0")
             .withName(TEST_SYMBOL)
-            .withType(Lang.INT);
+            .withType(Lang.INT)
+            .withValue("0");
 
     @Test
     void testNoValue() {
-        assertWithinClass(DEFAULT_INPUT.withName("first"), new MagmaDefinitionBuilder()
+        assertWithinClass(new DeclarationNodeBuilder()
+                .withName(TEST_SYMBOL)
+                .withType(Lang.INT)
+                .withName("first"), new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName("first")
-                .withType(Lang.I32)
-                .withValue("0"));
+                .withType(Lang.I32));
     }
 
     @ParameterizedTest

@@ -2,18 +2,20 @@ package com.meti.magma;
 
 import com.meti.java.RenderableBuilder;
 
+import java.util.Optional;
+
 public class MagmaDefinitionBuilder implements RenderableBuilder {
     private String flagString;
     private String mutabilityString;
     private String name;
     private String type;
-    private String value;
+    private Optional<String> value;
 
     public MagmaDefinitionBuilder() {
-        this("", "", "", "", "");
+        this("", "", "", "", Optional.empty());
     }
 
-    public MagmaDefinitionBuilder(String flagString, String mutabilityString, String name, String type, String value) {
+    public MagmaDefinitionBuilder(String flagString, String mutabilityString, String name, String type, Optional<String> value) {
         this.flagString = flagString;
         this.mutabilityString = mutabilityString;
         this.name = name;
@@ -38,7 +40,7 @@ public class MagmaDefinitionBuilder implements RenderableBuilder {
     }
 
     public MagmaDefinitionBuilder withValue(String value) {
-        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, Optional.of(value));
     }
 
     @Override
