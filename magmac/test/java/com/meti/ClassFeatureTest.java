@@ -14,17 +14,17 @@ public class ClassFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleClasses(String name) {
-        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(name).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
+        assertCompile(new JavaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render(), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
     }
 
     @Test
     void testPublicKeyword() {
-        assertCompile(new JavaClassNodeBuilder().setPrefix(Lang.PUBLIC_KEYWORD).setName(FeatureTest.TEST_SYMBOL).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().withPrefix("export ").withName(FeatureTest.TEST_SYMBOL).withContent("").build().render());
+        assertCompile(new JavaClassNodeBuilder().withPrefix(Lang.PUBLIC_KEYWORD).withName(FeatureTest.TEST_SYMBOL).withContent("").build().render(), new MagmaClassNodeBuilder().withPrefix("export ").withName(FeatureTest.TEST_SYMBOL).withContent("").build().render());
     }
 
     @Test
     void testBody() {
-        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(FeatureTest.TEST_SYMBOL).setContent(TEST_BODY).createJavaClassNode().renderJavaClass(),
+        assertCompile(new JavaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render(),
                 new MagmaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render());
     }
 }

@@ -13,7 +13,6 @@ import static com.meti.CompiledTest.assertCompile;
 import static com.meti.FeatureTest.TEST_SYMBOL;
 
 public class DefinitionFeatureTest {
-
     public static final String TEST_VALUE = "100";
     public static final DeclarationNodeBuilder DEFAULT_BUILDER = new DeclarationNodeBuilder()
             .withValue("0")
@@ -26,14 +25,25 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .withName(name)
                 .build()
-                .render(), new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(name).withType(Lang.I32).withValue("0").build().render());
+                .render(), new MagmaDefinitionBuilder()
+                .withMutability(Lang.LET_KEYWORD)
+                .withName(name)
+                .withType(Lang.I32)
+                .withValue("0").build().render());
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void testMultipleDefinitions(int count) {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER.build().render().repeat(count),
-                new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue("0").build().render().repeat(count));
+                new MagmaDefinitionBuilder()
+                        .withMutability(Lang.LET_KEYWORD)
+                        .withName(TEST_SYMBOL)
+                        .withType(Lang.I32)
+                        .withValue("0")
+                        .build()
+                        .render()
+                        .repeat(count));
     }
 
     @Test
@@ -41,7 +51,11 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .setType(Lang.LONG)
                 .build()
-                .render(), new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I64).withValue("0").build().render());
+                .render(), new MagmaDefinitionBuilder()
+                .withMutability(Lang.LET_KEYWORD)
+                .withName(TEST_SYMBOL)
+                .withType(Lang.I64)
+                .withValue("0").build().render());
     }
 
     @Test
@@ -49,7 +63,7 @@ public class DefinitionFeatureTest {
         FeatureTest.assertWithinClass(DEFAULT_BUILDER
                 .withValue(TEST_VALUE)
                 .build()
-                .render(), new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render());
+                .render(), new MagmaDefinitionBuilder().withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render());
     }
 
     @Test
@@ -58,22 +72,31 @@ public class DefinitionFeatureTest {
                 .withFlagString(Lang.FINAL_KEYWORD + " ")
                 .withValue(TEST_VALUE)
                 .build()
-                .render(), new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.CONST_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render());
+                .render(), new MagmaDefinitionBuilder().withMutability(Lang.CONST_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {TEST_SYMBOL, TEST_SYMBOL + "_more"})
     void testStatic(String className) {
-        String content = new MagmaDefinitionBuilder().withFlags("").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render();
+        String content = new MagmaDefinitionBuilder().withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render();
         String content1 = DEFAULT_BUILDER
-                        .withValue(TEST_VALUE)
-                        .withFlagString("static ")
+                .withValue(TEST_VALUE)
+                .withFlagString("static ")
+                .build()
+                .render();
+
+        assertCompile(new JavaClassNodeBuilder()
+                        .withPrefix("")
+                        .withName(className)
+                        .withContent(content1)
                         .build()
-                        .render();
-        assertCompile(new JavaClassNodeBuilder().setPrefix("").setName(className).setContent(content1).createJavaClassNode().renderJavaClass(),
+                        .render(),
                 new ObjectNode("", className, content).render()
                 + "\n\n"
-                + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());
+                + new MagmaClassNodeBuilder()
+                        .withName(className)
+                        .build()
+                        .render());
     }
 
     @Test
@@ -82,6 +105,13 @@ public class DefinitionFeatureTest {
                         .withValue(TEST_VALUE)
                         .build()
                         .render(),
-                new MagmaDefinitionBuilder().withFlags("pub ").withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render());
+                new MagmaDefinitionBuilder()
+                        .withFlags("pub ")
+                        .withMutability(Lang.LET_KEYWORD)
+                        .withName(TEST_SYMBOL)
+                        .withType(Lang.I32)
+                        .withValue(TEST_VALUE)
+                        .build()
+                        .render());
     }
 }

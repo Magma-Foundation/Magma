@@ -68,7 +68,7 @@ public class MethodFeatureTest {
     void testStatic(String className) {
         String content = new MagmaMethodBuilder().withPrefix("").withName(TEST_SYMBOL).withType("Void").withContent("{}").withExceptionString("").build().render();
         assertCompile(
-                new JavaClassNodeBuilder().setPrefix("").setName(className).setContent(renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")).createJavaClassNode().renderJavaClass(),
+                new JavaClassNodeBuilder().withPrefix("").withName(className).withContent(renderJavaMethod("", "static ", TEST_SYMBOL, "", "{}")).build().render(),
                 new ObjectNode("", className, content).render()
                 + "\n\n"
                 + new MagmaClassNodeBuilder().withPrefix("").withName(className).withContent("").build().render());

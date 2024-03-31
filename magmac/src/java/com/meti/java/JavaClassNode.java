@@ -15,7 +15,7 @@ public final class JavaClassNode {
         this.content = content;
     }
 
-    public String renderJavaClass() {
+    public String render() {
         return prefix() + Lang.CLASS_KEYWORD + name() + " {" + content() + "}";
     }
 

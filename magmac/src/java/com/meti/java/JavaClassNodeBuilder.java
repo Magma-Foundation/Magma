@@ -5,22 +5,22 @@ public class JavaClassNodeBuilder {
     private String name;
     private String content;
 
-    public JavaClassNodeBuilder setPrefix(String prefix) {
+    public JavaClassNodeBuilder withPrefix(String prefix) {
         this.prefix = prefix;
         return this;
     }
 
-    public JavaClassNodeBuilder setName(String name) {
+    public JavaClassNodeBuilder withName(String name) {
         this.name = name;
         return this;
     }
 
-    public JavaClassNodeBuilder setContent(String content) {
+    public JavaClassNodeBuilder withContent(String content) {
         this.content = content;
         return this;
     }
 
-    public JavaClassNode createJavaClassNode() {
+    public JavaClassNode build() {
         return new JavaClassNode(prefix, name, content);
     }
 }

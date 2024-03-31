@@ -7,29 +7,36 @@ public class MagmaDefinitionBuilder {
     private String type;
     private String value;
 
-    public MagmaDefinitionBuilder withFlags(String flagString) {
+    public MagmaDefinitionBuilder() {
+        this("", "", "", "", "");
+    }
+
+    public MagmaDefinitionBuilder(String flagString, String mutabilityString, String name, String type, String value) {
         this.flagString = flagString;
-        return this;
+        this.mutabilityString = mutabilityString;
+        this.name = name;
+        this.type = type;
+        this.value = value;
+    }
+
+    public MagmaDefinitionBuilder withFlags(String flagString) {
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
     public MagmaDefinitionBuilder withMutability(String mutabilityString) {
-        this.mutabilityString = mutabilityString;
-        return this;
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
     public MagmaDefinitionBuilder withName(String name) {
-        this.name = name;
-        return this;
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
     public MagmaDefinitionBuilder withType(String type) {
-        this.type = type;
-        return this;
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
     public MagmaDefinitionBuilder withValue(String value) {
-        this.value = value;
-        return this;
+        return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
 
     public MagmaDefinition build() {
