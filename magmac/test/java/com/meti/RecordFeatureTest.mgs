@@ -14,15 +14,15 @@ export class def RecordFeatureTest() => {
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
 	def testSimpleRecords() : Void => {
-        assertCompile(renderRecord(name), renderMagmaClass(name, ""));
+        assertCompile(renderRecord(name), new MagmaClassNodeBuilder().setPrefix("").setName(name).setContent("").createMagmaClassNode().render());
     }
 	@Test
 	def testPublicKeyword() : Void => {
-        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), renderMagmaClass(EXPORT_KEYWORD, TEST_SYMBOL, ""));
+        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), new MagmaClassNodeBuilder().setPrefix(EXPORT_KEYWORD).setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 	@Test
 	def testBody() : Void => {
         assertCompile(renderRecord("", TEST_SYMBOL, "{}"),
-                renderMagmaClass(TEST_SYMBOL, ""));
+                new MagmaClassNodeBuilder().setPrefix("").setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 }

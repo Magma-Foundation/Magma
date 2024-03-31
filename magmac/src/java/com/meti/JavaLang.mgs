@@ -1,6 +1,6 @@
 export object JavaLang = {
 	def renderJavaClass() : String => {
-        return Compiler.renderJavaClass("", name, content);
+        return new JavaClassNodeBuilder().setPrefix("").setName(name).setContent(content).createJavaClassNode().renderJavaClass();
     }
 	def renderRecord() : String => {
         return renderRecord("", name);

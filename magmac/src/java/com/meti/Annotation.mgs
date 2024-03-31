@@ -1,0 +1,5 @@
+export class def Annotation() => {
+	def renderAnnotation() : String => {
+        return "\n\t@" + name() + valueString();
+    }
+}
