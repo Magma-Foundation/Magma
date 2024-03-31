@@ -1,0 +1,28 @@
+extern import { Test } from org.junit.jupiter.api;
+extern import { ParameterizedTest } from org.junit.jupiter.params;
+extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import { assertCompile } from com.meti.CompiledTest;
+extern import com.meti.Compiler;
+extern import { TEST_SYMBOL } from com.meti.FeatureTest;
+extern import com.meti.JavaLang;
+
+export object RecordFeatureTest = {
+	pub const TEST_BODY : String = "0";
+}
+
+export class def RecordFeatureTest() => {
+	@ParameterizedTest
+	@ValueSource(strings = ["First", "Second"])
+	def testSimpleRecords() : Void => {
+        assertCompile(renderRecord(name), renderMagmaClass(name, ""));
+    }
+	@Test
+	def testPublicKeyword() : Void => {
+        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), renderMagmaClass(EXPORT_KEYWORD, TEST_SYMBOL, ""));
+    }
+	@Test
+	def testBody() : Void => {
+        assertCompile(renderRecord("", TEST_SYMBOL, "{}"),
+                renderMagmaClass(TEST_SYMBOL, ""));
+    }
+}

@@ -11,6 +11,15 @@ export object JavaLang = {
 	def renderDefinition() : String => {
         return flagString + type + " " + name + " = " + value + ";";
     }
+	def renderRecord() : String => {
+        return renderRecord("", name);
+    }
+	def renderRecord() : String => {
+        return renderRecord(prefix, name, "{}");
+    }
+	def renderRecord() : String => {
+        return prefix + "record " + name + "()" + body;
+    }
 }
 
 export class def JavaLang() => {

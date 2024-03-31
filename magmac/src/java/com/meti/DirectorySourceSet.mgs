@@ -4,3 +4,15 @@ extern import { Path } from java.nio.file;
 extern import { Set } from java.util;
 extern import { Collectors } from java.util.stream;
 extern import { Stream } from java.util.stream;
+
+export class def DirectorySourceSet() => {
+	@Override
+	def collect() : Set<Path> ? IOException => {
+        try (var stream = Files.walk(root)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.toString().endsWith(".java"))
+                    .collect(Collectors.toSet());
+        }
+    }
+}

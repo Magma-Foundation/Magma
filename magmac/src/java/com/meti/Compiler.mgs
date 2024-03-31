@@ -19,6 +19,7 @@ export object Compiler = {
 	pub const CAMEL_VOID : String = "Void";
 	pub const EXPORT_KEYWORD : String = "export ";
 	pub const INTERFACE_KEYWORD : String = "interface ";
+	pub const RECORD_KEYWORD : String = "record ";
 	def compile() : String => {
         var args = split(input);
 
@@ -57,4 +58,6 @@ export class def Compiler() => {
                 if (c == '}' || c == ')') state.descend();
                 state.append(c);
             };
+}class def MembersResult() => {
+}class def State() => {
 }

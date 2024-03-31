@@ -21,6 +21,7 @@ public class Compiler {
     public static final String CAMEL_VOID = "Void";
     public static final String EXPORT_KEYWORD = "export ";
     public static final String INTERFACE_KEYWORD = "interface ";
+    public static final String RECORD_KEYWORD = "record ";
 
     static String compile(String input) {
         var args = split(input);
@@ -73,13 +74,21 @@ public class Compiler {
                 .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
-    private static Optional< State> compileRecord(String input) {
-        if (input.startsWith("record ")) {
-            var name = input.substring("record ".length(), input.indexOf('(')).strip();
-            return Optional.of(new State(Optional.empty(), Optional.of(renderMagmaClass(name, "")), Optional.empty()));
-        } else {
-            return Optional.empty();
-        }
+    private static Optional<State> compileRecord(String input) {
+        var index = input.indexOf(RECORD_KEYWORD);
+        if (index == -1) return Optional.empty();
+
+        var isPublic = input.startsWith(PUBLIC_KEYWORD);
+
+        var name = input.substring(index + RECORD_KEYWORD.length(), input.indexOf('(')).strip();
+
+        var bodyStart = input.indexOf('{');
+        var bodyEnd = input.lastIndexOf('}');
+        var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
+
+        var rendered = renderMagmaClass(isPublic ? EXPORT_KEYWORD : "", name, membersString.value);
+
+        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {

@@ -18,6 +18,14 @@ public class JavaLang {
     }
 
     static String renderRecord(String name) {
-        return "record " + name + "(){}";
+        return renderRecord("", name);
+    }
+
+    static String renderRecord(String prefix, String name) {
+        return renderRecord(prefix, name, "{}");
+    }
+
+    static String renderRecord(String prefix, String name, String body) {
+        return prefix + "record " + name + "()" + body;
     }
 }
