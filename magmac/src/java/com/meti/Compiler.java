@@ -56,6 +56,7 @@ public class Compiler {
             }
         }
 
+        state.advance();
         state.clean();
         return state.unwrap();
     }
@@ -91,15 +92,19 @@ public class Compiler {
         }
 
         var value = String.join("", outputValues);
-        var renderedClass = outputValues.isEmpty() ? Optional.<String>empty() : Optional.of(isPublic
-                ? renderExportedMagmaClass(name, value)
-                : renderMagmaClass(name, value));
+        var flagString = isPublic ? "export " : "";
 
-        var renderedMore = outputMore.isEmpty()
-                ? Optional.<String>empty()
-                : Optional.of(renderObject(name, String.join("", outputMore)));
+        var renderedClass = renderMagmaClass(flagString, name, value);
 
-        return Optional.of(new State(renderedClass, renderedMore));
+        Optional<String> renderedMore;
+        if (outputMore.isEmpty()) {
+            renderedMore = Optional.empty();
+        } else {
+            String content = String.join("", outputMore);
+            renderedMore = Optional.of(renderObject(flagString, name, content));
+        }
+
+        return Optional.of(new State(Optional.of(renderedClass), renderedMore));
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -139,7 +144,11 @@ public class Compiler {
     }
 
     static String renderObject(String name, String content) {
-        return "object " + name + " {" + content + "\n}";
+        return renderObject("", name, content);
+    }
+
+    static String renderObject(String flagString, String name, String content) {
+        return flagString + "object " + name + " {" + content + "\n}";
     }
 
     private static Optional<State> compileImport(String input) {

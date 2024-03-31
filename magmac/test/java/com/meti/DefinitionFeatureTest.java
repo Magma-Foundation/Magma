@@ -53,6 +53,7 @@ public class DefinitionFeatureTest {
     void testStatic(String className) {
         assertCompile(
                 renderJavaClass(className, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
+                renderMagmaClass(className, "") + "\n\n" +
                 renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE)));
     }
 

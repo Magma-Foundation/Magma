@@ -27,7 +27,7 @@ export class def ApplicationTest() => {
     }
 }
 
-object ApplicationTest {
+export object ApplicationTest {
 	pub const ROOT : Path = Paths.get(".");
 	pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");
 	pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
