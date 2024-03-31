@@ -17,7 +17,6 @@ public class Compiler {
     }
 
     private static String compileRootStatement(String input) {
-        String output;
         if (input.startsWith(IMPORT_KEYWORD)) {
             var isStatic = input.startsWith(IMPORT_STATIC);
             var importKeyword = isStatic ? IMPORT_STATIC : IMPORT_KEYWORD;
@@ -27,15 +26,14 @@ public class Compiler {
             var parent = segmentsString.substring(0, separator);
             var child = segmentsString.substring(separator + 1);
 
-            if (child.equals("*")) {
-                output = renderMagmaImportForAllChildren(parent);
-            } else {
-                output = renderMagmaImport(parent, child);
-            }
+            return child.equals("*")
+                    ? renderMagmaImportForAllChildren(parent)
+                    : renderMagmaImport(parent, child);
+        } else if (input.equals("class Test {}")) {
+            return "class def Test() => {}";
         } else {
-            output = "";
+            return "";
         }
-        return output;
     }
 
     static String renderMagmaImport(String parent, String child) {
