@@ -6,9 +6,6 @@ extern import { Path } from java.nio.file;
 extern import { Paths } from java.nio.file;
 extern import org.junit.jupiter.api.Assertions;
 export class def ApplicationTest() => {
-    public static final Path ROOT = Paths.get(".");
-    public static final Path TARGET = ROOT.resolve("ApplicationTest.mgs");
-    public static final Path SOURCE = ROOT.resolve("ApplicationTest.java");
 
     @AfterEach
     void tearDown() throws IOException {
@@ -28,4 +25,10 @@ export class def ApplicationTest() => {
         Main.run(SOURCE);
         assertFalse(Files.exists(TARGET));
     }
+}
+
+object ApplicationTest {
+	pub const ROOT : Path = Paths.get(".");
+	pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");
+	pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
 }

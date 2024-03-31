@@ -35,7 +35,7 @@ public class Compiler {
         return Stream.of(values, more)
                 .filter(list -> !list.isEmpty())
                 .map(list -> String.join("", list))
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\n\n"));
     }
 
     private static List<String> split(String input) {
@@ -139,7 +139,7 @@ public class Compiler {
     }
 
     static String renderObject(String name, String content) {
-        return "object " + name + " {" + content + "}";
+        return "object " + name + " {" + content + "\n}";
     }
 
     private static Optional<State> compileImport(String input) {
@@ -178,7 +178,7 @@ public class Compiler {
     }
 
     private static String renderMagmaClass(String prefix, String name, String content) {
-        return prefix + CLASS_KEYWORD + "def " + name + "() => {" + content + "}";
+        return prefix + CLASS_KEYWORD + "def " + name + "() => {" + content + "\n}";
     }
 
     static String renderJavaClass(String prefix, String name, String content) {
@@ -194,7 +194,7 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String flagString, String mutabilityString, String name, String type, String value) {
-        return flagString + mutabilityString + name + " : " + type + " = " + value + ";";
+        return "\n\t" + flagString + mutabilityString + name + " : " + type + " = " + value + ";";
     }
 
     record State(Optional<String> value, Optional<String> more) {
