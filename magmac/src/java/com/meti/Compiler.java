@@ -116,27 +116,7 @@ public class Compiler {
                 .map(String::strip)
                 .filter(line -> line.startsWith("@"))
                 .map(line -> line.substring(1))
-                .map(line -> {
-                    var paramStart = line.indexOf('(');
-                    var paramEnd = line.lastIndexOf(')');
-
-                    if (paramStart == -1 || paramEnd == -1) {
-                        return line;
-                    } else {
-                        var annotationName = line.substring(0, paramStart).strip();
-                        var arg = line.substring(paramStart + 1, paramEnd)
-                                .strip();
-
-                        var separator = arg.indexOf('=');
-                        var name = arg.substring(0, separator).strip();
-                        var right = arg.substring(separator + 1).strip();
-
-                        var contentStart = right.indexOf('{');
-                        var contentEnd = right.lastIndexOf('}');
-
-                        return annotationName + "(" + name + " = [" + right.substring(contentStart + 1, contentEnd) + "])";
-                    }
-                })
+                .map(line -> compileAnnotation(line).orElse(line))
                 .toList();
 
         var methodString = lines.stream()
@@ -148,7 +128,7 @@ public class Compiler {
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        if(separator == -1) return Optional.empty();
+        if (separator == -1) return Optional.empty();
 
         var name = before.substring(separator + 1).strip();
         var flagsAndType = before.substring(0, separator).strip();
@@ -174,7 +154,7 @@ public class Compiler {
         var contentStart = methodString.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        if(!(paramEnd < contentStart)) return Optional.empty();
+        if (!(paramEnd < contentStart)) return Optional.empty();
         var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
         String result;
 
@@ -192,6 +172,28 @@ public class Compiler {
         return inputFlags.contains("static")
                 ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(result)))
                 : Optional.of(new State(Optional.empty(), Optional.of(result), Optional.empty()));
+    }
+
+    private static Optional<String> compileAnnotation(String line) {
+        var paramStart = line.indexOf('(');
+        var paramEnd = line.lastIndexOf(')');
+
+        if (paramStart == -1 || paramEnd == -1) {
+            return Optional.empty();
+        } else {
+            var annotationName = line.substring(0, paramStart).strip();
+            var arg = line.substring(paramStart + 1, paramEnd)
+                    .strip();
+
+            var separator = arg.indexOf('=');
+            var name = arg.substring(0, separator).strip();
+            var right = arg.substring(separator + 1).strip();
+
+            var contentStart = right.indexOf('{');
+            var contentEnd = right.lastIndexOf('}');
+
+            return Optional.of(annotationName + "(" + name + " = [" + right.substring(contentStart + 1, contentEnd) + "])");
+        }
     }
 
     static String renderMagmaMethodWithException(String annotationsString, String name, String type, String content, String exceptionName) {
