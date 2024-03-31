@@ -1,0 +1,26 @@
+export class def DeclarationNodeBuilder() => {
+	def DeclarationNodeBuilder() : public => {
+        this("", "", "", "");
+    }
+	def DeclarationNodeBuilder() : public => {
+        this.flagString = flagString;
+        this.name = name;
+        this.type = type;
+        this.value = value;
+    }
+	def withFlagString() : DeclarationNodeBuilder => {
+        return new DeclarationNodeBuilder(flagString, name, type, value);
+    }
+	def setName() : DeclarationNodeBuilder => {
+        return new DeclarationNodeBuilder(flagString, name, type, value);
+    }
+	def setType() : DeclarationNodeBuilder => {
+        return new DeclarationNodeBuilder(flagString, name, type, value);
+    }
+	def withValue() : DeclarationNodeBuilder => {
+        return new DeclarationNodeBuilder(flagString, name, type, value);
+    }
+	def build() : DeclarationNode => {
+        return new DeclarationNode(flagString, name, type, value);
+    }
+}

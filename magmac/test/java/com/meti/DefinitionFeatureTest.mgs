@@ -4,7 +4,6 @@ extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { assertCompile } from com.meti.CompiledTest;
 extern import com.meti.Compiler;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
-extern import { renderDefinition } from com.meti.JavaLang;
 extern import { renderJavaClass } from com.meti.JavaLang;
 
 export object DefinitionFeatureTest = {
@@ -12,44 +11,61 @@ export object DefinitionFeatureTest = {
 }
 
 export class def DefinitionFeatureTest() => {
+	DeclarationNodeBuilder : () => Void;
 	@ParameterizedTest
 	@ValueSource(strings = ["first", "second"])
 	def testSimpleDefinition() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(name, INT), renderMagmaDefinition(name, I32));
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER
+                .setName(name)
+                .build()
+                .render(), renderMagmaDefinition(name, I32));
     }
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
 	def testMultipleDefinitions() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT).repeat(count),
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER.build().render().repeat(count),
                 renderMagmaDefinition(TEST_SYMBOL, I32).repeat(count));
     }
 	@Test
 	def testType() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, LONG), renderMagmaDefinition(TEST_SYMBOL, I64));
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER
+                .setType(LONG)
+                .build()
+                .render(), renderMagmaDefinition(TEST_SYMBOL, I64));
     }
 	@Test
 	def testValue() : Void => {
-        FeatureTest.assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER
+                .withValue(TEST_VALUE)
+                .build()
+                .render(), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
     }
 	@Test
 	def testFinal() : Void => {
-        FeatureTest.assertWithinClass(
-                renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
-                renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER
+                .withFlagString(FINAL_KEYWORD + " ")
+                .withValue(TEST_VALUE)
+                .build()
+                .render(), renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
 	@ParameterizedTest
 	@ValueSource(strings = [TEST_SYMBOL, TEST_SYMBOL + "_more"])
 	def testStatic() : Void => {
-        assertCompile(
-                renderJavaClass(className, renderDefinition("static ", TEST_SYMBOL, INT, TEST_VALUE)),
+        assertCompile(renderJavaClass(className, DEFAULT_BUILDER
+                        .withValue(TEST_VALUE)
+                        .withFlagString("static ")
+                        .build()
+                        .render()),
                 renderObject(className, renderMagmaDefinition("", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE))
                 + "\n\n"
                 + renderMagmaClass(className, ""));
     }
 	@Test
 	def testPublic() : Void => {
-        FeatureTest.assertWithinClass(
-                renderDefinition("public ", TEST_SYMBOL, INT, TEST_VALUE),
+        FeatureTest.assertWithinClass(DEFAULT_BUILDER.withFlagString("public ")
+                        .withValue(TEST_VALUE)
+                        .build()
+                        .render(),
                 renderMagmaDefinition("pub ", LET_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
 }

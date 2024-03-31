@@ -1,0 +1,51 @@
+extern import { Objects } from java.util;
+
+export class def DeclarationNode() => {
+    private final String flagString
+    private final String name
+    private final String type
+    private final String value
+	def DeclarationNode() : public => {
+        this.flagString = flagString;
+        this.name = name;
+        this.type = type;
+        this.value = value;
+    }
+	def render() : String => {
+        return flagString() + type() + " " + name() + " = " + value() + ";";
+    }
+	def flagString() : String => {
+        return flagString;
+    }
+	def name() : String => {
+        return name;
+    }
+	def type() : String => {
+        return type;
+    }
+	def value() : String => {
+        return value;
+    }
+	@Override
+	def equals() : boolean => {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (DeclarationNode) obj;
+        return Objects.equals(this.flagString, that.flagString) &&
+               Objects.equals(this.name, that.name) &&
+               Objects.equals(this.type, that.type) &&
+               Objects.equals(this.value, that.value);
+    }
+	@Override
+	def hashCode() : I32 => {
+        return Objects.hash(flagString, name, type, value);
+    }
+	@Override
+	def toString() : String => {
+        return "DeclarationNode[" +
+               "flagString=" + flagString + ", " +
+               "name=" + name + ", " +
+               "type=" + type + ", " +
+               "value=" + value + ']';
+    }
+}
