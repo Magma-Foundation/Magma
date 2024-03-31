@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Compiler {
     public static final String IMPORT_KEYWORD = "import ";
@@ -20,28 +21,34 @@ public class Compiler {
     }
 
     private static String compileRootStatement(String input) {
-        if (input.startsWith(IMPORT_KEYWORD)) {
-            var isStatic = input.startsWith(IMPORT_STATIC);
-            var importKeyword = isStatic ? IMPORT_STATIC : IMPORT_KEYWORD;
-            var segmentsString = input.substring(importKeyword.length());
+        return compileImport(input)
+                .or(() -> compileClass(input))
+                .orElse("");
+    }
 
-            var separator = segmentsString.lastIndexOf('.');
-            var parent = segmentsString.substring(0, separator);
-            var child = segmentsString.substring(separator + 1);
+    private static Optional<String> compileClass(String input) {
+        if (!input.contains(CLASS_KEYWORD)) return Optional.empty();
+        var isPublic = input.startsWith(PUBLIC_KEYWORD);
+        var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
+        var name = input.substring(nameStart, input.indexOf(" {}"));
+        return Optional.of(isPublic
+                ? renderExportedMagmaClass(name)
+                : renderMagmaClass(name));
+    }
 
-            return child.equals("*")
-                    ? renderMagmaImportForAllChildren(parent)
-                    : renderMagmaImport(parent, child);
-        } else if (input.contains(CLASS_KEYWORD)) {
-            var isPublic = input.startsWith(PUBLIC_KEYWORD);
-            var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
-            var name = input.substring(nameStart, input.indexOf(" {}"));
-            return isPublic
-                    ? renderExportedMagmaClass(name)
-                    : renderMagmaClass(name);
-        } else {
-            return "";
-        }
+    private static Optional<String> compileImport(String input) {
+        if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
+        var isStatic = input.startsWith(IMPORT_STATIC);
+        var importKeyword = isStatic ? IMPORT_STATIC : IMPORT_KEYWORD;
+        var segmentsString = input.substring(importKeyword.length());
+
+        var separator = segmentsString.lastIndexOf('.');
+        var parent = segmentsString.substring(0, separator);
+        var child = segmentsString.substring(separator + 1);
+
+        return Optional.of(child.equals("*")
+                ? renderMagmaImportForAllChildren(parent)
+                : renderMagmaImport(parent, child));
     }
 
     static String renderMagmaImport(String parent, String child) {
