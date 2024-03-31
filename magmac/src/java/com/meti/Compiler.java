@@ -19,6 +19,8 @@ public class Compiler {
     public static final String FINAL_KEYWORD = "final";
     public static final String LOWER_VOID = "void";
     public static final String CAMEL_VOID = "Void";
+    public static final String EXPORT_KEYWORD = "export ";
+    public static final String INTERFACE_KEYWORD = "interface ";
 
     static String compile(String input) {
         var args = split(input);
@@ -71,19 +73,32 @@ public class Compiler {
     }
 
     private static Optional<State> compileInterface(String input) {
-        if (input.startsWith("interface ")) {
-            var name = input.substring("interface ".length(), input.indexOf('{')).strip();
-            return Optional.of(new State(Optional.of(renderMagmaTrait(name)), Optional.empty(), Optional.empty()));
+        var index = input.indexOf(INTERFACE_KEYWORD);
+        if (index != -1) {
+            var isPublic = input.startsWith(PUBLIC_KEYWORD);
+
+            var name = input.substring(index + INTERFACE_KEYWORD.length(), input.indexOf('{')).strip();
+            var rendered = renderMagmaTrait(isPublic ? EXPORT_KEYWORD : "", name);
+
+            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
     }
 
     static String renderMagmaTrait(String name) {
-        return "trait " + name + " {}";
+        return renderMagmaTrait("", name);
+    }
+
+    static String renderMagmaTrait(String prefixString, String name) {
+        return prefixString + "trait " + name + " {}";
     }
 
     static String renderJavaInterface(String name) {
-        return "interface " + name + " {}";
+        return renderJavaInterface("", name);
+    }
+
+    static String renderJavaInterface(String prefixString, String name) {
+        return prefixString + INTERFACE_KEYWORD + name + " {}";
     }
 
     private static Optional<State> compileClass(String input) {
@@ -112,7 +127,7 @@ public class Compiler {
         }
 
         var value = String.join("", outputValues);
-        var flagString = isPublic ? "export " : "";
+        var flagString = isPublic ? EXPORT_KEYWORD : "";
 
         var renderedClass = renderMagmaClass(flagString, name, value);
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.Compiler.*;
+import static com.meti.FeatureTest.TEST_SYMBOL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InterfaceFeatureTest {
@@ -12,5 +13,11 @@ public class InterfaceFeatureTest {
     @ValueSource(strings = {"First", "Second"})
     void testSimpleInterface(String name) {
         assertEquals(renderMagmaTrait(name), compile(renderJavaInterface(name)));
+    }
+
+    @Test
+    void testPublic() {
+        assertEquals(renderMagmaTrait("export ", TEST_SYMBOL),
+                compile(renderJavaInterface("public ", TEST_SYMBOL)));
     }
 }
