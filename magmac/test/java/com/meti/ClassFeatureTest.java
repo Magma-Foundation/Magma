@@ -31,9 +31,10 @@ public class ClassFeatureTest {
                 Compiler.renderMagmaClass(TEST_NAME, TEST_BODY));
     }
 
-    @Test
-    void testBodyContent() {
-        assertCompile(renderJavaClass(TEST_NAME, Compiler.renderJavaDefinition()),
-                Compiler.renderMagmaClass(TEST_NAME, Compiler.renderMagmaDefinition()));
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void testBodyContent(String name) {
+        assertCompile(renderJavaClass(TEST_NAME, Compiler.renderJavaDefinition(name)),
+                Compiler.renderMagmaClass(TEST_NAME, Compiler.renderMagmaDefinition(name)));
     }
 }

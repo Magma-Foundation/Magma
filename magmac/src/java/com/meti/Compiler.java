@@ -62,8 +62,9 @@ public class Compiler {
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
 
         String outputContent;
-        if (inputContent.equals(renderJavaDefinition())) {
-            outputContent = renderMagmaDefinition();
+        if (inputContent.startsWith("int ")) {
+            var definitionName = inputContent.substring("int ".length(), inputContent.indexOf(" = 0;"));
+            outputContent = renderMagmaDefinition(definitionName);
         } else {
             outputContent = inputContent;
         }
@@ -124,11 +125,11 @@ public class Compiler {
         return prefix + CLASS_KEYWORD + name + " {" + content + "}";
     }
 
-    static String renderMagmaDefinition() {
-        return "let root : I16 = 0;";
+    static String renderMagmaDefinition(String name) {
+        return "let " + name + " : I16 = 0;";
     }
 
-    static String renderJavaDefinition() {
-        return "int root = 0;";
+    static String renderJavaDefinition(String name) {
+        return "int " + name + " = 0;";
     }
 }
