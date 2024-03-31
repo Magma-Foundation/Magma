@@ -1,9 +1,6 @@
 package com.meti;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +17,8 @@ public class Compiler {
     public static final String CONST_KEYWORD = "const ";
     public static final String LET_KEYWORD = "let ";
     public static final String FINAL_KEYWORD = "final";
+    public static final String LOWER_VOID = "void";
+    public static final String CAMEL_VOID = "Void";
 
     static String compile(String input) {
         var args = split(input);
@@ -110,14 +109,37 @@ public class Compiler {
 
     private static Optional<? extends State> compileMethod(String classMember) {
         var paramStart = classMember.indexOf('(');
-        if(paramStart == -1) return Optional.empty();
+        if (paramStart == -1) return Optional.empty();
 
         var before = classMember.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        if(separator == -1) return Optional.empty();
+        if (separator == -1) return Optional.empty();
 
         var name = before.substring(separator + 1).strip();
-        return Optional.of(new State(Optional.of(renderMagmaMethodWithType("", name, "Void", "{}")), Optional.empty()));
+        var annotationsAndType = before.substring(0, separator).strip();
+        var typeSeparator = annotationsAndType.lastIndexOf('\n');
+        List<String> annotations;
+        String type;
+        if (typeSeparator == -1) {
+            annotations = Collections.emptyList();
+            type = compileType(annotationsAndType);
+        } else {
+            var asList = Arrays.stream(annotationsAndType.split("\n"))
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .collect(Collectors.toList());
+
+            annotations = asList.subList(0, asList.size() - 1).stream()
+                    .map(element -> element.substring(1))
+                    .collect(Collectors.toList());
+            type = compileType(asList.get(asList.size() - 1));
+        }
+
+        var annotationsString = annotations.stream()
+                .map(annotation -> "@" + annotation + "\n")
+                .collect(Collectors.joining());
+
+        return Optional.of(new State(Optional.of(renderMagmaMethodWithType(annotationsString, name, type, "{}")), Optional.empty()));
     }
 
     private static Optional<State> compileDefinition(String inputContent) {
@@ -139,10 +161,7 @@ public class Compiler {
             inputType = flagsAndType.substring(typeSeparator + 1).strip();
         }
 
-        String outputType;
-        if (inputType.equals(LONG)) outputType = I64;
-        else if (inputType.equals(INT)) outputType = I32;
-        else outputType = inputType;
+        var outputType = compileType(inputType);
 
         var name = beforeSlice.substring(nameSeparator + 1);
         var value = inputContent.substring(valueSeparator + 1).strip();
@@ -154,6 +173,15 @@ public class Compiler {
         return Optional.of(flags.contains("static")
                 ? new State(Optional.empty(), Optional.of(rendered))
                 : new State(Optional.of(rendered), Optional.empty()));
+    }
+
+    private static String compileType(String inputType) {
+        String outputType;
+        if (inputType.equals(LONG)) outputType = I64;
+        else if (inputType.equals(INT)) outputType = I32;
+        else if(inputType.equals(LOWER_VOID)) outputType = CAMEL_VOID;
+        else outputType = inputType;
+        return outputType;
     }
 
     static String renderObject(String name, String content) {
