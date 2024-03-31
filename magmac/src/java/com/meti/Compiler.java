@@ -71,10 +71,19 @@ public class Compiler {
     }
 
     private static Optional<State> compileInterface(String input) {
-        if (input.equals("interface Test {}")) {
-            return Optional.of(new State(Optional.of("trait Test {}"), Optional.empty(), Optional.empty()));
+        if (input.startsWith("interface ")) {
+            var name = input.substring("interface ".length(), input.indexOf('{')).strip();
+            return Optional.of(new State(Optional.of(renderMagmaTrait(name)), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
+    }
+
+    static String renderMagmaTrait(String name) {
+        return "trait " + name + " {}";
+    }
+
+    static String renderJavaInterface(String name) {
+        return "interface " + name + " {}";
     }
 
     private static Optional<State> compileClass(String input) {
