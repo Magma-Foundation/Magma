@@ -11,6 +11,9 @@ import static com.meti.JavaLang.renderDefinition;
 import static com.meti.JavaLang.renderJavaClass;
 
 public class DefinitionFeatureTest {
+
+    public static final String TEST_VALUE = "100";
+
     private static void assertWithinClass(String input, String output) {
         assertCompile(renderJavaClass(TEST_SYMBOL, input), renderMagmaClass(TEST_SYMBOL, output));
     }
@@ -28,13 +31,13 @@ public class DefinitionFeatureTest {
 
     @Test
     void testValue() {
-        assertWithinClass(renderDefinition(TEST_SYMBOL, INT, "100"), renderMagmaDefinition(TEST_SYMBOL, I32, "100"));
+        assertWithinClass(renderDefinition(TEST_SYMBOL, INT, TEST_VALUE), renderMagmaDefinition(TEST_SYMBOL, I32, TEST_VALUE));
     }
 
     @Test
     void testFinal() {
         assertWithinClass(
-                renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, "100"),
-                renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, "100"));
+                renderDefinition(FINAL_KEYWORD + " ", TEST_SYMBOL, INT, TEST_VALUE),
+                renderMagmaDefinition("", CONST_KEYWORD, TEST_SYMBOL, I32, TEST_VALUE));
     }
 }
