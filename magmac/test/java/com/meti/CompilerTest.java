@@ -9,7 +9,7 @@ import static com.meti.Compiler.renderMagmaImportForAllChildren;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CompilerTest {
-    public static final String PARENT = "org.junit.jupiter.api";
+    public static final String TEST_PARENT = "org.junit.jupiter.api";
     public static final String TEST_NAME = "Test";
 
     private static void assertCompile(String input, String expected) {
@@ -33,15 +33,20 @@ public class CompilerTest {
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void multipleImports(int count) {
-        var input = renderJavaImport(PARENT, TEST_NAME).repeat(count);
-        var output = renderMagmaImport(PARENT, TEST_NAME).repeat(count);
+        var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
+        var output = renderMagmaImport(TEST_PARENT, TEST_NAME).repeat(count);
         assertCompile(input, output);
+    }
+
+    @Test
+    void whitespace() {
+        assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", renderMagmaImport(TEST_PARENT, TEST_NAME));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"AfterEach", "Test"})
     void simpleImport(String name) {
-        assertCompile(renderJavaImport(PARENT, name), renderMagmaImport(PARENT, name));
+        assertCompile(renderJavaImport(TEST_PARENT, name), renderMagmaImport(TEST_PARENT, name));
     }
 
     @Test
@@ -52,6 +57,6 @@ public class CompilerTest {
 
     @Test
     void allImport() {
-        assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, CompilerTest.PARENT, "*"), renderMagmaImportForAllChildren(PARENT));
+        assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, CompilerTest.TEST_PARENT, "*"), renderMagmaImportForAllChildren(TEST_PARENT));
     }
 }

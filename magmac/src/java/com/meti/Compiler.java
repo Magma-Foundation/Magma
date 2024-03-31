@@ -11,7 +11,7 @@ public class Compiler {
         var args = input.split(";");
         var list = new ArrayList<String>();
         for (String arg : args) {
-            list.add(compileRootStatement(arg));
+            list.add(compileRootStatement(arg.strip()));
         }
         return String.join("", list);
     }
@@ -47,6 +47,6 @@ public class Compiler {
     }
 
     private static String renderMagmaImportWithChildString(String parent, String childString) {
-        return "extern " + IMPORT_KEYWORD + childString + parent + ";";
+        return "extern " + IMPORT_KEYWORD + childString + parent + ";\n";
     }
 }
