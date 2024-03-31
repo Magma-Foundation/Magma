@@ -14,7 +14,7 @@ public final class MagmaClassNode {
     }
 
     String render() {
-        return prefix() + Compiler.CLASS_KEYWORD + "def " + name() + "() " + "=> {" + content() + "\n}";
+        return prefix() + Lang.CLASS_KEYWORD + "def " + name() + "() " + "=> {" + content() + "\n}";
     }
 
     public String prefix() {

@@ -16,7 +16,7 @@ public class ImportFeatureTest {
     }
 
     private static String renderJavaImport(String staticString, String parent, String child) {
-        return Compiler.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
+        return Lang.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
     }
 
     @ParameterizedTest
@@ -50,6 +50,6 @@ public class ImportFeatureTest {
     @Test
     void testImportsForAll() {
         ImportNode importNode = new ImportNode(TEST_PARENT, "");
-        CompiledTest.assertCompile(renderJavaImport(Compiler.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), importNode.render());
+        CompiledTest.assertCompile(renderJavaImport(Lang.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), importNode.render());
     }
 }

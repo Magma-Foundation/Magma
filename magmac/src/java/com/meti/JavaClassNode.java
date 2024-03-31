@@ -14,7 +14,7 @@ public final class JavaClassNode {
     }
 
     String renderJavaClass() {
-        return prefix() + Compiler.CLASS_KEYWORD + name() + " {" + content() + "}";
+        return prefix() + Lang.CLASS_KEYWORD + name() + " {" + content() + "}";
     }
 
     public String prefix() {

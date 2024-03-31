@@ -17,7 +17,7 @@ public class ClassFeatureTest {
 
     @Test
     void testPublicKeyword() {
-        assertCompile(new JavaClassNodeBuilder().setPrefix(Compiler.PUBLIC_KEYWORD).setName(FeatureTest.TEST_SYMBOL).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().setPrefix("export ").setName(FeatureTest.TEST_SYMBOL).setContent("").createMagmaClassNode().render());
+        assertCompile(new JavaClassNodeBuilder().setPrefix(Lang.PUBLIC_KEYWORD).setName(FeatureTest.TEST_SYMBOL).setContent("").createJavaClassNode().renderJavaClass(), new MagmaClassNodeBuilder().setPrefix("export ").setName(FeatureTest.TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 
     @Test

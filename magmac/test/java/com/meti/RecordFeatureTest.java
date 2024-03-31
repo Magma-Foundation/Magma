@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.CompiledTest.assertCompile;
-import static com.meti.Compiler.*;
 import static com.meti.FeatureTest.TEST_SYMBOL;
 import static com.meti.JavaLang.*;
 
@@ -20,7 +19,7 @@ public class RecordFeatureTest {
 
     @Test
     void testPublicKeyword() {
-        assertCompile(renderRecord(PUBLIC_KEYWORD, TEST_SYMBOL), new MagmaClassNodeBuilder().setPrefix(EXPORT_KEYWORD).setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
+        assertCompile(renderRecord(Lang.PUBLIC_KEYWORD, TEST_SYMBOL), new MagmaClassNodeBuilder().setPrefix(Lang.EXPORT_KEYWORD).setName(TEST_SYMBOL).setContent("").createMagmaClassNode().render());
     }
 
     @Test

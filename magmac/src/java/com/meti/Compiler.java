@@ -5,24 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Compiler {
-    public static final String IMPORT_KEYWORD = "import ";
-    public static final String STATIC_KEYWORD = "static ";
-    public static final String IMPORT_STATIC = IMPORT_KEYWORD + STATIC_KEYWORD;
-    public static final String PUBLIC_KEYWORD = "public ";
-    public static final String CLASS_KEYWORD = "class ";
-    public static final String I64 = "I64";
-    public static final String I32 = "I32";
-    public static final String LONG = "long";
-    public static final String INT = "int";
-    public static final String CONST_KEYWORD = "const ";
-    public static final String LET_KEYWORD = "let ";
-    public static final String FINAL_KEYWORD = "final";
-    public static final String LOWER_VOID = "void";
-    public static final String CAMEL_VOID = "Void";
-    public static final String EXPORT_KEYWORD = "export ";
-    public static final String INTERFACE_KEYWORD = "interface ";
-    public static final String RECORD_KEYWORD = "record ";
-
     static String compile(String input) {
         var args = split(input);
 
@@ -75,26 +57,26 @@ public class Compiler {
     }
 
     private static Optional<State> compileRecord(String input) {
-        var index = input.indexOf(RECORD_KEYWORD);
+        var index = input.indexOf(Lang.RECORD_KEYWORD);
         if (index == -1) return Optional.empty();
 
-        var isPublic = input.startsWith(PUBLIC_KEYWORD);
+        var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
 
-        var name = input.substring(index + RECORD_KEYWORD.length(), input.indexOf('(')).strip();
+        var name = input.substring(index + Lang.RECORD_KEYWORD.length(), input.indexOf('(')).strip();
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
         var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
 
-        var rendered = new MagmaClassNodeBuilder().setPrefix(isPublic ? EXPORT_KEYWORD : "").setName(name).setContent(membersString.value).createMagmaClassNode().render();
+        var rendered = new MagmaClassNodeBuilder().setPrefix(isPublic ? Lang.EXPORT_KEYWORD : "").setName(name).setContent(membersString.value).createMagmaClassNode().render();
 
         return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {
-        var index = input.indexOf(INTERFACE_KEYWORD);
+        var index = input.indexOf(Lang.INTERFACE_KEYWORD);
         if (index != -1) {
-            var isPublic = input.startsWith(PUBLIC_KEYWORD);
+            var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
 
             var contentStart = input.indexOf('{');
             if (contentStart == -1) return Optional.empty();
@@ -105,8 +87,8 @@ public class Compiler {
             var content = input.substring(contentStart, contentEnd + 1);
             var membersResult = compileMembers(content.substring(1, content.length() - 1));
 
-            var name = input.substring(index + INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = new MagmaTraitNode(isPublic ? EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}").render();
+            var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
+            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}").render();
 
             return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
         }
@@ -114,9 +96,9 @@ public class Compiler {
     }
 
     private static Optional<State> compileClass(String input) {
-        if (!input.contains(CLASS_KEYWORD)) return Optional.empty();
-        var isPublic = input.startsWith(PUBLIC_KEYWORD);
-        var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
+        if (!input.contains(Lang.CLASS_KEYWORD)) return Optional.empty();
+        var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
+        var nameStart = input.indexOf(Lang.CLASS_KEYWORD) + Lang.CLASS_KEYWORD.length();
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
@@ -125,7 +107,7 @@ public class Compiler {
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
         var membersResult = compileMembers(inputContent);
-        var flagString = isPublic ? EXPORT_KEYWORD : "";
+        var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
 
         var renderedClass = new MagmaClassNodeBuilder().setPrefix(flagString).setName(name).setContent(membersResult.value()).createMagmaClassNode().render();
 
@@ -277,7 +259,7 @@ public class Compiler {
         var name = beforeSlice.substring(nameSeparator + 1);
         var value = inputContent.substring(valueSeparator + 1).strip();
 
-        var mutabilityString = flags.contains(FINAL_KEYWORD) ? CONST_KEYWORD : LET_KEYWORD;
+        var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
         var flagString = flags.contains("public") ? "pub " : "";
         var rendered = new MagmaDefinitionBuilder().setFlagString(flagString).setMutabilityString(mutabilityString).setName(name).setType(outputType).setValue(value).createMagmaDefinition().render();
 
@@ -286,17 +268,17 @@ public class Compiler {
 
     private static String compileType(String inputType) {
         return switch (inputType) {
-            case LONG -> I64;
-            case INT -> I32;
-            case LOWER_VOID -> CAMEL_VOID;
+            case Lang.LONG -> Lang.I64;
+            case Lang.INT -> Lang.I32;
+            case Lang.LOWER_VOID -> Lang.CAMEL_VOID;
             default -> inputType;
         };
     }
 
     private static Optional<State> compileImport(String input) {
-        if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
-        var isStatic = input.startsWith(IMPORT_STATIC);
-        var importKeyword = isStatic ? IMPORT_STATIC : IMPORT_KEYWORD;
+        if (!input.startsWith(Lang.IMPORT_KEYWORD)) return Optional.empty();
+        var isStatic = input.startsWith(Lang.IMPORT_STATIC);
+        var importKeyword = isStatic ? Lang.IMPORT_STATIC : Lang.IMPORT_KEYWORD;
         var segmentsString = input.substring(importKeyword.length());
 
         var separator = segmentsString.lastIndexOf('.');
