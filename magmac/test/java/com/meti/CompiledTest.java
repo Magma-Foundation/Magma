@@ -1,6 +1,6 @@
 package com.meti;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Assertions;
 
 public class CompiledTest {
     static void assertCompile(String input, String expected) {
