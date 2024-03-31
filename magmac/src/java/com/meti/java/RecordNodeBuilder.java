@@ -1,26 +1,36 @@
 package com.meti.java;
 
-public class RecordNodeBuilder {
+import com.meti.node.Renderable;
+
+public class RecordNodeBuilder implements RenderableBuilder {
     private String prefix;
     private String name;
     private String body;
 
-    public RecordNodeBuilder setPrefix(String prefix) {
+    public RecordNodeBuilder() {
+        this("", "", "");
+    }
+
+    public RecordNodeBuilder(String prefix, String name, String body) {
         this.prefix = prefix;
-        return this;
-    }
-
-    public RecordNodeBuilder setName(String name) {
         this.name = name;
-        return this;
-    }
-
-    public RecordNodeBuilder setBody(String body) {
         this.body = body;
-        return this;
     }
 
-    public RecordNode createRecordNode() {
+    public RecordNodeBuilder withPrefix(String prefix) {
+        return new RecordNodeBuilder(prefix, name, body);
+    }
+
+    public RecordNodeBuilder withName(String name) {
+        return new RecordNodeBuilder(prefix, name, body);
+    }
+
+    public RenderableBuilder withBody(String body) {
+        return new RecordNodeBuilder(prefix, name, body);
+    }
+
+    @Override
+    public Renderable build() {
         return new RecordNode(prefix, name, body);
     }
 }

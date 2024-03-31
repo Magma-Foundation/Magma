@@ -1,8 +1,10 @@
 package com.meti.java;
 
+import com.meti.node.Renderable;
+
 import java.util.Objects;
 
-public final class RecordNode {
+public final class RecordNode implements com.meti.node.Renderable {
     private final String prefix;
     private final String name;
     private final String body;
@@ -13,6 +15,7 @@ public final class RecordNode {
         this.body = body;
     }
 
+    @Override
     public String render() {
         return prefix() + "record " + name() + "()" + body();
     }

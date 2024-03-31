@@ -1,10 +1,11 @@
 package com.meti.magma;
 
 import com.meti.Lang;
+import com.meti.node.Renderable;
 
 import java.util.Objects;
 
-public final class MagmaClassNode {
+public final class MagmaClassNode implements Renderable {
     private final String prefix;
     private final String name;
     private final String content;
@@ -15,6 +16,7 @@ public final class MagmaClassNode {
         this.content = content;
     }
 
+    @Override
     public String render() {
         return prefix() + Lang.CLASS_KEYWORD + "def " + name() + "() " + "=> {" + content() + "\n}";
     }

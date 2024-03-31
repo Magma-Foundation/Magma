@@ -1,25 +1,35 @@
 package com.meti.magma;
 
-public class MagmaClassNodeBuilder {
+import com.meti.java.RenderableBuilder;
+
+public class MagmaClassNodeBuilder implements RenderableBuilder {
     private String prefix;
     private String name;
     private String content;
 
-    public MagmaClassNodeBuilder withPrefix(String prefix) {
+    public MagmaClassNodeBuilder() {
+        this("", "", "");
+    }
+
+    public MagmaClassNodeBuilder(String prefix, String name, String content) {
         this.prefix = prefix;
-        return this;
+        this.name = name;
+        this.content = content;
+    }
+
+    public MagmaClassNodeBuilder withPrefix(String prefix) {
+        return new MagmaClassNodeBuilder(prefix, name, content);
     }
 
     public MagmaClassNodeBuilder withName(String name) {
-        this.name = name;
-        return this;
+        return new MagmaClassNodeBuilder(prefix, name, content);
     }
 
     public MagmaClassNodeBuilder withContent(String content) {
-        this.content = content;
-        return this;
+        return new MagmaClassNodeBuilder(prefix, name, content);
     }
 
+    @Override
     public MagmaClassNode build() {
         return new MagmaClassNode(prefix, name, content);
     }
