@@ -19,39 +19,12 @@ public class ApplicationTest {
         if (!Files.exists(SOURCE)) return;
 
         var input = Files.readString(SOURCE);
-        String output;
-        if (input.startsWith("import org.junit.jupiter.api.")) {
-            var child = input.substring("import org.junit.jupiter.api.".length(), input.length() - 1);
-            output = "import { " + child + " } from org.junit.jupiter.api;";
-        } else {
-            output = "";
-        }
+        var output = Compiler.compile(input);
 
         var fileName = SOURCE.getFileName().toString();
         var separator = fileName.indexOf('.');
         var fileNameWithoutExtension = fileName.substring(0, separator);
         Files.writeString(SOURCE.resolveSibling(fileNameWithoutExtension + ".mgs"), output);
-    }
-
-    private static void assertCompile(String csq, String expected) throws IOException {
-        Files.writeString(SOURCE, csq);
-        run();
-        assertEquals(expected, Files.readString(TARGET));
-    }
-
-    @Test
-    void noPackage() throws IOException {
-        assertCompile("package test;", "");
-    }
-
-    @Test
-    void simpleImport() throws IOException {
-        assertCompile("import org.junit.jupiter.api.AfterEach;", "import { AfterEach } from org.junit.jupiter.api;");
-    }
-
-    @Test
-    void importChild() throws IOException {
-        assertCompile("import org.junit.jupiter.api.Test;", "import { Test } from org.junit.jupiter.api;");
     }
 
     @AfterEach
