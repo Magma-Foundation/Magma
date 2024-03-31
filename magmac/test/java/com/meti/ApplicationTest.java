@@ -25,6 +25,13 @@ public class ApplicationTest {
         }
     }
 
+    @Test
+    void noPackage() throws IOException {
+        Files.writeString(SOURCE, "package test;");
+        run();
+        assertTrue(Files.readString(TARGET).isEmpty());
+    }
+
     @AfterEach
     void tearDown() throws IOException {
         Files.deleteIfExists(TARGET);
