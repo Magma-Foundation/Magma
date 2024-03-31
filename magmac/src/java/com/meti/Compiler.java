@@ -9,8 +9,11 @@ public class Compiler {
     public static final String STATIC_KEYWORD = "static ";
     public static final String IMPORT_STATIC = IMPORT_KEYWORD + STATIC_KEYWORD;
     public static final String PUBLIC_KEYWORD = "public ";
-    public static final String EXPORT_KEYWORD = "export ";
     public static final String CLASS_KEYWORD = "class ";
+    public static final String I64 = "I64";
+    public static final String I32 = "I32";
+    public static final String LONG = "long";
+    public static final String INT = "int";
 
     static String compile(String input) {
         var args = split(input);
@@ -75,10 +78,14 @@ public class Compiler {
         var typeAndName = inputContent.substring(0, valueSeparator).strip();
         var nameSeparator = typeAndName.indexOf(' ');
         var inputType = typeAndName.substring(0, nameSeparator);
-        var outputType = inputType.equals("long") ? "I64" : "I32";
+        String outputType;
+        if (inputType.equals(LONG)) outputType = I64;
+        else if (inputType.equals(INT)) outputType = I32;
+        else outputType = inputType;
 
-        var definitionName = typeAndName.substring(nameSeparator + 1);
-        return Optional.of(renderMagmaDefinition(definitionName, outputType));
+        var name = typeAndName.substring(nameSeparator + 1);
+        var value = inputContent.substring(valueSeparator + 1, inputContent.length() - 1).strip();
+        return Optional.of(renderMagmaDefinition(name, outputType, value));
     }
 
     private static Optional<String> compileImport(String input) {
@@ -121,7 +128,7 @@ public class Compiler {
     }
 
     static String renderExportedMagmaClass(String name, String content) {
-        return renderMagmaClass(EXPORT_KEYWORD, name, content);
+        return renderMagmaClass("export ", name, content);
     }
 
     private static String renderMagmaClass(String prefix, String name, String content) {
@@ -133,6 +140,10 @@ public class Compiler {
     }
 
     static String renderMagmaDefinition(String name, String type) {
-        return "let " + name + " : " + type + " = 0;";
+        return renderMagmaDefinition(name, type, "0");
+    }
+
+    static String renderMagmaDefinition(String name, String type, String value) {
+        return "let " + name + " : " + type + " = " + value + ";";
     }
 }

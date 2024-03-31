@@ -6,6 +6,10 @@ public class JavaLang {
     }
 
     static String renderDefinition(String name, String type) {
-        return type + " " + name + " = 0;";
+        return renderDefinition(name, type, "0");
+    }
+
+    static String renderDefinition(String name, String type, String value) {
+        return type + " " + name + " = " + value + ";";
     }
 }
