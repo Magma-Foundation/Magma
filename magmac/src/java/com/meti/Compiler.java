@@ -30,10 +30,15 @@ public class Compiler {
         if (!input.contains(CLASS_KEYWORD)) return Optional.empty();
         var isPublic = input.startsWith(PUBLIC_KEYWORD);
         var nameStart = input.indexOf(CLASS_KEYWORD) + CLASS_KEYWORD.length();
-        var name = input.substring(nameStart, input.indexOf(" {}"));
+
+        var bodyStart = input.indexOf('{');
+        var bodyEnd = input.lastIndexOf('}');
+
+        var name = input.substring(nameStart, bodyStart).strip();
+        var content = input.substring(bodyStart + 1, bodyEnd);
         return Optional.of(isPublic
-                ? renderExportedMagmaClass(name)
-                : renderMagmaClass(name));
+                ? renderExportedMagmaClass(name, content)
+                : renderMagmaClass(name, content));
     }
 
     private static Optional<String> compileImport(String input) {
@@ -64,19 +69,26 @@ public class Compiler {
     }
 
     static String renderMagmaClass(String name) {
-        return renderMagmaClass("", name);
+        return renderMagmaClass(name, "");
+    }
+
+    static String renderMagmaClass(String name, String content) {
+        return renderMagmaClass("", name, content);
     }
 
     static String renderExportedMagmaClass(String name) {
-        return renderMagmaClass(EXPORT_KEYWORD, name);
+        return renderExportedMagmaClass(name, "");
     }
 
-
-    private static String renderMagmaClass(String prefix, String name) {
-        return prefix + CLASS_KEYWORD + "def " + name + "() => {}";
+    static String renderExportedMagmaClass(String name, String content) {
+        return renderMagmaClass(EXPORT_KEYWORD, name, content);
     }
 
-    static String renderJavaClass(String prefix, String name) {
-        return prefix + CLASS_KEYWORD + name + " {}";
+    private static String renderMagmaClass(String prefix, String name, String content) {
+        return prefix + CLASS_KEYWORD + "def " + name + "() => {" + content + "}";
+    }
+
+    static String renderJavaClass(String prefix, String name, String content) {
+        return prefix + CLASS_KEYWORD + name + " {" + content + "}";
     }
 }
