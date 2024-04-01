@@ -1,7 +1,8 @@
 extern import { RenderableBuilder } from com.meti.java;
 extern import { Optional } from java.util;
 
-export class def MagmaDefinitionBuilder implements RenderableBuilder() => {
+export class 
+	def MagmaDefinitionBuilder implements RenderableBuilder() => {
 	let flagString : String;
 	let mutabilityString : String;
 	let name : String;
@@ -10,26 +11,26 @@ export class def MagmaDefinitionBuilder implements RenderableBuilder() => {
 	def MagmaDefinitionBuilder() : public => {
         this("", "", "", "", Optional.empty());
     }
-	def MagmaDefinitionBuilder() : public => {
+	def MagmaDefinitionBuilder(flagString : String, mutabilityString : String, name : String, type : String, value : Optional<String>) : public => {
         this.flagString = flagString;
         this.mutabilityString = mutabilityString;
         this.name = name;
         this.type = type;
         this.value = value;
     }
-	def withFlags() : MagmaDefinitionBuilder => {
+	def withFlags(flagString : String) : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withMutability() : MagmaDefinitionBuilder => {
+	def withMutability(mutabilityString : String) : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withName() : MagmaDefinitionBuilder => {
+	def withName(name : String) : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withType() : MagmaDefinitionBuilder => {
+	def withType(type : String) : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withValue() : MagmaDefinitionBuilder => {
+	def withValue(value : String) : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, Optional.of(value));
     }
 	@Override

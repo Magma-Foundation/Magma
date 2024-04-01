@@ -6,16 +6,16 @@ export class def DeclarationNodeBuilder() => {
 	def DeclarationNodeBuilder() : public => {
         this("", "", "", Optional.empty());
     }
-	def withFlagString() : DeclarationNodeBuilder => {
+	def withFlagString(flagString : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	def withName() : DeclarationNodeBuilder => {
+	def withName(name : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	def withType() : DeclarationNodeBuilder => {
+	def withType(type : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	def withValue() : DeclarationNodeBuilder => {
+	def withValue(value : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, Optional.of(value));
     }
 	@Override

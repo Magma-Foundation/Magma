@@ -4,9 +4,10 @@ extern import java.util;
 extern import { Collectors } from java.util.stream;
 extern import { IntStream } from java.util.stream;
 extern import { Stream } from java.util.stream;
+extern import { CLASS_KEYWORD_WITH_SPACE } from com.meti.Lang;
 
 export object Compiler = {
-	def compile() : String => {
+	def compile(input : String) : String => {
         var args = split(input);
 
         var imports = new ArrayList<String>();
@@ -25,7 +26,7 @@ export object Compiler = {
 
         return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));
     }
-	def split() : List<String> => {
+	def split(input : String) : List<String> => {
         var state = new SplittingState();
 
         for (int i = 0; i < input.length(); i++) {
@@ -60,7 +61,7 @@ export object Compiler = {
                 .or(() -> compileClass(input))
                 .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
-                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileRecord(String input) {
@@ -73,16 +74,16 @@ export object Compiler = {
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
-        var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd));
+        var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd), name);
 
         var rendered = new MagmaClassNodeBuilder()
-                .withPrefix(isPublic ? Lang.EXPORT_KEYWORD : "")
+                .withPrefix(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "")
                 .withName(name)
                 .withContent(membersString.value)
                 .build()
                 .render();
 
-        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {
@@ -97,21 +98,21 @@ export object Compiler = {
             if (contentEnd == -1) return Optional.empty();
 
             var content = input.substring(contentStart, contentEnd + 1);
-            var membersResult = compileMembers(content.substring(1, content.length() - 1));
-
             var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
-            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}")
+            var membersResult = compileMembers(content.substring(1, content.length() - 1), name);
+
+            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "", name, "{" + membersResult.value + "\n}")
                     .render();
 
-            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
     }
 
     private static Optional<State> compileClass(String input) {
-        if (!input.contains(Lang.CLASS_KEYWORD)) return Optional.empty();
+        if (!input.contains(CLASS_KEYWORD_WITH_SPACE)) return Optional.empty();
         var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
-        var nameStart = input.indexOf(Lang.CLASS_KEYWORD) + Lang.CLASS_KEYWORD.length();
+        var nameStart = input.indexOf(CLASS_KEYWORD_WITH_SPACE) + CLASS_KEYWORD_WITH_SPACE.length();
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
@@ -119,10 +120,21 @@ export object Compiler = {
 
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
-        var membersResult = compileMembers(inputContent);
-        var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
+        var membersResult = compileMembers(inputContent, name);
 
-        var renderedClass = new MagmaClassNodeBuilder().withPrefix(flagString).withName(name).withContent(membersResult.value()).build().render();
+        var parameterString = membersResult.parameter.orElse("");
+
+        var flags = new ArrayList<String>();
+        if (isPublic) flags.add(Lang.EXPORT_KEYWORD);
+
+        var flagString = flags.isEmpty() ? "" : String.join(" ", flags) + " ";
+        var renderedClass = new MagmaMethodBuilder()
+                .withPrefix(flagString + CLASS_KEYWORD_WITH_SPACE)
+                .withName(name)
+                .withContent("{" + membersResult.value() + "\n}")
+                .withParameters(parameterString)
+                .build()
+                .render();
 
         Optional<String> renderedMore;
         if (membersResult.outputMore().isEmpty()) {
@@ -132,29 +144,32 @@ export object Compiler = {
             renderedMore = Optional.of(new ObjectNode(flagString, name, content).render());
         }
 
-        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore, Optional.empty()));
     }
 
-    private static MembersResult compileMembers(String inputContent) {
+    private static MembersResult compileMembers(String inputContent, String name) {
         var splitContent = split(inputContent);
 
         var outputValues = new ArrayList<String>();
         var outputMore = new ArrayList<String>();
+        Optional<String> parameter = Optional.empty();
 
         for (var classMember : splitContent) {
-            var compiledClassMember = compileMethod(classMember)
+            var compiledClassMember = compileMethod(classMember, name)
                     .or(() -> compileDefinition(classMember))
-                    .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
+                    .orElse(new State(Optional.empty(), Optional.of(classMember),
+                            Optional.empty(), Optional.empty()));
 
             compiledClassMember.instanceValue.ifPresent(outputValues::add);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
+            parameter = compiledClassMember.parameter;
         }
 
         var value = String.join("", outputValues);
-        return new MembersResult(outputMore, value);
+        return new MembersResult(outputMore, value, parameter);
     }
 
-    private static Optional<State> compileMethod(String input) {
+    private static Optional<State> compileMethod(String input, String parentName) {
         var lines = Arrays.stream(input.split("\n")).toList();
 
         var annotations = lines.stream()
@@ -171,38 +186,67 @@ export object Compiler = {
         var paramStart = methodString.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
+        var paramEnd = methodString.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var outputParamString = Arrays.stream(methodString.substring(paramStart + 1, paramEnd).strip().split(","))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(line -> {
+                    var paramSeparator = line.lastIndexOf(' ');
+                    if(paramSeparator == -1) {
+                        return Optional.<String>empty();
+                    }
+
+                    var substring = line.substring(0, paramSeparator);
+                    var paramType = compileType(substring.strip());
+                    var paramName = line.substring(paramSeparator + 1).strip();
+                    return Optional.of(paramName + " : " + paramType);
+                })
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining(", "));
+
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        if (separator == -1) return Optional.empty();
 
-        var name = before.substring(separator + 1).strip();
-        if (!isSymbol(name)) return Optional.empty();
-
-        var flagsAndType = before.substring(0, separator).strip();
-        var typeSeparator = flagsAndType.lastIndexOf(' ');
-
+        String name;
         List<String> inputFlags;
-        String outputType;
-        if (typeSeparator == -1) {
-            inputFlags = Collections.emptyList();
-            outputType = compileType(flagsAndType);
+        Optional<String> outputType;
+        if (separator == -1) {
+            if (!before.equals(parentName)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(new State(
+                        Optional.empty(),
+                        Optional.of(""),
+                        Optional.empty(),
+                        Optional.of(outputParamString)));
+            }
         } else {
-            inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
+            name = before.substring(separator + 1).strip();
+            if (!isSymbol(name)) return Optional.empty();
 
-            try {
-                var typeString = flagsAndType.substring(typeSeparator + 1).strip();
-                outputType = compileType(typeString);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to compile type string for input: " + input, e);
+            var flagsAndType = before.substring(0, separator).strip();
+            var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+            if (typeSeparator == -1) {
+                inputFlags = Collections.emptyList();
+                outputType = Optional.ofNullable(compileType(flagsAndType));
+            } else {
+                inputFlags = Arrays.stream(flagsAndType.substring(0, typeSeparator).split(" ")).toList();
+
+                try {
+                    var typeString = flagsAndType.substring(typeSeparator + 1).strip();
+                    outputType = Optional.ofNullable(compileType(typeString));
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to compile type string for input: " + input, e);
+                }
             }
         }
 
         var annotationsString = annotations.stream()
-                .map(name1 -> new Annotation(name1, "").renderAnnotation())
+                .map(name1 -> new Annotation(name1, "").render())
                 .collect(Collectors.joining());
-
-        var paramEnd = methodString.indexOf(')');
-        if (paramEnd == -1) return Optional.empty();
 
         var contentStart = methodString.indexOf('{');
 
@@ -213,11 +257,15 @@ export object Compiler = {
             var throwsString = methodString.substring(paramEnd + 1, contentStart).strip();
 
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
-            var builder = new MagmaMethodBuilder()
+            var magmaMethodBuilder = new MagmaMethodBuilder()
+                    .withParameters(outputParamString)
                     .withPrefix(annotationsString)
                     .withName(name)
-                    .withType(outputType)
                     .withContent(content);
+
+            var builder = outputType
+                    .map(magmaMethodBuilder::withType)
+                    .orElse(magmaMethodBuilder);
 
             MagmaMethodBuilder result;
             if (throwsString.isEmpty()) {
@@ -229,11 +277,11 @@ export object Compiler = {
 
             var rendered = result.build().render();
             return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered)))
-                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty()))
+                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
-            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
         } else {
             return Optional.empty();
         }
@@ -323,8 +371,8 @@ export object Compiler = {
 
         var rendered = withValue.build().render();
         return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
-                : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty())
+                : new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -334,7 +382,7 @@ export object Compiler = {
             return Lang.I32;
         } else if (inputType.equals(Lang.LOWER_VOID)) {
             return Lang.CAMEL_VOID;
-        } else if(inputType.equals(Lang.BOOL)) {
+        } else if (inputType.equals(Lang.BOOL)) {
             return Lang.CAMEL_BOOL;
         } else if (isSymbol(inputType)) return inputType;
 
@@ -347,6 +395,11 @@ export object Compiler = {
             return parent + "<" + child + ">";
         }
 
+        var arrayStart = inputType.indexOf('[');
+        var arrayEnd = inputType.lastIndexOf(']');
+        if(arrayStart != -1 && arrayEnd !=-1) {
+            return "Array<" + inputType.substring(0, arrayStart).strip() + ">";
+        }
 
         throw new UnsupportedOperationException("Unknown type: " + inputType);
     }
@@ -362,15 +415,17 @@ export object Compiler = {
         var child = segmentsString.substring(separator + 1);
 
         ImportNode importNode = new ImportNode(parent, "");
-        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
-    private record MembersResult(ArrayList<String> outputMore, String value) {
+    private record MembersResult(ArrayList<String> outputMore, String value, Optional<String> parameter) {
     }
 
-    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue) {
+    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue,
+                 Optional<String> parameter) {
     }
 }
 
-export class def Compiler() => {
+export class 
+	def Compiler() => {
 }

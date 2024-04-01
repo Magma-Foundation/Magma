@@ -6,20 +6,21 @@ extern import { Collectors } from java.util.stream;
 extern import { IntStream } from java.util.stream;
 
 export object ImportFeatureTest = {
-	def renderJavaImport() : String => {
+	def renderJavaImport(parent : String, child : String) : String => {
         return renderJavaImport("", parent, child);
     }
-	def renderJavaImport() : String => {
+	def renderJavaImport(staticString : String, parent : String, child : String) : String => {
         return Lang.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
     }
 }
 
-export class def ImportFeatureTest() => {
+export class 
+	def ImportFeatureTest() => {
     public static final String TEST_PARENT = "org.junit.jupiter.api"
     public static final String TEST_NAME = "Test"
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
-	def testMultipleImports() : Void => {
+	def testMultipleImports(count : I32) : Void => {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
                 .mapToObj(_i -> new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render())
@@ -33,7 +34,7 @@ export class def ImportFeatureTest() => {
     }
 	@ParameterizedTest
 	@ValueSource(strings = ["AfterEach", "Test"])
-	def testSimpleImports() : Void => {
+	def testSimpleImports(name : String) : Void => {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), new ImportNode(TEST_PARENT, "{ " + name + " } from ").render());
     }
 	@Test

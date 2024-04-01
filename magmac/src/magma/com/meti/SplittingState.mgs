@@ -1,17 +1,12 @@
 extern import { ArrayList } from java.util;
 extern import { List } from java.util;
 
-class def SplittingState() => {
+class 
+	def SplittingState() => {
 	const list : List<String>;
 	let builder : StringBuilder;
 	let depth : I32;
 	let isInSingleQuotes : Bool = false;
-
-    SplittingState(List<String> list, StringBuilder builder, int depth) {
-        this.list = list;
-        this.builder = builder;
-        this.depth = depth;
-    }
 	def SplittingState() : public => {
         this(new ArrayList<>(), new StringBuilder(), 0);
     }
@@ -21,7 +16,7 @@ class def SplittingState() => {
 	def isShallow() : Bool => {
         return this.depth == 1;
     }
-	def append() : Void => {
+	def append(c : char) : Void => {
         this.builder.append(c);
     }
 	def clean() : Void => {

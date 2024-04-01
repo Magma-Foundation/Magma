@@ -9,7 +9,8 @@ export object RecordFeatureTest = {
 	def RecordNodeBuilder() : new ? me(TEST_SYMBOL).withBody(" => {}
 }
 
-export class def RecordFeatureTest() => {
+export class 
+	def RecordFeatureTest() => {
 	MagmaClassNodeBuilder : () => Void;
 	@Test
 	def oneParameter() : Void => {
@@ -17,12 +18,12 @@ export class def RecordFeatureTest() => {
     }
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
-	def testSimpleRecords() : Void => {
+	def testSimpleRecords(name : String) : Void => {
         CompiledTest.assertCompile(DEFAULT_INPUT.withName(name), DEFAULT_OUTPUT.withName(name));
     }
 	@Test
 	def testPublicKeyword() : Void => {
-        CompiledTest.assertCompile(DEFAULT_INPUT.withPrefix(Lang.PUBLIC_KEYWORD), DEFAULT_OUTPUT.withPrefix(Lang.EXPORT_KEYWORD));
+        CompiledTest.assertCompile(DEFAULT_INPUT.withPrefix(Lang.PUBLIC_KEYWORD), DEFAULT_OUTPUT.withPrefix(Lang.EXPORT_KEYWORD_WITH_SPACE));
     }
 	@Test
 	def testBody() : Void => {
