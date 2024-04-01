@@ -3,26 +3,20 @@ extern import { RenderableBuilder } from com.meti.java;
 export class def MagmaClassNodeBuilder implements RenderableBuilder() => {
 	let prefix : String;
 	let name : String;
-	let content : String;
-	def MagmaClassNodeBuilder() : public => {
+	let content : String;def MagmaClassNodeBuilder() : public => {
         this("", "", "");
-    }
-	def MagmaClassNodeBuilder() : public => {
+    }def MagmaClassNodeBuilder(prefix : String, name : String, content : String) : public => {
         this.prefix = prefix;
         this.name = name;
         this.content = content;
-    }
-	def withPrefix() : MagmaClassNodeBuilder => {
+    }def withPrefix(prefix : String) : MagmaClassNodeBuilder => {
+        return new MagmaClassNodeBuilder(prefix, name, content);
+    }def withName(name : String) : MagmaClassNodeBuilder => {
+        return new MagmaClassNodeBuilder(prefix, name, content);
+    }def withContent(content : String) : MagmaClassNodeBuilder => {
         return new MagmaClassNodeBuilder(prefix, name, content);
     }
-	def withName() : MagmaClassNodeBuilder => {
-        return new MagmaClassNodeBuilder(prefix, name, content);
-    }
-	def withContent() : MagmaClassNodeBuilder => {
-        return new MagmaClassNodeBuilder(prefix, name, content);
-    }
-	@Override
-	def build() : MagmaClassNode => {
+	@Overridedef build() : MagmaClassNode => {
         return new MagmaClassNode(prefix, name, content);
     }
 }

@@ -2,24 +2,18 @@ extern import { RenderableBuilder } from com.meti.java;
 extern import { Renderable } from com.meti.node;
 extern import { Optional } from java.util;
 
-export class def DeclarationNodeBuilder() => {
-	def DeclarationNodeBuilder() : public => {
+export class def DeclarationNodeBuilder() => {def DeclarationNodeBuilder() : public => {
         this("", "", "", Optional.empty());
-    }
-	def withFlagString() : DeclarationNodeBuilder => {
+    }def withFlagString(flagString : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
-    }
-	def withName() : DeclarationNodeBuilder => {
+    }def withName(name : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
-    }
-	def withType() : DeclarationNodeBuilder => {
+    }def withType(type : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
-    }
-	def withValue() : DeclarationNodeBuilder => {
+    }def withValue(value : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, Optional.of(value));
     }
-	@Override
-	def build() : Renderable => {
+	@Overridedef build() : Renderable => {
         return new DeclarationNode(flagString, name, type, value);
     }
 }

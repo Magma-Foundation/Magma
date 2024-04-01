@@ -4,21 +4,18 @@ extern import { Path } from java.nio.file;
 extern import { ArrayList } from java.util;
 extern import { List } from java.util;
 
-export class def PathSource() => {
-	def findName() : String => {
+export class def PathSource() => {def findName() : String => {
         var fileName = child.getFileName().toString();
         var separator = fileName.indexOf('.');
         return fileName.substring(0, separator);
-    }
-	def findNamespace() : List<String> => {
+    }def findNamespace() : List<String> => {
         var list = new ArrayList<String>();
         var relative = root.relativize(child);
         for (int i = 0; i < relative.getNameCount() - 1; i++) {
             list.add(relative.getName(i).toString());
         }
         return list;
-    }
-	def read() : String ? IOException => {
+    }def read() : String ? IOException => {
         return Files.readString(child);
     }
 }
