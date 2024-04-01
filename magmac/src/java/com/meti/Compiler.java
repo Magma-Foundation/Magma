@@ -199,10 +199,14 @@ public class Compiler {
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
                     var paramSeparator = line.lastIndexOf(' ');
+                    if(paramSeparator ==-1) return Optional.<String>empty();
+
                     var paramType = compileType(line.substring(0, paramSeparator).strip());
                     var paramName = line.substring(paramSeparator + 1).strip();
-                    return paramName + " : " + paramType;
-                }).collect(Collectors.joining(", "));
+                    return Optional.of(paramName + " : " + paramType);
+                })
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining(", "));
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
@@ -393,6 +397,12 @@ public class Compiler {
             return parent + "<" + child + ">";
         }
 
+        var arrayStart = inputType.indexOf('[');
+        var arrayEnd = inputType.lastIndexOf(']');
+        if(arrayStart != -1 && arrayEnd != -1) {
+            var parent = inputType.substring(0, arrayStart);
+            return "Array<" + parent + ">";
+        }
 
         throw new UnsupportedOperationException("Unknown type: " + inputType);
     }

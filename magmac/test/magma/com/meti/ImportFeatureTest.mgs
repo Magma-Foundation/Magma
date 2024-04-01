@@ -5,11 +5,9 @@ extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { Collectors } from java.util.stream;
 extern import { IntStream } from java.util.stream;
 
-export object ImportFeatureTest = {
-	def renderJavaImport() : String => {
+export object ImportFeatureTest = {def renderJavaImport(parent : String, child : String) : String => {
         return renderJavaImport("", parent, child);
-    }
-	def renderJavaImport() : String => {
+    }def renderJavaImport(staticString : String, parent : String, child : String) : String => {
         return Lang.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
     }
 }
@@ -18,8 +16,7 @@ export class def ImportFeatureTest() => {
     public static final String TEST_PARENT = "org.junit.jupiter.api"
     public static final String TEST_NAME = "Test"
 	@ParameterizedTest
-	@ValueSource(ints = [2, 3])
-	def testMultipleImports() : Void => {
+	@ValueSource(ints = [2, 3])def testMultipleImports(count : I32) : Void => {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
                 .mapToObj(_i -> new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render())
@@ -27,22 +24,18 @@ export class def ImportFeatureTest() => {
 
         CompiledTest.assertCompile(input, output);
     }
-	@Test
-	def testWhitespace() : Void => {
+	@Testdef testWhitespace() : Void => {
         CompiledTest.assertCompile("\t" + renderJavaImport(TEST_PARENT, TEST_NAME) + "\t", new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render());
     }
 	@ParameterizedTest
-	@ValueSource(strings = ["AfterEach", "Test"])
-	def testSimpleImports() : Void => {
+	@ValueSource(strings = ["AfterEach", "Test"])def testSimpleImports(name : String) : Void => {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), new ImportNode(TEST_PARENT, "{ " + name + " } from ").render());
     }
-	@Test
-	def testImportsWithParent() : Void => {
+	@Testdef testImportsWithParent() : Void => {
         var otherParent = "Parent";
         CompiledTest.assertCompile(renderJavaImport(otherParent, TEST_NAME), new ImportNode(otherParent, "{ " + TEST_NAME + " } from ").render());
     }
-	@Test
-	def testImportsForAll() : Void => {
+	@Testdef testImportsForAll() : Void => {
         ImportNode importNode = new ImportNode(TEST_PARENT, "");
         CompiledTest.assertCompile(renderJavaImport(Lang.STATIC_KEYWORD, ImportFeatureTest.TEST_PARENT, "*"), importNode.render());
     }

@@ -1,24 +1,52 @@
 extern import { JavaClassNodeBuilder } from com.meti.java;
 extern import { MagmaClassNodeBuilder } from com.meti.magma;
+extern import { MagmaMethodBuilder } from com.meti.magma;
+extern import { MagmaMethodNode } from com.meti.magma;
 extern import { Test } from org.junit.jupiter.api;
 extern import { ParameterizedTest } from org.junit.jupiter.params;
 extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { assertCompile } from com.meti.CompiledTest;
+extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 
 export class def ClassFeatureTest() => {
     public static final String TEST_BODY = "0"
+	@Testdef testConstructorParameter() : Void => {
+        assertCompile(new JavaClassNodeBuilder()
+                .withName(TEST_SYMBOL)
+                .withContent(new JavaMethodBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent("{}")
+                        .withParameters("int value")
+                ),
+                new MagmaMethodBuilder()
+                        .withPrefix("class ")
+                        .withName(TEST_SYMBOL)
+                        .withParameters("value : I32")
+                        .withContent("{\n}"));
+    }
+	@Testdef testConstructor() : Void => {
+        assertCompile(new JavaClassNodeBuilder()
+                .withName(TEST_SYMBOL)
+                .withContent(TEST_SYMBOL + "(){}"), new MagmaClassNodeBuilder().withName(TEST_SYMBOL));
+    }
 	@ParameterizedTest
-	@ValueSource(strings = ["First", "Second"])
-	def testSimpleClasses() : Void => {
-        assertCompile(new JavaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render(), new MagmaClassNodeBuilder().withPrefix("").withName(name).withContent("").build().render());
+	@ValueSource(strings = ["First", "Second"])def testSimpleClasses(name : String) : Void => {
+        assertCompile(new JavaClassNodeBuilder().withName(name), new MagmaClassNodeBuilder().withName(name));
     }
-	@Test
-	def testPublicKeyword() : Void => {
-        assertCompile(new JavaClassNodeBuilder().withPrefix(Lang.PUBLIC_KEYWORD).withName(FeatureTest.TEST_SYMBOL).withContent("").build().render(), new MagmaClassNodeBuilder().withPrefix("export ").withName(FeatureTest.TEST_SYMBOL).withContent("").build().render());
+	@Testdef testPublicKeyword() : Void => {
+        assertCompile(new JavaClassNodeBuilder()
+                        .withPrefix(Lang.PUBLIC_KEYWORD)
+                        .withName(TEST_SYMBOL),
+                new MagmaClassNodeBuilder()
+                        .withPrefix("export ")
+                        .withName(TEST_SYMBOL));
     }
-	@Test
-	def testBody() : Void => {
-        assertCompile(new JavaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render(),
-                new MagmaClassNodeBuilder().withPrefix("").withName(FeatureTest.TEST_SYMBOL).withContent(TEST_BODY).build().render());
+	@Testdef testBody() : Void => {
+        assertCompile(new JavaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent(TEST_BODY),
+                new MagmaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent(TEST_BODY));
     }
 }

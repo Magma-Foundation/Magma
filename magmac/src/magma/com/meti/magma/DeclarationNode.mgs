@@ -2,8 +2,7 @@ extern import { Renderable } from com.meti.node;
 extern import { Optional } from java.util;
 
 export class def DeclarationNode() => {
-	@Override
-	def render() : String => {
+	@Overridedef render() : String => {
         var renderedValue = value.map(inner -> " = " + inner).orElse("");
         return flagString + type + " " + name + renderedValue + ";";
     }

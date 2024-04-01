@@ -13,8 +13,7 @@ extern import { assertWithinClass } from com.meti.FeatureTest;
 export class def DefinitionFeatureTest() => {
     public static final String TEST_VALUE = "100"
 	DeclarationNodeBuilder : () => Void;
-	@Test
-	def testNoValue() : Void => {
+	@Testdef testNoValue() : Void => {
         assertWithinClass(new DeclarationNodeBuilder()
                 .withName(TEST_SYMBOL)
                 .withType(Lang.INT)
@@ -24,8 +23,7 @@ export class def DefinitionFeatureTest() => {
                 .withType(Lang.I32));
     }
 	@ParameterizedTest
-	@ValueSource(strings = ["first", "second"])
-	def testSimpleDefinition() : Void => {
+	@ValueSource(strings = ["first", "second"])def testSimpleDefinition(name : String) : Void => {
         assertWithinClass(DEFAULT_INPUT.withName(name), new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(name)
@@ -33,8 +31,7 @@ export class def DefinitionFeatureTest() => {
                 .withValue("0"));
     }
 	@ParameterizedTest
-	@ValueSource(ints = [2, 3])
-	def testMultipleDefinitions() : Void => {
+	@ValueSource(ints = [2, 3])def testMultipleDefinitions(count : I32) : Void => {
         assertWithinClass(DEFAULT_INPUT.build().render().repeat(count), new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(TEST_SYMBOL)
@@ -44,24 +41,21 @@ export class def DefinitionFeatureTest() => {
                 .render()
                 .repeat(count));
     }
-	@Test
-	def testType() : Void => {
+	@Testdef testType() : Void => {
         assertWithinClass(DEFAULT_INPUT.withType(Lang.LONG), new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(TEST_SYMBOL)
                 .withType(Lang.I64)
                 .withValue("0"));
     }
-	@Test
-	def testValue() : Void => {
+	@Testdef testValue() : Void => {
         assertWithinClass(DEFAULT_INPUT.withValue(TEST_VALUE), new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(TEST_SYMBOL)
                 .withType(Lang.I32)
                 .withValue(TEST_VALUE));
     }
-	@Test
-	def testFinal() : Void => {
+	@Testdef testFinal() : Void => {
         assertWithinClass(DEFAULT_INPUT.withFlagString(Lang.FINAL_KEYWORD + " ").withValue(TEST_VALUE), new MagmaDefinitionBuilder()
                 .withMutability(Lang.CONST_KEYWORD)
                 .withName(TEST_SYMBOL)
@@ -69,8 +63,7 @@ export class def DefinitionFeatureTest() => {
                 .withValue(TEST_VALUE));
     }
 	@ParameterizedTest
-	@ValueSource(strings = [TEST_SYMBOL, TEST_SYMBOL + "_more"])
-	def testStatic() : Void => {
+	@ValueSource(strings = [TEST_SYMBOL, TEST_SYMBOL + "_more"])def testStatic(className : String) : Void => {
         String content = new MagmaDefinitionBuilder().withMutability(Lang.LET_KEYWORD).withName(TEST_SYMBOL).withType(Lang.I32).withValue(TEST_VALUE).build().render();
         String content1 = DEFAULT_INPUT
                 .withValue(TEST_VALUE)
@@ -91,8 +84,7 @@ export class def DefinitionFeatureTest() => {
                         .build()
                         .render());
     }
-	@Test
-	def testPublic() : Void => {
+	@Testdef testPublic() : Void => {
         assertWithinClass(DEFAULT_INPUT.withFlagString("public ").withValue(TEST_VALUE), new MagmaDefinitionBuilder()
                 .withFlags("pub ")
                 .withMutability(Lang.LET_KEYWORD)

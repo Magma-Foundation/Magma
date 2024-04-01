@@ -1,20 +1,21 @@
-export class def JavaClassNodeBuilder() => {
-	let prefix : String;
-	let name : String;
-	let content : String;
-	def withPrefix() : JavaClassNodeBuilder => {
+export class def JavaClassNodeBuilder implements RenderableBuilder() => {
+	const prefix : String;
+	const name : String;
+	const content : String;def JavaClassNodeBuilder() : public => {
+        this("", "", "");
+    }def JavaClassNodeBuilder(prefix : String, name : String, content : String) : public => {
         this.prefix = prefix;
-        return this;
-    }
-	def withName() : JavaClassNodeBuilder => {
         this.name = name;
-        return this;
-    }
-	def withContent() : JavaClassNodeBuilder => {
         this.content = content;
-        return this;
-    }
-	def build() : JavaClassNode => {
+    }def withPrefix(prefix : String) : JavaClassNodeBuilder => {
+        return new JavaClassNodeBuilder(prefix, name, content);
+    }def withName(name : String) : JavaClassNodeBuilder => {
+        return new JavaClassNodeBuilder(prefix, name, content);
+    }def withContent(content : String) : JavaClassNodeBuilder => {
+        return new JavaClassNodeBuilder(prefix, name, content);
+    }def build() : JavaClassNode => {
         return new JavaClassNode(prefix, name, content);
+    }def withContent(builder : RenderableBuilder) : JavaClassNodeBuilder => {
+        return withContent(builder.build().render());
     }
 }

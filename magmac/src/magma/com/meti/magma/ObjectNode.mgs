@@ -1,5 +1,4 @@
-export class def ObjectNode() => {
-	def render() : String => {
+export class def ObjectNode() => {def render() : String => {
         return flagString() + "object " + name() + " = {" + content() + "\n}";
     }
 }
