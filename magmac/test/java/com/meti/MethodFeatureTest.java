@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.CompiledTest.assertCompile;
 import static com.meti.FeatureTest.TEST_SYMBOL;
 import static com.meti.FeatureTest.assertWithinClass;
@@ -18,15 +21,24 @@ public class MethodFeatureTest {
             .withReturnType("void")
             .withContent("{}");
 
-    @Test
-    void testParameter() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void testParameters(int count) {
+        var inputParameters = IntStream.range(0, count)
+                .mapToObj(i -> "int value" + i)
+                .collect(Collectors.joining(", "));
+
+        var outputParameters = IntStream.range(0, count)
+                .mapToObj(i -> "value" + i + " : I32")
+                .collect(Collectors.joining(", "));
+
         assertWithinClass(DEFAULT_BUILDER.withName(TEST_SYMBOL)
-                        .withParameters("int value"),
+                        .withParameters(inputParameters),
                 new MagmaMethodBuilder()
                         .withName(TEST_SYMBOL)
                         .withType("Void")
                         .withContent("{}")
-                        .withParameters("value : I32"));
+                        .withParameters(outputParameters));
     }
 
     @Test

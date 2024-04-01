@@ -183,16 +183,15 @@ public class Compiler {
         var paramEnd = methodString.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
-        var paramString = methodString.substring(paramStart + 1, paramEnd).strip();
-        var paramSeparator = paramString.lastIndexOf(' ');
-        String outputParamString;
-        if (paramSeparator != -1) {
-            var paramType = compileType(paramString.substring(0, paramSeparator).strip());
-            var paramName = paramString.substring(paramSeparator + 1).strip();
-            outputParamString = paramName + " : " + paramType;
-        } else {
-            outputParamString = "";
-        }
+        var outputParamString = Arrays.stream(methodString.substring(paramStart + 1, paramEnd).strip().split(","))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(line -> {
+                    var paramSeparator = line.lastIndexOf(' ');
+                    var paramType = compileType(line.substring(0, paramSeparator).strip());
+                    var paramName = line.substring(paramSeparator + 1).strip();
+                    return paramName + " : " + paramType;
+                }).collect(Collectors.joining(", "));
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
