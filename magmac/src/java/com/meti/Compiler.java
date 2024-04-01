@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.meti.Lang.CLASS_KEYWORD_WITH_SPACE;
+
 public class Compiler {
     static String compile(String input) {
         var args = split(input);
@@ -64,7 +66,7 @@ public class Compiler {
                 .or(() -> compileClass(input))
                 .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
-                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty()));
+                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileRecord(String input) {
@@ -80,13 +82,13 @@ public class Compiler {
         var membersString = compileMembers(input.substring(bodyStart + 1, bodyEnd), name);
 
         var rendered = new MagmaClassNodeBuilder()
-                .withPrefix(isPublic ? Lang.EXPORT_KEYWORD : "")
+                .withPrefix(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "")
                 .withName(name)
                 .withContent(membersString.value)
                 .build()
                 .render();
 
-        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {
@@ -104,18 +106,18 @@ public class Compiler {
             var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
             var membersResult = compileMembers(content.substring(1, content.length() - 1), name);
 
-            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD : "", name, "{" + membersResult.value + "\n}")
+            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "", name, "{" + membersResult.value + "\n}")
                     .render();
 
-            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
     }
 
     private static Optional<State> compileClass(String input) {
-        if (!input.contains(Lang.CLASS_KEYWORD)) return Optional.empty();
+        if (!input.contains(CLASS_KEYWORD_WITH_SPACE)) return Optional.empty();
         var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
-        var nameStart = input.indexOf(Lang.CLASS_KEYWORD) + Lang.CLASS_KEYWORD.length();
+        var nameStart = input.indexOf(CLASS_KEYWORD_WITH_SPACE) + CLASS_KEYWORD_WITH_SPACE.length();
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
@@ -124,12 +126,18 @@ public class Compiler {
         var name = input.substring(nameStart, bodyStart).strip();
         var inputContent = input.substring(bodyStart + 1, bodyEnd);
         var membersResult = compileMembers(inputContent, name);
-        var flagString = isPublic ? Lang.EXPORT_KEYWORD : "";
 
-        var renderedClass = new MagmaClassNodeBuilder()
-                .withPrefix(flagString)
+        var parameterString = membersResult.parameter.orElse("");
+
+        var flags = new ArrayList<String>();
+        if (isPublic) flags.add(Lang.EXPORT_KEYWORD);
+
+        var flagString = flags.isEmpty() ? "" : String.join(" ", flags) + " ";
+        var renderedClass = new MagmaMethodBuilder()
+                .withPrefix(flagString + CLASS_KEYWORD_WITH_SPACE)
                 .withName(name)
-                .withContent(membersResult.value())
+                .withContent("{" + membersResult.value() + "\n}")
+                .withParameters(parameterString)
                 .build()
                 .render();
 
@@ -141,7 +149,7 @@ public class Compiler {
             renderedMore = Optional.of(new ObjectNode(flagString, name, content).render());
         }
 
-        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore));
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore, Optional.empty()));
     }
 
     private static MembersResult compileMembers(String inputContent, String name) {
@@ -149,18 +157,21 @@ public class Compiler {
 
         var outputValues = new ArrayList<String>();
         var outputMore = new ArrayList<String>();
+        Optional<String> parameter = Optional.empty();
 
         for (var classMember : splitContent) {
             var compiledClassMember = compileMethod(classMember, name)
                     .or(() -> compileDefinition(classMember))
-                    .orElse(new State(Optional.empty(), Optional.of(classMember), Optional.empty()));
+                    .orElse(new State(Optional.empty(), Optional.of(classMember),
+                            Optional.empty(), Optional.empty()));
 
             compiledClassMember.instanceValue.ifPresent(outputValues::add);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
+            parameter = compiledClassMember.parameter;
         }
 
         var value = String.join("", outputValues);
-        return new MembersResult(outputMore, value);
+        return new MembersResult(outputMore, value, parameter);
     }
 
     private static Optional<State> compileMethod(String input, String parentName) {
@@ -203,10 +214,11 @@ public class Compiler {
             if (!before.equals(parentName)) {
                 return Optional.empty();
             } else {
-/*                name = "__constructor__";
-                inputFlags = Collections.emptyList();
-                outputType = Optional.empty();*/
-                return Optional.of(new State(Optional.empty(), Optional.of(""), Optional.empty()));
+                return Optional.of(new State(
+                        Optional.empty(),
+                        Optional.of(""),
+                        Optional.empty(),
+                        Optional.of(outputParamString)));
             }
         } else {
             name = before.substring(separator + 1).strip();
@@ -263,11 +275,11 @@ public class Compiler {
 
             var rendered = result.build().render();
             return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered)))
-                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty()))
+                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
-            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
         } else {
             return Optional.empty();
         }
@@ -357,8 +369,8 @@ public class Compiler {
 
         var rendered = withValue.build().render();
         return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered))
-                : new State(Optional.empty(), Optional.of(rendered), Optional.empty()));
+                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty())
+                : new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -396,12 +408,13 @@ public class Compiler {
         var child = segmentsString.substring(separator + 1);
 
         ImportNode importNode = new ImportNode(parent, "");
-        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty(), Optional.empty()));
     }
 
-    private record MembersResult(ArrayList<String> outputMore, String value) {
+    private record MembersResult(ArrayList<String> outputMore, String value, Optional<String> parameter) {
     }
 
-    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue) {
+    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue,
+                 Optional<String> parameter) {
     }
 }

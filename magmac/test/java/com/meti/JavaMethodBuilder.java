@@ -55,7 +55,7 @@ public class JavaMethodBuilder implements RenderableBuilder {
         return new JavaMethodBuilder(annotations, flagsString, name, Optional.of(returnType), throwsString, content, parameterString);
     }
 
-    public JavaMethodBuilder withParameters(String intValue) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, intValue);
+    public JavaMethodBuilder withParameters(String parameterString) {
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 }

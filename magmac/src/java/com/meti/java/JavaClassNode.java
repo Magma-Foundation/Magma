@@ -17,7 +17,7 @@ public final class JavaClassNode implements Renderable {
     }
 
     public String render() {
-        return prefix() + Lang.CLASS_KEYWORD + name() + " {" + content() + "}";
+        return prefix() + Lang.CLASS_KEYWORD_WITH_SPACE + name() + " {" + content() + "}";
     }
 
     public String prefix() {

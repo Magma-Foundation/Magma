@@ -5,7 +5,8 @@ public class Lang {
     public static final String STATIC_KEYWORD = "static ";
     public static final String IMPORT_STATIC = IMPORT_KEYWORD + STATIC_KEYWORD;
     public static final String PUBLIC_KEYWORD = "public ";
-    public static final String CLASS_KEYWORD = "class ";
+    public static final String CLASS_KEYWORD = "class";
+    public static final String CLASS_KEYWORD_WITH_SPACE = CLASS_KEYWORD + " ";
     public static final String I64 = "I64";
     public static final String I32 = "I32";
     public static final String LONG = "long";
@@ -15,7 +16,8 @@ public class Lang {
     public static final String FINAL_KEYWORD = "final";
     public static final String LOWER_VOID = "void";
     public static final String CAMEL_VOID = "Void";
-    public static final String EXPORT_KEYWORD = "export ";
+    public static final String EXPORT_KEYWORD = "export";
+    public static final String EXPORT_KEYWORD_WITH_SPACE = EXPORT_KEYWORD + " ";
     public static final String INTERFACE_KEYWORD = "interface ";
     public static final String RECORD_KEYWORD = "record ";
     public static final String CAMEL_BOOL = "Bool";

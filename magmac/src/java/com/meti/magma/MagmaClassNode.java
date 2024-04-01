@@ -18,7 +18,7 @@ public final class MagmaClassNode implements Renderable {
 
     @Override
     public String render() {
-        return prefix() + Lang.CLASS_KEYWORD + "def " + name() + "() " + "=> {" + content() + "\n}";
+        return prefix() + Lang.CLASS_KEYWORD_WITH_SPACE + "def " + name() + "() " + "=> {" + content() + "\n}";
     }
 
     public String prefix() {

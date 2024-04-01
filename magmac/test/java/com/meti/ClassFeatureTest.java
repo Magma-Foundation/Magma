@@ -2,6 +2,8 @@ package com.meti;
 
 import com.meti.java.JavaClassNodeBuilder;
 import com.meti.magma.MagmaClassNodeBuilder;
+import com.meti.magma.MagmaMethodBuilder;
+import com.meti.magma.MagmaMethodNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,8 +20,14 @@ public class ClassFeatureTest {
                 .withName(TEST_SYMBOL)
                 .withContent(new JavaMethodBuilder()
                         .withName(TEST_SYMBOL)
-                        .withContent("{}")),
-                new MagmaClassNodeBuilder().withName(TEST_SYMBOL));
+                        .withContent("{}")
+                        .withParameters("int value")
+                ),
+                new MagmaMethodBuilder()
+                        .withPrefix("class ")
+                        .withName(TEST_SYMBOL)
+                        .withParameters("value : I32")
+                        .withContent("{\n}"));
     }
 
     @Test

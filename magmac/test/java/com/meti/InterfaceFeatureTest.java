@@ -19,6 +19,6 @@ public class InterfaceFeatureTest {
 
     @Test
     void testPublic() {
-        assertEquals(new MagmaTraitNode(Lang.EXPORT_KEYWORD, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
+        assertEquals(new MagmaTraitNode(Lang.EXPORT_KEYWORD_WITH_SPACE, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
     }
 }

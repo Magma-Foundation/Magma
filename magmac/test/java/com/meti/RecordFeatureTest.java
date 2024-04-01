@@ -25,7 +25,7 @@ public class RecordFeatureTest {
 
     @Test
     void testPublicKeyword() {
-        CompiledTest.assertCompile(DEFAULT_INPUT.withPrefix(Lang.PUBLIC_KEYWORD), DEFAULT_OUTPUT.withPrefix(Lang.EXPORT_KEYWORD));
+        CompiledTest.assertCompile(DEFAULT_INPUT.withPrefix(Lang.PUBLIC_KEYWORD), DEFAULT_OUTPUT.withPrefix(Lang.EXPORT_KEYWORD_WITH_SPACE));
     }
 
     @Test
