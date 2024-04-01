@@ -180,6 +180,20 @@ public class Compiler {
         var paramStart = methodString.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
+        var paramEnd = methodString.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var paramString = methodString.substring(paramStart + 1, paramEnd).strip();
+        var paramSeparator = paramString.lastIndexOf(' ');
+        String outputParamString;
+        if (paramSeparator != -1) {
+            var paramType = compileType(paramString.substring(0, paramSeparator).strip());
+            var paramName = paramString.substring(paramSeparator + 1).strip();
+            outputParamString = paramName + " : " + paramType;
+        } else {
+            outputParamString = "";
+        }
+
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
 
@@ -221,9 +235,6 @@ public class Compiler {
                 .map(name1 -> new Annotation(name1, "").render())
                 .collect(Collectors.joining());
 
-        var paramEnd = methodString.indexOf(')');
-        if (paramEnd == -1) return Optional.empty();
-
         var contentStart = methodString.indexOf('{');
 
         var contentEnd = methodString.lastIndexOf('}');
@@ -234,6 +245,7 @@ public class Compiler {
 
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
             var magmaMethodBuilder = new MagmaMethodBuilder()
+                    .withParameters(outputParamString)
                     .withPrefix(annotationsString)
                     .withName(name)
                     .withContent(content);

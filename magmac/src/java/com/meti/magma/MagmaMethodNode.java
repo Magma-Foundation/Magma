@@ -10,17 +10,19 @@ public final class MagmaMethodNode implements Renderable {
     private final Optional<String> type;
     private final String content;
     private final String exceptionString;
+    private final String parametersString;
 
-    public MagmaMethodNode(String prefix, String name, Optional<String> type, String content, String exceptionString) {
+    public MagmaMethodNode(String prefix, String name, String parametersString, Optional<String> type, String content, String exceptionString) {
         this.prefix = prefix;
         this.name = name;
         this.type = type;
         this.content = content;
         this.exceptionString = exceptionString;
+        this.parametersString = parametersString;
     }
 
     public String render() {
         var typeString = type.map(inner -> " : " + inner).orElse("");
-        return prefix + "\n\tdef " + name + "()" + typeString + exceptionString + " => " + content;
+        return prefix + "\n\tdef " + name + "(" + parametersString + ")" + typeString + exceptionString + " => " + content;
     }
 }

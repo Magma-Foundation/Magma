@@ -10,46 +10,52 @@ public class JavaMethodBuilder implements RenderableBuilder {
     private final String name;
     private final String throwsString;
     private final String content;
-    private Optional<String> returnType;
+    private final String parameterString;
+    private final Optional<String> returnType;
 
     public JavaMethodBuilder() {
-        this("", "", "", Optional.empty(), "", "");
+        this("", "", "", Optional.empty(), "", "", "");
     }
 
-    public JavaMethodBuilder(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content) {
+    public JavaMethodBuilder(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content, String parameterString) {
         this.annotations = annotations;
         this.flagsString = flagsString;
         this.name = name;
         this.throwsString = throwsString;
         this.content = content;
         this.returnType = returnType;
+        this.parameterString = parameterString;
     }
 
     public JavaMethodBuilder withAnnotations(String annotations) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethodBuilder withFlagsString(String flagsString) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethodBuilder withName(String name) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethodBuilder withThrows(String throwsString) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethodBuilder withContent(String content) {
-        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethod build() {
-        return new JavaMethod(annotations, flagsString, name, returnType, throwsString, content);
+        return new JavaMethod(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
 
     public JavaMethodBuilder withReturnType(String returnType) {
-        return new JavaMethodBuilder(annotations, flagsString, name, Optional.of(returnType), throwsString, content);
+        return new JavaMethodBuilder(annotations, flagsString, name, Optional.of(returnType), throwsString, content, parameterString);
+    }
+
+    public JavaMethodBuilder withParameters(String intValue) {
+        return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, intValue);
     }
 }

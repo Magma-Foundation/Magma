@@ -14,6 +14,21 @@ import static com.meti.FeatureTest.TEST_SYMBOL;
 import static com.meti.FeatureTest.assertWithinClass;
 
 public class MethodFeatureTest {
+    public static final JavaMethodBuilder DEFAULT_BUILDER = new JavaMethodBuilder()
+            .withReturnType("void")
+            .withContent("{}");
+
+    @Test
+    void testParameter() {
+        assertWithinClass(DEFAULT_BUILDER.withName(TEST_SYMBOL)
+                        .withParameters("int value"),
+                new MagmaMethodBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withType("Void")
+                        .withContent("{}")
+                        .withParameters("value : I32"));
+    }
+
     @Test
     void testWithNoBody() {
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
@@ -27,10 +42,7 @@ public class MethodFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void testSimpleMethod(String name) {
-        assertWithinClass(new JavaMethodBuilder()
-                        .withReturnType("void")
-                        .withName(name)
-                        .withContent("{}"),
+        assertWithinClass(DEFAULT_BUILDER.withName(name),
                 new MagmaMethodBuilder()
                         .withName(name)
                         .withType("Void")

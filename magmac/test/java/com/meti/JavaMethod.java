@@ -12,20 +12,22 @@ public final class JavaMethod implements Renderable {
     private final String throwsString;
     private final String content;
     private final Optional<String> returnType;
+    private final String parameterString;
 
-    public JavaMethod(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content) {
+    public JavaMethod(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content, String parameterString) {
         this.annotations = annotations;
         this.flagsString = flagsString;
         this.name = name;
         this.throwsString = throwsString;
         this.content = content;
         this.returnType = returnType;
+        this.parameterString = parameterString;
     }
 
     @Override
     public String render() {
         var returnsString = returnType.map(value -> value + " ").orElse("");
-        return annotations() + "\n" + flagsString() + returnsString + name() + "()" + throwsString() + content();
+        return annotations() + "\n" + flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
     }
 
     public String annotations() {
@@ -53,11 +55,7 @@ public final class JavaMethod implements Renderable {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (JavaMethod) obj;
-        return Objects.equals(this.annotations, that.annotations) &&
-               Objects.equals(this.flagsString, that.flagsString) &&
-               Objects.equals(this.name, that.name) &&
-               Objects.equals(this.throwsString, that.throwsString) &&
-               Objects.equals(this.content, that.content);
+        return Objects.equals(this.annotations, that.annotations) && Objects.equals(this.flagsString, that.flagsString) && Objects.equals(this.name, that.name) && Objects.equals(this.throwsString, that.throwsString) && Objects.equals(this.content, that.content);
     }
 
     @Override
@@ -67,12 +65,7 @@ public final class JavaMethod implements Renderable {
 
     @Override
     public String toString() {
-        return "JavaMethod[" +
-               "annotations=" + annotations + ", " +
-               "flagsString=" + flagsString + ", " +
-               "name=" + name + ", " +
-               "throwsString=" + throwsString + ", " +
-               "content=" + content + ']';
+        return "JavaMethod[" + "annotations=" + annotations + ", " + "flagsString=" + flagsString + ", " + "name=" + name + ", " + "throwsString=" + throwsString + ", " + "content=" + content + ']';
     }
 
 }
