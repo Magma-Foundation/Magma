@@ -18,7 +18,8 @@ export object MethodFeatureTest = {def JavaMethodBuilder() : new ? turnType("voi
 
 export class def MethodFeatureTest() => {
 	@ParameterizedTest
-	@ValueSource(ints = [1, 2, 3])def testParameters(count : I32) : Void => {
+	@ValueSource(ints = [1, 2, 3])
+	def testParameters(count : I32) : Void => {
         var inputParameters = IntStream.range(0, count)
                 .mapToObj(i -> "int value" + i)
                 .collect(Collectors.joining(", "));
@@ -35,7 +36,9 @@ export class def MethodFeatureTest() => {
                         .withContent("{}")
                         .withParameters(outputParameters));
     }
-	@Testdef testWithNoBody() : Void => {
+	
+	@Test
+	def testWithNoBody() : Void => {
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withName(TEST_SYMBOL)
                         .withContent(";")
@@ -43,16 +46,20 @@ export class def MethodFeatureTest() => {
                         .render(),
                 new MagmaDeclaration("", "", TEST_SYMBOL, "() => Void").render() + ";");
     }
+	
 	@ParameterizedTest
-	@ValueSource(strings = ["first", "second"])def testSimpleMethod(name : String) : Void => {
+	@ValueSource(strings = ["first", "second"])
+	def testSimpleMethod(name : String) : Void => {
         assertWithinClass(DEFAULT_BUILDER.withName(name),
                 new MagmaMethodBuilder()
                         .withName(name)
                         .withType("Void")
                         .withContent("{}"));
     }
+	
 	@ParameterizedTest
-	@ValueSource(strings = ["First", "Second"])def testAnnotation(name : String) : Void => {
+	@ValueSource(strings = ["First", "Second"])
+	def testAnnotation(name : String) : Void => {
         String prefix = new Annotation(name, "").render();
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(prefix)
@@ -64,8 +71,10 @@ export class def MethodFeatureTest() => {
                         .withType("Void")
                         .withContent("{}"));
     }
+	
 	@ParameterizedTest
-	@ValueSource(strings = ["First", "Second"])def testException(name : String) : Void => {
+	@ValueSource(strings = ["First", "Second"])
+	def testException(name : String) : Void => {
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withName(TEST_SYMBOL)
                         .withThrows(" throws " + name + " ")
@@ -76,8 +85,10 @@ export class def MethodFeatureTest() => {
                         .withContent("{}")
                         .withExceptionString(" ? " + name));
     }
+	
 	@ParameterizedTest
-	@ValueSource(ints = [2, 3])def testMultipleAnnotations(count : I32) : Void => {
+	@ValueSource(ints = [2, 3])
+	def testMultipleAnnotations(count : I32) : Void => {
         var rendered = new Annotation("First", "").render().repeat(count);
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(rendered)
@@ -89,7 +100,9 @@ export class def MethodFeatureTest() => {
                         .withType("Void")
                         .withContent("{}"));
     }
-	@Testdef testAnnotationWithValues() : Void => {
+	
+	@Test
+	def testAnnotationWithValues() : Void => {
         String prefix = new Annotation("First", "(ints = {2, 3})").render();
         assertWithinClass(new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(prefix)
@@ -101,8 +114,10 @@ export class def MethodFeatureTest() => {
                         .withType("Void")
                         .withContent("{}"));
     }
+	
 	@ParameterizedTest
-	@ValueSource(strings = ["Foo", "Bar"])def testStatic(className : String) : Void => {
+	@ValueSource(strings = ["Foo", "Bar"])
+	def testStatic(className : String) : Void => {
         var content = new MagmaMethodBuilder()
                 .withName(TEST_SYMBOL).withType("Void").withContent("{}")
                 .build()

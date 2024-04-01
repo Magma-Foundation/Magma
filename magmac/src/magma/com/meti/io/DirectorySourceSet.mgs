@@ -5,7 +5,8 @@ extern import { Set } from java.util;
 extern import { Collectors } from java.util.stream;
 
 export class def DirectorySourceSet() => {
-	@Overridedef collect() : Set<PathSource> ? IOException => {
+	@Override
+	def collect() : Set<PathSource> ? IOException => {
         try {
             try (var stream = Files.walk(root)) {
                 return stream

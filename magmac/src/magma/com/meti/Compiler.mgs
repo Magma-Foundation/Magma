@@ -16,7 +16,8 @@ export object Compiler = {def compile(input : String) : String => {
         for (String arg : args) {
             var state = compileRootStatement(arg.strip());
             state.importValue.ifPresent(imports::add);
-            state.instanceValue.ifPresent(classes::add);
+            classes.addAll(state.instanceValues);
+            
             state.staticValue.ifPresent(objects::add);
         }
 
@@ -59,7 +60,8 @@ export object Compiler = {def compile(input : String) : String => {
                 .or(() -> compileClass(input))
                 .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
-                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+                .orElse(new State(Optional.empty(), 
+                        Collections.emptyList(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileRecord(String input) {
@@ -81,7 +83,7 @@ export object Compiler = {def compile(input : String) : String => {
                 .build()
                 .render();
 
-        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {
@@ -102,7 +104,7 @@ export object Compiler = {def compile(input : String) : String => {
             var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "", name, "{" + membersResult.value + "\n}")
                     .render();
 
-            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.of(rendered), Collections.emptyList(), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
     }
@@ -142,7 +144,7 @@ export object Compiler = {def compile(input : String) : String => {
             renderedMore = Optional.of(new ObjectNode(flagString, name, content).render());
         }
 
-        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore, Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass).map(Collections::singletonList).orElse(Collections.emptyList()), renderedMore, Optional.empty()));
     }
 
     private static MembersResult compileMembers(String inputContent, String name) {
@@ -155,15 +157,15 @@ export object Compiler = {def compile(input : String) : String => {
         for (var classMember : splitContent) {
             var compiledClassMember = compileMethod(classMember, name)
                     .or(() -> compileDefinition(classMember))
-                    .orElse(new State(Optional.empty(), Optional.of(classMember),
-                            Optional.empty(), Optional.empty()));
+                    .orElse(new State(Optional.empty(),
+                            Optional.of(classMember).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
 
-            compiledClassMember.instanceValue.ifPresent(outputValues::add);
+            outputValues.addAll(compiledClassMember.instanceValues);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
             parameter = compiledClassMember.parameter;
         }
 
-        var value = String.join("", outputValues);
+        var value = String.join("\n\t", outputValues);
         return new MembersResult(outputMore, value, parameter);
     }
 
@@ -192,7 +194,7 @@ export object Compiler = {def compile(input : String) : String => {
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
                     var paramSeparator = line.lastIndexOf(' ');
-                    if(paramSeparator ==-1) return Optional.<String>empty();
+                    if (paramSeparator == -1) return Optional.<String>empty();
 
                     var paramType = compileType(line.substring(0, paramSeparator).strip());
                     var paramName = line.substring(paramSeparator + 1).strip();
@@ -213,8 +215,7 @@ export object Compiler = {def compile(input : String) : String => {
             } else {
                 return Optional.of(new State(
                         Optional.empty(),
-                        Optional.of(""),
-                        Optional.empty(),
+                        Optional.of("").map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(),
                         Optional.of(outputParamString)));
             }
         } else {
@@ -254,7 +255,6 @@ export object Compiler = {def compile(input : String) : String => {
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
             var magmaMethodBuilder = new MagmaMethodBuilder()
                     .withParameters(outputParamString)
-                    .withPrefix(annotationsString)
                     .withName(name)
                     .withContent(content);
 
@@ -272,11 +272,11 @@ export object Compiler = {def compile(input : String) : String => {
 
             var rendered = result.build().render();
             return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty()))
-                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+                    ? Optional.of(new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty()))
+                    : Optional.of(new State(Optional.empty(), List.of(annotationsString, rendered), Optional.empty(), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
-            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
         } else {
             return Optional.empty();
         }
@@ -366,8 +366,8 @@ export object Compiler = {def compile(input : String) : String => {
 
         var rendered = withValue.build().render();
         return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty())
-                : new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+                ? new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty())
+                : new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -392,7 +392,7 @@ export object Compiler = {def compile(input : String) : String => {
 
         var arrayStart = inputType.indexOf('[');
         var arrayEnd = inputType.lastIndexOf(']');
-        if(arrayStart != -1 && arrayEnd != -1) {
+        if (arrayStart != -1 && arrayEnd != -1) {
             var parent = inputType.substring(0, arrayStart);
             return "Array<" + parent + ">";
         }
@@ -411,14 +411,62 @@ export object Compiler = {def compile(input : String) : String => {
         var child = segmentsString.substring(separator + 1);
 
         ImportNode importNode = new ImportNode(parent, "");
-        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Collections.emptyList(), Optional.empty(), Optional.empty()));
     }
 
     private record MembersResult(ArrayList<String> outputMore, String value, Optional<String> parameter) {
     }
 
-    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue,
-                 Optional<String> parameter) {
+    static final class State {
+        private final Optional<String> importValue;
+        private final List<String> instanceValues;
+        private final Optional<String> staticValue;
+        private final Optional<String> parameter;
+
+        State(Optional<String> importValue,
+              List<String> instanceValues,
+              Optional<String> staticValue,
+              Optional<String> parameter) {
+            this.importValue = importValue;
+            this.instanceValues = instanceValues;
+            this.staticValue = staticValue;
+            this.parameter = parameter;
+        }
+
+        public Optional<String> importValue() {
+            return importValue;
+        }
+
+        public Optional<String> staticValue() {
+            return staticValue;
+        }
+
+        public Optional<String> parameter() {
+            return parameter;
+        }
+
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (State) obj;
+            return Objects.equals(this.importValue, that.importValue) &&
+                   Objects.equals(this.instanceValues, that.instanceValues) &&
+                   Objects.equals(this.staticValue, that.staticValue) &&
+                   Objects.equals(this.parameter, that.parameter);
+        }
+
+        public int hashCode() {
+            return Objects.hash(importValue, instanceValues, staticValue, parameter);
+        }
+
+        public String toString() {
+            return "State[" +
+                   "importValue=" + importValue + ", " +
+                   "instanceValue=" + instanceValues + ", " +
+                   "staticValue=" + staticValue + ", " +
+                   "parameter=" + parameter + ']';
+        }
+
     }
 }
 

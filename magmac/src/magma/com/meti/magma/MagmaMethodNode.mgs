@@ -3,18 +3,27 @@ extern import { Optional } from java.util;
 
 export class def MagmaMethodNode implements Renderable() => {
 	const prefix : String;
+	
 	const name : String;
+	
 	const type : Optional<String>;
+	
 	const content : String;
+	
 	const exceptionString : String;
-	const parametersString : String;def MagmaMethodNode(prefix : String, name : String, parametersString : String, type : Optional<String>, content : String, exceptionString : String) : public => {
+	
+	const parametersString : String;
+	
+	def MagmaMethodNode(prefix : String, name : String, parametersString : String, type : Optional<String>, content : String, exceptionString : String) : public => {
         this.prefix = prefix;
         this.name = name;
         this.type = type;
         this.content = content;
         this.exceptionString = exceptionString;
         this.parametersString = parametersString;
-    }def render() : String => {
+    }
+	
+	def render() : String => {
         var typeString = type.map(inner -> " : " + inner).orElse("");
         return prefix + "def " + name + "(" + parametersString + ")" + typeString + exceptionString + " => " + content;
     }

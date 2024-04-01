@@ -14,16 +14,21 @@ export object ApplicationTest = {
 }
 
 export class def ApplicationTest() => {
-	@AfterEachdef tearDown() : Void ? IOException => {
+	@AfterEach
+	def tearDown() : Void ? IOException => {
         Files.deleteIfExists(TARGET);
         Files.deleteIfExists(SOURCE);
     }
-	@Testdef generateSomething() : Void ? IOException => {
+	
+	@Test
+	def generateSomething() : Void ? IOException => {
         Files.createFile(SOURCE);
         Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
         assertTrue(Files.exists(TARGET));
     }
-	@Testdef generatesNothing() : Void ? IOException => {
+	
+	@Test
+	def generatesNothing() : Void ? IOException => {
         Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
         assertFalse(Files.exists(TARGET));
     }

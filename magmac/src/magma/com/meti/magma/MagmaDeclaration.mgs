@@ -1,4 +1,5 @@
-export class def MagmaDeclaration() => {def render() : String => {
+export class def MagmaDeclaration() => {
+	def render() : String => {
         return "\n\t" + flagString() + mutabilityString() + name() + " : " + type();
     }
 }

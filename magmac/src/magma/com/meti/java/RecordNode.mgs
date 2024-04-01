@@ -3,22 +3,36 @@ extern import { Objects } from java.util;
 
 export class def RecordNode implements com.meti.node.Renderable() => {
 	const prefix : String;
+	
 	const name : String;
-	const body : String;def RecordNode(prefix : String, name : String, body : String) : public => {
+	
+	const body : String;
+	
+	def RecordNode(prefix : String, name : String, body : String) : public => {
         this.prefix = prefix;
         this.name = name;
         this.body = body;
     }
-	@Overridedef render() : String => {
+	
+	@Override
+	def render() : String => {
         return prefix() + "record " + name() + "()" + body();
-    }def prefix() : String => {
+    }
+	
+	def prefix() : String => {
         return prefix;
-    }def name() : String => {
+    }
+	
+	def name() : String => {
         return name;
-    }def body() : String => {
+    }
+	
+	def body() : String => {
         return body;
     }
-	@Overridedef equals(obj : Object) : Bool => {
+	
+	@Override
+	def equals(obj : Object) : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (RecordNode) obj;
@@ -26,10 +40,14 @@ export class def RecordNode implements com.meti.node.Renderable() => {
                Objects.equals(this.name, that.name) &&
                Objects.equals(this.body, that.body);
     }
-	@Overridedef hashCode() : I32 => {
+	
+	@Override
+	def hashCode() : I32 => {
         return Objects.hash(prefix, name, body);
     }
-	@Overridedef toString() : String => {
+	
+	@Override
+	def toString() : String => {
         return "RecordNode[" +
                "prefix=" + prefix + ", " +
                "name=" + name + ", " +
