@@ -14,8 +14,9 @@ public class RecordFeatureTest {
     public static final MagmaClassNodeBuilder DEFAULT_OUTPUT = new MagmaClassNodeBuilder().withName(TEST_SYMBOL);
 
     static {
-        MapNode.Builder recordNodeBuilder = MapNode.Builder("record").string("name", TEST_SYMBOL);
-        DEFAULT_INPUT = recordNodeBuilder.string("body", "{}");
+        DEFAULT_INPUT = MapNode.Builder("record")
+                .string("name", TEST_SYMBOL)
+                .string("body", "{}");
     }
 
     @Test
