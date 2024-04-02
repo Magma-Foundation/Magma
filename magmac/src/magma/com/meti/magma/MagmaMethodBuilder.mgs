@@ -2,16 +2,16 @@ extern import { RenderableBuilder } from com.meti.java;
 extern import { Optional } from java.util;
 
 export class def MagmaMethodBuilder implements RenderableBuilder() => {
-	let prefix : String;
-	let name : String;
-	let type : Optional<String>;
-	let content : String;
-	let exceptionString : String;
-	let parametersString : String;
+	let prefix : String
+	let name : String
+	let type : Optional<String>
+	let content : String
+	let exceptionString : String
+	let parametersString : String
 	def MagmaMethodBuilder() : public => {
         this("", "", Optional.empty(), "", "", "");
     }
-	def MagmaMethodBuilder(let prefix : String;, let name : String;, let type : Optional<String>;, let content : String;, let exceptionString : String;) : public => {
+	def MagmaMethodBuilder(prefix : String, name : String, type : Optional<String>, content : String, exceptionString : String, parametersString : String) : public => {
         this.prefix = prefix;
         this.name = name;
         this.type = type;
@@ -19,25 +19,25 @@ export class def MagmaMethodBuilder implements RenderableBuilder() => {
         this.exceptionString = exceptionString;
         this.parametersString = parametersString;
     }
-	def withPrefix() : MagmaMethodBuilder => {
+	def withPrefix(prefix : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	def withName() : MagmaMethodBuilder => {
+	def withName(name : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	def withType() : MagmaMethodBuilder => {
+	def withType(type : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, Optional.of(type), content, exceptionString, parametersString);
     }
-	def withContent() : MagmaMethodBuilder => {
+	def withContent(content : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	def withExceptionString() : MagmaMethodBuilder => {
+	def withExceptionString(exceptionString : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
 	def build() : MagmaMethodNode => {
         return new MagmaMethodNode(prefix, name, parametersString, type, content, exceptionString);
     }
-	def withParameters() : MagmaMethodBuilder => {
+	def withParameters(parametersString : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
 }

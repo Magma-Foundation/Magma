@@ -6,7 +6,7 @@ extern import { IntStream } from java.util.stream;
 extern import { Stream } from java.util.stream;
 extern import { CLASS_KEYWORD_WITH_SPACE } from com.meti.Lang;
 
-export object Compiler = {def compile() : String => {
+export object Compiler = {def compile(input : String) : String => {
         var args = split(input);
 
         var imports = new ArrayList<String>();
@@ -25,7 +25,7 @@ export object Compiler = {def compile() : String => {
         var importStream = importString.isEmpty() ? Stream.<String>empty() : Stream.of(importString);
 
         return Stream.concat(importStream, Stream.of(objects, classes).filter(list -> !list.isEmpty()).map(list -> String.join("", list).strip())).collect(Collectors.joining("\n\n"));
-    }def split() : List<String> => {
+    }def split(input : String) : List<String> => {
         var state = new SplittingState();
 
         for (int i = 0; i < input.length(); i++) {
@@ -73,7 +73,7 @@ export object Compiler = {def compile() : String => {
         var nameStart = index + Lang.RECORD_KEYWORD.length();
         var nameEnd = input.indexOf('(');
 
-        if(!(nameStart < nameEnd)) return Optional.empty();
+        if (!(nameStart < nameEnd)) return Optional.empty();
 
         var name = input.substring(nameStart, nameEnd).strip();
 
@@ -161,7 +161,7 @@ export object Compiler = {def compile() : String => {
 
         for (var classMember : splitContent) {
             var compiledClassMember = compileMethod(classMember, name)
-                    .or(() -> compileDefinition(classMember))
+                    .or(() -> compileDefinition(classMember, false))
                     .orElse(new State(Optional.empty(),
                             Optional.of(classMember).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
 
@@ -207,7 +207,7 @@ export object Compiler = {def compile() : String => {
             outputParamString = splitParameters(parameterString)
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
-                    .map(Compiler::compileDefinition)
+                    .map((String input1) -> compileDefinition(input1, true))
                     .flatMap(Optional::stream)
                     .map(state -> state.instanceValues)
                     .flatMap(Collection::stream)
@@ -313,23 +313,10 @@ export object Compiler = {def compile() : String => {
             }
         }
 
+        list.add(builder.toString());
         return list.stream()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty());
-    }
-
-    private static Optional<String> getString(String paramString) {
-        var paramSeparator = paramString.lastIndexOf(' ');
-
-        if (paramSeparator == -1) {
-            return Optional.empty();
-        }
-
-        var substring = paramString.substring(0, paramSeparator);
-        var paramType = compileType(substring.strip());
-
-        var paramName = paramString.substring(paramSeparator + 1).strip();
-        return Optional.of(paramName + " : " + paramType);
     }
 
     private static boolean isSymbol(String name) {
@@ -365,7 +352,7 @@ export object Compiler = {def compile() : String => {
         }
     }
 
-    private static Optional<State> compileDefinition(String input) {
+    private static Optional<State> compileDefinition(String input, boolean isParameter) {
         var valueSeparator = input.indexOf('=');
 
         var beforeEnd = valueSeparator == -1 ? input.length() : valueSeparator;
@@ -398,7 +385,17 @@ export object Compiler = {def compile() : String => {
             throw new RuntimeException(message, e);
         }
 
-        var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
+        String mutabilityString;
+        if (flags.contains(Lang.FINAL_KEYWORD)) mutabilityString = Lang.CONST_KEYWORD;
+        else {
+            if(isParameter) {
+                mutabilityString = "";
+            } else {
+                mutabilityString = Lang.LET_KEYWORD;
+            }
+        }
+
+
         var flagString = flags.contains("public") ? "pub " : "";
         var withDeclaration = new MagmaDefinitionBuilder()
                 .withFlags(flagString)

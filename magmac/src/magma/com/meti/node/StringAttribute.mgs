@@ -1,8 +1,8 @@
 extern import { Optional } from java.util;
 
 export class def StringAttribute implements Attribute() => {
-	const value : String;
-	def StringAttribute() : public => {
+	const value : String
+	def StringAttribute(value : String) : public => {
         this.value = value;
     }
 	@Override
