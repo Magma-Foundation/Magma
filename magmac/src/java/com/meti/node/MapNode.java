@@ -21,6 +21,11 @@ public record MapNode(String name, Map<String, Attribute> attributes) implements
         }
     }
 
+    @Override
+    public boolean is(String name) {
+        return false;
+    }
+
     public record Builder(String name, Map<String, Attribute> attributes) implements RenderableBuilder {
         public Builder string(String name, String value) {
             var copy = new HashMap<>(attributes);

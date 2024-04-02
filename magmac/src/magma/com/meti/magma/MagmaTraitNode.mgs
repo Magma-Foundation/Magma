@@ -1,5 +1,22 @@
+extern import { MapNode } from com.meti.node;
+extern import { Node } from com.meti.node;
+
+export object MagmaTraitNode = {def createMagmaTraitNode(prefixString : String, name : String, content : String) : Node => {
+        return MapNode.Builder("trait")
+                .string("prefix", prefixString)
+                .string("name", name)
+                .string("content", content)
+                .build();
+    }
+}
+
 export class def MagmaTraitNode() => {
-	def render() : String => {
-        return prefixString() + "trait " + name() + " " + content();
+	const prefixString : String
+	const name : String
+	const content : String
+	def MagmaTraitNode(prefixString : String, name : String, content : String) : private => {
+        this.prefixString = prefixString;
+        this.name = name;
+        this.content = content;
     }
 }

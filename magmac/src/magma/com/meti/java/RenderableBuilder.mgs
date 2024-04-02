@@ -1,4 +1,2 @@
 extern import { Renderable } from com.meti.node;
-export trait RenderableBuilder {
-	build : () => Void;
-}
+export record RenderableBuilder()

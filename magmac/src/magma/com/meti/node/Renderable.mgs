@@ -1,3 +1,1 @@
-export trait Renderable {
-	render : () => Void;
-}
+export record Renderable()

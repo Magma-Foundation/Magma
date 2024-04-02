@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.java.ImportNode;
 import com.meti.magma.*;
+import com.meti.node.MapNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,7 +114,12 @@ public class Compiler {
             var name = input.substring(index + Lang.INTERFACE_KEYWORD.length(), contentStart).strip();
             var membersResult = compileMembers(content.substring(1, content.length() - 1), name);
 
-            var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "", name, "{" + membersResult.value + "\n}")
+            String prefixString = isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "";
+            var rendered = MapNode.Builder("trait")
+                    .string("prefix", prefixString)
+                    .string("name", name)
+                    .string("content", "{" + membersResult.value + "\n}")
+                    .build()
                     .render();
 
             return Optional.of(new State(Optional.of(rendered), Collections.emptyList(), Optional.empty(), Optional.empty()));

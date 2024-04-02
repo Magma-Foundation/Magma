@@ -1,7 +1,7 @@
 package com.meti;
 
 import com.meti.java.JavaInterfaceNode;
-import com.meti.magma.MagmaTraitNode;
+import com.meti.node.MapNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,11 +14,19 @@ public class InterfaceFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void testSimpleInterface(String name) {
-        assertEquals(new MagmaTraitNode("", name, "{\n}").render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
+        assertEquals(MapNode.Builder("trait")
+                .string("prefix", "")
+                .string("name", name)
+                .string("content", "{\n}")
+                .build().render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
     }
 
     @Test
     void testPublic() {
-        assertEquals(new MagmaTraitNode(Lang.EXPORT_KEYWORD_WITH_SPACE, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
+        assertEquals(MapNode.Builder("trait")
+                .string("prefix", Lang.EXPORT_KEYWORD_WITH_SPACE)
+                .string("name", TEST_SYMBOL)
+                .string("content", "{\n}")
+                .build().render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));
     }
 }
