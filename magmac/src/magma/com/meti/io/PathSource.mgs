@@ -10,7 +10,6 @@ export class def PathSource() => {
         var separator = fileName.indexOf('.');
         return fileName.substring(0, separator);
     }
-	
 	def findNamespace() : List<String> => {
         var list = new ArrayList<String>();
         var relative = root.relativize(child);
@@ -19,7 +18,6 @@ export class def PathSource() => {
         }
         return list;
     }
-	
 	def read() : String ? IOException => {
         return Files.readString(child);
     }

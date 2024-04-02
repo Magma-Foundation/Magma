@@ -9,8 +9,7 @@ extern import { assertCompile } from com.meti.CompiledTest;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 
 export class def ClassFeatureTest() => {
-    public static final String TEST_BODY = "0"
-	
+	public static final String TEST_BODY = "0"
 	@Test
 	def testConstructorParameter() : Void => {
         assertCompile(new JavaClassNodeBuilder()
@@ -26,20 +25,17 @@ export class def ClassFeatureTest() => {
                         .withParameters("value : I32")
                         .withContent("{\n}"));
     }
-	
 	@Test
 	def testConstructor() : Void => {
         assertCompile(new JavaClassNodeBuilder()
                 .withName(TEST_SYMBOL)
                 .withContent(TEST_SYMBOL + "(){}"), new MagmaClassNodeBuilder().withName(TEST_SYMBOL));
     }
-	
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
 	def testSimpleClasses(name : String) : Void => {
         assertCompile(new JavaClassNodeBuilder().withName(name), new MagmaClassNodeBuilder().withName(name));
     }
-	
 	@Test
 	def testPublicKeyword() : Void => {
         assertCompile(new JavaClassNodeBuilder()
@@ -49,7 +45,6 @@ export class def ClassFeatureTest() => {
                         .withPrefix("export ")
                         .withName(TEST_SYMBOL));
     }
-	
 	@Test
 	def testBody() : Void => {
         assertCompile(new JavaClassNodeBuilder()
@@ -57,6 +52,6 @@ export class def ClassFeatureTest() => {
                         .withContent(TEST_BODY),
                 new MagmaClassNodeBuilder()
                         .withName(TEST_SYMBOL)
-                        .withContent(TEST_BODY));
+                        .withContent("\n\t" + TEST_BODY));
     }
 }

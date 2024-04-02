@@ -6,15 +6,15 @@ extern import { ObjectNode } from com.meti.magma;
 extern import { Test } from org.junit.jupiter.api;
 extern import { ParameterizedTest } from org.junit.jupiter.params;
 extern import { ValueSource } from org.junit.jupiter.params.provider;
+extern import { Collectors } from java.util.stream;
+extern import { IntStream } from java.util.stream;
 extern import { assertCompile } from com.meti.CompiledTest;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 extern import { assertWithinClass } from com.meti.FeatureTest;
 
 export class def DefinitionFeatureTest() => {
-    public static final String TEST_VALUE = "100"
-	
+	public static final String TEST_VALUE = "100"
 	DeclarationNodeBuilder : () => Void;
-	
 	@Test
 	def testNoValue() : Void => {
         assertWithinClass(new DeclarationNodeBuilder()
@@ -25,7 +25,6 @@ export class def DefinitionFeatureTest() => {
                 .withName("first")
                 .withType(Lang.I32));
     }
-	
 	@ParameterizedTest
 	@ValueSource(strings = ["first", "second"])
 	def testSimpleDefinition(name : String) : Void => {
@@ -35,20 +34,21 @@ export class def DefinitionFeatureTest() => {
                 .withType(Lang.I32)
                 .withValue("0"));
     }
-	
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
 	def testMultipleDefinitions(count : I32) : Void => {
-        assertWithinClass(DEFAULT_INPUT.build().render().repeat(count), new MagmaDefinitionBuilder()
+        var render = new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(TEST_SYMBOL)
                 .withType(Lang.I32)
                 .withValue("0")
                 .build()
-                .render()
-                .repeat(count));
+                .render();
+
+        var collect = IntStream.range(0, count).mapToObj(i -> render).collect(Collectors.joining("\n\t"));
+
+        assertWithinClass(DEFAULT_INPUT.build().render().repeat(count), collect);
     }
-	
 	@Test
 	def testType() : Void => {
         assertWithinClass(DEFAULT_INPUT.withType(Lang.LONG), new MagmaDefinitionBuilder()
@@ -57,7 +57,6 @@ export class def DefinitionFeatureTest() => {
                 .withType(Lang.I64)
                 .withValue("0"));
     }
-	
 	@Test
 	def testValue() : Void => {
         assertWithinClass(DEFAULT_INPUT.withValue(TEST_VALUE), new MagmaDefinitionBuilder()
@@ -66,7 +65,6 @@ export class def DefinitionFeatureTest() => {
                 .withType(Lang.I32)
                 .withValue(TEST_VALUE));
     }
-	
 	@Test
 	def testFinal() : Void => {
         assertWithinClass(DEFAULT_INPUT.withFlagString(Lang.FINAL_KEYWORD + " ").withValue(TEST_VALUE), new MagmaDefinitionBuilder()
@@ -75,7 +73,6 @@ export class def DefinitionFeatureTest() => {
                 .withType(Lang.I32)
                 .withValue(TEST_VALUE));
     }
-	
 	@ParameterizedTest
 	@ValueSource(strings = [TEST_SYMBOL, TEST_SYMBOL + "_more"])
 	def testStatic(className : String) : Void => {
@@ -99,7 +96,6 @@ export class def DefinitionFeatureTest() => {
                         .build()
                         .render());
     }
-	
 	@Test
 	def testPublic() : Void => {
         assertWithinClass(DEFAULT_INPUT.withFlagString("public ").withValue(TEST_VALUE), new MagmaDefinitionBuilder()

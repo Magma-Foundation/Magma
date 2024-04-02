@@ -13,7 +13,6 @@ export class def InterfaceFeatureTest() => {
 	def testSimpleInterface(name : String) : Void => {
         assertEquals(new MagmaTraitNode("", name, "{\n}").render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
     }
-	
 	@Test
 	def testPublic() : Void => {
         assertEquals(new MagmaTraitNode(Lang.EXPORT_KEYWORD_WITH_SPACE, TEST_SYMBOL, "{\n}").render(), compile(new JavaInterfaceNode(Lang.PUBLIC_KEYWORD, TEST_SYMBOL).renderJavaInterface()));

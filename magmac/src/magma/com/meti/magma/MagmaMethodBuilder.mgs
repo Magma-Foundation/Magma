@@ -3,21 +3,14 @@ extern import { Optional } from java.util;
 
 export class def MagmaMethodBuilder implements RenderableBuilder() => {
 	let prefix : String;
-	
 	let name : String;
-	
 	let type : Optional<String>;
-	
 	let content : String;
-	
 	let exceptionString : String;
-	
 	let parametersString : String;
-	
 	def MagmaMethodBuilder() : public => {
         this("", "", Optional.empty(), "", "", "");
     }
-	
 	def MagmaMethodBuilder(prefix : String, name : String, type : Optional<String>, content : String, exceptionString : String, parametersString : String) : public => {
         this.prefix = prefix;
         this.name = name;
@@ -26,31 +19,24 @@ export class def MagmaMethodBuilder implements RenderableBuilder() => {
         this.exceptionString = exceptionString;
         this.parametersString = parametersString;
     }
-	
 	def withPrefix(prefix : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	
 	def withName(name : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	
 	def withType(type : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, Optional.of(type), content, exceptionString, parametersString);
     }
-	
 	def withContent(content : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	
 	def withExceptionString(exceptionString : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }
-	
 	def build() : MagmaMethodNode => {
         return new MagmaMethodNode(prefix, name, parametersString, type, content, exceptionString);
     }
-	
 	def withParameters(parametersString : String) : MagmaMethodBuilder => {
         return new MagmaMethodBuilder(prefix, name, type, content, exceptionString, parametersString);
     }

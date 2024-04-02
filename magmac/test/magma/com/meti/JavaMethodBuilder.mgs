@@ -3,23 +3,15 @@ extern import { Optional } from java.util;
 
 export class def JavaMethodBuilder implements RenderableBuilder() => {
 	const annotations : String;
-	
 	const flagsString : String;
-	
 	const name : String;
-	
 	const throwsString : String;
-	
 	const content : String;
-	
 	const parameterString : String;
-	
 	const returnType : Optional<String>;
-	
 	def JavaMethodBuilder() : public => {
         this("", "", "", Optional.empty(), "", "", "");
     }
-	
 	def JavaMethodBuilder(annotations : String, flagsString : String, name : String, returnType : Optional<String>, throwsString : String, content : String, parameterString : String) : public => {
         this.annotations = annotations;
         this.flagsString = flagsString;
@@ -29,35 +21,27 @@ export class def JavaMethodBuilder implements RenderableBuilder() => {
         this.returnType = returnType;
         this.parameterString = parameterString;
     }
-	
 	def withAnnotations(annotations : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def withFlagsString(flagsString : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def withName(name : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def withThrows(throwsString : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def withContent(content : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def build() : JavaMethod => {
         return new JavaMethod(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }
-	
 	def withReturnType(returnType : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, Optional.of(returnType), throwsString, content, parameterString);
     }
-	
 	def withParameters(parameterString : String) : JavaMethodBuilder => {
         return new JavaMethodBuilder(annotations, flagsString, name, returnType, throwsString, content, parameterString);
     }

@@ -7,10 +7,7 @@ extern import { Path } from java.nio.file;
 extern import { Paths } from java.nio.file;
 extern import org.junit.jupiter.api.Assertions;
 
-export object ApplicationTest = {
-	pub const ROOT : Path = Paths.get(".");
-	pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");
-	pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
+export object ApplicationTest = {pub const ROOT : Path = Paths.get(".");pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
 }
 
 export class def ApplicationTest() => {
@@ -19,14 +16,12 @@ export class def ApplicationTest() => {
         Files.deleteIfExists(TARGET);
         Files.deleteIfExists(SOURCE);
     }
-	
 	@Test
 	def generateSomething() : Void ? IOException => {
         Files.createFile(SOURCE);
         Main.run(new SingleSourceSet(SOURCE), Paths.get("."));
         assertTrue(Files.exists(TARGET));
     }
-	
 	@Test
 	def generatesNothing() : Void ? IOException => {
         Main.run(new SingleSourceSet(SOURCE), Paths.get("."));

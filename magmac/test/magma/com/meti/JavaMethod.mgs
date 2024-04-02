@@ -4,19 +4,12 @@ extern import { Optional } from java.util;
 
 export class def JavaMethod implements Renderable() => {
 	const annotations : String;
-	
 	const flagsString : String;
-	
 	const name : String;
-	
 	const throwsString : String;
-	
 	const content : String;
-	
 	const returnType : Optional<String>;
-	
 	const parameterString : String;
-	
 	def JavaMethod(annotations : String, flagsString : String, name : String, returnType : Optional<String>, throwsString : String, content : String, parameterString : String) : public => {
         this.annotations = annotations;
         this.flagsString = flagsString;
@@ -26,33 +19,23 @@ export class def JavaMethod implements Renderable() => {
         this.returnType = returnType;
         this.parameterString = parameterString;
     }
-	
 	@Override
 	def render() : String => {
         var returnsString = returnType.map(value -> value + " ").orElse("");
-        return annotations() + "\n" + flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
+        return flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
     }
-	
-	def annotations() : String => {
-        return annotations;
-    }
-	
 	def flagsString() : String => {
         return flagsString;
     }
-	
 	def name() : String => {
         return name;
     }
-	
 	def throwsString() : String => {
         return throwsString;
     }
-	
 	def content() : String => {
         return content;
     }
-	
 	@Override
 	def equals(obj : Object) : Bool => {
         if (obj == this) return true;
@@ -60,12 +43,10 @@ export class def JavaMethod implements Renderable() => {
         var that = (JavaMethod) obj;
         return Objects.equals(this.annotations, that.annotations) && Objects.equals(this.flagsString, that.flagsString) && Objects.equals(this.name, that.name) && Objects.equals(this.throwsString, that.throwsString) && Objects.equals(this.content, that.content);
     }
-	
 	@Override
 	def hashCode() : I32 => {
         return Objects.hash(annotations, flagsString, name, throwsString, content);
     }
-	
 	@Override
 	def toString() : String => {
         return "JavaMethod[" + "annotations=" + annotations + ", " + "flagsString=" + flagsString + ", " + "name=" + name + ", " + "throwsString=" + throwsString + ", " + "content=" + content + ']';

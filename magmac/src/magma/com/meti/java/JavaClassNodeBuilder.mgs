@@ -1,36 +1,27 @@
 export class def JavaClassNodeBuilder implements RenderableBuilder() => {
 	const prefix : String;
-	
 	const name : String;
-	
 	const content : String;
-	
 	def JavaClassNodeBuilder() : public => {
         this("", "", "");
     }
-	
 	def JavaClassNodeBuilder(prefix : String, name : String, content : String) : public => {
         this.prefix = prefix;
         this.name = name;
         this.content = content;
     }
-	
 	def withPrefix(prefix : String) : JavaClassNodeBuilder => {
         return new JavaClassNodeBuilder(prefix, name, content);
     }
-	
 	def withName(name : String) : JavaClassNodeBuilder => {
         return new JavaClassNodeBuilder(prefix, name, content);
     }
-	
 	def withContent(content : String) : JavaClassNodeBuilder => {
         return new JavaClassNodeBuilder(prefix, name, content);
     }
-	
 	def build() : JavaClassNode => {
         return new JavaClassNode(prefix, name, content);
     }
-	
 	def withContent(builder : RenderableBuilder) : JavaClassNodeBuilder => {
         return withContent(builder.build().render());
     }

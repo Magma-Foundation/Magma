@@ -4,12 +4,23 @@ extern import { MagmaClassNodeBuilder } from com.meti.magma;
 extern import { assertCompile } from com.meti.CompiledTest;
 
 export object FeatureTest = {def assertWithinClass(input : String, output : String) : Void => {
-        assertCompile(new JavaClassNodeBuilder().withPrefix("").withName(TEST_SYMBOL).withContent(input).build().render(), new MagmaClassNodeBuilder().withPrefix("").withName(TEST_SYMBOL).withContent(output).build().render());
+        var render = new JavaClassNodeBuilder().
+                withPrefix("")
+                .withName(TEST_SYMBOL)
+                .withContent(input)
+                .build()
+                .render();
+        var render1 = new MagmaClassNodeBuilder()
+                .withName(TEST_SYMBOL)
+                .withContent("\n\t" + output)
+                .build()
+                .render();
+        assertCompile(render, render1);
     }def assertWithinClass(input : RenderableBuilder, output : RenderableBuilder) : Void => {
         assertWithinClass(input.build().render(), output.build().render());
     }
 }
 
 export class def FeatureTest() => {
-    public static final String TEST_SYMBOL = "Test"
+	public static final String TEST_SYMBOL = "Test"
 }

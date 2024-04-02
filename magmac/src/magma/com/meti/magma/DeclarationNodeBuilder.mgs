@@ -6,23 +6,18 @@ export class def DeclarationNodeBuilder() => {
 	def DeclarationNodeBuilder() : public => {
         this("", "", "", Optional.empty());
     }
-	
 	def withFlagString(flagString : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	
 	def withName(name : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	
 	def withType(type : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, value);
     }
-	
 	def withValue(value : String) : DeclarationNodeBuilder => {
         return new DeclarationNodeBuilder(flagString, name, type, Optional.of(value));
     }
-	
 	@Override
 	def build() : Renderable => {
         return new DeclarationNode(flagString, name, type, value);
