@@ -23,6 +23,6 @@ public final class MagmaMethodNode implements Renderable {
 
     public String render() {
         var typeString = type.map(inner -> " : " + inner).orElse("");
-        return prefix + "\n\tdef " + name + "(" + parametersString + ")" + typeString + exceptionString + " => " + content;
+        return prefix + "def " + name + "(" + parametersString + ")" + typeString + exceptionString + " => " + content;
     }
 }

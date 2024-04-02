@@ -44,6 +44,11 @@ public class ClassFeatureTest {
 
     @Test
     void testBody() {
-        assertCompile(new JavaClassNodeBuilder().withName(TEST_SYMBOL).withContent(TEST_BODY), new MagmaClassNodeBuilder().withName(TEST_SYMBOL).withContent(TEST_BODY));
+        assertCompile(new JavaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent(TEST_BODY),
+                new MagmaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent("{\n\t" + TEST_BODY + "\n}"));
     }
 }

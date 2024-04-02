@@ -21,7 +21,8 @@ public class Compiler {
         for (String arg : args) {
             var state = compileRootStatement(arg.strip());
             state.importValue.ifPresent(imports::add);
-            state.instanceValue.ifPresent(classes::add);
+            classes.addAll(state.instanceValues);
+
             state.staticValue.ifPresent(objects::add);
         }
 
@@ -66,7 +67,8 @@ public class Compiler {
                 .or(() -> compileClass(input))
                 .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
-                .orElse(new State(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+                .orElse(new State(Optional.empty(),
+                        Collections.emptyList(), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileRecord(String input) {
@@ -88,7 +90,7 @@ public class Compiler {
                 .build()
                 .render();
 
-        return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
     }
 
     private static Optional<State> compileInterface(String input) {
@@ -109,7 +111,7 @@ public class Compiler {
             var rendered = new MagmaTraitNode(isPublic ? Lang.EXPORT_KEYWORD_WITH_SPACE : "", name, "{" + membersResult.value + "\n}")
                     .render();
 
-            return Optional.of(new State(Optional.of(rendered), Optional.empty(), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.of(rendered), Collections.emptyList(), Optional.empty(), Optional.empty()));
         }
         return Optional.empty();
     }
@@ -149,7 +151,7 @@ public class Compiler {
             renderedMore = Optional.of(new ObjectNode(flagString, name, content).render());
         }
 
-        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass), renderedMore, Optional.empty()));
+        return Optional.of(new State(Optional.empty(), Optional.of(renderedClass).map(Collections::singletonList).orElse(Collections.emptyList()), renderedMore, Optional.empty()));
     }
 
     private static MembersResult compileMembers(String inputContent, String name) {
@@ -162,15 +164,22 @@ public class Compiler {
         for (var classMember : splitContent) {
             var compiledClassMember = compileMethod(classMember, name)
                     .or(() -> compileDefinition(classMember))
-                    .orElse(new State(Optional.empty(), Optional.of(classMember),
-                            Optional.empty(), Optional.empty()));
+                    .orElse(new State(Optional.empty(),
+                            Optional.of(classMember).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
 
-            compiledClassMember.instanceValue.ifPresent(outputValues::add);
+            outputValues.addAll(compiledClassMember.instanceValues);
             compiledClassMember.staticValue.ifPresent(outputMore::add);
             parameter = compiledClassMember.parameter;
         }
 
-        var value = String.join("", outputValues);
+
+        var value = outputValues
+                .stream()
+                .map(String::strip)
+                .filter(line -> !line.isEmpty())
+                .map(element -> "\n\t" + element)
+                .collect(Collectors.joining());
+
         return new MembersResult(outputMore, value, parameter);
     }
 
@@ -199,12 +208,14 @@ public class Compiler {
                 .filter(value -> !value.isEmpty())
                 .map(line -> {
                     var paramSeparator = line.lastIndexOf(' ');
-                    if(paramSeparator == -1) {
+
+                    if (paramSeparator == -1) {
                         return Optional.<String>empty();
                     }
 
                     var substring = line.substring(0, paramSeparator);
                     var paramType = compileType(substring.strip());
+
                     var paramName = line.substring(paramSeparator + 1).strip();
                     return Optional.of(paramName + " : " + paramType);
                 })
@@ -223,8 +234,7 @@ public class Compiler {
             } else {
                 return Optional.of(new State(
                         Optional.empty(),
-                        Optional.of(""),
-                        Optional.empty(),
+                        Optional.of("").map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(),
                         Optional.of(outputParamString)));
             }
         } else {
@@ -249,9 +259,9 @@ public class Compiler {
             }
         }
 
-        var annotationsString = annotations.stream()
+        var instanceValues = new ArrayList<>(annotations.stream()
                 .map(name1 -> new Annotation(name1, "").render())
-                .collect(Collectors.joining());
+                .toList());
 
         var contentStart = methodString.indexOf('{');
 
@@ -264,7 +274,6 @@ public class Compiler {
             var content = methodString.substring(contentStart, contentEnd + 1).strip();
             var magmaMethodBuilder = new MagmaMethodBuilder()
                     .withParameters(outputParamString)
-                    .withPrefix(annotationsString)
                     .withName(name)
                     .withContent(content);
 
@@ -281,12 +290,14 @@ public class Compiler {
             }
 
             var rendered = result.build().render();
-            return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty()))
-                    : Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+            if (inputFlags.contains("static"))
+                return Optional.of(new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty()));
+
+            instanceValues.add(rendered);
+            return Optional.of(new State(Optional.empty(), instanceValues, Optional.empty(), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
-            return Optional.of(new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+            return Optional.of(new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
         } else {
             return Optional.empty();
         }
@@ -376,8 +387,8 @@ public class Compiler {
 
         var rendered = withValue.build().render();
         return Optional.of(flags.contains("static")
-                ? new State(Optional.empty(), Optional.empty(), Optional.of(rendered), Optional.empty())
-                : new State(Optional.empty(), Optional.of(rendered), Optional.empty(), Optional.empty()));
+                ? new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty())
+                : new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
     }
 
     private static String compileType(String inputType) {
@@ -402,8 +413,10 @@ public class Compiler {
 
         var arrayStart = inputType.indexOf('[');
         var arrayEnd = inputType.lastIndexOf(']');
-        if(arrayStart != -1 && arrayEnd !=-1) {
-            return "Array<" + inputType.substring(0, arrayStart).strip() + ">";
+
+        if (arrayStart != -1 && arrayEnd != -1) {
+            var parent = compileType(inputType.substring(0, arrayStart));
+            return "Array<" + parent + ">";
         }
 
         throw new UnsupportedOperationException("Unknown type: " + inputType);
@@ -420,13 +433,64 @@ public class Compiler {
         var child = segmentsString.substring(separator + 1);
 
         ImportNode importNode = new ImportNode(parent, "");
-        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Optional.empty(), Optional.empty(), Optional.empty()));
+        return Optional.of(new State(Optional.of(child.equals("*") ? importNode.render() : new ImportNode(parent, "{ " + child + " } from ").render()), Collections.emptyList(), Optional.empty(), Optional.empty()));
     }
 
     private record MembersResult(ArrayList<String> outputMore, String value, Optional<String> parameter) {
     }
 
-    record State(Optional<String> importValue, Optional<String> instanceValue, Optional<String> staticValue,
-                 Optional<String> parameter) {
+    static final class State {
+        private final Optional<String> importValue;
+        private final List<String> instanceValues;
+        private final Optional<String> staticValue;
+        private final Optional<String> parameter;
+
+        State(Optional<String> importValue,
+              List<String> instanceValues,
+              Optional<String> staticValue,
+              Optional<String> parameter) {
+            this.importValue = importValue;
+            this.instanceValues = instanceValues;
+            this.staticValue = staticValue;
+            this.parameter = parameter;
+        }
+
+        public Optional<String> importValue() {
+            return importValue;
+        }
+
+        public Optional<String> staticValue() {
+            return staticValue;
+        }
+
+        public Optional<String> parameter() {
+            return parameter;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (State) obj;
+            return Objects.equals(this.importValue, that.importValue) &&
+                   Objects.equals(this.instanceValues, that.instanceValues) &&
+                   Objects.equals(this.staticValue, that.staticValue) &&
+                   Objects.equals(this.parameter, that.parameter);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(importValue, instanceValues, staticValue, parameter);
+        }
+
+        @Override
+        public String toString() {
+            return "State[" +
+                   "importValue=" + importValue + ", " +
+                   "instanceValue=" + instanceValues + ", " +
+                   "staticValue=" + staticValue + ", " +
+                   "parameter=" + parameter + ']';
+        }
+
     }
 }
