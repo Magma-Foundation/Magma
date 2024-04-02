@@ -1,0 +1,4 @@
+extern import { Optional } from java.util;
+export trait Attribute {
+	asString : () => Void;
+}

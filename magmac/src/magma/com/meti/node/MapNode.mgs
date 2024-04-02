@@ -1,0 +1,28 @@
+extern import { RenderableBuilder } from com.meti.java;
+extern import { Collections } from java.util;
+extern import { HashMap } from java.util;
+extern import { Map } from java.util;
+extern import { Optional } from java.util;
+
+export class def MapNode() => {
+	@Override
+	def apply() : Optional<Attribute> => {
+        if (attributes.containsKey(prefix)) {
+            return Optional.of(attributes.get(prefix));
+        } else {
+            return Optional.empty();
+        }
+    }
+	@Override
+	def Builder(let name : String;) : record ? nts RenderableBuilder => {
+        public Builder string(String name, String value) {
+            var copy = new HashMap<>(attributes);
+            copy.put(name, new StringAttribute(value));
+            return new Builder(name, copy);
+        }
+
+        public Node build() {
+            return new MapNode(name, attributes);
+        }
+    }
+}
