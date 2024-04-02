@@ -80,7 +80,7 @@ public class Compiler {
         var nameStart = index + Lang.RECORD_KEYWORD.length();
         var nameEnd = input.indexOf('(');
 
-        if(!(nameStart < nameEnd)) return Optional.empty();
+        if (!(nameStart < nameEnd)) return Optional.empty();
 
         var name = input.substring(nameStart, nameEnd).strip();
 
@@ -168,7 +168,7 @@ public class Compiler {
 
         for (var classMember : splitContent) {
             var compiledClassMember = compileMethod(classMember, name)
-                    .or(() -> compileDefinition(classMember))
+                    .or(() -> compileDefinition(classMember, false))
                     .orElse(new State(Optional.empty(),
                             Optional.of(classMember).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));
 
@@ -214,7 +214,7 @@ public class Compiler {
             outputParamString = splitParameters(parameterString)
                     .map(String::strip)
                     .filter(value -> !value.isEmpty())
-                    .map(Compiler::compileDefinition)
+                    .map((String input1) -> compileDefinition(input1, true))
                     .flatMap(Optional::stream)
                     .map(state -> state.instanceValues)
                     .flatMap(Collection::stream)
@@ -359,7 +359,7 @@ public class Compiler {
         }
     }
 
-    private static Optional<State> compileDefinition(String input) {
+    private static Optional<State> compileDefinition(String input, boolean isParameter) {
         var valueSeparator = input.indexOf('=');
 
         var beforeEnd = valueSeparator == -1 ? input.length() : valueSeparator;
@@ -394,8 +394,14 @@ public class Compiler {
 
         String mutabilityString;
         if (flags.contains(Lang.FINAL_KEYWORD)) mutabilityString = Lang.CONST_KEYWORD;
-        else if(flags.contains("var ")) mutabilityString = Lang.LET_KEYWORD;
-        else mutabilityString = "";
+        else {
+            if(isParameter) {
+                mutabilityString = "";
+            } else {
+                mutabilityString = Lang.LET_KEYWORD;
+            }
+        }
+
 
         var flagString = flags.contains("public") ? "pub " : "";
         var withDeclaration = new MagmaDefinitionBuilder()
