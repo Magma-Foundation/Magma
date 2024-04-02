@@ -49,6 +49,6 @@ public class ClassFeatureTest {
                         .withContent(TEST_BODY),
                 new MagmaClassNodeBuilder()
                         .withName(TEST_SYMBOL)
-                        .withContent("{\n\t" + TEST_BODY + "\n}"));
+                        .withContent("\n\t" + TEST_BODY));
     }
 }
