@@ -1,4 +1,6 @@
-package com.meti.node;public interface Renderable {
+package com.meti.node;
+
+public interface Renderable {
     @Deprecated
     String render();
 }

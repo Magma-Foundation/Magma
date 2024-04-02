@@ -42,6 +42,7 @@ public class RecordFeatureTest {
 
     @Test
     void testParameter() {
-        assertCompile(DEFAULT_INPUT, DEFAULT_OUTPUT);
+        assertCompile(DEFAULT_INPUT.string("parameters", "int test"),
+                DEFAULT_OUTPUT);
     }
 }

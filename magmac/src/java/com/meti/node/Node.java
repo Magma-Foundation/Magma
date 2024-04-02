@@ -8,7 +8,9 @@ public interface Node extends Renderable {
         var prefix = apply("prefix").flatMap(Attribute::asString).orElse("");
         var name = apply("name").flatMap(Attribute::asString).orElse("");
         var body = apply("body").flatMap(Attribute::asString).orElse("");
-        return prefix + "record " + name + "()" + body;
+        var parameters = apply("parameters").flatMap(Attribute::asString).orElse("");
+
+        return prefix + "record " + name + "(" + parameters + ")" + body;
     }
 
     Optional<Attribute> apply(String prefix);
