@@ -320,23 +320,10 @@ public class Compiler {
             }
         }
 
+        list.add(builder.toString());
         return list.stream()
                 .map(String::strip)
                 .filter(value -> !value.isEmpty());
-    }
-
-    private static Optional<String> getString(String paramString) {
-        var paramSeparator = paramString.lastIndexOf(' ');
-
-        if (paramSeparator == -1) {
-            return Optional.empty();
-        }
-
-        var substring = paramString.substring(0, paramSeparator);
-        var paramType = compileType(substring.strip());
-
-        var paramName = paramString.substring(paramSeparator + 1).strip();
-        return Optional.of(paramName + " : " + paramType);
     }
 
     private static boolean isSymbol(String name) {
