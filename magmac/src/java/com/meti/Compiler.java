@@ -392,7 +392,11 @@ public class Compiler {
             throw new RuntimeException(message, e);
         }
 
-        var mutabilityString = flags.contains(Lang.FINAL_KEYWORD) ? Lang.CONST_KEYWORD : Lang.LET_KEYWORD;
+        String mutabilityString;
+        if (flags.contains(Lang.FINAL_KEYWORD)) mutabilityString = Lang.CONST_KEYWORD;
+        else if(flags.contains("var ")) mutabilityString = Lang.LET_KEYWORD;
+        else mutabilityString = "";
+
         var flagString = flags.contains("public") ? "pub " : "";
         var withDeclaration = new MagmaDefinitionBuilder()
                 .withFlags(flagString)

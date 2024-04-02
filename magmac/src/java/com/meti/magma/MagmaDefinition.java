@@ -9,6 +9,6 @@ public record MagmaDefinition(String flagString, String mutabilityString, String
     @Override
     public String render() {
         var valueString = value.map(inner -> " = " + inner).orElse("");
-        return new MagmaDeclaration(flagString, mutabilityString, name, type).render() + valueString + ";";
+        return new MagmaDeclaration(flagString, mutabilityString, name, type).render() + valueString;
     }
 }
