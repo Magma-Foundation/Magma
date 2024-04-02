@@ -22,7 +22,7 @@ public class Compiler {
             var state = compileRootStatement(arg.strip());
             state.importValue.ifPresent(imports::add);
             classes.addAll(state.instanceValues);
-            
+
             state.staticValue.ifPresent(objects::add);
         }
 
@@ -67,7 +67,7 @@ public class Compiler {
                 .or(() -> compileClass(input))
                 .or(() -> compileRecord(input))
                 .or(() -> compileInterface(input))
-                .orElse(new State(Optional.empty(), 
+                .orElse(new State(Optional.empty(),
                         Collections.emptyList(), Optional.empty(), Optional.empty()));
     }
 
@@ -172,7 +172,14 @@ public class Compiler {
             parameter = compiledClassMember.parameter;
         }
 
-        var value = String.join("\n\t", outputValues);
+
+        var value = outputValues
+                .stream()
+                .map(String::strip)
+                .filter(line -> !line.isEmpty())
+                .map(element -> "\n\t" + element)
+                .collect(Collectors.joining());
+
         return new MembersResult(outputMore, value, parameter);
     }
 
@@ -247,9 +254,9 @@ public class Compiler {
             }
         }
 
-        var annotationsString = annotations.stream()
+        var instanceValues = new ArrayList<>(annotations.stream()
                 .map(name1 -> new Annotation(name1, "").render())
-                .collect(Collectors.joining());
+                .toList());
 
         var contentStart = methodString.indexOf('{');
 
@@ -278,9 +285,11 @@ public class Compiler {
             }
 
             var rendered = result.build().render();
-            return inputFlags.contains("static")
-                    ? Optional.of(new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty()))
-                    : Optional.of(new State(Optional.empty(), List.of(annotationsString, rendered), Optional.empty(), Optional.empty()));
+            if (inputFlags.contains("static"))
+                return Optional.of(new State(Optional.empty(), Collections.emptyList(), Optional.of(rendered), Optional.empty()));
+
+            instanceValues.add(rendered);
+            return Optional.of(new State(Optional.empty(), instanceValues, Optional.empty(), Optional.empty()));
         } else if (contentStart == -1 && contentEnd == -1) {
             var rendered = new MagmaDeclaration("", "", name, "() => Void").render() + ";";
             return Optional.of(new State(Optional.empty(), Optional.of(rendered).map(Collections::singletonList).orElse(Collections.emptyList()), Optional.empty(), Optional.empty()));

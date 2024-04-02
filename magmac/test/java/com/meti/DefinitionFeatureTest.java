@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.CompiledTest.assertCompile;
 import static com.meti.FeatureTest.TEST_SYMBOL;
 import static com.meti.FeatureTest.assertWithinClass;
@@ -44,14 +47,17 @@ public class DefinitionFeatureTest {
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void testMultipleDefinitions(int count) {
-        assertWithinClass(DEFAULT_INPUT.build().render().repeat(count), new MagmaDefinitionBuilder()
+        var render = new MagmaDefinitionBuilder()
                 .withMutability(Lang.LET_KEYWORD)
                 .withName(TEST_SYMBOL)
                 .withType(Lang.I32)
                 .withValue("0")
                 .build()
-                .render()
-                .repeat(count));
+                .render();
+
+        var collect = IntStream.range(0, count).mapToObj(i -> render).collect(Collectors.joining("\n\t"));
+
+        assertWithinClass(DEFAULT_INPUT.build().render().repeat(count), collect);
     }
 
     @Test

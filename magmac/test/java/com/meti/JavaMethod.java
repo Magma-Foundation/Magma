@@ -27,11 +27,7 @@ public final class JavaMethod implements Renderable {
     @Override
     public String render() {
         var returnsString = returnType.map(value -> value + " ").orElse("");
-        return annotations() + "\n" + flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
-    }
-
-    public String annotations() {
-        return annotations;
+        return flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
     }
 
     public String flagsString() {
