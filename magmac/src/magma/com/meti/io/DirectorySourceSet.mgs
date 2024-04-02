@@ -7,12 +7,16 @@ extern import { Collectors } from java.util.stream;
 export class def DirectorySourceSet() => {
 	@Override
 	def collect() : Set<PathSource> ? IOException => {
-        try (var stream = Files.walk(root)) {
-            return stream
-                    .filter(Files::isRegularFile)
-                    .filter(file -> file.toString().endsWith(".java"))
-                    .map(file -> new PathSource(root, file))
-                    .collect(Collectors.toSet());
+        try {
+            try (var stream = Files.walk(root)) {
+                return stream
+                        .filter(Files::isRegularFile)
+                        .filter(file -> file.toString().endsWith(".java"))
+                        .map(file -> new PathSource(root, file))
+                        .collect(Collectors.toSet());
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to find source set at: " + root.toAbsolutePath(), e);
         }
     }
 }

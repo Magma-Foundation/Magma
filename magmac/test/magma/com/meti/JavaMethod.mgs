@@ -1,20 +1,16 @@
-package com.meti;
+extern import { Renderable } from com.meti.node;
+extern import { Objects } from java.util;
+extern import { Optional } from java.util;
 
-import com.meti.node.Renderable;
-
-import java.util.Objects;
-import java.util.Optional;
-
-public final class JavaMethod implements Renderable {
-    private final String annotations;
-    private final String flagsString;
-    private final String name;
-    private final String throwsString;
-    private final String content;
-    private final Optional<String> returnType;
-    private final String parameterString;
-
-    public JavaMethod(String annotations, String flagsString, String name, Optional<String> returnType, String throwsString, String content, String parameterString) {
+export class def JavaMethod implements Renderable() => {
+	const annotations : String;
+	const flagsString : String;
+	const name : String;
+	const throwsString : String;
+	const content : String;
+	const returnType : Optional<String>;
+	const parameterString : String;
+	def JavaMethod(annotations : String, flagsString : String, name : String, returnType : Optional<String>, throwsString : String, content : String, parameterString : String) : public => {
         this.annotations = annotations;
         this.flagsString = flagsString;
         this.name = name;
@@ -23,45 +19,36 @@ public final class JavaMethod implements Renderable {
         this.returnType = returnType;
         this.parameterString = parameterString;
     }
-
-    @Override
-    public String render() {
+	@Override
+	def render() : String => {
         var returnsString = returnType.map(value -> value + " ").orElse("");
         return flagsString() + returnsString + name() + "(" + parameterString + ")" + throwsString() + content();
     }
-
-    public String flagsString() {
+	def flagsString() : String => {
         return flagsString;
     }
-
-    public String name() {
+	def name() : String => {
         return name;
     }
-
-    public String throwsString() {
+	def throwsString() : String => {
         return throwsString;
     }
-
-    public String content() {
+	def content() : String => {
         return content;
     }
-
-    @Override
-    public boolean equals(Object obj) {
+	@Override
+	def equals(obj : Object) : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (JavaMethod) obj;
         return Objects.equals(this.annotations, that.annotations) && Objects.equals(this.flagsString, that.flagsString) && Objects.equals(this.name, that.name) && Objects.equals(this.throwsString, that.throwsString) && Objects.equals(this.content, that.content);
     }
-
-    @Override
-    public int hashCode() {
+	@Override
+	def hashCode() : I32 => {
         return Objects.hash(annotations, flagsString, name, throwsString, content);
     }
-
-    @Override
-    public String toString() {
+	@Override
+	def toString() : String => {
         return "JavaMethod[" + "annotations=" + annotations + ", " + "flagsString=" + flagsString + ", " + "name=" + name + ", " + "throwsString=" + throwsString + ", " + "content=" + content + ']';
     }
-
 }

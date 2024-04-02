@@ -1,6 +1,7 @@
 package com.meti;
 
 import com.meti.java.JavaClassNodeBuilder;
+import com.meti.java.RenderableBuilder;
 import com.meti.magma.MagmaClassNodeBuilder;
 import com.meti.magma.MagmaDeclaration;
 import com.meti.magma.MagmaMethodBuilder;
@@ -65,15 +66,15 @@ public class MethodFeatureTest {
     @ValueSource(strings = {"First", "Second"})
     void testAnnotation(String name) {
         String prefix = new Annotation(name, "").render();
-        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
-                        .withAnnotations(prefix)
-                        .withName(TEST_SYMBOL)
-                        .withContent("{}"),
-                new MagmaMethodBuilder()
-                        .withPrefix(new Annotation(name, "").render())
-                        .withName(TEST_SYMBOL)
-                        .withType("Void")
-                        .withContent("{}"));
+        RenderableBuilder input = new JavaMethodBuilder()
+                .withReturnType("void")
+                .withName(TEST_SYMBOL)
+                .withContent("{}");
+        RenderableBuilder output = new MagmaMethodBuilder()
+                .withName(TEST_SYMBOL)
+                .withType("Void")
+                .withContent("{}");
+        assertWithinClass(prefix + "\n\t" + input.build().render(), prefix + "\n\t" + output.build().render());
     }
 
     @ParameterizedTest
@@ -93,30 +94,35 @@ public class MethodFeatureTest {
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void testMultipleAnnotations(int count) {
-        var rendered = new Annotation("First", "").render().repeat(count);
-        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
+        var render = new Annotation("First", "").render();
+        var rendered = IntStream.range(0, count)
+                .mapToObj(i -> render + "\n\t")
+                .collect(Collectors.joining());
+
+        RenderableBuilder input = new JavaMethodBuilder().withReturnType("void")
                         .withAnnotations(rendered)
                         .withName(TEST_SYMBOL)
-                        .withContent("{}"),
-                new MagmaMethodBuilder()
-                        .withPrefix(rendered)
-                        .withName(TEST_SYMBOL)
-                        .withType("Void")
-                        .withContent("{}"));
+                        .withContent("{}");
+        RenderableBuilder output = new MagmaMethodBuilder()
+                .withPrefix(rendered)
+                .withName(TEST_SYMBOL)
+                .withType("Void")
+                .withContent("{}");
+        assertWithinClass(rendered + input.build().render(), output.build().render());
     }
 
     @Test
     void testAnnotationWithValues() {
         String prefix = new Annotation("First", "(ints = {2, 3})").render();
-        assertWithinClass(new JavaMethodBuilder().withReturnType("void")
-                        .withAnnotations(prefix)
-                        .withName(TEST_SYMBOL)
-                        .withContent("{}"),
-                new MagmaMethodBuilder()
-                        .withPrefix(new Annotation("First", "(ints = [2, 3])").render())
-                        .withName(TEST_SYMBOL)
-                        .withType("Void")
-                        .withContent("{}"));
+        RenderableBuilder input = new JavaMethodBuilder().withReturnType("void")
+                .withAnnotations(prefix)
+                .withName(TEST_SYMBOL)
+                .withContent("{}");
+        RenderableBuilder output = new MagmaMethodBuilder()
+                .withName(TEST_SYMBOL)
+                .withType("Void")
+                .withContent("{}");
+        assertWithinClass(prefix + "\n" + input.build().render(), new Annotation("First", "(ints = [2, 3])").render() + "\n\t" + output.build().render());
     }
 
     @ParameterizedTest
