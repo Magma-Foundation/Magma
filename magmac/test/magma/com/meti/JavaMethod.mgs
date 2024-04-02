@@ -10,7 +10,7 @@ export class def JavaMethod implements Renderable() => {
 	const content : String;
 	const returnType : Optional<String>;
 	const parameterString : String;
-	def JavaMethod(annotations : String, flagsString : String, name : String, returnType : Optional<String>, throwsString : String, content : String, parameterString : String) : public => {
+	def JavaMethod(let annotations : String;, let flagsString : String;, let name : String;, let returnType : Optional<String>;, let throwsString : String;, let content : String;) : public => {
         this.annotations = annotations;
         this.flagsString = flagsString;
         this.name = name;
@@ -37,7 +37,7 @@ export class def JavaMethod implements Renderable() => {
         return content;
     }
 	@Override
-	def equals(obj : Object) : Bool => {
+	def equals() : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (JavaMethod) obj;

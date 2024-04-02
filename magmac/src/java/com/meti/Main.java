@@ -11,8 +11,8 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) {
         try {
-            run(new DirectorySourceSet(Paths.get("./magmac/src/java")), Paths.get("./magmac/src/magma"));
-            run(new DirectorySourceSet(Paths.get("./magmac/test/java")), Paths.get("./magmac/test/magma"));
+            run(new DirectorySourceSet(Paths.get("./src/java")), Paths.get("./src/magma"));
+            run(new DirectorySourceSet(Paths.get("./test/java")), Paths.get("./test/magma"));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();

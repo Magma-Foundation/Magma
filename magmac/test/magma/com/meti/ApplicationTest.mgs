@@ -10,8 +10,7 @@ extern import org.junit.jupiter.api.Assertions;
 export object ApplicationTest = {pub const ROOT : Path = Paths.get(".");pub const TARGET : Path = ROOT.resolve("ApplicationTest.mgs");pub const SOURCE : Path = ROOT.resolve("ApplicationTest.java");
 }
 
-export class 
-	def ApplicationTest() => {
+export class def ApplicationTest() => {
 	@AfterEach
 	def tearDown() : Void ? IOException => {
         Files.deleteIfExists(TARGET);

@@ -1,8 +1,7 @@
 extern import { RenderableBuilder } from com.meti.java;
 extern import { Optional } from java.util;
 
-export class 
-	def MagmaDefinitionBuilder implements RenderableBuilder() => {
+export class def MagmaDefinitionBuilder implements RenderableBuilder() => {
 	let flagString : String;
 	let mutabilityString : String;
 	let name : String;
@@ -11,26 +10,26 @@ export class
 	def MagmaDefinitionBuilder() : public => {
         this("", "", "", "", Optional.empty());
     }
-	def MagmaDefinitionBuilder(flagString : String, mutabilityString : String, name : String, type : String, value : Optional<String>) : public => {
+	def MagmaDefinitionBuilder(let flagString : String;, let mutabilityString : String;, let name : String;, let type : String;) : public => {
         this.flagString = flagString;
         this.mutabilityString = mutabilityString;
         this.name = name;
         this.type = type;
         this.value = value;
     }
-	def withFlags(flagString : String) : MagmaDefinitionBuilder => {
+	def withFlags() : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withMutability(mutabilityString : String) : MagmaDefinitionBuilder => {
+	def withMutability() : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withName(name : String) : MagmaDefinitionBuilder => {
+	def withName() : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withType(type : String) : MagmaDefinitionBuilder => {
+	def withType() : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, value);
     }
-	def withValue(value : String) : MagmaDefinitionBuilder => {
+	def withValue() : MagmaDefinitionBuilder => {
         return new MagmaDefinitionBuilder(flagString, mutabilityString, name, type, Optional.of(value));
     }
 	@Override

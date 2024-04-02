@@ -1,16 +1,13 @@
 extern import { RenderableBuilder } from com.meti.java;
 extern import { Assertions } from org.junit.jupiter.api;
 
-export object CompiledTest = {
-	def assertCompile(input : String, expected : String) : Void => {
+export object CompiledTest = {def assertCompile(let input : String;) : Void => {
         var actual = Compiler.compile(input);
         Assertions.assertEquals(expected, actual);
-    }
-	def assertCompile(input : RenderableBuilder, output : RenderableBuilder) : Void => {
+    }def assertCompile(let input : RenderableBuilder;) : Void => {
         assertCompile(input.build().render(), output.build().render());
     }
 }
 
-export class 
-	def CompiledTest() => {
+export class def CompiledTest() => {
 }

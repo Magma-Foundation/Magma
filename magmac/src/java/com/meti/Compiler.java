@@ -77,7 +77,12 @@ public class Compiler {
 
         var isPublic = input.startsWith(Lang.PUBLIC_KEYWORD);
 
-        var name = input.substring(index + Lang.RECORD_KEYWORD.length(), input.indexOf('(')).strip();
+        var nameStart = index + Lang.RECORD_KEYWORD.length();
+        var nameEnd = input.indexOf('(');
+
+        if(!(nameStart < nameEnd)) return Optional.empty();
+
+        var name = input.substring(nameStart, nameEnd).strip();
 
         var bodyStart = input.indexOf('{');
         var bodyEnd = input.lastIndexOf('}');
@@ -203,24 +208,20 @@ public class Compiler {
         var paramEnd = methodString.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
-        var outputParamString = Arrays.stream(methodString.substring(paramStart + 1, paramEnd).strip().split(","))
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .map(line -> {
-                    var paramSeparator = line.lastIndexOf(' ');
-
-                    if (paramSeparator == -1) {
-                        return Optional.<String>empty();
-                    }
-
-                    var substring = line.substring(0, paramSeparator);
-                    var paramType = compileType(substring.strip());
-
-                    var paramName = line.substring(paramSeparator + 1).strip();
-                    return Optional.of(paramName + " : " + paramType);
-                })
-                .flatMap(Optional::stream)
-                .collect(Collectors.joining(", "));
+        var parameterString = methodString.substring(paramStart + 1, paramEnd).strip();
+        String outputParamString;
+        try {
+            outputParamString = splitParameters(parameterString)
+                    .map(String::strip)
+                    .filter(value -> !value.isEmpty())
+                    .map(Compiler::compileDefinition)
+                    .flatMap(Optional::stream)
+                    .map(state -> state.instanceValues)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.joining(", "));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to compile parameter string: " + parameterString, e);
+        }
 
         var before = methodString.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
@@ -301,6 +302,41 @@ public class Compiler {
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Stream<String> splitParameters(String parameterString) {
+        var list = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < parameterString.length(); i++) {
+            var c = parameterString.charAt(i);
+            if (c == ',' && depth == 0) {
+                list.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '<') depth++;
+                if (c == '>') depth--;
+                builder.append(c);
+            }
+        }
+
+        return list.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty());
+    }
+
+    private static Optional<String> getString(String paramString) {
+        var paramSeparator = paramString.lastIndexOf(' ');
+
+        if (paramSeparator == -1) {
+            return Optional.empty();
+        }
+
+        var substring = paramString.substring(0, paramSeparator);
+        var paramType = compileType(substring.strip());
+
+        var paramName = paramString.substring(paramSeparator + 1).strip();
+        return Optional.of(paramName + " : " + paramType);
     }
 
     private static boolean isSymbol(String name) {

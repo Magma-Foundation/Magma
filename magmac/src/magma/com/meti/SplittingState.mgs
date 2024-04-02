@@ -1,8 +1,7 @@
 extern import { ArrayList } from java.util;
 extern import { List } from java.util;
 
-class 
-	def SplittingState() => {
+class def SplittingState() => {
 	const list : List<String>;
 	let builder : StringBuilder;
 	let depth : I32;
@@ -16,7 +15,7 @@ class
 	def isShallow() : Bool => {
         return this.depth == 1;
     }
-	def append(c : char) : Void => {
+	def append() : Void => {
         this.builder.append(c);
     }
 	def clean() : Void => {

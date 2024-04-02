@@ -5,17 +5,15 @@ extern import { Files } from java.nio.file;
 extern import { Path } from java.nio.file;
 extern import { Paths } from java.nio.file;
 
-export object Main = {
-	def main(args : Array<String>) : Void => {
+export object Main = {def main() : Void => {
         try {
-            run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/src/java")), Paths.get("./Personal/Magma/magmac/src/magma"));
-            run(new DirectorySourceSet(Paths.get("./Personal/Magma/magmac/test/java")), Paths.get("./Personal/Magma/magmac/test/magma"));
+            run(new DirectorySourceSet(Paths.get("./src/java")), Paths.get("./src/magma"));
+            run(new DirectorySourceSet(Paths.get("./test/java")), Paths.get("./test/magma"));
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }
-	def run(sourceSet : SourceSet, targetDirectory : Path) : Void ? IOException => {
+    }def run(let sourceSet : SourceSet;) : Void ? IOException => {
         var set = sourceSet.collect();
 
         for (var source : set) {
@@ -34,6 +32,5 @@ export object Main = {
     }
 }
 
-export class 
-	def Main() => {
+export class def Main() => {
 }

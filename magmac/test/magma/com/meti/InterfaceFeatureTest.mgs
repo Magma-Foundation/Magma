@@ -7,11 +7,10 @@ extern import com.meti.Compiler;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 extern import { assertEquals } from org.junit.jupiter.api.Assertions;
 
-export class 
-	def InterfaceFeatureTest() => {
+export class def InterfaceFeatureTest() => {
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
-	def testSimpleInterface(name : String) : Void => {
+	def testSimpleInterface() : Void => {
         assertEquals(new MagmaTraitNode("", name, "{\n}").render(), compile(new JavaInterfaceNode("", name).renderJavaInterface()));
     }
 	@Test

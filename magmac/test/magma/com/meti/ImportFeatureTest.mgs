@@ -5,22 +5,19 @@ extern import { ValueSource } from org.junit.jupiter.params.provider;
 extern import { Collectors } from java.util.stream;
 extern import { IntStream } from java.util.stream;
 
-export object ImportFeatureTest = {
-	def renderJavaImport(parent : String, child : String) : String => {
+export object ImportFeatureTest = {def renderJavaImport(let parent : String;) : String => {
         return renderJavaImport("", parent, child);
-    }
-	def renderJavaImport(staticString : String, parent : String, child : String) : String => {
+    }def renderJavaImport(let staticString : String;, let parent : String;) : String => {
         return Lang.IMPORT_KEYWORD + staticString + parent + "." + child + ";";
     }
 }
 
-export class 
-	def ImportFeatureTest() => {
-    public static final String TEST_PARENT = "org.junit.jupiter.api"
-    public static final String TEST_NAME = "Test"
+export class def ImportFeatureTest() => {
+	public static final String TEST_PARENT = "org.junit.jupiter.api"
+	public static final String TEST_NAME = "Test"
 	@ParameterizedTest
 	@ValueSource(ints = [2, 3])
-	def testMultipleImports(count : I32) : Void => {
+	def testMultipleImports() : Void => {
         var input = renderJavaImport(TEST_PARENT, TEST_NAME).repeat(count);
         var output = IntStream.range(0, count)
                 .mapToObj(_i -> new ImportNode(TEST_PARENT, "{ " + TEST_NAME + " } from ").render())
@@ -34,7 +31,7 @@ export class
     }
 	@ParameterizedTest
 	@ValueSource(strings = ["AfterEach", "Test"])
-	def testSimpleImports(name : String) : Void => {
+	def testSimpleImports() : Void => {
         CompiledTest.assertCompile(renderJavaImport(TEST_PARENT, name), new ImportNode(TEST_PARENT, "{ " + name + " } from ").render());
     }
 	@Test

@@ -9,12 +9,11 @@ extern import { IntStream } from java.util.stream;
 extern import { assertCompile } from com.meti.CompiledTest;
 extern import { TEST_SYMBOL } from com.meti.FeatureTest;
 
-export class 
-	def ClassFeatureTest() => {
-    public static final String TEST_BODY = "0"
+export class def ClassFeatureTest() => {
+	public static final String TEST_BODY = "0"
 	@ParameterizedTest
 	@ValueSource(ints = [1, 2, 3])
-	def testConstructorParameter(count : I32) : Void => {
+	def testConstructorParameter() : Void => {
         var inputParams = IntStream.range(0, count).mapToObj(i -> "int value" + i).collect(Collectors.joining(", "));
 
         var outputParams = IntStream.range(0, count).mapToObj(i -> "value" + i + " : I32").collect(Collectors.joining(", "));
@@ -27,7 +26,7 @@ export class
     }
 	@ParameterizedTest
 	@ValueSource(strings = ["First", "Second"])
-	def testSimpleClasses(name : String) : Void => {
+	def testSimpleClasses() : Void => {
         assertCompile(new JavaClassNodeBuilder().withName(name), new MagmaClassNodeBuilder().withName(name));
     }
 	@Test
@@ -36,6 +35,11 @@ export class
     }
 	@Test
 	def testBody() : Void => {
-        assertCompile(new JavaClassNodeBuilder().withName(TEST_SYMBOL).withContent(TEST_BODY), new MagmaClassNodeBuilder().withName(TEST_SYMBOL).withContent(TEST_BODY));
+        assertCompile(new JavaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent(TEST_BODY),
+                new MagmaClassNodeBuilder()
+                        .withName(TEST_SYMBOL)
+                        .withContent("\n\t" + TEST_BODY));
     }
 }

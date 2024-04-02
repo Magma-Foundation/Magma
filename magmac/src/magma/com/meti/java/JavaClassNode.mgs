@@ -2,12 +2,11 @@ extern import { Lang } from com.meti;
 extern import { Renderable } from com.meti.node;
 extern import { Objects } from java.util;
 
-export class 
-	def JavaClassNode implements Renderable() => {
+export class def JavaClassNode implements Renderable() => {
 	const prefix : String;
 	const name : String;
 	const content : String;
-	def JavaClassNode(prefix : String, name : String, content : String) : public => {
+	def JavaClassNode(let prefix : String;, let name : String;) : public => {
         this.prefix = prefix;
         this.name = name;
         this.content = content;
@@ -25,7 +24,7 @@ export class
         return content;
     }
 	@Override
-	def equals(obj : Object) : Bool => {
+	def equals() : Bool => {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (JavaClassNode) obj;
