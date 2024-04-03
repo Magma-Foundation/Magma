@@ -7,33 +7,46 @@ public class MagmaCompiler {
     public static final String IMPORT_KEYWORD = "import ";
 
     static String run(String input) throws CompileException {
-        var lines = Arrays.stream(input.split(";")).toList();
+        var lines = Arrays.stream(input.split(";"))
+                .filter(line -> !line.isEmpty())
+                .toList();
+
         var builder = new StringBuilder();
+        var hasSeenPackage = false;
         for (String line : lines) {
-            builder.append(runForRootStatement(line));
+            var state = runForRootStatement(line);
+
+            builder.append(state.result);
+            if(state.wasPackage){
+                if(hasSeenPackage) {
+                    throw new CompileException("Only one package statement is allowed.");
+                } else {
+                    hasSeenPackage = true;
+                }
+            }
         }
+
         return builder.toString();
     }
 
-    private static String runForRootStatement(String input) throws CompileException {
+    private static State runForRootStatement(String input) throws CompileException {
         if (input.startsWith(IMPORT_KEYWORD)) {
             var separator = input.lastIndexOf('.');
             var parent = input.substring(IMPORT_KEYWORD.length(), separator);
 
             var name = input.substring(separator + 1).strip();
-            return renderMagmaImport(parent, name);
+            return new State(renderMagmaImport(parent, name), false);
+        } else if (input.startsWith(PACKAGE_KEYWORD)) {
+            return new State("", true);
+        } else {
+            throw new CompileException("Unknown input: " + input);
         }
-
-        var first = input.indexOf(PACKAGE_KEYWORD);
-        if (first == -1) return "";
-
-        var second = input.indexOf(PACKAGE_KEYWORD, first + (PACKAGE_KEYWORD + " ").length());
-        if (second == -1) return "";
-
-        throw new CompileException("Duplicate package statement.");
     }
 
     public static String renderMagmaImport(String parent, String child) {
         return IMPORT_KEYWORD + "{ " + child + " } " + parent + ";";
+    }
+
+    record State(String result, boolean wasPackage) {
     }
 }
