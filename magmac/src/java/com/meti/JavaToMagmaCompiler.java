@@ -1,6 +1,9 @@
 package com.meti;
 
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.meti.JavaLang.STATIC_KEYWORD;
 import static com.meti.Lang.*;
@@ -14,7 +17,7 @@ public class JavaToMagmaCompiler {
         var builder = new StringBuilder();
         var hasSeenPackage = false;
         for (String line : lines) {
-            var state = runForRootStatement(line);
+            var state = compileRootStatement(line);
             builder.append(state.result);
 
             if (state.wasPackage) {
@@ -29,37 +32,55 @@ public class JavaToMagmaCompiler {
         return builder.toString();
     }
 
-    private static State runForRootStatement(String input) throws CompileException {
-        if (input.startsWith(CLASS_KEYWORD)) {
-            var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
-            var rendered = MagmaLang.renderMagmaFunction(name);
-            return new State(rendered);
-        }
+    private static State compileRootStatement(String input) throws CompileException {
+        return streamCompilers(input)
+                .map(Supplier::get)
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow(() -> new CompileException("Unknown input: " + input));
+    }
 
-        if (input.startsWith(IMPORT_KEYWORD)) {
-            var isStatic = input.startsWith(IMPORT_KEYWORD + STATIC_KEYWORD);
+    private static Stream<Supplier<Optional<State>>> streamCompilers(String input) {
+        return Stream.of(
+                () -> compileClass(input),
+                () -> compileImport(input),
+                () -> getState1(input)
+        );
+    }
 
-            var separator = input.lastIndexOf('.');
-            var parentStart = isStatic
-                    ? IMPORT_KEYWORD.length() + STATIC_KEYWORD.length()
-                    : IMPORT_KEYWORD.length();
+    private static Optional<State> compileClass(String input) {
+        if (!input.startsWith(CLASS_KEYWORD)) return Optional.empty();
 
-            var parent = input.substring(parentStart, separator);
+        var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+        var rendered = MagmaLang.renderMagmaFunction(name);
+        return Optional.of(new State(rendered));
+    }
 
-            var child = input.substring(separator + 1).strip();
-            var childString = child.equals("*")
-                    ? "*"
-                    : MagmaLang.renderImportChildString(child);
+    private static Optional<State> getState1(String input) {
+        if (!input.startsWith(JavaLang.PACKAGE_KEYWORD)) return Optional.empty();
 
-            var rendered = MagmaLang.renderImportWithChildString(parent, childString);
-            return new State(rendered);
-        }
+        return Optional.of(new State("", true));
+    }
 
-        if (input.startsWith(JavaLang.PACKAGE_KEYWORD)) {
-            return new State("", true);
-        }
+    private static Optional<State> compileImport(String input) {
+        if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
 
-        throw new CompileException("Unknown input: " + input);
+        var isStatic = input.startsWith(IMPORT_KEYWORD + STATIC_KEYWORD);
+
+        var separator = input.lastIndexOf('.');
+        var parentStart = isStatic
+                ? IMPORT_KEYWORD.length() + STATIC_KEYWORD.length()
+                : IMPORT_KEYWORD.length();
+
+        var parent = input.substring(parentStart, separator);
+
+        var child = input.substring(separator + 1).strip();
+        var childString = child.equals("*")
+                ? "*"
+                : MagmaLang.renderImportChildString(child);
+
+        var rendered = MagmaLang.renderImportWithChildString(parent, childString);
+        return Optional.of(new State(rendered));
     }
 
     record State(String result, boolean wasPackage) {
