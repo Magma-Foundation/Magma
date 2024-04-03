@@ -1,2 +1,0 @@
-extern import { Renderable } from com.meti.node;
-export record RenderableBuilder()

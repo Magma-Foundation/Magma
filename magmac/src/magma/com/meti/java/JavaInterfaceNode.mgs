@@ -1,7 +1,0 @@
-extern import { Lang } from com.meti;
-
-export class def JavaInterfaceNode() => {
-	def renderJavaInterface() : String => {
-        return prefixString() + Lang.INTERFACE_KEYWORD + name() + " {}";
-    }
-}

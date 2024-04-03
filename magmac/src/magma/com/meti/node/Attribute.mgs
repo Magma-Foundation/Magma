@@ -1,2 +1,0 @@
-extern import { Optional } from java.util;
-export record Attribute()

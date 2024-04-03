@@ -1,5 +1,0 @@
-export class def MagmaDefinitionHeader() => {
-	def render() : String => {
-        return "\n\t" + flagString() + mutabilityString() + name() + " : " + type();
-    }
-}
