@@ -8,20 +8,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     public static final String PACKAGE_KEYWORD = "package";
-    public static final String IMPORT_PREFIX = "import org.junit.jupiter.api.";
+    public static final String IMPORT_KEYWORD = "import ";
+    public static final String TEST_PARENT = "org.junit.jupiter.api";
+    public static final String TEST_CHILD = "Test";
 
-    private static String renderJavaImport(String name) {
-        return IMPORT_PREFIX + name + ";";
+    private static String renderJavaImport(String parent, String child) {
+        return IMPORT_KEYWORD + parent + "." + child + ";";
     }
 
-    private static String renderMagmaImport(String name) {
-        return "import { " + name + " } org.junit.jupiter.api;";
+    private static String renderMagmaImport(String parent, String child) {
+        return IMPORT_KEYWORD + "{ " + child + " } " + parent + ";";
     }
 
     private static String run(String input) throws CompileException {
-        if (input.startsWith(IMPORT_PREFIX)) {
-            var name = input.substring(IMPORT_PREFIX.length(), input.length() - 1).strip();
-            return renderMagmaImport(name);
+        if (input.startsWith(IMPORT_KEYWORD)) {
+            var separator = input.lastIndexOf('.');
+            var parent = input.substring(IMPORT_KEYWORD.length(), separator);
+
+            var name = input.substring(separator + 1, input.length() - 1).strip();
+            return renderMagmaImport(parent, name);
         }
 
         var first = input.indexOf(PACKAGE_KEYWORD);
@@ -66,7 +71,13 @@ public class ApplicationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
-    void testImports(String name) {
-        assertCompile(renderJavaImport(name), renderMagmaImport(name));
+    void testImportChildren(String child) {
+        assertCompile(renderJavaImport(TEST_PARENT, child), renderMagmaImport(TEST_PARENT, child));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "Second"})
+    void testImportParents(String parent) {
+        assertCompile(renderJavaImport(parent, TEST_CHILD), renderMagmaImport(parent, TEST_CHILD));
     }
 }
