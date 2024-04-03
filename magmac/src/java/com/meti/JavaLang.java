@@ -26,4 +26,12 @@ public class JavaLang {
     public static String renderJavaClass(String publicString, String name, String content) {
         return publicString + Lang.CLASS_KEYWORD + name + " " + content;
     }
+
+    static String renderConstructor() {
+        return renderConstructor("");
+    }
+
+    static String renderConstructor(String parameter) {
+        return "Test" + "(" + parameter + "){}";
+    }
 }

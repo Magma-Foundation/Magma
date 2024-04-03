@@ -8,6 +8,7 @@ import static com.meti.FeatureTest.assertCompile;
 import static com.meti.JavaLang.PUBLIC_KEYWORD;
 import static com.meti.JavaLang.renderJavaClass;
 import static com.meti.Lang.EMPTY_CONTENT;
+import static com.meti.Lang.renderContent;
 import static com.meti.MagmaLang.EXPORT_KEYWORD;
 import static com.meti.MagmaLang.renderMagmaFunction;
 
@@ -17,8 +18,16 @@ public class ClassFeatureTest {
     @Test
     void testConstructor() {
         assertCompile(
-                renderJavaClass("", TEST_SYMBOL, "{" + TEST_SYMBOL + "(){}" + "}"),
-                renderMagmaFunction("", TEST_SYMBOL, EMPTY_CONTENT)
+                renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor())),
+                renderMagmaFunction("", TEST_SYMBOL, "", EMPTY_CONTENT)
+        );
+    }
+
+    @Test
+    void testConstructorParameter() {
+        assertCompile(
+                renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor(JavaToMagmaCompiler.TEST_PARAM_IN))),
+                renderMagmaFunction("", TEST_SYMBOL, JavaToMagmaCompiler.TEST_PARAM_OUT, EMPTY_CONTENT)
         );
     }
 
@@ -26,7 +35,7 @@ public class ClassFeatureTest {
     void testPublic() {
         assertCompile(
                 renderJavaClass(PUBLIC_KEYWORD, TEST_SYMBOL, "{}"),
-                renderMagmaFunction(EXPORT_KEYWORD, TEST_SYMBOL, "{}")
+                renderMagmaFunction(EXPORT_KEYWORD, TEST_SYMBOL, "", "{}")
         );
     }
 

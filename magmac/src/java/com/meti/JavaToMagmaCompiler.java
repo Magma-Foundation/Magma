@@ -7,9 +7,12 @@ import java.util.stream.Stream;
 
 import static com.meti.JavaLang.STATIC_KEYWORD;
 import static com.meti.Lang.*;
-import static com.meti.MagmaLang.EXPORT_KEYWORD;
+import static com.meti.MagmaLang.*;
 
 public class JavaToMagmaCompiler {
+    public static final String TEST_PARAM_OUT = "value : I32";
+    public static final String TEST_PARAM_IN = "int value";
+
     static String run(String input) throws CompileException {
         var lines = Arrays.stream(input.split(";"))
                 .filter(line -> !line.isEmpty())
@@ -45,7 +48,7 @@ public class JavaToMagmaCompiler {
         return Stream.of(
                 () -> compileClass(input),
                 () -> compileImport(input),
-                () -> getState1(input)
+                () -> compilePackage(input)
         );
     }
 
@@ -55,14 +58,31 @@ public class JavaToMagmaCompiler {
 
         var isPublic = input.startsWith("public ");
 
-        var name = input.substring(index + CLASS_KEYWORD.length(), input.indexOf('{')).strip();
+        var contentStart = input.indexOf('{');
+        if (contentStart == -1) return Optional.empty();
+
+        var contentEnd = input.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var name = input.substring(index + CLASS_KEYWORD.length(), contentStart).strip();
+        var content = input.substring(contentStart + 1, contentEnd);
+        String parameterString;
+        if(content.isEmpty()) {
+            parameterString = "";
+        } else {
+            if(content.equals(JavaLang.renderConstructor(TEST_PARAM_IN))) {
+                parameterString = TEST_PARAM_OUT;
+            } else {
+                parameterString = "";
+            }
+        }
 
         var exportString = isPublic ? EXPORT_KEYWORD : "";
-        var rendered = MagmaLang.renderMagmaFunction(exportString, name, "{}");
+        var rendered = renderMagmaFunction(exportString, name, parameterString, EMPTY_CONTENT);
         return Optional.of(new State(rendered));
     }
 
-    private static Optional<State> getState1(String input) {
+    private static Optional<State> compilePackage(String input) {
         if (!input.startsWith(JavaLang.PACKAGE_KEYWORD)) return Optional.empty();
 
         return Optional.of(new State("", true));
@@ -83,9 +103,9 @@ public class JavaToMagmaCompiler {
         var child = input.substring(separator + 1).strip();
         var childString = child.equals("*")
                 ? "*"
-                : MagmaLang.renderImportChildString(child);
+                : renderImportChildString(child);
 
-        var rendered = MagmaLang.renderImportWithChildString(parent, childString);
+        var rendered = renderImportWithChildString(parent, childString);
         return Optional.of(new State(rendered));
     }
 

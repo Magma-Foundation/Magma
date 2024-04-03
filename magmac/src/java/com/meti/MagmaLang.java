@@ -18,10 +18,10 @@ public class MagmaLang {
     }
 
     public static String renderMagmaFunction(String name) {
-        return renderMagmaFunction("", name, EMPTY_CONTENT);
+        return renderMagmaFunction("", name, "", EMPTY_CONTENT);
     }
 
-    public static String renderMagmaFunction(String exportString, String name, String content) {
-        return exportString + CLASS_KEYWORD + "def " + name + "() => " + content;
+    public static String renderMagmaFunction(String exportString, String name, String parameters, String content) {
+        return exportString + CLASS_KEYWORD + "def " + name + "(" + parameters + ") => " + content;
     }
 }
