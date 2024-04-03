@@ -2,8 +2,6 @@ package com.meti;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 public class MagmaCompiler {
     public static final String PACKAGE_KEYWORD = "package";
     public static final String IMPORT_KEYWORD = "import ";
