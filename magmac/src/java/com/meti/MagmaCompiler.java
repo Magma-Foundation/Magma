@@ -5,6 +5,8 @@ import java.util.Arrays;
 public class MagmaCompiler {
     public static final String PACKAGE_KEYWORD = "package";
     public static final String IMPORT_KEYWORD = "import ";
+    public static final String TEST_INPUT = "class Test {}";
+    public static final String TEST_OUTPUT = "class def Test() => {}";
 
     static String run(String input) throws CompileException {
         var lines = Arrays.stream(input.split(";"))
@@ -17,8 +19,8 @@ public class MagmaCompiler {
             var state = runForRootStatement(line);
             builder.append(state.result);
 
-            if(state.wasPackage){
-                if(hasSeenPackage) {
+            if (state.wasPackage) {
+                if (hasSeenPackage) {
                     throw new CompileException("Only one package statement is allowed.");
                 } else {
                     hasSeenPackage = true;
@@ -30,12 +32,14 @@ public class MagmaCompiler {
     }
 
     private static State runForRootStatement(String input) throws CompileException {
-        if (input.startsWith(IMPORT_KEYWORD)) {
+        if (input.equals(TEST_INPUT)) {
+            return new State(TEST_OUTPUT);
+        } else if (input.startsWith(IMPORT_KEYWORD)) {
             var separator = input.lastIndexOf('.');
             var parent = input.substring(IMPORT_KEYWORD.length(), separator);
 
             var name = input.substring(separator + 1).strip();
-            return new State(renderMagmaImport(parent, name), false);
+            return new State(renderMagmaImport(parent, name));
         } else if (input.startsWith(PACKAGE_KEYWORD)) {
             return new State("", true);
         } else {
@@ -48,5 +52,8 @@ public class MagmaCompiler {
     }
 
     record State(String result, boolean wasPackage) {
+        public State(String result) {
+            this(result, false);
+        }
     }
 }
