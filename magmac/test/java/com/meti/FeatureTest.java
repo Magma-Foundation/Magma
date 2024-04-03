@@ -1,6 +1,6 @@
 package com.meti;
 
-import static com.meti.MagmaCompiler.run;
+import static com.meti.JavaToMagmaCompiler.run;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

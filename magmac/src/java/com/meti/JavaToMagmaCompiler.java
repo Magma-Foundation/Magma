@@ -2,9 +2,10 @@ package com.meti;
 
 import java.util.Arrays;
 
+import static com.meti.JavaLang.STATIC_KEYWORD;
 import static com.meti.Lang.*;
 
-public class MagmaCompiler {
+public class JavaToMagmaCompiler {
     static String run(String input) throws CompileException {
         var lines = Arrays.stream(input.split(";"))
                 .filter(line -> !line.isEmpty())
@@ -36,8 +37,14 @@ public class MagmaCompiler {
         }
 
         if (input.startsWith(IMPORT_KEYWORD)) {
+            var isStatic = input.startsWith(IMPORT_KEYWORD + STATIC_KEYWORD);
+
             var separator = input.lastIndexOf('.');
-            var parent = input.substring(IMPORT_KEYWORD.length(), separator);
+            var parentStart = isStatic
+                    ? IMPORT_KEYWORD.length() + STATIC_KEYWORD.length()
+                    : IMPORT_KEYWORD.length();
+
+            var parent = input.substring(parentStart, separator);
 
             var name = input.substring(separator + 1).strip();
             var rendered = MagmaLang.renderMagmaImport(parent, name);

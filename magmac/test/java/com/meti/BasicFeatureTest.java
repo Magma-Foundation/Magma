@@ -3,7 +3,7 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static com.meti.JavaLang.renderPackage;
-import static com.meti.MagmaCompiler.run;
+import static com.meti.JavaToMagmaCompiler.run;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BasicFeatureTest {

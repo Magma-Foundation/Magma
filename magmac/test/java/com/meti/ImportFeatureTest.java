@@ -1,5 +1,6 @@
 package com.meti;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -17,6 +18,14 @@ public class ImportFeatureTest {
                 .mapToObj(i -> TEST_CHILD + i)
                 .map(mapper)
                 .collect(Collectors.joining());
+    }
+
+    @Test
+    void testStatic() {
+        assertCompile(
+                renderJavaImport(JavaLang.STATIC_KEYWORD, TEST_PARENT, TEST_CHILD),
+                renderMagmaImport(TEST_PARENT, TEST_CHILD)
+        );
     }
 
     @ParameterizedTest
