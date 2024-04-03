@@ -1,16 +1,28 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     public static final String PACKAGE_KEYWORD = "package";
-    public static final String IMPORT_INPUT = "import org.junit.jupiter.api.Test;";
-    public static final String IMPORT_OUTPUT = "import { Test } org.junit.jupiter.api;";
+    public static final String IMPORT_PREFIX = "import org.junit.jupiter.api.";
+
+    private static String renderJavaImport(String name) {
+        return IMPORT_PREFIX + name + ";";
+    }
+
+    private static String renderMagmaImport(String name) {
+        return "import { " + name + " } org.junit.jupiter.api;";
+    }
 
     private static String run(String input) throws CompileException {
-        if(input.equals(IMPORT_INPUT)) return IMPORT_OUTPUT;
+        if (input.startsWith(IMPORT_PREFIX)) {
+            var name = input.substring(IMPORT_PREFIX.length(), input.length() - 1).strip();
+            return renderMagmaImport(name);
+        }
 
         var first = input.indexOf(PACKAGE_KEYWORD);
         if (first == -1) return "";
@@ -52,8 +64,9 @@ public class ApplicationTest {
         assertThrows(CompileException.class, () -> run(renderPackage("first") + renderPackage("second")));
     }
 
-    @Test
-    void testImports(){
-        assertCompile(IMPORT_INPUT, IMPORT_OUTPUT);
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void testImports(String name) {
+        assertCompile(renderJavaImport(name), renderMagmaImport(name));
     }
 }
