@@ -20,10 +20,10 @@ public class JavaLang {
     }
 
     public static String renderJavaClass(String name) {
-        return renderJavaClass("", name);
+        return renderJavaClass("", name, Lang.EMPTY_CONTENT);
     }
 
-    public static String renderJavaClass(String publicString, String name) {
-        return publicString + Lang.CLASS_KEYWORD + name + Lang.CONTENT;
+    public static String renderJavaClass(String publicString, String name, String content) {
+        return publicString + Lang.CLASS_KEYWORD + name + " " + content;
     }
 }

@@ -55,10 +55,10 @@ public class JavaToMagmaCompiler {
 
         var isPublic = input.startsWith("public ");
 
-        var name = input.substring(index + CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+        var name = input.substring(index + CLASS_KEYWORD.length(), input.indexOf('{')).strip();
 
         var exportString = isPublic ? EXPORT_KEYWORD : "";
-        var rendered = MagmaLang.renderMagmaFunction(exportString, name);
+        var rendered = MagmaLang.renderMagmaFunction(exportString, name, "{}");
         return Optional.of(new State(rendered));
     }
 
