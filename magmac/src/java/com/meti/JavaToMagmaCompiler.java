@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import static com.meti.JavaLang.STATIC_KEYWORD;
 import static com.meti.Lang.*;
+import static com.meti.MagmaLang.EXPORT_KEYWORD;
 
 public class JavaToMagmaCompiler {
     static String run(String input) throws CompileException {
@@ -49,10 +50,15 @@ public class JavaToMagmaCompiler {
     }
 
     private static Optional<State> compileClass(String input) {
-        if (!input.startsWith(CLASS_KEYWORD)) return Optional.empty();
+        var index = input.indexOf(CLASS_KEYWORD);
+        if (index == -1) return Optional.empty();
 
-        var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
-        var rendered = MagmaLang.renderMagmaFunction(name);
+        var isPublic = input.startsWith("public ");
+
+        var name = input.substring(index + CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+
+        var exportString = isPublic ? EXPORT_KEYWORD : "";
+        var rendered = MagmaLang.renderMagmaFunction(exportString, name);
         return Optional.of(new State(rendered));
     }
 

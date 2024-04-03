@@ -1,6 +1,8 @@
 package com.meti;
 
 public class MagmaLang {
+    public static final String EXPORT_KEYWORD = "export ";
+
     public static String renderImport(String parent, String child) {
         return renderImportWithChildString(parent, renderImportChildString(child));
     }
@@ -14,6 +16,10 @@ public class MagmaLang {
     }
 
     public static String renderMagmaFunction(String name) {
-        return Lang.CLASS_KEYWORD + " def " + name + "() =>" + Lang.CONTENT;
+        return renderMagmaFunction("", name);
+    }
+
+    public static String renderMagmaFunction(String exportString, String name) {
+        return exportString + Lang.CLASS_KEYWORD + "def " + name + "() =>" + Lang.CONTENT;
     }
 }

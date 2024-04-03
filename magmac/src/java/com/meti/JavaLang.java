@@ -5,6 +5,7 @@ import static com.meti.Lang.IMPORT_KEYWORD;
 public class JavaLang {
     public static final String PACKAGE_KEYWORD = "package";
     public static final String STATIC_KEYWORD = "static ";
+    public static final String PUBLIC_KEYWORD = "public ";
 
     static String renderJavaImport(String parent, String child) {
         return renderJavaImport("", parent, child);
@@ -19,6 +20,10 @@ public class JavaLang {
     }
 
     public static String renderJavaClass(String name) {
-        return Lang.CLASS_KEYWORD + name + Lang.CONTENT;
+        return renderJavaClass("", name);
+    }
+
+    public static String renderJavaClass(String publicString, String name) {
+        return publicString + Lang.CLASS_KEYWORD + name + Lang.CONTENT;
     }
 }
