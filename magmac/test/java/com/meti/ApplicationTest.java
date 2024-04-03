@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
     public static final String PACKAGE_KEYWORD = "package";
+    public static final String IMPORT_INPUT = "import org.junit.jupiter.api.Test;";
+    public static final String IMPORT_OUTPUT = "import { Test } org.junit.jupiter.api;";
 
     private static String run(String input) throws CompileException {
+        if(input.equals(IMPORT_INPUT)) return IMPORT_OUTPUT;
+
         var first = input.indexOf(PACKAGE_KEYWORD);
         if (first == -1) return "";
 
@@ -46,5 +50,10 @@ public class ApplicationTest {
     @Test
     void testMultiplePackages() {
         assertThrows(CompileException.class, () -> run(renderPackage("first") + renderPackage("second")));
+    }
+
+    @Test
+    void testImports(){
+        assertCompile(IMPORT_INPUT, IMPORT_OUTPUT);
     }
 }
