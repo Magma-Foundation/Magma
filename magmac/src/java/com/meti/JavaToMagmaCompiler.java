@@ -1,6 +1,7 @@
 package com.meti;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -10,13 +11,16 @@ import static com.meti.Lang.*;
 import static com.meti.MagmaLang.*;
 
 public class JavaToMagmaCompiler {
-    public static final String TEST_PARAM_OUT = "value : I32";
-    public static final String TEST_PARAM_IN = "int value";
+    public static String renderMagmaDeclaration(String name, String type) {
+        return name + " : " + type;
+    }
+
+    public static String renderJavaDeclaration(String name, String type) {
+        return type + " " + name;
+    }
 
     static String run(String input) throws CompileException {
-        var lines = Arrays.stream(input.split(";"))
-                .filter(line -> !line.isEmpty())
-                .toList();
+        var lines = split(input);
 
         var builder = new StringBuilder();
         var hasSeenPackage = false;
@@ -36,6 +40,30 @@ public class JavaToMagmaCompiler {
         return builder.toString();
     }
 
+    private static List<String> split(String input) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+
+        return lines.stream()
+                .filter(line -> !line.isBlank())
+                .toList();
+    }
+
     private static State compileRootStatement(String input) throws CompileException {
         return streamCompilers(input)
                 .map(Supplier::get)
@@ -52,7 +80,7 @@ public class JavaToMagmaCompiler {
         );
     }
 
-    private static Optional<State> compileClass(String input) {
+    private static Optional<State> compileClass(String input)  {
         var index = input.indexOf(CLASS_KEYWORD);
         if (index == -1) return Optional.empty();
 
@@ -64,21 +92,55 @@ public class JavaToMagmaCompiler {
         var contentEnd = input.lastIndexOf('}');
         if (contentEnd == -1) return Optional.empty();
 
-        var name = input.substring(index + CLASS_KEYWORD.length(), contentStart).strip();
-        var content = input.substring(contentStart + 1, contentEnd);
+        var strip = input.substring(index + CLASS_KEYWORD.length(), contentStart).strip();
+
+        String name;
+        Optional<String> superclass;
+        var extendsIndex = strip.indexOf("extends ");
+        if (extendsIndex != -1) {
+            name = strip.substring(0, extendsIndex).strip();
+            superclass = Optional.of(strip.substring("extends ".length() + extendsIndex).strip());
+        } else {
+            name = strip;
+            superclass = Optional.empty();
+        }
+
+        var content = input.substring(contentStart + 1, contentEnd).strip();
         String parameterString;
-        if(content.isEmpty()) {
+        if (content.isEmpty()) {
             parameterString = "";
         } else {
-            if(content.equals(JavaLang.renderConstructor(TEST_PARAM_IN))) {
-                parameterString = TEST_PARAM_OUT;
+            var nameIndex = content.indexOf(name);
+            if (nameIndex != -1) {
+                var paramStart = content.indexOf('(');
+                var paramEnd = content.indexOf(')');
+                var paramString = content.substring(paramStart + 1, paramEnd).strip();
+                var separator = paramString.indexOf(' ');
+                if (separator == -1) {
+                    parameterString = "";
+                } else {
+                    var inputParameterType = paramString.substring(0, separator).strip();
+                    String outputParameterType;
+                    if (inputParameterType.equals("int")) {
+                        outputParameterType = "I32";
+                    } else if(inputParameterType.equals("String")) {
+                        outputParameterType = "String";
+                    } else {
+                        return Optional.empty();
+                    }
+
+                    var paramName = paramString.substring(separator + 1).strip();
+
+                    parameterString = renderMagmaDeclaration(paramName, outputParameterType);
+                }
             } else {
                 parameterString = "";
             }
         }
 
         var exportString = isPublic ? EXPORT_KEYWORD : "";
-        var rendered = renderMagmaFunction(exportString, name, parameterString, EMPTY_CONTENT);
+        var membersString = superclass.map(value -> "implements " + value + ";").orElse("");
+        var rendered = renderMagmaFunction(exportString, name, parameterString, renderContent(membersString));
         return Optional.of(new State(rendered));
     }
 

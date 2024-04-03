@@ -16,6 +16,13 @@ public class ClassFeatureTest {
     public static final String TEST_SYMBOL = "Test";
 
     @Test
+    void testExtends() {
+        assertCompile(renderJavaClass("", TEST_SYMBOL, "extends First ", EMPTY_CONTENT),
+                renderMagmaFunction("", TEST_SYMBOL, "", renderContent(
+                        "implements First;")));
+    }
+
+    @Test
     void testConstructor() {
         assertCompile(
                 renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor())),
@@ -23,11 +30,20 @@ public class ClassFeatureTest {
         );
     }
 
-    @Test
-    void testConstructorParameter() {
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void testConstructorParameter(String name) {
         assertCompile(
-                renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor(JavaToMagmaCompiler.TEST_PARAM_IN))),
-                renderMagmaFunction("", TEST_SYMBOL, JavaToMagmaCompiler.TEST_PARAM_OUT, EMPTY_CONTENT)
+                renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor(JavaToMagmaCompiler.renderJavaDeclaration(name, "int")))),
+                renderMagmaFunction("", TEST_SYMBOL, JavaToMagmaCompiler.renderMagmaDeclaration(name, "I32"), EMPTY_CONTENT)
+        );
+    }
+
+    @Test
+    void testConstructorParameterType() {
+        assertCompile(
+                renderJavaClass("", TEST_SYMBOL, renderContent(JavaLang.renderConstructor(JavaToMagmaCompiler.renderJavaDeclaration("test", "int")))),
+                renderMagmaFunction("", TEST_SYMBOL, JavaToMagmaCompiler.renderMagmaDeclaration("test", "I32"), EMPTY_CONTENT)
         );
     }
 
