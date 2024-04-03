@@ -46,8 +46,12 @@ public class JavaToMagmaCompiler {
 
             var parent = input.substring(parentStart, separator);
 
-            var name = input.substring(separator + 1).strip();
-            var rendered = MagmaLang.renderMagmaImport(parent, name);
+            var child = input.substring(separator + 1).strip();
+            var childString = child.equals("*")
+                    ? "*"
+                    : MagmaLang.renderImportChildString(child);
+
+            var rendered = MagmaLang.renderImportWithChildString(parent, childString);
             return new State(rendered);
         }
 
