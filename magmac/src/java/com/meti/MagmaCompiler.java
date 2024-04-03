@@ -15,8 +15,8 @@ public class MagmaCompiler {
         var hasSeenPackage = false;
         for (String line : lines) {
             var state = runForRootStatement(line);
-
             builder.append(state.result);
+
             if(state.wasPackage){
                 if(hasSeenPackage) {
                     throw new CompileException("Only one package statement is allowed.");
