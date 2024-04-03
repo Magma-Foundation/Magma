@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
@@ -21,11 +25,20 @@ public class ApplicationTest {
     }
 
     private static String run(String input) throws CompileException {
+        var lines = Arrays.stream(input.split(";")).toList();
+        var builder = new StringBuilder();
+        for (String line : lines) {
+            builder.append(runForRootStatement(line));
+        }
+        return builder.toString();
+    }
+
+    private static String runForRootStatement(String input) throws CompileException {
         if (input.startsWith(IMPORT_KEYWORD)) {
             var separator = input.lastIndexOf('.');
             var parent = input.substring(IMPORT_KEYWORD.length(), separator);
 
-            var name = input.substring(separator + 1, input.length() - 1).strip();
+            var name = input.substring(separator + 1).strip();
             return renderMagmaImport(parent, name);
         }
 
@@ -79,5 +92,20 @@ public class ApplicationTest {
     @ValueSource(strings = {"first", "Second"})
     void testImportParents(String parent) {
         assertCompile(renderJavaImport(parent, TEST_CHILD), renderMagmaImport(parent, TEST_CHILD));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void testMultipleImports(int count) {
+        var input = IntStream.range(0, count)
+                .mapToObj(i -> TEST_CHILD + i)
+                .map(line -> renderJavaImport(TEST_PARENT, line))
+                .collect(Collectors.joining());
+
+        var output = IntStream.range(0, count)
+                .mapToObj(i -> TEST_CHILD + i)
+                .map(line -> renderMagmaImport(TEST_PARENT, line))
+                .collect(Collectors.joining());
+        assertCompile(input, output);
     }
 }
