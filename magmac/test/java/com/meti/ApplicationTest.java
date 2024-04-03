@@ -5,19 +5,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    private static String run(String s) throws CompileException {
-        var first = s.indexOf("package");
+    public static final String PACKAGE_KEYWORD = "package";
+
+    private static String run(String input) throws CompileException {
+        var first = input.indexOf(PACKAGE_KEYWORD);
         if (first == -1) return "";
 
-        var second = s.indexOf("package", first + "package ".length());
+        var second = input.indexOf(PACKAGE_KEYWORD, first + (PACKAGE_KEYWORD + " ").length());
         if (second == -1) return "";
 
         throw new CompileException("Duplicate package statement.");
-    }
-
-    @Test
-    void testEmpty() {
-        assertEquals("", runImpl(""));
     }
 
     private static String runImpl(String s) {
@@ -28,13 +25,26 @@ public class ApplicationTest {
         }
     }
 
+    private static String renderPackage(String namespace) {
+        return PACKAGE_KEYWORD + " " + namespace + ";";
+    }
+
+    private static void assertCompile(String input, String output) {
+        assertEquals(output, runImpl(input));
+    }
+
+    @Test
+    void testEmpty() {
+        assertCompile("", "");
+    }
+
     @Test
     void testPackages() {
-        assertEquals("", runImpl("package com.meti;"));
+        assertCompile(renderPackage("com.meti"), "");
     }
 
     @Test
     void testMultiplePackages() {
-        assertThrows(CompileException.class, () -> run("package first;package second"));
+        assertThrows(CompileException.class, () -> run(renderPackage("first") + renderPackage("second")));
     }
 }
