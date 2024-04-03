@@ -2,12 +2,9 @@ package com.meti;
 
 import java.util.Arrays;
 
-public class MagmaCompiler {
-    public static final String PACKAGE_KEYWORD = "package";
-    public static final String IMPORT_KEYWORD = "import ";
-    public static final String TEST_INPUT = "class Test {}";
-    public static final String TEST_OUTPUT = "class def Test() => {}";
+import static com.meti.Lang.*;
 
+public class MagmaCompiler {
     static String run(String input) throws CompileException {
         var lines = Arrays.stream(input.split(";"))
                 .filter(line -> !line.isEmpty())
@@ -32,23 +29,26 @@ public class MagmaCompiler {
     }
 
     private static State runForRootStatement(String input) throws CompileException {
-        if (input.equals(TEST_INPUT)) {
-            return new State(TEST_OUTPUT);
-        } else if (input.startsWith(IMPORT_KEYWORD)) {
+        if (input.startsWith(CLASS_KEYWORD)) {
+            var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+            var rendered = MagmaLang.renderMagmaFunction(name);
+            return new State(rendered);
+        }
+
+        if (input.startsWith(IMPORT_KEYWORD)) {
             var separator = input.lastIndexOf('.');
             var parent = input.substring(IMPORT_KEYWORD.length(), separator);
 
             var name = input.substring(separator + 1).strip();
-            return new State(renderMagmaImport(parent, name));
-        } else if (input.startsWith(PACKAGE_KEYWORD)) {
-            return new State("", true);
-        } else {
-            throw new CompileException("Unknown input: " + input);
+            var rendered = MagmaLang.renderMagmaImport(parent, name);
+            return new State(rendered);
         }
-    }
 
-    public static String renderMagmaImport(String parent, String child) {
-        return IMPORT_KEYWORD + "{ " + child + " } " + parent + ";";
+        if (input.startsWith(JavaLang.PACKAGE_KEYWORD)) {
+            return new State("", true);
+        }
+
+        throw new CompileException("Unknown input: " + input);
     }
 
     record State(String result, boolean wasPackage) {

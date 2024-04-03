@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 
 import static com.meti.FeatureTest.*;
 import static com.meti.JavaLang.renderJavaImport;
-import static com.meti.MagmaCompiler.renderMagmaImport;
+import static com.meti.MagmaLang.renderMagmaImport;
 
 public class ImportFeatureTest {
     private static String join(int count, Function<String, String> mapper) {
