@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
     public static final String CLASS_KEYWORD = "class ";
-    public static final String TEST_NAME = "Test";
     public static final String NO_CLASS_PRESENT = "Location: com.meti.ApplicationTest\n" +
                                                   "Message: No class present.";
     public static final String CONTENT = " {}";
