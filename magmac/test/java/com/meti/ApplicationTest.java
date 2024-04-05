@@ -1,26 +1,29 @@
 package com.meti;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
+    @Test
+    void test() {
+        assertEquals("""
+                **Location**: com.meti.Test
+                **Message**: Unknown Token*
 
-    private static String getString(String c) {
-        return "**Location**: com.meti.Test\n" +
-               "**Message**: Unknown Token*\n" +
-               "\n" +
-               "**Details**:\n" +
-               "```\n" +
-               "1) " + c + "\n" +
-               "   ^\n" +
-               "```";
-    }
+                **Details**:
+                ```
+                1) a
+                   ^
+                ```""", """
+                **Location**: com.meti.Test
+                **Message**: Unknown Token*
 
-    @ParameterizedTest
-    @ValueSource(strings = {"a", "b"})
-    void testOneChar(String c) {
-        assertEquals(getString(c), getString(c));
+                **Details**:
+                ```
+                1) a
+                   ^
+                ```""");
     }
 }
