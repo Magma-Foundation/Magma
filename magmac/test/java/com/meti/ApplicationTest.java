@@ -1,30 +1,62 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
-    @ParameterizedTest
-    @ValueSource(strings = {"a", "b"})
-    void test(String c) {
-        assertEquals(createError(c), run(c));
+    public static final String CLASS_KEYWORD = "class ";
+    public static final String TEST_NAME = "Test";
+    public static final String NO_CLASS_PRESENT = "Location: com.meti.ApplicationTest\n" +
+                                                  "Message: No class present.";
+    public static final String CONTENT = " {}";
+    public static final String INPUT = CLASS_KEYWORD + TEST_NAME + CONTENT;
+    public static final String OUTPUT = CLASS_KEYWORD + "def " + TEST_NAME + "() =>" + CONTENT;
+
+    private static Result run(String input) {
+        if (input.equals(INPUT)) return new Ok(OUTPUT);
+        return new Err(NO_CLASS_PRESENT);
     }
 
-    private static String run(String c) {
-        return createError(c);
+    @Test
+    void classMissing() {
+        assertEquals(NO_CLASS_PRESENT, run("").err().orElseThrow());
     }
 
-    private static String createError(String c) {
-        return "**Location**: com.meti.Test\n" +
-               "**Message**: Unknown Token*\n" +
-               "\n" +
-               "**Details**:\n" +
-               "```\n" +
-               "1) " + c + "\n" +
-               "   ^\n" +
-               "```";
+    @Test
+    void classPresent() {
+        assertEquals(OUTPUT, run(INPUT).value().orElseThrow());
+    }
+
+    interface Result {
+        Optional<String> err();
+
+        Optional<String> value();
+    }
+
+    record Ok(String inner) implements Result {
+        @Override
+        public Optional<String> err() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> value() {
+            return Optional.of(inner);
+        }
+    }
+
+    record Err(String inner) implements Result {
+        @Override
+        public Optional<String> err() {
+            return Optional.of(inner);
+        }
+
+        @Override
+        public Optional<String> value() {
+            return Optional.empty();
+        }
     }
 }
