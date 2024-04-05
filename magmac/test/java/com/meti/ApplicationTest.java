@@ -1,6 +1,8 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Optional;
 
@@ -12,11 +14,21 @@ public class ApplicationTest {
     public static final String NO_CLASS_PRESENT = "Location: com.meti.ApplicationTest\n" +
                                                   "Message: No class present.";
     public static final String CONTENT = " {}";
-    public static final String INPUT = CLASS_KEYWORD + TEST_NAME + CONTENT;
-    public static final String OUTPUT = CLASS_KEYWORD + "def " + TEST_NAME + "() =>" + CONTENT;
+
+    private static String createInput(String name) {
+        return CLASS_KEYWORD + name + CONTENT;
+    }
+
+    private static String createOutput(String output) {
+        return CLASS_KEYWORD + "def " + output + "() =>" + CONTENT;
+    }
 
     private static Result run(String input) {
-        if (input.equals(INPUT)) return new Ok(OUTPUT);
+        if (input.startsWith(CLASS_KEYWORD)) {
+            var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+            return new Ok(createOutput(name));
+        }
+
         return new Err(NO_CLASS_PRESENT);
     }
 
@@ -25,10 +37,12 @@ public class ApplicationTest {
         assertEquals(NO_CLASS_PRESENT, run("").err().orElseThrow());
     }
 
-    @Test
-    void classPresent() {
-        assertEquals(OUTPUT, run(INPUT).value().orElseThrow());
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void classPresent(String name) {
+        assertEquals(createOutput(name), run(createInput(name)).value().orElseThrow());
     }
+
 
     interface Result {
         Optional<String> err();
