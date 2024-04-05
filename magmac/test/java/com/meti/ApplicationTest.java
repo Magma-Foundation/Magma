@@ -10,9 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
     public static final String CLASS_KEYWORD = "class ";
-    public static final String NO_CLASS_PRESENT = "Location: com.meti.ApplicationTest\n" +
-                                                  "Message: No class present.";
+    public static final String NO_CLASS_PRESENT = "No class present.";
     public static final String CONTENT = " {}";
+    public static final String ONLY_ONE_ROOT_CLASS = "Only one root class is permitted.";
+
+    private static String getString(String message) {
+        return "Location: com.meti.ApplicationTest\n" + "Message: " + message;
+    }
 
     private static String createInput(String name) {
         return CLASS_KEYWORD + name + CONTENT;
@@ -24,16 +28,26 @@ public class ApplicationTest {
 
     private static Result run(String input) {
         if (input.startsWith(CLASS_KEYWORD)) {
-            var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(CONTENT));
+            var contentStart = input.indexOf("{");
+            var contentEnd = input.lastIndexOf('}');
+
+            var name = input.substring(CLASS_KEYWORD.length(), contentStart).strip();
+            if(input.substring(contentStart + 1, contentEnd).contains(CLASS_KEYWORD)) {
+                return new Err(getString(ONLY_ONE_ROOT_CLASS));
+            }
             return new Ok(createOutput(name));
         }
 
-        return new Err(NO_CLASS_PRESENT);
+        return new Err(getString(NO_CLASS_PRESENT));
     }
 
     @Test
     void classMissing() {
-        assertEquals(NO_CLASS_PRESENT, run("").err().orElseThrow());
+        assertError(NO_CLASS_PRESENT, "");
+    }
+
+    private static void assertError(String message, String input) {
+        assertEquals(getString(message), run(input).err().orElseThrow());
     }
 
     @ParameterizedTest
@@ -42,6 +56,10 @@ public class ApplicationTest {
         assertEquals(createOutput(name), run(createInput(name)).value().orElseThrow());
     }
 
+    @Test
+    void multipleClasses(){
+        assertError(ONLY_ONE_ROOT_CLASS, createInput("First") + createInput("Second"));
+    }
 
     interface Result {
         Optional<String> err();
