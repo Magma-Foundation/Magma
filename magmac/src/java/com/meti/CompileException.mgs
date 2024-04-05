@@ -1,1 +1,0 @@
-class def CompileException(message : String) => {implements Exception;}
