@@ -16,7 +16,7 @@ public class ApplicationTest {
             var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(EMPTY_CONTENT)).strip();
             return renderMagmaClass(name);
         }
-        throw new CompileException("No " + CLASS_KEYWORD + "present.");
+        throw new CompileException("No class present.");
     }
 
     private static String renderMagmaClass(String name) {
