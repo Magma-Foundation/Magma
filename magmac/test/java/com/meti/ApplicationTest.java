@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
-    public static final String TEST_INPUT = "System.out.println(\"Hello World!\");";
 
     private static String createInput(String content) {
         return "class Main {public static void main(String[] args){" + content + "}}";
@@ -17,8 +16,8 @@ public class ApplicationTest {
         var prefix = "class Main {public static void main(String[] args){";
         var suffix = "}}";
 
-        if(!input.startsWith(prefix)) return "";
-        if(!input.endsWith(suffix)) return "";
+        if (!input.startsWith(prefix)) return "";
+        if (!input.endsWith(suffix)) return "";
 
         return input.substring(prefix.length(), input.length() - suffix.length());
     }
@@ -29,10 +28,8 @@ public class ApplicationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {TEST_INPUT, "System.out.println(\"Test!\");"})
+    @ValueSource(strings = {"System.out.println(\"Hello World!\");", "System.out.println(\"Test!\");"})
     void print(String input) {
         assertEquals(input, run(createInput(input)));
-
-
     }
 }
