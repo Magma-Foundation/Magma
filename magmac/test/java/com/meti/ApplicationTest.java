@@ -1,6 +1,8 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,10 +14,13 @@ public class ApplicationTest {
     }
 
     private static String run(String input) {
-        if (input.equals(createInput(TEST_INPUT))) {
-            return TEST_INPUT;
-        }
-        return "";
+        var prefix = "class Main {public static void main(String[] args){";
+        var suffix = "}}";
+
+        if(!input.startsWith(prefix)) return "";
+        if(!input.endsWith(suffix)) return "";
+
+        return input.substring(prefix.length(), input.length() - suffix.length());
     }
 
     @Test
@@ -23,9 +28,10 @@ public class ApplicationTest {
         assertEquals("", run(createInput("")));
     }
 
-    @Test
-    void print() {
-        assertEquals(TEST_INPUT, run(createInput(TEST_INPUT)));
+    @ParameterizedTest
+    @ValueSource(strings = {TEST_INPUT, "System.out.println(\"Test!\");"})
+    void print(String input) {
+        assertEquals(input, run(createInput(input)));
 
 
     }
