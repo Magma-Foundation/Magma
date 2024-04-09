@@ -1,16 +1,24 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ApplicationTest {
-    public static final String SIMPLEST_JAVA = "class Test {public static void main(String[] args){}}";
+    public static final String TEST_NAME = "Test";
+    public static final String CLASS_KEYWORD = "class ";
+    public static final String CLASS_SUFFIX = " {public static void main(String[] args){}}";
 
-    private static String compileMagmaToJava(String magmaInput) throws CompileException {
+    private static String renderJavaClass(String name) {
+        return CLASS_KEYWORD + name + CLASS_SUFFIX;
+    }
+
+    private static String compileMagmaToJava(String namespace, String magmaInput) throws CompileException {
         if (magmaInput.isEmpty()) {
-            return SIMPLEST_JAVA;
+            return renderJavaClass(namespace);
         } else {
             throw createUnknownInput(magmaInput);
         }
@@ -21,7 +29,7 @@ public class ApplicationTest {
     }
 
     private static String compileJavaToMagma(String javaInput) throws CompileException {
-        if (javaInput.equals(SIMPLEST_JAVA)) {
+        if (javaInput.startsWith(CLASS_KEYWORD)) {
             return "";
         } else {
             throw createUnknownInput(javaInput);
@@ -30,7 +38,7 @@ public class ApplicationTest {
 
     @Test
     void invalidMagma() {
-        assertThrows(CompileException.class, () -> compileMagmaToJava("test"));
+        assertThrows(CompileException.class, () -> compileMagmaToJava(TEST_NAME, "test"));
     }
 
     @Test
@@ -40,11 +48,12 @@ public class ApplicationTest {
 
     @Test
     void smallestMagma() throws CompileException {
-        assertEquals("", compileJavaToMagma(compileMagmaToJava("")));
+        assertEquals("", compileJavaToMagma(compileMagmaToJava(TEST_NAME, "")));
     }
 
-    @Test
-    void smallestJava() throws CompileException {
-        assertEquals(SIMPLEST_JAVA, compileMagmaToJava(compileJavaToMagma(SIMPLEST_JAVA)));
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void smallestJava(String className) throws CompileException {
+        assertEquals(renderJavaClass(className), compileMagmaToJava(className, compileJavaToMagma(renderJavaClass(className))));
     }
 }
