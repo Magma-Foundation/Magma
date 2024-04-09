@@ -3,25 +3,40 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ApplicationTest {
-    public static final String JAVA_CLASS = "class Test {public static void main(String args[]){}}";
-
-    private static String compileMagma(String input) {
-        return input;
+    private static String renderJavaMethod(String name) {
+        return "class " + name + " {}";
     }
 
-    private static String compileJava(String input) {
-        return input;
+    private static String compileMagmaFromJava(String input) throws CompileException {
+        if (input.isEmpty()) return renderJavaMethod("Test");
+        throw new CompileException("Unknown input: " + input);
+    }
+
+    private static String compileJavaFromMagma(String input) throws CompileException {
+        if (input.equals(renderJavaMethod("Test"))) return "";
+        throw new CompileException("Unknown input: " + input);
     }
 
     @Test
-    void emptyMagma() {
-        assertEquals("", compileJava(compileMagma("")));
+    void invalidMagma() {
+        assertThrows(CompileException.class, () -> compileMagmaFromJava("Test"));
     }
 
     @Test
-    void emptyJava() {
-        assertEquals(JAVA_CLASS, compileMagma(compileJava(JAVA_CLASS)));
+    void invalidJava() {
+        assertThrows(CompileException.class, () -> compileJavaFromMagma(""));
+    }
+
+    @Test
+    void emptyMagma() throws CompileException {
+        assertEquals("", compileJavaFromMagma(compileMagmaFromJava("")));
+    }
+
+    @Test
+    void emptyJava() throws CompileException {
+        assertEquals(renderJavaMethod("Test"), compileMagmaFromJava(compileJavaFromMagma(renderJavaMethod("Test"))));
     }
 }
