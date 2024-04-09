@@ -1,42 +1,48 @@
 package com.meti;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ApplicationTest {
-    private static String renderJavaMethod(String name) {
+
+    public static final String TEST_NAMESPACE = "Test";
+
+    private static String renderJavaClass(String name) {
         return "class " + name + " {}";
     }
 
-    private static String compileMagmaFromJava(String input) throws CompileException {
-        if (input.isEmpty()) return renderJavaMethod("Test");
-        throw new CompileException("Unknown input: " + input);
+    private static String compileJavaFromMagma(String namespace, String magmaInput) throws CompileException {
+        if (magmaInput.isEmpty()) return renderJavaClass(namespace);
+        throw new CompileException("Unknown input: " + magmaInput);
     }
 
-    private static String compileJavaFromMagma(String input) throws CompileException {
-        if (input.equals(renderJavaMethod("Test"))) return "";
-        throw new CompileException("Unknown input: " + input);
+    private static String compileMagmaFromJava(String javaInput) throws CompileException {
+        if (javaInput.startsWith("class ")) return "";
+        throw new CompileException("Unknown input: " + javaInput);
     }
 
     @Test
     void invalidMagma() {
-        assertThrows(CompileException.class, () -> compileMagmaFromJava("Test"));
+        assertThrows(CompileException.class, () -> compileJavaFromMagma(TEST_NAMESPACE, TEST_NAMESPACE));
     }
 
     @Test
     void invalidJava() {
-        assertThrows(CompileException.class, () -> compileJavaFromMagma(""));
+        assertThrows(CompileException.class, () -> compileMagmaFromJava(""));
     }
 
     @Test
     void emptyMagma() throws CompileException {
-        assertEquals("", compileJavaFromMagma(compileMagmaFromJava("")));
+        assertEquals("", compileMagmaFromJava(compileJavaFromMagma(TEST_NAMESPACE, "")));
     }
 
-    @Test
-    void emptyJava() throws CompileException {
-        assertEquals(renderJavaMethod("Test"), compileMagmaFromJava(compileJavaFromMagma(renderJavaMethod("Test"))));
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void emptyJava(String name) throws CompileException {
+        assertEquals(renderJavaClass(name), compileJavaFromMagma(name, compileMagmaFromJava(renderJavaClass(name))));
     }
 }
