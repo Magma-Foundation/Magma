@@ -3,25 +3,48 @@ package com.meti;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ApplicationTest {
     public static final String SIMPLEST_JAVA = "class Test {public static void main(String[] args){}}";
 
-    private static String compileJavaFromMagma(String magmaInput) {
-        return magmaInput;
+    private static String compileMagmaToJava(String magmaInput) throws CompileException {
+        if (magmaInput.isEmpty()) {
+            return SIMPLEST_JAVA;
+        } else {
+            throw createUnknownInput(magmaInput);
+        }
     }
 
-    private static String compileMagmaFromJava(String javaInput) {
-        return javaInput;
+    private static CompileException createUnknownInput(String magmaInput) {
+        return new CompileException("Unknown input: " + magmaInput);
+    }
+
+    private static String compileJavaToMagma(String javaInput) throws CompileException {
+        if (javaInput.equals(SIMPLEST_JAVA)) {
+            return "";
+        } else {
+            throw createUnknownInput(javaInput);
+        }
     }
 
     @Test
-    void smallestMagma() {
-        assertEquals("", compileMagmaFromJava(compileJavaFromMagma("")));
+    void invalidMagma() {
+        assertThrows(CompileException.class, () -> compileMagmaToJava("test"));
     }
 
     @Test
-    void smallestJava() {
-        assertEquals(SIMPLEST_JAVA, compileJavaFromMagma(compileMagmaFromJava(SIMPLEST_JAVA)));
+    void invalidJava() {
+        assertThrows(CompileException.class, () -> compileJavaToMagma(""));
+    }
+
+    @Test
+    void smallestMagma() throws CompileException {
+        assertEquals("", compileJavaToMagma(compileMagmaToJava("")));
+    }
+
+    @Test
+    void smallestJava() throws CompileException {
+        assertEquals(SIMPLEST_JAVA, compileMagmaToJava(compileJavaToMagma(SIMPLEST_JAVA)));
     }
 }
