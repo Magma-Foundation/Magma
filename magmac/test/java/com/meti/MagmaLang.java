@@ -1,7 +1,14 @@
 package com.meti;
 
 public class MagmaLang {
+
+    public static final String LET_KEYWORD = "let ";
+
     static String renderMagmaDefinition() {
-        return "let x = 0;";
+        return renderMagmaDefinition("x");
+    }
+
+    static String renderMagmaDefinition(String name) {
+        return LET_KEYWORD + name + " = 0;";
     }
 }
