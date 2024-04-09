@@ -4,16 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static com.meti.JavaLang.renderJavaClass;
-import static com.meti.JavaLang.renderJavaDefinition;
+import static com.meti.JavaLang.*;
 import static com.meti.Lang.renderBlock;
-import static com.meti.MagmaLang.LET_KEYWORD;
-import static com.meti.MagmaLang.renderMagmaDefinition;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.meti.MagmaLang.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-    public static final String TEST_NAME = "Test";
+    public static final String TEST_UPPER_SYMBOL = "Test";
 
     private static String compileMagmaToJava(String namespace, String magmaInput) throws CompileException {
         if (magmaInput.isEmpty()) {
@@ -21,8 +18,29 @@ public class ApplicationTest {
         }
 
         if (magmaInput.startsWith(LET_KEYWORD)) {
-            var name = magmaInput.substring(LET_KEYWORD.length(), magmaInput.indexOf('=')).strip();
-            return renderJavaClass(namespace, renderBlock(renderJavaDefinition(name)));
+            var before = magmaInput.substring(LET_KEYWORD.length(), magmaInput.indexOf('=')).strip();
+            var separator = before.indexOf(':');
+
+            String name;
+            String outputType;
+            if (separator == -1) {
+                name = before;
+                outputType = INT_TYPE;
+            } else {
+                name = before.substring(0, separator).strip();
+                var inputType = before.substring(separator + 1).strip();
+                if (inputType.equals(I64)) {
+                    outputType = LONG_TYPE;
+                } else {
+                    throw new CompileException("Unknown Magma type: " + inputType);
+                }
+            }
+
+            return renderJavaClass(namespace,
+                    renderBlock(
+                            renderJavaDefinition(name, outputType)
+                    )
+            );
         }
 
         throw createUnknownInput(magmaInput);
@@ -46,20 +64,31 @@ public class ApplicationTest {
             var valueSeparator = fieldString.indexOf('=');
             var before = fieldString.substring(0, valueSeparator).strip();
             var nameSeparator = before.lastIndexOf(' ');
+
+            var type = before.substring(0, nameSeparator).strip();
             var name = before.substring(nameSeparator + 1).strip();
-            return renderMagmaDefinition(name);
+
+            if (type.equals(INT_TYPE)) {
+                return renderMagmaDefinitionWithTypeString(name, "");
+            } else {
+                return renderMagmaDefinition(name, I64);
+            }
         } else {
             throw createUnknownInput(javaInput);
         }
     }
 
-    private static void assertJava(String namespace, String content) throws CompileException {
-        assertEquals(content, compileMagmaToJava(namespace, compileJavaToMagma(content)));
+    private static void assertJava(String namespace, String content) {
+        try {
+            assertEquals(content, compileMagmaToJava(namespace, compileJavaToMagma(content)));
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test
     void invalidMagma() {
-        assertThrows(CompileException.class, () -> compileMagmaToJava(TEST_NAME, "test"));
+        assertThrows(CompileException.class, () -> compileMagmaToJava(TEST_UPPER_SYMBOL, "test"));
     }
 
     @Test
@@ -69,18 +98,29 @@ public class ApplicationTest {
 
     @Test
     void magmaSmallest() throws CompileException {
-        assertEquals("", compileJavaToMagma(compileMagmaToJava(TEST_NAME, "")));
+        assertEquals("", compileJavaToMagma(compileMagmaToJava(TEST_UPPER_SYMBOL, "")));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
-    void javaSmallest(String className) throws CompileException {
+    void javaSmallest(String className) {
         assertJava(className, renderJavaClass(className));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void javaField(String name) throws CompileException {
-        assertJava(TEST_NAME, renderJavaClass(TEST_NAME, renderBlock(renderJavaDefinition(name))));
+    void javaField(String name) {
+        assertJava(TEST_UPPER_SYMBOL, renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(renderJavaDefinition(name))));
+    }
+
+    @Test
+    void javaFieldType() {
+        assertJava(TEST_UPPER_SYMBOL,
+                renderJavaClass(TEST_UPPER_SYMBOL,
+                        renderBlock(
+                                renderJavaDefinition("test", JavaLang.LONG_TYPE)
+                        )
+                )
+        );
     }
 }

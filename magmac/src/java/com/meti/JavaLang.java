@@ -2,6 +2,8 @@ package com.meti;
 
 public class JavaLang {
     public static final String CLASS_KEYWORD = "class ";
+    public static final String INT_TYPE = "int";
+    public static final String LONG_TYPE = "long";
 
     static String renderJavaClass(String name) {
         return renderJavaClass(name, Lang.renderBlock());
@@ -16,6 +18,10 @@ public class JavaLang {
     }
 
     static String renderJavaDefinition(String name) {
-        return "int " + name + " = 0;";
+        return renderJavaDefinition(name, INT_TYPE);
+    }
+
+    static String renderJavaDefinition(String name, String type) {
+        return type + " " + name + " = 0;";
     }
 }
