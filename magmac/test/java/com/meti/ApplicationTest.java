@@ -11,27 +11,11 @@ public class ApplicationTest {
     public static final String TEST_NAME = "Test";
     public static final String CLASS_KEYWORD = "class ";
 
-    private static String renderBlock() {
-        return renderBlock("");
-    }
-
-    private static String renderBlock(String fieldString) {
-        return "{" + fieldString + "public static void main(String[] args){}}";
-    }
-
-    private static String renderJavaClass(String name) {
-        return renderJavaClass(name, renderBlock());
-    }
-
-    private static String renderJavaClass(String name, String value) {
-        return CLASS_KEYWORD + name + " " + value;
-    }
-
     private static String compileMagmaToJava(String namespace, String magmaInput) throws CompileException {
         if (magmaInput.isEmpty()) {
-            return renderJavaClass(namespace);
-        } else if (magmaInput.equals(renderMagmaDefinition())) {
-            return renderJavaClass(namespace, renderBlock(renderJavaDefinition()));
+            return JavaLang.renderJavaClass(namespace);
+        } else if (magmaInput.equals(MagmaLang.renderMagmaDefinition())) {
+            return JavaLang.renderJavaClass(namespace, Lang.renderBlock(JavaLang.renderJavaDefinition()));
         } else {
             throw createUnknownInput(magmaInput);
         }
@@ -51,18 +35,10 @@ public class ApplicationTest {
 
             var typeString = contentString.substring(0, separator).strip();
             if (typeString.isEmpty()) return "";
-            else return renderMagmaDefinition();
+            else return MagmaLang.renderMagmaDefinition();
         } else {
             throw createUnknownInput(javaInput);
         }
-    }
-
-    private static String renderMagmaDefinition() {
-        return "let x = 0;";
-    }
-
-    private static String renderJavaDefinition() {
-        return "int value = 0;";
     }
 
     @Test
@@ -83,13 +59,13 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void smallestJava(String className) throws CompileException {
-        var value = renderJavaClass(className);
+        var value = JavaLang.renderJavaClass(className);
         assertEquals(value, compileMagmaToJava(className, compileJavaToMagma(value)));
     }
 
     @Test
     void definition() throws CompileException {
-        var value = renderJavaClass(TEST_NAME, renderBlock(renderJavaDefinition()));
+        var value = JavaLang.renderJavaClass(TEST_NAME, Lang.renderBlock(JavaLang.renderJavaDefinition()));
         assertEquals(value, compileMagmaToJava(TEST_NAME, compileJavaToMagma(value)));
     }
 }
