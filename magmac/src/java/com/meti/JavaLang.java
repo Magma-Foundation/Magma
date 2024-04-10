@@ -13,10 +13,6 @@ public class JavaLang {
         return CLASS_KEYWORD + name + " " + value;
     }
 
-    static String renderJavaDefinition() {
-        return renderJavaDefinition("value");
-    }
-
     static String renderJavaDefinition(String name) {
         return renderJavaDefinition(name, INT_TYPE);
     }
