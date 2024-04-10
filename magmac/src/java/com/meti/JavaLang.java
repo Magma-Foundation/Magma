@@ -18,6 +18,10 @@ public class JavaLang {
     }
 
     static String renderJavaDefinition(String name, String type) {
-        return type + " " + name + " = 0;";
+        return renderJavaDefinition(name, type, "0");
+    }
+
+    static String renderJavaDefinition(String name, String type, String value) {
+        return type + " " + name + " = " + value + ";";
     }
 }
