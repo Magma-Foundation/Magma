@@ -21,28 +21,28 @@ public class MagmaFeatureTest {
     }
 
     private static void assertMagmaFunctionStatements(String definition) {
-        assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(definition)));
+        assertMagma(Lang.renderMagmaFunction(TEST_UPPER_SYMBOL, Lang.renderBlock(definition)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertMagmaFunctionStatements(renderMutableMagmaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
+        assertMagmaFunctionStatements(Lang.renderMutableMagmaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertMagmaFunctionStatements(renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING));
+        assertMagmaFunctionStatements(Lang.renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, Lang.I16_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionValue() {
-        assertMagmaFunctionStatements(renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+        assertMagmaFunctionStatements(Lang.renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, Lang.I16_TYPE, TEST_NUMERIC));
     }
 
     @Test
     void definitionConst() {
-        assertMagmaFunctionStatements(renderMagmaDefinition(CONST_KEYWORD, TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+        assertMagmaFunctionStatements(Lang.renderMagmaDefinition(Lang.CONST_KEYWORD, TEST_LOWER_SYMBOL, Lang.I16_TYPE, TEST_NUMERIC));
     }
 
     @Test
@@ -53,18 +53,18 @@ public class MagmaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void magmaSimple(String name) {
-        assertMagma(renderMagmaFunction(name));
+        assertMagma(Lang.renderMagmaFunction(name));
     }
 
     @Test
     void magmaPublic() {
-        assertMagma(EXPORT_KEYWORD + renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertMagma(Lang.EXPORT_KEYWORD + Lang.renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void multipleDefinitions(int count) {
-        var input = renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING);
+        var input = Lang.renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, Lang.I16_TYPE, TEST_STRING);
         var joinedInput = IntStream.range(0, count)
                 .mapToObj(index -> input)
                 .collect(Collectors.joining());

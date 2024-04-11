@@ -22,7 +22,7 @@ public class JavaFeatureTest {
     }
 
     private static void assertJavaClassContent(String content) {
-        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
+        assertJava(Lang.renderJavaClass(TEST_UPPER_SYMBOL, Lang.renderBlock(content)));
     }
 
     @Test
@@ -33,24 +33,24 @@ public class JavaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void javaSimple(String name) {
-        assertJava(renderJavaClass(name));
+        assertJava(Lang.renderJavaClass(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertJavaClassContent(renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
+        assertJavaClassContent(Lang.renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
+        assertJavaClassContent(Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_STRING));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void multipleDefinitions(int count) {
-        var input = renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING);
+        var input = Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_STRING);
         var joinedInput = IntStream.range(0, count)
                 .mapToObj(index -> input)
                 .collect(Collectors.joining());
@@ -60,16 +60,16 @@ public class JavaFeatureTest {
 
     @Test
     void definitionValue() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
+        assertJavaClassContent(Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
     }
 
     @Test
     void finalDefinition() {
-        assertJavaClassContent(renderJavaDefinition(FINAL_KEYWORD, TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
+        assertJavaClassContent(Lang.renderJavaDefinition(Lang.FINAL_KEYWORD, TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
     }
 
     @Test
     void javaPublic() {
-        assertJava(PUBLIC_KEYWORD + renderJavaClass(TEST_UPPER_SYMBOL));
+        assertJava(Lang.PUBLIC_KEYWORD + Lang.renderJavaClass(TEST_UPPER_SYMBOL));
     }
 }
