@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.Application.*;
 import static com.meti.CompiledTest.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,9 +46,15 @@ public class JavaFeatureTest {
         assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
     }
 
-    @Test
-    void multipleDefinitions() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING) + renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void multipleDefinitions(int count) {
+        var input = renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING);
+        var joinedInput = IntStream.range(0, count)
+                .mapToObj(index -> input)
+                .collect(Collectors.joining());
+
+        assertJavaClassContent(joinedInput);
     }
 
     @Test

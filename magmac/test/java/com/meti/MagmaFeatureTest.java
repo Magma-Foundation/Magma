@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.Application.*;
 import static com.meti.CompiledTest.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,28 +20,24 @@ public class MagmaFeatureTest {
         }
     }
 
-    private static void assertMagmaFunctionStatement(String definition) {
+    private static void assertMagmaFunctionStatements(String definition) {
         assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(definition)));
-    }
-
-    public static String renderMagmaDefinition(String name, String type) {
-        return Application.renderMagmaDefinition(name, type, TEST_STRING);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertMagmaFunctionStatement(renderMagmaDefinition(name, TEST_DEFINITION_TYPE));
+        assertMagmaFunctionStatements(renderMagmaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertMagmaFunctionStatement(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE));
+        assertMagmaFunctionStatements(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionValue() {
-        assertMagmaFunctionStatement(Application.renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+        assertMagmaFunctionStatements(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
     }
 
     @Test
@@ -55,5 +54,16 @@ public class MagmaFeatureTest {
     @Test
     void magmaPublic() {
         assertMagma(EXPORT_KEYWORD + renderMagmaFunction(TEST_UPPER_SYMBOL));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void multipleDefinitions(int count) {
+        var input = renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING);
+        var joinedInput = IntStream.range(0, count)
+                .mapToObj(index -> input)
+                .collect(Collectors.joining());
+
+        assertMagmaFunctionStatements(joinedInput);
     }
 }
