@@ -20,10 +20,12 @@ public class JavaToMagmaCompiler {
         var type = before.substring(0, nameSeparator).strip();
         var name = before.substring(nameSeparator + 1).strip();
 
+        var value = fieldString.substring(valueSeparator + 1).strip();
+
         if (type.equals(JavaLang.INT_TYPE)) {
-            return MagmaLang.renderMagmaDefinitionWithTypeString(name, "");
+            return MagmaLang.renderMagmaDefinitionWithTypeString(name, "", value);
         } else {
-            return MagmaLang.renderMagmaDefinition(name, MagmaLang.I64);
+            return MagmaLang.renderMagmaDefinitionWithTypeString(name, " : " + MagmaLang.I64, value);
         }
     }
 }

@@ -36,7 +36,7 @@ public class MagmaToJavaCompiler {
 
         return Optional.of(JavaLang.renderJavaClass(namespace,
                 Lang.renderBlock(
-                        JavaLang.renderJavaDefinition(name, outputType)
+                        JavaLang.renderJavaDefinition(name, outputType, "0")
                 )
         ));
     }
