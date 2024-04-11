@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.Application.*;
+import static com.meti.CompiledTest.TEST_UPPER_SYMBOL;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MagmaFeatureTest {
@@ -14,6 +15,11 @@ public class MagmaFeatureTest {
         } catch (CompileException e) {
             fail(e);
         }
+    }
+
+    @Test
+    void functionBody() {
+        assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(TEST_MAGMA_DEFINITION)));
     }
 
     @Test
