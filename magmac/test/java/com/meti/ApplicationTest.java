@@ -24,12 +24,10 @@ public class ApplicationTest {
     }
 
     private static String compileJavaToMagma(String input) throws CompileException {
-        if (input.startsWith(CLASS_KEYWORD)) {
-            var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(JAVA_CLASS_BODY));
-            return renderMagmaFunction(name);
-        } else {
-            throw createUnknownInputError(input);
-        }
+        if (!input.startsWith(CLASS_KEYWORD)) throw createUnknownInputError(input);
+
+        var name = input.substring(CLASS_KEYWORD.length(), input.indexOf(JAVA_CLASS_BODY));
+        return renderMagmaFunction(name);
     }
 
     private static CompileException createUnknownInputError(String input) {
@@ -37,12 +35,10 @@ public class ApplicationTest {
     }
 
     private static String compileMagmaToJava(String input) throws CompileException {
-        if (input.startsWith(CLASS_KEYWORD + DEF_KEYWORD)) {
-            var name = input.substring((CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(MAGMA_FUNCTION_BODY));
-            return renderJavaClass(name);
-        } else {
-            throw createUnknownInputError(input);
-        }
+        if (!input.startsWith(CLASS_KEYWORD + DEF_KEYWORD)) throw createUnknownInputError(input);
+
+        var name = input.substring((CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(MAGMA_FUNCTION_BODY));
+        return renderJavaClass(name);
     }
 
     @Test
