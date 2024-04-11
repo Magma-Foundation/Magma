@@ -10,7 +10,6 @@ public class Application {
     public static final String INT_TYPE = "int";
     public static final String VALUE_SEPARATOR = " = ";
     public static final String STATEMENT_END = ";";
-    public static final String PARAM_START = "(";
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16_TYPE = "I16";
@@ -91,7 +90,7 @@ public class Application {
         var prefixIndex = input.indexOf(CLASS_KEYWORD + DEF_KEYWORD);
         if (prefixIndex == -1) throw createUnknownInputError(input);
 
-        var className = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(PARAM_START));
+        var className = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf("("));
         var content = input.substring(input.indexOf('{') + 1, input.lastIndexOf('}'));
 
         var testContent = compileMagmaDefinition(content);
