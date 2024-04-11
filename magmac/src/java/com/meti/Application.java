@@ -1,5 +1,9 @@
 package com.meti;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 public class Application {
     public static final String CLASS_KEYWORD = "class ";
     public static final String DEF_KEYWORD = "def ";
@@ -59,27 +63,33 @@ public class Application {
 
         var className = input.substring(classIndex + CLASS_KEYWORD.length(), blockStart);
         var inputContent = input.substring(blockStart + 1, blockEnd);
-        var content = compileJavaDefinition(inputContent);
+        var content = Arrays.stream(inputContent.split(";"))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(Application::compileJavaDefinition)
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining());
+
         var body = renderBlock(content);
         var rendered = renderMagmaFunction(className, body);
         return input.startsWith(PUBLIC_KEYWORD) ? EXPORT_KEYWORD + rendered : rendered;
     }
 
-    private static String compileJavaDefinition(String inputContent) {
+    private static Optional<String> compileJavaDefinition(String inputContent) {
         var typeNameEnd = inputContent.indexOf(VALUE_SEPARATOR);
-        if (typeNameEnd == -1) return "";
+        if (typeNameEnd == -1) return Optional.empty();
 
         var typeName = inputContent.substring(0, typeNameEnd);
         var separator = typeName.indexOf(' ');
-        if (separator == -1) return "";
+        if (separator == -1) return Optional.empty();
 
         var inputType = typeName.substring(0, separator);
         var outputType = inputType.equals(INT_TYPE) ? I16_TYPE : inputType;
 
         var name = typeName.substring(separator + 1);
-        var value = inputContent.substring(typeNameEnd + VALUE_SEPARATOR.length(), inputContent.lastIndexOf(STATEMENT_END));
+        var value = inputContent.substring(typeNameEnd + VALUE_SEPARATOR.length());
 
-        return renderMagmaDefinition(name, outputType, value);
+        return Optional.of(renderMagmaDefinition(name, outputType, value));
     }
 
     static CompileException createUnknownInputError(String input) {
@@ -91,28 +101,28 @@ public class Application {
         if (prefixIndex == -1) throw createUnknownInputError(input);
 
         var className = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf("("));
-        var content = input.substring(input.indexOf('{') + 1, input.lastIndexOf('}'));
+        var content = Arrays.stream(input.substring(input.indexOf('{') + 1, input.lastIndexOf('}')).split(";"))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(Application::compileMagmaDefinition)
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining());
 
-        var testContent = compileMagmaDefinition(content);
-
-        var rendered = renderJavaClass(className, renderBlock(testContent));
+        var rendered = renderJavaClass(className, renderBlock(content));
         return input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD + rendered : rendered;
     }
 
-    private static String compileMagmaDefinition(String content) {
-        if (content.startsWith(LET_KEYWORD)) {
-            var typeSeparator = content.indexOf(MAGMA_TYPE_SEPARATOR);
+    private static Optional<String> compileMagmaDefinition(String content) {
+        if (!content.startsWith(LET_KEYWORD)) return Optional.empty();
 
-            var functionName = content.substring(LET_KEYWORD.length(), typeSeparator);
+        var typeSeparator = content.indexOf(MAGMA_TYPE_SEPARATOR);
+        var functionName = content.substring(LET_KEYWORD.length(), typeSeparator);
 
-            var valueSeparator = content.indexOf(VALUE_SEPARATOR);
-            var inputType = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), valueSeparator);
-            var outputType = inputType.equals(I16_TYPE) ? INT_TYPE : inputType;
+        var valueSeparator = content.indexOf(VALUE_SEPARATOR);
+        var inputType = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), valueSeparator);
+        var outputType = inputType.equals(I16_TYPE) ? INT_TYPE : inputType;
 
-            var value = content.substring(valueSeparator + VALUE_SEPARATOR.length(), content.lastIndexOf(STATEMENT_END));
-            return renderJavaDefinition(functionName, outputType, value);
-        } else {
-            return "";
-        }
+        var value = content.substring(valueSeparator + VALUE_SEPARATOR.length());
+        return Optional.of(renderJavaDefinition(functionName, outputType, value));
     }
 }

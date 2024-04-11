@@ -17,8 +17,8 @@ public class JavaFeatureTest {
         }
     }
 
-    public static String renderJavaDefinition(String name, String type) {
-        return Application.renderJavaDefinition(name, type, TEST_STRING);
+    private static void assertJavaClassContent(String content) {
+        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
     }
 
     @Test
@@ -35,21 +35,22 @@ public class JavaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertJavaClassMember(renderJavaDefinition(name, CompiledTest.TEST_DEFINITION_TYPE));
-    }
-
-    private static void assertJavaClassMember(String content) {
-        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
+        assertJavaClassContent(renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertJavaClassMember(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE));
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
+    }
+
+    @Test
+    void multipleDefinitions() {
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING) + renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionValue() {
-        assertJavaClassMember(Application.renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
     }
 
     @Test
