@@ -16,16 +16,12 @@ public class ApplicationTest {
     public static final String EXPORT_KEYWORD = "export ";
     public static final String PUBLIC_KEYWORD = "public ";
 
-    private static String renderJavaClass(String publicString, String name) {
-        return publicString + CLASS_KEYWORD + name + JAVA_CLASS_BODY;
+    private static String renderJavaClass(String name) {
+        return CLASS_KEYWORD + name + JAVA_CLASS_BODY;
     }
 
     private static String renderMagmaFunction(String name) {
-        return renderMagmaFunction("", name);
-    }
-
-    private static String renderMagmaFunction(String exportString, String name) {
-        return exportString + CLASS_KEYWORD + DEF_KEYWORD + name + MAGMA_FUNCTION_BODY;
+        return CLASS_KEYWORD + DEF_KEYWORD + name + MAGMA_FUNCTION_BODY;
     }
 
     private static String compileJavaToMagma(String input) throws CompileException {
@@ -33,9 +29,9 @@ public class ApplicationTest {
         if (classIndex == -1) throw createUnknownInputError(input);
 
         var name = input.substring(classIndex + CLASS_KEYWORD.length(), input.indexOf(JAVA_CLASS_BODY));
-        var exportString = input.startsWith(PUBLIC_KEYWORD) ? EXPORT_KEYWORD : "";
+        var rendered = renderMagmaFunction(name);
 
-        return renderMagmaFunction(exportString, name);
+        return input.startsWith(PUBLIC_KEYWORD) ? EXPORT_KEYWORD + rendered : rendered;
     }
 
     private static CompileException createUnknownInputError(String input) {
@@ -47,9 +43,9 @@ public class ApplicationTest {
         if (prefixIndex == -1) throw createUnknownInputError(input);
 
         var name = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(MAGMA_FUNCTION_BODY));
-        var publicString = input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD : "";
+        var rendered = renderJavaClass(name);
 
-        return renderJavaClass(publicString, name);
+        return input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD + rendered : rendered;
     }
 
     private static void assertMagma(String input) {
@@ -86,17 +82,17 @@ public class ApplicationTest {
 
     @Test
     void magmaPublic() {
-        assertMagma(renderMagmaFunction(EXPORT_KEYWORD, TEST_UPPER_SYMBOL));
+        assertMagma(EXPORT_KEYWORD + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void javaSimple(String name) {
-        assertJava(renderJavaClass("", name));
+        assertJava(renderJavaClass(name));
     }
 
     @Test
     void javaPublic() {
-        assertJava(renderJavaClass(PUBLIC_KEYWORD, TEST_UPPER_SYMBOL));
+        assertJava(PUBLIC_KEYWORD + renderJavaClass(TEST_UPPER_SYMBOL));
     }
 }
