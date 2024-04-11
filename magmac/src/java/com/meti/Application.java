@@ -9,7 +9,6 @@ public class Application {
     public static final String PUBLIC_KEYWORD = "public ";
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
-    public static final String TEST_DEFINITION_NAME = "TEST_UPPER_SYMBOL";
     public static final String TEST_DEFINITION_TYPE = "String";
     public static final String TEST_JAVA_DEFINITION_PREFIX = TEST_DEFINITION_TYPE + " ";
     public static final String TEST_DEFINITION_SUFFIX = " = \"Main\";";
