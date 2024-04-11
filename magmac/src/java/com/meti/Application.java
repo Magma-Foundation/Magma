@@ -15,7 +15,6 @@ public class Application {
     public static final String TEST_DEFINITION_SUFFIX = " = \"Main\";";
     public static final String TEST_MAGMA_DEFINITION_SUFFIX = " : " + TEST_DEFINITION_TYPE + TEST_DEFINITION_SUFFIX;
     public static final String PARAM_START = "(";
-    public static final String PARAM_END = ")";
     public static final String LET_KEYWORD = "let ";
 
     public static String renderMagmaDefinition(String name) {
