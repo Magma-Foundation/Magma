@@ -31,7 +31,7 @@ public class MagmaFeatureTest {
 
     @Test
     void definitionType() {
-        assertMagmaFunctionStatement(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16));
+        assertMagmaFunctionStatement(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE));
     }
 
     @Test

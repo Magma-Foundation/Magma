@@ -14,7 +14,7 @@ public class Application {
     public static final String PARAM_START = "(";
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
-    public static final String I16 = "I16";
+    public static final String I16_TYPE = "I16";
 
     public static String renderMagmaDefinition(String name, String type) {
         return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + TEST_DEFINITION_SUFFIX;
@@ -71,10 +71,12 @@ public class Application {
         var separator = typeName.indexOf(' ');
         if(separator == -1) return "";
 
-        var type = typeName.substring(0, separator);
+        var inputType = typeName.substring(0, separator);
+        var outputType = inputType.equals(INT_TYPE) ? I16_TYPE : inputType;
+
         var name = typeName.substring(separator + 1);
 
-        return renderMagmaDefinition(name, type);
+        return renderMagmaDefinition(name, outputType);
     }
 
     static CompileException createUnknownInputError(String input) {
@@ -99,9 +101,10 @@ public class Application {
             var typeSeparator = content.indexOf(MAGMA_TYPE_SEPARATOR);
 
             var functionName = content.substring(LET_KEYWORD.length(), typeSeparator);
-            var type = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), content.indexOf(TEST_DEFINITION_SUFFIX));
+            var inputType = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), content.indexOf(TEST_DEFINITION_SUFFIX));
+            var outputType = inputType.equals(I16_TYPE) ? INT_TYPE : inputType;
 
-            return renderJavaDefinition(functionName, type);
+            return renderJavaDefinition(functionName, outputType);
         } else {
             return "";
         }
