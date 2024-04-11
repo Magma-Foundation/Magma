@@ -26,7 +26,7 @@ public class MagmaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertMagmaFunctionStatement(renderMagmaDefinition(name));
+        assertMagmaFunctionStatement(renderMagmaDefinition(name, CompiledTest.TEST_DEFINITION_TYPE));
     }
 
     @Test

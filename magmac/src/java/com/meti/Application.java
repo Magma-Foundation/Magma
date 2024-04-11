@@ -9,7 +9,6 @@ public class Application {
     public static final String PUBLIC_KEYWORD = "public ";
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
-    public static final String TEST_DEFINITION_TYPE = "String";
     public static final String INT_TYPE = "int";
     public static final String TEST_DEFINITION_SUFFIX = " = \"Main\";";
     public static final String PARAM_START = "(";
@@ -17,16 +16,8 @@ public class Application {
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16 = "I16";
 
-    public static String renderMagmaDefinition(String name) {
-        return renderMagmaDefinition(name, TEST_DEFINITION_TYPE);
-    }
-
     public static String renderMagmaDefinition(String name, String type) {
         return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + TEST_DEFINITION_SUFFIX;
-    }
-
-    public static String renderJavaDefinition(String name) {
-        return renderJavaDefinition(name, TEST_DEFINITION_TYPE);
     }
 
     public static String renderJavaDefinition(String name, String type) {

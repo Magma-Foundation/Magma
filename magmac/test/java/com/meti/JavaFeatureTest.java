@@ -32,7 +32,7 @@ public class JavaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertJavaClassMember(renderJavaDefinition(name));
+        assertJavaClassMember(renderJavaDefinition(name, CompiledTest.TEST_DEFINITION_TYPE));
     }
 
     private static void assertJavaClassMember(String content) {
