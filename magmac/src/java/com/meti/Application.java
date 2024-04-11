@@ -17,14 +17,6 @@ public class Application {
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16 = "I16";
 
-    public static String renderJavaDefinitionPrefix(String type) {
-        return type + " ";
-    }
-
-    public static String renderMagmaDefinitionSuffix(String type) {
-        return MAGMA_TYPE_SEPARATOR + type + TEST_DEFINITION_SUFFIX;
-    }
-
     public static String renderMagmaDefinition(String name) {
         return renderMagmaDefinition(name, TEST_DEFINITION_TYPE);
     }
