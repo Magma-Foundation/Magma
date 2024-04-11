@@ -17,17 +17,27 @@ public class Application {
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16_TYPE = "I16";
+    public static final String FINAL_KEYWORD = "final ";
+    public static final String CONST_KEYWORD = "const ";
 
     public static String renderDefinitionSuffix(String value) {
         return VALUE_SEPARATOR + value + STATEMENT_END;
     }
 
-    public static String renderMagmaDefinition(String name, String type, String value) {
-        return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + renderDefinitionSuffix(value);
+    public static String renderMutableMagmaDefinition(String name, String type, String value) {
+        return renderMagmaDefinition(LET_KEYWORD, name, type, value);
+    }
+
+    public static String renderMagmaDefinition(String mutabilityModifier, String name, String type, String value) {
+        return mutabilityModifier + name + MAGMA_TYPE_SEPARATOR + type + renderDefinitionSuffix(value);
     }
 
     public static String renderJavaDefinition(String name, String type, String value) {
-        return type + " " + name + renderDefinitionSuffix(value);
+        return renderJavaDefinition("", name, type, value);
+    }
+
+    public static String renderJavaDefinition(String finalString, String name, String type, String value) {
+        return finalString + type + " " + name + renderDefinitionSuffix(value);
     }
 
     public static String renderBlock() {
@@ -89,7 +99,7 @@ public class Application {
         var name = typeName.substring(separator + 1);
         var value = inputContent.substring(typeNameEnd + VALUE_SEPARATOR.length());
 
-        return Optional.of(renderMagmaDefinition(name, outputType, value));
+        return Optional.of(renderMutableMagmaDefinition(name, outputType, value));
     }
 
     static CompileException createUnknownInputError(String input) {

@@ -27,17 +27,22 @@ public class MagmaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertMagmaFunctionStatements(renderMagmaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
+        assertMagmaFunctionStatements(renderMutableMagmaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertMagmaFunctionStatements(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING));
+        assertMagmaFunctionStatements(renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionValue() {
-        assertMagmaFunctionStatements(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+        assertMagmaFunctionStatements(renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+    }
+
+    @Test
+    void definitionConst() {
+        assertMagmaFunctionStatements(renderMagmaDefinition(CONST_KEYWORD, TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
     }
 
     @Test
@@ -59,7 +64,7 @@ public class MagmaFeatureTest {
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void multipleDefinitions(int count) {
-        var input = renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING);
+        var input = renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING);
         var joinedInput = IntStream.range(0, count)
                 .mapToObj(index -> input)
                 .collect(Collectors.joining());
