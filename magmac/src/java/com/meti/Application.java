@@ -11,11 +11,20 @@ public class Application {
     public static final String BLOCK_END = "}";
     public static final String TEST_DEFINITION_NAME = "TEST_UPPER_SYMBOL";
     public static final String TEST_DEFINITION_TYPE = "String";
+    public static final String TEST_JAVA_DEFINITION_PREFIX = TEST_DEFINITION_TYPE + " ";
     public static final String TEST_DEFINITION_SUFFIX = " = \"Main\";";
-    public static final String TEST_MAGMA_DEFINITION = "let " + TEST_DEFINITION_NAME + " : " + TEST_DEFINITION_TYPE + TEST_DEFINITION_SUFFIX;
-    public static final String TEST_JAVA_DEFINITION = TEST_DEFINITION_TYPE + " " + TEST_DEFINITION_NAME + TEST_DEFINITION_SUFFIX;
+    public static final String TEST_MAGMA_DEFINITION_SUFFIX = " : " + TEST_DEFINITION_TYPE + TEST_DEFINITION_SUFFIX;
     public static final String PARAM_START = "(";
     public static final String PARAM_END = ")";
+    public static final String LET_KEYWORD = "let ";
+
+    public static String renderMagmaDefinition(String name) {
+        return LET_KEYWORD + name + " : " + TEST_DEFINITION_TYPE + TEST_DEFINITION_SUFFIX;
+    }
+
+    public static String renderJavaDefinition(String name) {
+        return TEST_DEFINITION_TYPE + " " + name + TEST_DEFINITION_SUFFIX;
+    }
 
     public static String renderBlock() {
         return renderBlock("");
@@ -48,11 +57,18 @@ public class Application {
         var blockStart = input.indexOf(BLOCK_START);
         var blockEnd = input.lastIndexOf(BLOCK_END);
 
-        var name = input.substring(classIndex + CLASS_KEYWORD.length(), blockStart);
-        var content = input.substring(blockStart + 1, blockEnd).equals(TEST_JAVA_DEFINITION) ? TEST_MAGMA_DEFINITION : "";
+        var className = input.substring(classIndex + CLASS_KEYWORD.length(), blockStart);
+        String content;
+        var inputContent = input.substring(blockStart + 1, blockEnd);
+        if (inputContent.startsWith(TEST_JAVA_DEFINITION_PREFIX)) {
+            var definitionName = inputContent.substring(TEST_JAVA_DEFINITION_PREFIX.length(), inputContent.indexOf(TEST_DEFINITION_SUFFIX));
+            content = renderMagmaDefinition(definitionName);
+        } else {
+            content = "";
+        }
 
         var body = renderBlock(content);
-        var rendered = renderMagmaFunction(name, body);
+        var rendered = renderMagmaFunction(className, body);
         return input.startsWith(PUBLIC_KEYWORD) ? EXPORT_KEYWORD + rendered : rendered;
     }
 
@@ -64,17 +80,18 @@ public class Application {
         var prefixIndex = input.indexOf(CLASS_KEYWORD + DEF_KEYWORD);
         if (prefixIndex == -1) throw createUnknownInputError(input);
 
-        var name = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(PARAM_START));
+        var className = input.substring(prefixIndex + (CLASS_KEYWORD + DEF_KEYWORD).length(), input.indexOf(PARAM_START));
         var content = input.substring(input.indexOf('{') + 1, input.lastIndexOf('}'));
 
         String testContent;
-        if (content.equals(TEST_MAGMA_DEFINITION)) {
-            testContent = TEST_JAVA_DEFINITION;
+        if (content.startsWith(LET_KEYWORD)) {
+            var functionName = content.substring(LET_KEYWORD.length(), content.indexOf(TEST_MAGMA_DEFINITION_SUFFIX));
+            testContent = renderJavaDefinition(functionName);
         } else {
             testContent = "";
         }
 
-        var rendered = renderJavaClass(name, renderBlock(testContent));
+        var rendered = renderJavaClass(className, renderBlock(testContent));
         return input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD + rendered : rendered;
     }
 }

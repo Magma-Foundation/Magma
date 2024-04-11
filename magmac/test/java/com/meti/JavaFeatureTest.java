@@ -29,9 +29,10 @@ public class JavaFeatureTest {
         assertJava(renderJavaClass(name));
     }
 
-    @Test
-    void functionBody() {
-        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(TEST_JAVA_DEFINITION)));
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void definitionName(String name) {
+        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(renderJavaDefinition(name))));
     }
 
     @Test

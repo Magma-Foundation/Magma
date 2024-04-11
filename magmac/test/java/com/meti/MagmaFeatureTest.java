@@ -17,9 +17,10 @@ public class MagmaFeatureTest {
         }
     }
 
-    @Test
-    void functionBody() {
-        assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(TEST_MAGMA_DEFINITION)));
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void definitionName(String name) {
+        assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(renderMagmaDefinition(name))));
     }
 
     @Test
