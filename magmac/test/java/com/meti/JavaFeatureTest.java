@@ -17,6 +17,10 @@ public class JavaFeatureTest {
         }
     }
 
+    public static String renderJavaDefinition(String name, String type) {
+        return Application.renderJavaDefinition(name, type, TEST_STRING);
+    }
+
     @Test
     void javaInvalid() {
         assertThrows(CompileException.class, () -> compileJavaToMagma(""));
@@ -45,7 +49,7 @@ public class JavaFeatureTest {
 
     @Test
     void definitionValue() {
-        assertJavaClassMember(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
+        assertJavaClassMember(Application.renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
     }
 
     @Test

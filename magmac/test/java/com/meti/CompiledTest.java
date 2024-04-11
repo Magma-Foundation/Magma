@@ -5,4 +5,5 @@ public class CompiledTest {
     public static final String TEST_LOWER_SYMBOL = "test";
     public static final String TEST_DEFINITION_TYPE = "String";
     public static final String TEST_NUMERIC = "0";
+    public static final String TEST_STRING = "\"Main\"";
 }

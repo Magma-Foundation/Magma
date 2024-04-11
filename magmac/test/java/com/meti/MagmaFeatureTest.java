@@ -21,6 +21,10 @@ public class MagmaFeatureTest {
         assertMagma(renderMagmaFunction(TEST_UPPER_SYMBOL, renderBlock(definition)));
     }
 
+    public static String renderMagmaDefinition(String name, String type) {
+        return Application.renderMagmaDefinition(name, type, TEST_STRING);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
@@ -34,7 +38,7 @@ public class MagmaFeatureTest {
 
     @Test
     void definitionValue() {
-        assertMagmaFunctionStatement(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+        assertMagmaFunctionStatement(Application.renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
     }
 
     @Test

@@ -3,36 +3,24 @@ package com.meti;
 public class Application {
     public static final String CLASS_KEYWORD = "class ";
     public static final String DEF_KEYWORD = "def ";
-    public static final String MAGMA_FUNCTION_BODY_PREFIX = "() => ";
-    public static final String MAGMA_FUNCTION_BODY = MAGMA_FUNCTION_BODY_PREFIX + "{}";
     public static final String EXPORT_KEYWORD = "export ";
     public static final String PUBLIC_KEYWORD = "public ";
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
     public static final String INT_TYPE = "int";
-    public static final String TEST_DEFINITION_VALUE = "\"Main\"";
     public static final String VALUE_SEPARATOR = " = ";
     public static final String STATEMENT_END = ";";
-
-    public static String renderDefinitionSuffix(String value) {
-        return VALUE_SEPARATOR + value + STATEMENT_END;
-    }
-
     public static final String PARAM_START = "(";
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16_TYPE = "I16";
 
-    public static String renderMagmaDefinition(String name, String type) {
-        return renderMagmaDefinition(name, type, TEST_DEFINITION_VALUE);
+    public static String renderDefinitionSuffix(String value) {
+        return VALUE_SEPARATOR + value + STATEMENT_END;
     }
 
     public static String renderMagmaDefinition(String name, String type, String value) {
         return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + renderDefinitionSuffix(value);
-    }
-
-    public static String renderJavaDefinition(String name, String type) {
-        return renderJavaDefinition(name, type, TEST_DEFINITION_VALUE);
     }
 
     public static String renderJavaDefinition(String name, String type, String value) {
@@ -60,7 +48,7 @@ public class Application {
     }
 
     static String renderMagmaFunction(String name, String body) {
-        return CLASS_KEYWORD + DEF_KEYWORD + name + MAGMA_FUNCTION_BODY_PREFIX + body;
+        return CLASS_KEYWORD + DEF_KEYWORD + name + "() => " + body;
     }
 
     static String compileJavaToMagma(String input) throws CompileException {
@@ -80,11 +68,11 @@ public class Application {
 
     private static String compileJavaDefinition(String inputContent) {
         var typeNameEnd = inputContent.indexOf(VALUE_SEPARATOR);
-        if(typeNameEnd == -1) return "";
+        if (typeNameEnd == -1) return "";
 
         var typeName = inputContent.substring(0, typeNameEnd);
         var separator = typeName.indexOf(' ');
-        if(separator == -1) return "";
+        if (separator == -1) return "";
 
         var inputType = typeName.substring(0, separator);
         var outputType = inputType.equals(INT_TYPE) ? I16_TYPE : inputType;
