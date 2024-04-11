@@ -5,8 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.Application.*;
-import static com.meti.CompiledTest.TEST_LOWER_SYMBOL;
-import static com.meti.CompiledTest.TEST_UPPER_SYMBOL;
+import static com.meti.CompiledTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JavaFeatureTest {
@@ -42,6 +41,11 @@ public class JavaFeatureTest {
     @Test
     void definitionType() {
         assertJavaClassMember(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE));
+    }
+
+    @Test
+    void definitionValue() {
+        assertJavaClassMember(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
     }
 
     @Test

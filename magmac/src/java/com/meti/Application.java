@@ -10,18 +10,33 @@ public class Application {
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
     public static final String INT_TYPE = "int";
-    public static final String TEST_DEFINITION_SUFFIX = " = \"Main\";";
+    public static final String TEST_DEFINITION_VALUE = "\"Main\"";
+    public static final String VALUE_SEPARATOR = " = ";
+    public static final String STATEMENT_END = ";";
+
+    public static String renderDefinitionSuffix(String value) {
+        return VALUE_SEPARATOR + value + STATEMENT_END;
+    }
+
     public static final String PARAM_START = "(";
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16_TYPE = "I16";
 
     public static String renderMagmaDefinition(String name, String type) {
-        return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + TEST_DEFINITION_SUFFIX;
+        return renderMagmaDefinition(name, type, TEST_DEFINITION_VALUE);
+    }
+
+    public static String renderMagmaDefinition(String name, String type, String value) {
+        return LET_KEYWORD + name + MAGMA_TYPE_SEPARATOR + type + renderDefinitionSuffix(value);
     }
 
     public static String renderJavaDefinition(String name, String type) {
-        return type + " " + name + TEST_DEFINITION_SUFFIX;
+        return renderJavaDefinition(name, type, TEST_DEFINITION_VALUE);
+    }
+
+    public static String renderJavaDefinition(String name, String type, String value) {
+        return type + " " + name + renderDefinitionSuffix(value);
     }
 
     public static String renderBlock() {
@@ -64,7 +79,7 @@ public class Application {
     }
 
     private static String compileJavaDefinition(String inputContent) {
-        var typeNameEnd = inputContent.indexOf(TEST_DEFINITION_SUFFIX);
+        var typeNameEnd = inputContent.indexOf(VALUE_SEPARATOR);
         if(typeNameEnd == -1) return "";
 
         var typeName = inputContent.substring(0, typeNameEnd);
@@ -75,8 +90,9 @@ public class Application {
         var outputType = inputType.equals(INT_TYPE) ? I16_TYPE : inputType;
 
         var name = typeName.substring(separator + 1);
+        var value = inputContent.substring(typeNameEnd + VALUE_SEPARATOR.length(), inputContent.lastIndexOf(STATEMENT_END));
 
-        return renderMagmaDefinition(name, outputType);
+        return renderMagmaDefinition(name, outputType, value);
     }
 
     static CompileException createUnknownInputError(String input) {
@@ -101,10 +117,13 @@ public class Application {
             var typeSeparator = content.indexOf(MAGMA_TYPE_SEPARATOR);
 
             var functionName = content.substring(LET_KEYWORD.length(), typeSeparator);
-            var inputType = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), content.indexOf(TEST_DEFINITION_SUFFIX));
+
+            var valueSeparator = content.indexOf(VALUE_SEPARATOR);
+            var inputType = content.substring(typeSeparator + MAGMA_TYPE_SEPARATOR.length(), valueSeparator);
             var outputType = inputType.equals(I16_TYPE) ? INT_TYPE : inputType;
 
-            return renderJavaDefinition(functionName, outputType);
+            var value = content.substring(valueSeparator + VALUE_SEPARATOR.length(), content.lastIndexOf(STATEMENT_END));
+            return renderJavaDefinition(functionName, outputType, value);
         } else {
             return "";
         }

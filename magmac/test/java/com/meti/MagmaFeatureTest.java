@@ -5,12 +5,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.Application.*;
-import static com.meti.CompiledTest.TEST_LOWER_SYMBOL;
-import static com.meti.CompiledTest.TEST_UPPER_SYMBOL;
+import static com.meti.CompiledTest.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MagmaFeatureTest {
-
     private static void assertMagma(String input) {
         try {
             assertEquals(input, compileJavaToMagma(compileMagmaToJava(input)));
@@ -26,7 +24,7 @@ public class MagmaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertMagmaFunctionStatement(renderMagmaDefinition(name, CompiledTest.TEST_DEFINITION_TYPE));
+        assertMagmaFunctionStatement(renderMagmaDefinition(name, TEST_DEFINITION_TYPE));
     }
 
     @Test
@@ -35,8 +33,13 @@ public class MagmaFeatureTest {
     }
 
     @Test
+    void definitionValue() {
+        assertMagmaFunctionStatement(renderMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_NUMERIC));
+    }
+
+    @Test
     void magmaInvalid() {
-        assertThrows(CompileException.class, () -> compileMagmaToJava(CompiledTest.TEST_UPPER_SYMBOL));
+        assertThrows(CompileException.class, () -> compileMagmaToJava(TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
@@ -47,6 +50,6 @@ public class MagmaFeatureTest {
 
     @Test
     void magmaPublic() {
-        assertMagma(EXPORT_KEYWORD + renderMagmaFunction(CompiledTest.TEST_UPPER_SYMBOL));
+        assertMagma(EXPORT_KEYWORD + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 }
