@@ -65,7 +65,7 @@ public class JavaFeatureTest {
 
     @Test
     void finalDefinition() {
-        assertJavaClassContent(Lang.renderJavaDefinition(Lang.FINAL_KEYWORD, TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
+        assertJavaClassContent(Lang.renderJavaDefinition(Lang.FINAL_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
     }
 
     @Test

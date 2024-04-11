@@ -13,7 +13,8 @@ public class Lang {
     public static final String LET_KEYWORD = "let ";
     public static final String MAGMA_TYPE_SEPARATOR = " : ";
     public static final String I16_TYPE = "I16";
-    public static final String FINAL_KEYWORD = "final ";
+    public static final String FINAL_KEYWORD = "final";
+    public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
     public static final String CONST_KEYWORD = "const ";
 
     public static String renderDefinitionSuffix(String value) {
