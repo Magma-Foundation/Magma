@@ -1,7 +1,5 @@
 package com.meti;
 
-import java.util.List;
-
 public class Lang {
     public static final String CLASS_KEYWORD = "class ";
     public static final String DEF_KEYWORD = "def ";
@@ -22,6 +20,9 @@ public class Lang {
     public static final String CONST_KEYWORD = "const";
     public static final String CONST_KEYWORD_WITH_SPACE = CONST_KEYWORD + " ";
     public static final String PUB_KEYWORD_WITH_SPACE = PUB_KEYWORD + " ";
+    public static final String STATIC_KEYWORD = "static";
+    public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
+    public static final String OBJECT_KEYWORD = "object";
 
     public static String renderDefinitionSuffix(String value) {
         return VALUE_SEPARATOR + value + STATEMENT_END;
@@ -40,15 +41,7 @@ public class Lang {
     }
 
     public static String renderJavaDefinition(String name, String type, String value) {
-        return renderJavaDefinition(name, type, value, "");
-    }
-
-    public static String renderJavaDefinition(String name, String type, String value, List<String> flags) {
-        return renderJavaDefinition(name, type, value, flags.isEmpty() ? "" : (String.join(" ", flags) + " "));
-    }
-
-    public static String renderJavaDefinition(String name, String type, String value, String finalString) {
-        return finalString + type + " " + name + renderDefinitionSuffix(value);
+        return JavaDefinition.render(name, type, value, "");
     }
 
     public static String renderBlock() {
@@ -73,5 +66,9 @@ public class Lang {
 
     static String renderMagmaFunction(String name, String body) {
         return CLASS_KEYWORD + DEF_KEYWORD + name + "() => " + body;
+    }
+
+    static String renderObject(String className, String staticContent) {
+        return OBJECT_KEYWORD + " " + className + "{" + staticContent + "}";
     }
 }

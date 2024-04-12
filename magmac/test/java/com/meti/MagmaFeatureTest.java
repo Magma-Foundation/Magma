@@ -65,6 +65,12 @@ public class MagmaFeatureTest {
     }
 
     @Test
+    void magmaObject() {
+        var input = renderObject(TEST_UPPER_SYMBOL, renderMutableMagmaDefinition(TEST_LOWER_SYMBOL, I16_TYPE, TEST_STRING)) + renderMagmaFunction(TEST_UPPER_SYMBOL);
+        assertMagma(input);
+    }
+
+    @Test
     void magmaPublic() {
         assertMagma(EXPORT_KEYWORD + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }

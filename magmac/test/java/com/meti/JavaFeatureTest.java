@@ -14,7 +14,6 @@ import static com.meti.Lang.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JavaFeatureTest {
-
     private static void assertJava(String input) {
         try {
             assertEquals(input, compileMagmaToJava(compileJavaToMagma(input)));
@@ -67,12 +66,17 @@ public class JavaFeatureTest {
 
     @Test
     void definitionFinal() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, FINAL_KEYWORD_WITH_SPACE));
+        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, FINAL_KEYWORD_WITH_SPACE));
     }
 
     @Test
     void definitionPublic() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, PUBLIC_KEYWORD_WITH_SPACE));
+        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, PUBLIC_KEYWORD_WITH_SPACE));
+    }
+
+    @Test
+    void definitionStatic() {
+        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, STATIC_KEYWORD_WITH_SPACE));
     }
 
     @Test
