@@ -5,28 +5,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.meti.Application.compileJavaToMagma;
 import static com.meti.Application.compileMagmaToJava;
-import static com.meti.CompiledTest.*;
+import static com.meti.CompiledTest.TEST_UPPER_SYMBOL;
 import static com.meti.Lang.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JavaFeatureTest {
-    private static void assertJava(String input) {
-        try {
-            assertEquals(input, compileMagmaToJava(compileJavaToMagma(input)));
-        } catch (CompileException e) {
-            fail(e);
-        }
-    }
-
-    private static void assertJavaClassContent(String content) {
-        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
-    }
-
     @Test
     void javaPackage() throws CompileException {
         var namespace = List.of("com", "meti");
@@ -51,53 +38,11 @@ public class JavaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void javaSimple(String name) {
-        assertJava(renderJavaClass(name));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"first", "second"})
-    void definitionName(String name) {
-        assertJavaClassContent(renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
-    }
-
-    @Test
-    void definitionType() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {2, 3})
-    void multipleDefinitions(int count) {
-        var input = renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING);
-        var joinedInput = IntStream.range(0, count)
-                .mapToObj(index -> input)
-                .collect(Collectors.joining());
-
-        assertJavaClassContent(joinedInput);
-    }
-
-    @Test
-    void definitionValue() {
-        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
-    }
-
-    @Test
-    void definitionFinal() {
-        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, FINAL_KEYWORD_WITH_SPACE));
-    }
-
-    @Test
-    void definitionPublic() {
-        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, PUBLIC_KEYWORD_WITH_SPACE));
-    }
-
-    @Test
-    void definitionStatic() {
-        assertJavaClassContent(JavaDefinition.render(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, STATIC_KEYWORD_WITH_SPACE));
+        JavaTest.assertJava(renderJavaClass(name));
     }
 
     @Test
     void javaPublic() {
-        assertJava(PUBLIC_KEYWORD_WITH_SPACE + renderJavaClass(TEST_UPPER_SYMBOL));
+        JavaTest.assertJava(PUBLIC_KEYWORD_WITH_SPACE + renderJavaClass(TEST_UPPER_SYMBOL));
     }
 }
