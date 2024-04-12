@@ -71,4 +71,8 @@ public class Lang {
     static String renderObject(String className, String staticContent) {
         return OBJECT_KEYWORD + " " + className + "{" + staticContent + "}";
     }
+
+    static String renderPackage(String name) {
+        return "package " + name + ";";
+    }
 }

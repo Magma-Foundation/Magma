@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,6 +25,18 @@ public class JavaFeatureTest {
 
     private static void assertJavaClassContent(String content) {
         assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void javaPackage(String name) {
+        String input = renderPackage(name) + renderJavaClass(TEST_UPPER_SYMBOL);
+        try {
+            String input1 = compileJavaToMagma(input);
+            assertEquals(input, compileMagmaToJava(input1, List.of(name)));
+        } catch (CompileException e) {
+            fail(e);
+        }
     }
 
     @Test

@@ -7,6 +7,18 @@ import static com.meti.Lang.*;
 
 public class Application {
     static String compileJavaToMagma(String input) throws CompileException {
+        var classStart = input.indexOf(CLASS_KEYWORD);
+        if(classStart == -1) throw createUnknownInputError(input);
+
+        var separator = input.substring(0, classStart).indexOf(';');
+        if (separator == -1) {
+            return compileClass(input);
+        } else {
+            return compileClass(input.substring(separator + 1));
+        }
+    }
+
+    private static String compileClass(String input) throws CompileException {
         var classIndex = input.indexOf(CLASS_KEYWORD);
         if (classIndex == -1) throw createUnknownInputError(input);
 
@@ -77,6 +89,10 @@ public class Application {
     }
 
     static String compileMagmaToJava(String input) throws CompileException {
+        return compileMagmaToJava(input, Collections.emptyList());
+    }
+
+    static String compileMagmaToJava(String input, List<String> namespace) throws CompileException {
         var prefixIndex = input.indexOf(CLASS_KEYWORD + DEF_KEYWORD);
         if (prefixIndex == -1) throw createUnknownInputError(input);
         List<JavaDefinition> staticMembers;
@@ -112,7 +128,10 @@ public class Application {
 
         var renderedMembers = copy.stream().map(JavaDefinition::render).collect(Collectors.joining());
         var rendered = renderJavaClass(className, renderBlock(renderedMembers));
-        return input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD_WITH_SPACE + rendered : rendered;
+
+        var renderedClass = input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD_WITH_SPACE + rendered : rendered;
+        var packageString = namespace.isEmpty() ? "" : renderPackage(namespace.get(0));
+        return packageString + renderedClass;
     }
 
     private static Optional<JavaDefinition> compileMagmaDefinition(String content) {
