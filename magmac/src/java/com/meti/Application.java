@@ -36,9 +36,9 @@ public class Application {
         var staticContent = members.stream()
                 .map(Member::staticValue)
                 .flatMap(Optional::stream)
-                .collect(Collectors.joining());
+                .collect(Collectors.toList());
 
-        var renderedStatic = staticContent.isEmpty() ? "" : renderObject(className, staticContent);
+        var renderedStatic = staticContent.isEmpty() ? "" : renderObject1(className, staticContent);
         var instanceContent = members.stream()
                 .map(Member::instanceValue)
                 .flatMap(Optional::stream)

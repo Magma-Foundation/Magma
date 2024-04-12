@@ -1,1 +1,8 @@
-object CompiledTest {pub const TEST_UPPER_SYMBOL : String = "Main";pub const TEST_LOWER_SYMBOL : String = "test";pub const TEST_DEFINITION_TYPE : String = "String";pub const TEST_NUMERIC : String = "0";pub const TEST_STRING : String = "\"Main\"";}class def CompiledTest () => {}
+object CompiledTest {
+	pub const TEST_UPPER_SYMBOL : String = "Main";
+	pub const TEST_LOWER_SYMBOL : String = "test";
+	pub const TEST_DEFINITION_TYPE : String = "String";
+	pub const TEST_NUMERIC : String = "0";
+	pub const TEST_STRING : String = "\"Main\"";
+}
+class def CompiledTest () => {}

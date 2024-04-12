@@ -2,6 +2,7 @@ package com.meti;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Lang {
     public static final String CLASS_KEYWORD = "class ";
@@ -72,14 +73,20 @@ public class Lang {
     }
 
     static String renderObject(String className, String staticContent) {
-        return OBJECT_KEYWORD + " " + className + "{" + staticContent + "}";
+        return renderObject1(className, Collections.singletonList(staticContent));
+    }
+
+     static String renderObject1(String className, List<String> staticContent) {
+        var renderedLines = (staticContent.size() == 1) ? staticContent.get(0) : staticContent.stream().map(line -> "\n\t" + line).collect(Collectors.joining());
+
+        return OBJECT_KEYWORD + " " + className + BLOCK_START + renderedLines + "\n" + BLOCK_END + "\n";
     }
 
     static String renderPackage(String name) {
         return renderPackage(Collections.singletonList(name));
     }
 
-     static String renderPackage(List<String> namespace) {
+    static String renderPackage(List<String> namespace) {
         return "package " + String.join(".", namespace) + ";";
     }
 }
