@@ -130,7 +130,7 @@ public class Application {
         var rendered = renderJavaClass(className, renderBlock(renderedMembers));
 
         var renderedClass = input.startsWith(EXPORT_KEYWORD) ? PUBLIC_KEYWORD_WITH_SPACE + rendered : rendered;
-        var packageString = namespace.isEmpty() ? "" : renderPackage(namespace.get(0));
+        var packageString = namespace.isEmpty() ? "" : renderPackage(namespace);
         return packageString + renderedClass;
     }
 

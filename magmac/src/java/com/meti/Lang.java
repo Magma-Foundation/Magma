@@ -1,5 +1,8 @@
 package com.meti;
 
+import java.util.Collections;
+import java.util.List;
+
 public class Lang {
     public static final String CLASS_KEYWORD = "class ";
     public static final String DEF_KEYWORD = "def ";
@@ -73,6 +76,10 @@ public class Lang {
     }
 
     static String renderPackage(String name) {
-        return "package " + name + ";";
+        return renderPackage(Collections.singletonList(name));
+    }
+
+     static String renderPackage(List<String> namespace) {
+        return "package " + String.join(".", namespace) + ";";
     }
 }

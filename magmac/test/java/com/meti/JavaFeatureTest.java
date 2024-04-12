@@ -27,16 +27,20 @@ public class JavaFeatureTest {
         assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
     }
 
+    @Test
+    void javaPackage() throws CompileException {
+        var namespace = List.of("com", "meti");
+        var input = renderPackage(namespace) + renderJavaClass(TEST_UPPER_SYMBOL);
+        var magmaSource = compileJavaToMagma(input);
+        assertEquals(input, compileMagmaToJava(magmaSource, namespace));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void javaPackage(String name) {
-        String input = renderPackage(name) + renderJavaClass(TEST_UPPER_SYMBOL);
-        try {
-            String input1 = compileJavaToMagma(input);
-            assertEquals(input, compileMagmaToJava(input1, List.of(name)));
-        } catch (CompileException e) {
-            fail(e);
-        }
+    void javaPackage(String name) throws CompileException {
+        var input = renderPackage(name) + renderJavaClass(TEST_UPPER_SYMBOL);
+        var magmaSource = compileJavaToMagma(input);
+        assertEquals(input, compileMagmaToJava(magmaSource, List.of(name)));
     }
 
     @Test
