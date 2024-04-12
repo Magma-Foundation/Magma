@@ -7,8 +7,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.meti.Application.*;
+import static com.meti.Application.compileJavaToMagma;
+import static com.meti.Application.compileMagmaToJava;
 import static com.meti.CompiledTest.*;
+import static com.meti.Lang.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JavaFeatureTest {
@@ -22,7 +24,7 @@ public class JavaFeatureTest {
     }
 
     private static void assertJavaClassContent(String content) {
-        assertJava(Lang.renderJavaClass(TEST_UPPER_SYMBOL, Lang.renderBlock(content)));
+        assertJava(renderJavaClass(TEST_UPPER_SYMBOL, renderBlock(content)));
     }
 
     @Test
@@ -33,24 +35,24 @@ public class JavaFeatureTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void javaSimple(String name) {
-        assertJava(Lang.renderJavaClass(name));
+        assertJava(renderJavaClass(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertJavaClassContent(Lang.renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
+        assertJavaClassContent(renderJavaDefinition(name, TEST_DEFINITION_TYPE, TEST_STRING));
     }
 
     @Test
     void definitionType() {
-        assertJavaClassContent(Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_STRING));
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void multipleDefinitions(int count) {
-        var input = Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_STRING);
+        var input = renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_STRING);
         var joinedInput = IntStream.range(0, count)
                 .mapToObj(index -> input)
                 .collect(Collectors.joining());
@@ -60,16 +62,21 @@ public class JavaFeatureTest {
 
     @Test
     void definitionValue() {
-        assertJavaClassContent(Lang.renderJavaDefinition(TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC));
     }
 
     @Test
-    void finalDefinition() {
-        assertJavaClassContent(Lang.renderJavaDefinition(Lang.FINAL_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, Lang.INT_TYPE, TEST_NUMERIC));
+    void definitionFinal() {
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, FINAL_KEYWORD_WITH_SPACE));
+    }
+
+    @Test
+    void definitionPublic() {
+        assertJavaClassContent(renderJavaDefinition(TEST_LOWER_SYMBOL, INT_TYPE, TEST_NUMERIC, PUBLIC_KEYWORD_WITH_SPACE));
     }
 
     @Test
     void javaPublic() {
-        assertJava(Lang.PUBLIC_KEYWORD + Lang.renderJavaClass(TEST_UPPER_SYMBOL));
+        assertJava(PUBLIC_KEYWORD_WITH_SPACE + renderJavaClass(TEST_UPPER_SYMBOL));
     }
 }
