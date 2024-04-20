@@ -54,13 +54,14 @@ public class ApplicationTest {
         assertEquals(output, compile(input));
     }
 
-    private static String renderPackageStatement() {
-        return "package test;";
+    private static String renderPackageStatement(String name) {
+        return "package " + name + ";";
     }
 
-    @Test
-    void packageStatement() {
-        assertCompile(renderPackageStatement() + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void packageStatement(String name) {
+        assertCompile(renderPackageStatement(name) + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @Test
