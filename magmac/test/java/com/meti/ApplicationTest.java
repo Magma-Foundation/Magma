@@ -13,6 +13,8 @@ public class ApplicationTest {
     public static final String TEST_UPPER_SYMBOL = "Test";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
+    public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
+    public static final String STATEMENT_END = ";";
 
     private static String renderMagmaFunction(String name) {
         return renderMagmaFunction("", name);
@@ -36,8 +38,9 @@ public class ApplicationTest {
 
         var before = input.substring(0, separator + 1);
         String newBefore;
-        if (before.equals(renderImport())) {
-            newBefore = renderImport();
+        if (before.startsWith(IMPORT_KEYWORD_WITH_SPACE)) {
+            var name = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
+            newBefore = renderImport(name);
         } else {
             newBefore = "";
         }
@@ -61,20 +64,21 @@ public class ApplicationTest {
     }
 
     private static String renderPackageStatement(String name) {
-        return "package " + name + ";";
+        return "package " + name + STATEMENT_END;
     }
 
-    private static String renderImport() {
-        return "import " + TEST_UPPER_SYMBOL + ";";
+    private static String renderImport(String name) {
+        return IMPORT_KEYWORD_WITH_SPACE + name + STATEMENT_END;
     }
 
     private static void assertCompileWithClass(String input, String output) {
         assertCompile(input + renderJavaClass(TEST_UPPER_SYMBOL), output + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
-    @Test
-    void simpleImports() {
-        assertCompileWithClass(renderImport(), renderImport());
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void simpleImports(String name) {
+        assertCompileWithClass(renderImport(name), renderImport(name));
     }
 
     @ParameterizedTest
