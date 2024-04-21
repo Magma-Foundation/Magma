@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
@@ -13,8 +17,6 @@ public class ApplicationTest {
     public static final String TEST_UPPER_SYMBOL = "Test";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
-    public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
-    public static final String STATEMENT_END = ";";
     public static final String TEST_LOWER_SYMBOL = "test";
 
     private static String renderMagmaFunction(String name) {
@@ -34,27 +36,65 @@ public class ApplicationTest {
     }
 
     private static String compile(String input) {
-        var statementSeparator = input.indexOf(';');
-        if (statementSeparator == -1) return compileClass(input);
+        var lines = input.split(";");
 
-        var before = input.substring(0, statementSeparator + 1);
-        var compiledBefore = compileStatement(before);
+        var rootImportsWithChildren = new HashMap<String, List<String>>();
+        var rootImports = new HashSet<String>();
 
-        var classString = input.substring(statementSeparator + 1);
-        return compiledBefore + compileClass(classString);
+        for (int i = 0; i < lines.length - 1; i++) {
+            String line = lines[i];
+            var option = compileStatement(line);
+            if (option.isPresent()) {
+                var value = option.get();
+                if (value instanceof MagmaImport node) {
+                    var parent = node.parent();
+                    var child = node.child();
+
+                    if (!rootImportsWithChildren.containsKey(parent)) {
+                        rootImportsWithChildren.put(parent, new ArrayList<>());
+                    }
+
+                    rootImportsWithChildren.get(parent).addAll(child);
+                } else if (value instanceof Import node) {
+                    rootImports.add(node.name());
+                } else {
+                    throw new UnsupportedOperationException("Unknown node type: " + value.getClass());
+                }
+            }
+        }
+
+        var parentSet = new HashSet<>(rootImportsWithChildren.keySet());
+        parentSet.addAll(rootImports);
+
+        var combinedLines = parentSet.stream()
+                .sorted()
+                .map(parent -> {
+                    var outputImports = new ArrayList<Node>();
+                    if (rootImports.contains(parent)) outputImports.add(new Import(parent));
+                    if(rootImportsWithChildren.containsKey(parent)) {
+                        outputImports.add(new MagmaImport(parent, rootImportsWithChildren.get(parent)));
+                    }
+
+                    return outputImports;
+                })
+                .flatMap(Collection::stream)
+                .map(Node::render)
+                .collect(Collectors.joining());
+
+        return combinedLines + compileClass(lines[lines.length - 1]);
     }
 
-    private static String compileStatement(String before) {
-        if (!before.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
+    private static Optional<Node> compileStatement(String before) {
+        if (!before.startsWith(Compiler.IMPORT_KEYWORD_WITH_SPACE)) return Optional.empty();
 
-        var total = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
+        var total = before.substring(Compiler.IMPORT_KEYWORD_WITH_SPACE.length());
         var parentSeparator = total.lastIndexOf('.');
         if (parentSeparator == -1) {
-            return renderImportWithNoParent(total);
+            return Optional.of(new Import(total));
         } else {
             var parent = total.substring(0, parentSeparator);
             var child = total.substring(parentSeparator + 1);
-            return renderMagmaImport(parent, child);
+            return Optional.of(new MagmaImport(parent, child));
         }
     }
 
@@ -73,39 +113,50 @@ public class ApplicationTest {
     }
 
     private static String renderPackageStatement(String name) {
-        return "package " + name + STATEMENT_END;
-    }
-
-    private static String renderImportWithNoParent(String name) {
-        return renderImportWithParent("", name);
-    }
-
-    private static String renderImportWithParent(String parentString, String child) {
-        return renderImport(parentString + child);
-    }
-
-    private static String renderImport(String importString) {
-        return IMPORT_KEYWORD_WITH_SPACE + importString + STATEMENT_END;
+        return "package " + name + Compiler.STATEMENT_END;
     }
 
     private static void assertCompileWithClass(String input, String output) {
         assertCompile(input + renderJavaClass(TEST_UPPER_SYMBOL), output + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
-    private static String renderMagmaImport(String parent, String child) {
-        return renderImport("{" + child + "} from " + parent);
+    private static String renderJavaImport(String parent, String child) {
+        return Compiler.renderImport(parent + "." + child);
+    }
+
+    @Test
+    void multipleImports() {
+        assertCompileWithClass(
+                renderJavaImport("a", "B") + renderJavaImport("c", "D"),
+                new MagmaImport("a", "B").render() + new MagmaImport("c", "D").render()
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void siblingImports(int counts) {
+        var names = IntStream.range(0, counts)
+                .mapToObj(value -> TEST_UPPER_SYMBOL + value)
+                .toList();
+
+        var input = names.stream()
+                .map(name -> renderJavaImport(TEST_LOWER_SYMBOL, name))
+                .collect(Collectors.joining());
+
+        var output = new MagmaImport(TEST_LOWER_SYMBOL, String.join(", ", names)).render();
+        assertCompileWithClass(input, output);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void simpleImports(String name) {
-        assertCompileWithClass(renderImportWithNoParent(name), renderImportWithNoParent(name));
+        assertCompileWithClass(new Import(name).render(), new Import(name).render());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void parentImports(String parentName) {
-        assertCompileWithClass(renderImportWithParent(parentName + ".", TEST_LOWER_SYMBOL), renderMagmaImport(parentName, TEST_LOWER_SYMBOL));
+        assertCompileWithClass(renderJavaImport(parentName, TEST_LOWER_SYMBOL), new MagmaImport(parentName, TEST_LOWER_SYMBOL).render());
     }
 
     @ParameterizedTest
