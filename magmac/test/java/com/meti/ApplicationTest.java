@@ -15,6 +15,7 @@ public class ApplicationTest {
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
+    public static final String TEST_LOWER_SYMBOL = "test";
 
     private static String renderMagmaFunction(String name) {
         return renderMagmaFunction("", name);
@@ -33,19 +34,26 @@ public class ApplicationTest {
     }
 
     private static String compile(String input) {
-        var separator = input.indexOf(';');
-        if (separator == -1) return compileClass(input);
+        var statementSeparator = input.indexOf(';');
+        if (statementSeparator == -1) return compileClass(input);
 
-        var before = input.substring(0, separator + 1);
+        var before = input.substring(0, statementSeparator + 1);
         String newBefore;
         if (before.startsWith(IMPORT_KEYWORD_WITH_SPACE)) {
-            var name = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
-            newBefore = renderImport(name);
+            var total = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
+            var parentSeparator = total.lastIndexOf('.');
+            if (parentSeparator == -1) {
+                newBefore = renderImportWithNoParent(total);
+            } else {
+                var parent = total.substring(0, parentSeparator);
+                var child = total.substring(parentSeparator + 1);
+                newBefore = renderMagmaImport(parent, child);
+            }
         } else {
             newBefore = "";
         }
 
-        var classString = input.substring(separator + 1);
+        var classString = input.substring(statementSeparator + 1);
         return newBefore + compileClass(classString);
     }
 
@@ -67,18 +75,36 @@ public class ApplicationTest {
         return "package " + name + STATEMENT_END;
     }
 
-    private static String renderImport(String name) {
-        return IMPORT_KEYWORD_WITH_SPACE + name + STATEMENT_END;
+    private static String renderImportWithNoParent(String name) {
+        return renderImportWithParent("", name);
+    }
+
+    private static String renderImportWithParent(String parentString, String child) {
+        return renderImport(parentString + child);
+    }
+
+    private static String renderImport(String importString) {
+        return IMPORT_KEYWORD_WITH_SPACE + importString + STATEMENT_END;
     }
 
     private static void assertCompileWithClass(String input, String output) {
         assertCompile(input + renderJavaClass(TEST_UPPER_SYMBOL), output + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
+    private static String renderMagmaImport(String parent, String child) {
+        return renderImport("{" + child + "} from " + parent);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void simpleImports(String name) {
-        assertCompileWithClass(renderImport(name), renderImport(name));
+        assertCompileWithClass(renderImportWithNoParent(name), renderImportWithNoParent(name));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void parentImports(String parentName) {
+        assertCompileWithClass(renderImportWithParent(parentName + ".", TEST_LOWER_SYMBOL), renderMagmaImport(parentName, TEST_LOWER_SYMBOL));
     }
 
     @ParameterizedTest
