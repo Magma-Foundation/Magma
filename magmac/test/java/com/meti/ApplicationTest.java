@@ -38,23 +38,24 @@ public class ApplicationTest {
         if (statementSeparator == -1) return compileClass(input);
 
         var before = input.substring(0, statementSeparator + 1);
-        String newBefore;
-        if (before.startsWith(IMPORT_KEYWORD_WITH_SPACE)) {
-            var total = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
-            var parentSeparator = total.lastIndexOf('.');
-            if (parentSeparator == -1) {
-                newBefore = renderImportWithNoParent(total);
-            } else {
-                var parent = total.substring(0, parentSeparator);
-                var child = total.substring(parentSeparator + 1);
-                newBefore = renderMagmaImport(parent, child);
-            }
-        } else {
-            newBefore = "";
-        }
+        var compiledBefore = compileStatement(before);
 
         var classString = input.substring(statementSeparator + 1);
-        return newBefore + compileClass(classString);
+        return compiledBefore + compileClass(classString);
+    }
+
+    private static String compileStatement(String before) {
+        if (!before.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
+
+        var total = before.substring(IMPORT_KEYWORD_WITH_SPACE.length(), before.indexOf(STATEMENT_END));
+        var parentSeparator = total.lastIndexOf('.');
+        if (parentSeparator == -1) {
+            return renderImportWithNoParent(total);
+        } else {
+            var parent = total.substring(0, parentSeparator);
+            var child = total.substring(parentSeparator + 1);
+            return renderMagmaImport(parent, child);
+        }
     }
 
     private static String compileClass(String input) {
