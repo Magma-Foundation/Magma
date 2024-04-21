@@ -32,12 +32,18 @@ public class ApplicationTest {
 
     private static String compile(String input) {
         var separator = input.indexOf(';');
-        if (separator == -1) {
-            return compileClass(input);
+        if (separator == -1) return compileClass(input);
+
+        var before = input.substring(0, separator + 1);
+        String newBefore;
+        if (before.equals(renderImport())) {
+            newBefore = renderImport();
         } else {
-            var classString = input.substring(separator + 1);
-            return compileClass(classString);
+            newBefore = "";
         }
+
+        var classString = input.substring(separator + 1);
+        return newBefore + compileClass(classString);
     }
 
     private static String compileClass(String input) {
@@ -58,10 +64,23 @@ public class ApplicationTest {
         return "package " + name + ";";
     }
 
+    private static String renderImport() {
+        return "import " + TEST_UPPER_SYMBOL + ";";
+    }
+
+    private static void assertCompileWithClass(String input, String output) {
+        assertCompile(input + renderJavaClass(TEST_UPPER_SYMBOL), output + renderMagmaFunction(TEST_UPPER_SYMBOL));
+    }
+
+    @Test
+    void simpleImports() {
+        assertCompileWithClass(renderImport(), renderImport());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertCompile(renderPackageStatement(name) + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertCompileWithClass(renderPackageStatement(name), "");
     }
 
     @Test
