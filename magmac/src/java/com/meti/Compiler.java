@@ -19,11 +19,16 @@ public class Compiler {
         return modifierString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + CLASS_CONTENT;
     }
 
+    record ImportChildren(Optional<String> defaultValue, List<String> children) {
+        private ImportChildren withDefault(String defaultValue) {
+            return new ImportChildren(Optional.of(defaultValue), this.children);
+        }
+    }
+
     static String compile(String input) {
         var lines = input.split(";");
 
-        var rootImportsWithChildren = new HashMap<String, List<String>>();
-        var rootImports = new HashSet<String>();
+        var roots = new HashMap<String, ImportChildren>();
 
         for (int i = 0; i < lines.length - 1; i++) {
             String line = lines[i];
@@ -33,44 +38,35 @@ public class Compiler {
             var value = option.get();
             if (value instanceof MagmaImport node) {
                 var parent = node.parent();
-                var child = node.child();
+                var children = node.children();
 
-                ensureKey(rootImportsWithChildren, parent);
+                ensureKey(roots, parent);
 
-                rootImportsWithChildren.get(parent).addAll(child);
+                roots.get(parent).children.addAll(children);
             } else if (value instanceof Import node) {
-                rootImports.add(node.name());
+                ensureKey(roots, node.name());
+
+                roots.put(node.name(), roots.get(node.name()).withDefault(node.name()));
             } else {
                 throw new UnsupportedOperationException("Unknown node type: " + value.getClass());
             }
         }
 
-        var parentSet = new HashSet<>(rootImportsWithChildren.keySet());
-        parentSet.addAll(rootImports);
 
-        var combinedLines = parentSet.stream()
-                .sorted()
-                .map(parent -> createImports(parent, rootImports, rootImportsWithChildren))
-                .flatMap(Collection::stream)
-                .map(Node::render)
+        var combinedLines = roots.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> new MagmaImport(entry.getKey(), entry.getValue().defaultValue, entry.getValue().children()))
+                .map(MagmaImport::render)
                 .collect(Collectors.joining());
 
         return combinedLines + compileClass(lines[lines.length - 1]);
     }
 
-    private static void ensureKey(Map<String, List<String>> map, String key) {
+    private static void ensureKey(HashMap<String, ImportChildren> map, String key) {
         if (!map.containsKey(key)) {
-            map.put(key, new ArrayList<>());
+            map.put(key, new ImportChildren(Optional.empty(), new ArrayList<>()));
         }
-    }
-
-    private static List<Node> createImports(String parent, HashSet<String> rootImports, HashMap<String, List<String>> rootImportsWithChildren) {
-        var outputImports = new ArrayList<Node>();
-        if (rootImports.contains(parent)) outputImports.add(new Import(parent));
-        if (rootImportsWithChildren.containsKey(parent))
-            outputImports.add(new MagmaImport(parent, rootImportsWithChildren.get(parent)));
-
-        return outputImports;
     }
 
     private static Optional<Node> compileStatement(String before) {

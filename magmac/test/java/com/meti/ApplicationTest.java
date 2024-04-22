@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,7 +66,7 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void simpleImports(String name) {
-        assertCompileWithClass(new Import(name).render(), new Import(name).render());
+        assertCompileWithClass(new Import(name).render(), new MagmaImport(name, Optional.of(name), Collections.emptyList()).render());
     }
 
     @ParameterizedTest

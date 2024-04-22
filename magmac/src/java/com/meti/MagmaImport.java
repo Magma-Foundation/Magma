@@ -2,20 +2,18 @@ package com.meti;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-public record MagmaImport(String parent, List<String> child) implements Node {
+public record MagmaImport(String parent, Optional<String> defaultValue, List<String> children) implements Node {
     public MagmaImport(String parent, String child) {
-        this(parent, Collections.singletonList(child));
-    }
-
-    public MagmaImport(String parent, List<String> child) {
-        this.parent = parent;
-        this.child = child;
+        this(parent, Optional.empty(), Collections.singletonList(child));
     }
 
     @Override
     public String render() {
-        return Compiler.renderImport("{" + String.join(", ", child) + "} from " + parent());
+        var defaultString = defaultValue.map(value -> children.isEmpty() ? value : value + ", ").orElse("");
+        var childrenString = children.isEmpty() ? "" : ("{" + String.join(", ", children) + "}");
+
+        return Compiler.renderImport("%s%s from %s".formatted(defaultString, childrenString, parent()));
     }
 }
