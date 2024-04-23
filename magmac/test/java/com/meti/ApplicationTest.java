@@ -66,7 +66,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void javaEmpty() {
+    void java() {
         assertEquals("", compileMagmaFromJava(wrapInMain("")));
     }
 
@@ -88,7 +88,7 @@ public class ApplicationTest {
     }
 
     @Test
-    void compileC() {
+    void c() {
         assertEquals(renderCProgram(), compileCFromMagma(""));
     }
 
