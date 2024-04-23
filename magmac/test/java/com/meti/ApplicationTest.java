@@ -15,18 +15,18 @@ public class ApplicationTest {
     public static final String DEFINITION_SUFFIX = " = 0;";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String TEST_LOWER_SYMBOL = "test";
-    public static final String I16_TYPE = "I16";
-    public static final String NUMBER_TYPE = "number";
+    public static final String I32_TYPE = "I32";
     public static final String TYPE_SEPARATOR = " : ";
     public static final String LONG_TYPE = "long";
-    public static final String I32_TYPE = "I32";
+    public static final String I64_TYPE = "I64";
+    public static final String NUMBER_TYPE = "number";
 
     private static String renderCProgram() {
         return renderCProgram("");
     }
 
     private static String renderCProgram(String input) {
-        return INT_KEYWORD_WITH_SPACE + " main(){" + input + "return 0;}";
+        return INT_KEYWORD_WITH_SPACE + "main(){" + input + "return 0;}";
     }
 
     private static String compileMagmaFromJava(String javaSource) {
@@ -38,10 +38,10 @@ public class ApplicationTest {
         var name = before.substring(separator + 1);
         var inputType = before.substring(0, separator);
         String outputType;
-        if(inputType.equals(INT_TYPE)) {
-            outputType = I16_TYPE;
-        } else if(inputType.equals(LONG_TYPE)) {
+        if (inputType.equals(INT_TYPE)) {
             outputType = I32_TYPE;
+        } else if (inputType.equals(LONG_TYPE)) {
+            outputType = I64_TYPE;
         } else {
             throw new UnsupportedOperationException("Unknown type: " + inputType);
         }
@@ -62,8 +62,25 @@ public class ApplicationTest {
         if (input.isEmpty()) {
             output = "";
         } else {
-            output = input;
+            var result = lexMagmaDefinition(input);
+            var inputType = result.type();
+            var outputType = compileMagmaToJSType(inputType);
+            output = renderTSDefinition(result.name, outputType);
         }
+        return formatJS(output);
+    }
+
+    private static String compileMagmaToJSType(String inputType) {
+        String outputType1;
+        if (inputType.equals(I32_TYPE) || inputType.equals(I64_TYPE)) {
+            outputType1 = NUMBER_TYPE;
+        } else {
+            throw new UnsupportedOperationException("Unknown input type: " + inputType);
+        }
+        return outputType1;
+    }
+
+    private static String formatJS(String output) {
         return USE_STRICT + output;
     }
 
@@ -76,10 +93,33 @@ public class ApplicationTest {
         if (input.isEmpty()) {
             output = "";
         } else {
-            var name = input.substring(LET_KEYWORD_WITH_SPACE.length(), input.indexOf(TYPE_SEPARATOR));
-            output = renderJavaDefinition(INT_TYPE, name);
+            var result = lexMagmaDefinition(input);
+            var outputType = compileMagmaToCType(result.type());
+            output = renderJavaDefinition(outputType, result.name());
         }
         return renderCProgram(output);
+    }
+
+    private static MagmaDefinition lexMagmaDefinition(String input) {
+        var typeSeparatorIndex = input.indexOf(TYPE_SEPARATOR);
+        var name = input.substring(LET_KEYWORD_WITH_SPACE.length(), typeSeparatorIndex);
+        var inputType = input.substring(typeSeparatorIndex + TYPE_SEPARATOR.length(), input.indexOf(DEFINITION_SUFFIX));
+        return new MagmaDefinition(name, inputType);
+    }
+
+    private record MagmaDefinition(String name, String type) {
+    }
+
+    private static String compileMagmaToCType(String inputType) {
+        String outputType;
+        if (inputType.equals(I32_TYPE)) {
+            outputType = INT_TYPE;
+        } else if (inputType.equals(I64_TYPE)) {
+            outputType = LONG_TYPE;
+        } else {
+            throw new UnsupportedOperationException("Unknown input type: " + inputType);
+        }
+        return outputType;
     }
 
     @Test
@@ -90,23 +130,28 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void javaDefinition(String name) {
-        assertEquals(renderTSDefinition(name, I16_TYPE), compileMagmaFromJava(wrapInMain(renderJavaDefinition(INT_TYPE, name))));
+        assertEquals(renderTSDefinition(name, I32_TYPE), compileMagmaFromJava(wrapInMain(renderJavaDefinition(INT_TYPE, name))));
     }
 
     @Test
     void javaDefinitionType() {
-        assertEquals(renderTSDefinition(TEST_LOWER_SYMBOL, I32_TYPE), compileMagmaFromJava(wrapInMain(renderJavaDefinition(LONG_TYPE, TEST_LOWER_SYMBOL))));
+        assertEquals(renderTSDefinition(TEST_LOWER_SYMBOL, I64_TYPE), compileMagmaFromJava(wrapInMain(renderJavaDefinition(LONG_TYPE, TEST_LOWER_SYMBOL))));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void tsDefinition(String name) {
-        assertEquals(USE_STRICT + renderTSDefinition(name, I16_TYPE), compileTSFromMagma(renderTSDefinition(name, I16_TYPE)));
+        assertEquals(formatJS(renderTSDefinition(name, NUMBER_TYPE)), compileTSFromMagma(renderTSDefinition(name, I32_TYPE)));
+    }
+
+    @Test
+    void tsDefinitionType() {
+        assertEquals(formatJS(renderTSDefinition(TEST_LOWER_SYMBOL, NUMBER_TYPE)), compileTSFromMagma(renderTSDefinition(TEST_LOWER_SYMBOL, I64_TYPE)));
     }
 
     @Test
     void ts() {
-        assertEquals(USE_STRICT, compileTSFromMagma(""));
+        assertEquals(formatJS(""), compileTSFromMagma(""));
     }
 
     @Test
@@ -117,6 +162,11 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void cDefinition(String name) {
-        assertEquals(renderCProgram(renderJavaDefinition(INT_TYPE, name)), compileCFromMagma(renderTSDefinition(name, I16_TYPE)));
+        assertEquals(renderCProgram(renderJavaDefinition(INT_TYPE, name)), compileCFromMagma(renderTSDefinition(name, I32_TYPE)));
+    }
+
+    @Test
+    void cDefinitionType() {
+        assertEquals(renderCProgram(renderJavaDefinition(LONG_TYPE, TEST_LOWER_SYMBOL)), compileCFromMagma(renderTSDefinition(TEST_LOWER_SYMBOL, I64_TYPE)));
     }
 }
