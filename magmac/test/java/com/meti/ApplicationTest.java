@@ -65,7 +65,7 @@ public class ApplicationTest {
             var result = lexMagmaDefinition(input);
             var inputType = result.type();
             var outputType = compileMagmaToJSType(inputType);
-            output = renderTSDefinition(result.name, outputType);
+            output = renderTSDefinition(result.name(), outputType);
         }
         return formatJS(output);
     }
@@ -105,9 +105,6 @@ public class ApplicationTest {
         var name = input.substring(LET_KEYWORD_WITH_SPACE.length(), typeSeparatorIndex);
         var inputType = input.substring(typeSeparatorIndex + TYPE_SEPARATOR.length(), input.indexOf(DEFINITION_SUFFIX));
         return new MagmaDefinition(name, inputType);
-    }
-
-    private record MagmaDefinition(String name, String type) {
     }
 
     private static String compileMagmaToCType(String inputType) {
