@@ -37,6 +37,12 @@ public class ApplicationTest {
         var separator = before.indexOf(' ');
         var name = before.substring(separator + 1);
         var inputType = before.substring(0, separator);
+        var outputType = compileJavaType(inputType);
+
+        return renderTSDefinition(name, outputType);
+    }
+
+    private static String compileJavaType(String inputType) {
         String outputType;
         if (inputType.equals(INT_TYPE)) {
             outputType = I32_TYPE;
@@ -45,8 +51,7 @@ public class ApplicationTest {
         } else {
             throw new UnsupportedOperationException("Unknown type: " + inputType);
         }
-
-        return renderTSDefinition(name, outputType);
+        return outputType;
     }
 
     private static String wrapInMain(String content) {
