@@ -7,14 +7,31 @@ import java.util.Map;
 
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-    public static final String CLASS_CONTENT = " {}";
     public static final String DEF_KEYWORD_WITH_SPACE = "def ";
     public static final String MAGMA_FUNCTION_PREFIX = CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE;
     public static final String FUNCTION_SEPARATOR = "() =>";
     public static final String TEST_LOWER_SYMBOL = "test";
+    public static final String BLOCK_START = "{";
+    public static final char BLOCK_END = '}';
 
-    static String renderMagmaFunction(String name) {
-        return MAGMA_FUNCTION_PREFIX + name + FUNCTION_SEPARATOR + CLASS_CONTENT;
+    public static String renderBlock() {
+        return renderBlock("");
+    }
+
+    public static String renderBlock(String content) {
+        return BLOCK_START + content + "}";
+    }
+
+    static String renderMagmaClass(String name) {
+        return renderMagmaClass(name, "");
+    }
+
+    static String renderMagmaClass(String name, String content) {
+        return renderMagmaFunction(CLASS_KEYWORD_WITH_SPACE, name, content);
+    }
+
+    static String renderMagmaFunction(String flags, String name, String content) {
+        return flags + DEF_KEYWORD_WITH_SPACE + name + FUNCTION_SEPARATOR + " " + renderBlock(content);
     }
 
     static String run(String input, boolean isJava) throws CompileException {
@@ -36,16 +53,22 @@ public class Compiler {
 
     private static Map<String, String> compileMagmaFromJava(String input) throws CompileException {
         var classIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
-        if (classIndex == -1) {
-            throw new CompileException("No class present.");
-        } else {
-            var next = input.indexOf(CLASS_KEYWORD_WITH_SPACE, classIndex + CLASS_KEYWORD_WITH_SPACE.length());
-            if (next == -1) {
-                var name = input.substring(CLASS_KEYWORD_WITH_SPACE.length(), input.indexOf(CLASS_CONTENT));
-                return Map.of(name, renderMagmaFunction(name));
+        if (classIndex == -1) throw new CompileException("No class present.");
+
+        var next = input.indexOf(CLASS_KEYWORD_WITH_SPACE, classIndex + CLASS_KEYWORD_WITH_SPACE.length());
+        if (next == -1) {
+            var name = input.substring(CLASS_KEYWORD_WITH_SPACE.length(), input.indexOf(BLOCK_START)).strip();
+            var inputContent = input.substring(input.indexOf(BLOCK_START) + 1, input.lastIndexOf(BLOCK_END));
+            String outputContent;
+            if (inputContent.isBlank()) {
+                outputContent = "";
             } else {
-                throw new CompileException("Multiple classes are not allowed.");
+                outputContent = renderMagmaFunction("", "empty", "");
             }
+
+            return Map.of(name, renderMagmaClass(name, outputContent));
+        } else {
+            throw new CompileException("Multiple classes are not allowed.");
         }
     }
 
@@ -78,14 +101,14 @@ public class Compiler {
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == '}' && depth == 1) {
+            if (c == BLOCK_END && depth == 1) {
                 builder.append(c);
                 depth = 0;
                 lines.add(builder.toString());
                 builder = new StringBuilder();
             } else {
                 if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (c == BLOCK_END) depth--;
                 builder.append(c);
             }
         }
@@ -96,6 +119,14 @@ public class Compiler {
     }
 
     static String renderJavaClass(String name) {
-        return CLASS_KEYWORD_WITH_SPACE + name + CLASS_CONTENT;
+        return renderJavaClass(name, "");
+    }
+
+    static String renderJavaClass(String name, String content) {
+        return CLASS_KEYWORD_WITH_SPACE + name + " " + renderBlock(content);
+    }
+
+    static String renderJavaMethod() {
+        return "void empty(){}";
     }
 }
