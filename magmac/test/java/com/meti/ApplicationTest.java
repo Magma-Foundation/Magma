@@ -38,19 +38,25 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRunWithinClass(renderJavaDefinition(name, INT_KEYWORD, "0"), renderMagmaDefinition(name, I32_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(INT_KEYWORD, name, "0"), renderMagmaDefinition(name, I32_KEYWORD, "0"));
     }
 
     @Test
     void definitionType() {
-        assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL, "0"), renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
     @Test
     void definitionValue() {
         var value = "100";
-        assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, value),
+        assertRunWithinClass(renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL, value),
                 renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, value));
+    }
+
+    @Test
+    void definitionPublic() {
+        assertRunWithinClass(renderJavaDefinition(PUBLIC_KEYWORD_WITH_SPACE, LONG_KEYWORD, TEST_LOWER_SYMBOL, "0"),
+                renderMagmaDefinition(PUBLIC_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
     @ParameterizedTest

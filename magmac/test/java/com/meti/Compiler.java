@@ -1,6 +1,6 @@
 package com.meti;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -17,14 +17,21 @@ public class Compiler {
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final String VALUE_SEPARATOR = "=";
-    public static final String DEFINITION_END = " " + VALUE_SEPARATOR + " 0;";
 
-    public static String renderJavaDefinition(String name, String type, String value) {
-        return type + " " + name + " " + VALUE_SEPARATOR + " " + value + ";";
+    public static String renderJavaDefinition(String type, String name, String value) {
+        return renderJavaDefinition("", type, name, value);
+    }
+
+    public static String renderJavaDefinition(String modifiersString, String type, String name, String value) {
+        return modifiersString + type + " " + name + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
     public static String renderMagmaDefinition(String name, String type, String value) {
-        return "let " + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
+        return renderMagmaDefinition("", name, type, value);
+    }
+
+    public static String renderMagmaDefinition(String modifierString, String name, String type, String value) {
+        return modifierString + "let " + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
     private static String renderBlock(String content) {
@@ -117,12 +124,32 @@ public class Compiler {
 
         var before = inputContent.substring(0, valueSeparatorIndex).strip();
         var separator = before.lastIndexOf(' ');
-        var inputType = before.substring(0, separator);
+
         var name = before.substring(separator + 1);
+
+        var modifiersAndType = before.substring(0, separator);
+
+        Set<String> modifiers;
+        String inputType;
+
+        var lastIndex = modifiersAndType.indexOf(' ');
+        if (lastIndex == -1) {
+            inputType = modifiersAndType;
+            modifiers = Collections.emptySet();
+        } else {
+            var modifiersString = modifiersAndType.substring(0, lastIndex).strip();
+            var typeString = modifiersAndType.substring(lastIndex + 1).strip();
+
+            modifiers = new HashSet<>(Arrays.asList(modifiersString.split(" ")));
+            inputType = typeString;
+        }
+
         var outputType = compileType(inputType);
 
         var after = inputContent.substring(valueSeparatorIndex + 1, inputContent.lastIndexOf(STATEMENT_END)).strip();
-        return renderMagmaDefinition(name, outputType, after);
+        var modifierString = modifiers.isEmpty() ? "" : modifiers.stream().map(modifier -> modifier + " ").collect(Collectors.joining());
+
+        return renderMagmaDefinition(modifierString, name, outputType, after);
     }
 
     private static String compileType(String inputType) {
