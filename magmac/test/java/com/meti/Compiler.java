@@ -1,16 +1,24 @@
 package com.meti;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-    public static final String CLASS_END = " {}";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
+    public static final String BLOCK_START = "{";
+
+    private static String renderBlock() {
+        return renderBlock("");
+    }
+
+    private static String renderBlock(String content) {
+        return BLOCK_START + content + "}";
+    }
 
     static String renderMagmaImport(String parent, String child) {
         return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
@@ -21,11 +29,31 @@ public class Compiler {
     }
 
     static String renderMagmaFunction(String modifiersString, String name) {
-        return modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + CLASS_END;
+        return renderMagmaFunction(modifiersString, name, "");
+    }
+
+    static String renderMagmaFunction(String modifiersString, String name, String content) {
+        return modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + " " + renderBlock(content);
     }
 
     static String run(String input) {
-        var lines = Arrays.asList(input.split(";"));
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if(c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if(c == '{') depth++;
+                if(c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+
         if (lines.isEmpty()) return "";
 
         var imports = lines.subList(0, lines.size() - 1);
@@ -57,7 +85,9 @@ public class Compiler {
         var classIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
         if (classIndex == -1) throw new UnsupportedOperationException("No class present.");
 
-        var name = input.substring(classIndex + CLASS_KEYWORD_WITH_SPACE.length(), input.indexOf(CLASS_END));
+        var nameStart = classIndex + CLASS_KEYWORD_WITH_SPACE.length();
+        var nameEnd = input.indexOf(BLOCK_START);
+        var name = input.substring(nameStart, nameEnd).strip();
         var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
 
         return renderMagmaFunction(modifierString, name);
@@ -68,15 +98,11 @@ public class Compiler {
     }
 
     static String renderJavaClass(String modifiersString, String name) {
-        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + CLASS_END;
+        return renderJavaClass(modifiersString, name, "");
     }
 
-    static String renderMagmaFunction() {
-        return renderMagmaFunction(ApplicationTest.TEST_UPPER_SYMBOL);
-    }
-
-    static String renderBeforeClass(String input) {
-        return input + renderJavaClass(ApplicationTest.TEST_UPPER_SYMBOL);
+    static String renderJavaClass(String modifiersString, String name, String content) {
+        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + renderBlock(content);
     }
 
     static String renderJavaImport(String parent, String child) {
@@ -88,6 +114,6 @@ public class Compiler {
     }
 
     static String renderBeforeFunction(String before) {
-        return before + renderMagmaFunction();
+        return before + ApplicationTest.renderMagmaFunction();
     }
 }

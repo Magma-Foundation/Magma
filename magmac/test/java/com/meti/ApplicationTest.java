@@ -18,6 +18,24 @@ public class ApplicationTest {
         assertEquals(output, run(input));
     }
 
+    static String renderMagmaFunction() {
+        return Compiler.renderMagmaFunction(TEST_UPPER_SYMBOL);
+    }
+
+    static String renderBeforeClass(String input) {
+        return input + renderJavaClass();
+    }
+
+    private static String renderJavaClass() {
+        return Compiler.renderJavaClass(TEST_UPPER_SYMBOL);
+    }
+
+    @Test
+    void definitionName() {
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, "int x = 0;"),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, "let x : I32 = 0;"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
@@ -59,12 +77,12 @@ public class ApplicationTest {
 
     @Test
     void classPublic() {
-        assertRun(renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), renderMagmaFunction(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL));
+        assertRun(Compiler.renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), Compiler.renderMagmaFunction(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void className(String name) {
-        assertRun(renderJavaClass(name), renderMagmaFunction(name));
+        assertRun(Compiler.renderJavaClass(name), Compiler.renderMagmaFunction(name));
     }
 }
