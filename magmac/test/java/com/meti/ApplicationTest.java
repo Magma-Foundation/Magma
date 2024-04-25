@@ -37,7 +37,7 @@ public class ApplicationTest {
         if (lines.isEmpty()) return "";
 
         var imports = lines.subList(0, lines.size() - 1);
-        var classString = lines.getLast();
+        var classString = lines.get(lines.size() - 1);
 
         var beforeString = imports.stream()
                 .map(ApplicationTest::compileImport)
