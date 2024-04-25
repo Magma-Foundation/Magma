@@ -2,7 +2,6 @@ package com.meti.compile;
 
 import com.meti.collect.JavaString;
 import com.meti.collect.Range;
-import com.meti.collect.Tuple;
 import com.meti.node.Attribute;
 import com.meti.node.MapNode;
 import com.meti.node.Node;
@@ -11,7 +10,10 @@ import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -136,6 +138,19 @@ public class Compiler {
 
 
     private static Option<StateResult> compileDefinition(JavaString inputContent) {
+        return lexDefinition(inputContent).map(built -> {
+            var modifiers = built.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
+            var outputType = compileType(built.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
+            var withNewType = built.with("type", new StringAttribute(outputType)).orElse(built);
+
+            var parsed = parseDefinition(withNewType);
+
+            var rendered = renderMagmaDefinition(parsed);
+            return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
+        });
+    }
+
+    private static Option<MapNode> lexDefinition(JavaString inputContent) {
         return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
             var before = valueSlices.a().strip();
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
@@ -157,16 +172,7 @@ public class Compiler {
 
                 var b = valueSlices.b().strip();
                 var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
-                var built = tuple.withString("value", value).complete();
-
-                var modifiers = built.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
-                var outputType = compileType(built.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
-                var withNewType = built.with("type", new StringAttribute(outputType)).orElse(built);
-
-                var parsed = parseDefinition(withNewType);
-
-                var rendered = renderMagmaDefinition(parsed);
-                return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
+                return tuple.withString("value", value).complete();
             });
         });
     }
