@@ -30,17 +30,27 @@ public class ApplicationTest {
         return Compiler.renderJavaClass(TEST_UPPER_SYMBOL);
     }
 
+    private static void assertRunWithinClass(String input, String output) {
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, input),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, output));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(name, INT_KEYWORD)),
-                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(name, I32_KEYWORD)));
+        assertRunWithinClass(renderJavaDefinition(name, INT_KEYWORD, "0"), renderMagmaDefinition(name, I32_KEYWORD, "0"));
     }
 
     @Test
-    void definitionName() {
-        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD)),
-                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD)));
+    void definitionType() {
+        assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+    }
+
+    @Test
+    void definitionValue() {
+        var value = "100";
+        assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, value),
+                renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, value));
     }
 
     @ParameterizedTest

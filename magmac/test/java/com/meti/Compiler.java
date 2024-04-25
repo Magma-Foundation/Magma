@@ -19,12 +19,12 @@ public class Compiler {
     public static final String VALUE_SEPARATOR = "=";
     public static final String DEFINITION_END = " " + VALUE_SEPARATOR + " 0;";
 
-    public static String renderJavaDefinition(String name, String type) {
-        return type + " " + name + DEFINITION_END;
+    public static String renderJavaDefinition(String name, String type, String value) {
+        return type + " " + name + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
-    public static String renderMagmaDefinition(String name, String type) {
-        return "let " + name + " : " + type + DEFINITION_END;
+    public static String renderMagmaDefinition(String name, String type, String value) {
+        return "let " + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
     private static String renderBlock(String content) {
@@ -112,15 +112,17 @@ public class Compiler {
     }
 
     private static String compileDefinition(String inputContent) {
-        if (!inputContent.contains(VALUE_SEPARATOR)) return "";
+        var valueSeparatorIndex = inputContent.indexOf(VALUE_SEPARATOR);
+        if (valueSeparatorIndex == -1) return "";
 
-        var before = inputContent.substring(0, inputContent.indexOf(DEFINITION_END));
+        var before = inputContent.substring(0, valueSeparatorIndex).strip();
         var separator = before.lastIndexOf(' ');
         var inputType = before.substring(0, separator);
         var name = before.substring(separator + 1);
         var outputType = compileType(inputType);
 
-        return renderMagmaDefinition(name, outputType);
+        var after = inputContent.substring(valueSeparatorIndex + 1, inputContent.lastIndexOf(STATEMENT_END)).strip();
+        return renderMagmaDefinition(name, outputType, after);
     }
 
     private static String compileType(String inputType) {
