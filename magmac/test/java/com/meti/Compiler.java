@@ -10,6 +10,7 @@ public class Compiler {
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
+    public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
 
     static String renderMagmaImport(String parent, String child) {
         return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
@@ -40,8 +41,11 @@ public class Compiler {
 
     private static String compileImport(String beforeString) {
         if (!beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
+        var segmentStart = beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE + STATIC_KEYWORD_WITH_SPACE)
+                ? (IMPORT_KEYWORD_WITH_SPACE + STATIC_KEYWORD_WITH_SPACE).length()
+                : IMPORT_KEYWORD_WITH_SPACE.length();
 
-        var set = beforeString.substring(IMPORT_KEYWORD_WITH_SPACE.length());
+        var set = beforeString.substring(segmentStart);
         var last = set.lastIndexOf('.');
         var parent = set.substring(0, last);
         var child = set.substring(last + 1);
@@ -76,7 +80,11 @@ public class Compiler {
     }
 
     static String renderJavaImport(String parent, String child) {
-        return IMPORT_KEYWORD_WITH_SPACE + parent + "." + child + STATEMENT_END;
+        return renderJavaImport(parent, child, "");
+    }
+
+    static String renderJavaImport(String parent, String child, String modifierString) {
+        return IMPORT_KEYWORD_WITH_SPACE + modifierString + parent + "." + child + STATEMENT_END;
     }
 
     static String renderBeforeFunction(String before) {
