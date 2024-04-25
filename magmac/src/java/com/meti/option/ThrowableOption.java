@@ -29,6 +29,11 @@ public record ThrowableOption<T>(Option<T> parent) implements Option<T> {
         return parent.into(mapper);
     }
 
+    @Override
+    public T orElseGet(Supplier<T> supplier) {
+        return parent.orElseGet(supplier);
+    }
+
     public <E extends Throwable> Result<T, E> orElseThrow(Supplier<E> supplier) {
         return parent
                 .<Result<T, E>>map(Ok::new)

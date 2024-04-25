@@ -1,6 +1,7 @@
 package com.meti.option;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface Option<T> {
     <R> Option<R> map(Function<T, R> mapper);
@@ -12,4 +13,6 @@ public interface Option<T> {
     default <R> R into(Function<Option<T>, R> mapper) {
         return mapper.apply(this);
     }
+
+    T orElseGet(Supplier<T> supplier);
 }

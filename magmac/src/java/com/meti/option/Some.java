@@ -1,6 +1,7 @@
 package com.meti.option;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
     @Override
@@ -16,5 +17,10 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public T orElse(T value) {
         return this.value;
+    }
+
+    @Override
+    public T orElseGet(Supplier<T> supplier) {
+        return value;
     }
 }

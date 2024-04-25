@@ -5,14 +5,13 @@ import com.meti.collect.Range;
 import com.meti.collect.Tuple;
 import com.meti.node.Attribute;
 import com.meti.node.MapNode;
+import com.meti.node.Node;
+import com.meti.node.StringAttribute;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -142,46 +141,61 @@ public class Compiler {
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
                 var modifiersAndType = separator.a();
                 var name = separator.b();
+                var withName = MapNode.Builder(new JavaString("definition"))
+                        .withString("name", name);
 
                 var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
                     var modifiersString = lastIndex.a().strip();
                     var typeString = lastIndex.b().strip();
 
                     var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
-                    return new Tuple<Set<JavaString>, JavaString>(modifiers, typeString);
-                }).orElse(new Tuple<>(new HashSet<>(), modifiersAndType));
 
-                var outputType = compileType(tuple.b());
+                    return withName.withListOfStrings("modifiers", new ArrayList<>(modifiers)).withString("type", typeString);
+                }).orElseGet(() -> {
+                    return withName.withListOfStrings("modifiers", new ArrayList<>(Collections.emptyList())).withString("type", modifiersAndType);
+                });
 
                 var b = valueSlices.b().strip();
-                var after = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
+                var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
+                var built = tuple.withString("value", value).complete();
 
-                var modifiers = tuple.a();
+                var modifiers = built.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
+                var outputType = compileType(built.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
+                var withNewType = built.with("type", new StringAttribute(outputType)).orElse(built);
 
-                JavaString modifierString;
-                if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
-                else modifierString = modifiers.stream()
-                        .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
-                        .map(modifier -> modifier.concat(new JavaString(" ")))
-                        .reduce(JavaString::concat)
-                        .orElse(JavaString.EMPTY);
+                var parsed = parseDefinition(withNewType);
 
-                var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
-                        ? CONST_KEYWORD_WITH_SPACE
-                        : LET_KEYWORD_WITH_SPACE);
-
-                var built = MapNode.Builder(new JavaString("definition"))
-                        .withString("modifierString", modifierString)
-                        .withString("mutabilityString", mutabilityString)
-                        .withString("name", name)
-                        .withString("outputType", outputType)
-                        .withString("after", after)
-                        .complete();
-
-                var rendered = renderMagmaDefinition(built);
+                var rendered = renderMagmaDefinition(parsed);
                 return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
             });
         });
+    }
+
+    private static MapNode parseDefinition(Node node) {
+        var modifiers = node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
+        var name = node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var type = node.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var value = node.apply("value").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+
+        JavaString modifierString;
+        if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
+        else modifierString = modifiers.stream()
+                .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
+                .map(modifier -> modifier.concat(new JavaString(" ")))
+                .reduce(JavaString::concat)
+                .orElse(JavaString.EMPTY);
+
+        var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
+                ? CONST_KEYWORD_WITH_SPACE
+                : LET_KEYWORD_WITH_SPACE);
+
+        return MapNode.Builder(new JavaString("definition"))
+                .withString("modifierString", modifierString)
+                .withString("mutabilityString", mutabilityString)
+                .withString("name", name)
+                .withString("outputType", type)
+                .withString("after", value)
+                .complete();
     }
 
     private static JavaString compileType(JavaString inputType) {

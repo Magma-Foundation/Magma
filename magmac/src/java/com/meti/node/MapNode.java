@@ -7,6 +7,7 @@ import com.meti.option.Some;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapNode implements Node {
@@ -31,6 +32,17 @@ public class MapNode implements Node {
         }
     }
 
+    @Override
+    public Option<Node> with(String name, Attribute attribute) {
+        if (attributeMap.containsKey(name)) {
+            var copy = new HashMap<>(attributeMap);
+            copy.put(name, attribute);
+            return new Some<>(new MapNode(this.name, copy));
+        } else {
+            return new None<>();
+        }
+    }
+
     public record Builder(JavaString name, Map<String, Attribute> attributeMap) {
         public Builder withString(String key, JavaString value) {
             var copy = new HashMap<>(attributeMap);
@@ -40,6 +52,12 @@ public class MapNode implements Node {
 
         public MapNode complete() {
             return new MapNode(name, attributeMap);
+        }
+
+        public Builder withListOfStrings(String key, List<JavaString> values) {
+            var copy = new HashMap<>(attributeMap);
+            copy.put(key, new StringListAttribute(values));
+            return new Builder(name, copy);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.meti.option;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
     @Override
@@ -16,5 +17,10 @@ public class None<T> implements Option<T> {
     @Override
     public T orElse(T value) {
         return value;
+    }
+
+    @Override
+    public T orElseGet(Supplier<T> supplier) {
+        return supplier.get();
     }
 }
