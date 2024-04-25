@@ -150,7 +150,7 @@ public class Compiler {
         });
     }
 
-    private static Option<MapNode> lexDefinition(JavaString inputContent) {
+    private static Option<Node> lexDefinition(JavaString inputContent) {
         return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
             var before = valueSlices.a().strip();
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
@@ -177,7 +177,7 @@ public class Compiler {
         });
     }
 
-    private static MapNode parseDefinition(Node node) {
+    private static Node parseDefinition(Node node) {
         var modifiers = node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
         var name = node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
         var type = node.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
@@ -255,7 +255,7 @@ public class Compiler {
         return new JavaString(renderMagmaImportUnsafe(parent.value(), child.value()));
     }
 
-    private static JavaString renderMagmaDefinition(MapNode node) {
+    private static JavaString renderMagmaDefinition(Node node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
                 node.apply("modifierString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
