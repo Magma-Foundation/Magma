@@ -69,7 +69,7 @@ public class Compiler {
     }
 
     public static JavaString run(JavaString input) {
-        var lines = getSplit(input);
+        var lines = split(input);
 
         var imports = lines.subList(0, lines.size() - 1);
         var classString = lines.get(lines.size() - 1);
@@ -144,7 +144,7 @@ public class Compiler {
         return new JavaString(compileImport(beforeString1.value()));
     }
 
-    private static List<JavaString> getSplit(JavaString input) {
+    private static List<JavaString> split(JavaString input) {
         return split(input.value()).stream().map(JavaString::new).collect(Collectors.toList());
     }
 
