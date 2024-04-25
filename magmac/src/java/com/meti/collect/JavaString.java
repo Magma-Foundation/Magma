@@ -4,6 +4,10 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public record JavaString(String value) {
     public static final JavaString EMPTY = new JavaString("");
 
@@ -54,5 +58,25 @@ public record JavaString(String value) {
 
     public JavaString sliceTo(Index end) {
         return new JavaString(this.value.substring(0, end.value()));
+    }
+
+    public Option<Tuple<JavaString, JavaString>> splitAtFirstIndexOfCharExclusive(char c) {
+        return firstIndexOfChar(c).map(index -> {
+            return new Tuple<>(sliceTo(index), sliceFrom(index.next().orElse(end())));
+        });
+    }
+
+    public Index end() {
+        return createIndex(this.value.length());
+    }
+
+    public List<JavaString> splitBySlice(String sliceRegex) {
+        return Arrays.stream(this.value.split(sliceRegex))
+                .map(JavaString::new)
+                .collect(Collectors.toList());
+    }
+
+    public boolean equalsToSlice(String slice) {
+        return this.value.equals(slice);
     }
 }

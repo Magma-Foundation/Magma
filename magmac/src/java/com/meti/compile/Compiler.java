@@ -2,11 +2,14 @@ package com.meti.compile;
 
 import com.meti.collect.JavaString;
 import com.meti.collect.Range;
+import com.meti.collect.Tuple;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -15,7 +18,7 @@ public class Compiler {
     public static final String PUBLIC_KEYWORD = "public";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = PUBLIC_KEYWORD + " ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
-    public static final String STATEMENT_END = ";";
+    public static final char STATEMENT_END = ';';
     public static final String STATIC_KEYWORD = "static";
     public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
     public static final char BLOCK_START = '{';
@@ -24,7 +27,7 @@ public class Compiler {
     public static final String I32_KEYWORD = "I32";
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
-    public static final String VALUE_SEPARATOR = "=";
+    public static final char VALUE_SEPARATOR = '=';
     public static final String FINAL_KEYWORD = "final";
     public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
@@ -99,12 +102,8 @@ public class Compiler {
 
                     return contentStart.next().map(afterContentStart -> {
                         var inputContent = classString.sliceBetween(afterContentStart, contentEnd);
-                        var outputContent = compileDefinition(inputContent);
-                        JavaString result;
-                        if (outputContent.isEmpty()) {
-                            result = renderMagmaFunction(modifierString, className, JavaString.EMPTY);
-                        } else {
-                            var content = outputContent.get();
+
+                        return compileDefinition(inputContent).map(content -> {
                             var instanceValue = content.findInstanceValue().orElse(JavaString.EMPTY);
                             var instanceFunction = renderMagmaFunction(modifierString, className, instanceValue);
                             var staticValueOptional = content.findStaticValue();
@@ -113,10 +112,8 @@ public class Compiler {
                                     .map(staticValue -> renderObject(className, staticValue))
                                     .orElse(JavaString.EMPTY);
 
-                            result = instanceFunction.concat(objectString);
-                        }
-
-                        return result;
+                            return instanceFunction.concat(objectString);
+                        }).orElse(renderMagmaFunction(modifierString, className, JavaString.EMPTY));
                     });
                 });
             });
@@ -135,8 +132,51 @@ public class Compiler {
         return renderMagmaFunctionUnsafe(modifierString.value(), className.value(), content.value());
     }
 
-    private static Optional<StateResult> compileDefinition(JavaString inputContent) {
-        return compileDefinition(inputContent.value());
+
+    private static Option<StateResult> compileDefinition(JavaString inputContent) {
+        return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
+            var before = valueSlices.a().strip();
+            return before.lastIndexOfChar(' ').flatMap(separator -> {
+                return separator.next().map(nextSeparator -> {
+                    var name = before.sliceFrom(nextSeparator);
+                    var modifiersAndType = before.sliceTo(separator);
+
+                    var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
+                        var modifiersString = lastIndex.a().strip();
+                        var typeString = lastIndex.b().strip();
+
+                        var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
+                        return new Tuple<>(modifiers, typeString);
+                    }).orElse(new Tuple<>(new HashSet<>(), modifiersAndType));
+
+                    var outputType = compileType(tuple);
+
+                    var b = valueSlices.b().strip();
+                    var after = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
+
+                    var modifiers = tuple.a();
+
+                    JavaString modifierString;
+                    if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
+                    else modifierString = modifiers.stream()
+                            .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
+                            .map(modifier -> modifier.concat(new JavaString(" ")))
+                            .reduce(JavaString::concat)
+                            .orElse(JavaString.EMPTY);
+
+                    var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
+                            ? CONST_KEYWORD_WITH_SPACE
+                            : LET_KEYWORD_WITH_SPACE);
+
+                    var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
+                    return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
+                });
+            });
+        });
+    }
+
+    private static JavaString compileType(Tuple<HashSet<JavaString>, JavaString> tuple) {
+        return new JavaString(compileTypeUnsafe(tuple.b().value()));
     }
 
     private static List<JavaString> split(JavaString input) {
@@ -186,53 +226,16 @@ public class Compiler {
         return new JavaString(renderMagmaImportUnsafe(parent.value(), child.value()));
     }
 
-    private static Optional<StateResult> compileDefinition(String inputContent) {
-        var valueSeparatorIndex = inputContent.indexOf(VALUE_SEPARATOR);
-        if (valueSeparatorIndex == -1) return Optional.empty();
-
-        var before = inputContent.substring(0, valueSeparatorIndex).strip();
-        var separator = before.lastIndexOf(' ');
-
-        var name = before.substring(separator + 1);
-
-        var modifiersAndType = before.substring(0, separator);
-
-        Set<String> modifiers;
-        String inputType;
-
-        var lastIndex = modifiersAndType.indexOf(' ');
-        if (lastIndex == -1) {
-            inputType = modifiersAndType;
-            modifiers = Collections.emptySet();
-        } else {
-            var modifiersString = modifiersAndType.substring(0, lastIndex).strip();
-            var typeString = modifiersAndType.substring(lastIndex + 1).strip();
-
-            modifiers = new HashSet<>(Arrays.asList(modifiersString.split(" ")));
-            inputType = typeString;
-        }
-
-        var outputType = compileType(inputType);
-
-        var after = inputContent.substring(valueSeparatorIndex + 1, inputContent.lastIndexOf(STATEMENT_END)).strip();
-        var modifierString = modifiers.isEmpty() ? "" : modifiers.stream()
-                .filter(modifier -> modifier.equals(PUBLIC_KEYWORD))
-                .map(modifier -> modifier + " ")
-                .collect(Collectors.joining());
-
-        var mutabilityString = modifiers.contains(FINAL_KEYWORD)
-                ? CONST_KEYWORD_WITH_SPACE
-                : LET_KEYWORD_WITH_SPACE;
-
-        var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
-        return Optional.of(modifiers.contains(STATIC_KEYWORD) ? new StaticResult(rendered) : new InstanceResult(rendered));
+    private static JavaString renderMagmaDefinition(JavaString modifierString, JavaString mutabilityString, JavaString name, JavaString outputType, JavaString after) {
+        return new JavaString(renderMagmaDefinitionUnsafe(
+                modifierString.value(),
+                mutabilityString.value(),
+                name.value(),
+                outputType.value(),
+                after.value()));
     }
 
-    private static JavaString renderMagmaDefinition(String modifierString, String mutabilityString, String name, String outputType, String after) {
-        return new JavaString(renderMagmaDefinitionUnsafe(modifierString, mutabilityString, name, outputType, after));
-    }
-
-    private static String compileType(String inputType) {
+    private static String compileTypeUnsafe(String inputType) {
         return switch (inputType) {
             case INT_KEYWORD -> I32_KEYWORD;
             case LONG_KEYWORD -> I64_KEYWORD;
