@@ -14,6 +14,7 @@ public class ApplicationTest {
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
+    public static final String TEST_LOWER_SYMBOL = "test";
 
     private static String renderMagmaImport(String parent, String child) {
         return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
@@ -83,12 +84,13 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
-        assertEquals(renderMagmaImport("parent", child) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport("parent", child))));
+        assertEquals(renderMagmaImport(TEST_LOWER_SYMBOL, child) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, child))));
     }
 
     @Test
     void importParent() {
-
+        var otherParent = "foo";
+        assertEquals(renderMagmaImport(otherParent, TEST_UPPER_SYMBOL) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport(otherParent, TEST_UPPER_SYMBOL))));
     }
 
     @ParameterizedTest
