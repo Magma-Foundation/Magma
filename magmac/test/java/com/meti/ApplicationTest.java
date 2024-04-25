@@ -7,12 +7,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
-
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
     public static final String CLASS_END = " {}";
     public static final String TEST_UPPER_SYMBOL = "Test";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
+    public static final String JAVA_IMPORT = "import parent.Child;";
+    public static final String MAGMA_IMPORT = "import { Child } from parent;";
 
     private static String renderMagmaFunction(String name) {
         return renderMagmaFunction("", name);
@@ -23,6 +24,24 @@ public class ApplicationTest {
     }
 
     private static String run(String input) {
+        var separator = input.indexOf(';');
+        if (separator == -1) return compileClass(input);
+
+        var beforeString = input.substring(0, separator + 1);
+        var afterString = input.substring(separator + 1);
+        var afterContent = compileClass(afterString);
+
+        String newBefore;
+        if (beforeString.equals(JAVA_IMPORT)) {
+            newBefore = MAGMA_IMPORT;
+        } else {
+            newBefore = "";
+        }
+
+        return newBefore + afterContent;
+    }
+
+    private static String compileClass(String input) {
         var classIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
         if (classIndex == -1) throw new UnsupportedOperationException("No class present.");
 
@@ -40,10 +59,23 @@ public class ApplicationTest {
         return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + CLASS_END;
     }
 
+    private static String renderMagmaFunction() {
+        return renderMagmaFunction(TEST_UPPER_SYMBOL);
+    }
+
+    private static String renderBeforeClass(String input) {
+        return input + renderJavaClass(TEST_UPPER_SYMBOL);
+    }
+
+    @Test
+    void importStatement() {
+        assertEquals(MAGMA_IMPORT + renderMagmaFunction(), run(renderBeforeClass(JAVA_IMPORT)));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertEquals(renderMagmaFunction(TEST_UPPER_SYMBOL), run("package " + name + ";" + renderJavaClass(TEST_UPPER_SYMBOL)));
+        assertEquals(renderMagmaFunction(), run(renderBeforeClass("package " + name + ";")));
     }
 
     @Test
