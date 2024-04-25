@@ -30,10 +30,11 @@ public class ApplicationTest {
         return Compiler.renderJavaClass(TEST_UPPER_SYMBOL);
     }
 
-    @Test
-    void definitionName() {
-        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, "int x = 0;"),
-                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, "let x : I32 = 0;"));
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void definitionName(String name) {
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(name)),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(name)));
     }
 
     @ParameterizedTest

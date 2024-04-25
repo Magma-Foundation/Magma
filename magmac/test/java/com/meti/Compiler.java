@@ -11,13 +11,20 @@ public class Compiler {
     public static final String STATEMENT_END = ";";
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
     public static final String BLOCK_START = "{";
+    public static final String BLOCK_END = "}";
+    public static final String INT_TYPE_WITH_SPACE = "int ";
+    public static final String DEFINITION_END = " = 0;";
 
-    private static String renderBlock() {
-        return renderBlock("");
+    public static String renderJavaDefinition(String name) {
+        return INT_TYPE_WITH_SPACE + name + DEFINITION_END;
+    }
+
+    public static String renderMagmaDefinition(String name) {
+        return "let " + name + " : I32" + DEFINITION_END;
     }
 
     private static String renderBlock(String content) {
-        return BLOCK_START + content + "}";
+        return BLOCK_START + content + BLOCK_END;
     }
 
     static String renderMagmaImport(String parent, String child) {
@@ -37,25 +44,7 @@ public class Compiler {
     }
 
     static String run(String input) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-        for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if(c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
-                builder.append(c);
-            }
-        }
-
-        lines.add(builder.toString());
-
-        if (lines.isEmpty()) return "";
-
+        var lines = split(input);
         var imports = lines.subList(0, lines.size() - 1);
         var classString = lines.get(lines.size() - 1);
 
@@ -65,6 +54,26 @@ public class Compiler {
 
         var compiledClass = compileClass(classString);
         return beforeString + compiledClass;
+    }
+
+    private static ArrayList<String> split(String input) {
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if (c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '{') depth++;
+                if (c == '}') depth--;
+                builder.append(c);
+            }
+        }
+
+        lines.add(builder.toString());
+        return lines;
     }
 
     private static String compileImport(String beforeString) {
@@ -86,11 +95,23 @@ public class Compiler {
         if (classIndex == -1) throw new UnsupportedOperationException("No class present.");
 
         var nameStart = classIndex + CLASS_KEYWORD_WITH_SPACE.length();
-        var nameEnd = input.indexOf(BLOCK_START);
-        var name = input.substring(nameStart, nameEnd).strip();
+        var contentStart = input.indexOf(BLOCK_START);
+        var contentEnd = input.lastIndexOf(BLOCK_END);
+
+        var className = input.substring(nameStart, contentStart).strip();
         var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
 
-        return renderMagmaFunction(modifierString, name);
+        var inputContent = input.substring(contentStart + 1, contentEnd);
+        var outputContent = compileDefinition(inputContent);
+
+        return renderMagmaFunction(modifierString, className, outputContent);
+    }
+
+    private static String compileDefinition(String inputContent) {
+        if (!inputContent.startsWith(INT_TYPE_WITH_SPACE)) return "";
+
+        var definitionName = inputContent.substring(INT_TYPE_WITH_SPACE.length(), inputContent.indexOf(DEFINITION_END));
+        return renderMagmaDefinition(definitionName);
     }
 
     static String renderJavaClass(String name) {
