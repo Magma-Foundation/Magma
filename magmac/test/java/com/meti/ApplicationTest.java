@@ -12,8 +12,12 @@ public class ApplicationTest {
     public static final String TEST_UPPER_SYMBOL = "Test";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
-    public static final String JAVA_IMPORT = "import parent.Child;";
-    public static final String MAGMA_IMPORT = "import { Child } from parent;";
+    public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
+    public static final String STATEMENT_END = ";";
+
+    private static String renderMagmaImport(String parent, String child) {
+        return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
+    }
 
     private static String renderMagmaFunction(String name) {
         return renderMagmaFunction("", name);
@@ -31,14 +35,19 @@ public class ApplicationTest {
         var afterString = input.substring(separator + 1);
         var afterContent = compileClass(afterString);
 
-        String newBefore;
-        if (beforeString.equals(JAVA_IMPORT)) {
-            newBefore = MAGMA_IMPORT;
-        } else {
-            newBefore = "";
-        }
-
+        var newBefore = compileImport(beforeString);
         return newBefore + afterContent;
+    }
+
+    private static String compileImport(String beforeString) {
+        if (!beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
+
+        var set = beforeString.substring(IMPORT_KEYWORD_WITH_SPACE.length(), beforeString.indexOf(STATEMENT_END));
+        var last = set.lastIndexOf('.');
+        var parent = set.substring(0, last);
+        var child = set.substring(last + 1);
+
+        return renderMagmaImport(parent, child);
     }
 
     private static String compileClass(String input) {
@@ -67,15 +76,25 @@ public class ApplicationTest {
         return input + renderJavaClass(TEST_UPPER_SYMBOL);
     }
 
+    private static String renderJavaImport(String parent, String child) {
+        return IMPORT_KEYWORD_WITH_SPACE + parent + "." + child + STATEMENT_END;
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"First", "Second"})
+    void importChildren(String child) {
+        assertEquals(renderMagmaImport("parent", child) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport("parent", child))));
+    }
+
     @Test
-    void importStatement() {
-        assertEquals(MAGMA_IMPORT + renderMagmaFunction(), run(renderBeforeClass(JAVA_IMPORT)));
+    void importParent() {
+
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertEquals(renderMagmaFunction(), run(renderBeforeClass("package " + name + ";")));
+        assertEquals(renderMagmaFunction(), run(renderBeforeClass("package " + name + STATEMENT_END)));
     }
 
     @Test
