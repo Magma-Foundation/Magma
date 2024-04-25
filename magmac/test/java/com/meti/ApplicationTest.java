@@ -40,6 +40,12 @@ public class ApplicationTest {
         return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + CLASS_END;
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void packageStatement(String name) {
+        assertEquals(renderMagmaFunction(TEST_UPPER_SYMBOL), run("package " + name + ";" + renderJavaClass(TEST_UPPER_SYMBOL)));
+    }
+
     @Test
     void classPublic() {
         assertEquals(renderMagmaFunction(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), run(renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL)));
