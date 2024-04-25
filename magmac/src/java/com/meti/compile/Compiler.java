@@ -3,6 +3,8 @@ package com.meti.compile;
 import com.meti.collect.JavaString;
 import com.meti.collect.Range;
 import com.meti.collect.Tuple;
+import com.meti.node.Attribute;
+import com.meti.node.MapNode;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
@@ -168,7 +170,15 @@ public class Compiler {
                         ? CONST_KEYWORD_WITH_SPACE
                         : LET_KEYWORD_WITH_SPACE);
 
-                var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
+                var built = MapNode.Builder(new JavaString("definition"))
+                        .withString("modifierString", modifierString)
+                        .withString("mutabilityString", mutabilityString)
+                        .withString("name", name)
+                        .withString("outputType", outputType)
+                        .withString("after", after)
+                        .complete();
+
+                var rendered = renderMagmaDefinition(built);
                 return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
             });
         });
@@ -225,13 +235,13 @@ public class Compiler {
         return new JavaString(renderMagmaImportUnsafe(parent.value(), child.value()));
     }
 
-    private static JavaString renderMagmaDefinition(JavaString modifierString, JavaString mutabilityString, JavaString name, JavaString outputType, JavaString after) {
+    private static JavaString renderMagmaDefinition(MapNode node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
-                modifierString.value(),
-                mutabilityString.value(),
-                name.value(),
-                outputType.value(),
-                after.value()));
+                node.apply("modifierString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                node.apply("after").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()));
     }
 
     private static String compileTypeUnsafe(String inputType) {
