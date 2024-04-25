@@ -136,41 +136,39 @@ public class Compiler {
     private static Option<StateResult> compileDefinition(JavaString inputContent) {
         return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
             var before = valueSlices.a().strip();
-            return before.lastIndexOfChar(' ').flatMap(separator -> {
-                return separator.next().map(nextSeparator -> {
-                    var name = before.sliceFrom(nextSeparator);
-                    var modifiersAndType = before.sliceTo(separator);
+            return before.splitAtFirstIndexOfCharExclusive(' ').map(separator -> {
+                var modifiersAndType = separator.a();
+                var name = separator.b();
 
-                    var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
-                        var modifiersString = lastIndex.a().strip();
-                        var typeString = lastIndex.b().strip();
+                var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
+                    var modifiersString = lastIndex.a().strip();
+                    var typeString = lastIndex.b().strip();
 
-                        var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
-                        return new Tuple<>(modifiers, typeString);
-                    }).orElse(new Tuple<>(new HashSet<>(), modifiersAndType));
+                    var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
+                    return new Tuple<>(modifiers, typeString);
+                }).orElse(new Tuple<>(new HashSet<>(), modifiersAndType));
 
-                    var outputType = compileType(tuple);
+                var outputType = compileType(tuple);
 
-                    var b = valueSlices.b().strip();
-                    var after = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
+                var b = valueSlices.b().strip();
+                var after = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
 
-                    var modifiers = tuple.a();
+                var modifiers = tuple.a();
 
-                    JavaString modifierString;
-                    if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
-                    else modifierString = modifiers.stream()
-                            .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
-                            .map(modifier -> modifier.concat(new JavaString(" ")))
-                            .reduce(JavaString::concat)
-                            .orElse(JavaString.EMPTY);
+                JavaString modifierString;
+                if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
+                else modifierString = modifiers.stream()
+                        .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
+                        .map(modifier -> modifier.concat(new JavaString(" ")))
+                        .reduce(JavaString::concat)
+                        .orElse(JavaString.EMPTY);
 
-                    var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
-                            ? CONST_KEYWORD_WITH_SPACE
-                            : LET_KEYWORD_WITH_SPACE);
+                var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
+                        ? CONST_KEYWORD_WITH_SPACE
+                        : LET_KEYWORD_WITH_SPACE);
 
-                    var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
-                    return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
-                });
+                var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
+                return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
             });
         });
     }
