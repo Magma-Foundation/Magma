@@ -10,7 +10,8 @@ public class Compiler {
     public static final String PUBLIC_KEYWORD_WITH_SPACE = PUBLIC_KEYWORD + " ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
-    public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
+    public static final String STATIC_KEYWORD = "static";
+    public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
     public static final String INT_KEYWORD = "int";
@@ -123,13 +124,23 @@ public class Compiler {
 
         var inputContent = input.substring(contentStart + 1, contentEnd);
         var outputContent = compileDefinition(inputContent);
+        if (outputContent.isEmpty()) return renderMagmaFunction(modifierString, className, "");
 
-        return renderMagmaFunction(modifierString, className, outputContent);
+        var content = outputContent.get();
+        var instanceValue = content.findInstanceValue().orElse("");
+        var instanceFunction = renderMagmaFunction(modifierString, className, instanceValue);
+
+        var staticValueOptional = content.findStaticValue();
+        var objectString = staticValueOptional
+                .map(staticValue -> renderObject(className, staticValue))
+                .orElse("");
+
+        return instanceFunction + objectString;
     }
 
-    private static String compileDefinition(String inputContent) {
+    private static Optional<Result> compileDefinition(String inputContent) {
         var valueSeparatorIndex = inputContent.indexOf(VALUE_SEPARATOR);
-        if (valueSeparatorIndex == -1) return "";
+        if (valueSeparatorIndex == -1) return Optional.empty();
 
         var before = inputContent.substring(0, valueSeparatorIndex).strip();
         var separator = before.lastIndexOf(' ');
@@ -165,7 +176,8 @@ public class Compiler {
                 ? CONST_KEYWORD_WITH_SPACE
                 : LET_KEYWORD_WITH_SPACE;
 
-        return renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
+        var rendered = renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
+        return Optional.of(modifiers.contains(STATIC_KEYWORD) ? new StaticResult(rendered) : new InstanceResult(rendered));
     }
 
     private static String compileType(String inputType) {
@@ -198,5 +210,9 @@ public class Compiler {
 
     static String renderBeforeFunction(String before) {
         return before + ApplicationTest.renderMagmaFunction();
+    }
+
+    static String renderObject(String name, String content) {
+        return "object " + name + " " + BLOCK_START + content + BLOCK_END;
     }
 }

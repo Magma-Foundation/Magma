@@ -65,6 +65,12 @@ public class ApplicationTest {
                 renderMagmaDefinition("", CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
+    @Test
+    void definitionStatic() {
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(STATIC_KEYWORD_WITH_SPACE, LONG_KEYWORD, TEST_LOWER_SYMBOL, "0")),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, "") + renderObject(TEST_UPPER_SYMBOL, renderMagmaDefinition("", TEST_LOWER_SYMBOL, I64_KEYWORD, "0")));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
