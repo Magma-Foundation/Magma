@@ -164,7 +164,10 @@ public class Compiler {
 
                     var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
 
-                    return withName.withListOfStrings("modifiers", new ArrayList<>(modifiers)).withString("type", typeString);
+                    var modifiers1 = withName.withListOfStrings("modifiers", new ArrayList<>(modifiers));
+
+                    var applied = new CaptureRule("type").apply(typeString).orElse(new MapNodePrototype());
+                    return modifiers1.merge(applied);
                 }).orElseGet(() -> {
                     return withName.withListOfStrings("modifiers", new ArrayList<>(Collections.emptyList())).withString("type", modifiersAndType);
                 });
