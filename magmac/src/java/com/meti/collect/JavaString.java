@@ -43,4 +43,16 @@ public record JavaString(String value) {
     public JavaString strip() {
         return new JavaString(this.value.strip());
     }
+
+    public boolean startsWithSlice(String slice) {
+        return this.value.startsWith(slice);
+    }
+
+    public JavaString sliceFrom(Index start) {
+        return new JavaString(this.value.substring(start.value()));
+    }
+
+    public JavaString sliceTo(Index end) {
+        return new JavaString(this.value.substring(0, end.value()));
+    }
 }

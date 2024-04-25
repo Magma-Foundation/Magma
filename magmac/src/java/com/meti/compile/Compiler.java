@@ -1,6 +1,8 @@
 package com.meti.compile;
 
 import com.meti.collect.JavaString;
+import com.meti.collect.Range;
+import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 
@@ -52,7 +54,7 @@ public class Compiler {
         return BLOCK_START + content + BLOCK_END;
     }
 
-    public static String renderMagmaImport(String parent, String child) {
+    public static String renderMagmaImportUnsafe(String parent, String child) {
         return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
     }
 
@@ -76,6 +78,7 @@ public class Compiler {
 
         var beforeString = imports.stream()
                 .map(Compiler::compileImport)
+                .map(option -> option.orElse(JavaString.EMPTY))
                 .reduce(JavaString::concat)
                 .orElse(JavaString.EMPTY);
 
@@ -121,15 +124,11 @@ public class Compiler {
     }
 
     private static JavaString renderObject(JavaString className, JavaString staticValue) {
-        return new JavaString(renderObjectUnsafe(className, staticValue));
+        return new JavaString(renderObjectUnsafe(className.value(), staticValue.value()));
     }
 
     private static JavaString renderMagmaFunction(JavaString modifierString, JavaString name, JavaString content) {
         return new JavaString(renderMagmaFunctionUnsafe(modifierString, name, content));
-    }
-
-    private static String renderObjectUnsafe(JavaString className, JavaString staticValue) {
-        return renderObjectUnsafe(className.value(), staticValue.value());
     }
 
     private static String renderMagmaFunctionUnsafe(JavaString modifierString, JavaString className, JavaString content) {
@@ -138,10 +137,6 @@ public class Compiler {
 
     private static Optional<StateResult> compileDefinition(JavaString inputContent) {
         return compileDefinition(inputContent.value());
-    }
-
-    private static JavaString compileImport(JavaString beforeString1) {
-        return new JavaString(compileImport(beforeString1.value()));
     }
 
     private static List<JavaString> split(JavaString input) {
@@ -168,18 +163,27 @@ public class Compiler {
         return lines;
     }
 
-    private static String compileImport(String beforeString) {
-        if (!beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
-        var segmentStart = beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE + STATIC_KEYWORD_WITH_SPACE)
-                ? (IMPORT_KEYWORD_WITH_SPACE + STATIC_KEYWORD_WITH_SPACE).length()
-                : IMPORT_KEYWORD_WITH_SPACE.length();
+    private static Option<JavaString> compileImport(JavaString beforeString) {
+        return beforeString.firstRangeOfSlice(IMPORT_KEYWORD_WITH_SPACE).flatMap(importString -> {
+            var segmentStart = beforeString.firstRangeOfSlice(IMPORT_KEYWORD_WITH_SPACE + STATIC_KEYWORD_WITH_SPACE)
+                    .map(Range::endIndex)
+                    .orElse(importString.endIndex());
 
-        var set = beforeString.substring(segmentStart);
-        var last = set.lastIndexOf('.');
-        var parent = set.substring(0, last);
-        var child = set.substring(last + 1);
+            var set = beforeString.sliceFrom(segmentStart);
+            return set.lastIndexOfChar('.').flatMap(last -> {
+                var parent = set.sliceTo(last);
 
-        return renderMagmaImport(parent, child);
+                return last.next().map(nextLast -> {
+                    var child = set.sliceFrom(nextLast);
+
+                    return renderMagmaImport(parent, child);
+                });
+            });
+        });
+    }
+
+    private static JavaString renderMagmaImport(JavaString parent, JavaString child) {
+        return new JavaString(renderMagmaImportUnsafe(parent.value(), child.value()));
     }
 
     private static Optional<StateResult> compileDefinition(String inputContent) {
@@ -259,5 +263,4 @@ public class Compiler {
     public static String renderObjectUnsafe(String name, String content) {
         return "object " + name + " " + BLOCK_START + content + BLOCK_END;
     }
-
 }
