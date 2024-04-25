@@ -15,7 +15,8 @@ public class ApplicationTest {
     public static final String TEST_LOWER_SYMBOL = "test";
 
     private static void assertRun(String input, String output) {
-        assertEquals(output, run(input));
+        JavaString input1 = new JavaString(input);
+        assertEquals(output, run(input1).value());
     }
 
     static String renderBeforeClass(String input) {

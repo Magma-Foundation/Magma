@@ -64,17 +64,31 @@ public class Compiler {
         return modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + " " + renderBlock(content);
     }
 
-    static String run(String input) {
-        var lines = split(input);
+    static JavaString run(JavaString input) {
+        var lines = getSplit(input);
+
         var imports = lines.subList(0, lines.size() - 1);
         var classString = lines.get(lines.size() - 1);
 
         var beforeString = imports.stream()
                 .map(Compiler::compileImport)
-                .collect(Collectors.joining());
+                .reduce(JavaString::concat)
+                .orElse(JavaString.EMPTY);
 
         var compiledClass = compileClass(classString);
-        return beforeString + compiledClass;
+        return beforeString.concat(compiledClass);
+    }
+
+    private static JavaString compileClass(JavaString classString) {
+        return new JavaString(compileClass(classString.value()));
+    }
+
+    private static JavaString compileImport(JavaString beforeString1) {
+        return new JavaString(compileImport(beforeString1.value()));
+    }
+
+    private static List<JavaString> getSplit(JavaString input) {
+        return split(input.value()).stream().map(JavaString::new).collect(Collectors.toList());
     }
 
     private static ArrayList<String> split(String input) {
