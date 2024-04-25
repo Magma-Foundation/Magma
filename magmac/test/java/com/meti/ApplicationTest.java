@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
@@ -29,21 +33,24 @@ public class ApplicationTest {
     }
 
     private static String run(String input) {
-        var separator = input.indexOf(';');
-        if (separator == -1) return compileClass(input);
+        var lines = Arrays.asList(input.split(";"));
+        if (lines.isEmpty()) return "";
 
-        var beforeString = input.substring(0, separator + 1);
-        var afterString = input.substring(separator + 1);
-        var afterContent = compileClass(afterString);
+        var imports = lines.subList(0, lines.size() - 1);
+        var classString = lines.getLast();
 
-        var newBefore = compileImport(beforeString);
-        return newBefore + afterContent;
+        var beforeString = imports.stream()
+                .map(ApplicationTest::compileImport)
+                .collect(Collectors.joining());
+
+        var compiledClass = compileClass(classString);
+        return beforeString + compiledClass;
     }
 
     private static String compileImport(String beforeString) {
         if (!beforeString.startsWith(IMPORT_KEYWORD_WITH_SPACE)) return "";
 
-        var set = beforeString.substring(IMPORT_KEYWORD_WITH_SPACE.length(), beforeString.indexOf(STATEMENT_END));
+        var set = beforeString.substring(IMPORT_KEYWORD_WITH_SPACE.length());
         var last = set.lastIndexOf('.');
         var parent = set.substring(0, last);
         var child = set.substring(last + 1);
@@ -81,32 +88,55 @@ public class ApplicationTest {
         return IMPORT_KEYWORD_WITH_SPACE + parent + "." + child + STATEMENT_END;
     }
 
+    private static void assertRun(String input, String output) {
+        assertEquals(output, run(input));
+    }
+
+    private static String renderBeforeFunction(String before) {
+        return before + renderMagmaFunction();
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
-        assertEquals(renderMagmaImport(TEST_LOWER_SYMBOL, child) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, child))));
+        assertRun(renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, child)), renderBeforeFunction(renderMagmaImport(TEST_LOWER_SYMBOL, child)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void importMultiple(int count) {
+        var inputBefore = IntStream.range(0, count)
+                .mapToObj(index -> renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index))
+                .collect(Collectors.joining());
+
+        var outputBefore = IntStream.range(0, count)
+                .mapToObj(index -> renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index))
+                .collect(Collectors.joining());
+
+        assertRun(renderBeforeClass(inputBefore), renderBeforeFunction(outputBefore));
+
     }
 
     @Test
     void importParent() {
         var otherParent = "foo";
-        assertEquals(renderMagmaImport(otherParent, TEST_UPPER_SYMBOL) + renderMagmaFunction(), run(renderBeforeClass(renderJavaImport(otherParent, TEST_UPPER_SYMBOL))));
+        assertRun(renderBeforeClass(renderJavaImport(otherParent, TEST_UPPER_SYMBOL)), renderBeforeFunction(renderMagmaImport(otherParent, TEST_UPPER_SYMBOL)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertEquals(renderMagmaFunction(), run(renderBeforeClass("package " + name + STATEMENT_END)));
+        assertRun(renderBeforeClass("package " + name + STATEMENT_END), renderMagmaFunction());
     }
 
     @Test
     void classPublic() {
-        assertEquals(renderMagmaFunction(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), run(renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL)));
+        assertRun(renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), renderMagmaFunction(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void className(String name) {
-        assertEquals(renderMagmaFunction(name), run(renderJavaClass(name)));
+        assertRun(renderJavaClass(name), renderMagmaFunction(name));
     }
 }
