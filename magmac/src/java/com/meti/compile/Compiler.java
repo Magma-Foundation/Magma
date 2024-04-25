@@ -1,4 +1,8 @@
-package com.meti;
+package com.meti.compile;
+
+import com.meti.collect.JavaString;
+import com.meti.option.ThrowableOption;
+import com.meti.result.Result;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,8 +16,8 @@ public class Compiler {
     public static final String STATEMENT_END = ";";
     public static final String STATIC_KEYWORD = "static";
     public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
-    public static final String BLOCK_START = "{";
-    public static final String BLOCK_END = "}";
+    public static final char BLOCK_START = '{';
+    public static final char BLOCK_END = '}';
     public static final String INT_KEYWORD = "int";
     public static final String I32_KEYWORD = "I32";
     public static final String LONG_KEYWORD = "long";
@@ -32,15 +36,15 @@ public class Compiler {
         return modifiersString + type + " " + name + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
-    public static String renderMagmaDefinition(String name, String type, String value) {
-        return renderMagmaDefinition("", name, type, value);
+    public static String renderMagmaDefinitionUnsafe(String name, String type, String value) {
+        return renderMagmaDefinitionUnsafe("", name, type, value);
     }
 
-    public static String renderMagmaDefinition(String modifierString, String name, String type, String value) {
-        return renderMagmaDefinition(modifierString, LET_KEYWORD_WITH_SPACE, name, type, value);
+    public static String renderMagmaDefinitionUnsafe(String modifierString, String name, String type, String value) {
+        return renderMagmaDefinitionUnsafe(modifierString, LET_KEYWORD_WITH_SPACE, name, type, value);
     }
 
-    public static String renderMagmaDefinition(String modifierString, String mutabilityString, String name, String type, String value) {
+    public static String renderMagmaDefinitionUnsafe(String modifierString, String mutabilityString, String name, String type, String value) {
         return modifierString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
@@ -48,23 +52,23 @@ public class Compiler {
         return BLOCK_START + content + BLOCK_END;
     }
 
-    static String renderMagmaImport(String parent, String child) {
+    public static String renderMagmaImport(String parent, String child) {
         return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
     }
 
-    static String renderMagmaFunction(String name) {
-        return renderMagmaFunction("", name);
+    public static String renderMagmaFunctionUnsafe(String name) {
+        return renderMagmaFunctionUnsafe("", name);
     }
 
-    static String renderMagmaFunction(String modifiersString, String name) {
-        return renderMagmaFunction(modifiersString, name, "");
+    public static String renderMagmaFunctionUnsafe(String modifiersString, String name) {
+        return renderMagmaFunctionUnsafe(modifiersString, name, "");
     }
 
-    static String renderMagmaFunction(String modifiersString, String name, String content) {
+    public static String renderMagmaFunctionUnsafe(String modifiersString, String name, String content) {
         return modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + " " + renderBlock(content);
     }
 
-    static JavaString run(JavaString input) {
+    public static JavaString run(JavaString input) {
         var lines = getSplit(input);
 
         var imports = lines.subList(0, lines.size() - 1);
@@ -75,12 +79,65 @@ public class Compiler {
                 .reduce(JavaString::concat)
                 .orElse(JavaString.EMPTY);
 
-        var compiledClass = compileClass(classString);
+        var compiledClass = compileClass(classString).$();
         return beforeString.concat(compiledClass);
     }
 
-    private static JavaString compileClass(JavaString classString) {
-        return new JavaString(compileClass(classString.value()));
+    private static Result<JavaString, UnsupportedOperationException> compileClass(JavaString classString) {
+        return classString.firstRangeOfSlice(CLASS_KEYWORD_WITH_SPACE).flatMap(classIndex -> {
+            return classString.firstIndexOfChar(BLOCK_START).flatMap(contentStart -> {
+                return classString.lastIndexOfChar(BLOCK_END).flatMap(contentEnd -> {
+                    var nameStart = classIndex.endIndex();
+
+                    var className = classString.sliceBetween(nameStart, contentStart).strip();
+                    var modifierString = classString.value().startsWith(PUBLIC_KEYWORD_WITH_SPACE)
+                            ? new JavaString(EXPORT_KEYWORD_WITH_SPACE)
+                            : JavaString.EMPTY;
+
+                    return contentStart.next().map(afterContentStart -> {
+                        var inputContent = classString.sliceBetween(afterContentStart, contentEnd);
+                        var outputContent = compileDefinition(inputContent);
+                        JavaString result;
+                        if (outputContent.isEmpty()) {
+                            result = renderMagmaFunction(modifierString, className, JavaString.EMPTY);
+                        } else {
+                            var content = outputContent.get();
+                            var instanceValue = content.findInstanceValue().orElse(JavaString.EMPTY);
+                            var instanceFunction = renderMagmaFunction(modifierString, className, instanceValue);
+                            var staticValueOptional = content.findStaticValue();
+
+                            var objectString = staticValueOptional
+                                    .map(staticValue -> renderObject(className, staticValue))
+                                    .orElse(JavaString.EMPTY);
+
+                            result = instanceFunction.concat(objectString);
+                        }
+
+                        return result;
+                    });
+                });
+            });
+        }).into(ThrowableOption::new).orElseThrow(() -> new UnsupportedOperationException("No class present."));
+    }
+
+    private static JavaString renderObject(JavaString className, JavaString staticValue) {
+        return new JavaString(renderObjectUnsafe(className, staticValue));
+    }
+
+    private static JavaString renderMagmaFunction(JavaString modifierString, JavaString name, JavaString content) {
+        return new JavaString(renderMagmaFunctionUnsafe(modifierString, name, content));
+    }
+
+    private static String renderObjectUnsafe(JavaString className, JavaString staticValue) {
+        return renderObjectUnsafe(className.value(), staticValue.value());
+    }
+
+    private static String renderMagmaFunctionUnsafe(JavaString modifierString, JavaString className, JavaString content) {
+        return renderMagmaFunctionUnsafe(modifierString.value(), className.value(), content.value());
+    }
+
+    private static Optional<StateResult> compileDefinition(JavaString inputContent) {
+        return compileDefinition(inputContent.value());
     }
 
     private static JavaString compileImport(JavaString beforeString1) {
@@ -125,34 +182,7 @@ public class Compiler {
         return renderMagmaImport(parent, child);
     }
 
-    private static String compileClass(String input) {
-        var classIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
-        if (classIndex == -1) throw new UnsupportedOperationException("No class present.");
-
-        var nameStart = classIndex + CLASS_KEYWORD_WITH_SPACE.length();
-        var contentStart = input.indexOf(BLOCK_START);
-        var contentEnd = input.lastIndexOf(BLOCK_END);
-
-        var className = input.substring(nameStart, contentStart).strip();
-        var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
-
-        var inputContent = input.substring(contentStart + 1, contentEnd);
-        var outputContent = compileDefinition(inputContent);
-        if (outputContent.isEmpty()) return renderMagmaFunction(modifierString, className, "");
-
-        var content = outputContent.get();
-        var instanceValue = content.findInstanceValue().orElse("");
-        var instanceFunction = renderMagmaFunction(modifierString, className, instanceValue);
-
-        var staticValueOptional = content.findStaticValue();
-        var objectString = staticValueOptional
-                .map(staticValue -> renderObject(className, staticValue))
-                .orElse("");
-
-        return instanceFunction + objectString;
-    }
-
-    private static Optional<Result> compileDefinition(String inputContent) {
+    private static Optional<StateResult> compileDefinition(String inputContent) {
         var valueSeparatorIndex = inputContent.indexOf(VALUE_SEPARATOR);
         if (valueSeparatorIndex == -1) return Optional.empty();
 
@@ -194,6 +224,10 @@ public class Compiler {
         return Optional.of(modifiers.contains(STATIC_KEYWORD) ? new StaticResult(rendered) : new InstanceResult(rendered));
     }
 
+    private static JavaString renderMagmaDefinition(String modifierString, String mutabilityString, String name, String outputType, String after) {
+        return new JavaString(renderMagmaDefinitionUnsafe(modifierString, mutabilityString, name, outputType, after));
+    }
+
     private static String compileType(String inputType) {
         return switch (inputType) {
             case INT_KEYWORD -> I32_KEYWORD;
@@ -202,27 +236,27 @@ public class Compiler {
         };
     }
 
-    static String renderJavaClass(String name) {
+    public static String renderJavaClass(String name) {
         return renderJavaClass("", name);
     }
 
-    static String renderJavaClass(String modifiersString, String name) {
+    public static String renderJavaClass(String modifiersString, String name) {
         return renderJavaClass(modifiersString, name, "");
     }
 
-    static String renderJavaClass(String modifiersString, String name, String content) {
+    public static String renderJavaClass(String modifiersString, String name, String content) {
         return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + renderBlock(content);
     }
 
-    static String renderJavaImport(String parent, String child) {
+    public static String renderJavaImport(String parent, String child) {
         return renderJavaImport(parent, child, "");
     }
 
-    static String renderJavaImport(String parent, String child, String modifierString) {
+    public static String renderJavaImport(String parent, String child, String modifierString) {
         return IMPORT_KEYWORD_WITH_SPACE + modifierString + parent + "." + child + STATEMENT_END;
     }
 
-    static String renderObject(String name, String content) {
+    public static String renderObjectUnsafe(String name, String content) {
         return "object " + name + " " + BLOCK_START + content + BLOCK_END;
     }
 
