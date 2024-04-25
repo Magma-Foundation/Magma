@@ -156,7 +156,7 @@ public class Compiler {
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
                 var modifiersAndType = separator.a();
                 var name = separator.b();
-                var withName = MapNode.Builder(new JavaString("definition"))
+                var withName = MapNode.Builder()
                         .withString("name", name);
 
                 var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
@@ -172,7 +172,7 @@ public class Compiler {
 
                 var b = valueSlices.b().strip();
                 var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
-                return tuple.withString("value", value).complete();
+                return tuple.withString("value", value).complete(new JavaString("definition"));
             });
         });
     }
@@ -195,13 +195,13 @@ public class Compiler {
                 ? CONST_KEYWORD_WITH_SPACE
                 : LET_KEYWORD_WITH_SPACE);
 
-        return MapNode.Builder(new JavaString("definition"))
+        return MapNode.Builder()
                 .withString("modifierString", modifierString)
                 .withString("mutabilityString", mutabilityString)
                 .withString("name", name)
                 .withString("outputType", type)
                 .withString("after", value)
-                .complete();
+                .complete(new JavaString("definition"));
     }
 
     private static JavaString compileType(JavaString inputType) {

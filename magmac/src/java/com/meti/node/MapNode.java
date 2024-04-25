@@ -19,8 +19,8 @@ public class MapNode implements Node {
         this.attributeMap = attributeMap;
     }
 
-    public static Builder Builder(JavaString name) {
-        return new Builder(name, Collections.emptyMap());
+    public static Builder Builder() {
+        return new Builder(Collections.emptyMap());
     }
 
     @Override
@@ -43,21 +43,21 @@ public class MapNode implements Node {
         }
     }
 
-    public record Builder(JavaString name, Map<String, Attribute> attributeMap) {
+    public record Builder(Map<String, Attribute> attributeMap) {
         public Builder withString(String key, JavaString value) {
             var copy = new HashMap<>(attributeMap);
             copy.put(key, new StringAttribute(value));
-            return new Builder(name, copy);
+            return new Builder(copy);
         }
 
-        public MapNode complete() {
+        public MapNode complete(JavaString name) {
             return new MapNode(name, attributeMap);
         }
 
         public Builder withListOfStrings(String key, List<JavaString> values) {
             var copy = new HashMap<>(attributeMap);
             copy.put(key, new StringListAttribute(values));
-            return new Builder(name, copy);
+            return new Builder(copy);
         }
     }
 }
