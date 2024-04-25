@@ -61,9 +61,7 @@ public record JavaString(String value) {
     }
 
     public Option<Tuple<JavaString, JavaString>> splitAtFirstIndexOfCharExclusive(char c) {
-        return firstIndexOfChar(c).map(index -> {
-            return new Tuple<>(sliceTo(index), sliceFrom(index.next().orElse(end())));
-        });
+        return firstIndexOfChar(c).map(index -> new Tuple<>(sliceTo(index), sliceFrom(index.next().orElse(end()))));
     }
 
     public Index end() {
@@ -78,5 +76,9 @@ public record JavaString(String value) {
 
     public boolean equalsToSlice(String slice) {
         return this.value.equals(slice);
+    }
+
+    public Option<Tuple<JavaString, JavaString>> splitAtLastIndexOfCharExclusive(char c) {
+        return lastIndexOfChar(c).map(index -> new Tuple<>(sliceTo(index), sliceFrom(index.next().orElse(end()))));
     }
 }

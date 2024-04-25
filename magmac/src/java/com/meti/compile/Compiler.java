@@ -10,6 +10,7 @@ import com.meti.result.Result;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Compiler {
@@ -136,7 +137,7 @@ public class Compiler {
     private static Option<StateResult> compileDefinition(JavaString inputContent) {
         return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
             var before = valueSlices.a().strip();
-            return before.splitAtFirstIndexOfCharExclusive(' ').map(separator -> {
+            return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
                 var modifiersAndType = separator.a();
                 var name = separator.b();
 
@@ -145,10 +146,10 @@ public class Compiler {
                     var typeString = lastIndex.b().strip();
 
                     var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
-                    return new Tuple<>(modifiers, typeString);
+                    return new Tuple<Set<JavaString>, JavaString>(modifiers, typeString);
                 }).orElse(new Tuple<>(new HashSet<>(), modifiersAndType));
 
-                var outputType = compileType(tuple);
+                var outputType = compileType(tuple.b());
 
                 var b = valueSlices.b().strip();
                 var after = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
@@ -173,8 +174,8 @@ public class Compiler {
         });
     }
 
-    private static JavaString compileType(Tuple<HashSet<JavaString>, JavaString> tuple) {
-        return new JavaString(compileTypeUnsafe(tuple.b().value()));
+    private static JavaString compileType(JavaString inputType) {
+        return new JavaString(compileTypeUnsafe(inputType.value()));
     }
 
     private static List<JavaString> split(JavaString input) {
