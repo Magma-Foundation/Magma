@@ -18,21 +18,21 @@ public class ApplicationTest {
         assertEquals(output, run(input));
     }
 
-    static String renderMagmaFunction() {
-        return Compiler.renderMagmaFunction(TEST_UPPER_SYMBOL);
-    }
-
     static String renderBeforeClass(String input) {
-        return input + renderJavaClass();
-    }
-
-    private static String renderJavaClass() {
-        return Compiler.renderJavaClass(TEST_UPPER_SYMBOL);
+        return input + Compiler.renderJavaClass(TEST_UPPER_SYMBOL);
     }
 
     private static void assertRunWithinClass(String input, String output) {
         assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, input),
                 Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, output));
+    }
+
+    static String renderBeforeFunction(String before) {
+        return before + renderMagmaFunction();
+    }
+
+    static String renderMagmaFunction() {
+        return Compiler.renderMagmaFunction(TEST_UPPER_SYMBOL);
     }
 
     @ParameterizedTest

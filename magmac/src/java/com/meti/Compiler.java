@@ -208,11 +208,8 @@ public class Compiler {
         return IMPORT_KEYWORD_WITH_SPACE + modifierString + parent + "." + child + STATEMENT_END;
     }
 
-    static String renderBeforeFunction(String before) {
-        return before + ApplicationTest.renderMagmaFunction();
-    }
-
     static String renderObject(String name, String content) {
         return "object " + name + " " + BLOCK_START + content + BLOCK_END;
     }
+
 }
