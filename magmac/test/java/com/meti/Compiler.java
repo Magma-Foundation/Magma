@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
-    public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
+    public static final String PUBLIC_KEYWORD = "public";
+    public static final String PUBLIC_KEYWORD_WITH_SPACE = PUBLIC_KEYWORD + " ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final String STATEMENT_END = ";";
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
@@ -17,6 +18,10 @@ public class Compiler {
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final String VALUE_SEPARATOR = "=";
+    public static final String FINAL_KEYWORD = "final";
+    public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
+    public static final String LET_KEYWORD_WITH_SPACE = "let ";
+    public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderJavaDefinition(String type, String name, String value) {
         return renderJavaDefinition("", type, name, value);
@@ -31,7 +36,11 @@ public class Compiler {
     }
 
     public static String renderMagmaDefinition(String modifierString, String name, String type, String value) {
-        return modifierString + "let " + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
+        return renderMagmaDefinition(modifierString, LET_KEYWORD_WITH_SPACE, name, type, value);
+    }
+
+    public static String renderMagmaDefinition(String modifierString, String mutabilityString, String name, String type, String value) {
+        return modifierString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
     private static String renderBlock(String content) {
@@ -147,21 +156,24 @@ public class Compiler {
         var outputType = compileType(inputType);
 
         var after = inputContent.substring(valueSeparatorIndex + 1, inputContent.lastIndexOf(STATEMENT_END)).strip();
-        var modifierString = modifiers.isEmpty() ? "" : modifiers.stream().map(modifier -> modifier + " ").collect(Collectors.joining());
+        var modifierString = modifiers.isEmpty() ? "" : modifiers.stream()
+                .filter(modifier -> modifier.equals(PUBLIC_KEYWORD))
+                .map(modifier -> modifier + " ")
+                .collect(Collectors.joining());
 
-        return renderMagmaDefinition(modifierString, name, outputType, after);
+        var mutabilityString = modifiers.contains(FINAL_KEYWORD)
+                ? CONST_KEYWORD_WITH_SPACE
+                : LET_KEYWORD_WITH_SPACE;
+
+        return renderMagmaDefinition(modifierString, mutabilityString, name, outputType, after);
     }
 
     private static String compileType(String inputType) {
-        String outputType;
-        if (inputType.equals(INT_KEYWORD)) {
-            outputType = I32_KEYWORD;
-        } else if (inputType.equals(LONG_KEYWORD)) {
-            outputType = I64_KEYWORD;
-        } else {
-            outputType = inputType;
-        }
-        return outputType;
+        return switch (inputType) {
+            case INT_KEYWORD -> I32_KEYWORD;
+            case LONG_KEYWORD -> I64_KEYWORD;
+            default -> inputType;
+        };
     }
 
     static String renderJavaClass(String name) {

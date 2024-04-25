@@ -59,6 +59,12 @@ public class ApplicationTest {
                 renderMagmaDefinition(PUBLIC_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
+    @Test
+    void definitionConst() {
+        assertRunWithinClass(renderJavaDefinition(FINAL_KEYWORD_WITH_SPACE, LONG_KEYWORD, TEST_LOWER_SYMBOL, "0"),
+                renderMagmaDefinition("", CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
@@ -81,7 +87,7 @@ public class ApplicationTest {
 
     @Test
     void importStatic() {
-        var input = renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, STATIC_KEYWORD_WITH_SPACE));
+        var input = renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, Compiler.STATIC_KEYWORD_WITH_SPACE));
         var output = renderBeforeFunction(renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL));
         assertRun(input, output);
     }
