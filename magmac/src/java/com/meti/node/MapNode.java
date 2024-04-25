@@ -5,7 +5,6 @@ import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,10 +15,6 @@ public class MapNode implements Node {
     public MapNode(JavaString name, Map<String, Attribute> attributeMap) {
         this.name = name;
         this.attributeMap = attributeMap;
-    }
-
-    public static NodePrototype Builder() {
-        return new MapNodePrototype(Collections.emptyMap());
     }
 
     @Override

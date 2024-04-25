@@ -2,13 +2,11 @@ package com.meti.compile;
 
 import com.meti.collect.JavaString;
 import com.meti.collect.Range;
-import com.meti.node.Attribute;
-import com.meti.node.MapNode;
-import com.meti.node.Node;
-import com.meti.node.StringAttribute;
+import com.meti.node.*;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
+import com.meti.rule.CaptureRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,9 +153,10 @@ public class Compiler {
             var before = valueSlices.a().strip();
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
                 var modifiersAndType = separator.a();
-                var name = separator.b();
-                var withName = MapNode.Builder()
-                        .withString("name", name);
+
+                var withName = new CaptureRule("name")
+                        .apply(separator.b())
+                        .orElse(new MapNodePrototype());
 
                 var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
                     var modifiersString = lastIndex.a().strip();
@@ -195,7 +194,7 @@ public class Compiler {
                 ? CONST_KEYWORD_WITH_SPACE
                 : LET_KEYWORD_WITH_SPACE);
 
-        return MapNode.Builder()
+        return ((NodePrototype) new MapNodePrototype())
                 .withString("modifierString", modifierString)
                 .withString("mutabilityString", mutabilityString)
                 .withString("name", name)
