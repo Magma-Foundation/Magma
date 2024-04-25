@@ -33,8 +33,14 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(name)),
-                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(name)));
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(name, INT_KEYWORD)),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(name, I32_KEYWORD)));
+    }
+
+    @Test
+    void definitionName() {
+        assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD)),
+                Compiler.renderMagmaFunction("", TEST_UPPER_SYMBOL, renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD)));
     }
 
     @ParameterizedTest

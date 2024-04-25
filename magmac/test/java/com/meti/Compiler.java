@@ -12,15 +12,19 @@ public class Compiler {
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
     public static final String BLOCK_START = "{";
     public static final String BLOCK_END = "}";
-    public static final String INT_TYPE_WITH_SPACE = "int ";
-    public static final String DEFINITION_END = " = 0;";
+    public static final String INT_KEYWORD = "int";
+    public static final String I32_KEYWORD = "I32";
+    public static final String LONG_KEYWORD = "long";
+    public static final String I64_KEYWORD = "I64";
+    public static final String VALUE_SEPARATOR = "=";
+    public static final String DEFINITION_END = " " + VALUE_SEPARATOR + " 0;";
 
-    public static String renderJavaDefinition(String name) {
-        return INT_TYPE_WITH_SPACE + name + DEFINITION_END;
+    public static String renderJavaDefinition(String name, String type) {
+        return type + " " + name + DEFINITION_END;
     }
 
-    public static String renderMagmaDefinition(String name) {
-        return "let " + name + " : I32" + DEFINITION_END;
+    public static String renderMagmaDefinition(String name, String type) {
+        return "let " + name + " : " + type + DEFINITION_END;
     }
 
     private static String renderBlock(String content) {
@@ -108,10 +112,27 @@ public class Compiler {
     }
 
     private static String compileDefinition(String inputContent) {
-        if (!inputContent.startsWith(INT_TYPE_WITH_SPACE)) return "";
+        if (!inputContent.contains(VALUE_SEPARATOR)) return "";
 
-        var definitionName = inputContent.substring(INT_TYPE_WITH_SPACE.length(), inputContent.indexOf(DEFINITION_END));
-        return renderMagmaDefinition(definitionName);
+        var before = inputContent.substring(0, inputContent.indexOf(DEFINITION_END));
+        var separator = before.lastIndexOf(' ');
+        var inputType = before.substring(0, separator);
+        var name = before.substring(separator + 1);
+        var outputType = compileType(inputType);
+
+        return renderMagmaDefinition(name, outputType);
+    }
+
+    private static String compileType(String inputType) {
+        String outputType;
+        if (inputType.equals(INT_KEYWORD)) {
+            outputType = I32_KEYWORD;
+        } else if (inputType.equals(LONG_KEYWORD)) {
+            outputType = I64_KEYWORD;
+        } else {
+            outputType = inputType;
+        }
+        return outputType;
     }
 
     static String renderJavaClass(String name) {
