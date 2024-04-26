@@ -29,7 +29,7 @@ public class ApplicationTest {
 
     private static void assertRunWithinClass(String input, String output) {
         assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, input),
-                Compiler.renderMagmaFunctionUnsafe("", TEST_UPPER_SYMBOL, output));
+                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, output)));
     }
 
     static String renderBeforeFunction(String before) {
@@ -88,7 +88,7 @@ public class ApplicationTest {
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition")))),
-                Compiler.renderMagmaFunctionUnsafe("", TEST_UPPER_SYMBOL, "") + renderObjectUnsafe(TEST_UPPER_SYMBOL, renderMagmaDefinitionUnsafe("", TEST_LOWER_SYMBOL, I64_KEYWORD, "0")));
+                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(TEST_UPPER_SYMBOL, renderMagmaDefinitionUnsafe("", TEST_LOWER_SYMBOL, I64_KEYWORD, "0")));
     }
 
     @ParameterizedTest
@@ -144,7 +144,10 @@ public class ApplicationTest {
 
     @Test
     void classPublic() {
-        assertRun(Compiler.renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL), Compiler.renderMagmaFunctionUnsafe(EXPORT_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL));
+        var input = renderJavaClass(PUBLIC_KEYWORD_WITH_SPACE, TEST_UPPER_SYMBOL);
+        final java.util.List<JavaString> ts = Collections.singletonList(new JavaString(EXPORT_KEYWORD));
+        var output = renderMagmaFunctionUnsafe(createFunctionNode(ts, TEST_UPPER_SYMBOL, ""));
+        assertRun(input, output);
     }
 
     @ParameterizedTest

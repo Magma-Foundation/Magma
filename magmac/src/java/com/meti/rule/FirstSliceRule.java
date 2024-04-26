@@ -25,6 +25,7 @@ public class FirstSliceRule implements Rule {
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        return left.fromNode(node).and(right.fromNode(node)).map(tuple -> tuple.a().appendSlice(c).concatOwned(tuple.b()));
+        return left.fromNode(node).and(right.fromNode(node))
+                .map(tuple -> tuple.a().appendSlice(c).concatOwned(tuple.b()));
     }
 }

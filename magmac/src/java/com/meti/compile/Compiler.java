@@ -13,9 +13,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-    public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
+    public static final String EXPORT_KEYWORD = "export";
+    public static final String EXPORT_KEYWORD_WITH_SPACE = EXPORT_KEYWORD + " ";
     public static final String PUBLIC_KEYWORD = "public";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = PUBLIC_KEYWORD + " ";
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
@@ -32,20 +35,22 @@ public class Compiler {
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final char VALUE_SEPARATOR = '=';
-    public static final FirstCharRule JAVA_DEFINITION = new FirstCharRule(new StripRule(new LastCharSeparatorRule(new OrRule(new FirstCharRule(
-            new StringListRule("modifiers", " "), ' ',
+    public static final FirstCharRule JAVA_DEFINITION = new FirstCharRule(VALUE_SEPARATOR, new StripRule(new LastCharSeparatorRule(new OrRule(new FirstCharRule(
+            ' ', new StringListRule("modifiers", " "),
             new StringRule("type")),
-            new StringRule("type")), ' ', new StringRule("name"))), VALUE_SEPARATOR,
+            new StringRule("type")), ' ', new StringRule("name"))),
             new RequireRightChar(new StripRule(new StringRule("value")), STATEMENT_END));
     public static final String FINAL_KEYWORD = "final";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
     public static final String TEMP_SEPARATOR = "() =>";
     public static final String DEF_KEYWORD = "def";
+    public static final String DEF_KEYWORD_WITH_SPACE = "def ";
+    public static final FirstSliceRule MAGMA_FUNCTION = new FirstSliceRule(TEMP_SEPARATOR, new FirstSliceRule(CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE, new OrRule(new RequireRightSlice(" ", new StringListRule("modifiers", " ")), new EmptyRule()), new StringRule("name")), new RequireLeft(' ', BLOCK));
 
     public static String renderJavaDefinition(String type, String name, String value) {
         return renderJavaDefinition(new MapNodePrototype()
-                .withListOfStrings("modifiers", Collections.emptyList())
+                .withListOfStrings("modifiers", emptyList())
                 .withString("type", new JavaString(type))
                 .withString("name", new JavaString(name))
                 .withString("value", new JavaString(value))
@@ -87,21 +92,20 @@ public class Compiler {
     }
 
     public static String renderMagmaFunctionUnsafe(String name) {
-        return renderMagmaFunctionUnsafe("", name);
+        return renderMagmaFunctionUnsafe(createFunctionNode(emptyList(), name, ""));
     }
 
-    public static String renderMagmaFunctionUnsafe(String modifiersString, String name) {
-        return renderMagmaFunctionUnsafe(modifiersString, name, "");
+    public static String renderMagmaFunctionUnsafe(Node node) {
+        return MAGMA_FUNCTION.fromNode(node).orElse(JavaString.EMPTY).value();
     }
 
-    public static String renderMagmaFunctionUnsafe(String modifiersString, String name, String content) {
-        var s = modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name;
-        var s1 = new RequireLeft(' ', BLOCK).fromNode(new MapNodePrototype()
-                        .withString("content", new JavaString(content))
-                        .complete(new JavaString("block")))
-                .orElse(JavaString.EMPTY)
-                .value();
-        return s + TEMP_SEPARATOR + s1;
+    public static Node createFunctionNode(List<JavaString> modifiers, String name, String content) {
+        var nodePrototype = new MapNodePrototype()
+                .withString("name", new JavaString(name))
+                .withString("content", new JavaString(content));
+
+        var nodePrototype1 = modifiers.isEmpty() ? nodePrototype : nodePrototype.withListOfStrings("modifiers", modifiers);
+        return nodePrototype1.complete(new JavaString("function"));
     }
 
     public static JavaString run(JavaString input) {
@@ -130,9 +134,10 @@ public class Compiler {
 
                     return contentStart.next().map(afterContentStart -> {
                         var inputContent = classString.sliceBetween(afterContentStart, contentEnd);
-                        var modifierString = classString.startsWithSlice(PUBLIC_KEYWORD_WITH_SPACE)
-                                ? new JavaString(EXPORT_KEYWORD_WITH_SPACE)
-                                : JavaString.EMPTY;
+
+                        var modifiers1 = classString.startsWithSlice(PUBLIC_KEYWORD_WITH_SPACE)
+                                ? Collections.singletonList(new JavaString(EXPORT_KEYWORD))
+                                : Collections.<JavaString>emptyList();
 
                         var stateResultOption = lexDefinition(inputContent)
                                 .map(built -> {
@@ -146,7 +151,7 @@ public class Compiler {
                                 .map(Compiler::parseDefinition).<StateResult>map(parsed -> {
                                     var modifiers = new ArrayList<>(parsed.apply("modifiers")
                                             .flatMap(Attribute::asListOfStrings)
-                                            .orElse(Collections.emptyList()));
+                                            .orElse(emptyList()));
 
                                     if (modifiers.contains(STATIC_STRING)) {
                                         modifiers.remove(STATIC_STRING);
@@ -160,11 +165,13 @@ public class Compiler {
                                 .flatMap(StateResult::findInstanceValue)
                                 .map(Compiler::renderMagmaDefinition);
 
-                        var instanceFunction = renderMagmaFunction(new MapNodePrototype()
-                                .withString("modifiers", modifierString)
+                        var nodePrototype = new MapNodePrototype()
                                 .withString("name", className)
-                                .withString("content", instanceValue.orElse(JavaString.EMPTY))
-                                .complete(new JavaString("function")));
+                                .withString("content", instanceValue.orElse(JavaString.EMPTY));
+
+                        var nodePrototype1 = modifiers1.isEmpty() ? nodePrototype : nodePrototype.withListOfStrings("modifiers", modifiers1);
+
+                        var instanceFunction = new JavaString(renderMagmaFunctionUnsafe(nodePrototype1.complete(new JavaString("function"))));
 
                         var objectString = stateResultOption
                                 .flatMap(StateResult::findStaticValue)
@@ -183,18 +190,6 @@ public class Compiler {
         return new JavaString(renderObjectUnsafe(className.value(), staticValue.value()));
     }
 
-    private static JavaString renderMagmaFunction(Node node) {
-        var modifierString1 = node.apply("modifiers").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-        var name1 = node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-        var content1 = node.apply("content").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-
-        return new JavaString(renderMagmaFunctionUnsafe(modifierString1, name1, content1));
-    }
-
-    private static String renderMagmaFunctionUnsafe(JavaString modifierString, JavaString className, JavaString content) {
-        return renderMagmaFunctionUnsafe(modifierString.value(), className.value(), content.value());
-    }
-
 
     private static Option<Node> lexDefinition(JavaString inputContent) {
         return JAVA_DEFINITION
@@ -203,13 +198,13 @@ public class Compiler {
     }
 
     private static Node parseDefinition(Node node) {
-        var modifiers = node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
+        var modifiers = node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList());
         var name = node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
         var type = node.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
         var value = node.apply("value").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
 
         List<JavaString> newModifiers;
-        if (modifiers.isEmpty()) newModifiers = Collections.emptyList();
+        if (modifiers.isEmpty()) newModifiers = emptyList();
         else newModifiers = modifiers.stream()
                 .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD) || modifier.equalsToSlice(STATIC_KEYWORD))
                 .collect(Collectors.toList());
@@ -283,7 +278,7 @@ public class Compiler {
 
     private static JavaString renderMagmaDefinition(Node node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
-                node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList()),
+                node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList()),
                 node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),

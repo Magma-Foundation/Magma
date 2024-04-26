@@ -1,5 +1,6 @@
 package com.meti.collect;
 
+import com.meti.node.NodePrototype;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
@@ -112,5 +113,9 @@ public record JavaString(String value) {
 
     private Range createRange(String slice, int index) {
         return new Range(index, index + slice.length(), value.length());
+    }
+
+    public boolean isEmpty() {
+        return this.value.isEmpty();
     }
 }

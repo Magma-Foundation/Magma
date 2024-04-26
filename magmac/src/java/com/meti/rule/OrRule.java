@@ -15,6 +15,11 @@ public class OrRule implements Rule {
     }
 
     @Override
+    public String toString() {
+        return super.toString();
+    }
+
+    @Override
     public Option<NodePrototype> fromString(JavaString input) {
         return first.fromString(input).or(second.fromString(input));
     }

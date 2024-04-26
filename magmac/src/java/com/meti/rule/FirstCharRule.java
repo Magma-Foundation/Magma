@@ -10,7 +10,7 @@ public class FirstCharRule implements Rule {
     private final Rule right;
     private final char c;
 
-    public FirstCharRule(Rule left, char c, Rule right) {
+    public FirstCharRule(char c, Rule left, Rule right) {
         this.left = left;
         this.right = right;
         this.c = c;

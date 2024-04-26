@@ -9,7 +9,7 @@ public class RequireRightSlice implements Rule {
     private final String c;
     private final Rule before;
 
-    public RequireRightSlice(Rule before, String c) {
+    public RequireRightSlice(String c, Rule before) {
         this.c = c;
         this.before = before;
     }
