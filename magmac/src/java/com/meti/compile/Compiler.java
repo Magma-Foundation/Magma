@@ -97,24 +97,29 @@ public class Compiler {
                     var nameStart = classIndex.endIndex();
 
                     var className = classString.sliceBetween(nameStart, contentStart).strip();
-                    var modifierString = classString.value().startsWith(PUBLIC_KEYWORD_WITH_SPACE)
-                            ? new JavaString(EXPORT_KEYWORD_WITH_SPACE)
-                            : JavaString.EMPTY;
 
                     return contentStart.next().map(afterContentStart -> {
                         var inputContent = classString.sliceBetween(afterContentStart, contentEnd);
+                        var modifierString = classString.startsWithSlice(PUBLIC_KEYWORD_WITH_SPACE)
+                                ? new JavaString(EXPORT_KEYWORD_WITH_SPACE)
+                                : JavaString.EMPTY;
 
-                        return compileDefinition(inputContent).map(content -> {
-                            var instanceValue = content.findInstanceValue().orElse(JavaString.EMPTY);
-                            var instanceFunction = renderMagmaFunction(modifierString, className, instanceValue);
-                            var staticValueOptional = content.findStaticValue();
+                        var stateResultOption = compileDefinition(inputContent);
+                        var instanceValue = compileDefinition(inputContent)
+                                .flatMap(StateResult::findInstanceValue);
 
-                            var objectString = staticValueOptional
-                                    .map(staticValue -> renderObject(className, staticValue))
-                                    .orElse(JavaString.EMPTY);
+                        var instanceFunction = renderMagmaFunction(new MapNodePrototype()
+                                .withString("modifiers", modifierString)
+                                .withString("name", className)
+                                .withString("content", instanceValue.orElse(JavaString.EMPTY))
+                                .complete(new JavaString("function")));
 
-                            return instanceFunction.concat(objectString);
-                        }).orElse(renderMagmaFunction(modifierString, className, JavaString.EMPTY));
+                        var objectString = stateResultOption
+                                .flatMap(StateResult::findStaticValue)
+                                .map(staticValue -> renderObject(className, staticValue))
+                                .orElse(JavaString.EMPTY);
+
+                        return instanceFunction.concat(objectString);
                     });
                 });
             });
@@ -125,8 +130,12 @@ public class Compiler {
         return new JavaString(renderObjectUnsafe(className.value(), staticValue.value()));
     }
 
-    private static JavaString renderMagmaFunction(JavaString modifierString, JavaString name, JavaString content) {
-        return new JavaString(renderMagmaFunctionUnsafe(modifierString, name, content));
+    private static JavaString renderMagmaFunction(Node node) {
+        var modifierString1 = node.apply("modifiers").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var name1 = node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var content1 = node.apply("content").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+
+        return new JavaString(renderMagmaFunctionUnsafe(modifierString1, name1, content1));
     }
 
     private static String renderMagmaFunctionUnsafe(JavaString modifierString, JavaString className, JavaString content) {

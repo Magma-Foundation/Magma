@@ -1,11 +1,12 @@
 package com.meti.compile;
 
 import com.meti.collect.JavaString;
+import com.meti.option.Option;
 
 import java.util.Optional;
 
 public interface StateResult {
-    Optional<JavaString> findInstanceValue();
+    Option<JavaString> findInstanceValue();
 
-    Optional<JavaString> findStaticValue();
+    Option<JavaString> findStaticValue();
 }
