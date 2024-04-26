@@ -6,16 +6,16 @@ import com.meti.node.NodePrototype;
 import com.meti.option.None;
 import com.meti.option.Option;
 
-public class RequireBoth implements Rule {
+public class Both implements Rule {
     private final String before;
     private final String after;
     private final Rule content;
 
-    public RequireBoth(char before, Rule content, char after) {
+    public Both(char before, Rule content, char after) {
         this(before + "", content, after + "");
     }
 
-    public RequireBoth(String before, Rule content, String after) {
+    public Both(String before, Rule content, String after) {
         this.before = before;
         this.after = after;
         this.content = content;

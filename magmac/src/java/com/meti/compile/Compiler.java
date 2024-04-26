@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.JavaLang;
+import com.meti.MagmaLang;
 import com.meti.collect.JavaString;
 import com.meti.collect.Range;
 import com.meti.node.*;
@@ -17,13 +19,13 @@ import static java.util.Collections.singletonList;
 
 public class Compiler {
     public static String renderJavaDefinition(Node node) {
-        return Lang.JAVA_DEFINITION.fromNode(node)
+        return JavaLang.JAVA_DEFINITION.fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
     }
 
     public static String renderMagmaDefinitionUnsafe(Node node) {
-        return Lang.MAGMA_DEFINITION
+        return MagmaLang.MAGMA_DEFINITION
                 .fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
@@ -37,13 +39,13 @@ public class Compiler {
     }
 
     public static String renderMagmaImportUnsafe(Node node) {
-        return Lang.MAGMA_IMPORT.fromNode(node)
+        return MagmaLang.MAGMA_IMPORT.fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
     }
 
     public static String renderMagmaFunctionUnsafe(Node node) {
-        return Lang.MAGMA_FUNCTION.fromNode(node).orElse(JavaString.EMPTY).value();
+        return MagmaLang.MAGMA_FUNCTION.fromNode(node).orElse(JavaString.EMPTY).value();
     }
 
     public static Node createFunctionNode(List<JavaString> modifiers, String name, String content) {
@@ -142,7 +144,7 @@ public class Compiler {
 
 
     private static Option<Node> lexDefinition(JavaString inputContent) {
-        return Lang.JAVA_DEFINITION
+        return JavaLang.JAVA_DEFINITION
                 .fromString(inputContent)
                 .map(prototype -> prototype.complete(new JavaString("definition")));
     }
@@ -276,7 +278,7 @@ public class Compiler {
     }
 
     public static String renderObjectUnsafe(Node node) {
-        return Lang.MAGMA_OBJECT.fromNode(node)
+        return MagmaLang.MAGMA_OBJECT.fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
     }
