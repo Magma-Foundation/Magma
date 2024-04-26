@@ -6,10 +6,7 @@ import com.meti.node.*;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
-import com.meti.rule.CaptureStringListRule;
-import com.meti.rule.CaptureStringRule;
-import com.meti.rule.OrRule;
-import com.meti.rule.SplitAtFirstCharRule;
+import com.meti.rule.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,24 +150,15 @@ public class Compiler {
     private static Option<Node> lexDefinition(JavaString inputContent) {
         return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
             var before = valueSlices.a().strip();
-            return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
-                var modifiersAndType = separator.a();
-
-                var withName = new CaptureStringRule("name")
-                        .apply(separator.b())
-                        .orElse(new MapNodePrototype());
-
-                var applied1 = new OrRule(new SplitAtFirstCharRule(' ',
-                        new CaptureStringListRule("modifiers", " "),
-                        new CaptureStringRule("type")),
-                        new CaptureStringRule("type"))
-                        .apply(modifiersAndType)
-                        .orElse(new MapNodePrototype());
-
-                var b = valueSlices.b().strip();
-                var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
-                return withName.merge(applied1).withString("value", value).complete(new JavaString("definition"));
-            });
+            return new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
+                    new CaptureStringListRule("modifiers", " "),
+                    new CaptureStringRule("type")),
+                    new CaptureStringRule("type")), new CaptureStringRule("name"))
+                    .apply(before).map(merge -> {
+                        var b = valueSlices.b().strip();
+                        var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
+                        return merge.withString("value", value).complete(new JavaString("definition"));
+                    });
         });
     }
 
