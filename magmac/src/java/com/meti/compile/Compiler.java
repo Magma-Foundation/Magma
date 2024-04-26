@@ -155,9 +155,11 @@ public class Compiler {
                     new CaptureStringRule("type")),
                     new CaptureStringRule("type")), new CaptureStringRule("name"))
                     .apply(before).map(merge -> {
-                        var b = valueSlices.b().strip();
-                        var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
-                        return merge.withString("value", value).complete(new JavaString("definition"));
+                        var value = new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END)
+                                .apply(valueSlices.b())
+                                .orElse(new MapNodePrototype());
+
+                        return merge.merge(value).complete(new JavaString("definition"));
                     });
         });
     }
