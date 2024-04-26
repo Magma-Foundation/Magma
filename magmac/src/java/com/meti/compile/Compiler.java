@@ -6,12 +6,12 @@ import com.meti.node.*;
 import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
-import com.meti.rule.CaptureRule;
 import com.meti.rule.CaptureStringListRule;
+import com.meti.rule.CaptureStringRule;
+import com.meti.rule.SplitAtFirstCharRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -155,24 +155,19 @@ public class Compiler {
             return before.splitAtLastIndexOfCharExclusive(' ').map(separator -> {
                 var modifiersAndType = separator.a();
 
-                var withName = new CaptureRule("name")
+                var withName = new CaptureStringRule("name")
                         .apply(separator.b())
                         .orElse(new MapNodePrototype());
 
-                var tuple = modifiersAndType.splitAtFirstIndexOfCharExclusive(' ').map(lastIndex -> {
-                    var modifiersString = lastIndex.a().strip();
-                    var typeString = lastIndex.b().strip();
-
-                    var modifiers1 = new CaptureStringListRule("modifiers", " ").apply(modifiersString).orElse(new MapNodePrototype());
-                    var applied = new CaptureRule("type").apply(typeString).orElse(new MapNodePrototype());
-                    return modifiers1.merge(applied);
-                }).orElseGet(() -> {
-                    return withName.withListOfStrings("modifiers", new ArrayList<>(Collections.emptyList())).withString("type", modifiersAndType);
-                });
+                var applied1 = new SplitAtFirstCharRule(' ',
+                        new CaptureStringListRule("modifiers", " "),
+                        new CaptureStringRule("type"))
+                        .apply(modifiersAndType)
+                        .orElseGet(() -> withName.withListOfStrings("modifiers", new ArrayList<>(Collections.emptyList())).withString("type", modifiersAndType));
 
                 var b = valueSlices.b().strip();
                 var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();
-                return tuple.withString("value", value).complete(new JavaString("definition"));
+                return withName.merge(applied1).withString("value", value).complete(new JavaString("definition"));
             });
         });
     }

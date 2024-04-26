@@ -1,5 +1,7 @@
 package com.meti.option;
 
+import com.meti.collect.Tuple;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,5 +24,10 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public T orElseGet(Supplier<T> supplier) {
         return value;
+    }
+
+    @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> option) {
+        return option.map(otherValue -> new Tuple<>(value, otherValue));
     }
 }

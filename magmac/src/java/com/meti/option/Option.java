@@ -1,5 +1,7 @@
 package com.meti.option;
 
+import com.meti.collect.Tuple;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -15,4 +17,6 @@ public interface Option<T> {
     }
 
     T orElseGet(Supplier<T> supplier);
+
+    <R> Option<Tuple<T, R>> and(Option<R> option);
 }
