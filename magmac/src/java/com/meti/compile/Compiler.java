@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -64,25 +65,34 @@ public class Compiler {
     }
 
     public static String renderMagmaDefinitionUnsafe(String name, String type, String value) {
-        return renderMagmaDefinitionUnsafe("", name, type, value);
+        return renderMagmaDefinitionUnsafe(getJavaStrings(emptyList(), LET_KEYWORD_WITH_SPACE, name), type, value);
     }
 
-    public static String renderMagmaDefinitionUnsafe(String modifierString, String name, String type, String value) {
-        return renderMagmaDefinitionUnsafe(modifierString, LET_KEYWORD_WITH_SPACE, name, type, value);
+    public static String renderMagmaDefinitionUnsafe(JavaString modifierString, String name, String type, String value) {
+        return renderMagmaDefinitionUnsafe(getJavaStrings(singletonList(modifierString), LET_KEYWORD_WITH_SPACE, name), type, value);
     }
 
-    public static String renderMagmaDefinitionUnsafe(List<JavaString> modifierString, String mutabilityString, String name, String type, String value) {
-        var renderedModifiers = modifierString
-                .stream()
-                .map(JavaString::value)
-                .map(modifier -> modifier + " ")
-                .collect(Collectors.joining());
+    public static String renderMagmaDefinitionUnsafe(List<JavaString> segments, String type, String value) {
+        var s2 = new StringListRule("segments", " ")
+                .fromNode(new MapNodePrototype()
+                        .withListOfStrings("segments", segments)
+                        .complete(new JavaString("definition")))
+                .orElse(JavaString.EMPTY)
+                .value();
 
-        return renderMagmaDefinitionUnsafe(renderedModifiers, mutabilityString, name, type, value);
+        var s3 = type + " ";
+        var s = s2 + " : " + s3;
+
+        var s1 = " " + value + ";";
+
+        return s + VALUE_SEPARATOR + s1;
     }
 
-    public static String renderMagmaDefinitionUnsafe(String modifiersString, String mutabilityString, String name, String type, String value) {
-        return modifiersString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
+    private static List<JavaString> getJavaStrings(List<JavaString> modifiersString, String mutabilityString, String name) {
+        List<JavaString> segments = new ArrayList<>(modifiersString);
+        segments.add(new JavaString(mutabilityString));
+        segments.add(new JavaString(name));
+        return segments;
     }
 
     public static String renderMagmaImportUnsafe(Node node) {
@@ -278,10 +288,7 @@ public class Compiler {
 
     private static JavaString renderMagmaDefinition(Node node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
-                node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList()),
-                node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
-                node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
-                node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                getJavaStrings(node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList()), node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(), node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()), node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("after").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()));
     }
 

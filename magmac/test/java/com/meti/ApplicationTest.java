@@ -66,7 +66,7 @@ public class ApplicationTest {
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition"))),
-                renderMagmaDefinitionUnsafe(PUBLIC_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+                renderMagmaDefinitionUnsafe(new JavaString(PUBLIC_KEYWORD), TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ApplicationTest {
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition"))),
-                renderMagmaDefinitionUnsafe("", CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+                renderMagmaDefinitionUnsafe(getJavaStrings(Collections.emptyList(), CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL), I64_KEYWORD, "0"));
     }
 
     @Test
@@ -88,7 +88,8 @@ public class ApplicationTest {
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition")))),
-                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(TEST_UPPER_SYMBOL, renderMagmaDefinitionUnsafe("", TEST_LOWER_SYMBOL, I64_KEYWORD, "0")));
+                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(TEST_UPPER_SYMBOL,
+                        renderMagmaDefinitionUnsafe(getJavaStrings(Collections.emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL), I64_KEYWORD, "0")));
     }
 
     @ParameterizedTest
