@@ -148,20 +148,13 @@ public class Compiler {
     }
 
     private static Option<Node> lexDefinition(JavaString inputContent) {
-        return inputContent.splitAtFirstIndexOfCharExclusive(VALUE_SEPARATOR).flatMap(valueSlices -> {
-            var before = valueSlices.a().strip();
-            return new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
-                    new CaptureStringListRule("modifiers", " "),
-                    new CaptureStringRule("type")),
-                    new CaptureStringRule("type")), new CaptureStringRule("name"))
-                    .apply(before).map(merge -> {
-                        var value = new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END)
-                                .apply(valueSlices.b())
-                                .orElse(new MapNodePrototype());
-
-                        return merge.merge(value).complete(new JavaString("definition"));
-                    });
-        });
+        return new SplitAtFirstCharRule(VALUE_SEPARATOR, new StripRule(new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
+                new CaptureStringListRule("modifiers", " "),
+                new CaptureStringRule("type")),
+                new CaptureStringRule("type")), new CaptureStringRule("name"))),
+                new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END))
+                .apply(inputContent)
+                .map(prototype -> prototype.complete(new JavaString("definition")));
     }
 
     private static Node parseDefinition(Node node) {
