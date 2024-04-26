@@ -1,7 +1,6 @@
 package com.meti.option;
 
 import com.meti.collect.Tuple;
-import com.meti.option.Option;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
@@ -33,6 +32,12 @@ public record ThrowableOption<T>(Option<T> parent) implements Option<T> {
     @Override
     public T orElseGet(Supplier<T> supplier) {
         return parent.orElseGet(supplier);
+    }
+
+
+    @Override
+    public Option<T> or(Option<T> other) {
+        return parent.or(other);
     }
 
     @Override

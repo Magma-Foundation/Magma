@@ -19,4 +19,6 @@ public interface Option<T> {
     T orElseGet(Supplier<T> supplier);
 
     <R> Option<Tuple<T, R>> and(Option<R> option);
+
+    Option<T> or(Option<T> other);
 }

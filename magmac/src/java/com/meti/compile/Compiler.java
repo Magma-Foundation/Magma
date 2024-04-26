@@ -8,6 +8,7 @@ import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 import com.meti.rule.CaptureStringListRule;
 import com.meti.rule.CaptureStringRule;
+import com.meti.rule.OrRule;
 import com.meti.rule.SplitAtFirstCharRule;
 
 import java.util.ArrayList;
@@ -159,11 +160,12 @@ public class Compiler {
                         .apply(separator.b())
                         .orElse(new MapNodePrototype());
 
-                var applied1 = new SplitAtFirstCharRule(' ',
+                var applied1 = new OrRule(new SplitAtFirstCharRule(' ',
                         new CaptureStringListRule("modifiers", " "),
+                        new CaptureStringRule("type")),
                         new CaptureStringRule("type"))
                         .apply(modifiersAndType)
-                        .orElseGet(() -> withName.withListOfStrings("modifiers", new ArrayList<>(Collections.emptyList())).withString("type", modifiersAndType));
+                        .orElse(new MapNodePrototype());
 
                 var b = valueSlices.b().strip();
                 var value = b.sliceTo(b.firstIndexOfChar(STATEMENT_END).orElse(b.end())).strip();

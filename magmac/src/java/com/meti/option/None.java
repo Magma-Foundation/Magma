@@ -30,4 +30,9 @@ public class None<T> implements Option<T> {
     public <R> Option<Tuple<T, R>> and(Option<R> option) {
         return new None<>();
     }
+
+    @Override
+    public Option<T> or(Option<T> other) {
+        return other;
+    }
 }
