@@ -7,6 +7,7 @@ import com.meti.option.Option;
 import com.meti.option.ThrowableOption;
 import com.meti.result.Result;
 import com.meti.rule.CaptureRule;
+import com.meti.rule.CaptureStringListRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -162,10 +163,7 @@ public class Compiler {
                     var modifiersString = lastIndex.a().strip();
                     var typeString = lastIndex.b().strip();
 
-                    var modifiers = new HashSet<>(modifiersString.splitBySlice(" "));
-
-                    var modifiers1 = withName.withListOfStrings("modifiers", new ArrayList<>(modifiers));
-
+                    var modifiers1 = new CaptureStringListRule("modifiers", " ").apply(modifiersString).orElse(new MapNodePrototype());
                     var applied = new CaptureRule("type").apply(typeString).orElse(new MapNodePrototype());
                     return modifiers1.merge(applied);
                 }).orElseGet(() -> {
