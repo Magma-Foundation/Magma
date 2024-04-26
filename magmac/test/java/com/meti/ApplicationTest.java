@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.meti.compile.Compiler.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
@@ -37,36 +39,71 @@ public class ApplicationTest {
     }
 
     static String renderMagmaFunction() {
-        return Compiler.renderMagmaFunctionUnsafe(TEST_UPPER_SYMBOL);
+        return renderMagmaFunctionUnsafe(new MapNodePrototype()
+                .withString("name", new JavaString(TEST_UPPER_SYMBOL))
+                .withString("content", new JavaString(""))
+                .complete(new JavaString("function")));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRunWithinClass(renderJavaDefinition(INT_KEYWORD, name, "0"), renderMagmaDefinitionUnsafe(name, I32_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(new MapNodePrototype()
+                .withListOfStrings("modifiers", emptyList())
+                .withString("type", new JavaString(INT_KEYWORD))
+                .withString("name", new JavaString(name))
+                .withString("value", new JavaString("0"))
+                .complete(new JavaString("definition"))), renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                .withListOfStrings("segments", computeSegments(emptyList(), LET_KEYWORD_WITH_SPACE, name))
+                .withString("type", new JavaString(I32_KEYWORD))
+                .withString("value", new JavaString("0"))
+                .complete(new JavaString("definition"))));
     }
 
     @Test
     void definitionType() {
-        assertRunWithinClass(renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL, "0"), renderMagmaDefinitionUnsafe(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(new MapNodePrototype()
+                .withListOfStrings("modifiers", emptyList())
+                .withString("type", new JavaString(LONG_KEYWORD))
+                .withString("name", new JavaString(TEST_LOWER_SYMBOL))
+                .withString("value", new JavaString("0"))
+                .complete(new JavaString("definition"))), renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                .withListOfStrings("segments", computeSegments(emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                .withString("type", new JavaString(I64_KEYWORD))
+                .withString("value", new JavaString("0"))
+                .complete(new JavaString("definition"))));
     }
 
     @Test
     void definitionValue() {
         var value = "100";
-        assertRunWithinClass(renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL, value),
-                renderMagmaDefinitionUnsafe(TEST_LOWER_SYMBOL, I64_KEYWORD, value));
+        assertRunWithinClass(renderJavaDefinition(new MapNodePrototype()
+                        .withListOfStrings("modifiers", emptyList())
+                        .withString("type", new JavaString(LONG_KEYWORD))
+                        .withString("name", new JavaString(TEST_LOWER_SYMBOL))
+                        .withString("value", new JavaString(value))
+                        .complete(new JavaString("definition"))),
+                renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                        .withListOfStrings("segments", computeSegments(emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                        .withString("type", new JavaString(I64_KEYWORD))
+                        .withString("value", new JavaString(value))
+                        .complete(new JavaString("definition"))));
     }
 
     @Test
     void definitionPublic() {
+        JavaString modifierString = new JavaString(PUBLIC_KEYWORD);
         assertRunWithinClass(renderJavaDefinition(new MapNodePrototype()
                         .withListOfStrings("modifiers", Collections.singletonList(new JavaString(PUBLIC_KEYWORD)))
                         .withString("type", new JavaString(LONG_KEYWORD))
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition"))),
-                renderMagmaDefinitionUnsafe(new JavaString(PUBLIC_KEYWORD), TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+                renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                        .withListOfStrings("segments", computeSegments(singletonList(modifierString), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                        .withString("type", new JavaString(I64_KEYWORD))
+                        .withString("value", new JavaString("0"))
+                        .complete(new JavaString("definition"))));
     }
 
     @Test
@@ -77,7 +114,11 @@ public class ApplicationTest {
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition"))),
-                renderMagmaDefinitionUnsafe(getJavaStrings(Collections.emptyList(), CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL), I64_KEYWORD, "0"));
+                renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                        .withListOfStrings("segments", computeSegments(Collections.emptyList(), CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                        .withString("type", new JavaString(I64_KEYWORD))
+                        .withString("value", new JavaString("0"))
+                        .complete(new JavaString("definition"))));
     }
 
     @Test
@@ -89,7 +130,11 @@ public class ApplicationTest {
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition")))),
                 Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(TEST_UPPER_SYMBOL,
-                        renderMagmaDefinitionUnsafe(getJavaStrings(Collections.emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL), I64_KEYWORD, "0")));
+                        renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                                .withListOfStrings("segments", computeSegments(Collections.emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                                .withString("type", new JavaString(I64_KEYWORD))
+                                .withString("value", new JavaString("0"))
+                                .complete(new JavaString("definition")))));
     }
 
     @ParameterizedTest
@@ -154,6 +199,9 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void className(String name) {
-        assertRun(Compiler.renderJavaClass(name), Compiler.renderMagmaFunctionUnsafe(name));
+        assertRun(Compiler.renderJavaClass(name), renderMagmaFunctionUnsafe(new MapNodePrototype()
+                .withString("name", new JavaString(name))
+                .withString("content", new JavaString(""))
+                .complete(new JavaString("function"))));
     }
 }

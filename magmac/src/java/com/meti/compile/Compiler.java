@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 public class Compiler {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -30,12 +29,13 @@ public class Compiler {
     public static final char BLOCK_START = '{';
     public static final char BLOCK_END = '}';
     public static final RequireBoth BLOCK = new RequireBoth(BLOCK_START, new StringRule("content"), BLOCK_END);
-    public static final FirstSliceRule MAGMA_IMPORT = new FirstSliceRule("from", new RequireBoth(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new StringRule("child"), " " + BLOCK_END + " "), new RequireRightChar(new StringRule("parent"), STATEMENT_END));
+    public static final FirstRule MAGMA_IMPORT = new FirstRule("from", new RequireBoth(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new StringRule("child"), " " + BLOCK_END + " "), new RequireRightChar(new StringRule("parent"), STATEMENT_END));
     public static final String INT_KEYWORD = "int";
     public static final String I32_KEYWORD = "I32";
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final char VALUE_SEPARATOR = '=';
+    public static final FirstRule MAGMA_DEFINITION = new FirstRule(VALUE_SEPARATOR + "", new FirstRule(" : ", new StringListRule("segments", " "), new RequireRightSlice(" ", new StringRule("type"))), new RequireBoth(" ", new StringRule("value"), ";"));
     public static final FirstCharRule JAVA_DEFINITION = new FirstCharRule(VALUE_SEPARATOR, new StripRule(new LastCharSeparatorRule(new OrRule(new FirstCharRule(
             ' ', new StringListRule("modifiers", " "),
             new StringRule("type")),
@@ -45,18 +45,8 @@ public class Compiler {
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
     public static final String TEMP_SEPARATOR = "() =>";
-    public static final String DEF_KEYWORD = "def";
     public static final String DEF_KEYWORD_WITH_SPACE = "def ";
-    public static final FirstSliceRule MAGMA_FUNCTION = new FirstSliceRule(TEMP_SEPARATOR, new FirstSliceRule(CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE, new OrRule(new RequireRightSlice(" ", new StringListRule("modifiers", " ")), new EmptyRule()), new StringRule("name")), new RequireLeft(' ', BLOCK));
-
-    public static String renderJavaDefinition(String type, String name, String value) {
-        return renderJavaDefinition(new MapNodePrototype()
-                .withListOfStrings("modifiers", emptyList())
-                .withString("type", new JavaString(type))
-                .withString("name", new JavaString(name))
-                .withString("value", new JavaString(value))
-                .complete(new JavaString("definition")));
-    }
+    public static final FirstRule MAGMA_FUNCTION = new FirstRule(TEMP_SEPARATOR, new FirstRule(CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE, new OrRule(new RequireRightSlice(" ", new StringListRule("modifiers", " ")), new EmptyRule()), new StringRule("name")), new RequireLeft(' ', BLOCK));
 
     public static String renderJavaDefinition(Node node) {
         return JAVA_DEFINITION.fromNode(node)
@@ -64,31 +54,14 @@ public class Compiler {
                 .value();
     }
 
-    public static String renderMagmaDefinitionUnsafe(String name, String type, String value) {
-        return renderMagmaDefinitionUnsafe(getJavaStrings(emptyList(), LET_KEYWORD_WITH_SPACE, name), type, value);
-    }
-
-    public static String renderMagmaDefinitionUnsafe(JavaString modifierString, String name, String type, String value) {
-        return renderMagmaDefinitionUnsafe(getJavaStrings(singletonList(modifierString), LET_KEYWORD_WITH_SPACE, name), type, value);
-    }
-
-    public static String renderMagmaDefinitionUnsafe(List<JavaString> segments, String type, String value) {
-        var s2 = new StringListRule("segments", " ")
-                .fromNode(new MapNodePrototype()
-                        .withListOfStrings("segments", segments)
-                        .complete(new JavaString("definition")))
+    public static String renderMagmaDefinitionUnsafe(Node node) {
+        return MAGMA_DEFINITION
+                .fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
-
-        var s3 = type + " ";
-        var s = s2 + " : " + s3;
-
-        var s1 = " " + value + ";";
-
-        return s + VALUE_SEPARATOR + s1;
     }
 
-    private static List<JavaString> getJavaStrings(List<JavaString> modifiersString, String mutabilityString, String name) {
+    public static List<JavaString> computeSegments(List<JavaString> modifiersString, String mutabilityString, String name) {
         List<JavaString> segments = new ArrayList<>(modifiersString);
         segments.add(new JavaString(mutabilityString));
         segments.add(new JavaString(name));
@@ -99,10 +72,6 @@ public class Compiler {
         return MAGMA_IMPORT.fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
-    }
-
-    public static String renderMagmaFunctionUnsafe(String name) {
-        return renderMagmaFunctionUnsafe(createFunctionNode(emptyList(), name, ""));
     }
 
     public static String renderMagmaFunctionUnsafe(Node node) {
@@ -288,8 +257,11 @@ public class Compiler {
 
     private static JavaString renderMagmaDefinition(Node node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
-                getJavaStrings(node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList()), node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(), node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()), node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
-                node.apply("after").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()));
+                new MapNodePrototype()
+                        .withListOfStrings("segments", computeSegments(node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(emptyList()), node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(), node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()))
+                        .withString("type", new JavaString(node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()))
+                        .withString("value", new JavaString(node.apply("after").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value()))
+                        .complete(new JavaString("definition"))));
     }
 
     private static String compileTypeUnsafe(String inputType) {

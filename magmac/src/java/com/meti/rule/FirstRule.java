@@ -5,12 +5,12 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class FirstSliceRule implements Rule {
+public class FirstRule implements Rule {
     private final Rule left;
     private final Rule right;
     private final String c;
 
-    public FirstSliceRule(String slice, Rule left, Rule right) {
+    public FirstRule(String slice, Rule left, Rule right) {
         this.left = left;
         this.right = right;
         this.c = slice;
