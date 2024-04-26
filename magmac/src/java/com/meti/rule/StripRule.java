@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.collect.JavaString;
+import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
@@ -12,7 +13,12 @@ public class StripRule implements Rule {
     }
 
     @Override
-    public Option<NodePrototype> apply(JavaString input) {
-        return next.apply(input.strip());
+    public Option<NodePrototype> fromString(JavaString input) {
+        return next.fromString(input.strip());
+    }
+
+    @Override
+    public Option<JavaString> fromNode(Node node){
+        throw new UnsupportedOperationException();
     }
 }

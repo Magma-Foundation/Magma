@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.collect.JavaString;
+import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
@@ -14,7 +15,12 @@ public class IgnoreRight implements Rule {
     }
 
     @Override
-    public Option<NodePrototype> apply(JavaString input) {
-        return input.firstIndexOfChar(c).flatMap(before -> this.before.apply(input.sliceTo(before)));
+    public Option<NodePrototype> fromString(JavaString input) {
+        return input.firstIndexOfChar(c).flatMap(before -> this.before.fromString(input.sliceTo(before)));
+    }
+
+    @Override
+    public Option<JavaString> fromNode(Node node){
+        throw new UnsupportedOperationException();
     }
 }

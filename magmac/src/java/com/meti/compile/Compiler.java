@@ -115,7 +115,28 @@ public class Compiler {
                                 ? new JavaString(EXPORT_KEYWORD_WITH_SPACE)
                                 : JavaString.EMPTY;
 
-                        var stateResultOption = compileDefinition(inputContent);
+                        var stateResultOption = lexDefinition(inputContent)
+                                .map(built -> {
+                                    var inputType = built.apply("type")
+                                            .flatMap(Attribute::asString)
+                                            .orElse(JavaString.EMPTY);
+
+                                    var outputType = compileType(inputType);
+                                    return built.with("type", new StringAttribute(outputType)).orElse(built);
+                                })
+                                .map(Compiler::parseDefinition).<StateResult>map(parsed -> {
+                                    var modifiers = new ArrayList<>(parsed.apply("modifiers")
+                                            .flatMap(Attribute::asListOfStrings)
+                                            .orElse(Collections.emptyList()));
+
+                                    if (modifiers.contains(STATIC_STRING)) {
+                                        modifiers.remove(STATIC_STRING);
+
+                                        return new StaticResult(parsed.with("modifiers", new StringListAttribute(modifiers)).orElse(parsed));
+                                    }
+                                    return new InstanceResult(parsed);
+                                });
+
                         var instanceValue = stateResultOption
                                 .flatMap(StateResult::findInstanceValue)
                                 .map(Compiler::renderMagmaDefinition);
@@ -156,30 +177,6 @@ public class Compiler {
     }
 
 
-    private static Option<StateResult> compileDefinition(JavaString inputContent) {
-        return lexDefinition(inputContent)
-                .map(built -> {
-                    var inputType = built.apply("type")
-                            .flatMap(Attribute::asString)
-                            .orElse(JavaString.EMPTY);
-
-                    var outputType = compileType(inputType);
-                    return built.with("type", new StringAttribute(outputType)).orElse(built);
-                })
-                .map(Compiler::parseDefinition).map(parsed -> {
-                    var modifiers = new ArrayList<>(parsed.apply("modifiers")
-                            .flatMap(Attribute::asListOfStrings)
-                            .orElse(Collections.emptyList()));
-
-                    if (modifiers.contains(STATIC_STRING)) {
-                        modifiers.remove(STATIC_STRING);
-
-                        return new StaticResult(parsed.with("modifiers", new StringListAttribute(modifiers)).orElse(parsed));
-                    }
-                    return new InstanceResult(parsed);
-                });
-    }
-
     private static Option<Node> lexDefinition(JavaString inputContent) {
         var beforeRule = new StripRule(new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
                 new CaptureStringListRule("modifiers", " "),
@@ -188,7 +185,7 @@ public class Compiler {
 
         return new SplitAtFirstCharRule(VALUE_SEPARATOR, beforeRule,
                 new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END))
-                .apply(inputContent)
+                .fromString(inputContent)
                 .map(prototype -> prototype.complete(new JavaString("definition")));
     }
 
