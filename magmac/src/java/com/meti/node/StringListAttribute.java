@@ -14,6 +14,11 @@ public class StringListAttribute implements Attribute {
     }
 
     @Override
+    public String toString() {
+        return values.toString();
+    }
+
+    @Override
     public Option<List<JavaString>> asListOfStrings() {
         return new Some<>(values);
     }

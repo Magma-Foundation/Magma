@@ -21,6 +21,7 @@ public class Compiler {
     public static final String IMPORT_KEYWORD_WITH_SPACE = "import ";
     public static final char STATEMENT_END = ';';
     public static final String STATIC_KEYWORD = "static";
+    public static final JavaString STATIC_STRING = new JavaString(STATIC_KEYWORD);
     public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
     public static final char BLOCK_START = '{';
     public static final char BLOCK_END = '}';
@@ -50,8 +51,18 @@ public class Compiler {
         return renderMagmaDefinitionUnsafe(modifierString, LET_KEYWORD_WITH_SPACE, name, type, value);
     }
 
-    public static String renderMagmaDefinitionUnsafe(String modifierString, String mutabilityString, String name, String type, String value) {
-        return modifierString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
+    public static String renderMagmaDefinitionUnsafe(List<JavaString> modifierString, String mutabilityString, String name, String type, String value) {
+        var renderedModifiers = modifierString
+                .stream()
+                .map(JavaString::value)
+                .map(modifier -> modifier + " ")
+                .collect(Collectors.joining());
+
+        return renderMagmaDefinitionUnsafe(renderedModifiers, mutabilityString, name, type, value);
+    }
+
+    public static String renderMagmaDefinitionUnsafe(String modifiersString, String mutabilityString, String name, String type, String value) {
+        return modifiersString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
     private static String renderBlock(String content) {
@@ -156,16 +167,26 @@ public class Compiler {
                     return built.with("type", new StringAttribute(outputType)).orElse(built);
                 })
                 .map(Compiler::parseDefinition).map(parsed -> {
-                    var modifiers = parsed.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
-                    return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(parsed) : new InstanceResult(parsed);
+                    var modifiers = new ArrayList<>(parsed.apply("modifiers")
+                            .flatMap(Attribute::asListOfStrings)
+                            .orElse(Collections.emptyList()));
+
+                    if (modifiers.contains(STATIC_STRING)) {
+                        modifiers.remove(STATIC_STRING);
+
+                        return new StaticResult(parsed.with("modifiers", new StringListAttribute(modifiers)).orElse(parsed));
+                    }
+                    return new InstanceResult(parsed);
                 });
     }
 
     private static Option<Node> lexDefinition(JavaString inputContent) {
-        return new SplitAtFirstCharRule(VALUE_SEPARATOR, new StripRule(new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
+        var beforeRule = new StripRule(new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
                 new CaptureStringListRule("modifiers", " "),
                 new CaptureStringRule("type")),
-                new CaptureStringRule("type")), new CaptureStringRule("name"))),
+                new CaptureStringRule("type")), new CaptureStringRule("name")));
+
+        return new SplitAtFirstCharRule(VALUE_SEPARATOR, beforeRule,
                 new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END))
                 .apply(inputContent)
                 .map(prototype -> prototype.complete(new JavaString("definition")));
@@ -177,20 +198,18 @@ public class Compiler {
         var type = node.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
         var value = node.apply("value").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
 
-        JavaString modifierString;
-        if (modifiers.isEmpty()) modifierString = JavaString.EMPTY;
-        else modifierString = modifiers.stream()
-                .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD))
-                .map(modifier -> modifier.concat(new JavaString(" ")))
-                .reduce(JavaString::concat)
-                .orElse(JavaString.EMPTY);
+        List<JavaString> newModifiers;
+        if (modifiers.isEmpty()) newModifiers = Collections.emptyList();
+        else newModifiers = modifiers.stream()
+                .filter(modifier -> modifier.equalsToSlice(PUBLIC_KEYWORD) || modifier.equalsToSlice(STATIC_KEYWORD))
+                .collect(Collectors.toList());
 
         var mutabilityString = new JavaString(modifiers.contains(new JavaString(FINAL_KEYWORD))
                 ? CONST_KEYWORD_WITH_SPACE
                 : LET_KEYWORD_WITH_SPACE);
 
-        return ((NodePrototype) new MapNodePrototype())
-                .withString("modifierString", modifierString)
+        return new MapNodePrototype()
+                .withListOfStrings("modifiers", newModifiers)
                 .withString("mutabilityString", mutabilityString)
                 .withString("name", name)
                 .withString("outputType", type)
@@ -251,7 +270,7 @@ public class Compiler {
 
     private static JavaString renderMagmaDefinition(Node node) {
         return new JavaString(renderMagmaDefinitionUnsafe(
-                node.apply("modifierString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
+                node.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList()),
                 node.apply("mutabilityString").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("name").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),
                 node.apply("outputType").flatMap(Attribute::asString).orElse(JavaString.EMPTY).value(),

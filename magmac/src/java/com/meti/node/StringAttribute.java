@@ -12,6 +12,11 @@ public class StringAttribute implements Attribute {
     }
 
     @Override
+    public String toString() {
+        return value.toString();
+    }
+
+    @Override
     public Option<JavaString> asString() {
         return new Some<>(value);
     }

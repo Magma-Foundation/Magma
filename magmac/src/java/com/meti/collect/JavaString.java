@@ -11,6 +11,11 @@ import java.util.stream.Collectors;
 public record JavaString(String value) {
     public static final JavaString EMPTY = new JavaString("");
 
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
     public Option<Index> lastIndexOfChar(char c) {
         var index = value.lastIndexOf(c);
         return index == -1
