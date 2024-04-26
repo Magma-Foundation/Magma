@@ -5,12 +5,12 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class SplitAtFirstCharRule implements Rule {
+public class FirstSliceRule implements Rule {
     private final Rule left;
     private final Rule right;
-    private final char c;
+    private final String c;
 
-    public SplitAtFirstCharRule(Rule left, char c, Rule right) {
+    public FirstSliceRule(Rule left, String c, Rule right) {
         this.left = left;
         this.right = right;
         this.c = c;
@@ -18,13 +18,13 @@ public class SplitAtFirstCharRule implements Rule {
 
     @Override
     public Option<NodePrototype> fromString(JavaString input) {
-        return input.splitAtFirstIndexOfCharExclusive(c)
+        return input.splitAtFirstSliceExclusive(c)
                 .flatMap(tuple -> left.fromString(tuple.a()).and(right.fromString(tuple.b())))
                 .map(tuple -> tuple.a().merge(tuple.b()));
     }
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        return left.fromNode(node).and(right.fromNode(node)).map(tuple -> tuple.a().concatChar(c).concatOwned(tuple.b()));
+        return left.fromNode(node).and(right.fromNode(node)).map(tuple -> tuple.a().appendSlice(c).concatOwned(tuple.b()));
     }
 }

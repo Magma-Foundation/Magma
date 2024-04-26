@@ -94,7 +94,10 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChildren(String child) {
-        assertRun(renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, child)), renderBeforeFunction(renderMagmaImportUnsafe(TEST_LOWER_SYMBOL, child)));
+        assertRun(renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, child)), renderBeforeFunction(renderMagmaImportUnsafe(new MapNodePrototype()
+                .withString("parent", new JavaString(TEST_LOWER_SYMBOL))
+                .withString("child", new JavaString(child))
+                .complete(new JavaString("import")))));
     }
 
     @ParameterizedTest
@@ -105,7 +108,10 @@ public class ApplicationTest {
                 .collect(Collectors.joining());
 
         var outputBefore = IntStream.range(0, count)
-                .mapToObj(index -> renderMagmaImportUnsafe(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index))
+                .mapToObj(index -> renderMagmaImportUnsafe(new MapNodePrototype()
+                        .withString("parent", new JavaString(TEST_LOWER_SYMBOL))
+                        .withString("child", new JavaString(TEST_UPPER_SYMBOL + index))
+                        .complete(new JavaString("import"))))
                 .collect(Collectors.joining());
 
         assertRun(renderBeforeClass(inputBefore), renderBeforeFunction(outputBefore));
@@ -114,14 +120,20 @@ public class ApplicationTest {
     @Test
     void importStatic() {
         var input = renderBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, Compiler.STATIC_KEYWORD_WITH_SPACE));
-        var output = renderBeforeFunction(renderMagmaImportUnsafe(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL));
+        var output = renderBeforeFunction(renderMagmaImportUnsafe(new MapNodePrototype()
+                .withString("parent", new JavaString(TEST_LOWER_SYMBOL))
+                .withString("child", new JavaString(TEST_UPPER_SYMBOL))
+                .complete(new JavaString("import"))));
         assertRun(input, output);
     }
 
     @Test
     void importParent() {
         var otherParent = "foo";
-        assertRun(renderBeforeClass(renderJavaImport(otherParent, TEST_UPPER_SYMBOL)), renderBeforeFunction(renderMagmaImportUnsafe(otherParent, TEST_UPPER_SYMBOL)));
+        assertRun(renderBeforeClass(renderJavaImport(otherParent, TEST_UPPER_SYMBOL)), renderBeforeFunction(renderMagmaImportUnsafe(new MapNodePrototype()
+                .withString("parent", new JavaString(otherParent))
+                .withString("child", new JavaString(TEST_UPPER_SYMBOL))
+                .complete(new JavaString("import")))));
     }
 
     @ParameterizedTest

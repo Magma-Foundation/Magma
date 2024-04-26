@@ -13,7 +13,7 @@ public record JavaString(String value) {
 
     @Override
     public String toString() {
-        return value.toString();
+        return value;
     }
 
     public Option<Index> lastIndexOfChar(char c) {
@@ -31,7 +31,7 @@ public record JavaString(String value) {
         var index = value.indexOf(slice);
         return index == -1
                 ? new None<>()
-                : new Some<>(new Range(index, index + slice.length(), value.length()));
+                : new Some<>(createRange(slice, index));
     }
 
     public JavaString concatOwned(JavaString other) {
@@ -89,5 +89,28 @@ public record JavaString(String value) {
 
     public JavaString concatChar(char c) {
         return new JavaString(this.value + c);
+    }
+
+    public Option<Tuple<JavaString, JavaString>> splitAtFirstSliceExclusive(String slice) {
+        return firstRangeOfSlice(slice).map(range -> new Tuple<>(sliceTo(range.startIndex()), sliceFrom(range.endIndex())));
+    }
+
+    public JavaString appendSlice(String slice) {
+        return new JavaString(this.value + slice);
+    }
+
+    public JavaString prependSlice(String slice) {
+        return new JavaString(slice + this.value);
+    }
+
+    public Option<Range> lastRangeOfSlice(String slice) {
+        var index = value.lastIndexOf(slice);
+        return index == -1
+                ? new None<>()
+                : new Some<>(createRange(slice, index));
+    }
+
+    private Range createRange(String slice, int index) {
+        return new Range(index, index + slice.length(), value.length());
     }
 }

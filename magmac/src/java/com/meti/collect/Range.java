@@ -1,7 +1,7 @@
 package com.meti.collect;
 
 public record Range(int start, int end, int length) {
-    Index startIndex() {
+    public Index startIndex() {
         return new Index(start, length);
     }
 

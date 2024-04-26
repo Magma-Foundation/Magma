@@ -13,4 +13,12 @@ public record Index(int value, int length) {
             return new Some<>(new Index(next, length));
         }
     }
+
+    public boolean isStart() {
+        return this.value == 0;
+    }
+
+    public boolean isEnd() {
+        return this.value == length;
+    }
 }

@@ -25,16 +25,17 @@ public class Compiler {
     public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
     public static final char BLOCK_START = '{';
     public static final char BLOCK_END = '}';
+    public static final FirstSliceRule MAGMA_IMPORT = new FirstSliceRule(new RequireBothSlices(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new CaptureStringRule("child"), " " + BLOCK_END + " "), "from", new RequireRight(new CaptureStringRule("parent"), STATEMENT_END));
     public static final String INT_KEYWORD = "int";
     public static final String I32_KEYWORD = "I32";
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final char VALUE_SEPARATOR = '=';
-    public static final SplitAtFirstCharRule JAVA_DEFINITION = new SplitAtFirstCharRule(new StripRule(new LastCharSeparatorRule(new OrRule(new SplitAtFirstCharRule(
+    public static final FirstCharRule JAVA_DEFINITION = new FirstCharRule(new StripRule(new LastCharSeparatorRule(new OrRule(new FirstCharRule(
             new StringListRule("modifiers", " "), ' ',
             new CaptureStringRule("type")),
             new CaptureStringRule("type")), ' ', new CaptureStringRule("name"))), VALUE_SEPARATOR,
-            new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END));
+            new RequireRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END));
     public static final String FINAL_KEYWORD = "final";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
@@ -80,8 +81,10 @@ public class Compiler {
         return BLOCK_START + content + BLOCK_END;
     }
 
-    public static String renderMagmaImportUnsafe(String parent, String child) {
-        return IMPORT_KEYWORD_WITH_SPACE + "{ " + child + " } from " + parent + STATEMENT_END;
+    public static String renderMagmaImportUnsafe(Node node) {
+        return MAGMA_IMPORT.fromNode(node)
+                .orElse(JavaString.EMPTY)
+                .value();
     }
 
     public static String renderMagmaFunctionUnsafe(String name) {
@@ -267,7 +270,10 @@ public class Compiler {
     }
 
     private static JavaString renderMagmaImport(JavaString parent, JavaString child) {
-        return new JavaString(renderMagmaImportUnsafe(parent.value(), child.value()));
+        return new JavaString(renderMagmaImportUnsafe(new MapNodePrototype()
+                .withString("parent", new JavaString(parent.value()))
+                .withString("child", new JavaString(child.value()))
+                .complete(new JavaString("import"))));
     }
 
     private static JavaString renderMagmaDefinition(Node node) {

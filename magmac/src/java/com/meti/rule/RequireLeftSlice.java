@@ -5,22 +5,22 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class IgnoreRight implements Rule {
-    private final char c;
+public class RequireLeftSlice implements Rule {
+    private final String slice;
     private final Rule before;
 
-    public IgnoreRight(Rule before, char c) {
-        this.c = c;
+    public RequireLeftSlice(String slice, Rule before) {
+        this.slice = slice;
         this.before = before;
     }
 
     @Override
     public Option<NodePrototype> fromString(JavaString input) {
-        return input.firstIndexOfChar(c).flatMap(before -> this.before.fromString(input.sliceTo(before)));
+        return input.firstRangeOfSlice(slice).flatMap(before -> this.before.fromString(input.sliceTo(before.startIndex())));
     }
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        return before.fromNode(node).map(value -> value.concatChar(c));
+        return before.fromNode(node).map(value -> value.prependSlice(slice));
     }
 }
