@@ -29,6 +29,9 @@ public class Compiler {
     public static final char BLOCK_START = '{';
     public static final char BLOCK_END = '}';
     public static final RequireBoth BLOCK = new RequireBoth(BLOCK_START, new StringRule("content"), BLOCK_END);
+    public static final RequireLeft MAGMA_OBJECT = new RequireLeft("object ", new FirstRule(" ",
+            new StringRule("name"), BLOCK));
+    public static final FirstRule MAGMA_FUNCTION = new FirstRule(TEMP_SEPARATOR, new FirstRule(CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE, new OrRule(new RequireRightSlice(" ", new StringListRule("modifiers", " ")), new EmptyRule()), new StringRule("name")), new RequireLeft(' ', BLOCK));
     public static final FirstRule MAGMA_IMPORT = new FirstRule("from", new RequireBoth(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new StringRule("child"), " " + BLOCK_END + " "), new RequireRightChar(new StringRule("parent"), STATEMENT_END));
     public static final String INT_KEYWORD = "int";
     public static final String I32_KEYWORD = "I32";
@@ -46,7 +49,6 @@ public class Compiler {
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
     public static final String TEMP_SEPARATOR = "() =>";
     public static final String DEF_KEYWORD_WITH_SPACE = "def ";
-    public static final FirstRule MAGMA_FUNCTION = new FirstRule(TEMP_SEPARATOR, new FirstRule(CLASS_KEYWORD_WITH_SPACE + DEF_KEYWORD_WITH_SPACE, new OrRule(new RequireRightSlice(" ", new StringListRule("modifiers", " ")), new EmptyRule()), new StringRule("name")), new RequireLeft(' ', BLOCK));
 
     public static String renderJavaDefinition(Node node) {
         return JAVA_DEFINITION.fromNode(node)
@@ -166,7 +168,10 @@ public class Compiler {
     }
 
     private static JavaString renderObject(JavaString className, JavaString staticValue) {
-        return new JavaString(renderObjectUnsafe(className.value(), staticValue.value()));
+        return new JavaString(renderObjectUnsafe(new MapNodePrototype()
+                .withString("name", new JavaString(className.value()))
+                .withString("content", new JavaString(staticValue.value()))
+                .complete(new JavaString("object"))));
     }
 
 
@@ -281,9 +286,12 @@ public class Compiler {
     }
 
     public static String renderJavaClass(String modifiersString, String name, String content) {
-        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + BLOCK.fromNode(new MapNodePrototype()
-                        .withString("content", new JavaString(content))
-                        .complete(new JavaString("block")))
+        var node = new MapNodePrototype()
+                .withString("content", new JavaString(content))
+                .complete(new JavaString("block"));
+
+
+        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + BLOCK.fromNode(node)
                 .orElse(JavaString.EMPTY)
                 .value();
     }
@@ -296,7 +304,9 @@ public class Compiler {
         return IMPORT_KEYWORD_WITH_SPACE + modifierString + parent + "." + child + STATEMENT_END;
     }
 
-    public static String renderObjectUnsafe(String name, String content) {
-        return "object " + name + " " + BLOCK_START + content + BLOCK_END;
+    public static String renderObjectUnsafe(Node node) {
+        return MAGMA_OBJECT.fromNode(node)
+                .orElse(JavaString.EMPTY)
+                .value();
     }
 }

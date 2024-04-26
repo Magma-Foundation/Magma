@@ -123,18 +123,22 @@ public class ApplicationTest {
 
     @Test
     void definitionStatic() {
+        final String content = renderMagmaDefinitionUnsafe(new MapNodePrototype()
+                .withListOfStrings("segments", computeSegments(Collections.emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
+                .withString("type", new JavaString(I64_KEYWORD))
+                .withString("value", new JavaString("0"))
+                .complete(new JavaString("definition")));
         assertRun(Compiler.renderJavaClass("", TEST_UPPER_SYMBOL, renderJavaDefinition(new MapNodePrototype()
                         .withListOfStrings("modifiers", Collections.singletonList(STATIC_STRING))
                         .withString("type", new JavaString(LONG_KEYWORD))
                         .withString("name", new JavaString(TEST_LOWER_SYMBOL))
                         .withString("value", new JavaString("0"))
                         .complete(new JavaString("definition")))),
-                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(TEST_UPPER_SYMBOL,
-                        renderMagmaDefinitionUnsafe(new MapNodePrototype()
-                                .withListOfStrings("segments", computeSegments(Collections.emptyList(), LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL))
-                                .withString("type", new JavaString(I64_KEYWORD))
-                                .withString("value", new JavaString("0"))
-                                .complete(new JavaString("definition")))));
+                Compiler.renderMagmaFunctionUnsafe(createFunctionNode(Collections.emptyList(), TEST_UPPER_SYMBOL, "")) + renderObjectUnsafe(
+                        new MapNodePrototype()
+                                .withString("name", new JavaString(TEST_UPPER_SYMBOL))
+                                .withString("content", new JavaString(content))
+                                .complete(new JavaString("object"))));
     }
 
     @ParameterizedTest
