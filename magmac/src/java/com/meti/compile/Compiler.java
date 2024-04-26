@@ -36,7 +36,6 @@ public class Compiler {
             new CaptureStringRule("type")), ' ', new CaptureStringRule("name"))), VALUE_SEPARATOR,
             new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END));
     public static final String FINAL_KEYWORD = "final";
-    public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
