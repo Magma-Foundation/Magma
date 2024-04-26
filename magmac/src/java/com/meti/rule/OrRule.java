@@ -21,6 +21,6 @@ public class OrRule implements Rule {
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        throw new UnsupportedOperationException();
+        return first.fromNode(node).or(second.fromNode(node));
     }
 }

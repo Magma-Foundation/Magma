@@ -30,17 +30,29 @@ public class Compiler {
     public static final String LONG_KEYWORD = "long";
     public static final String I64_KEYWORD = "I64";
     public static final char VALUE_SEPARATOR = '=';
+    public static final SplitAtFirstCharRule JAVA_DEFINITION = new SplitAtFirstCharRule(new StripRule(new LastCharSeparatorRule(new OrRule(new SplitAtFirstCharRule(
+            new StringListRule("modifiers", " "), ' ',
+            new CaptureStringRule("type")),
+            new CaptureStringRule("type")), ' ', new CaptureStringRule("name"))), VALUE_SEPARATOR,
+            new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END));
     public static final String FINAL_KEYWORD = "final";
     public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderJavaDefinition(String type, String name, String value) {
-        return renderJavaDefinition("", type, name, value);
+        return renderJavaDefinition(new MapNodePrototype()
+                .withListOfStrings("modifiers", Collections.emptyList())
+                .withString("type", new JavaString(type))
+                .withString("name", new JavaString(name))
+                .withString("value", new JavaString(value))
+                .complete(new JavaString("definition")));
     }
 
-    public static String renderJavaDefinition(String modifiersString, String type, String name, String value) {
-        return modifiersString + type + " " + name + " " + VALUE_SEPARATOR + " " + value + ";";
+    public static String renderJavaDefinition(Node node) {
+        return JAVA_DEFINITION.fromNode(node)
+                .orElse(JavaString.EMPTY)
+                .value();
     }
 
     public static String renderMagmaDefinitionUnsafe(String name, String type, String value) {
@@ -94,11 +106,11 @@ public class Compiler {
         var beforeString = imports.stream()
                 .map(Compiler::compileImport)
                 .map(option -> option.orElse(JavaString.EMPTY))
-                .reduce(JavaString::concat)
+                .reduce(JavaString::concatOwned)
                 .orElse(JavaString.EMPTY);
 
         var compiledClass = compileClass(classString).$();
-        return beforeString.concat(compiledClass);
+        return beforeString.concatOwned(compiledClass);
     }
 
     private static Result<JavaString, UnsupportedOperationException> compileClass(JavaString classString) {
@@ -153,7 +165,7 @@ public class Compiler {
                                 .map(staticValue -> renderObject(className, staticValue))
                                 .orElse(JavaString.EMPTY);
 
-                        return instanceFunction.concat(objectString);
+                        return instanceFunction.concatOwned(objectString);
                     });
                 });
             });
@@ -178,13 +190,7 @@ public class Compiler {
 
 
     private static Option<Node> lexDefinition(JavaString inputContent) {
-        var beforeRule = new StripRule(new SplitAtLastCharRule(' ', new OrRule(new SplitAtFirstCharRule(' ',
-                new CaptureStringListRule("modifiers", " "),
-                new CaptureStringRule("type")),
-                new CaptureStringRule("type")), new CaptureStringRule("name")));
-
-        return new SplitAtFirstCharRule(VALUE_SEPARATOR, beforeRule,
-                new IgnoreRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END))
+        return JAVA_DEFINITION
                 .fromString(inputContent)
                 .map(prototype -> prototype.complete(new JavaString("definition")));
     }

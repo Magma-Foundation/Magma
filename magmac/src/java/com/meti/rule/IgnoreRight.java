@@ -21,6 +21,6 @@ public class IgnoreRight implements Rule {
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        throw new UnsupportedOperationException();
+        return before.fromNode(node).map(value -> value.concatChar(c));
     }
 }

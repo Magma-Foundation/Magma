@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.collect.JavaString;
+import com.meti.node.Attribute;
 import com.meti.node.MapNodePrototype;
 import com.meti.node.Node;
 import com.meti.node.NodePrototype;
@@ -21,6 +22,6 @@ public class CaptureStringRule implements Rule{
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        throw new UnsupportedOperationException();
+        return node.apply(name).flatMap(Attribute::asString);
     }
 }

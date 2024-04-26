@@ -34,7 +34,7 @@ public record JavaString(String value) {
                 : new Some<>(new Range(index, index + slice.length(), value.length()));
     }
 
-    public JavaString concat(JavaString other) {
+    public JavaString concatOwned(JavaString other) {
         return new JavaString(value + other.value);
     }
 
@@ -85,5 +85,9 @@ public record JavaString(String value) {
 
     public Option<Tuple<JavaString, JavaString>> splitAtLastIndexOfCharExclusive(char c) {
         return lastIndexOfChar(c).map(index -> new Tuple<>(sliceTo(index), sliceFrom(index.next().orElse(end()))));
+    }
+
+    public JavaString concatChar(char c) {
+        return new JavaString(this.value + c);
     }
 }

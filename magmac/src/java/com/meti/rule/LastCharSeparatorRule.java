@@ -5,12 +5,12 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class SplitAtLastCharRule implements Rule {
+public class LastCharSeparatorRule implements Rule {
     private final Rule left;
     private final Rule right;
     private final char c;
 
-    public SplitAtLastCharRule(char c, Rule left, Rule right) {
+    public LastCharSeparatorRule(Rule left, char c, Rule right) {
         this.left = left;
         this.right = right;
         this.c = c;
@@ -25,6 +25,6 @@ public class SplitAtLastCharRule implements Rule {
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        throw new UnsupportedOperationException();
+        return left.fromNode(node).and(right.fromNode(node)).map(tuple -> tuple.a().concatChar(c).concatOwned(tuple.b()));
     }
 }

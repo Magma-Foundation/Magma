@@ -10,7 +10,7 @@ public class SplitAtFirstCharRule implements Rule {
     private final Rule right;
     private final char c;
 
-    public SplitAtFirstCharRule(char c, Rule left, Rule right) {
+    public SplitAtFirstCharRule(Rule left, char c, Rule right) {
         this.left = left;
         this.right = right;
         this.c = c;
@@ -25,6 +25,6 @@ public class SplitAtFirstCharRule implements Rule {
 
     @Override
     public Option<JavaString> fromNode(Node node){
-        throw new UnsupportedOperationException();
+        return left.fromNode(node).and(right.fromNode(node)).map(tuple -> tuple.a().concatChar(c).concatOwned(tuple.b()));
     }
 }
