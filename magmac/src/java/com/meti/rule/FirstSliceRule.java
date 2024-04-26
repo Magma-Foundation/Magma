@@ -10,10 +10,10 @@ public class FirstSliceRule implements Rule {
     private final Rule right;
     private final String c;
 
-    public FirstSliceRule(Rule left, String c, Rule right) {
+    public FirstSliceRule(String slice, Rule left, Rule right) {
         this.left = left;
         this.right = right;
-        this.c = c;
+        this.c = slice;
     }
 
     @Override

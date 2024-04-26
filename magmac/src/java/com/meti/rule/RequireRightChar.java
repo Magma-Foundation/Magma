@@ -5,11 +5,11 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class RequireRight implements Rule {
+public class RequireRightChar implements Rule {
     private final char c;
     private final Rule before;
 
-    public RequireRight(Rule before, char c) {
+    public RequireRightChar(Rule before, char c) {
         this.c = c;
         this.before = before;
     }

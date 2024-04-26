@@ -8,10 +8,10 @@ import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-public class CaptureStringRule implements Rule{
+public class StringRule implements Rule{
     private final String name;
 
-    public CaptureStringRule(String name) {
+    public StringRule(String name) {
         this.name = name;
     }
 

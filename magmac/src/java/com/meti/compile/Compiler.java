@@ -25,7 +25,8 @@ public class Compiler {
     public static final String STATIC_KEYWORD_WITH_SPACE = STATIC_KEYWORD + " ";
     public static final char BLOCK_START = '{';
     public static final char BLOCK_END = '}';
-    public static final FirstSliceRule MAGMA_IMPORT = new FirstSliceRule(new RequireBothSlices(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new CaptureStringRule("child"), " " + BLOCK_END + " "), "from", new RequireRight(new CaptureStringRule("parent"), STATEMENT_END));
+    public static final RequireBoth BLOCK = new RequireBoth(BLOCK_START, new StringRule("content"), BLOCK_END);
+    public static final FirstSliceRule MAGMA_IMPORT = new FirstSliceRule("from", new RequireBoth(IMPORT_KEYWORD_WITH_SPACE + BLOCK_START + " ", new StringRule("child"), " " + BLOCK_END + " "), new RequireRightChar(new StringRule("parent"), STATEMENT_END));
     public static final String INT_KEYWORD = "int";
     public static final String I32_KEYWORD = "I32";
     public static final String LONG_KEYWORD = "long";
@@ -33,12 +34,14 @@ public class Compiler {
     public static final char VALUE_SEPARATOR = '=';
     public static final FirstCharRule JAVA_DEFINITION = new FirstCharRule(new StripRule(new LastCharSeparatorRule(new OrRule(new FirstCharRule(
             new StringListRule("modifiers", " "), ' ',
-            new CaptureStringRule("type")),
-            new CaptureStringRule("type")), ' ', new CaptureStringRule("name"))), VALUE_SEPARATOR,
-            new RequireRight(new StripRule(new CaptureStringRule("value")), STATEMENT_END));
+            new StringRule("type")),
+            new StringRule("type")), ' ', new StringRule("name"))), VALUE_SEPARATOR,
+            new RequireRightChar(new StripRule(new StringRule("value")), STATEMENT_END));
     public static final String FINAL_KEYWORD = "final";
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
+    public static final String TEMP_SEPARATOR = "() =>";
+    public static final String DEF_KEYWORD = "def";
 
     public static String renderJavaDefinition(String type, String name, String value) {
         return renderJavaDefinition(new MapNodePrototype()
@@ -77,10 +80,6 @@ public class Compiler {
         return modifiersString + mutabilityString + name + " : " + type + " " + VALUE_SEPARATOR + " " + value + ";";
     }
 
-    private static String renderBlock(String content) {
-        return BLOCK_START + content + BLOCK_END;
-    }
-
     public static String renderMagmaImportUnsafe(Node node) {
         return MAGMA_IMPORT.fromNode(node)
                 .orElse(JavaString.EMPTY)
@@ -96,7 +95,13 @@ public class Compiler {
     }
 
     public static String renderMagmaFunctionUnsafe(String modifiersString, String name, String content) {
-        return modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + " " + renderBlock(content);
+        var s = modifiersString + CLASS_KEYWORD_WITH_SPACE + "def " + name;
+        var s1 = new RequireLeft(' ', BLOCK).fromNode(new MapNodePrototype()
+                        .withString("content", new JavaString(content))
+                        .complete(new JavaString("block")))
+                .orElse(JavaString.EMPTY)
+                .value();
+        return s + TEMP_SEPARATOR + s1;
     }
 
     public static JavaString run(JavaString input) {
@@ -302,7 +307,11 @@ public class Compiler {
     }
 
     public static String renderJavaClass(String modifiersString, String name, String content) {
-        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + renderBlock(content);
+        return modifiersString + CLASS_KEYWORD_WITH_SPACE + name + " " + BLOCK.fromNode(new MapNodePrototype()
+                        .withString("content", new JavaString(content))
+                        .complete(new JavaString("block")))
+                .orElse(JavaString.EMPTY)
+                .value();
     }
 
     public static String renderJavaImport(String parent, String child) {

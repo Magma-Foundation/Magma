@@ -5,11 +5,15 @@ import com.meti.node.Node;
 import com.meti.node.NodePrototype;
 import com.meti.option.Option;
 
-public class RequireLeftSlice implements Rule {
+public class RequireLeft implements Rule {
     private final String slice;
     private final Rule before;
 
-    public RequireLeftSlice(String slice, Rule before) {
+    public RequireLeft(char c, Rule before) {
+        this(c +"", before);
+    }
+
+    public RequireLeft(String slice, Rule before) {
         this.slice = slice;
         this.before = before;
     }
