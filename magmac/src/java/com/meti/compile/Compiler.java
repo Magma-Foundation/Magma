@@ -105,7 +105,7 @@ public class Compiler {
                                 : JavaString.EMPTY;
 
                         var stateResultOption = compileDefinition(inputContent);
-                        var instanceValue = compileDefinition(inputContent)
+                        var instanceValue = stateResultOption
                                 .flatMap(StateResult::findInstanceValue)
                                 .map(Compiler::renderMagmaDefinition);
 
