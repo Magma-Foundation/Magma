@@ -106,7 +106,8 @@ public class Compiler {
 
                         var stateResultOption = compileDefinition(inputContent);
                         var instanceValue = compileDefinition(inputContent)
-                                .flatMap(StateResult::findInstanceValue);
+                                .flatMap(StateResult::findInstanceValue)
+                                .map(Compiler::renderMagmaDefinition);
 
                         var instanceFunction = renderMagmaFunction(new MapNodePrototype()
                                 .withString("modifiers", modifierString)
@@ -116,6 +117,7 @@ public class Compiler {
 
                         var objectString = stateResultOption
                                 .flatMap(StateResult::findStaticValue)
+                                .map(Compiler::renderMagmaDefinition)
                                 .map(staticValue -> renderObject(className, staticValue))
                                 .orElse(JavaString.EMPTY);
 
@@ -144,16 +146,19 @@ public class Compiler {
 
 
     private static Option<StateResult> compileDefinition(JavaString inputContent) {
-        return lexDefinition(inputContent).map(built -> {
-            var modifiers = built.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
-            var outputType = compileType(built.apply("type").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
-            var withNewType = built.with("type", new StringAttribute(outputType)).orElse(built);
+        return lexDefinition(inputContent)
+                .map(built -> {
+                    var inputType = built.apply("type")
+                            .flatMap(Attribute::asString)
+                            .orElse(JavaString.EMPTY);
 
-            var parsed = parseDefinition(withNewType);
-
-            var rendered = renderMagmaDefinition(parsed);
-            return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(rendered) : new InstanceResult(rendered);
-        });
+                    var outputType = compileType(inputType);
+                    return built.with("type", new StringAttribute(outputType)).orElse(built);
+                })
+                .map(Compiler::parseDefinition).map(parsed -> {
+                    var modifiers = parsed.apply("modifiers").flatMap(Attribute::asListOfStrings).orElse(Collections.emptyList());
+                    return modifiers.contains(new JavaString(STATIC_KEYWORD)) ? new StaticResult(parsed) : new InstanceResult(parsed);
+                });
     }
 
     private static Option<Node> lexDefinition(JavaString inputContent) {

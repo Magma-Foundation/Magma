@@ -1,20 +1,18 @@
 package com.meti.compile;
 
-import com.meti.collect.JavaString;
+import com.meti.node.Node;
 import com.meti.option.None;
 import com.meti.option.Option;
 import com.meti.option.Some;
 
-import java.util.Optional;
-
-public record InstanceResult(JavaString value) implements StateResult {
+public record InstanceResult(com.meti.node.Node value) implements StateResult {
     @Override
-    public Option<JavaString> findInstanceValue() {
+    public Option<Node> findInstanceValue() {
         return new Some<>(value);
     }
 
     @Override
-    public Option<JavaString> findStaticValue() {
+    public Option<Node> findStaticValue() {
         return new None<>();
     }
 }
