@@ -5,14 +5,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.meti.FeatureTest.*;
-import static com.meti.Lang.renderJavaImport;
-import static com.meti.Lang.renderMagmaImport;
+import static com.meti.JavaLang.renderJavaImport;
+import static com.meti.MagmaLang.renderMagmaImport;
 
 public class ImportTest {
     @Test
     void importStatic() {
         assertRunBeforeClass(
-                renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, Lang.STATIC_KEYWORD_WITH_SPACE),
+                renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, JavaLang.STATIC_KEYWORD_WITH_SPACE),
                 renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL));
     }
 

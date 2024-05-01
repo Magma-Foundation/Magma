@@ -11,30 +11,30 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", renderJavaDefinition(INT_KEYWORD, name)),
-                renderMagmaFunction(TEST_UPPER_SYMBOL, "", renderMagmaDefinition(name, I32_KEYWORD)));
+        assertRun(JavaLang.renderJavaClass(TEST_UPPER_SYMBOL, "", JavaLang.renderJavaDefinition(JavaLang.INT_KEYWORD, name)),
+                MagmaLang.renderMagmaFunction(TEST_UPPER_SYMBOL, "", MagmaLang.renderMagmaDefinition(name, MagmaLang.I32_KEYWORD)));
     }
 
     @Test
     void definitionType() {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL)),
-                renderMagmaFunction(TEST_UPPER_SYMBOL, "", renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD)));
+        assertRun(JavaLang.renderJavaClass(TEST_UPPER_SYMBOL, "", JavaLang.renderJavaDefinition(JavaLang.LONG_KEYWORD, TEST_LOWER_SYMBOL)),
+                MagmaLang.renderMagmaFunction(TEST_UPPER_SYMBOL, "", MagmaLang.renderMagmaDefinition(TEST_LOWER_SYMBOL, MagmaLang.I64_KEYWORD)));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void className(String name) {
-        assertRun(renderJavaClass(name), renderMagmaFunction(name));
+        assertRun(JavaLang.renderJavaClass(name), MagmaLang.renderMagmaFunction(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(JavaLang.PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + JavaLang.renderJavaClass(TEST_UPPER_SYMBOL), MagmaLang.renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @Test
     void classPublic() {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), renderMagmaFunction(TEST_UPPER_SYMBOL, EXPORT_KEYWORD_WITH_SPACE));
+        assertRun(JavaLang.renderJavaClass(TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), MagmaLang.renderMagmaFunction(TEST_UPPER_SYMBOL, MagmaLang.EXPORT_KEYWORD_WITH_SPACE));
     }
 }

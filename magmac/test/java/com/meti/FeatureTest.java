@@ -15,8 +15,8 @@ public class FeatureTest {
     }
 
     static void assertRunBeforeClass(String beforeClass, String beforeFunction) {
-        assertRun(beforeClass + Lang.renderJavaClass(TEST_UPPER_SYMBOL),
-                beforeFunction + Lang.renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(beforeClass + JavaLang.renderJavaClass(TEST_UPPER_SYMBOL),
+                beforeFunction + MagmaLang.renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     static String repeatAndJoin(int count, IntFunction<String> mapper) {
