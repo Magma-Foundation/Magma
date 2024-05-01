@@ -2,7 +2,6 @@ package com.meti;
 
 public class Lang {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-    public static final String TEST_UPPER_SYMBOL = "Test";
     public static final String PUBLIC_KEYWORD_WITH_SPACE = "public ";
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String IMPORT_KEYWORD = "import ";

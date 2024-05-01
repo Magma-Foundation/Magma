@@ -10,8 +10,8 @@ import static com.meti.Lang.*;
 public class ApplicationTest {
     @Test
     void definitionName() {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", JAVA_DEFINITION),
-                renderMagmaFunction(TEST_UPPER_SYMBOL, "", MAGMA_DEFINITION));
+        assertRun(renderJavaClass(FeatureTest.TEST_UPPER_SYMBOL, "", JAVA_DEFINITION),
+                renderMagmaFunction(FeatureTest.TEST_UPPER_SYMBOL, "", MAGMA_DEFINITION));
     }
 
 
@@ -24,11 +24,11 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(FeatureTest.TEST_UPPER_SYMBOL), renderMagmaFunction(FeatureTest.TEST_UPPER_SYMBOL));
     }
 
     @Test
     void classPublic() {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), renderMagmaFunction(TEST_UPPER_SYMBOL, EXPORT_KEYWORD_WITH_SPACE));
+        assertRun(renderJavaClass(FeatureTest.TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), renderMagmaFunction(FeatureTest.TEST_UPPER_SYMBOL, EXPORT_KEYWORD_WITH_SPACE));
     }
 }

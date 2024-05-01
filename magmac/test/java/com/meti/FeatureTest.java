@@ -8,14 +8,15 @@ import java.util.stream.IntStream;
 
 public class FeatureTest {
     public static final String TEST_LOWER_SYMBOL = "test";
+    public static final String TEST_UPPER_SYMBOL = "Test";
 
     static void assertRun(String input, String output) {
         Assertions.assertEquals(output, Compiler.run(input));
     }
 
     static void assertRunBeforeClass(String beforeClass, String beforeFunction) {
-        assertRun(beforeClass + Lang.renderJavaClass(Lang.TEST_UPPER_SYMBOL),
-                beforeFunction + Lang.renderMagmaFunction(Lang.TEST_UPPER_SYMBOL));
+        assertRun(beforeClass + Lang.renderJavaClass(TEST_UPPER_SYMBOL),
+                beforeFunction + Lang.renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     static String repeatAndJoin(int count, IntFunction<String> mapper) {
