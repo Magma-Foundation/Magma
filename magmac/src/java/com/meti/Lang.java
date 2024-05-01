@@ -7,11 +7,14 @@ public class Lang {
     public static final char STATEMENT_END = ';';
     public static final String BLOCK_START = " {";
     public static final String BLOCK_END = "}";
-    public static final String DEFINITION_END = " = 0;";
     public static final char TYPE_NAME_SEPARATOR = ' ';
+    public static final String VALUE_SEPARATOR = " = ";
+
+    public static String renderDefinitionEnd(String value) {
+        return VALUE_SEPARATOR + value + STATEMENT_END;
+    }
 
     public static String renderBlock(String content) {
         return BLOCK_START + content + BLOCK_END;
     }
-
 }

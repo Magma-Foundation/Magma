@@ -2,7 +2,9 @@ package com.meti;
 
 import java.util.ArrayList;
 
+import static com.meti.JavaLang.*;
 import static com.meti.Lang.*;
+import static com.meti.MagmaLang.*;
 
 public class Compiler {
 
@@ -36,17 +38,17 @@ public class Compiler {
     }
 
     private static String compileStatement(String input) {
-        if (input.startsWith(JavaLang.PACKAGE_KEYWORD_WITH_SPACE)) return "";
+        if (input.startsWith(PACKAGE_KEYWORD_WITH_SPACE)) return "";
         if (input.startsWith(IMPORT_KEYWORD)) {
             var truncated = input.substring(IMPORT_KEYWORD.length());
-            var segments = truncated.startsWith(JavaLang.STATIC_KEYWORD_WITH_SPACE)
-                    ? truncated.substring(JavaLang.STATIC_KEYWORD_WITH_SPACE.length())
+            var segments = truncated.startsWith(STATIC_KEYWORD_WITH_SPACE)
+                    ? truncated.substring(STATIC_KEYWORD_WITH_SPACE.length())
                     : truncated;
 
-            var separator = segments.indexOf(JavaLang.JAVA_IMPORT_SEPARATOR);
+            var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
             var parent = segments.substring(0, separator);
             var child = segments.substring(separator + 1);
-            return MagmaLang.renderMagmaImport(parent, child);
+            return renderMagmaImport(parent, child);
         }
         return compileClass(input);
     }
@@ -59,20 +61,21 @@ public class Compiler {
         var outputContent = compileClassContent(inputContent);
 
         var name = input.substring(nameStart, contentStart);
-        var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? MagmaLang.EXPORT_KEYWORD_WITH_SPACE : "";
-        return MagmaLang.renderMagmaFunction(name, modifierString, outputContent);
+        var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
+        return renderMagmaFunction(name, modifierString, outputContent);
     }
 
     private static String compileClassContent(String input) {
-        if (input.endsWith(DEFINITION_END)) {
-            var merged = input.substring(0, input.lastIndexOf(DEFINITION_END));
-            var separator = merged.indexOf(TYPE_NAME_SEPARATOR);
-            var inputType = merged.substring(0, separator);
-            var name = merged.substring(separator + 1);
+        var index = input.indexOf(VALUE_SEPARATOR);
+        if (index != -1) {
+            var beforeValue = input.substring(0, index);
+            var separator = beforeValue.indexOf(TYPE_NAME_SEPARATOR);
+            var inputType = beforeValue.substring(0, separator);
+            var name = beforeValue.substring(separator + 1);
+            var outputType = inputType.equals(INT_KEYWORD) ? I32_KEYWORD : I64_KEYWORD;
 
-            var outputType = inputType.equals(JavaLang.INT_KEYWORD) ? MagmaLang.I32_KEYWORD : MagmaLang.I64_KEYWORD;
-
-            return MagmaLang.renderMagmaDefinition(name, outputType);
+            var valueString = input.substring(index + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
+            return renderMagmaDefinition(name, outputType, valueString);
         }
         return "";
     }

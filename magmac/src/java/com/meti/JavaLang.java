@@ -7,8 +7,8 @@ public class JavaLang {
     public static final String INT_KEYWORD = "int";
     public static final String LONG_KEYWORD = "long";
 
-    public static String renderJavaDefinition(String type, String name) {
-        return type + Lang.TYPE_NAME_SEPARATOR + name + Lang.DEFINITION_END;
+    public static String renderJavaDefinition(String name, String type, String value) {
+        return type + Lang.TYPE_NAME_SEPARATOR + name + Lang.renderDefinitionEnd(value);
     }
 
     public static String renderJavaImport(String parent, String child) {

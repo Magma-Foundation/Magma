@@ -5,8 +5,8 @@ public class MagmaLang {
     public static final String I32_KEYWORD = "I32";
     public static final String I64_KEYWORD = "I64";
 
-    public static String renderMagmaDefinition(String name, String type) {
-        return "let " + name + " : " + type + " = 0;";
+    public static String renderMagmaDefinition(String name, String type, String value) {
+        return "let " + name + " : " + type + Lang.renderDefinitionEnd(value);
     }
 
     public static String renderMagmaImport(String parent, String child) {
