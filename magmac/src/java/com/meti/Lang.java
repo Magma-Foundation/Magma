@@ -9,10 +9,18 @@ public class Lang {
     public static final char STATEMENT_END = ';';
     public static final String PACKAGE_KEYWORD_WITH_SPACE = "package ";
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
-    public static final String JAVA_DEFINITION = "int value = 0;";
-    public static final String MAGMA_DEFINITION = "let value : I32 = 0;";
     public static final String BLOCK_START = " {";
     public static final String BLOCK_END = "}";
+    public static final String INT_KEYWORD_WITH_SPACE = "int ";
+    public static final String JAVA_DEFINITION_END = " = 0;";
+
+    public static String renderJavaDefinition(String name) {
+        return INT_KEYWORD_WITH_SPACE + name + JAVA_DEFINITION_END;
+    }
+
+    public static String renderMagmaDefinition(String name) {
+        return "let " + name + " : I32 = 0;";
+    }
 
     public static String renderBlock(String content) {
         return BLOCK_START + content + BLOCK_END;
