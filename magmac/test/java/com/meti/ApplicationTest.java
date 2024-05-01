@@ -8,15 +8,24 @@ import static com.meti.Compiler.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplicationTest {
+    public static final String TEST_LOWER_SYMBOL = "test";
+
     private static void assertRun(String input, String output) {
         assertEquals(output, run(input));
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void importParent(String name) {
+        assertRun(renderJavaImport(name, TEST_UPPER_SYMBOL) + renderJavaClass(TEST_UPPER_SYMBOL),
+                renderMagmaImport(name, TEST_UPPER_SYMBOL) + renderMagmaFunction(TEST_UPPER_SYMBOL));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChild(String name) {
-        assertRun(renderJavaImport(name) + renderJavaClass(TEST_UPPER_SYMBOL),
-                renderMagmaImport(name) + renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(renderJavaImport(TEST_LOWER_SYMBOL, name) + renderJavaClass(TEST_UPPER_SYMBOL),
+                renderMagmaImport(TEST_LOWER_SYMBOL, name) + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
