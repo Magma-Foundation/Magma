@@ -30,6 +30,10 @@ public class ApplicationTest {
     }
 
     private static String run(String input) {
+        return compileClass(input);
+    }
+
+    private static String compileClass(String input) {
         var nameStart = input.indexOf(CLASS_KEYWORD_WITH_SPACE) + CLASS_KEYWORD_WITH_SPACE.length();
         var nameEnd = input.indexOf(CONTENT);
         var name = input.substring(nameStart, nameEnd);
@@ -45,6 +49,12 @@ public class ApplicationTest {
     @ValueSource(strings = {"First", "Second"})
     void className(String name) {
         assertRun(renderJavaClass(name), renderMagmaFunction(name));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void packageStatement(String name) {
+        assertRun("package " + name + ";" + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @Test
