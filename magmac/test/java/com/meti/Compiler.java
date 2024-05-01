@@ -10,9 +10,14 @@ public class Compiler {
     public static final String JAVA_IMPORT_SEPARATOR = ".";
     public static final String STATEMENT_END = ";";
     public static final String PACKAGE_KEYWORD_WITH_SPACE = "package ";
+    public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
 
     public static String renderJavaImport(String parent, String child) {
-        return IMPORT_KEYWORD + parent + JAVA_IMPORT_SEPARATOR + child + STATEMENT_END;
+        return renderJavaImport(parent, child, "");
+    }
+
+    public static String renderJavaImport(String parent, String child, String modifierString) {
+        return IMPORT_KEYWORD + modifierString + parent + JAVA_IMPORT_SEPARATOR + child + STATEMENT_END;
     }
 
     public static String renderMagmaImport(String parent, String child) {
@@ -47,7 +52,11 @@ public class Compiler {
     private static String compileStatement(String input) {
         if (input.startsWith(PACKAGE_KEYWORD_WITH_SPACE)) return "";
         if (input.startsWith(IMPORT_KEYWORD)) {
-            var segments = input.substring(IMPORT_KEYWORD.length());
+            var truncated = input.substring(IMPORT_KEYWORD.length());
+            var segments = truncated.startsWith(STATIC_KEYWORD_WITH_SPACE)
+                    ? truncated.substring(STATIC_KEYWORD_WITH_SPACE.length())
+                    : truncated;
+
             var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
             var parent = segments.substring(0, separator);
             var child = segments.substring(separator + 1);

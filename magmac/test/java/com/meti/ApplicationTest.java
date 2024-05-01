@@ -24,28 +24,37 @@ public class ApplicationTest {
                 .collect(Collectors.joining());
     }
 
+    private static void assertRunBeforeClass(String beforeClass, String beforeFunction) {
+        assertRun(beforeClass + renderJavaClass(TEST_UPPER_SYMBOL),
+                beforeFunction + renderMagmaFunction(TEST_UPPER_SYMBOL));
+    }
+
+    @Test
+    void importStatic() {
+        assertRunBeforeClass(
+                renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL, STATIC_KEYWORD_WITH_SPACE),
+                renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL));
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {2, 3})
     void importMultiple(int count) {
         var inputImports = repeatAndJoin(count, index -> renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index));
         var outputImports = repeatAndJoin(count, index -> renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index));
 
-        assertRun(inputImports + renderJavaClass(TEST_UPPER_SYMBOL),
-                outputImports + renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRunBeforeClass(inputImports, outputImports);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void importParent(String name) {
-        assertRun(renderJavaImport(name, TEST_UPPER_SYMBOL) + renderJavaClass(TEST_UPPER_SYMBOL),
-                renderMagmaImport(name, TEST_UPPER_SYMBOL) + renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRunBeforeClass(renderJavaImport(name, TEST_UPPER_SYMBOL), renderMagmaImport(name, TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void importChild(String name) {
-        assertRun(renderJavaImport(TEST_LOWER_SYMBOL, name) + renderJavaClass(TEST_UPPER_SYMBOL),
-                renderMagmaImport(TEST_LOWER_SYMBOL, name) + renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRunBeforeClass(renderJavaImport(TEST_LOWER_SYMBOL, name), renderMagmaImport(TEST_LOWER_SYMBOL, name));
     }
 
     @ParameterizedTest
