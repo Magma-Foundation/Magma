@@ -9,10 +9,7 @@ public class Compiler {
     public static final String IMPORT_KEYWORD = "import ";
     public static final String JAVA_IMPORT_SEPARATOR = ".";
     public static final String STATEMENT_END = ";";
-
-    public static String getString(String parent) {
-        return IMPORT_KEYWORD + parent + JAVA_IMPORT_SEPARATOR;
-    }
+    public static final String PACKAGE_KEYWORD_WITH_SPACE = "package ";
 
     public static String renderJavaImport(String parent, String child) {
         return IMPORT_KEYWORD + parent + JAVA_IMPORT_SEPARATOR + child + STATEMENT_END;
@@ -39,25 +36,24 @@ public class Compiler {
     }
 
     static String run(String input) {
-        var separator = input.indexOf(STATEMENT_END);
-        if (separator == -1) {
-            return compileClass(input);
+        var statements = input.split(STATEMENT_END);
+        var builder = new StringBuilder();
+        for (String statement : statements) {
+            builder.append(compileStatement(statement));
         }
-
-        var before = input.substring(0, separator + 1);
-        var after = input.substring(separator + 1);
-
-        var newBefore = compileStatement(before);
-        return newBefore + compileClass(after);
+        return builder.toString();
     }
 
     private static String compileStatement(String input) {
-        if (!input.startsWith(IMPORT_KEYWORD)) return "";
-        var segments = input.substring(IMPORT_KEYWORD.length(), input.indexOf(STATEMENT_END));
-        var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
-        var parent = segments.substring(0, separator);
-        var child = segments.substring(separator + 1);
-        return renderMagmaImport(parent, child);
+        if (input.startsWith(PACKAGE_KEYWORD_WITH_SPACE)) return "";
+        if (input.startsWith(IMPORT_KEYWORD)) {
+            var segments = input.substring(IMPORT_KEYWORD.length());
+            var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
+            var parent = segments.substring(0, separator);
+            var child = segments.substring(separator + 1);
+            return renderMagmaImport(parent, child);
+        }
+        return compileClass(input);
     }
 
     private static String compileClass(String input) {

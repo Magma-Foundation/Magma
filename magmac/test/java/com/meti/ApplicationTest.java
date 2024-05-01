@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static com.meti.Compiler.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,6 +16,22 @@ public class ApplicationTest {
 
     private static void assertRun(String input, String output) {
         assertEquals(output, run(input));
+    }
+
+    private static String repeatAndJoin(int count, IntFunction<String> mapper) {
+        return IntStream.range(0, count)
+                .mapToObj(mapper)
+                .collect(Collectors.joining());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void importMultiple(int count) {
+        var inputImports = repeatAndJoin(count, index -> renderJavaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index));
+        var outputImports = repeatAndJoin(count, index -> renderMagmaImport(TEST_LOWER_SYMBOL, TEST_UPPER_SYMBOL + index));
+
+        assertRun(inputImports + renderJavaClass(TEST_UPPER_SYMBOL),
+                outputImports + renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @ParameterizedTest
@@ -37,7 +57,7 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertRun("package " + name + ";" + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
     }
 
     @Test
