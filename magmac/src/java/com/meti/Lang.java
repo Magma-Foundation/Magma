@@ -11,15 +11,19 @@ public class Lang {
     public static final String STATIC_KEYWORD_WITH_SPACE = "static ";
     public static final String BLOCK_START = " {";
     public static final String BLOCK_END = "}";
-    public static final String INT_KEYWORD_WITH_SPACE = "int ";
+    public static final String INT_KEYWORD = "int";
     public static final String JAVA_DEFINITION_END = " = 0;";
+    public static final String I32_KEYWORD = "I32";
+    public static final String LONG_KEYWORD = "long";
+    public static final String I64_KEYWORD = "I64";
+    public static final char TYPE_NAME_SEPARATOR = ' ';
 
-    public static String renderJavaDefinition(String name) {
-        return INT_KEYWORD_WITH_SPACE + name + JAVA_DEFINITION_END;
+    public static String renderJavaDefinition(String type, String name) {
+        return type + TYPE_NAME_SEPARATOR + name + JAVA_DEFINITION_END;
     }
 
-    public static String renderMagmaDefinition(String name) {
-        return "let " + name + " : I32 = 0;";
+    public static String renderMagmaDefinition(String name, String type) {
+        return "let " + name + " : " + type + " = 0;";
     }
 
     public static String renderBlock(String content) {

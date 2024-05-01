@@ -64,9 +64,15 @@ public class Compiler {
     }
 
     private static String compileClassContent(String input) {
-        if (input.startsWith(INT_KEYWORD_WITH_SPACE)) {
-            var name = input.substring(INT_KEYWORD_WITH_SPACE.length(), input.lastIndexOf(JAVA_DEFINITION_END));
-            return renderMagmaDefinition(name);
+        if (input.endsWith(JAVA_DEFINITION_END)) {
+            var merged = input.substring(0, input.lastIndexOf(JAVA_DEFINITION_END));
+            var separator = merged.indexOf(TYPE_NAME_SEPARATOR);
+            var inputType = merged.substring(0, separator);
+            var name = merged.substring(separator + 1);
+
+            var outputType = inputType.equals(INT_KEYWORD) ? I32_KEYWORD : I64_KEYWORD;
+
+            return renderMagmaDefinition(name, outputType);
         }
         return "";
     }

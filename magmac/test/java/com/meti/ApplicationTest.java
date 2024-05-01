@@ -4,16 +4,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static com.meti.FeatureTest.TEST_UPPER_SYMBOL;
-import static com.meti.FeatureTest.assertRun;
+import static com.meti.FeatureTest.*;
 import static com.meti.Lang.*;
 
 public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", renderJavaDefinition(name)),
-                renderMagmaFunction(TEST_UPPER_SYMBOL, "", renderMagmaDefinition(name)));
+        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", renderJavaDefinition(INT_KEYWORD, name)),
+                renderMagmaFunction(TEST_UPPER_SYMBOL, "", renderMagmaDefinition(name, I32_KEYWORD)));
+    }
+
+    @Test
+    void definitionType() {
+        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", renderJavaDefinition(LONG_KEYWORD, TEST_LOWER_SYMBOL)),
+                renderMagmaFunction(TEST_UPPER_SYMBOL, "", renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD)));
     }
 
     @ParameterizedTest
