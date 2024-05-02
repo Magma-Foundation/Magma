@@ -20,8 +20,12 @@ public class FeatureTest {
     }
 
     static String repeatAndJoin(int count, IntFunction<String> mapper) {
+        return repeatAndJoin(count, mapper, "");
+    }
+
+    static String repeatAndJoin(int count, IntFunction<String> mapper, String delimiter) {
         return IntStream.range(0, count)
                 .mapToObj(mapper)
-                .collect(Collectors.joining());
+                .collect(Collectors.joining(delimiter));
     }
 }

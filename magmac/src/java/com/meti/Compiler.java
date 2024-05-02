@@ -88,19 +88,25 @@ public class Compiler {
         var paramStart = input.indexOf(PARAM_START);
         var paramEnd = input.indexOf(PARAM_END);
         var inputParamContent = input.substring(paramStart + 1, paramEnd);
+        var inputParams = inputParamContent.split(",");
 
-        return compileParamContent(inputParamContent).map(outputParamContent -> {
-            var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
-            return renderMagmaFunction("", name, outputParamContent, "");
-        });
-    }
+        var outputParams = new ArrayList<String>();
+        for (var inputParam : inputParams) {
+            var stripped = inputParam.strip();
+            if(stripped.isEmpty()) continue;
 
-    private static Optional<String> compileParamContent(String inputParamContent) {
-        if (inputParamContent.isEmpty()) {
-            return Optional.of("");
-        } else {
-            return compileDefinition(inputParamContent);
+            var compiledParam = compileDefinition(stripped);
+            if (compiledParam.isEmpty()) {
+                return Optional.empty();
+            }
+
+            outputParams.add(compiledParam.get());
         }
+
+        var outputParamContent = String.join(", ", outputParams);
+
+        var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
+        return Optional.of(renderMagmaFunction("", name, outputParamContent, ""));
     }
 
     private static Optional<String> compileDefinition(String input) {

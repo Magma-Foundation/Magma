@@ -39,6 +39,17 @@ public class ApplicationTest {
                 renderMagmaFunction("", TEST_LOWER_SYMBOL, renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD), ""));
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {2, 3})
+    void methodParameters(int count) {
+        var inputParamString = repeatAndJoin(count, index -> renderJavaDeclaration(TEST_LOWER_SYMBOL + index, INT_KEYWORD), ", ");
+        var outputParamString = repeatAndJoin(count, index -> renderMagmaDeclaration(TEST_LOWER_SYMBOL + index, I32_KEYWORD), ", ");
+
+        assertRunWithinClass(
+                renderJavaMethod(TEST_LOWER_SYMBOL, inputParamString),
+                renderMagmaFunction("", TEST_LOWER_SYMBOL, outputParamString, ""));
+    }
+
     @Test
     void definitionValue() {
         var value = "100";
