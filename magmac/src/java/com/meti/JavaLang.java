@@ -9,10 +9,6 @@ public class JavaLang {
     public static final String VOID_TYPE_WITH_SPACE = "void ";
     public static final String FINAL_KEYWORD = "final";
 
-    public static String renderMethodContent() {
-        return renderMethodContent("");
-    }
-
     public static String renderMethodContent(String methodContent) {
         return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock("");
     }
