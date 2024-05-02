@@ -12,22 +12,33 @@ import static com.meti.Lang.STATEMENT_END;
 import static com.meti.MagmaLang.*;
 
 public class ApplicationTest {
+    public static final JavaDefinitionNodeBuilder BUILDER0 = new JavaDefinitionNodeBuilder()
+            .withModifierString(FINAL_KEYWORD_WITH_SPACE)
+            .withName(TEST_LOWER_SYMBOL)
+            .withType(INT_KEYWORD)
+            .withValue("0");
+
     @Test
     void definitionFinal() {
         assertRunWithinClass(
-                renderJavaDefinition(FINAL_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, INT_KEYWORD, "0"),
-                renderMagmaDefinition(CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I32_KEYWORD, "0"));
+                renderJavaDefinition(BUILDER0.complete()),
+                renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(CONST_KEYWORD_WITH_SPACE).withName(TEST_LOWER_SYMBOL).withType(I32_KEYWORD).withValue("0").build()));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRunWithinClass(renderJavaDefinition("", name, INT_KEYWORD, "0"), renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, name, I32_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(new JavaDefinitionNodeBuilder()
+                        .withName(name)
+                        .withType(INT_KEYWORD)
+                        .withValue("0")
+                        .complete()),
+                renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(LET_KEYWORD_WITH_SPACE).withName(name).withType(I32_KEYWORD).withValue("0").build()));
     }
 
     @Test
     void definitionType() {
-        assertRunWithinClass(renderJavaDefinition("", TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition(new JavaDefinitionNodeBuilder().withName(TEST_LOWER_SYMBOL).withType(LONG_KEYWORD).withValue("0").complete()), renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(LET_KEYWORD_WITH_SPACE).withName(TEST_LOWER_SYMBOL).withType(I64_KEYWORD).withValue("0").build()));
     }
 
     @ParameterizedTest
@@ -58,8 +69,8 @@ public class ApplicationTest {
     void definitionValue() {
         var value = "100";
         assertRunWithinClass(
-                renderJavaDefinition("", TEST_LOWER_SYMBOL, INT_KEYWORD, value),
-                renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I32_KEYWORD, value));
+                renderJavaDefinition(new JavaDefinitionNodeBuilder().withName(TEST_LOWER_SYMBOL).withType(INT_KEYWORD).withValue(value).complete()),
+                renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(LET_KEYWORD_WITH_SPACE).withName(TEST_LOWER_SYMBOL).withType(I32_KEYWORD).withValue(value).build()));
     }
 
     @ParameterizedTest

@@ -135,7 +135,7 @@ public class Compiler {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
             var mutabilityModifier = input.startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
-            rendered = renderMagmaDefinition(mutabilityModifier, name, outputType, valueString);
+            rendered = renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(mutabilityModifier).withName(name).withType(outputType).withValue(valueString).build());
         }
 
         return Optional.of(rendered);
