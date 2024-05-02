@@ -39,7 +39,17 @@ public class Compiler {
     }
 
     private static String compileStatement(String input) {
-        if (input.startsWith(PACKAGE_KEYWORD_WITH_SPACE)) return "";
+        return compilePackage(input)
+                .or(() -> compileImports(input))
+                .or(() -> compileClass(input))
+                .orElse("");
+    }
+
+    private static Optional<String> compilePackage(String input) {
+        return input.startsWith(PACKAGE_KEYWORD_WITH_SPACE) ? Optional.of("") : Optional.empty();
+    }
+
+    private static Optional<String> compileImports(String input) {
         if (input.startsWith(IMPORT_KEYWORD)) {
             var truncated = input.substring(IMPORT_KEYWORD.length());
             var segments = truncated.startsWith(STATIC_KEYWORD_WITH_SPACE)
@@ -49,12 +59,12 @@ public class Compiler {
             var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
             var parent = segments.substring(0, separator);
             var child = segments.substring(separator + 1);
-            return renderMagmaImport(parent, child);
+            return Optional.of(renderMagmaImport(parent, child));
         }
-        return compileClass(input);
+        return Optional.empty();
     }
 
-    private static String compileClass(String input) {
+    private static Optional<String> compileClass(String input) {
         var nameStart = input.indexOf(CLASS_KEYWORD_WITH_SPACE) + CLASS_KEYWORD_WITH_SPACE.length();
         var contentStart = input.indexOf(BLOCK_START);
         var contentEnd = input.lastIndexOf(BLOCK_END);
@@ -63,7 +73,7 @@ public class Compiler {
 
         var name = input.substring(nameStart, contentStart);
         var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
-        return renderMagmaClass(name, modifierString, outputContent);
+        return Optional.of(renderMagmaClass(name, modifierString, outputContent));
     }
 
     private static String compileClassContent(String input) {
@@ -73,23 +83,24 @@ public class Compiler {
     }
 
     private static Optional<String> compileMethod(String input) {
-        if (input.startsWith(VOID_TYPE_WITH_SPACE)) {
-            var paramStart = input.indexOf(PARAM_START);
-            var paramEnd = input.indexOf(PARAM_END);
-            var inputParamContent = input.substring(paramStart + 1, paramEnd);
-            String outputParamContent;
-            if (inputParamContent.isEmpty()) {
-                outputParamContent = "";
-            } else {
-                var outputParamContentOptional = compileDefinition(inputParamContent);
-                if (outputParamContentOptional.isEmpty()) return Optional.empty();
-                outputParamContent = outputParamContentOptional.get();
-            }
+        if (!input.startsWith(VOID_TYPE_WITH_SPACE)) return Optional.empty();
 
+        var paramStart = input.indexOf(PARAM_START);
+        var paramEnd = input.indexOf(PARAM_END);
+        var inputParamContent = input.substring(paramStart + 1, paramEnd);
+
+        return compileParamContent(inputParamContent).map(outputParamContent -> {
             var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
-            return Optional.of(renderMagmaFunction("", name, outputParamContent, ""));
+            return renderMagmaFunction("", name, outputParamContent, "");
+        });
+    }
+
+    private static Optional<String> compileParamContent(String inputParamContent) {
+        if (inputParamContent.isEmpty()) {
+            return Optional.of("");
+        } else {
+            return compileDefinition(inputParamContent);
         }
-        return Optional.empty();
     }
 
     private static Optional<String> compileDefinition(String input) {
@@ -110,6 +121,7 @@ public class Compiler {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
             rendered = renderMagmaDefinition(name, outputType, valueString);
         }
+
         return Optional.of(rendered);
     }
 }
