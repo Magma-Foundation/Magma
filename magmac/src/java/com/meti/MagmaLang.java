@@ -1,12 +1,19 @@
 package com.meti;
 
+import static com.meti.Lang.PARAM_END;
+import static com.meti.Lang.PARAM_START;
+
 public class MagmaLang {
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String I32_KEYWORD = "I32";
     public static final String I64_KEYWORD = "I64";
 
     public static String renderMagmaDefinition(String name, String type, String value) {
-        return "let " + name + " : " + type + Lang.renderDefinitionEnd(value);
+        return "let " + renderMagmaDeclaration(name, type) + Lang.renderDefinitionEnd(value);
+    }
+
+    public static String renderMagmaDeclaration(String name, String type) {
+        return name + " : " + type;
     }
 
     public static String renderMagmaImport(String parent, String child) {
@@ -34,6 +41,10 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(String modifierString, String name, String content) {
-        return modifierString + "def " + name + "() =>" + Lang.renderBlock(content);
+        return renderMagmaFunction(modifierString, name, "", content);
+    }
+
+    static String renderMagmaFunction(String modifierString, String name, String paramString, String content) {
+        return modifierString + "def " + name + PARAM_START + paramString + PARAM_END + " =>" + Lang.renderBlock(content);
     }
 }

@@ -9,6 +9,8 @@ public class Lang {
     public static final String BLOCK_END = "}";
     public static final char TYPE_NAME_SEPARATOR = ' ';
     public static final String VALUE_SEPARATOR = " = ";
+    public static final String PARAM_START = "(";
+    public static final String PARAM_END = ")";
 
     public static String renderDefinitionEnd(String value) {
         return VALUE_SEPARATOR + value + STATEMENT_END;

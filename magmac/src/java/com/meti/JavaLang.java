@@ -7,10 +7,21 @@ public class JavaLang {
     public static final String INT_KEYWORD = "int";
     public static final String LONG_KEYWORD = "long";
     public static final String VOID_TYPE_WITH_SPACE = "void ";
-    public static final String METHOD_CONTENT = "(){}";
+
+    public static String renderMethodContent() {
+        return renderMethodContent("");
+    }
+
+    public static String renderMethodContent(String methodContent) {
+        return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock("");
+    }
 
     public static String renderJavaDefinition(String name, String type, String value) {
-        return type + Lang.TYPE_NAME_SEPARATOR + name + Lang.renderDefinitionEnd(value);
+        return renderJavaDeclaration(name, type) + Lang.renderDefinitionEnd(value);
+    }
+
+    public static String renderJavaDeclaration(String name, String type) {
+        return type + Lang.TYPE_NAME_SEPARATOR + name;
     }
 
     public static String renderJavaImport(String parent, String child) {
@@ -34,6 +45,10 @@ public class JavaLang {
     }
 
     static String renderJavaMethod(String name) {
-        return VOID_TYPE_WITH_SPACE + name + METHOD_CONTENT;
+        return renderJavaMethod(name, "");
+    }
+
+    static String renderJavaMethod(String name, String paramString) {
+        return VOID_TYPE_WITH_SPACE + name + renderMethodContent(paramString);
     }
 }

@@ -1,6 +1,7 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static com.meti.JavaLang.*;
 import static com.meti.Lang.*;
@@ -66,22 +67,49 @@ public class Compiler {
     }
 
     private static String compileClassContent(String input) {
-        if(input.startsWith(VOID_TYPE_WITH_SPACE)) {
-            var name = input.substring(VOID_TYPE_WITH_SPACE.length(), input.indexOf(METHOD_CONTENT));
-            return renderMagmaFunction(name);
-        }
+        return compileMethod(input)
+                .or(() -> compileDefinition(input))
+                .orElse("");
+    }
 
-        var index = input.indexOf(VALUE_SEPARATOR);
-        if (index != -1) {
-            var beforeValue = input.substring(0, index);
-            var separator = beforeValue.indexOf(TYPE_NAME_SEPARATOR);
-            var inputType = beforeValue.substring(0, separator);
-            var name = beforeValue.substring(separator + 1);
-            var outputType = inputType.equals(INT_KEYWORD) ? I32_KEYWORD : I64_KEYWORD;
+    private static Optional<String> compileMethod(String input) {
+        if (input.startsWith(VOID_TYPE_WITH_SPACE)) {
+            var paramStart = input.indexOf(PARAM_START);
+            var paramEnd = input.indexOf(PARAM_END);
+            var inputParamContent = input.substring(paramStart + 1, paramEnd);
+            String outputParamContent;
+            if (inputParamContent.isEmpty()) {
+                outputParamContent = "";
+            } else {
+                var outputParamContentOptional = compileDefinition(inputParamContent);
+                if (outputParamContentOptional.isEmpty()) return Optional.empty();
+                outputParamContent = outputParamContentOptional.get();
+            }
 
-            var valueString = input.substring(index + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
-            return renderMagmaDefinition(name, outputType, valueString);
+            var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
+            return Optional.of(renderMagmaFunction("", name, outputParamContent, ""));
         }
-        return "";
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileDefinition(String input) {
+        var valueSeparator = input.indexOf(VALUE_SEPARATOR);
+        var keysString = input.substring(0, valueSeparator == -1 ? input.length() : valueSeparator);
+
+        var separator = keysString.indexOf(TYPE_NAME_SEPARATOR);
+        if (separator == -1) return Optional.empty();
+
+        var inputType = keysString.substring(0, separator);
+        var name = keysString.substring(separator + 1);
+        var outputType = inputType.equals(INT_KEYWORD) ? I32_KEYWORD : I64_KEYWORD;
+
+        String rendered;
+        if (valueSeparator == -1) {
+            rendered = renderMagmaDeclaration(name, outputType);
+        } else {
+            var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
+            rendered = renderMagmaDefinition(name, outputType, valueString);
+        }
+        return Optional.of(rendered);
     }
 }

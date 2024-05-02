@@ -28,8 +28,15 @@ public class ApplicationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
-    void emptyMethod(String name) {
+    void methodName(String name) {
         assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(name));
+    }
+
+    @Test
+    void methodParameter() {
+        assertRunWithinClass(
+                renderJavaMethod(TEST_LOWER_SYMBOL, renderJavaDeclaration(TEST_LOWER_SYMBOL, INT_KEYWORD)),
+                renderMagmaFunction("", TEST_LOWER_SYMBOL, renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD), ""));
     }
 
     @Test
