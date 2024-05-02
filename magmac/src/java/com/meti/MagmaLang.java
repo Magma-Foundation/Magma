@@ -11,7 +11,7 @@ public class MagmaLang {
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderMagmaDefinition(MagmaDefinition magmaDefinition) {
-        return magmaDefinition.mutabilityModifier() + renderMagmaDeclaration(magmaDefinition.name(), magmaDefinition.type()) + Lang.renderDefinitionEnd(magmaDefinition.value());
+        return magmaDefinition.findMutabilityModifier().orElseThrow() + renderMagmaDeclaration(magmaDefinition.findName().orElseThrow(), magmaDefinition.findType().orElseThrow()) + Lang.renderDefinitionEnd(magmaDefinition.findValue().orElseThrow());
     }
 
     public static String renderMagmaDeclaration(String name, String type) {

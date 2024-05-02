@@ -14,7 +14,7 @@ public class JavaLang {
     }
 
     public static String renderJavaDefinition(JavaDefinitionNode javaDefinitionNode) {
-        return javaDefinitionNode.modifierString() + renderJavaDeclaration(javaDefinitionNode.name(), javaDefinitionNode.type()) + Lang.renderDefinitionEnd(javaDefinitionNode.value());
+        return javaDefinitionNode.findModifierString().orElseThrow() + renderJavaDeclaration(javaDefinitionNode.findName().orElseThrow(), javaDefinitionNode.findType().orElseThrow()) + Lang.renderDefinitionEnd(javaDefinitionNode.findValue().orElseThrow());
     }
 
     public static String renderJavaDeclaration(String name, String type) {

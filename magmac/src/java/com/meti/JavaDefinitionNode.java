@@ -1,8 +1,8 @@
 package com.meti;
 
-import java.util.Objects;
+import java.util.Optional;
 
-public final class JavaDefinitionNode {
+public final class JavaDefinitionNode implements Node {
     private final String modifierString;
     private final String name;
     private final String type;
@@ -15,19 +15,23 @@ public final class JavaDefinitionNode {
         this.value = value;
     }
 
-    public String modifierString() {
-        return modifierString;
+    @Override
+    public Optional<String> findModifierString() {
+        return Optional.of(modifierString);
     }
 
-    public String name() {
-        return name;
+    @Override
+    public Optional<String> findName() {
+        return Optional.of(name);
     }
 
-    public String type() {
-        return type;
+    @Override
+    public Optional<String> findType() {
+        return Optional.of(type);
     }
 
-    public String value() {
-        return value;
+    @Override
+    public Optional<String> findValue() {
+        return Optional.of(value);
     }
 }
