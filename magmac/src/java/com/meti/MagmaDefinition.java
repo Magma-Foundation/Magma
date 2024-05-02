@@ -15,23 +15,35 @@ public final class MagmaDefinition implements Node {
         this.value = value;
     }
 
-    @Override
-    public Optional<String> findMutabilityModifier() {
+    private Optional<String> findMutabilityModifier() {
         return Optional.of(mutabilityModifier);
     }
 
-    @Override
-    public Optional<String> findName() {
+    private Optional<String> findName() {
         return Optional.of(name);
     }
 
-    @Override
-    public Optional<String> findType() {
+    private Optional<String> findType() {
         return Optional.of(type);
     }
 
-    @Override
-    public Optional<String> findValue() {
+    private Optional<String> findValue() {
         return Optional.of(value);
+    }
+
+    @Override
+    public Optional<String> find(String key) {
+        return switch (key) {
+            case "mutability-modifier" -> findMutabilityModifier();
+            case "modifier-string" -> findModifierString();
+            case "name" -> findName();
+            case "type" -> findType();
+            case "value" -> findValue();
+            default -> Optional.empty();
+        };
+    }
+
+    private Optional<String> findModifierString() {
+        throw new UnsupportedOperationException();
     }
 }
