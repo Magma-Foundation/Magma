@@ -15,15 +15,22 @@ public class ApplicationTest {
         assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", input), renderMagmaClass(TEST_UPPER_SYMBOL, "", output));
     }
 
+    @Test
+    void definitionFinal() {
+        assertRunWithinClass(
+                renderJavaDefinition(Compiler.FINAL_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, INT_KEYWORD, "0"),
+                renderMagmaDefinition(CONST_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I32_KEYWORD, "0"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        assertRunWithinClass(renderJavaDefinition(name, INT_KEYWORD, "0"), renderMagmaDefinition(name, I32_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition("", name, INT_KEYWORD, "0"), renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, name, I32_KEYWORD, "0"));
     }
 
     @Test
     void definitionType() {
-        assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
+        assertRunWithinClass(renderJavaDefinition("", TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
     @ParameterizedTest
@@ -54,8 +61,8 @@ public class ApplicationTest {
     void definitionValue() {
         var value = "100";
         assertRunWithinClass(
-                renderJavaDefinition(TEST_LOWER_SYMBOL, INT_KEYWORD, value),
-                renderMagmaDefinition(TEST_LOWER_SYMBOL, I32_KEYWORD, value));
+                renderJavaDefinition("", TEST_LOWER_SYMBOL, INT_KEYWORD, value),
+                renderMagmaDefinition(LET_KEYWORD_WITH_SPACE, TEST_LOWER_SYMBOL, I32_KEYWORD, value));
     }
 
     @ParameterizedTest

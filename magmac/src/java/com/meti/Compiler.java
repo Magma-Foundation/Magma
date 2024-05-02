@@ -8,6 +8,7 @@ import static com.meti.Lang.*;
 import static com.meti.MagmaLang.*;
 
 public class Compiler {
+    public static final String FINAL_KEYWORD_WITH_SPACE = FINAL_KEYWORD + " ";
 
     static String run(String input) {
         var statements = split(input);
@@ -50,18 +51,17 @@ public class Compiler {
     }
 
     private static Optional<String> compileImports(String input) {
-        if (input.startsWith(IMPORT_KEYWORD)) {
-            var truncated = input.substring(IMPORT_KEYWORD.length());
-            var segments = truncated.startsWith(STATIC_KEYWORD_WITH_SPACE)
-                    ? truncated.substring(STATIC_KEYWORD_WITH_SPACE.length())
-                    : truncated;
+        if (!input.startsWith(IMPORT_KEYWORD)) return Optional.empty();
 
-            var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
-            var parent = segments.substring(0, separator);
-            var child = segments.substring(separator + 1);
-            return Optional.of(renderMagmaImport(parent, child));
-        }
-        return Optional.empty();
+        var truncated = input.substring(IMPORT_KEYWORD.length());
+        var segments = truncated.startsWith(STATIC_KEYWORD_WITH_SPACE)
+                ? truncated.substring(STATIC_KEYWORD_WITH_SPACE.length())
+                : truncated;
+
+        var separator = segments.indexOf(JAVA_IMPORT_SEPARATOR);
+        var parent = segments.substring(0, separator);
+        var child = segments.substring(separator + 1);
+        return Optional.of(renderMagmaImport(parent, child));
     }
 
     private static Optional<String> compileClass(String input) {
@@ -93,7 +93,7 @@ public class Compiler {
         var outputParams = new ArrayList<String>();
         for (var inputParam : inputParams) {
             var stripped = inputParam.strip();
-            if(stripped.isEmpty()) continue;
+            if (stripped.isEmpty()) continue;
 
             var compiledParam = compileDefinition(stripped);
             if (compiledParam.isEmpty()) {
@@ -113,10 +113,18 @@ public class Compiler {
         var valueSeparator = input.indexOf(VALUE_SEPARATOR);
         var keysString = input.substring(0, valueSeparator == -1 ? input.length() : valueSeparator);
 
-        var separator = keysString.indexOf(TYPE_NAME_SEPARATOR);
+        var separator = keysString.lastIndexOf(TYPE_NAME_SEPARATOR);
         if (separator == -1) return Optional.empty();
 
-        var inputType = keysString.substring(0, separator);
+        var typeAndFlags = keysString.substring(0, separator);
+        String inputType;
+        var flagSeparator = typeAndFlags.lastIndexOf(' ');
+        if (flagSeparator == -1) {
+            inputType = typeAndFlags;
+        } else {
+            inputType = typeAndFlags.substring(flagSeparator + 1);
+        }
+
         var name = keysString.substring(separator + 1);
         var outputType = inputType.equals(INT_KEYWORD) ? I32_KEYWORD : I64_KEYWORD;
 
@@ -125,7 +133,9 @@ public class Compiler {
             rendered = renderMagmaDeclaration(name, outputType);
         } else {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
-            rendered = renderMagmaDefinition(name, outputType, valueString);
+            var mutabilityModifier = input.startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
+
+            rendered = renderMagmaDefinition(mutabilityModifier, name, outputType, valueString);
         }
 
         return Optional.of(rendered);

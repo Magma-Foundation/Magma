@@ -7,9 +7,11 @@ public class MagmaLang {
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
     public static final String I32_KEYWORD = "I32";
     public static final String I64_KEYWORD = "I64";
+    public static final String LET_KEYWORD_WITH_SPACE = "let ";
+    public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
-    public static String renderMagmaDefinition(String name, String type, String value) {
-        return "let " + renderMagmaDeclaration(name, type) + Lang.renderDefinitionEnd(value);
+    public static String renderMagmaDefinition(String mutabilityModifier, String name, String type, String value) {
+        return mutabilityModifier + renderMagmaDeclaration(name, type) + Lang.renderDefinitionEnd(value);
     }
 
     public static String renderMagmaDeclaration(String name, String type) {
