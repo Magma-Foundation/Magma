@@ -1,7 +1,6 @@
 package com.meti;
 
-import static com.meti.Lang.PARAM_END;
-import static com.meti.Lang.PARAM_START;
+import static com.meti.Lang.*;
 
 public class MagmaLang {
     public static final String EXPORT_KEYWORD_WITH_SPACE = "export ";
@@ -11,7 +10,9 @@ public class MagmaLang {
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderMagmaDefinition(MagmaDefinition magmaDefinition) {
-        return magmaDefinition.find("mutability-modifier").orElseThrow() + renderMagmaDeclaration(magmaDefinition.find("name").orElseThrow(), magmaDefinition.find("type").orElseThrow()) + Lang.renderDefinitionEnd(magmaDefinition.find("value").orElseThrow());
+        return magmaDefinition.find("mutability-modifier").orElseThrow() +
+               renderMagmaDeclaration(magmaDefinition.find("name").orElseThrow(), magmaDefinition.find("type").orElseThrow()) +
+               renderDefinitionEnd(magmaDefinition.find("value").orElseThrow());
     }
 
     public static String renderMagmaDeclaration(String name, String type) {
@@ -19,7 +20,7 @@ public class MagmaLang {
     }
 
     public static String renderMagmaImport(String parent, String child) {
-        return Lang.IMPORT_KEYWORD + "{ " + child + " } from " + parent + Lang.STATEMENT_END;
+        return IMPORT_KEYWORD + "{ " + child + " } from " + parent + STATEMENT_END;
     }
 
     static String renderMagmaClass(String name) {
@@ -31,7 +32,7 @@ public class MagmaLang {
     }
 
     static String renderMagmaClass(String name, String modifierString, String content) {
-        return renderMagmaFunction(modifierString + Lang.CLASS_KEYWORD_WITH_SPACE, name, content);
+        return renderMagmaFunction(modifierString + CLASS_KEYWORD_WITH_SPACE, name, content);
     }
 
     static String renderMagmaFunction(String name) {
@@ -47,6 +48,6 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(String modifierString, String name, String paramString, String content) {
-        return modifierString + "def " + name + PARAM_START + paramString + PARAM_END + " =>" + Lang.renderBlock(content);
+        return modifierString + "def " + name + PARAM_START + paramString + PARAM_END + " =>" + renderBlock(content);
     }
 }

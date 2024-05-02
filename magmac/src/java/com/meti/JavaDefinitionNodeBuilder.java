@@ -1,10 +1,12 @@
 package com.meti;
 
+import java.util.Map;
+
 public class JavaDefinitionNodeBuilder {
-    private String modifierString;
-    private String name;
-    private String type;
-    private String value;
+    private final String modifierString;
+    private final String name;
+    private final String type;
+    private final String value;
 
     public JavaDefinitionNodeBuilder() {
         this("", "", "", "");
@@ -33,7 +35,12 @@ public class JavaDefinitionNodeBuilder {
         return new JavaDefinitionNodeBuilder(modifierString, name, type, value);
     }
 
-    public JavaDefinitionNode complete() {
-        return new JavaDefinitionNode(modifierString, name, type, value);
+    public Node complete() {
+        return new MapNode(Map.of(
+                "modifier-string", modifierString,
+                "name", name,
+                "type", type,
+                "value", value
+        ));
     }
 }

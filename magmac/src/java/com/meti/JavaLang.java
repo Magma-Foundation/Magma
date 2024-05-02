@@ -13,7 +13,7 @@ public class JavaLang {
         return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock("");
     }
 
-    public static String renderJavaDefinition(JavaDefinitionNode javaDefinitionNode) {
+    public static String renderJavaDefinition(Node javaDefinitionNode) {
         return javaDefinitionNode.find("modifier-string").orElseThrow() + renderJavaDeclaration(javaDefinitionNode.find("name").orElseThrow(), javaDefinitionNode.find("type").orElseThrow()) + Lang.renderDefinitionEnd(javaDefinitionNode.find("value").orElseThrow());
     }
 
