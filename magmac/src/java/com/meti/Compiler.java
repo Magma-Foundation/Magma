@@ -135,7 +135,11 @@ public class Compiler {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
             var mutabilityModifier = input.startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
-            rendered = renderMagmaDefinition(new MagmaDefinitionBuilder().withMutabilityModifier(mutabilityModifier).withName(name).withType(outputType).withValue(valueString).build());
+            MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().with("mutability-modifier", mutabilityModifier);
+            MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("name", name);
+            MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.with("type", outputType);
+            MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.with("value", valueString);
+            rendered = renderMagmaDefinition(mapNodeBuilder.complete());
         }
 
         return Optional.of(rendered);

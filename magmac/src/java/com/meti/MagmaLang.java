@@ -9,7 +9,7 @@ public class MagmaLang {
     public static final String LET_KEYWORD_WITH_SPACE = "let ";
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
-    public static String renderMagmaDefinition(MagmaDefinition magmaDefinition) {
+    public static String renderMagmaDefinition(Node magmaDefinition) {
         return magmaDefinition.find("mutability-modifier").orElseThrow() +
                renderMagmaDeclaration(magmaDefinition.find("name").orElseThrow(), magmaDefinition.find("type").orElseThrow()) +
                renderDefinitionEnd(magmaDefinition.find("value").orElseThrow());
