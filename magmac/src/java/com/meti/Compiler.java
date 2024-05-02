@@ -62,10 +62,15 @@ public class Compiler {
 
         var name = input.substring(nameStart, contentStart);
         var modifierString = input.startsWith(PUBLIC_KEYWORD_WITH_SPACE) ? EXPORT_KEYWORD_WITH_SPACE : "";
-        return renderMagmaFunction(name, modifierString, outputContent);
+        return renderMagmaClass(name, modifierString, outputContent);
     }
 
     private static String compileClassContent(String input) {
+        if(input.startsWith(VOID_TYPE_WITH_SPACE)) {
+            var name = input.substring(VOID_TYPE_WITH_SPACE.length(), input.indexOf(METHOD_CONTENT));
+            return renderMagmaFunction(name);
+        }
+
         var index = input.indexOf(VALUE_SEPARATOR);
         if (index != -1) {
             var beforeValue = input.substring(0, index);

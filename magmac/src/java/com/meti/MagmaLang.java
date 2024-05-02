@@ -13,15 +13,27 @@ public class MagmaLang {
         return Lang.IMPORT_KEYWORD + "{ " + child + " } from " + parent + Lang.STATEMENT_END;
     }
 
+    static String renderMagmaClass(String name) {
+        return renderMagmaClass(name, "");
+    }
+
+    static String renderMagmaClass(String name, String modifierString) {
+        return renderMagmaClass(name, modifierString, "");
+    }
+
+    static String renderMagmaClass(String name, String modifierString, String content) {
+        return renderMagmaFunction(modifierString + Lang.CLASS_KEYWORD_WITH_SPACE, name, content);
+    }
+
     static String renderMagmaFunction(String name) {
         return renderMagmaFunction(name, "");
     }
 
-    static String renderMagmaFunction(String name, String modifierString) {
-        return renderMagmaFunction(name, modifierString, "");
+    static String renderMagmaFunction(String name, String content) {
+        return renderMagmaFunction("", name, content);
     }
 
-    static String renderMagmaFunction(String name, String modifierString, String content) {
-        return modifierString + Lang.CLASS_KEYWORD_WITH_SPACE + "def " + name + "() =>" + Lang.renderBlock(content);
+    static String renderMagmaFunction(String modifierString, String name, String content) {
+        return modifierString + "def " + name + "() =>" + Lang.renderBlock(content);
     }
 }

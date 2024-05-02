@@ -12,7 +12,7 @@ import static com.meti.MagmaLang.*;
 
 public class ApplicationTest {
     private static void assertRunWithinClass(String input, String output) {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", input), renderMagmaFunction(TEST_UPPER_SYMBOL, "", output));
+        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", input), renderMagmaClass(TEST_UPPER_SYMBOL, "", output));
     }
 
     @ParameterizedTest
@@ -26,6 +26,12 @@ public class ApplicationTest {
         assertRunWithinClass(renderJavaDefinition(TEST_LOWER_SYMBOL, LONG_KEYWORD, "0"), renderMagmaDefinition(TEST_LOWER_SYMBOL, I64_KEYWORD, "0"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"first", "second"})
+    void emptyMethod(String name) {
+        assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(name));
+    }
+
     @Test
     void definitionValue() {
         var value = "100";
@@ -37,17 +43,17 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"First", "Second"})
     void className(String name) {
-        assertRun(renderJavaClass(name), renderMagmaFunction(name));
+        assertRun(renderJavaClass(name), renderMagmaClass(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void packageStatement(String name) {
-        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaFunction(TEST_UPPER_SYMBOL));
+        assertRun(PACKAGE_KEYWORD_WITH_SPACE + name + STATEMENT_END + renderJavaClass(TEST_UPPER_SYMBOL), renderMagmaClass(TEST_UPPER_SYMBOL));
     }
 
     @Test
     void classPublic() {
-        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), renderMagmaFunction(TEST_UPPER_SYMBOL, EXPORT_KEYWORD_WITH_SPACE));
+        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, PUBLIC_KEYWORD_WITH_SPACE), renderMagmaClass(TEST_UPPER_SYMBOL, EXPORT_KEYWORD_WITH_SPACE));
     }
 }
