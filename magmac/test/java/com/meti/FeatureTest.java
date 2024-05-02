@@ -6,6 +6,9 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.meti.JavaLang.renderJavaClass;
+import static com.meti.MagmaLang.renderMagmaClass;
+
 public class FeatureTest {
     public static final String TEST_LOWER_SYMBOL = "test";
     public static final String TEST_UPPER_SYMBOL = "Test";
@@ -27,5 +30,9 @@ public class FeatureTest {
         return IntStream.range(0, count)
                 .mapToObj(mapper)
                 .collect(Collectors.joining(delimiter));
+    }
+
+    static void assertRunWithinClass(String input, String output) {
+        assertRun(renderJavaClass(TEST_UPPER_SYMBOL, "", input), renderMagmaClass(TEST_UPPER_SYMBOL, "", output));
     }
 }
