@@ -32,22 +32,9 @@ public class MagmaLang {
     }
 
     static String renderMagmaClass(String name, String modifierString, String content) {
-        return renderMagmaFunction(modifierString + CLASS_KEYWORD_WITH_SPACE, name, content);
-    }
-
-    static String renderMagmaFunction(String name) {
-        return renderMagmaFunction(name, "");
-    }
-
-    static String renderMagmaFunction(String name, String content) {
-        return renderMagmaFunction("", name, content);
-    }
-
-    static String renderMagmaFunction(String modifierString, String name, String content) {
         return renderMagmaFunction(new MapNodeBuilder()
-                .with("modifier-string", modifierString)
+                .with("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
                 .with("name", name)
-                .with("param-string", "")
                 .with("content", content)
                 .complete());
     }

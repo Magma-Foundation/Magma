@@ -60,7 +60,9 @@ public class ApplicationTest {
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void methodName(String name) {
-        assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(name));
+        assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(new MapNodeBuilder()
+                .with("name", name)
+                .complete()));
     }
 
     @Test
@@ -68,10 +70,8 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, renderJavaDeclaration(TEST_LOWER_SYMBOL, INT_KEYWORD)),
                 renderMagmaFunction(new MapNodeBuilder()
-                        .with("modifier-string", "")
                         .with("name", TEST_LOWER_SYMBOL)
                         .with("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
-                        .with("content", "")
                         .complete()));
     }
 
@@ -84,10 +84,8 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, inputParamString),
                 renderMagmaFunction(new MapNodeBuilder()
-                        .with("modifier-string", "")
                         .with("name", TEST_LOWER_SYMBOL)
                         .with("param-string", outputParamString)
-                        .with("content", "")
                         .complete()));
     }
 
