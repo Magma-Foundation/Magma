@@ -40,11 +40,14 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(Node node) {
+        var annotationString = node.apply("annotation-string").orElse("");
         var modifierString1 = node.apply("modifier-string").orElse("");
         var name1 = node.apply("name").orElse("");
         var paramString1 = node.apply("param-string").orElse("");
         var content1 = node.apply("content").orElse("");
 
-        return modifierString1 + "def " + name1 + PARAM_START + paramString1 + PARAM_END + " =>" + renderBlock(content1);
+        return annotationString + modifierString1 + "def " + name1 +
+               PARAM_START + paramString1 +
+               PARAM_END + " =>" + renderBlock(content1);
     }
 }

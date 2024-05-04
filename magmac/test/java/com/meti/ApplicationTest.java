@@ -66,6 +66,16 @@ public class ApplicationTest {
     }
 
     @Test
+    void methodAnnotation() {
+        assertRunWithinClass(
+                renderJavaMethod("@Test\n", TEST_LOWER_SYMBOL, ""),
+                renderMagmaFunction(new MapNodeBuilder()
+                        .with("annotation-string", "@Test\n")
+                        .with("name", TEST_LOWER_SYMBOL)
+                        .complete()));
+    }
+
+    @Test
     void methodParameter() {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, renderJavaDeclaration(TEST_LOWER_SYMBOL, INT_KEYWORD)),

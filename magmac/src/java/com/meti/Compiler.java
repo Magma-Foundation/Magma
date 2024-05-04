@@ -83,7 +83,10 @@ public class Compiler {
     }
 
     private static Optional<String> compileMethod(String input) {
-        if (!input.startsWith(VOID_TYPE_WITH_SPACE)) return Optional.empty();
+        var annotationEnd = input.indexOf(VOID_TYPE_WITH_SPACE);
+        if (annotationEnd == -1) return Optional.empty();
+
+        var annotationString = input.substring(0, annotationEnd);
 
         var paramStart = input.indexOf(PARAM_START);
         var paramEnd = input.indexOf(PARAM_END);
@@ -105,8 +108,9 @@ public class Compiler {
 
         var outputParamContent = String.join(", ", outputParams);
 
-        var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
+        var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
         return Optional.of(renderMagmaFunction(new MapNodeBuilder()
+                .with("annotation-string", annotationString)
                 .with("modifier-string", "")
                 .with("name", name)
                 .with("param-string", outputParamContent)
