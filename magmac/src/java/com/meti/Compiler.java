@@ -106,7 +106,12 @@ public class Compiler {
         var outputParamContent = String.join(", ", outputParams);
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length(), paramStart);
-        return Optional.of(renderMagmaFunction("", name, outputParamContent, ""));
+        return Optional.of(renderMagmaFunction(new MapNodeBuilder()
+                .with("modifier-string", "")
+                .with("name", name)
+                .with("param-string", outputParamContent)
+                .with("content", "")
+                .complete()));
     }
 
     private static Optional<String> compileDefinition(String input) {

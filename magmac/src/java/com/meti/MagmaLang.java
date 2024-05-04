@@ -10,9 +10,9 @@ public class MagmaLang {
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderMagmaDefinition(Node magmaDefinition) {
-        return magmaDefinition.find("mutability-modifier").orElseThrow() +
-               renderMagmaDeclaration(magmaDefinition.find("name").orElseThrow(), magmaDefinition.find("type").orElseThrow()) +
-               renderDefinitionEnd(magmaDefinition.find("value").orElseThrow());
+        return magmaDefinition.apply("mutability-modifier").orElseThrow() +
+               renderMagmaDeclaration(magmaDefinition.apply("name").orElseThrow(), magmaDefinition.apply("type").orElseThrow()) +
+               renderDefinitionEnd(magmaDefinition.apply("value").orElseThrow());
     }
 
     public static String renderMagmaDeclaration(String name, String type) {
@@ -44,10 +44,20 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(String modifierString, String name, String content) {
-        return renderMagmaFunction(modifierString, name, "", content);
+        return renderMagmaFunction(new MapNodeBuilder()
+                .with("modifier-string", modifierString)
+                .with("name", name)
+                .with("param-string", "")
+                .with("content", content)
+                .complete());
     }
 
-    static String renderMagmaFunction(String modifierString, String name, String paramString, String content) {
-        return modifierString + "def " + name + PARAM_START + paramString + PARAM_END + " =>" + renderBlock(content);
+    static String renderMagmaFunction(Node node) {
+        var modifierString1 = node.apply("modifier-string").orElse("");
+        var name1 = node.apply("name").orElse("");
+        var paramString1 = node.apply("param-string").orElse("");
+        var content1 = node.apply("content").orElse("");
+
+        return modifierString1 + "def " + name1 + PARAM_START + paramString1 + PARAM_END + " =>" + renderBlock(content1);
     }
 }

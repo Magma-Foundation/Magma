@@ -32,7 +32,7 @@ public final class MagmaDefinition implements Node {
     }
 
     @Override
-    public Optional<String> find(String key) {
+    public Optional<String> apply(String key) {
         return switch (key) {
             case "mutability-modifier" -> findMutabilityModifier();
             case "modifier-string" -> findModifierString();

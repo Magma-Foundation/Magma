@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public record MapNode(Map<String, String> map) implements Node {
     @Override
-    public Optional<String> find(String key) {
+    public Optional<String> apply(String key) {
         if (map.containsKey(key)) {
             return Optional.of(map.get(key));
         } else {

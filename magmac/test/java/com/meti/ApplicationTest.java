@@ -12,21 +12,19 @@ import static com.meti.Lang.STATEMENT_END;
 import static com.meti.MagmaLang.*;
 
 public class ApplicationTest {
-    public static final MapNodeBuilder BUILDER0 = new MapNodeBuilder()
-            .with("modifier-string", FINAL_KEYWORD_WITH_SPACE)
-            .with("name", TEST_LOWER_SYMBOL)
-            .with("type", INT_KEYWORD)
-            .with("value", "0");
-
     @Test
     void definitionFinal() {
-        MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().with("mutability-modifier", CONST_KEYWORD_WITH_SPACE);
-        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("name", TEST_LOWER_SYMBOL);
-        MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.with("type", I32_KEYWORD);
-        MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.with("value", "0");
         assertRunWithinClass(
-                renderJavaDefinition(BUILDER0.complete()),
-                renderMagmaDefinition(mapNodeBuilder.complete()));
+                renderJavaDefinition(new MapNodeBuilder()
+                        .with("modifier-string", FINAL_KEYWORD_WITH_SPACE)
+                        .with("name", TEST_LOWER_SYMBOL)
+                        .with("type", INT_KEYWORD)
+                        .with("value", "0").complete()),
+                renderMagmaDefinition(new MapNodeBuilder()
+                        .with("mutability-modifier", CONST_KEYWORD_WITH_SPACE)
+                        .with("name", TEST_LOWER_SYMBOL)
+                        .with("type", I32_KEYWORD)
+                        .with("value", "0").complete()));
     }
 
     @ParameterizedTest
@@ -69,7 +67,12 @@ public class ApplicationTest {
     void methodParameter() {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, renderJavaDeclaration(TEST_LOWER_SYMBOL, INT_KEYWORD)),
-                renderMagmaFunction("", TEST_LOWER_SYMBOL, renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD), ""));
+                renderMagmaFunction(new MapNodeBuilder()
+                        .with("modifier-string", "")
+                        .with("name", TEST_LOWER_SYMBOL)
+                        .with("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
+                        .with("content", "")
+                        .complete()));
     }
 
     @ParameterizedTest
@@ -80,7 +83,12 @@ public class ApplicationTest {
 
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, inputParamString),
-                renderMagmaFunction("", TEST_LOWER_SYMBOL, outputParamString, ""));
+                renderMagmaFunction(new MapNodeBuilder()
+                        .with("modifier-string", "")
+                        .with("name", TEST_LOWER_SYMBOL)
+                        .with("param-string", outputParamString)
+                        .with("content", "")
+                        .complete()));
     }
 
     @Test

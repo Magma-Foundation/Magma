@@ -14,10 +14,10 @@ public class JavaLang {
     }
 
     public static String renderJavaDefinition(Node javaDefinitionNode) {
-        return javaDefinitionNode.find("modifier-string").orElse("") +
-               renderJavaDeclaration(javaDefinitionNode.find("name").orElseThrow(),
-                       javaDefinitionNode.find("type").orElseThrow()) +
-               Lang.renderDefinitionEnd(javaDefinitionNode.find("value").orElseThrow());
+        return javaDefinitionNode.apply("modifier-string").orElse("") +
+               renderJavaDeclaration(javaDefinitionNode.apply("name").orElseThrow(),
+                       javaDefinitionNode.apply("type").orElseThrow()) +
+               Lang.renderDefinitionEnd(javaDefinitionNode.apply("value").orElseThrow());
     }
 
     public static String renderJavaDeclaration(String name, String type) {
@@ -49,6 +49,10 @@ public class JavaLang {
     }
 
     static String renderJavaMethod(String name, String paramString) {
-        return VOID_TYPE_WITH_SPACE + name + renderMethodContent(paramString);
+        return renderJavaMethod("", name, paramString);
+    }
+
+    static String renderJavaMethod(String annotationString, String name, String paramString) {
+        return annotationString + VOID_TYPE_WITH_SPACE + name + renderMethodContent(paramString);
     }
 }
