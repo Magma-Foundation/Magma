@@ -38,8 +38,8 @@ public class Compiler {
                 statements.add(inputBuilder.toString());
                 inputBuilder = new StringBuilder();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (c == '{' || c == '(') depth++;
+                if (c == '}' || c == ')') depth--;
                 inputBuilder.append(c);
             }
         }
@@ -107,13 +107,13 @@ public class Compiler {
         if (annotationEnd == -1) return Optional.empty();
 
         var annotations = Arrays.stream(input.substring(0, annotationEnd)
-                .split("\n"))
+                        .split("\n"))
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(value -> value.substring(1))
                 .collect(Collectors.toList());
 
-        var paramStart = input.indexOf(PARAM_START);
+        var paramStart = input.indexOf(PARAM_START, annotationEnd);
         var paramEnd = input.indexOf(PARAM_END, paramStart);
         var inputParamContent = input.substring(paramStart + 1, paramEnd);
         var inputParams = inputParamContent.split(",");
@@ -134,12 +134,14 @@ public class Compiler {
         var outputParamContent = String.join(", ", outputParams);
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
-        return Optional.of(renderMagmaFunction(MapNodeBuilder.NodeBuilder
+        var node = MapNodeBuilder.NodeBuilder
                 .stringList("annotations", annotations)
                 .string("name", name)
                 .string("param-string", outputParamContent)
                 .integer("indent", 1)
-                .build()));
+                .build();
+
+        return Optional.of(renderMagmaFunction(node));
     }
 
     private static Optional<String> compileDefinition(String input) {
