@@ -68,6 +68,8 @@ public class Compiler {
         var nameStart = input.indexOf(CLASS_KEYWORD_WITH_SPACE) + CLASS_KEYWORD_WITH_SPACE.length();
         var contentStart = input.indexOf(BLOCK_START);
         var contentEnd = input.lastIndexOf(BLOCK_END);
+        if (contentEnd == -1) return Optional.empty();
+
         var inputContent = input.substring(contentStart + BLOCK_START.length(), contentEnd);
         var outputContent = compileClassContent(inputContent);
 
