@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+
 import static com.meti.Compiler.FINAL_KEYWORD_WITH_SPACE;
 import static com.meti.FeatureTest.*;
 import static com.meti.JavaLang.*;
@@ -78,7 +80,7 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod("@Test\n", TEST_LOWER_SYMBOL, ""),
                 renderMagmaFunction(Empty
-                        .string("annotation-string", "@Test\n")
+                        .stringList("annotations", List.of("@Test"))
                         .string("name", TEST_LOWER_SYMBOL)
                         .integer("indent", 1)
                         .build()));

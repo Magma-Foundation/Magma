@@ -1,26 +1,76 @@
+
 class def ApplicationTest() => {
-@Test	def definitionFinal() => {
+	
+	@Test
+	
+
+	def definitionFinal() => {
 	}
-let @ValueSource(strings : I64 = {"first", "second"};)	def definitionName(name : I64) => {
+let @ValueSource(strings : I64 = {"first", "second"};	)
+	
+
+	def definitionName(name : I64) => {
 	}
-@Test	def definitionType() => {
+	
+	
+	@Test
+	
+
+	def definitionType() => {
 	}
-@Test	def methodsMultiple() => {
+	
+	
+	@Test
+	
+
+	def methodsMultiple() => {
 	}
-let @ValueSource(strings : I64 = {"first", "second"};)	def methodName(name : I64) => {
+let @ValueSource(strings : I64 = {"first", "second"};	)
+	
+
+	def methodName(name : I64) => {
 	}
-@Test	def methodAnnotation() => {
+	
+	
+	@Test
+	
+
+	def methodAnnotation() => {
 	}
-@Test	def methodParameter() => {
+	
+	
+	@Test
+	
+
+	def methodParameter() => {
 	}
-let @ValueSource(ints : I64 = {2, 3};)	def methodParameters(count : I32) => {
+let @ValueSource(ints : I64 = {2, 3};	)
+	
+
+	def methodParameters(count : I32) => {
 	}
-@Test	def definitionValue() => {
+	
+	
+	@Test
+	
+
+	def definitionValue() => {
 	}
-let @ValueSource(strings : I64 = {"First", "Second"};)	def className(name : I64) => {
+let @ValueSource(strings : I64 = {"First", "Second"};	)
+	
+
+	def className(name : I64) => {
 	}
-let @ValueSource(strings : I64 = {"first", "second"};)	def packageStatement(name : I64) => {
+let @ValueSource(strings : I64 = {"first", "second"};	)
+	
+
+	def packageStatement(name : I64) => {
 	}
-@Test	def classPublic() => {
+	
+	
+	@Test
+	
+
+	def classPublic() => {
 	}
 }

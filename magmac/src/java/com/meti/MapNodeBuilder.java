@@ -2,6 +2,7 @@ package com.meti;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapNodeBuilder {
@@ -32,5 +33,9 @@ public class MapNodeBuilder {
 
     public Node build() {
         return new MapNode(map);
+    }
+
+    public MapNodeBuilder stringList(String key, List<String> values) {
+        return with(key, new StringListAttribute(values));
     }
 }

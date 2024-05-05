@@ -1,7 +1,9 @@
 package com.meti;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.meti.JavaLang.*;
 import static com.meti.Lang.*;
@@ -104,7 +106,11 @@ public class Compiler {
         var annotationEnd = input.indexOf(VOID_TYPE_WITH_SPACE);
         if (annotationEnd == -1) return Optional.empty();
 
-        var annotationString = input.substring(0, annotationEnd);
+        var annotations = Arrays.stream(input.substring(0, annotationEnd)
+                .split("\n"))
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
 
         var paramStart = input.indexOf(PARAM_START);
         var paramEnd = input.indexOf(PARAM_END, paramStart);
@@ -128,7 +134,7 @@ public class Compiler {
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
         return Optional.of(renderMagmaFunction(MapNodeBuilder.Empty
-                .string("annotation-string", annotationString)
+                .stringList("annotations", annotations)
                 .string("name", name)
                 .string("param-string", outputParamContent)
                 .integer("indent", 1)

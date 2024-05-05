@@ -1,5 +1,8 @@
 package com.meti;
 
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import static com.meti.Lang.*;
 
 public class MagmaLang {
@@ -40,14 +43,21 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(Node node) {
-        var annotationString = node.apply("annotation-string").flatMap(Attribute::asString).orElse("").strip();
         var modifierString1 = node.apply("modifier-string").flatMap(Attribute::asString).orElse("");
         var name1 = node.apply("name").flatMap(Attribute::asString).orElse("");
         var paramString1 = node.apply("param-string").flatMap(Attribute::asString).orElse("");
         var content1 = node.apply("content").flatMap(Attribute::asString).orElse("");
         var indent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0);
 
-        return annotationString + "\t".repeat(indent) + modifierString1 + "def " + name1 +
+        var annotations = node.apply("annotations")
+                .flatMap(Attribute::asListOfStrings)
+                .orElse(Collections.emptyList());
+
+        var annotationsString = annotations.stream()
+                .map(annotation -> "\t".repeat(indent) + annotation + "\n")
+                .collect(Collectors.joining());
+
+        return annotationsString + "\t".repeat(indent) + modifierString1 + "def " + name1 +
                PARAM_START + paramString1 +
                PARAM_END + " =>" + renderBlock(content1, indent) + "\n";
     }
