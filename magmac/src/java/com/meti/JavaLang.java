@@ -1,5 +1,10 @@
 package com.meti;
 
+import java.util.Collections;
+import java.util.stream.Collectors;
+
+import static com.meti.MapNodeBuilder.NodeBuilder;
+
 public class JavaLang {
     public static final String JAVA_IMPORT_SEPARATOR = ".";
     public static final String PACKAGE_KEYWORD_WITH_SPACE = "package ";
@@ -49,10 +54,22 @@ public class JavaLang {
     }
 
     static String renderJavaMethod(String name, String paramString) {
-        return renderJavaMethod("", name, paramString);
+        return renderJavaMethod(NodeBuilder.string("annotation-string", "")
+                .string("name", name)
+                .string("param-string", paramString)
+                .build());
     }
 
-    static String renderJavaMethod(String annotationString, String name, String paramString) {
-        return annotationString + VOID_TYPE_WITH_SPACE + name + renderMethodContent(paramString);
+    static String renderJavaMethod(Node node) {
+        var s = node.apply("annotations")
+                .flatMap(Attribute::asListOfStrings)
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(annotation -> "@" + annotation + "\n")
+                .collect(Collectors.joining());
+
+        var s1 = node.apply("name").flatMap(Attribute::asString).orElse("");
+        var methodContent = node.apply("param-string").flatMap(Attribute::asString).orElse("");
+        return s + VOID_TYPE_WITH_SPACE + s1 + renderMethodContent(methodContent);
     }
 }

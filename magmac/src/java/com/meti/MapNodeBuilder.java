@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MapNodeBuilder {
-    public static final MapNodeBuilder Empty = new MapNodeBuilder();
+    public static final MapNodeBuilder NodeBuilder = new MapNodeBuilder();
     private final Map<String, Attribute> map;
 
     private MapNodeBuilder() {

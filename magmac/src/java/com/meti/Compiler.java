@@ -110,6 +110,7 @@ public class Compiler {
                 .split("\n"))
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
+                .map(value -> value.substring(1))
                 .collect(Collectors.toList());
 
         var paramStart = input.indexOf(PARAM_START);
@@ -133,7 +134,7 @@ public class Compiler {
         var outputParamContent = String.join(", ", outputParams);
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
-        return Optional.of(renderMagmaFunction(MapNodeBuilder.Empty
+        return Optional.of(renderMagmaFunction(MapNodeBuilder.NodeBuilder
                 .stringList("annotations", annotations)
                 .string("name", name)
                 .string("param-string", outputParamContent)
@@ -167,7 +168,7 @@ public class Compiler {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length());
             var mutabilityModifier = input.strip().startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
-            MapNodeBuilder mapNodeBuilder1 = MapNodeBuilder.Empty.string("mutability-modifier", mutabilityModifier);
+            MapNodeBuilder mapNodeBuilder1 = MapNodeBuilder.NodeBuilder.string("mutability-modifier", mutabilityModifier);
             MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.string("name", name);
             MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.string("type", outputType);
             MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.string("value", valueString);

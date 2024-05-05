@@ -35,7 +35,7 @@ public class MagmaLang {
     }
 
     static String renderMagmaClass(String name, String modifierString, String content) {
-        return renderMagmaFunction(MapNodeBuilder.Empty
+        return renderMagmaFunction(MapNodeBuilder.NodeBuilder
                 .string("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
                 .string("name", name)
                 .string("content", content)
@@ -54,7 +54,7 @@ public class MagmaLang {
                 .orElse(Collections.emptyList());
 
         var annotationsString = annotations.stream()
-                .map(annotation -> "\t".repeat(indent) + annotation + "\n")
+                .map(annotation -> "\t".repeat(indent) + "@"+ annotation + "\n")
                 .collect(Collectors.joining());
 
         return annotationsString + "\t".repeat(indent) + modifierString1 + "def " + name1 +
