@@ -126,13 +126,13 @@ public class Compiler {
         var separator = keysString.lastIndexOf(TYPE_NAME_SEPARATOR);
         if (separator == -1) return Optional.empty();
 
-        var typeAndFlags = keysString.substring(0, separator);
+        var typeAndFlags = keysString.substring(0, separator).strip();
         String inputType;
         var flagSeparator = typeAndFlags.lastIndexOf(' ');
         if (flagSeparator == -1) {
             inputType = typeAndFlags;
         } else {
-            inputType = typeAndFlags.substring(flagSeparator + 1);
+            inputType = typeAndFlags.substring(flagSeparator + 1).strip();
         }
 
         var name = keysString.substring(separator + 1);
@@ -143,7 +143,7 @@ public class Compiler {
             rendered = renderMagmaDeclaration(name, outputType);
         } else {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
-            var mutabilityModifier = input.startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
+            var mutabilityModifier = input.strip().startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
             MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().withString("mutability-modifier", mutabilityModifier);
             MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("name", name);

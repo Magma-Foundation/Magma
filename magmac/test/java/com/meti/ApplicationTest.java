@@ -62,6 +62,7 @@ public class ApplicationTest {
     void methodName(String name) {
         assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(new MapNodeBuilder()
                 .withString("name", name)
+                .withInteger("indent", 1)
                 .complete()));
     }
 
@@ -72,6 +73,7 @@ public class ApplicationTest {
                 renderMagmaFunction(new MapNodeBuilder()
                         .withString("annotation-string", "@Test\n")
                         .withString("name", TEST_LOWER_SYMBOL)
+                        .withInteger("indent", 1)
                         .complete()));
     }
 
@@ -82,6 +84,7 @@ public class ApplicationTest {
                 renderMagmaFunction(new MapNodeBuilder()
                         .withString("name", TEST_LOWER_SYMBOL)
                         .withString("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
+                        .withInteger("indent", 1)
                         .complete()));
     }
 
@@ -96,6 +99,7 @@ public class ApplicationTest {
                 renderMagmaFunction(new MapNodeBuilder()
                         .withString("name", TEST_LOWER_SYMBOL)
                         .withString("param-string", outputParamString)
+                        .withInteger("indent", 1)
                         .complete()));
     }
 

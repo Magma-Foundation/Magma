@@ -40,15 +40,15 @@ public class MagmaLang {
     }
 
     static String renderMagmaFunction(Node node) {
-        var annotationString = node.apply("annotation-string").flatMap(Attribute::asString).orElse("");
+        var annotationString = node.apply("annotation-string").flatMap(Attribute::asString).orElse("").strip();
         var modifierString1 = node.apply("modifier-string").flatMap(Attribute::asString).orElse("");
         var name1 = node.apply("name").flatMap(Attribute::asString).orElse("");
         var paramString1 = node.apply("param-string").flatMap(Attribute::asString).orElse("");
         var content1 = node.apply("content").flatMap(Attribute::asString).orElse("");
         var indent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0);
 
-        return annotationString + modifierString1 + "def " + name1 +
+        return annotationString + "\t".repeat(indent) + modifierString1 + "def " + name1 +
                PARAM_START + paramString1 +
-               PARAM_END + " =>" + renderBlock(content1, indent);
+               PARAM_END + " =>" + renderBlock(content1, indent) + "\n";
     }
 }
