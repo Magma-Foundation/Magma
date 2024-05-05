@@ -29,6 +29,12 @@ public class Compiler {
             if (c == STATEMENT_END && depth == 0) {
                 statements.add(inputBuilder.toString());
                 inputBuilder = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                inputBuilder.append(c);
+                depth = 0;
+
+                statements.add(inputBuilder.toString());
+                inputBuilder = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -79,6 +85,16 @@ public class Compiler {
     }
 
     private static String compileClassContent(String input) {
+        var lines = split(input);
+        var builder = new StringBuilder();
+        for (String line : lines) {
+            builder.append(compileClassMember(line));
+        }
+
+        return builder.toString();
+    }
+
+    private static String compileClassMember(String input) {
         return compileMethod(input)
                 .or(() -> compileDefinition(input))
                 .orElse("");
@@ -111,12 +127,12 @@ public class Compiler {
         var outputParamContent = String.join(", ", outputParams);
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
-        return Optional.of(renderMagmaFunction(new MapNodeBuilder()
-                .withString("annotation-string", annotationString)
-                .withString("name", name)
-                .withString("param-string", outputParamContent)
-                .withInteger("indent", 1)
-                .complete()));
+        return Optional.of(renderMagmaFunction(MapNodeBuilder.Empty
+                .string("annotation-string", annotationString)
+                .string("name", name)
+                .string("param-string", outputParamContent)
+                .integer("indent", 1)
+                .build()));
     }
 
     private static Optional<String> compileDefinition(String input) {
@@ -142,14 +158,14 @@ public class Compiler {
         if (valueSeparator == -1) {
             rendered = renderMagmaDeclaration(name, outputType);
         } else {
-            var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
+            var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length());
             var mutabilityModifier = input.strip().startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
-            MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().withString("mutability-modifier", mutabilityModifier);
-            MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("name", name);
-            MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.withString("type", outputType);
-            MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.withString("value", valueString);
-            rendered = renderMagmaDefinition(mapNodeBuilder.complete());
+            MapNodeBuilder mapNodeBuilder1 = MapNodeBuilder.Empty.string("mutability-modifier", mutabilityModifier);
+            MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.string("name", name);
+            MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.string("type", outputType);
+            MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.string("value", valueString);
+            rendered = renderMagmaDefinition(mapNodeBuilder.build());
         }
 
         return Optional.of(rendered);

@@ -32,11 +32,11 @@ public class MagmaLang {
     }
 
     static String renderMagmaClass(String name, String modifierString, String content) {
-        return renderMagmaFunction(new MapNodeBuilder()
-                .withString("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
-                .withString("name", name)
-                .withString("content", content)
-                .complete());
+        return renderMagmaFunction(MapNodeBuilder.Empty
+                .string("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
+                .string("name", name)
+                .string("content", content)
+                .build());
     }
 
     static String renderMagmaFunction(Node node) {

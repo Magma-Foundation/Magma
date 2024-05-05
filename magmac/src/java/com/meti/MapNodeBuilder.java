@@ -1,15 +1,14 @@
 package com.meti;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MapNodeBuilder {
+    public static final MapNodeBuilder Empty = new MapNodeBuilder();
     private final Map<String, Attribute> map;
 
-    public MapNodeBuilder() {
+    private MapNodeBuilder() {
         this(Collections.emptyMap());
     }
 
@@ -17,11 +16,11 @@ public class MapNodeBuilder {
         this.map = map;
     }
 
-    public MapNodeBuilder withString(String key, String value) {
+    public MapNodeBuilder string(String key, String value) {
         return with(key, new StringAttribute(value));
     }
 
-    public MapNodeBuilder withInteger(String key, int value) {
+    public MapNodeBuilder integer(String key, int value) {
         return with(key, new IntegerAttribute(value));
     }
 
@@ -31,7 +30,7 @@ public class MapNodeBuilder {
         return new MapNodeBuilder(copy);
     }
 
-    public Node complete() {
+    public Node build() {
         return new MapNode(map);
     }
 }
