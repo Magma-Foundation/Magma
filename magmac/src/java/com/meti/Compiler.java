@@ -134,11 +134,15 @@ public class Compiler {
         var outputParamContent = String.join(", ", outputParams);
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
+        var beginIndex = input.indexOf(BLOCK_START, paramEnd);
+        var value = input.substring(beginIndex+ BLOCK_START.length(), input.lastIndexOf(BLOCK_END));
+
         var node = MapNodeBuilder.NodeBuilder
                 .stringList("annotations", annotations)
                 .string("name", name)
                 .string("param-string", outputParamContent)
                 .integer("indent", 1)
+                .string("content", value)
                 .build();
 
         return Optional.of(renderMagmaFunction(node));
