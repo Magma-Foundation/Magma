@@ -1,3 +1,5 @@
 class def ApplicationTest() => {
     @Test
-    def definitionFinal() => {}}
+    def definitionFinal() => {
+	}
+}

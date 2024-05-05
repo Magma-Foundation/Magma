@@ -14,10 +14,10 @@ public class JavaLang {
     }
 
     public static String renderJavaDefinition(Node javaDefinitionNode) {
-        return javaDefinitionNode.apply("modifier-string").orElse("") +
-               renderJavaDeclaration(javaDefinitionNode.apply("name").orElseThrow(),
-                       javaDefinitionNode.apply("type").orElseThrow()) +
-               Lang.renderDefinitionEnd(javaDefinitionNode.apply("value").orElseThrow());
+        return javaDefinitionNode.apply("modifier-string").flatMap(Attribute::asString).orElse("") +
+               renderJavaDeclaration(javaDefinitionNode.apply("name").flatMap(Attribute::asString).orElseThrow(),
+                       javaDefinitionNode.apply("type").flatMap(Attribute::asString).orElseThrow()) +
+               Lang.renderDefinitionEnd(javaDefinitionNode.apply("value").flatMap(Attribute::asString).orElseThrow());
     }
 
     public static String renderJavaDeclaration(String name, String type) {

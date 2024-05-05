@@ -10,9 +10,9 @@ public class MagmaLang {
     public static final String CONST_KEYWORD_WITH_SPACE = "const ";
 
     public static String renderMagmaDefinition(Node magmaDefinition) {
-        return magmaDefinition.apply("mutability-modifier").orElseThrow() +
-               renderMagmaDeclaration(magmaDefinition.apply("name").orElseThrow(), magmaDefinition.apply("type").orElseThrow()) +
-               renderDefinitionEnd(magmaDefinition.apply("value").orElseThrow());
+        return magmaDefinition.apply("mutability-modifier").flatMap(Attribute::asString).orElseThrow() +
+               renderMagmaDeclaration(magmaDefinition.apply("name").flatMap(Attribute::asString).orElseThrow(), magmaDefinition.apply("type").flatMap(Attribute::asString).orElseThrow()) +
+               renderDefinitionEnd(magmaDefinition.apply("value").flatMap(Attribute::asString).orElseThrow());
     }
 
     public static String renderMagmaDeclaration(String name, String type) {
@@ -33,21 +33,22 @@ public class MagmaLang {
 
     static String renderMagmaClass(String name, String modifierString, String content) {
         return renderMagmaFunction(new MapNodeBuilder()
-                .with("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
-                .with("name", name)
-                .with("content", content)
+                .withString("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
+                .withString("name", name)
+                .withString("content", content)
                 .complete());
     }
 
     static String renderMagmaFunction(Node node) {
-        var annotationString = node.apply("annotation-string").orElse("");
-        var modifierString1 = node.apply("modifier-string").orElse("");
-        var name1 = node.apply("name").orElse("");
-        var paramString1 = node.apply("param-string").orElse("");
-        var content1 = node.apply("content").orElse("");
+        var annotationString = node.apply("annotation-string").flatMap(Attribute::asString).orElse("");
+        var modifierString1 = node.apply("modifier-string").flatMap(Attribute::asString).orElse("");
+        var name1 = node.apply("name").flatMap(Attribute::asString).orElse("");
+        var paramString1 = node.apply("param-string").flatMap(Attribute::asString).orElse("");
+        var content1 = node.apply("content").flatMap(Attribute::asString).orElse("");
+        var indent = node.apply("indent").flatMap(Attribute::asInteger).orElse(0);
 
         return annotationString + modifierString1 + "def " + name1 +
                PARAM_START + paramString1 +
-               PARAM_END + " =>" + renderBlock(content1);
+               PARAM_END + " =>" + renderBlock(content1, indent);
     }
 }

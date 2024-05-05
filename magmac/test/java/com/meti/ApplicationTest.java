@@ -16,44 +16,44 @@ public class ApplicationTest {
     void definitionFinal() {
         assertRunWithinClass(
                 renderJavaDefinition(new MapNodeBuilder()
-                        .with("modifier-string", FINAL_KEYWORD_WITH_SPACE)
-                        .with("name", TEST_LOWER_SYMBOL)
-                        .with("type", INT_KEYWORD)
-                        .with("value", "0").complete()),
+                        .withString("modifier-string", FINAL_KEYWORD_WITH_SPACE)
+                        .withString("name", TEST_LOWER_SYMBOL)
+                        .withString("type", INT_KEYWORD)
+                        .withString("value", "0").complete()),
                 renderMagmaDefinition(new MapNodeBuilder()
-                        .with("mutability-modifier", CONST_KEYWORD_WITH_SPACE)
-                        .with("name", TEST_LOWER_SYMBOL)
-                        .with("type", I32_KEYWORD)
-                        .with("value", "0").complete()));
+                        .withString("mutability-modifier", CONST_KEYWORD_WITH_SPACE)
+                        .withString("name", TEST_LOWER_SYMBOL)
+                        .withString("type", I32_KEYWORD)
+                        .withString("value", "0").complete()));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
         MapNodeBuilder mapNodeBuilder = new MapNodeBuilder();
-        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.with("name", name);
-        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("type", INT_KEYWORD);
+        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.withString("name", name);
+        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("type", INT_KEYWORD);
 
-        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().with("mutability-modifier", LET_KEYWORD_WITH_SPACE);
-        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.with("name", name);
-        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.with("type", I32_KEYWORD);
-        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.with("value", "0");
+        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().withString("mutability-modifier", LET_KEYWORD_WITH_SPACE);
+        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.withString("name", name);
+        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.withString("type", I32_KEYWORD);
+        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.withString("value", "0");
 
-        assertRunWithinClass(renderJavaDefinition(mapNodeBuilder2.with("value", "0").complete()),
+        assertRunWithinClass(renderJavaDefinition(mapNodeBuilder2.withString("value", "0").complete()),
                 renderMagmaDefinition(mapNodeBuilder0.complete()));
     }
 
     @Test
     void definitionType() {
         MapNodeBuilder mapNodeBuilder = new MapNodeBuilder();
-        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.with("name", TEST_LOWER_SYMBOL);
-        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("type", LONG_KEYWORD);
+        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.withString("name", TEST_LOWER_SYMBOL);
+        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("type", LONG_KEYWORD);
 
-        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().with("mutability-modifier", LET_KEYWORD_WITH_SPACE);
-        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.with("name", TEST_LOWER_SYMBOL);
-        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.with("type", I64_KEYWORD);
-        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.with("value", "0");
-        assertRunWithinClass(renderJavaDefinition(mapNodeBuilder2.with("value", "0").complete()),
+        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().withString("mutability-modifier", LET_KEYWORD_WITH_SPACE);
+        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.withString("name", TEST_LOWER_SYMBOL);
+        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.withString("type", I64_KEYWORD);
+        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.withString("value", "0");
+        assertRunWithinClass(renderJavaDefinition(mapNodeBuilder2.withString("value", "0").complete()),
                 renderMagmaDefinition(mapNodeBuilder0.complete()));
     }
 
@@ -61,7 +61,7 @@ public class ApplicationTest {
     @ValueSource(strings = {"first", "second"})
     void methodName(String name) {
         assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(new MapNodeBuilder()
-                .with("name", name)
+                .withString("name", name)
                 .complete()));
     }
 
@@ -70,8 +70,8 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod("@Test\n", TEST_LOWER_SYMBOL, ""),
                 renderMagmaFunction(new MapNodeBuilder()
-                        .with("annotation-string", "@Test\n")
-                        .with("name", TEST_LOWER_SYMBOL)
+                        .withString("annotation-string", "@Test\n")
+                        .withString("name", TEST_LOWER_SYMBOL)
                         .complete()));
     }
 
@@ -80,8 +80,8 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, renderJavaDeclaration(TEST_LOWER_SYMBOL, INT_KEYWORD)),
                 renderMagmaFunction(new MapNodeBuilder()
-                        .with("name", TEST_LOWER_SYMBOL)
-                        .with("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
+                        .withString("name", TEST_LOWER_SYMBOL)
+                        .withString("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
                         .complete()));
     }
 
@@ -94,8 +94,8 @@ public class ApplicationTest {
         assertRunWithinClass(
                 renderJavaMethod(TEST_LOWER_SYMBOL, inputParamString),
                 renderMagmaFunction(new MapNodeBuilder()
-                        .with("name", TEST_LOWER_SYMBOL)
-                        .with("param-string", outputParamString)
+                        .withString("name", TEST_LOWER_SYMBOL)
+                        .withString("param-string", outputParamString)
                         .complete()));
     }
 
@@ -103,15 +103,15 @@ public class ApplicationTest {
     void definitionValue() {
         var value = "100";
         MapNodeBuilder mapNodeBuilder = new MapNodeBuilder();
-        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.with("name", TEST_LOWER_SYMBOL);
-        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("type", INT_KEYWORD);
+        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.withString("name", TEST_LOWER_SYMBOL);
+        MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("type", INT_KEYWORD);
 
-        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().with("mutability-modifier", LET_KEYWORD_WITH_SPACE);
-        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.with("name", TEST_LOWER_SYMBOL);
-        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.with("type", I32_KEYWORD);
-        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.with("value", value);
+        MapNodeBuilder mapNodeBuilder10 = new MapNodeBuilder().withString("mutability-modifier", LET_KEYWORD_WITH_SPACE);
+        MapNodeBuilder mapNodeBuilder20 = mapNodeBuilder10.withString("name", TEST_LOWER_SYMBOL);
+        MapNodeBuilder mapNodeBuilder30 = mapNodeBuilder20.withString("type", I32_KEYWORD);
+        MapNodeBuilder mapNodeBuilder0 = mapNodeBuilder30.withString("value", value);
         assertRunWithinClass(
-                renderJavaDefinition(mapNodeBuilder2.with("value", value).complete()),
+                renderJavaDefinition(mapNodeBuilder2.withString("value", value).complete()),
                 renderMagmaDefinition(mapNodeBuilder0.complete()));
     }
 

@@ -112,11 +112,10 @@ public class Compiler {
 
         var name = input.substring(VOID_TYPE_WITH_SPACE.length() + annotationEnd, paramStart);
         return Optional.of(renderMagmaFunction(new MapNodeBuilder()
-                .with("annotation-string", annotationString)
-                .with("modifier-string", "")
-                .with("name", name)
-                .with("param-string", outputParamContent)
-                .with("content", "")
+                .withString("annotation-string", annotationString)
+                .withString("name", name)
+                .withString("param-string", outputParamContent)
+                .withInteger("indent", 1)
                 .complete()));
     }
 
@@ -146,10 +145,10 @@ public class Compiler {
             var valueString = input.substring(valueSeparator + VALUE_SEPARATOR.length(), input.lastIndexOf(STATEMENT_END));
             var mutabilityModifier = input.startsWith(FINAL_KEYWORD) ? CONST_KEYWORD_WITH_SPACE : LET_KEYWORD_WITH_SPACE;
 
-            MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().with("mutability-modifier", mutabilityModifier);
-            MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.with("name", name);
-            MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.with("type", outputType);
-            MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.with("value", valueString);
+            MapNodeBuilder mapNodeBuilder1 = new MapNodeBuilder().withString("mutability-modifier", mutabilityModifier);
+            MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.withString("name", name);
+            MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.withString("type", outputType);
+            MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.withString("value", valueString);
             rendered = renderMagmaDefinition(mapNodeBuilder.complete());
         }
 

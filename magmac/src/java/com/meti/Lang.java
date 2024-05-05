@@ -17,6 +17,10 @@ public class Lang {
     }
 
     public static String renderBlock(String content) {
-        return BLOCK_START + content + BLOCK_END;
+        return renderBlock(content, 0);
+    }
+
+    public static String renderBlock(String content, int indent) {
+        return BLOCK_START + content +"\n"+ "\t".repeat(indent) + BLOCK_END;
     }
 }

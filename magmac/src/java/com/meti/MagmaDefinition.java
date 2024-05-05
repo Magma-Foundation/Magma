@@ -31,8 +31,7 @@ public final class MagmaDefinition implements Node {
         return Optional.of(value);
     }
 
-    @Override
-    public Optional<String> apply(String key) {
+    private Optional<String> applyAsString(String key) {
         return switch (key) {
             case "mutability-modifier" -> findMutabilityModifier();
             case "modifier-string" -> findModifierString();
@@ -45,5 +44,10 @@ public final class MagmaDefinition implements Node {
 
     private Optional<String> findModifierString() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<Attribute> apply(String key) {
+        return applyAsString(key).map(StringAttribute::new);
     }
 }
