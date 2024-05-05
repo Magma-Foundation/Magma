@@ -107,7 +107,7 @@ public class Compiler {
         var annotationString = input.substring(0, annotationEnd);
 
         var paramStart = input.indexOf(PARAM_START);
-        var paramEnd = input.indexOf(PARAM_END);
+        var paramEnd = input.indexOf(PARAM_END, paramStart);
         var inputParamContent = input.substring(paramStart + 1, paramEnd);
         var inputParams = inputParamContent.split(",");
 
