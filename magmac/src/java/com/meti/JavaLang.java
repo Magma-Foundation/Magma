@@ -17,7 +17,7 @@ public class JavaLang {
     public static String renderMethodContent(String methodContent) {
         return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock(NodeBuilder
                 .string("content", "")
-                .build());
+                .build(""));
     }
 
     public static String renderJavaDefinition(Node javaDefinitionNode) {
@@ -50,7 +50,7 @@ public class JavaLang {
     static String renderJavaClass(String name, String modifierString, String content) {
         return modifierString + Lang.CLASS_KEYWORD_WITH_SPACE + name + Lang.renderBlock(NodeBuilder
                 .string("content", content)
-                .build());
+                .build(""));
     }
 
     static String renderJavaMethod(String name) {
@@ -61,7 +61,7 @@ public class JavaLang {
         return renderJavaMethod(NodeBuilder.string("annotation-string", "")
                 .string("name", name)
                 .string("param-string", paramString)
-                .build());
+                .build(""));
     }
 
     static String renderJavaMethod(Node node) {

@@ -39,7 +39,7 @@ public class MagmaLang {
                 .string("modifier-string", modifierString + CLASS_KEYWORD_WITH_SPACE)
                 .string("name", name)
                 .string("content", content)
-                .build());
+                .build(""));
     }
 
     static String renderMagmaFunction(Node node) {
@@ -62,6 +62,6 @@ public class MagmaLang {
                PARAM_END + " =>" + renderBlock(MapNodeBuilder.NodeBuilder
                        .string("content", content1)
                        .integer("indent", indent)
-                       .build()) + "\n";
+                       .build("")) + "\n";
     }
 }

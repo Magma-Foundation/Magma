@@ -20,8 +20,8 @@ public class MethodTest {
     @Test
     void methodsMultiple() {
         assertRunWithinClass(renderJavaMethod("first") + renderJavaMethod("second"),
-                renderMagmaFunction(NodeBuilder.string("name", "first").integer("indent", 1).build()) +
-                renderMagmaFunction(NodeBuilder.string("name", "second").integer("indent", 1).build()));
+                renderMagmaFunction(NodeBuilder.string("name", "first").integer("indent", 1).build("")) +
+                renderMagmaFunction(NodeBuilder.string("name", "second").integer("indent", 1).build("")));
     }
 
     @ParameterizedTest
@@ -29,7 +29,7 @@ public class MethodTest {
     void methodName(String name) {
         assertRunWithinClass(renderJavaMethod(name), renderMagmaFunction(NodeBuilder.string("name", name)
                 .integer("indent", 1)
-                .build()));
+                .build("")));
     }
 
     @Test
@@ -39,12 +39,12 @@ public class MethodTest {
                         .stringList("annotations", List.of("First", "Second"))
                         .string("name", TEST_LOWER_SYMBOL)
                         .string("param-string", "")
-                        .build()),
+                        .build("")),
                 renderMagmaFunction(NodeBuilder
                         .stringList("annotations", List.of("First", "Second"))
                         .string("name", TEST_LOWER_SYMBOL)
                         .integer("indent", 1)
-                        .build()));
+                        .build("")));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class MethodTest {
                         .string("name", TEST_LOWER_SYMBOL)
                         .string("param-string", renderMagmaDeclaration(TEST_LOWER_SYMBOL, I32_KEYWORD))
                         .integer("indent", 1)
-                        .build()));
+                        .build("")));
     }
 
     @ParameterizedTest
@@ -70,6 +70,6 @@ public class MethodTest {
                         .string("name", TEST_LOWER_SYMBOL)
                         .string("param-string", outputParamString)
                         .integer("indent", 1)
-                        .build()));
+                        .build("")));
     }
 }

@@ -31,8 +31,8 @@ public class MapNodeBuilder {
         return new MapNodeBuilder(copy);
     }
 
-    public Node build() {
-        return new MapNode(map);
+    public Node build(String name) {
+        return new MapNode(name, map);
     }
 
     public MapNodeBuilder stringList(String key, List<String> values) {

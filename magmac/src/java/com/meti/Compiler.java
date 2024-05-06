@@ -143,7 +143,7 @@ public class Compiler {
                 .string("param-string", outputParamContent)
                 .integer("indent", 1)
                 .string("content", value)
-                .build();
+                .build("");
 
         return Optional.of(renderMagmaFunction(node));
     }
@@ -178,7 +178,7 @@ public class Compiler {
             MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.string("name", name);
             MapNodeBuilder mapNodeBuilder3 = mapNodeBuilder2.string("type", outputType);
             MapNodeBuilder mapNodeBuilder = mapNodeBuilder3.string("value", valueString);
-            rendered = renderMagmaDefinition(mapNodeBuilder.build());
+            rendered = renderMagmaDefinition(mapNodeBuilder.build(""));
         }
 
         return Optional.of(rendered);
