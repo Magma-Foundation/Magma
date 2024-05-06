@@ -15,24 +15,25 @@ import static com.meti.MapNodeBuilder.NodeBuilder;
 public class ApplicationTest {
     @Test
     void definitionFinal() {
-        assertRunWithinClass(
-                renderJavaDefinition(NodeBuilder
-                        .string("modifier-string", FINAL_KEYWORD_WITH_SPACE)
-                        .string("name", TEST_LOWER_SYMBOL)
-                        .string("type", INT_KEYWORD)
-                        .string("value", "0").build()),
-                renderMagmaDefinition(NodeBuilder
-                        .string("mutability-modifier", CONST_KEYWORD_WITH_SPACE)
-                        .string("name", TEST_LOWER_SYMBOL)
-                        .string("type", I32_KEYWORD)
-                        .string("value", "0").build()));
+        var input = NodeBuilder
+                .string("modifier-string", FINAL_KEYWORD_WITH_SPACE)
+                .string("name", TEST_LOWER_SYMBOL)
+                .string("type", INT_KEYWORD)
+                .string("value", "0").build();
+
+        var output = NodeBuilder
+                .string("mutability-modifier", CONST_KEYWORD_WITH_SPACE)
+                .string("name", TEST_LOWER_SYMBOL)
+                .string("type", I32_KEYWORD)
+                .string("value", "0").build();
+
+        assertRunWithinClass(renderJavaDefinition(input), renderMagmaDefinition(output));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"first", "second"})
     void definitionName(String name) {
-        MapNodeBuilder mapNodeBuilder = NodeBuilder;
-        MapNodeBuilder mapNodeBuilder1 = mapNodeBuilder.string("name", name);
+        MapNodeBuilder mapNodeBuilder1 = NodeBuilder.string("name", name);
         MapNodeBuilder mapNodeBuilder2 = mapNodeBuilder1.string("type", INT_KEYWORD);
 
         MapNodeBuilder mapNodeBuilder10 = NodeBuilder.string("mutability-modifier", LET_KEYWORD_WITH_SPACE);

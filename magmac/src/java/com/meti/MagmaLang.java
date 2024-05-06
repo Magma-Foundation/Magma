@@ -59,6 +59,9 @@ public class MagmaLang {
 
         return annotationsString + "\t".repeat(indent) + modifierString1 + "def " + name1 +
                PARAM_START + paramString1 +
-               PARAM_END + " =>" + renderBlock(content1, indent) + "\n";
+               PARAM_END + " =>" + renderBlock(MapNodeBuilder.NodeBuilder
+                       .string("content", content1)
+                       .integer("indent", indent)
+                       .build()) + "\n";
     }
 }

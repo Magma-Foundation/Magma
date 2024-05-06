@@ -15,7 +15,9 @@ public class JavaLang {
     public static final String FINAL_KEYWORD = "final";
 
     public static String renderMethodContent(String methodContent) {
-        return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock("");
+        return Lang.PARAM_START + methodContent + Lang.PARAM_END + Lang.renderBlock(NodeBuilder
+                .string("content", "")
+                .build());
     }
 
     public static String renderJavaDefinition(Node javaDefinitionNode) {
@@ -46,7 +48,9 @@ public class JavaLang {
     }
 
     static String renderJavaClass(String name, String modifierString, String content) {
-        return modifierString + Lang.CLASS_KEYWORD_WITH_SPACE + name + Lang.renderBlock(content);
+        return modifierString + Lang.CLASS_KEYWORD_WITH_SPACE + name + Lang.renderBlock(NodeBuilder
+                .string("content", content)
+                .build());
     }
 
     static String renderJavaMethod(String name) {

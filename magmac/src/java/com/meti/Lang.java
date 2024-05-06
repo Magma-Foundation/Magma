@@ -16,12 +16,14 @@ public class Lang {
         return VALUE_SEPARATOR + value + STATEMENT_END;
     }
 
-    public static String renderBlock(String content) {
-        return renderBlock(content, 0);
-    }
+    public static String renderBlock(Node node) {
+        var content1 = node.apply("content").flatMap(Attribute::asString).orElse("");
+        var indent1 = node.apply("indent").flatMap(Attribute::asInteger).orElse(0);
 
-    public static String renderBlock(String content, int indent) {
-        var innerContent = content.isEmpty() ? "" : "\n" + content + "\t".repeat(indent);
+        var innerContent = content1.isEmpty()
+                ? ""
+                : "\n" + content1 + "\t".repeat(indent1);
+
         return BLOCK_START + innerContent + BLOCK_END;
     }
 }

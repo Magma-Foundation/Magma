@@ -7,14 +7,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 
 import static com.meti.FeatureTest.*;
-import static com.meti.FeatureTest.TEST_LOWER_SYMBOL;
 import static com.meti.JavaLang.*;
-import static com.meti.JavaLang.renderJavaMethod;
 import static com.meti.MagmaLang.*;
-import static com.meti.MagmaLang.renderMagmaFunction;
 import static com.meti.MapNodeBuilder.NodeBuilder;
 
 public class MethodTest {
+    @Test
+    void methodWithContent() {
+    }
+
+
     @Test
     void methodsMultiple() {
         assertRunWithinClass(renderJavaMethod("first") + renderJavaMethod("second"),
