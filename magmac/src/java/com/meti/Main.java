@@ -142,7 +142,9 @@ public class Main {
     }
 
     private static String compileStatement(String line, int indent) {
-        return compileFor(line, indent)
+        return compileIf(line, indent)
+                .or(() -> compileElse(line, indent))
+                .or(() -> compileFor(line, indent))
                 .or(() -> compileTry(line, indent))
                 .or(() -> compileDeclaration(line)
                         .map(Definition::render)
@@ -181,6 +183,26 @@ public class Main {
         return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
     }
 
+    private static Optional<String> compileIf(String line, int indent) {
+        if (!line.startsWith("if ")) return Optional.empty();
+
+        var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
+        var compiled = compileValue(substring);
+
+        var start = line.indexOf('{');
+        var end = line.lastIndexOf('}');
+        if(end == -1) {
+            var value = line.substring( line.indexOf(')') + 1);
+            var compiledValue = compileValue(value);
+            return Optional.of("if (" + compiled + ")" + compiledValue + ";");
+        }
+
+        var content = line.substring(start + 1, end);
+        var rendered = compileStatements(content, indent);
+
+        return Optional.of("if (" + compiled + ")" + rendered);
+    }
+
     private static Optional<String> compileCatch(String line, int indent) {
         if (!line.startsWith("catch ")) return Optional.empty();
 
@@ -203,6 +225,28 @@ public class Main {
             builder.add(statement);
         }
         return renderBlock(builder, indent);
+    }
+
+    private static Optional<String> compileElse(String line, int indent) {
+        if (!line.startsWith("else ")) return Optional.empty();
+
+        var blockStart = line.indexOf('{');
+        var blockEnd = line.lastIndexOf('}');
+        if(blockEnd == -1) {
+            var value = line.substring("else ".length());
+            var compiledValue = compileValue(value);
+            return Optional.of("else " + compiledValue);
+        }
+
+        var content = line.substring(blockStart + 1, blockEnd);
+        var splitContent = split(content);
+        var builder = new ArrayList<String>();
+        for (String s : splitContent) {
+            var statement = compileStatement(s, indent + 1);
+            builder.add(statement);
+        }
+
+        return Optional.of("else " + renderBlock(builder, indent));
     }
 
     private static Optional<String> compileTry(String line, int indent) {
