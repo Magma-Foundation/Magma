@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Main {
     private static Optional<String> compileImport(String stripped) {
@@ -63,13 +64,17 @@ public class Main {
             result.staticValue().ifPresent(staticMembers::add);
         }
 
-        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers), "export class ", 0, "", "");
-        var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers);
+        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", 0, "", "");
+        var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
         return Optional.of(instanceOutput + renderedObject);
     }
 
-    private static String renderBlock(ArrayList<String> instanceMembers) {
-        return "{\n" + String.join("\n", instanceMembers) + "}\n";
+    private static String renderBlock(ArrayList<String> members, int indent) {
+        var blockString = members.stream()
+                .map(member -> "\t".repeat(indent + 1) + member + "\n")
+                .collect(Collectors.joining());
+
+        return "{\n" + blockString + "\t".repeat(indent) + "}\n";
     }
 
     private static Optional<Result> compileMethod(String input) {
@@ -77,7 +82,7 @@ public class Main {
         if (paramStart == -1) return Optional.empty();
 
         var paramEnd = input.indexOf(')');
-        if(paramEnd == -1) return Optional.empty();
+        if (paramEnd == -1) return Optional.empty();
 
         var inputParamString = input.substring(paramStart + 1, paramEnd);
 
@@ -110,10 +115,20 @@ public class Main {
         var contentEnd = input.lastIndexOf('}');
         if (contentEnd == -1) return Optional.empty();
 
-        var content = input.substring(contentStart, contentEnd + 1);
+        var inputContent = input.substring(contentStart + 1, contentEnd);
+        var inputContentLines = split(inputContent);
+        var output = new ArrayList<String>();
+        for (var inputContentLine : inputContentLines) {
+            var line = inputContentLine.strip();
+            if (!line.isEmpty()) {
+                output.add(line + ";");
+            }
+        }
+
+        var outputContent = renderBlock(output, 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = renderMagmaFunction(name, content, modifierString, 1, ": " + type, outputParamString);
+        var rendered = renderMagmaFunction(name, outputContent, modifierString, 1, ": " + type, outputParamString);
 
         Result result;
         if (modifiers.contains("static")) {
@@ -126,7 +141,7 @@ public class Main {
     }
 
     private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString, String paramString) {
-        return "\t".repeat(indent) + modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
+        return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
     }
 
     public static List<String> split(String input) {
@@ -147,7 +162,7 @@ public class Main {
             if (inQuotes) {
                 builder.append(c);
 
-                if(c == '\\') {
+                if (c == '\\') {
                     wasEscaped = true;
                 }
             } else {
@@ -161,8 +176,8 @@ public class Main {
                     lines.add(builder.toString());
                     builder = new StringBuilder();
                 } else {
-                    if (c == '{') depth++;
-                    if (c == '}') depth--;
+                    if (c == '{' || c == '(') depth++;
+                    if (c == '}' || c == ')') depth--;
                     builder.append(c);
                 }
             }
