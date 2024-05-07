@@ -8,16 +8,14 @@ import java.util.Optional;
 
 public class Main {
     private static Optional<String> compileImport(String stripped) {
-        if (stripped.startsWith("import ")) {
-            var segments = stripped.substring("import ".length());
-            var separator = segments.lastIndexOf('.');
-            var parent = segments.substring(0, separator);
-            var child = segments.substring(separator + 1);
-            var rendered = "import { " + child + " } from " + parent + ";\n";
-            return Optional.of(rendered);
-        } else {
-            return Optional.empty();
-        }
+        if (!stripped.startsWith("import ")) return Optional.empty();
+
+        var segments = stripped.substring("import ".length());
+        var separator = segments.lastIndexOf('.');
+        var parent = segments.substring(0, separator);
+        var child = segments.substring(separator + 1);
+        var rendered = "import { " + child + " } from " + parent + ";\n";
+        return Optional.of(rendered);
     }
 
     public static void main(String[] args) {
@@ -54,11 +52,11 @@ public class Main {
         var name = after.substring(0, braceStart).strip();
         var inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
         var outputContent = new ArrayList<String>();
-        for (String s : inputContent) {
-            outputContent.add(compileMethod(s).orElse(s));
+        for (var line : inputContent) {
+            outputContent.add(compileMethod(line).orElse(line));
         }
 
-        return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0));
+        return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0, ""));
     }
 
     private static Optional<String> compileMethod(String input) {
@@ -67,21 +65,26 @@ public class Main {
 
         var before = input.substring(0, start);
         var separator = before.lastIndexOf(' ');
+
+        var flagsAndType = before.substring(0, separator);
+        var typeSeparator = flagsAndType.lastIndexOf(' ');
+        var type = flagsAndType.substring(typeSeparator + 1);
+
         var name = before.substring(separator + 1);
 
         var contentStart = input.indexOf('{');
-        if(contentStart == -1) return Optional.empty();
+        if (contentStart == -1) return Optional.empty();
 
         var contentEnd = input.lastIndexOf('}');
-        if(contentEnd == -1) return Optional.empty();
+        if (contentEnd == -1) return Optional.empty();
 
         var content = input.substring(contentStart, contentEnd + 1);
 
-        return Optional.of(renderMagmaFunction(name, content, "", 1));
+        return Optional.of(renderMagmaFunction(name, content, "", 1, ": " + type));
     }
 
-    private static String renderMagmaFunction(String name, String content, String modifiers, int indent) {
-        return "\t".repeat(indent) + modifiers + "def " + name + "() => " + content;
+    private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString) {
+        return "\t".repeat(indent) + modifiers + "def " + name + "()" + typeString + " => " + content;
     }
 
     private static ArrayList<String> split(String input) {
