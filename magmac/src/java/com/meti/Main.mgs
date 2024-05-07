@@ -9,7 +9,7 @@ import { Collectors } from java.util.stream;
 export class def Main() => {
 }
 export object Main {
-	private def compileImport(stripped : String): Optional<String> => {
+	private def compileImport(let stripped : String): Optional<String> => {
 		if (!stripped.startsWith("import ")) return Optional.empty();
 		let segments = stripped.substring("import ".length());
 		let separator = segments.lastIndexOf('.');
@@ -18,8 +18,7 @@ export object Main {
 		let rendered = "import { " + child + " } from " + parent + ";\n";
 		return Optional.of(rendered);
 	}
-
-	def main(args : String[]): void => {
+	def main(): void => {
 		try {
 			let source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
 			let target = source.resolveSibling("Main.mgs");
@@ -34,18 +33,14 @@ export object Main {
                         .or(() -> compileClass(stripped))
                         .orElse(stripped));
 			}
-
 			let output = String.join("", outputLines);
 			Files.writeString(target, output);
 		}
-
 		catch (let e : IOException){
 			throw new RuntimeException(e);
 		}
-
 	}
-
-	private def compileClass(stripped : String): Optional<String> => {
+	private def compileClass(let stripped : String): Optional<String> => {
 		let index = stripped.indexOf("class");
 		if (index == -1) return Optional.empty();
 		let after = stripped.substring(index + "class".length());
@@ -61,20 +56,17 @@ export object Main {
 			result.instanceValue().ifPresent(instanceMembers::add);
 			result.staticValue().ifPresent(staticMembers::add);
 		}
-
 		let instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", "", "");
-		let renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
+		let renderedObject = staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(staticMembers, 0);
 		return Optional.of(instanceOutput + renderedObject);
 	}
-
-	private def renderBlock(indent : ArrayList<String> members, int): String => {
+	private def renderBlock(let indent : I32): String => {
 		let blockString = members.stream()
                 .map(member -> "\t".repeat(indent + 1) + member + "\n")
                 .collect(Collectors.joining());
-		return "{\n" + blockString + "\t".repeat(indent) + "}\n";
+		return "{\n" + blockString + "\t".repeat(indent) + "}";
 	}
-
-	private def compileMethod(input : String): Optional<Result> => {
+	private def compileMethod(let input : String): Optional<Result> => {
 		let paramStart = input.indexOf('(');
 		if (paramStart == -1) return Optional.empty();
 		let paramEnd = input.indexOf(')');
@@ -84,14 +76,14 @@ export object Main {
 		if (input.isBlank(){
 			outputParamString = inputParamString;
 		}
-
 		else {
-			let space = inputParamString.lastIndexOf(' ');
-			let type = inputParamString.substring(0, space);
-			let name = inputParamString.substring(space + 1);
-			outputParamString = name + " : " + type;
+			let lines = inputParamString.split(",");
+			outputParamString = Arrays.stream(lines)
+                    .map(Main::compileDeclaration)
+                    .flatMap(Optional::stream)
+                    .map(Definition::render)
+                    .collect(Collectors.joining(", "));
 		}
-
 		let before = input.substring(0, paramStart);
 		let separator = before.lastIndexOf(' ');
 		if (separator == -1) return Optional.empty();
@@ -115,9 +107,7 @@ export object Main {
 			let methodOutput = compileStatement(line, 2);
 			output.add(methodOutput);
 		}
-
 		}
-
 		let outputContent = renderBlock(output, 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
 		let rendered = renderMagmaFunction(name, outputContent, modifierString, ": " + type, outputParamString);
@@ -125,15 +115,12 @@ export object Main {
 		if (modifiers.contains("static"){
 			result = new StaticResult(rendered);
 		}
-
 		else {
 			result = new InstanceResult(rendered);
 		}
-
 		return Optional.of(result);
 	}
-
-	private def compileStatement(indent : String line, int): String => {
+	private def compileStatement(let line : String, let indent : I32): String => {
 		return compileIf(line, indent)
                 .or(() -> compileElse(line, indent))
                 .or(() -> compileFor(line, indent))
@@ -144,8 +131,7 @@ export object Main {
                 .or(() -> compileCatch(line, indent))
                 .orElse(line + ";");
 	}
-
-	private def compileFor(indent : String line, int): Optional<String> => {
+	private def compileFor(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("for ")) return Optional.empty();
 		let paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let content : String = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
@@ -156,13 +142,11 @@ export object Main {
 			let statement = compileStatement(s, indent);
 			cache.add(statement);
 		}
-
 		let separator = paramString.indexOf(':');
 		if (separator == -1){
 			let statements = renderBlock(cache, indent);
 			return Optional.of("for (" + paramString + ")" + statements);
 		}
-
 		let substring = paramString.substring(0, separator);
 		let declaration = compileDeclaration(substring);
 		if (declaration.isEmpty()) return Optional.empty();
@@ -172,24 +156,22 @@ export object Main {
 		let statements = renderBlock(cache, indent);
 		return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
 	}
-
-	private def compileIf(indent : String line, int): Optional<String> => {
-		if (!line.startsWith("if ")) return Optional.empty();
+	private def compileIf(let line : String, let indent : I32): Optional<String> => {
+		if (!line.startsWith("if")) return Optional.empty();
 		let substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let compiled = compileValue(substring);
 		let start = line.indexOf('{');
 		let end = line.lastIndexOf('}');
-		if(end == -1) {
-            var value = line.substring( line.indexOf(')') + 1);
-            var compiledValue = compileValue(value);
-            return Optional.of("if (" + compiled + ")" + compiledValue + ";");
-        };
+		if (end == -1){
+			let value = line.substring( line.indexOf(')') + 1);
+			let compiledValue = compileValue(value);
+			return Optional.of("if (" + compiled + ")" + compiledValue + ";");
+		}
 		let content = line.substring(start + 1, end);
 		let rendered = compileStatements(content, indent);
 		return Optional.of("if (" + compiled + ")" + rendered);
 	}
-
-	private def compileCatch(indent : String line, int): Optional<String> => {
+	private def compileCatch(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("catch ")) return Optional.empty();
 		let substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let compiled = compileDeclaration(substring)
@@ -199,8 +181,7 @@ export object Main {
 		let rendered = compileStatements(content, indent);
 		return Optional.of("catch (" + compiled + ")" + rendered);
 	}
-
-	private def compileStatements(indent : String content, int): String => {
+	private def compileStatements(let content : String, let indent : I32): String => {
 		let splitContent = split(content);
 		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
@@ -208,19 +189,17 @@ export object Main {
 			let statement = compileStatement(s, indent);
 			builder.add(statement);
 		}
-
 		return renderBlock(builder, indent);
 	}
-
-	private def compileElse(indent : String line, int): Optional<String> => {
+	private def compileElse(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("else ")) return Optional.empty();
 		let blockStart = line.indexOf('{');
 		let blockEnd = line.lastIndexOf('}');
-		if(blockEnd == -1) {
-            var value = line.substring("else ".length());
-            var compiledValue = compileValue(value);
-            return Optional.of("else " + compiledValue);
-        };
+		if (blockEnd == -1){
+			let value = line.substring("else ".length());
+			let compiledValue = compileValue(value);
+			return Optional.of("else " + compiledValue);
+		}
 		let content = line.substring(blockStart + 1, blockEnd);
 		let splitContent = split(content);
 		let builder = ArrayList<String>();
@@ -229,11 +208,9 @@ export object Main {
 			let statement = compileStatement(s, indent + 1);
 			builder.add(statement);
 		}
-
 		return Optional.of("else " + renderBlock(builder, indent));
 	}
-
-	private def compileTry(indent : String line, int): Optional<String> => {
+	private def compileTry(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("try ")) return Optional.empty();
 		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let splitContent = split(content);
@@ -243,18 +220,15 @@ export object Main {
 			let statement = compileStatement(s, indent + 1);
 			builder.add(statement);
 		}
-
 		return Optional.of("try " + renderBlock(builder, indent));
 	}
-
-	private def compileDeclaration(line : String): Optional<Definition> => {
+	private def compileDeclaration(let line : String): Optional<Definition> => {
 		let valueSeparator = line.indexOf('=');
 		let before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
 		let lastSpace = before.lastIndexOf(' ');
 		if (lastSpace == -1){
 			return Optional.empty();
 		}
-
 		let type = before.substring(0, lastSpace).strip();
 		let definitionName = before.substring(lastSpace).strip();
 		if (!isAlphaNumeric(definitionName)) return Optional.empty();
@@ -262,54 +236,44 @@ export object Main {
 		if (type.equals("var")) typeString = Optional.empty();
 		else {
 			typeString = compileType(type);
-			if(typeString.isEmpty()) return Optional.empty();
+			if (typeString.isEmpty()) return Optional.empty();
 		}
-
 		Optional<String> value;
 		if (valueSeparator != -1){
 			let stripped = line.substring(valueSeparator + 1).strip();
 			value = Optional.of(compileValue(stripped));
 		}
-
 		else {
 			value = Optional.empty();
 		}
-
 		return Optional.of(new Definition(definitionName, typeString, value));
 	}
-
-	private def compileValue(stripped : String): String => {
+	private def compileValue(let stripped : String): String => {
 		let outputValue : String;
 		if (stripped.startsWith("new "){
 			outputValue = stripped.substring("new ".length());
 		}
-
 		else {
 			outputValue = stripped;
 		}
-
 		let outputValue : return;
 	}
-
-	private def isAlphaNumeric(definitionName : String): boolean => {
+	private def isAlphaNumeric(let definitionName : String): boolean => {
 		for (int i = 0; i < definitionName.length(){
 			let c = definitionName.charAt(i);
 			if (!Character.isAlphabetic(c) && !Character.isDigit(c)) return false;
 		}
-
 		let true : return;
 	}
-
-	private def compileType(type : String): Optional<String> => {
+	private def compileType(let type : String): Optional<String> => {
 		if (!isAlphaNumeric(type)) return Optional.empty();
+		if (type.equals("int")) return Optional.of("I32");
 		else return Optional.of(type)
 	}
-
-	private def renderMagmaFunction(paramString : String name, String content, String modifiers, String typeString, String): String => {
+	private def renderMagmaFunction(let name : String, let content : String, let modifiers : String, let typeString : String, let paramString : String): String => {
 		return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
 	}
-
-	def split(input : String): List<String> => {
+	def split(let input : String): List<String> => {
 		let lines = ArrayList<String>();
 		let builder = StringBuilder();
 		let depth = 0;
@@ -389,9 +353,6 @@ export object Main {
         public Optional<String> staticValue() {
             return Optional.empty();;
 		}
-
 		}
-
 	}
-
 }

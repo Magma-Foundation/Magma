@@ -65,7 +65,7 @@ public class Main {
         }
 
         var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", "", "");
-        var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
+        var renderedObject = staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(staticMembers, 0);
         return Optional.of(instanceOutput + renderedObject);
     }
 
@@ -74,7 +74,7 @@ public class Main {
                 .map(member -> "\t".repeat(indent + 1) + member + "\n")
                 .collect(Collectors.joining());
 
-        return "{\n" + blockString + "\t".repeat(indent) + "}\n";
+        return "{\n" + blockString + "\t".repeat(indent) + "}";
     }
 
     private static Optional<Result> compileMethod(String input) {
@@ -90,10 +90,12 @@ public class Main {
         if (input.isBlank()) {
             outputParamString = inputParamString;
         } else {
-            var space = inputParamString.lastIndexOf(' ');
-            var type = inputParamString.substring(0, space);
-            var name = inputParamString.substring(space + 1);
-            outputParamString = name + " : " + type;
+            var lines = inputParamString.split(",");
+            outputParamString = Arrays.stream(lines)
+                    .map(Main::compileDeclaration)
+                    .flatMap(Optional::stream)
+                    .map(Definition::render)
+                    .collect(Collectors.joining(", "));
         }
 
         var before = input.substring(0, paramStart);
@@ -184,7 +186,7 @@ public class Main {
     }
 
     private static Optional<String> compileIf(String line, int indent) {
-        if (!line.startsWith("if ")) return Optional.empty();
+        if (!line.startsWith("if")) return Optional.empty();
 
         var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
         var compiled = compileValue(substring);
@@ -315,6 +317,7 @@ public class Main {
 
     private static Optional<String> compileType(String type) {
         if (!isAlphaNumeric(type)) return Optional.empty();
+        if(type.equals("int")) return Optional.of("I32");
         else return Optional.of(type);
     }
 
