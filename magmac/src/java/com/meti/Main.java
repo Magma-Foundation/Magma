@@ -63,7 +63,7 @@ public class Main {
             result.staticValue().ifPresent(staticMembers::add);
         }
 
-        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers), "export class ", 0, "");
+        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers), "export class ", 0, "", "");
         var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers);
         return Optional.of(instanceOutput + renderedObject);
     }
@@ -73,10 +73,25 @@ public class Main {
     }
 
     private static Optional<Result> compileMethod(String input) {
-        var start = input.indexOf('(');
-        if (start == -1) return Optional.empty();
+        var paramStart = input.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
 
-        var before = input.substring(0, start);
+        var paramEnd = input.indexOf(')');
+        if(paramEnd == -1) return Optional.empty();
+
+        var inputParamString = input.substring(paramStart + 1, paramEnd);
+
+        String outputParamString;
+        if (input.isBlank()) {
+            outputParamString = inputParamString;
+        } else {
+            var space = inputParamString.lastIndexOf(' ');
+            var type = inputParamString.substring(0, space);
+            var name = inputParamString.substring(space + 1);
+            outputParamString = name + " : " + type;
+        }
+
+        var before = input.substring(0, paramStart);
         var separator = before.lastIndexOf(' ');
         if (separator == -1) return Optional.empty();
 
@@ -98,7 +113,7 @@ public class Main {
         var content = input.substring(contentStart, contentEnd + 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = renderMagmaFunction(name, content, modifierString, 1, ": " + type);
+        var rendered = renderMagmaFunction(name, content, modifierString, 1, ": " + type, outputParamString);
 
         Result result;
         if (modifiers.contains("static")) {
@@ -110,8 +125,8 @@ public class Main {
         return Optional.of(result);
     }
 
-    private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString) {
-        return "\t".repeat(indent) + modifiers + "def " + name + "()" + typeString + " => " + content;
+    private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString, String paramString) {
+        return "\t".repeat(indent) + modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
     }
 
     public static List<String> split(String input) {
