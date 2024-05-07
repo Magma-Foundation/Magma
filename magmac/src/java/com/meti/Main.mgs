@@ -1,12 +1,53 @@
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
-import { ArrayList } from java.util;
-import { Arrays } from java.util;
-import { List } from java.util;
-import { Optional } from java.util;
+import { * } from java.util;
 import { Collectors } from java.util.stream;
 export class def Main() => {
+	struct Result {
+		List<String> staticValue()
+		List<String> instanceValue()
+	}
+	record MultipleResult(List<String> instanceMembers, List<String> staticMembers) implements Result {
+        @Override
+        public List<String> staticValue() {
+            return staticMembers;
+        }
+
+        @Override
+        public List<String> instanceValue() {
+            return instanceMembers;
+        }
+    }
+	record Definition(String name, Optional<String> type, Optional<String> value) {
+        String render() {
+            var typeString = type.map(type -> " : " + type).orElse("");
+            var valueString = value.map(value -> " = " + value).orElse("");
+            return "let " + name + typeString + valueString;
+        }
+    }
+	record StaticResult(String value) implements Result {
+        @Override
+        public List<String> staticValue() {
+            return Collections.singletonList(value);
+        }
+
+        @Override
+        public List<String> instanceValue() {
+            return Collections.emptyList();
+        }
+    }
+	record InstanceResult(String value) implements Result {
+        @Override
+        public List<String> staticValue() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<String> instanceValue() {
+            return Collections.singletonList(value);
+        }
+    }
 }
 export object Main {
 	private def compileImport(let stripped : String): Optional<String> => {
@@ -23,7 +64,7 @@ export object Main {
 			let source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
 			let target = source.resolveSibling("Main.mgs");
 			let input = Files.readString(source);
-			let lines = split(input);
+			let lines = Strings.split(input);
 			let outputLines = ArrayList<String>();
 			for (let __temp__ = 0; i < lines.size(); i++){
 				let line = lines.get(__temp__)
@@ -46,19 +87,23 @@ export object Main {
 		let after = stripped.substring(index + "class".length());
 		let braceStart = after.indexOf('{');
 		let name = after.substring(0, braceStart).strip();
-		let inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
-		let instanceMembers = ArrayList<String>();
-		let staticMembers = ArrayList<String>();
+		let inputContent = Strings.split(after.substring(braceStart + 1, after.lastIndexOf('}')));
+		let members = getMultipleResult(inputContent, 0);
+		let instanceOutput = renderMagmaFunction(name, renderBlock(members.instanceMembers, 0), "export class ", "", "");
+		let renderedObject = members.staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers, 0);
+		return Optional.of(instanceOutput + renderedObject);
+	}
+	private def getMultipleResult(let indent : I32): MultipleResult => {
+		let members = MultipleResult(new ArrayList<>(), new ArrayList<>());
 		for (let __temp__ = 0; i < inputContent.size(); i++){
 			let line = inputContent.get(__temp__)
-			let result = compileMethod(line)
+			let result = compileInterface(line, indent)
+                    .or(() -> compileMethod(line))
                     .orElse(new InstanceResult(line));
-			result.instanceValue().ifPresent(instanceMembers::add);
-			result.staticValue().ifPresent(staticMembers::add);
+			members.instanceMembers.addAll(result.instanceValue());
+			members.staticMembers.addAll(result.staticValue());
 		}
-		let instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", "", "");
-		let renderedObject = staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(staticMembers, 0);
-		return Optional.of(instanceOutput + renderedObject);
+		let members : return;
 	}
 	private def renderBlock(let indent : I32): String => {
 		let blockString = members.stream()
@@ -98,7 +143,7 @@ export object Main {
 		let contentEnd = input.lastIndexOf('}');
 		if (contentEnd == -1) return Optional.empty();
 		let inputContent = input.substring(contentStart + 1, contentEnd);
-		let inputContentLines = split(inputContent);
+		let inputContentLines = Strings.split(inputContent);
 		let output = ArrayList<String>();
 		for (let __temp__ = 0; i < inputContentLines.size(); i++){
 			let inputContentLine = inputContentLines.get(__temp__)
@@ -131,11 +176,20 @@ export object Main {
                 .or(() -> compileCatch(line, indent))
                 .orElse(line + ";");
 	}
+	private def compileInterface(let line : String, let indent : I32): Optional<Result> => {
+		if (!line.startsWith("interface ")) return Optional.empty();
+		let start = line.indexOf('{');
+		let end = line.lastIndexOf('}');
+		let name = line.substring("interface ".length(), start).strip();
+		let content = Strings.split(line.substring(start + 1, end));
+		let members = getMultipleResult(content, indent);
+		return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers, indent + 1)));
+	}
 	private def compileFor(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("for ")) return Optional.empty();
 		let paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let content : String = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
-		let splitContent = split(content);
+		let splitContent = Strings.split(content);
 		let cache = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
@@ -163,7 +217,7 @@ export object Main {
 		let start = line.indexOf('{');
 		let end = line.lastIndexOf('}');
 		if (end == -1){
-			let value = line.substring( line.indexOf(')') + 1);
+			let value = line.substring(line.indexOf(')') + 1);
 			let compiledValue = compileValue(value);
 			return Optional.of("if (" + compiled + ")" + compiledValue + ";");
 		}
@@ -182,7 +236,7 @@ export object Main {
 		return Optional.of("catch (" + compiled + ")" + rendered);
 	}
 	private def compileStatements(let content : String, let indent : I32): String => {
-		let splitContent = split(content);
+		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
@@ -201,7 +255,7 @@ export object Main {
 			return Optional.of("else " + compiledValue);
 		}
 		let content = line.substring(blockStart + 1, blockEnd);
-		let splitContent = split(content);
+		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
@@ -213,7 +267,7 @@ export object Main {
 	private def compileTry(let line : String, let indent : I32): Optional<String> => {
 		if (!line.startsWith("try ")) return Optional.empty();
 		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
-		let splitContent = split(content);
+		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
@@ -272,87 +326,5 @@ export object Main {
 	}
 	private def renderMagmaFunction(let name : String, let content : String, let modifiers : String, let typeString : String, let paramString : String): String => {
 		return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
-	}
-	def split(let input : String): List<String> => {
-		let lines = ArrayList<String>();
-		let builder = StringBuilder();
-		let depth = 0;
-		let inSingleQuotes = false;
-		let inDoubleQuotes = false;
-		for (int i = 0; i < input.length(){
-			let c = input.charAt(i);
-			if (c == '\''){
-			inSingleQuotes = !inSingleQuotes;
-			}
-
-            if (c == '\"') {
-                inDoubleQuotes = !inDoubleQuotes;
-            }
-
-            if (inSingleQuotes) {
-                builder.append(c);
-            } else if (inDoubleQuotes) {
-                builder.append(c);
-            } else {
-                if (c == ';' && depth == 0) {
-                    lines.add(builder.toString());
-                    builder = new StringBuilder();
-                } else if (c == '}' && depth == 1) {
-                    depth = 0;
-                    builder.append('}');
-
-                    lines.add(builder.toString());
-                    builder = new StringBuilder();
-                } else {
-                    if (c == '{' || c == '(') {
-                        depth++;
-                    }
-                    if (c == '}' || c == ')') {
-                        depth--;
-                    }
-                    builder.append(c);
-                }
-            }
-        }
-
-        lines.add(builder.toString());
-        return lines.stream()
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    interface Result {
-        Optional<String> staticValue();
-
-        Optional<String> instanceValue();
-    }
-
-    record Definition(String name, Optional<String> type, Optional<String> value) {
-        String render() {
-            var typeString = type.map(type -> " : " + type).orElse("");
-            var valueString = value.map(value -> " = " + value).orElse("");
-            return "let " + name + typeString + valueString;
-        }
-    }
-
-    record StaticResult(String value) implements Result {
-        @Override
-        public Optional<String> staticValue() {
-            return Optional.of(value);
-        }
-
-        @Override
-        public Optional<String> instanceValue() {
-            return Optional.empty();
-        }
-    }
-
-    record InstanceResult(String value) implements Result {
-        @Override
-        public Optional<String> staticValue() {
-            return Optional.empty();;
-		}
-		}
 	}
 }

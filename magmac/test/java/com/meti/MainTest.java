@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class MainTest {
     private static void splitSingle(String value) {
-        var output = Main.split(value);
+        var output = Strings.split(value);
         assertIterableEquals(singletonList(value), output);
     }
 
@@ -20,7 +20,7 @@ public class MainTest {
 
     @Test
     void semicolon() {
-        var output = Main.split("a;b");
+        var output = Strings.split("a;b");
         assertIterableEquals(List.of("a", "b"), output);
     }
 
@@ -31,7 +31,7 @@ public class MainTest {
 
     @Test
     void two_braces() {
-        var output = Main.split("{}{}");
+        var output = Strings.split("{}{}");
         assertIterableEquals(List.of("{}", "{}"), output);
     }
 
@@ -55,7 +55,7 @@ public class MainTest {
         var first = "{\"\\\"}";
         var second = "main";
 
-        var output = Main.split(first + second);
+        var output = Strings.split(first + second);
         assertIterableEquals(List.of(first, second), output);
     }
 }
