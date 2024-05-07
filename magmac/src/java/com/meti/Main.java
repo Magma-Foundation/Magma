@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class Main {
-    public static Optional<String> compileImport(String stripped) {
+    private static Optional<String> compileImport(String stripped) {
         if (stripped.startsWith("import ")) {
             var segments = stripped.substring("import ".length());
             var separator = segments.lastIndexOf('.');
@@ -52,9 +52,36 @@ public class Main {
 
         var braceStart = after.indexOf('{');
         var name = after.substring(0, braceStart).strip();
-        var content = after.substring(braceStart);
+        var inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
+        var outputContent = new ArrayList<String>();
+        for (String s : inputContent) {
+            outputContent.add(compileMethod(s).orElse(s));
+        }
 
-        return Optional.of("export class def " + name + "() => " + content);
+        return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        var start = input.indexOf('(');
+        if (start == -1) return Optional.empty();
+
+        var before = input.substring(0, start);
+        var separator = before.lastIndexOf(' ');
+        var name = before.substring(separator + 1);
+
+        var contentStart = input.indexOf('{');
+        if(contentStart == -1) return Optional.empty();
+
+        var contentEnd = input.lastIndexOf('}');
+        if(contentEnd == -1) return Optional.empty();
+
+        var content = input.substring(contentStart, contentEnd + 1);
+
+        return Optional.of(renderMagmaFunction(name, content, "", 1));
+    }
+
+    private static String renderMagmaFunction(String name, String content, String modifiers, int indent) {
+        return "\t".repeat(indent) + modifiers + "def " + name + "() => " + content;
     }
 
     private static ArrayList<String> split(String input) {
@@ -64,6 +91,11 @@ public class Main {
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == ';' && depth == 0) {
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                buffer.append(c);
+                depth = 0;
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {

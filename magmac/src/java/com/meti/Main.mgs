@@ -4,7 +4,7 @@ import { Paths } from java.nio.file;
 import { ArrayList } from java.util;
 import { Optional } from java.util;
 export class def Main() => {
-    public static Optional<String> compileImport(String stripped) {
+	def compileImport() => {
         if (stripped.startsWith("import ")) {
             var segments = stripped.substring("import ".length());
             var separator = segments.lastIndexOf('.');
@@ -16,8 +16,7 @@ export class def Main() => {
             return Optional.empty();
         }
     }
-
-    public static void main(String[] args) {
+	def main() => {
         try {
             var source = Paths.get(".", "src", "java", "com", "meti", "Main.java");
             var target = source.resolveSibling("Main.mgs");
@@ -40,8 +39,7 @@ export class def Main() => {
             throw new RuntimeException(e);
         }
     }
-
-    private static Optional<String> compileClass(String stripped) {
+	def compileClass() => {
         var index = stripped.indexOf("class");
         if (index == -1) return Optional.empty();
 
@@ -49,12 +47,36 @@ export class def Main() => {
 
         var braceStart = after.indexOf('{');
         var name = after.substring(0, braceStart).strip();
-        var content = after.substring(braceStart);
+        var inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
+        var outputContent = new ArrayList<String>();
+        for (String s : inputContent) {
+            outputContent.add(compileMethod(s).orElse(s));
+        }
 
-        return Optional.of("export class def " + name + "() => " + content);
+        return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0));
     }
+	def compileMethod() => {
+        var start = input.indexOf('(');
+        if (start == -1) return Optional.empty();
 
-    private static ArrayList<String> split(String input) {
+        var before = input.substring(0, start);
+        var separator = before.lastIndexOf(' ');
+        var name = before.substring(separator + 1);
+
+        var contentStart = input.indexOf('{');
+        if(contentStart == -1) return Optional.empty();
+
+        var contentEnd = input.lastIndexOf('}');
+        if(contentEnd == -1) return Optional.empty();
+
+        var content = input.substring(contentStart, contentEnd + 1);
+
+        return Optional.of(renderMagmaFunction(name, content, "", 1));
+    }
+	def renderMagmaFunction() => {
+        return "\t".repeat(indent) + modifiers + "def " + name + "() => " + content;
+    }
+	def split() => {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
@@ -63,13 +85,20 @@ export class def Main() => {
             if (c == ';' && depth == 0) {
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                buffer.append(c);
+                depth = 0;
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
                 buffer.append(c);
             }
         }
-        lines.add(buffer.toString());
-        return lines;
-    }
-}
+
+        lines.add(buffer.toString())
+
+        return lines
+
+    }}
