@@ -4,8 +4,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Main {
+    public static Optional<String> compileImport(String stripped) {
+        if (stripped.startsWith("import ")) {
+            var segments = stripped.substring("import ".length());
+            var separator = segments.lastIndexOf('.');
+            var parent = segments.substring(0, separator);
+            var child = segments.substring(separator + 1);
+            var rendered = "import { " + child + " } from " + parent + ";\n";
+            return Optional.of(rendered);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public static void main(String[] args) {
         try {
             var source = Paths.get(".", "src", "java", "com", "meti", "Main.java");
@@ -17,15 +31,9 @@ public class Main {
             for (var line : lines) {
                 var stripped = line.strip();
                 if (!stripped.startsWith("package ")) {
-                    if (stripped.startsWith("import ")) {
-                        var segments = stripped.substring("import ".length());
-                        var separator = segments.lastIndexOf('.');
-                        var parent = segments.substring(0, separator);
-                        var child = segments.substring(separator + 1);
-                        outputLines.add("import { " + child + " } from " + parent + ";\n");
-                    } else {
-                        outputLines.add(stripped);
-                    }
+                    outputLines.add(compileImport(stripped)
+                            .or(() -> compileClass(stripped))
+                            .orElse(stripped));
                 }
             }
 
@@ -34,6 +42,19 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Optional<String> compileClass(String stripped) {
+        var index = stripped.indexOf("class");
+        if (index == -1) return Optional.empty();
+
+        var after = stripped.substring(index + "class".length());
+
+        var braceStart = after.indexOf('{');
+        var name = after.substring(0, braceStart).strip();
+        var content = after.substring(braceStart);
+
+        return Optional.of("export class def " + name + "() => " + content);
     }
 
     private static ArrayList<String> split(String input) {
