@@ -23,8 +23,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            var source = Paths.get(".", "src", "java", "com", "meti", "Main.java");
-            var target = source.resolveSibling("Main.mgs");
+            var source = Paths.get(".", "src", "java", "com", "meti", "Compiler.java");
+            var target = source.resolveSibling("Compiler.mgs");
             var input = Files.readString(source);
             var lines = split(input);
 
@@ -80,9 +80,11 @@ public class Main {
 
         var before = input.substring(0, start);
         var separator = before.lastIndexOf(' ');
+        if(separator == -1) return Optional.empty();
 
         var flagsAndType = before.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
+        if(typeSeparator == -1) return Optional.empty();
 
         var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
@@ -114,18 +116,24 @@ public class Main {
         return "\t".repeat(indent) + modifiers + "def " + name + "()" + typeString + " => " + content;
     }
 
-    private static List<String> split(String input) {
+    public static List<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
         var inSingleString = false;
+        var inEscape = false;
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(inSingleString) {
+            if (inSingleString) {
                 buffer.append(c);
 
-                if(c == '\'') inSingleString = false;
+                if (c == '\\') inEscape = true;
+                if (inEscape) {
+                    inEscape = false;
+                } else {
+                    if (c == '\'') inSingleString = false;
+                }
             } else {
                 if (c == ';' && depth == 0) {
                     lines.add(buffer.toString());
@@ -136,9 +144,13 @@ public class Main {
                     lines.add(buffer.toString());
                     buffer = new StringBuilder();
                 } else {
-                    if (c == '{') depth++;
-                    if (c == '}') depth--;
-                    if(c == '\'') inSingleString = true;
+                    if (c == '{') {
+                        depth++;
+                    }
+                    if (c == '}') {
+                        depth--;
+                    }
+                    if (c == '\'') inSingleString = true;
 
                     buffer.append(c);
                 }
