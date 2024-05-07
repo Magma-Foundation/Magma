@@ -15,4 +15,17 @@ public class MainTest {
         var output = Main.split(value);
         assertIterableEquals(singletonList(value), output);
     }
+
+    @Test
+    void semicolon() {
+        var output = Main.split("a;b");
+        assertIterableEquals(List.of("a", "b"), output);
+    }
+
+    @Test
+    void braces() {
+        var value = "{a;b}";
+        var output = Main.split(value);
+        assertIterableEquals(singletonList(value), output);
+    }
 }

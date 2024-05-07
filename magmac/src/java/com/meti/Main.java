@@ -115,7 +115,22 @@ public class Main {
     }
 
     public static List<String> split(String input) {
-        return List.of(input);
+        var lines = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < input.length(); i++) {
+            var c = input.charAt(i);
+            if(c == ';' && depth == 0) {
+                lines.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if(c == '{') depth++;
+                if(c == '}') depth--;
+                builder.append(c);
+            }
+        }
+        lines.add(builder.toString());
+        return lines;
     }
 
     interface Result {
