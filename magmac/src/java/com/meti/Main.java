@@ -242,12 +242,23 @@ public class Main {
 
         Optional<String> value;
         if (valueSeparator != -1) {
-            value = Optional.of(line.substring(valueSeparator + 1).strip());
+            var stripped = line.substring(valueSeparator + 1).strip();
+            value = Optional.of(compileValue(stripped));
         } else {
             value = Optional.empty();
         }
 
         return Optional.of(new Definition(definitionName, typeString, value));
+    }
+
+    private static String compileValue(String stripped) {
+        String outputValue;
+        if (stripped.startsWith("new ")) {
+            outputValue = stripped.substring("new ".length());
+        } else {
+            outputValue = stripped;
+        }
+        return outputValue;
     }
 
     private static boolean isAlphaNumeric(String definitionName) {

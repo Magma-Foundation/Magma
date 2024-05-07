@@ -25,7 +25,7 @@ export object Main {
 			let target = source.resolveSibling("Main.mgs");
 			let input = Files.readString(source);
 			let lines = split(input);
-			let outputLines = new ArrayList<String>();
+			let outputLines = ArrayList<String>();
 			for (let __temp__ = 0; i < lines.size(); i++){
 				let line = lines.get(__temp__)
 				let stripped = line.strip();
@@ -52,8 +52,8 @@ export object Main {
 		let braceStart = after.indexOf('{');
 		let name = after.substring(0, braceStart).strip();
 		let inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
-		let instanceMembers = new ArrayList<String>();
-		let staticMembers = new ArrayList<String>();
+		let instanceMembers = ArrayList<String>();
+		let staticMembers = ArrayList<String>();
 		for (let __temp__ = 0; i < inputContent.size(); i++){
 			let line = inputContent.get(__temp__)
 			let result = compileMethod(line)
@@ -105,7 +105,7 @@ export object Main {
 		if (contentEnd == -1) return Optional.empty();
 		let inputContent = input.substring(contentStart + 1, contentEnd);
 		let inputContentLines = split(inputContent);
-		let output = new ArrayList<String>();
+		let output = ArrayList<String>();
 		for (let __temp__ = 0; i < inputContentLines.size(); i++){
 			let inputContentLine = inputContentLines.get(__temp__)
 			let line = inputContentLine.strip();
@@ -143,7 +143,7 @@ export object Main {
 		let paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let content : String = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let splitContent = split(content);
-		let cache = new ArrayList<String>();
+		let cache = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
 			let statement = compileStatement(s, indent);
@@ -178,7 +178,7 @@ export object Main {
 
 	private def compileStatements(indent : String content, int): String => {
 		let splitContent = split(content);
-		let builder = new ArrayList<String>();
+		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
 			let statement = compileStatement(s, indent);
@@ -192,7 +192,7 @@ export object Main {
 		if (!line.startsWith("try ")) return Optional.empty();
 		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let splitContent = split(content);
-		let builder = new ArrayList<String>();
+		let builder = ArrayList<String>();
 		for (let __temp__ = 0; i < splitContent.size(); i++){
 			let s = splitContent.get(__temp__)
 			let statement = compileStatement(s, indent + 1);
@@ -220,12 +220,24 @@ export object Main {
         };
 		Optional<String> value;
 		if (valueSeparator != -1) {
-            value = Optional.of(line.substring(valueSeparator + 1).strip());
+            var stripped = line.substring(valueSeparator + 1).strip();
+            value = Optional.of(compileValue(stripped));
         };
 		else {
             value = Optional.empty();
         };
 		return Optional.of(new Definition(definitionName, typeString, value));
+	}
+
+	private def compileValue(stripped : String): String => {
+		let outputValue : String;
+		if (stripped.startsWith("new ")) {
+            outputValue = stripped.substring("new ".length());
+        };
+		else {
+            outputValue = stripped;
+        };
+		let outputValue : return;
 	}
 
 	private def isAlphaNumeric(definitionName : String): boolean => {
@@ -247,8 +259,8 @@ export object Main {
 	}
 
 	def split(input : String): List<String> => {
-		let lines = new ArrayList<String>();
-		let builder = new StringBuilder();
+		let lines = ArrayList<String>();
+		let builder = StringBuilder();
 		let depth = 0;
 		let inSingleQuotes = false;
 		let inDoubleQuotes = false;
