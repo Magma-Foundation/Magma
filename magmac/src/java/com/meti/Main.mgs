@@ -11,11 +11,11 @@ export class def Main() => {
 export object Main {
 	private def compileImport(stripped : String): Optional<String> => {
 		if (!stripped.startsWith("import ")) return Optional.empty();
-		var segments = stripped.substring("import ".length());
-		var separator = segments.lastIndexOf('.');
-		var parent = segments.substring(0, separator);
-		var child = segments.substring(separator + 1);
-		var rendered = "import { " + child + " };
+		let segments = stripped.substring("import ".length());
+		let separator = segments.lastIndexOf('.');
+		let parent = segments.substring(0, separator);
+		let child = segments.substring(separator + 1);
+		let rendered = "import { " + child + " };
 		from " + parent + ";
 		\n";
 		return Optional.of(rendered);
@@ -46,14 +46,14 @@ export object Main {
 	}
 
 	private def compileClass(stripped : String): Optional<String> => {
-		var index = stripped.indexOf("class");
+		let index = stripped.indexOf("class");
 		if (index == -1) return Optional.empty();
-		var after = stripped.substring(index + "class".length());
-		var braceStart = after.indexOf('{');
-		var name = after.substring(0, braceStart).strip();
-		var inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
-		var instanceMembers = new ArrayList<String>();
-		var staticMembers = new ArrayList<String>();
+		let after = stripped.substring(index + "class".length());
+		let braceStart = after.indexOf('{');
+		let name = after.substring(0, braceStart).strip();
+		let inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
+		let instanceMembers = new ArrayList<String>();
+		let staticMembers = new ArrayList<String>();
 		for (var line : inputContent) {
             var result = compileMethod(line)
                     .orElse(new InstanceResult(line));
@@ -61,13 +61,13 @@ export object Main {
             result.instanceValue().ifPresent(instanceMembers::add);
             result.staticValue().ifPresent(staticMembers::add);
         };
-		var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", 0, "", "");
-		var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
+		let instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", 0, "", "");
+		let renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
 		return Optional.of(instanceOutput + renderedObject);
 	}
 
 	private def renderBlock(indent : ArrayList<String> members, int): String => {
-		var blockString = members.stream()
+		let blockString = members.stream()
                 .map(member -> "\t".repeat(indent + 1) + member + "\n")
                 .collect(Collectors.joining());
 		return "{\n" + blockString + "\t".repeat(indent) + "};
@@ -75,11 +75,11 @@ export object Main {
 	}
 
 	private def compileMethod(input : String): Optional<Result> => {
-		var paramStart = input.indexOf('(');
+		let paramStart = input.indexOf('(');
 		if (paramStart == -1) return Optional.empty();
-		var paramEnd = input.indexOf(')');
+		let paramEnd = input.indexOf(')');
 		if (paramEnd == -1) return Optional.empty();
-		var inputParamString = input.substring(paramStart + 1, paramEnd);
+		let inputParamString = input.substring(paramStart + 1, paramEnd);
 		String outputParamString;
 		if (input.isBlank()) {
             outputParamString = inputParamString;
@@ -90,31 +90,41 @@ export object Main {
             var name = inputParamString.substring(space + 1);
             outputParamString = name + " : " + type;
         };
-		var before = input.substring(0, paramStart);
-		var separator = before.lastIndexOf(' ');
+		let before = input.substring(0, paramStart);
+		let separator = before.lastIndexOf(' ');
 		if (separator == -1) return Optional.empty();
-		var flagsAndType = before.substring(0, separator);
-		var typeSeparator = flagsAndType.lastIndexOf(' ');
+		let flagsAndType = before.substring(0, separator);
+		let typeSeparator = flagsAndType.lastIndexOf(' ');
 		if (typeSeparator == -1) return Optional.empty();
-		var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
-		var type = flagsAndType.substring(typeSeparator + 1);
-		var name = before.substring(separator + 1);
-		var contentStart = input.indexOf('{');
+		let modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
+		let type = flagsAndType.substring(typeSeparator + 1);
+		let name = before.substring(separator + 1);
+		let contentStart = input.indexOf('{');
 		if (contentStart == -1) return Optional.empty();
-		var contentEnd = input.lastIndexOf('}');
+		let contentEnd = input.lastIndexOf('}');
 		if (contentEnd == -1) return Optional.empty();
-		var inputContent = input.substring(contentStart + 1, contentEnd);
-		var inputContentLines = split(inputContent);
-		var output = new ArrayList<String>();
+		let inputContent = input.substring(contentStart + 1, contentEnd);
+		let inputContentLines = split(inputContent);
+		let output = new ArrayList<String>();
 		for (var inputContentLine : inputContentLines) {
             var line = inputContentLine.strip();
             if (!line.isEmpty()) {
-                output.add(line + ";");
+                String methodOutput;
+                if (!line.startsWith("var ")) {
+                    methodOutput = line + ";";
+                } else {
+                    var valueSeparator = line.indexOf('=');
+                    var definitionName = line.substring("var ".length(), valueSeparator).strip();
+                    var value = line.substring(valueSeparator + 1).strip();
+
+                    methodOutput = "let " + definitionName + " = " + value + ";";
+                }
+                output.add(methodOutput);
             }
         };
-		var outputContent = renderBlock(output, 1);
-		var modifierString = modifiers.contains("private") ? "private " : "";
-		var rendered = renderMagmaFunction(name, outputContent, modifierString, 1, ": " + type, outputParamString);
+		let outputContent = renderBlock(output, 1);
+		let modifierString = modifiers.contains("private") ? "private " : "";
+		let rendered = renderMagmaFunction(name, outputContent, modifierString, 1, ": " + type, outputParamString);
 		Result result;
 		if (modifiers.contains("static")) {
             result = new StaticResult(rendered);
@@ -130,11 +140,11 @@ export object Main {
 	}
 
 	def split(input : String): List<String> => {
-		var lines = new ArrayList<String>();
-		var builder = new StringBuilder();
-		var depth = 0;
-		var inQuotes = false;
-		var wasEscaped = false;
+		let lines = new ArrayList<String>();
+		let builder = new StringBuilder();
+		let depth = 0;
+		let inQuotes = false;
+		let wasEscaped = false;
 		for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == '\'') {

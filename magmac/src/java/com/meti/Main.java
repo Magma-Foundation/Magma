@@ -121,7 +121,17 @@ public class Main {
         for (var inputContentLine : inputContentLines) {
             var line = inputContentLine.strip();
             if (!line.isEmpty()) {
-                output.add(line + ";");
+                String methodOutput;
+                if (!line.startsWith("var ")) {
+                    methodOutput = line + ";";
+                } else {
+                    var valueSeparator = line.indexOf('=');
+                    var definitionName = line.substring("var ".length(), valueSeparator).strip();
+                    var value = line.substring(valueSeparator + 1).strip();
+
+                    methodOutput = "let " + definitionName + " = " + value + ";";
+                }
+                output.add(methodOutput);
             }
         }
 
