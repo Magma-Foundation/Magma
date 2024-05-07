@@ -5,13 +5,8 @@ import { ArrayList } from java.util;
 import { Arrays } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-import { Collectors } from java.util.stream;
 export class def Main() => {
-lines.add(buffer.toString())
-return lines.stream()
-                .map(String::strip)
-                .filter(value -> !value.isEmpty())
-                .collect(Collectors.toList())}
+}
 export object Main {
 	private def compileImport(): Optional<String> => {
         if (!stripped.startsWith("import ")) return Optional.empty();
@@ -25,7 +20,7 @@ export object Main {
     }
 	def main(): void => {
         try {
-            var source = Paths.get(".", "src", "java", "com", "meti", "Main.java");
+            var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
             var target = source.resolveSibling("Main.mgs");
             var input = Files.readString(source);
             var lines = split(input);
@@ -33,11 +28,10 @@ export object Main {
             var outputLines = new ArrayList<String>();
             for (var line : lines) {
                 var stripped = line.strip();
-                if (!stripped.startsWith("package ")) {
-                    outputLines.add(compileImport(stripped)
-                            .or(() -> compileClass(stripped))
-                            .orElse(stripped));
-                }
+                if (stripped.startsWith("package ")) continue;
+                outputLines.add(compileImport(stripped)
+                        .or(() -> compileClass(stripped))
+                        .orElse(stripped));
             }
 
             var output = String.join("", outputLines);
@@ -79,11 +73,11 @@ export object Main {
 
         var before = input.substring(0, start);
         var separator = before.lastIndexOf(' ');
-        if(separator == -1) return Optional.empty();
+        if (separator == -1) return Optional.empty();
 
         var flagsAndType = before.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
-        if(typeSeparator == -1) return Optional.empty();
+        if (typeSeparator == -1) return Optional.empty();
 
         var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
@@ -115,45 +109,55 @@ export object Main {
     }
 	def split(): List<String> => {
         var lines = new ArrayList<String>();
-        var buffer = new StringBuilder();
+        var builder = new StringBuilder();
         var depth = 0;
-        var inSingleString = false;
-        var inEscape = false;
+        var inQuotes = false;
+        var wasEscaped = false;
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(inSingleString) {
-                buffer.append(c);
+            if (c == '\'') {
+                if (!wasEscaped) {
+                    inQuotes = !inQuotes;
+                }
+            }
 
-                if(c == '\\') inEscape = true;
-                if (inEscape) {
-                    inEscape = false;
-                } else {
-                    if(c == '\'') inSingleString = false;
+            if (inQuotes) {
+                builder.append(c);
+
+                if(c == '\\') {
+                    wasEscaped = true;
                 }
             } else {
                 if (c == ';' && depth == 0) {
-                    lines.add(buffer.toString());
-                    buffer = new StringBuilder();
+                    lines.add(builder.toString());
+                    builder = new StringBuilder();
                 } else if (c == '}' && depth == 1) {
-                    buffer.append(c);
                     depth = 0;
-                    lines.add(buffer.toString());
-                    buffer = new StringBuilder();
+                    builder.append('}');
+
+                    lines.add(builder.toString());
+                    builder = new StringBuilder();
                 } else {
                     if (c == '{') depth++;
                     if (c == '}') depth--;
-                    if(c == '\'') inSingleString = true;
-
-                    buffer.append(c);
+                    builder.append(c);
                 }
             }
-        }}
-interface Result {
+        }
+
+        lines.add(builder.toString());
+        lines.removeIf(String::isEmpty);
+        return lines;
+    }
+
+    interface Result {
         Optional<String> staticValue();
 
         Optional<String> instanceValue();
-    }record StaticResult(String value) implements Result {
+    }
+
+    record StaticResult(String value) implements Result {
         @Override
         public Optional<String> staticValue() {
             return Optional.of(value);
@@ -163,7 +167,9 @@ interface Result {
         public Optional<String> instanceValue() {
             return Optional.empty();
         }
-    }record InstanceResult(String value) implements Result {
+    }
+
+    record InstanceResult(String value) implements Result {
         @Override
         public Optional<String> staticValue() {
             return Optional.empty();

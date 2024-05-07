@@ -1,19 +1,21 @@
 package com.meti;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class MainTest {
-    @Test
-    void split() {
-        var value = "test";
+    private static void splitSingle(String value) {
         var output = Main.split(value);
         assertIterableEquals(singletonList(value), output);
+    }
+
+    @Test
+    void split() {
+        splitSingle("test");
     }
 
     @Test
@@ -24,8 +26,22 @@ public class MainTest {
 
     @Test
     void braces() {
-        var value = "{a;b}";
-        var output = Main.split(value);
-        assertIterableEquals(singletonList(value), output);
+        splitSingle("{a;b}");
+    }
+
+    @Test
+    void two_braces() {
+        var output = Main.split("{}{}");
+        assertIterableEquals(List.of("{}", "{}"), output);
+    }
+
+    @Test
+    void quotes() {
+        splitSingle("';'");
+    }
+
+    @Test
+    void quotes_braces() {
+        splitSingle("{'}'}");
     }
 }

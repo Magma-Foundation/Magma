@@ -22,7 +22,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            var source = Paths.get(".", "src", "java", "com", "meti", "Main.java");
+            var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
             var target = source.resolveSibling("Main.mgs");
             var input = Files.readString(source);
             var lines = split(input);
@@ -118,18 +118,43 @@ public class Main {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
+        var inQuotes = false;
+        var wasEscaped = false;
+
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
+            if (c == '\'') {
+                if (!wasEscaped) {
+                    inQuotes = !inQuotes;
+                }
+            }
+
+            if (inQuotes) {
                 builder.append(c);
+
+                if(c == '\\') {
+                    wasEscaped = true;
+                }
+            } else {
+                if (c == ';' && depth == 0) {
+                    lines.add(builder.toString());
+                    builder = new StringBuilder();
+                } else if (c == '}' && depth == 1) {
+                    depth = 0;
+                    builder.append('}');
+
+                    lines.add(builder.toString());
+                    builder = new StringBuilder();
+                } else {
+                    if (c == '{') depth++;
+                    if (c == '}') depth--;
+                    builder.append(c);
+                }
             }
         }
+
         lines.add(builder.toString());
+        lines.removeIf(String::isEmpty);
         return lines;
     }
 
