@@ -142,27 +142,67 @@ public class Main {
     }
 
     private static String compileStatement(String line, int indent) {
-        return compileTry(line, indent)
-                .or(() -> compileDeclaration(line))
+        return compileFor(line, indent)
+                .or(() -> compileTry(line, indent))
+                .or(() -> compileDeclaration(line)
+                        .map(Definition::render)
+                        .map(value -> value + ";"))
                 .or(() -> compileCatch(line, indent))
                 .orElse(line + ";");
+    }
+
+    private static Optional<String> compileFor(String line, int indent) {
+        if (!line.startsWith("for ")) return Optional.empty();
+
+        var paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
+        String content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+        var splitContent = split(content);
+        var cache = new ArrayList<String>();
+        for (String s : splitContent) {
+            var statement = compileStatement(s, indent);
+            cache.add(statement);
+        }
+
+        var separator = paramString.indexOf(':');
+        if (separator == -1) {
+            var statements = renderBlock(cache, indent);
+            return Optional.of("for (" + paramString + ")" + statements);
+        }
+
+        var substring = paramString.substring(0, separator);
+        var declaration = compileDeclaration(substring);
+        if (declaration.isEmpty()) return Optional.empty();
+
+        var container = paramString.substring(separator + 1).strip();
+        var generatedName = "__temp__";
+        cache.add(0, new Definition(declaration.get().name, Optional.empty(), Optional.of(container + ".get(" + generatedName + ")")).render());
+
+        var statements = renderBlock(cache, indent);
+        return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
     }
 
     private static Optional<String> compileCatch(String line, int indent) {
         if (!line.startsWith("catch ")) return Optional.empty();
 
         var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
-        var compiled = compileDeclaration(substring).orElse(substring);
+        var compiled = compileDeclaration(substring)
+                .map(Definition::render)
+                .orElse(substring);
 
         var content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+        var rendered = compileStatements(content, indent);
+
+        return Optional.of("catch (" + compiled + ")" + rendered);
+    }
+
+    private static String compileStatements(String content, int indent) {
         var splitContent = split(content);
         var builder = new ArrayList<String>();
         for (String s : splitContent) {
-            var statement = compileStatement(s, 0);
+            var statement = compileStatement(s, indent);
             builder.add(statement);
         }
-
-        return Optional.of("catch (" + compiled + ")" + renderBlock(builder, indent));
+        return renderBlock(builder, indent);
     }
 
     private static Optional<String> compileTry(String line, int indent) {
@@ -172,44 +212,42 @@ public class Main {
         var splitContent = split(content);
         var builder = new ArrayList<String>();
         for (String s : splitContent) {
-            var statement = compileStatement(s, 0);
+            var statement = compileStatement(s, indent + 1);
             builder.add(statement);
         }
 
         return Optional.of("try " + renderBlock(builder, indent));
     }
 
-    private static Optional<String> compileDeclaration(String line) {
+    private static Optional<Definition> compileDeclaration(String line) {
         var valueSeparator = line.indexOf('=');
 
         var before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
         var lastSpace = before.lastIndexOf(' ');
+        if (lastSpace == -1) {
+            return Optional.empty();
+        }
 
         var type = before.substring(0, lastSpace).strip();
+
         var definitionName = before.substring(lastSpace).strip();
-        if(!isAlphaNumeric(definitionName)) return Optional.empty();
+        if (!isAlphaNumeric(definitionName)) return Optional.empty();
 
-        String typeString;
-        if (type.equals("var")) typeString = "";
+        Optional<String> typeString;
+        if (type.equals("var")) typeString = Optional.empty();
         else {
-            var compiledType = compileType(type);
-            if (compiledType.isPresent()) {
-                typeString = ": " + compiledType.get();
-            } else {
-                return Optional.empty();
-            }
+            typeString = compileType(type);
+            if(typeString.isEmpty()) return Optional.empty();
         }
 
-        String value;
-        String rendered;
+        Optional<String> value;
         if (valueSeparator != -1) {
-            value = line.substring(valueSeparator + 1).strip();
-            rendered = " = " + value + ";";
+            value = Optional.of(line.substring(valueSeparator + 1).strip());
         } else {
-            rendered = "";
+            value = Optional.empty();
         }
 
-        return Optional.of("let " + definitionName + typeString + rendered);
+        return Optional.of(new Definition(definitionName, typeString, value));
     }
 
     private static boolean isAlphaNumeric(String definitionName) {
@@ -221,7 +259,7 @@ public class Main {
     }
 
     private static Optional<String> compileType(String type) {
-        if(!isAlphaNumeric(type)) return Optional.empty();
+        if (!isAlphaNumeric(type)) return Optional.empty();
         else return Optional.of(type);
     }
 
@@ -284,6 +322,14 @@ public class Main {
         Optional<String> staticValue();
 
         Optional<String> instanceValue();
+    }
+
+    record Definition(String name, Optional<String> type, Optional<String> value) {
+        String render() {
+            var typeString = type.map(type -> " : " + type).orElse("");
+            var valueString = value.map(value -> " = " + value).orElse("");
+            return "let " + name + typeString + valueString;
+        }
     }
 
     record StaticResult(String value) implements Result {
