@@ -53,7 +53,7 @@ public class Main {
 
         var members = getMultipleResult(inputContent, 0);
 
-        var instanceOutput = renderMagmaFunction(name, renderBlock(members.instanceMembers, 0), "export class ", "", "");
+        var instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers, 0), "");
         var renderedObject = members.staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers, 0);
         return Optional.of(instanceOutput + renderedObject);
     }
@@ -63,13 +63,28 @@ public class Main {
 
         for (var line : inputContent) {
             var result = compileInterface(line, indent)
-                    .or(() -> compileMethod(line))
-                    .orElse(new InstanceResult(line));
+                    .or(() -> compileRecord(line, indent))
+                    .or(() -> compileMethod(line, indent))
+                    .orElse(new InstanceResult(Collections.singletonList(line)));
 
             members.instanceMembers.addAll(result.instanceValue());
             members.staticMembers.addAll(result.staticValue());
         }
         return members;
+    }
+
+    private static Optional<? extends Result> compileRecord(String line, int indent) {
+        if (!line.startsWith("record ")) return Optional.empty();
+
+        var name = line.substring("record ".length(), line.indexOf('('));
+        var paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
+        var compiledParameters = compileParamString(paramString);
+        var split = Strings.split(line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')));
+
+        var results = getMultipleResult(split, indent);
+        var renderedContent = renderBlock(results.instanceMembers, indent + 1);
+
+        return Optional.of(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
     }
 
     private static String renderBlock(List<String> members, int indent) {
@@ -80,7 +95,7 @@ public class Main {
         return "{\n" + blockString + "\t".repeat(indent) + "}";
     }
 
-    private static Optional<Result> compileMethod(String input) {
+    private static Optional<Result> compileMethod(String input, int indent) {
         var paramStart = input.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
@@ -89,61 +104,82 @@ public class Main {
 
         var inputParamString = input.substring(paramStart + 1, paramEnd);
 
-        String outputParamString;
-        if (input.isBlank()) {
-            outputParamString = inputParamString;
-        } else {
-            var lines = inputParamString.split(",");
-            outputParamString = Arrays.stream(lines)
-                    .map(Main::compileDeclaration)
-                    .flatMap(Optional::stream)
-                    .map(Definition::render)
-                    .collect(Collectors.joining(", "));
-        }
+        var outputParamString = compileParamString(inputParamString);
 
         var before = input.substring(0, paramStart);
-        var separator = before.lastIndexOf(' ');
+        var annotationsSeparator = before.indexOf('\n');
+        var before1 = annotationsSeparator == -1 ? before : before.substring(annotationsSeparator + 1).strip();
+
+        var annotationsString = annotationsSeparator == -1 ? "" : before.substring(0, annotationsSeparator).strip();
+
+        var separator = before1.lastIndexOf(' ');
         if (separator == -1) return Optional.empty();
 
-        var flagsAndType = before.substring(0, separator);
+        var flagsAndType = before1.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
         if (typeSeparator == -1) return Optional.empty();
 
         var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
 
-        var name = before.substring(separator + 1);
+        var name = before1.substring(separator + 1);
 
         var contentStart = input.indexOf('{');
-        if (contentStart == -1) return Optional.empty();
-
         var contentEnd = input.lastIndexOf('}');
-        if (contentEnd == -1) return Optional.empty();
+        if (contentStart == -1 && contentEnd == -1) {
+            var modifierString = modifiers.contains("private") ? "private " : "";
+            var rendered = renderMagmaFunction(name, modifierString, ": " + type, outputParamString, ";", "");
 
-        var inputContent = input.substring(contentStart + 1, contentEnd);
-        var inputContentLines = Strings.split(inputContent);
-        var output = new ArrayList<String>();
-        for (var inputContentLine : inputContentLines) {
-            var line = inputContentLine.strip();
-            if (!line.isEmpty()) {
-                var methodOutput = compileStatement(line, 2);
-                output.add(methodOutput);
+            Result result;
+            if (modifiers.contains("static")) {
+                result = new StaticResult(rendered);
+            } else {
+                result = new InstanceResult(rendered);
             }
-        }
 
-        var outputContent = renderBlock(output, 1);
+            return Optional.of(result);
+        } else if (contentStart != -1 && contentEnd != -1) {
+            var inputContent = input.substring(contentStart + 1, contentEnd);
+            var inputContentLines = Strings.split(inputContent);
+            var output = new ArrayList<String>();
+            for (var inputContentLine : inputContentLines) {
+                var line = inputContentLine.strip();
+                if (!line.isEmpty()) {
+                    var methodOutput = compileStatement(line, indent + 1);
+                    output.add(methodOutput);
+                }
+            }
 
-        var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = renderMagmaFunction(name, outputContent, modifierString, ": " + type, outputParamString);
+            var outputContent = renderBlock(output, indent + 1);
 
-        Result result;
-        if (modifiers.contains("static")) {
-            result = new StaticResult(rendered);
+            var modifierString = modifiers.contains("private") ? "private " : "";
+            var rendered = List.of(
+                    annotationsString,
+                    renderMagmaFunction(name, modifierString, ": " + type, outputParamString, " => " + outputContent, annotationsString)
+            );
+
+            Result result;
+            if (modifiers.contains("static")) {
+                result = new StaticResult(rendered);
+            } else {
+                result = new InstanceResult(rendered);
+            }
+
+            return Optional.of(result);
         } else {
-            result = new InstanceResult(rendered);
+            return Optional.empty();
         }
+    }
 
-        return Optional.of(result);
+    private static String compileParamString(String inputParamString) {
+        var lines = inputParamString.split(",");
+        return Arrays.stream(lines)
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .map(Main::compileDeclaration)
+                .flatMap(Optional::stream)
+                .map(Definition::render)
+                .collect(Collectors.joining(", "));
     }
 
     private static String compileStatement(String line, int indent) {
@@ -331,13 +367,25 @@ public class Main {
     }
 
     private static Optional<String> compileType(String type) {
-        if (!isAlphaNumeric(type)) return Optional.empty();
+        var genStart = type.indexOf('<');
+        var genEnd = type.lastIndexOf('>');
+        if (genStart != -1 && genEnd != -1) {
+            var parent = type.substring(0, genStart).strip();
+            var substring = type.substring(genStart + 1, genEnd).strip();
+
+            var parentType = compileType(parent);
+            if (parentType.isEmpty()) return Optional.empty();
+
+            return Optional.of(parentType.get() + "<" + substring + ">");
+        }
+
         if (type.equals("int")) return Optional.of("I32");
+        if (!isAlphaNumeric(type)) return Optional.empty();
         else return Optional.of(type);
     }
 
-    private static String renderMagmaFunction(String name, String content, String modifiers, String typeString, String paramString) {
-        return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
+    private static String renderMagmaFunction(String name, String modifiers, String typeString, String paramString, String contentString, String annotationsString) {
+        return modifiers + "def " + name + "(" + paramString + ")" + typeString + contentString;
     }
 
     interface Result {
@@ -366,10 +414,14 @@ public class Main {
         }
     }
 
-    record StaticResult(String value) implements Result {
+    record StaticResult(List<String> value) implements Result {
+        StaticResult(String value) {
+            this(Collections.singletonList(value));
+        }
+
         @Override
         public List<String> staticValue() {
-            return Collections.singletonList(value);
+            return value;
         }
 
         @Override
@@ -378,7 +430,15 @@ public class Main {
         }
     }
 
-    record InstanceResult(String value) implements Result {
+    record InstanceResult(List<String> value) implements Result {
+        InstanceResult(String value) {
+            this(Collections.singletonList(value));
+        }
+
+        InstanceResult(List<String> value) {
+            this.value = value;
+        }
+
         @Override
         public List<String> staticValue() {
             return Collections.emptyList();
@@ -386,7 +446,7 @@ public class Main {
 
         @Override
         public List<String> instanceValue() {
-            return Collections.singletonList(value);
+            return value;
         }
     }
 }
