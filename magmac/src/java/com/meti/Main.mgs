@@ -21,26 +21,26 @@ export object Main {
 
 	def main(args : String[]): void => {
 		try {
-            var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
-            var target = source.resolveSibling("Main.mgs");
-            var input = Files.readString(source);
-            var lines = split(input);
-
-            var outputLines = new ArrayList<String>();
-            for (var line : lines) {
+			let source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
+			let target = source.resolveSibling("Main.mgs");
+			let input = Files.readString(source);
+			let lines = split(input);
+			let outputLines = new ArrayList<String>();
+			for (var line : lines) {
                 var stripped = line.strip();
                 if (stripped.startsWith("package ")) continue;
                 outputLines.add(compileImport(stripped)
                         .or(() -> compileClass(stripped))
                         .orElse(stripped));
-            }
+            };
+			let output = String.join("", outputLines);
+			Files.writeString(target, output);
+		}
 
-            var output = String.join("", outputLines);
-            Files.writeString(target, output);
-        };
-		catch (IOException e) {
-            throw new RuntimeException(e);
-        };
+		catch (let e: IOException){
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	private def compileClass(stripped : String): Optional<String> => {
@@ -59,7 +59,7 @@ export object Main {
             result.instanceValue().ifPresent(instanceMembers::add);
             result.staticValue().ifPresent(staticMembers::add);
         };
-		let instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", 0, "", "");
+		let instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", "", "");
 		let renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
 		return Optional.of(instanceOutput + renderedObject);
 	}
@@ -77,7 +77,7 @@ export object Main {
 		let paramEnd = input.indexOf(')');
 		if (paramEnd == -1) return Optional.empty();
 		let inputParamString = input.substring(paramStart + 1, paramEnd);
-		String outputParamString;
+		let outputParamString: String
 		if (input.isBlank()) {
             outputParamString = inputParamString;
         };
@@ -106,23 +106,14 @@ export object Main {
 		for (var inputContentLine : inputContentLines) {
             var line = inputContentLine.strip();
             if (!line.isEmpty()) {
-                String methodOutput;
-                if (!line.startsWith("var ")) {
-                    methodOutput = line + ";";
-                } else {
-                    var valueSeparator = line.indexOf('=');
-                    var definitionName = line.substring("var ".length(), valueSeparator).strip();
-                    var value = line.substring(valueSeparator + 1).strip();
-
-                    methodOutput = "let " + definitionName + " = " + value + ";";
-                }
+                var methodOutput = compileStatement(line, 2);
                 output.add(methodOutput);
             }
         };
 		let outputContent = renderBlock(output, 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
-		let rendered = renderMagmaFunction(name, outputContent, modifierString, 1, ": " + type, outputParamString);
-		Result result;
+		let rendered = renderMagmaFunction(name, outputContent, modifierString, ": " + type, outputParamString);
+		let result: Result
 		if (modifiers.contains("static")) {
             result = new StaticResult(rendered);
         };
@@ -132,7 +123,82 @@ export object Main {
 		return Optional.of(result);
 	}
 
-	private def renderMagmaFunction(paramString : String name, String content, String modifiers, int indent, String typeString, String): String => {
+	private def compileStatement(indent : String line, int): String => {
+		return compileTry(line, indent)
+                .or(() -> compileDeclaration(line))
+                .or(() -> compileCatch(line, indent))
+                .orElse(line + ";");
+	}
+
+	private def compileCatch(indent : String line, int): Optional<String> => {
+		if (!line.startsWith("catch ")) return Optional.empty();
+		let substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
+		let compiled = compileDeclaration(substring).orElse(substring);
+		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+		let splitContent = split(content);
+		let builder = new ArrayList<String>();
+		for (String s : splitContent) {
+            var statement = compileStatement(s, 0);
+            builder.add(statement);
+        };
+		return Optional.of("catch (" + compiled + ")" + renderBlock(builder, indent));
+	}
+
+	private def compileTry(indent : String line, int): Optional<String> => {
+		if (!line.startsWith("try ")) return Optional.empty();
+		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+		let splitContent = split(content);
+		let builder = new ArrayList<String>();
+		for (String s : splitContent) {
+            var statement = compileStatement(s, 0);
+            builder.add(statement);
+        };
+		return Optional.of("try " + renderBlock(builder, indent));
+	}
+
+	private def compileDeclaration(line : String): Optional<String> => {
+		let valueSeparator = line.indexOf('=');
+		let before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
+		let lastSpace = before.lastIndexOf(' ');
+		let type = before.substring(0, lastSpace).strip();
+		let definitionName = before.substring(lastSpace).strip();
+		if(!isAlphaNumeric(definitionName)) return Optional.empty();
+		let typeString: String
+		if (type.equals("var")) typeString = "";
+		else {
+            var compiledType = compileType(type);
+            if (compiledType.isPresent()) {
+                typeString = ": " + compiledType.get();
+            } else {
+                return Optional.empty();
+            }
+        };
+		let value: String
+		let rendered: String
+		if (valueSeparator != -1) {
+            value = line.substring(valueSeparator + 1).strip();
+            rendered = " = " + value + ";";
+        };
+		else {
+            rendered = "";
+        };
+		return Optional.of("let " + definitionName + typeString + rendered);
+	}
+
+	private def isAlphaNumeric(definitionName : String): boolean => {
+		for (int i = 0; i < definitionName.length(); i++) {
+            var c = definitionName.charAt(i);
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c)) return false;
+        };
+		let true: return
+	}
+
+	private def compileType(type : String): Optional<String> => {
+		if(!isAlphaNumeric(type)) return Optional.empty();
+		else return Optional.of(type);
+	}
+
+	private def renderMagmaFunction(paramString : String name, String content, String modifiers, String typeString, String): String => {
 		return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
 	}
 
@@ -148,13 +214,13 @@ export object Main {
                 inSingleQuotes = !inSingleQuotes;
             }
 
-            if(c == '\"') {
+            if (c == '\"') {
                 inDoubleQuotes = !inDoubleQuotes;
             }
 
             if (inSingleQuotes) {
                 builder.append(c);
-            } else if(inDoubleQuotes) {
+            } else if (inDoubleQuotes) {
                 builder.append(c);
             } else {
                 if (c == ';' && depth == 0) {
@@ -179,8 +245,10 @@ export object Main {
         }
 
         lines.add(builder.toString());
-        lines.removeIf(String::isEmpty);
-        return lines;
+        return lines.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
     }
 
     interface Result {

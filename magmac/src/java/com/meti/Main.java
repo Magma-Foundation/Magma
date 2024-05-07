@@ -64,7 +64,7 @@ public class Main {
             result.staticValue().ifPresent(staticMembers::add);
         }
 
-        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", 0, "", "");
+        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers, 0), "export class ", "", "");
         var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers, 0);
         return Optional.of(instanceOutput + renderedObject);
     }
@@ -121,16 +121,7 @@ public class Main {
         for (var inputContentLine : inputContentLines) {
             var line = inputContentLine.strip();
             if (!line.isEmpty()) {
-                String methodOutput;
-                if (!line.startsWith("var ")) {
-                    methodOutput = line + ";";
-                } else {
-                    var valueSeparator = line.indexOf('=');
-                    var definitionName = line.substring("var ".length(), valueSeparator).strip();
-                    var value = line.substring(valueSeparator + 1).strip();
-
-                    methodOutput = "let " + definitionName + " = " + value + ";";
-                }
+                var methodOutput = compileStatement(line, 2);
                 output.add(methodOutput);
             }
         }
@@ -138,7 +129,7 @@ public class Main {
         var outputContent = renderBlock(output, 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = renderMagmaFunction(name, outputContent, modifierString, 1, ": " + type, outputParamString);
+        var rendered = renderMagmaFunction(name, outputContent, modifierString, ": " + type, outputParamString);
 
         Result result;
         if (modifiers.contains("static")) {
@@ -150,7 +141,91 @@ public class Main {
         return Optional.of(result);
     }
 
-    private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString, String paramString) {
+    private static String compileStatement(String line, int indent) {
+        return compileTry(line, indent)
+                .or(() -> compileDeclaration(line))
+                .or(() -> compileCatch(line, indent))
+                .orElse(line + ";");
+    }
+
+    private static Optional<String> compileCatch(String line, int indent) {
+        if (!line.startsWith("catch ")) return Optional.empty();
+
+        var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
+        var compiled = compileDeclaration(substring).orElse(substring);
+
+        var content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+        var splitContent = split(content);
+        var builder = new ArrayList<String>();
+        for (String s : splitContent) {
+            var statement = compileStatement(s, 0);
+            builder.add(statement);
+        }
+
+        return Optional.of("catch (" + compiled + ")" + renderBlock(builder, indent));
+    }
+
+    private static Optional<String> compileTry(String line, int indent) {
+        if (!line.startsWith("try ")) return Optional.empty();
+
+        var content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+        var splitContent = split(content);
+        var builder = new ArrayList<String>();
+        for (String s : splitContent) {
+            var statement = compileStatement(s, 0);
+            builder.add(statement);
+        }
+
+        return Optional.of("try " + renderBlock(builder, indent));
+    }
+
+    private static Optional<String> compileDeclaration(String line) {
+        var valueSeparator = line.indexOf('=');
+
+        var before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
+        var lastSpace = before.lastIndexOf(' ');
+
+        var type = before.substring(0, lastSpace).strip();
+        var definitionName = before.substring(lastSpace).strip();
+        if(!isAlphaNumeric(definitionName)) return Optional.empty();
+
+        String typeString;
+        if (type.equals("var")) typeString = "";
+        else {
+            var compiledType = compileType(type);
+            if (compiledType.isPresent()) {
+                typeString = ": " + compiledType.get();
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        String value;
+        String rendered;
+        if (valueSeparator != -1) {
+            value = line.substring(valueSeparator + 1).strip();
+            rendered = " = " + value + ";";
+        } else {
+            rendered = "";
+        }
+
+        return Optional.of("let " + definitionName + typeString + rendered);
+    }
+
+    private static boolean isAlphaNumeric(String definitionName) {
+        for (int i = 0; i < definitionName.length(); i++) {
+            var c = definitionName.charAt(i);
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c)) return false;
+        }
+        return true;
+    }
+
+    private static Optional<String> compileType(String type) {
+        if(!isAlphaNumeric(type)) return Optional.empty();
+        else return Optional.of(type);
+    }
+
+    private static String renderMagmaFunction(String name, String content, String modifiers, String typeString, String paramString) {
         return modifiers + "def " + name + "(" + paramString + ")" + typeString + " => " + content;
     }
 
@@ -168,13 +243,13 @@ public class Main {
                 inSingleQuotes = !inSingleQuotes;
             }
 
-            if(c == '\"') {
+            if (c == '\"') {
                 inDoubleQuotes = !inDoubleQuotes;
             }
 
             if (inSingleQuotes) {
                 builder.append(c);
-            } else if(inDoubleQuotes) {
+            } else if (inDoubleQuotes) {
                 builder.append(c);
             } else {
                 if (c == ';' && depth == 0) {
@@ -199,8 +274,10 @@ public class Main {
         }
 
         lines.add(builder.toString());
-        lines.removeIf(String::isEmpty);
-        return lines;
+        return lines.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
     }
 
     interface Result {
