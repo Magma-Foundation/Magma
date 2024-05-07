@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Main {
     private static Optional<String> compileImport(String stripped) {
@@ -52,15 +54,27 @@ public class Main {
         var braceStart = after.indexOf('{');
         var name = after.substring(0, braceStart).strip();
         var inputContent = split(after.substring(braceStart + 1, after.lastIndexOf('}')));
-        var outputContent = new ArrayList<String>();
+
+        var instanceMembers = new ArrayList<String>();
+        var staticMembers = new ArrayList<String>();
         for (var line : inputContent) {
-            outputContent.add(compileMethod(line).orElse(line));
+            var result = compileMethod(line)
+                    .orElse(new InstanceResult(line));
+
+            result.instanceValue().ifPresent(instanceMembers::add);
+            result.staticValue().ifPresent(staticMembers::add);
         }
 
-        return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0, ""));
+        var instanceOutput = renderMagmaFunction(name, renderBlock(instanceMembers), "export class ", 0, "");
+        var renderedObject = staticMembers.isEmpty() ? "" : "export object " + name + " " + renderBlock(staticMembers);
+        return Optional.of(instanceOutput + renderedObject);
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static String renderBlock(ArrayList<String> instanceMembers) {
+        return "{\n" + String.join("\n", instanceMembers) + "}\n";
+    }
+
+    private static Optional<Result> compileMethod(String input) {
         var start = input.indexOf('(');
         if (start == -1) return Optional.empty();
 
@@ -70,7 +84,7 @@ public class Main {
         var flagsAndType = before.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
 
-        var keys = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
+        var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
 
         var name = before.substring(separator + 1);
@@ -83,35 +97,88 @@ public class Main {
 
         var content = input.substring(contentStart, contentEnd + 1);
 
-        var modifierString = keys.contains("private") ? "private ": "";
-        return Optional.of(renderMagmaFunction(name, content, modifierString, 1, ": " + type));
+        var modifierString = modifiers.contains("private") ? "private " : "";
+        var rendered = renderMagmaFunction(name, content, modifierString, 1, ": " + type);
+
+        Result result;
+        if (modifiers.contains("static")) {
+            result = new StaticResult(rendered);
+        } else {
+            result = new InstanceResult(rendered);
+        }
+
+        return Optional.of(result);
     }
 
     private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString) {
         return "\t".repeat(indent) + modifiers + "def " + name + "()" + typeString + " => " + content;
     }
 
-    private static ArrayList<String> split(String input) {
+    private static List<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
+        var inSingleString = false;
+
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == ';' && depth == 0) {
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
+            if(inSingleString) {
                 buffer.append(c);
-                depth = 0;
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
+
+                if(c == '\'') inSingleString = false;
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                buffer.append(c);
+                if (c == ';' && depth == 0) {
+                    lines.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else if (c == '}' && depth == 1) {
+                    buffer.append(c);
+                    depth = 0;
+                    lines.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else {
+                    if (c == '{') depth++;
+                    if (c == '}') depth--;
+                    if(c == '\'') inSingleString = true;
+
+                    buffer.append(c);
+                }
             }
         }
         lines.add(buffer.toString());
-        return lines;
+
+        return lines.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    interface Result {
+        Optional<String> staticValue();
+
+        Optional<String> instanceValue();
+    }
+
+    record StaticResult(String value) implements Result {
+        @Override
+        public Optional<String> staticValue() {
+            return Optional.of(value);
+        }
+
+        @Override
+        public Optional<String> instanceValue() {
+            return Optional.empty();
+        }
+    }
+
+    record InstanceResult(String value) implements Result {
+        @Override
+        public Optional<String> staticValue() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> instanceValue() {
+            return Optional.of(value);
+        }
     }
 }
