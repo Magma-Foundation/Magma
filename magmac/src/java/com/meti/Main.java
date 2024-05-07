@@ -1,7 +1,5 @@
 package com.meti;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,8 +16,16 @@ public class Main {
             var outputLines = new ArrayList<String>();
             for (var line : lines) {
                 var stripped = line.strip();
-                if(!stripped.startsWith("package ")) {
-                    outputLines.add(stripped);
+                if (!stripped.startsWith("package ")) {
+                    if (stripped.startsWith("import ")) {
+                        var segments = stripped.substring("import ".length());
+                        var separator = segments.lastIndexOf('.');
+                        var parent = segments.substring(0, separator);
+                        var child = segments.substring(separator + 1);
+                        outputLines.add("import { " + child + " } from " + parent + ";\n");
+                    } else {
+                        outputLines.add(stripped);
+                    }
                 }
             }
 
@@ -36,12 +42,12 @@ public class Main {
         var depth = 0;
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if(c == ';' && depth == 0 ){
+            if (c == ';' && depth == 0) {
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
+                if (c == '{') depth++;
+                if (c == '}') depth--;
                 buffer.append(c);
             }
         }
