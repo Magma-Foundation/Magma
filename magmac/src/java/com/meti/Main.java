@@ -27,7 +27,15 @@ public class Main {
             }
             lines.add(buffer.toString());
 
-            var output = String.join("", input);
+            var outputLines = new ArrayList<String>();
+            for (var line : lines) {
+                var stripped = line.strip();
+                if(!stripped.startsWith("package ")) {
+                    outputLines.add(stripped);
+                }
+            }
+
+            var output = String.join("", outputLines);
             Files.writeString(target, output);
         } catch (IOException e) {
             throw new RuntimeException(e);
