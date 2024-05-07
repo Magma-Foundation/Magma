@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class Main {
@@ -68,6 +69,8 @@ public class Main {
 
         var flagsAndType = before.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+        var keys = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
 
         var name = before.substring(separator + 1);
@@ -80,7 +83,8 @@ public class Main {
 
         var content = input.substring(contentStart, contentEnd + 1);
 
-        return Optional.of(renderMagmaFunction(name, content, "", 1, ": " + type));
+        var modifierString = keys.contains("private") ? "private ": "";
+        return Optional.of(renderMagmaFunction(name, content, modifierString, 1, ": " + type));
     }
 
     private static String renderMagmaFunction(String name, String content, String modifiers, int indent, String typeString) {

@@ -2,9 +2,10 @@ import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { ArrayList } from java.util;
+import { Arrays } from java.util;
 import { Optional } from java.util;
 export class def Main() => {
-	def compileImport(): Optional<String> => {
+	private def compileImport(): Optional<String> => {
         if (!stripped.startsWith("import ")) return Optional.empty();
 
         var segments = stripped.substring("import ".length());
@@ -37,7 +38,7 @@ export class def Main() => {
             throw new RuntimeException(e);
         }
     }
-	def compileClass(): Optional<String> => {
+	private def compileClass(): Optional<String> => {
         var index = stripped.indexOf("class");
         if (index == -1) return Optional.empty();
 
@@ -53,7 +54,7 @@ export class def Main() => {
 
         return Optional.of(renderMagmaFunction(name, "{\n" + String.join("\n", outputContent) + "}", "export class ", 0, ""));
     }
-	def compileMethod(): Optional<String> => {
+	private def compileMethod(): Optional<String> => {
         var start = input.indexOf('(');
         if (start == -1) return Optional.empty();
 
@@ -62,6 +63,8 @@ export class def Main() => {
 
         var flagsAndType = before.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
+
+        var keys = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
 
         var name = before.substring(separator + 1);
@@ -74,12 +77,13 @@ export class def Main() => {
 
         var content = input.substring(contentStart, contentEnd + 1);
 
-        return Optional.of(renderMagmaFunction(name, content, "", 1, ": " + type));
+        var modifierString = keys.contains("private") ? "private ": "";
+        return Optional.of(renderMagmaFunction(name, content, modifierString, 1, ": " + type));
     }
-	def renderMagmaFunction(): String => {
+	private def renderMagmaFunction(): String => {
         return "\t".repeat(indent) + modifiers + "def " + name + "()" + typeString + " => " + content;
     }
-	def split(): ArrayList<String> => {
+	private def split(): ArrayList<String> => {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
