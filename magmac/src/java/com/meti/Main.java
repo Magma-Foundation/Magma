@@ -30,7 +30,6 @@ public class Main {
         }
     }
 
-    @NotNull
     private static ArrayList<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
