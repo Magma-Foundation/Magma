@@ -44,4 +44,18 @@ public class MainTest {
     void quotes_braces() {
         splitSingle("{'}'}");
     }
+
+    @Test
+    void bug0() {
+        splitSingle("\"i{ \" + child + \" } from \" + parent + \";\\n\"");
+    }
+
+    @Test
+    void huh() {
+        var first = "{\"\\\"}";
+        var second = "main";
+
+        var output = Main.split(first + second);
+        assertIterableEquals(List.of(first, second), output);
+    }
 }

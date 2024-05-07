@@ -158,23 +158,24 @@ public class Main {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
-        var inQuotes = false;
-        var wasEscaped = false;
+
+        var inSingleQuotes = false;
+        var inDoubleQuotes = false;
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == '\'') {
-                if (!wasEscaped) {
-                    inQuotes = !inQuotes;
-                }
+                inSingleQuotes = !inSingleQuotes;
             }
 
-            if (inQuotes) {
-                builder.append(c);
+            if(c == '\"') {
+                inDoubleQuotes = !inDoubleQuotes;
+            }
 
-                if (c == '\\') {
-                    wasEscaped = true;
-                }
+            if (inSingleQuotes) {
+                builder.append(c);
+            } else if(inDoubleQuotes) {
+                builder.append(c);
             } else {
                 if (c == ';' && depth == 0) {
                     lines.add(builder.toString());
@@ -186,8 +187,12 @@ public class Main {
                     lines.add(builder.toString());
                     builder = new StringBuilder();
                 } else {
-                    if (c == '{' || c == '(') depth++;
-                    if (c == '}' || c == ')') depth--;
+                    if (c == '{' || c == '(') {
+                        depth++;
+                    }
+                    if (c == '}' || c == ')') {
+                        depth--;
+                    }
                     builder.append(c);
                 }
             }

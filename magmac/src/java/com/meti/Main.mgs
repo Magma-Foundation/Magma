@@ -15,9 +15,7 @@ export object Main {
 		let separator = segments.lastIndexOf('.');
 		let parent = segments.substring(0, separator);
 		let child = segments.substring(separator + 1);
-		let rendered = "import { " + child + " };
-		from " + parent + ";
-		\n";
+		let rendered = "import { " + child + " } from " + parent + ";\n";
 		return Optional.of(rendered);
 	}
 
@@ -70,8 +68,7 @@ export object Main {
 		let blockString = members.stream()
                 .map(member -> "\t".repeat(indent + 1) + member + "\n")
                 .collect(Collectors.joining());
-		return "{\n" + blockString + "\t".repeat(indent) + "};
-		\n";
+		return "{\n" + blockString + "\t".repeat(indent) + "}\n";
 	}
 
 	private def compileMethod(input : String): Optional<Result> => {
@@ -143,22 +140,22 @@ export object Main {
 		let lines = new ArrayList<String>();
 		let builder = new StringBuilder();
 		let depth = 0;
-		let inQuotes = false;
-		let wasEscaped = false;
+		let inSingleQuotes = false;
+		let inDoubleQuotes = false;
 		for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == '\'') {
-                if (!wasEscaped) {
-                    inQuotes = !inQuotes;
-                }
+                inSingleQuotes = !inSingleQuotes;
             }
 
-            if (inQuotes) {
-                builder.append(c);
+            if(c == '\"') {
+                inDoubleQuotes = !inDoubleQuotes;
+            }
 
-                if (c == '\\') {
-                    wasEscaped = true;
-                }
+            if (inSingleQuotes) {
+                builder.append(c);
+            } else if(inDoubleQuotes) {
+                builder.append(c);
             } else {
                 if (c == ';' && depth == 0) {
                     lines.add(builder.toString());
@@ -170,8 +167,12 @@ export object Main {
                     lines.add(builder.toString());
                     builder = new StringBuilder();
                 } else {
-                    if (c == '{' || c == '(') depth++;
-                    if (c == '}' || c == ')') depth--;
+                    if (c == '{' || c == '(') {
+                        depth++;
+                    }
+                    if (c == '}' || c == ')') {
+                        depth--;
+                    }
                     builder.append(c);
                 }
             }
