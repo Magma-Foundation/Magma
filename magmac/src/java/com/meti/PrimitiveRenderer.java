@@ -5,7 +5,7 @@ import java.util.Optional;
 public record PrimitiveRenderer(MapNode node) implements Renderer {
 
     @Override
-    public Optional<String> render() {
-        return Optional.of(node.values().get("value"));
+    public Option<String> render() {
+        return new Some<>(node.values().get("value"));
     }
 }

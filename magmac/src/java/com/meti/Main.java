@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    private static Optional<MapNode> lex(String input) {
+    private static Option<MapNode> lex(String input) {
         return new ImportLexer(input).lex();
     }
 
-    private static Optional<String> render(MapNode node) {
+    private static Option<String> render(MapNode node) {
         return Map.<String, Function<MapNode, ImportRenderer>>of("import", ImportRenderer::new)
                 .get(node.name())
                 .apply(node)
@@ -33,7 +33,7 @@ public class Main {
                 if (stripped.startsWith("package ")) continue;
                 outputLines.add(lex(stripped)
                         .flatMap(Main::render)
-                        .or(() -> compileClass(stripped))
+                        .orLazy(() -> compileClass(stripped))
                         .orElse(stripped));
             }
 
@@ -44,9 +44,9 @@ public class Main {
         }
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Option<String> compileClass(String stripped) {
         var index = stripped.indexOf("class");
-        if (index == -1) return Optional.empty();
+        if (index == -1) return new None<>();
 
         var after = stripped.substring(index + "class".length());
 
@@ -58,7 +58,7 @@ public class Main {
 
         var instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers(), 0), "");
         var renderedObject = members.staticMembers().isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers(), 0);
-        return Optional.of(instanceOutput + renderedObject);
+        return new Some<>(instanceOutput + renderedObject);
     }
 
     private static MultipleResult getMultipleResult(List<String> inputContent, int indent) {
@@ -66,8 +66,8 @@ public class Main {
 
         for (var line : inputContent) {
             var result = compileInterface(line, indent)
-                    .or(() -> compileRecord(line, indent))
-                    .or(() -> compileMethod(line, indent))
+                    .orLazy(() -> compileRecord(line, indent))
+                    .orLazy(() -> compileMethod(line, indent))
                     .orElse(new InstanceResult(Collections.singletonList(line)));
 
             members.instanceMembers().addAll(result.instanceValue());
@@ -76,8 +76,8 @@ public class Main {
         return members;
     }
 
-    private static Optional<? extends Result> compileRecord(String line, int indent) {
-        if (!line.startsWith("record ")) return Optional.empty();
+    private static Option<Result> compileRecord(String line, int indent) {
+        if (!line.startsWith("record ")) return new None<>();
 
         var name = line.substring("record ".length(), line.indexOf('('));
         var paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
@@ -87,7 +87,7 @@ public class Main {
         var results = getMultipleResult(split, indent);
         var renderedContent = renderBlock(results.instanceMembers(), indent + 1);
 
-        return Optional.of(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
+        return new Some<>(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
     }
 
     private static String renderBlock(List<String> members, int indent) {
@@ -98,12 +98,12 @@ public class Main {
         return "{\n" + blockString + "\t".repeat(indent) + "}";
     }
 
-    private static Optional<Result> compileMethod(String input, int indent) {
+    private static Option<Result> compileMethod(String input, int indent) {
         var paramStart = input.indexOf('(');
-        if (paramStart == -1) return Optional.empty();
+        if (paramStart == -1) return new None<>();
 
         var paramEnd = input.indexOf(')');
-        if (paramEnd == -1) return Optional.empty();
+        if (paramEnd == -1) return new None<>();
 
         var inputParamString = input.substring(paramStart + 1, paramEnd);
 
@@ -116,11 +116,11 @@ public class Main {
         var annotationsString = annotationsSeparator == -1 ? "" : before.substring(0, annotationsSeparator).strip();
 
         var separator = before1.lastIndexOf(' ');
-        if (separator == -1) return Optional.empty();
+        if (separator == -1) return new None<>();
 
         var flagsAndType = before1.substring(0, separator);
         var typeSeparator = flagsAndType.lastIndexOf(' ');
-        if (typeSeparator == -1) return Optional.empty();
+        if (typeSeparator == -1) return new None<>();
 
         var modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
         var type = flagsAndType.substring(typeSeparator + 1);
@@ -140,7 +140,7 @@ public class Main {
                 result = new InstanceResult(rendered);
             }
 
-            return Optional.of(result);
+            return new Some<>(result);
         } else if (contentStart != -1 && contentEnd != -1) {
             var inputContent = input.substring(contentStart + 1, contentEnd);
             var inputContentLines = Strings.split(inputContent);
@@ -168,9 +168,9 @@ public class Main {
                 result = new InstanceResult(rendered);
             }
 
-            return Optional.of(result);
+            return new Some<>(result);
         } else {
-            return Optional.empty();
+            return new None<>();
         }
     }
 
@@ -180,25 +180,25 @@ public class Main {
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(Main::compileDeclaration)
-                .flatMap(Optional::stream)
+                .flatMap(Options::stream)
                 .map(Definition::render)
                 .collect(Collectors.joining(", "));
     }
 
     private static String compileStatement(String line, int indent) {
         return compileIf(line, indent)
-                .or(() -> compileElse(line, indent))
-                .or(() -> compileFor(line, indent))
-                .or(() -> compileTry(line, indent))
-                .or(() -> compileDeclaration(line)
+                .orLazy(() -> compileElse(line, indent))
+                .orLazy(() -> compileFor(line, indent))
+                .orLazy(() -> compileTry(line, indent))
+                .orLazy(() -> compileDeclaration(line)
                         .map(Definition::render)
                         .map(value -> value + ";"))
-                .or(() -> compileCatch(line, indent))
+                .orLazy(() -> compileCatch(line, indent))
                 .orElse(line + ";");
     }
 
-    private static Optional<Result> compileInterface(String input, int indent) {
-        if (!input.startsWith("interface ")) return Optional.empty();
+    private static Option<Result> compileInterface(String input, int indent) {
+        if (!input.startsWith("interface ")) return new None<>();
         var start = input.indexOf('{');
         var end = input.lastIndexOf('}');
 
@@ -206,11 +206,11 @@ public class Main {
         var content = Strings.split(input.substring(start + 1, end));
         var members = getMultipleResult(content, indent);
 
-        return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers(), indent + 1)));
+        return new Some<>(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers(), indent + 1)));
     }
 
-    private static Optional<String> compileFor(String line, int indent) {
-        if (!line.startsWith("for ")) return Optional.empty();
+    private static Option<String> compileFor(String line, int indent) {
+        if (!line.startsWith("for ")) return new None<>();
 
         var paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
         String content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
@@ -224,23 +224,23 @@ public class Main {
         var separator = paramString.indexOf(':');
         if (separator == -1) {
             var statements = renderBlock(cache, indent);
-            return Optional.of("for (" + paramString + ")" + statements);
+            return new Some<>("for (" + paramString + ")" + statements);
         }
 
         var substring = paramString.substring(0, separator);
         var declaration = compileDeclaration(substring);
-        if (declaration.isEmpty()) return Optional.empty();
+        if (declaration.isEmpty()) return new None<>();
 
         var container = paramString.substring(separator + 1).strip();
         var generatedName = "__temp__";
-        cache.add(0, new Definition(declaration.get().name(), Optional.empty(), Optional.of(container + ".get(" + generatedName + ")")).render());
+        cache.add(0, new Definition(declaration.orElseNull().name(), new None<>(), new Some<>(container + ".get(" + generatedName + ")")).render());
 
         var statements = renderBlock(cache, indent);
-        return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
+        return new Some<>("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
     }
 
-    private static Optional<String> compileIf(String line, int indent) {
-        if (!line.startsWith("if")) return Optional.empty();
+    private static Option<String> compileIf(String line, int indent) {
+        if (!line.startsWith("if")) return new None<>();
 
         var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
         var compiled = compileValue(substring);
@@ -250,17 +250,17 @@ public class Main {
         if (end == -1) {
             var value = line.substring(line.indexOf(')') + 1);
             var compiledValue = compileValue(value);
-            return Optional.of("if (" + compiled + ")" + compiledValue + ";");
+            return new Some<>("if (" + compiled + ")" + compiledValue + ";");
         }
 
         var content = line.substring(start + 1, end);
         var rendered = compileStatements(content, indent);
 
-        return Optional.of("if (" + compiled + ")" + rendered);
+        return new Some<>("if (" + compiled + ")" + rendered);
     }
 
-    private static Optional<String> compileCatch(String line, int indent) {
-        if (!line.startsWith("catch ")) return Optional.empty();
+    private static Option<String> compileCatch(String line, int indent) {
+        if (!line.startsWith("catch ")) return new None<>();
 
         var substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
         var compiled = compileDeclaration(substring)
@@ -270,7 +270,7 @@ public class Main {
         var content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
         var rendered = compileStatements(content, indent);
 
-        return Optional.of("catch (" + compiled + ")" + rendered);
+        return new Some<>("catch (" + compiled + ")" + rendered);
     }
 
     private static String compileStatements(String content, int indent) {
@@ -283,15 +283,15 @@ public class Main {
         return renderBlock(builder, indent);
     }
 
-    private static Optional<String> compileElse(String line, int indent) {
-        if (!line.startsWith("else ")) return Optional.empty();
+    private static Option<String> compileElse(String line, int indent) {
+        if (!line.startsWith("else ")) return new None<>();
 
         var blockStart = line.indexOf('{');
         var blockEnd = line.lastIndexOf('}');
         if (blockEnd == -1) {
             var value = line.substring("else ".length());
             var compiledValue = compileValue(value);
-            return Optional.of("else " + compiledValue);
+            return new Some<>("else " + compiledValue);
         }
 
         var content = line.substring(blockStart + 1, blockEnd);
@@ -302,11 +302,11 @@ public class Main {
             builder.add(statement);
         }
 
-        return Optional.of("else " + renderBlock(builder, indent));
+        return new Some<>("else " + renderBlock(builder, indent));
     }
 
-    private static Optional<String> compileTry(String line, int indent) {
-        if (!line.startsWith("try ")) return Optional.empty();
+    private static Option<String> compileTry(String line, int indent) {
+        if (!line.startsWith("try ")) return new None<>();
 
         var content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
         var splitContent = Strings.split(content);
@@ -316,39 +316,39 @@ public class Main {
             builder.add(statement);
         }
 
-        return Optional.of("try " + renderBlock(builder, indent));
+        return new Some<>("try " + renderBlock(builder, indent));
     }
 
-    private static Optional<Definition> compileDeclaration(String line) {
+    private static Option<Definition> compileDeclaration(String line) {
         var valueSeparator = line.indexOf('=');
 
         var before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
         var lastSpace = before.lastIndexOf(' ');
         if (lastSpace == -1) {
-            return Optional.empty();
+            return new None<>();
         }
 
         var type = before.substring(0, lastSpace).strip();
 
         var definitionName = before.substring(lastSpace).strip();
-        if (!isAlphaNumeric(definitionName)) return Optional.empty();
+        if (!isAlphaNumeric(definitionName)) return new None<>();
 
-        Optional<String> typeString;
-        if (type.equals("var")) typeString = Optional.empty();
+        Option<String> typeString;
+        if (type.equals("var")) typeString = new None<>();
         else {
             typeString = compileType(type);
-            if (typeString.isEmpty()) return Optional.empty();
+            if (typeString.isEmpty()) return new None<>();
         }
 
-        Optional<String> value;
+        Option<String> value;
         if (valueSeparator != -1) {
             var stripped = line.substring(valueSeparator + 1).strip();
-            value = Optional.of(compileValue(stripped));
+            value = new Some<>(compileValue(stripped));
         } else {
-            value = Optional.empty();
+            value = new None<>();
         }
 
-        return Optional.of(new Definition(definitionName, typeString, value));
+        return new Some<>(new Definition(definitionName, typeString, value));
     }
 
     private static String compileValue(String stripped) {
@@ -369,7 +369,7 @@ public class Main {
         return true;
     }
 
-    private static Optional<String> compileType(String type) {
+    private static Option<String> compileType(String type) {
         var genStart = type.indexOf('<');
         var genEnd = type.lastIndexOf('>');
         if (genStart != -1 && genEnd != -1) {
@@ -380,15 +380,21 @@ public class Main {
             return parentType.map(s -> s + "<" + substring + ">");
         }
 
-        if (type.equals("int")) {
-            var node = new MapNode("primitive-type", Map.of("value", "I32"));
-            return new PrimitiveRenderer(node).render();
-        } else if (isAlphaNumeric(type)) {
-            var node = new MapNode("primitive-type", Map.of("value", type));
-            return new PrimitiveRenderer(node).render();
-        } else {
-            return Optional.empty();
-        }
+        return extracted(type).orLazy(() -> {
+            return lexStringType(type);
+        }).flatMap(node -> new PrimitiveRenderer(node).render());
+    }
+
+    private static Option<MapNode> extracted(String type) {
+        return type.equals("int")
+                ? new Some<>(new MapNode("primitive-type", Map.of("value", "I32")))
+                : new None<>();
+    }
+
+    private static Option<MapNode> lexStringType(String type) {
+        return isAlphaNumeric(type)
+                ? new Some<>(new MapNode("primitive-type", Map.of("value", type)))
+                : new None<>();
     }
 
     private static String renderMagmaFunction(String name, String modifiers, String typeString, String paramString, String contentString, String annotationsString) {
