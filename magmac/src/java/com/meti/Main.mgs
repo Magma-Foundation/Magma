@@ -50,17 +50,17 @@ class def Main() => {
         var name = stripped.substring(classIndex + "class".length(), stripped.indexOf('{')).strip();
         var content = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
 
-        return Optional.of(new MagmaRenderer(new MapNode("class", Map.of("name", name, "content", content))).render().orElseThrow());
+        var attributes = Map.of("name", name, "content", content);
+        var node = new MapNode("class", attributes);
+
+        return Optional.of(new MagmaRenderer(node).render().orElseThrow());
     }
 
     private static Optional<String> compileImport(String stripped) {
-        if (!stripped.startsWith("import ")) return Optional.empty();
-
-        var segments = stripped.substring("import ".length());
-        var separator = segments.lastIndexOf('.');
-        var parent = segments.substring(0, separator);
-        var child = segments.substring(separator + 1);
-        return Optional.of(new MagmaRenderer(new MapNode("import", Map.of("child", child, "parent", parent))).render().orElseThrow());
+        return new NamingRule(new RequireLeft("import ", new LastIndexOfRule(".", new ExtractRule("parent"),
+                new ExtractRule("child"))), "import").apply(stripped)
+                .flatMap(MapNode::fromTuple)
+                .map(node -> new MagmaRenderer(node).render().orElseThrow());
     }
 
     private static ArrayList<String> split(String input) {

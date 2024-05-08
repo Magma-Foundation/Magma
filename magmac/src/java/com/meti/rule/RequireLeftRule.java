@@ -1,9 +1,15 @@
-package com.meti;
+package com.meti.rule;
+
+import com.meti.Tuple;
 
 import java.util.Map;
 import java.util.Optional;
 
-public record RequireLeft(String slice, LastIndexOfRule right) implements Rule {
+public record RequireLeftRule(String slice, SplitByLastSliceRule right) implements Rule {
+    public static RequireLeftRule Left(String slice, SplitByLastSliceRule right) {
+        return new RequireLeftRule(slice, right);
+    }
+
     private Optional<Map<String, String>> apply1(String stripped) {
         Optional<Map<String, String>> empty;
         if (!stripped.startsWith(slice())) {

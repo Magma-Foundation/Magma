@@ -1,5 +1,8 @@
 package com.meti;
 
+import com.meti.render.MagmaRenderer;
+import com.meti.rule.NamingRule;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,7 +14,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.meti.rule.ExtractRule.$;
+import static com.meti.rule.RequireLeftRule.Left;
+import static com.meti.rule.SplitByLastSliceRule.Last;
+
 public class Main {
+    public static final NamingRule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
+
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -26,24 +35,13 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        return split(input)
-                .stream()
-                .map(String::strip)
-                .map(Main::compileRootElement)
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+        return split(input).stream().map(String::strip).map(Main::compileRootElement).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
 
-        var value = Stream.<Supplier<Optional<String>>>of(
-                        () -> compileImport(stripped),
-                        () -> compileClass(stripped))
-                .map(Supplier::get)
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElse(stripped);
+        var value = Stream.<Supplier<Optional<String>>>of(() -> compileImport(stripped), () -> compileClass(stripped)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(stripped);
 
         return Optional.of(value);
     }
@@ -60,10 +58,7 @@ public class Main {
     }
 
     private static Optional<String> compileImport(String stripped) {
-        return new NamingRule(new RequireLeft("import ", new LastIndexOfRule(".", new ExtractRule("parent"),
-                new ExtractRule("child"))), "import").apply(stripped)
-                .flatMap(MapNode::fromTuple)
-                .map(node -> new MagmaRenderer(node).render().orElseThrow());
+        return IMPORT_RULE.apply(stripped).flatMap(MapNode::fromTuple).map(node -> new MagmaRenderer(node).render().orElseThrow());
     }
 
     private static ArrayList<String> split(String input) {

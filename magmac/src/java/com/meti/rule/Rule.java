@@ -1,4 +1,6 @@
-package com.meti;
+package com.meti.rule;
+
+import com.meti.Tuple;
 
 import java.util.Map;
 import java.util.Optional;

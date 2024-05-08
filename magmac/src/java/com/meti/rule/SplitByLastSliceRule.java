@@ -1,10 +1,16 @@
-package com.meti;
+package com.meti.rule;
+
+import com.meti.Tuple;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public record LastIndexOfRule(String slice, ExtractRule leftRule, ExtractRule rightRule) implements Rule {
+public record SplitByLastSliceRule(ExtractRule leftRule, String slice, ExtractRule rightRule) implements Rule {
+    public static SplitByLastSliceRule Last(ExtractRule parent, String slice, ExtractRule child) {
+        return new SplitByLastSliceRule(parent, slice, child);
+    }
+
     private Optional<Map<String, String>> apply1(String segments) {
         var separator = segments.lastIndexOf(slice());
         if (separator == -1) return Optional.empty();
