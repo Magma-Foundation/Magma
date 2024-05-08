@@ -2,24 +2,30 @@ package com.meti;
 
 import com.meti.render.MagmaRenderer;
 import com.meti.rule.NamingRule;
+import com.meti.rule.Rule;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.meti.rule.DiscardRule.Discard;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.RequireLeftRule.Left;
+import static com.meti.rule.RequireRightRule.Right;
+import static com.meti.rule.SplitByFirstSliceRule.First;
 import static com.meti.rule.SplitByLastSliceRule.Last;
+import static com.meti.rule.StripRule.Strip;
 
 public class Main {
-    public static final NamingRule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule CLASS_RULE = new NamingRule("class", First(Discard, "class ",
+            First(Strip($("name")), "{", Right($("content"), "}"))));
 
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -40,25 +46,22 @@ public class Main {
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-
         var value = Stream.<Supplier<Optional<String>>>of(() -> compileImport(stripped), () -> compileClass(stripped)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(stripped);
-
         return Optional.of(value);
     }
 
     private static Optional<String> compileClass(String stripped) {
-        var classIndex = stripped.indexOf("class");
-        var name = stripped.substring(classIndex + "class".length(), stripped.indexOf('{')).strip();
-        var content = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
-
-        var attributes = Map.of("name", name, "content", content);
-        var node = new MapNode("class", attributes);
-
-        return Optional.of(new MagmaRenderer(node).render().orElseThrow());
+        return CLASS_RULE.apply(stripped)
+                .flatMap(MapNode::fromTuple)
+                .map(MagmaRenderer::new)
+                .flatMap(MagmaRenderer::render);
     }
 
     private static Optional<String> compileImport(String stripped) {
-        return IMPORT_RULE.apply(stripped).flatMap(MapNode::fromTuple).map(node -> new MagmaRenderer(node).render().orElseThrow());
+        return IMPORT_RULE.apply(stripped)
+                .flatMap(MapNode::fromTuple)
+                .map(MagmaRenderer::new)
+                .flatMap(MagmaRenderer::render);
     }
 
     private static ArrayList<String> split(String input) {

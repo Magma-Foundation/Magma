@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public record ExtractRule(String key) implements Rule {
 
-    public static ExtractRule $(String parent) {
+    public static Rule $(String parent) {
         return new ExtractRule(parent);
     }
 

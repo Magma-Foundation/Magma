@@ -5,24 +5,16 @@ import com.meti.Tuple;
 import java.util.Map;
 import java.util.Optional;
 
-public record RequireLeftRule(String slice, SplitByLastSliceRule right) implements Rule {
-    public static RequireLeftRule Left(String slice, SplitByLastSliceRule right) {
+public record RequireLeftRule(String slice, Rule right) implements Rule {
+    public static Rule Left(String slice, Rule right) {
         return new RequireLeftRule(slice, right);
-    }
-
-    private Optional<Map<String, String>> apply1(String stripped) {
-        Optional<Map<String, String>> empty;
-        if (!stripped.startsWith(slice())) {
-            empty = Optional.empty();
-        } else {
-            var segments = stripped.substring(slice().length());
-            empty = this.right().apply(segments).map(tuple -> tuple.a());
-        }
-        return empty;
     }
 
     @Override
     public Optional<Tuple<Map<String, String>, Optional<String>>> apply(String value) {
-        return apply1(value).map(map -> new Tuple<>(map, Optional.empty()));
+        if (!value.startsWith(this.slice)) return Optional.empty();
+
+        var segments = value.substring(this.slice.length());
+        return this.right.apply(segments);
     }
 }

@@ -1,14 +1,27 @@
+import { MagmaRenderer } from com.meti.render;
+import { NamingRule } from com.meti.rule;
+import { Rule } from com.meti.rule;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { ArrayList } from java.util;
 import { List } from java.util;
-import { Map } from java.util;
 import { Optional } from java.util;
 import { Supplier } from java.util.function;
 import { Collectors } from java.util.stream;
 import { Stream } from java.util.stream;
+import { Discard } from static com.meti.rule.DiscardRule;
+import { $ } from static com.meti.rule.ExtractRule;
+import { Left } from static com.meti.rule.RequireLeftRule;
+import { Right } from static com.meti.rule.RequireRightRule;
+import { First } from static com.meti.rule.SplitByFirstSliceRule;
+import { Last } from static com.meti.rule.SplitByLastSliceRule;
+import { Strip } from static com.meti.rule.StripRule;
 class def Main() => {
+    public static final Rule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule CLASS_RULE = new NamingRule("class", First(Discard, "class ",
+            First(Strip($("name")), "{", Right($("content"), "}"))));
+
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -23,44 +36,27 @@ class def Main() => {
     }
 
     private static List<String> compile(String input) {
-        return split(input)
-                .stream()
-                .map(String::strip)
-                .map(Main::compileRootElement)
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+        return split(input).stream().map(String::strip).map(Main::compileRootElement).flatMap(Optional::stream).collect(Collectors.toList());
     }
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-
-        var value = Stream.<Supplier<Optional<String>>>of(
-                        () -> compileImport(stripped),
-                        () -> compileClass(stripped))
-                .map(Supplier::get)
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElse(stripped);
-
+        var value = Stream.<Supplier<Optional<String>>>of(() -> compileImport(stripped), () -> compileClass(stripped)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(stripped);
         return Optional.of(value);
     }
 
     private static Optional<String> compileClass(String stripped) {
-        var classIndex = stripped.indexOf("class");
-        var name = stripped.substring(classIndex + "class".length(), stripped.indexOf('{')).strip();
-        var content = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
-
-        var attributes = Map.of("name", name, "content", content);
-        var node = new MapNode("class", attributes);
-
-        return Optional.of(new MagmaRenderer(node).render().orElseThrow());
+        return CLASS_RULE.apply(stripped)
+                .flatMap(MapNode::fromTuple)
+                .map(MagmaRenderer::new)
+                .flatMap(MagmaRenderer::render);
     }
 
     private static Optional<String> compileImport(String stripped) {
-        return new NamingRule(new RequireLeft("import ", new LastIndexOfRule(".", new ExtractRule("parent"),
-                new ExtractRule("child"))), "import").apply(stripped)
+        return IMPORT_RULE.apply(stripped)
                 .flatMap(MapNode::fromTuple)
-                .map(node -> new MagmaRenderer(node).render().orElseThrow());
+                .map(MagmaRenderer::new)
+                .flatMap(MagmaRenderer::render);
     }
 
     private static ArrayList<String> split(String input) {
@@ -103,5 +99,4 @@ class def Main() => {
             copy.add(builder.toString());
             return new SplitState(depth, copy, new StringBuilder());
         }
-    }
-}
+    }}

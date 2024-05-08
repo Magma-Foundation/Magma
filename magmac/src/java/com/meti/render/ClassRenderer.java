@@ -12,6 +12,6 @@ public record ClassRenderer(MapNode mapNode) implements Renderer {
         var name = mapNode().node().get("name");
         var content = mapNode().node().get("content");
 
-        return Optional.of("class def " + name + "() => " + content);
+        return Optional.of("class def " + name + "() => {" + content + "}");
     }
 }
