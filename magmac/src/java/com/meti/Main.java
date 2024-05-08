@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class Main {
         var name = stripped.substring(classIndex + "class".length(), stripped.indexOf('{')).strip();
         var content = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
 
-        return Optional.of("class def " + name + "() => " + content);
+        return Optional.of(new MagmaRenderer(new MapNode("class", Map.of("name", name, "content", content))).render().orElseThrow());
     }
 
     private static Optional<String> compileImport(String stripped) {
@@ -62,7 +63,7 @@ public class Main {
         var separator = segments.lastIndexOf('.');
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
-        return Optional.of("import { " + child + " } from " + parent + ";\n");
+        return Optional.of(new MagmaRenderer(new MapNode("import", Map.of("child", child, "parent", parent))).render().orElseThrow());
     }
 
     private static ArrayList<String> split(String input) {
