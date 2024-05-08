@@ -378,12 +378,17 @@ public class Main {
 
             var parentType = compileType(parent);
             return parentType.map(s -> s + "<" + substring + ">");
-
         }
 
-        if (type.equals("int")) return Optional.of("I32");
-        if (!isAlphaNumeric(type)) return Optional.empty();
-        else return Optional.of(type);
+        if (type.equals("int")) {
+            var node = new MapNode("primitive-type", Map.of("value", "I32"));
+            return new PrimitiveRenderer(node).render();
+        } else if (isAlphaNumeric(type)) {
+            var node = new MapNode("primitive-type", Map.of("value", type));
+            return new PrimitiveRenderer(node).render();
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static String renderMagmaFunction(String name, String modifiers, String typeString, String paramString, String contentString, String annotationsString) {
