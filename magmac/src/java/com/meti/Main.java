@@ -6,7 +6,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,9 +25,8 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        var inputContent = split(input);
-
-        return inputContent.stream()
+        return split(input)
+                .stream()
                 .map(String::strip)
                 .map(Main::compileRootElement)
                 .flatMap(Optional::stream)
@@ -35,15 +36,33 @@ public class Main {
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
 
-        if (stripped.startsWith("import ")) {
-            var segments = stripped.substring("import ".length());
-            var separator = segments.lastIndexOf('.');
-            var parent = segments.substring(0, separator);
-            var child = segments.substring(separator + 1);
-            return Optional.of("import { " + child + " } from " + parent + ";\n");
-        }
+        var value = Stream.<Supplier<Optional<String>>>of(
+                        () -> compileImport(stripped),
+                        () -> compileClass(stripped))
+                .map(Supplier::get)
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElse(stripped);
 
-        return Optional.of(stripped);
+        return Optional.of(value);
+    }
+
+    private static Optional<String> compileClass(String stripped) {
+        var classIndex = stripped.indexOf("class");
+        var name = stripped.substring(classIndex + "class".length(), stripped.indexOf('{')).strip();
+        var content = stripped.substring(stripped.indexOf('{'), stripped.lastIndexOf('}') + 1);
+
+        return Optional.of("class def " + name + "() => " + content);
+    }
+
+    private static Optional<String> compileImport(String stripped) {
+        if (!stripped.startsWith("import ")) return Optional.empty();
+
+        var segments = stripped.substring("import ".length());
+        var separator = segments.lastIndexOf('.');
+        var parent = segments.substring(0, separator);
+        var child = segments.substring(separator + 1);
+        return Optional.of("import { " + child + " } from " + parent + ";\n");
     }
 
     private static ArrayList<String> split(String input) {
