@@ -8,14 +8,23 @@ import java.util.stream.Collectors;
 
 public class Main {
     private static Optional<String> compileImport(String stripped) {
+        return lexImport(stripped).flatMap(Main::renderImport);
+    }
+
+    private static Optional<Map<String, String>> lexImport(String stripped) {
         if (!stripped.startsWith("import ")) return Optional.empty();
 
         var segments = stripped.substring("import ".length());
         var separator = segments.lastIndexOf('.');
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
-        var rendered = "import { " + child + " } from " + parent + ";\n";
-        return Optional.of(rendered);
+        var map = Map.of("parent", parent, "child", child);
+
+        return Optional.of(map);
+    }
+
+    private static Optional<String> renderImport(Map<String, String> node) {
+        return Optional.of("import { %s } from %s;\n".formatted(node.get("child"), node.get("parent")));
     }
 
     public static void main(String[] args) {
