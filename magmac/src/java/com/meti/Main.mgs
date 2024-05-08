@@ -4,66 +4,15 @@ import { Paths } from java.nio.file;
 import { * } from java.util;
 import { Function } from java.util.function;
 import { Collectors } from java.util.stream;
-import { Stream } from java.util.stream;
 export class def Main() => {
-	struct Result {
-		List<String> staticValue()
-		List<String> instanceValue()
-	}
-	class def MultipleResult(let instanceMembers : List<String>, let staticMembers : List<String>) => {
-		@Override
-		def staticValue(): List<String> => {
-		let staticMembers : return;
-	}
-		@Override
-		def instanceValue(): List<String> => {
-		let instanceMembers : return;
-	}
-	}
-	class def Definition(let name : String, let type : Optional<String>, let value : Optional<String>) => {
-		String render() {
-            var typeString = type.map(type -> " : " + type).orElse("");
-            var valueString = value.map(value -> " = " + value).orElse("");
-            return "let " + name + typeString + valueString;
-        }
-	}
-	class def StaticResult(let value : List<String>) => {
-		StaticResult(String value) {
-            this(Collections.singletonList(value));
-        }
-		@Override
-		def staticValue(): List<String> => {
-		let value : return;
-	}
-		@Override
-		def instanceValue(): List<String> => {
-		return Collections.emptyList();
-	}
-	}
-	class def InstanceResult(let value : List<String>) => {
-		InstanceResult(String value) {
-            this(Collections.singletonList(value));
-        }
-		InstanceResult(List<String> value) {
-            this.value = value;
-        }
-		@Override
-		def staticValue(): List<String> => {
-		return Collections.emptyList();
-	}
-		@Override
-		def instanceValue(): List<String> => {
-		let value : return;
-	}
-	}
 }
 export object Main {
 	
-	private def lex(let input : String): Optional<MapNode> => {
+	private def lex(): Option<MapNode> => {
 		return new ImportLexer(input).lex();
 	}
 	
-	private def render(let node : MapNode): Optional<String> => {
+	private def render(): Option<String> => {
 		return Map.<String, Function<MapNode, ImportRenderer>>of("import", ImportRenderer::new)
                 .get(node.name())
                 .apply(node)
@@ -77,73 +26,72 @@ export object Main {
 		let input = Files.readString(source);
 		let lines = Strings.split(input);
 		let outputLines = ArrayList<String>();
-		for (let __temp__ = 0; i < lines.size(); i++){
-			let line = lines.get(__temp__)
-			let stripped = line.strip();
-			if (stripped.startsWith("package ")) continue;
-			outputLines.add(lex(stripped)
+		for (var line : lines) {
+                var stripped = line.strip();
+                if (stripped.startsWith("package ")) continue;
+                outputLines.add(lex(stripped)
                         .flatMap(Main::render)
-                        .or(() -> compileClass(stripped))
+                        .orLazy(() -> compileClass(stripped))
                         .orElse(stripped));
-		}
+            };
 		let output = String.join("", outputLines);
 		Files.writeString(target, output);
 	}
-		catch (let e : IOException){
+		catch (IOException e){
 		throw new RuntimeException(e);
 	}
 	}
 	
-	private def compileClass(let stripped : String): Optional<String> => {
+	private def compileClass(): Option<String> => {
 		let index = stripped.indexOf("class");
-		if (index == -1) return Optional.empty();
+		if (index == -1) return new None<>();
 		let after = stripped.substring(index + "class".length());
 		let braceStart = after.indexOf('{');
 		let name = after.substring(0, braceStart).strip();
 		let inputContent = Strings.split(after.substring(braceStart + 1, after.lastIndexOf('}')));
 		let members = getMultipleResult(inputContent, 0);
-		let instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers, 0), "");
-		let renderedObject = members.staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers, 0);
-		return Optional.of(instanceOutput + renderedObject);
+		let instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers(), 0), "");
+		let renderedObject = members.staticMembers().isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers(), 0);
+		return new Some<>(instanceOutput + renderedObject);
 	}
 	
-	private def getMultipleResult(let inputContent : List<String>, let indent : I32): MultipleResult => {
+	private def getMultipleResult(): MultipleResult => {
 		let members = MultipleResult(new ArrayList<>(), new ArrayList<>());
-		for (let __temp__ = 0; i < inputContent.size(); i++){
-		let line = inputContent.get(__temp__)
-		let result = compileInterface(line, indent)
-                    .or(() -> compileRecord(line, indent))
-                    .or(() -> compileMethod(line, indent))
+		for (var line : inputContent) {
+            var result = compileInterface(line, indent)
+                    .orLazy(() -> compileRecord(line, indent))
+                    .orLazy(() -> compileMethod(line, indent))
                     .orElse(new InstanceResult(Collections.singletonList(line)));
-		members.instanceMembers.addAll(result.instanceValue());
-		members.staticMembers.addAll(result.staticValue());
-	}
-		let members : return;
+
+            members.instanceMembers().addAll(result.instanceValue());
+            members.staticMembers().addAll(result.staticValue());
+        };
+		return members;
 	}
 	
-	private def compileRecord(let line : String, let indent : I32): Result> => {
-		if (!line.startsWith("record ")) return Optional.empty();
+	private def compileRecord(): Option<Result> => {
+		if (!line.startsWith("record ")) return new None<>();
 		let name = line.substring("record ".length(), line.indexOf('('));
 		let paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let compiledParameters = compileParamString(paramString);
 		let split = Strings.split(line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')));
 		let results = getMultipleResult(split, indent);
-		let renderedContent = renderBlock(results.instanceMembers, indent + 1);
-		return Optional.of(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
+		let renderedContent = renderBlock(results.instanceMembers(), indent + 1);
+		return new Some<>(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
 	}
 	
-	private def renderBlock(let members : List<String>, let indent : I32): String => {
+	private def renderBlock(): String => {
 		let blockString = members.stream()
                 .map(member -> "\t".repeat(indent + 1) + member + "\n")
                 .collect(Collectors.joining());
 		return "{\n" + blockString + "\t".repeat(indent) + "}";
 	}
 	
-	private def compileMethod(let input : String, let indent : I32): Optional<Result> => {
+	private def compileMethod(): Option<Result> => {
 		let paramStart = input.indexOf('(');
-		if (paramStart == -1) return Optional.empty();
+		if (paramStart == -1) return new None<>();
 		let paramEnd = input.indexOf(')');
-		if (paramEnd == -1) return Optional.empty();
+		if (paramEnd == -1) return new None<>();
 		let inputParamString = input.substring(paramStart + 1, paramEnd);
 		let outputParamString = compileParamString(inputParamString);
 		let before = input.substring(0, paramStart);
@@ -151,10 +99,10 @@ export object Main {
 		let before1 = annotationsSeparator == -1 ? before : before.substring(annotationsSeparator + 1).strip();
 		let annotationsString = annotationsSeparator == -1 ? "" : before.substring(0, annotationsSeparator).strip();
 		let separator = before1.lastIndexOf(' ');
-		if (separator == -1) return Optional.empty();
+		if (separator == -1) return new None<>();
 		let flagsAndType = before1.substring(0, separator);
 		let typeSeparator = flagsAndType.lastIndexOf(' ');
-		if (typeSeparator == -1) return Optional.empty();
+		if (typeSeparator == -1) return new None<>();
 		let modifiers = Arrays.asList(flagsAndType.substring(0, typeSeparator).strip().split(" "));
 		let type = flagsAndType.substring(typeSeparator + 1);
 		let name = before1.substring(separator + 1);
@@ -163,108 +111,106 @@ export object Main {
 		if (contentStart == -1 && contentEnd == -1){
 		let modifierString = modifiers.contains("private") ? "private " : "";
 		let rendered = renderMagmaFunction(name, modifierString, ": " + type, outputParamString, ";", "");
-		let result : Result;
+		Result result;
 		if (modifiers.contains("static"){
 		result = new StaticResult(rendered);
 	}
 		else {
 		result = new InstanceResult(rendered);
 	}
-		return Optional.of(result);
+		return new Some<>(result);
 	}
 		else {
 		let inputContent = input.substring(contentStart + 1, contentEnd);
 		let inputContentLines = Strings.split(inputContent);
 		let output = ArrayList<String>();
-		for (let __temp__ = 0; i < inputContentLines.size(); i++){
-			let inputContentLine = inputContentLines.get(__temp__)
-			let line = inputContentLine.strip();
-			if (!line.isEmpty(){
-			let methodOutput = compileStatement(line, indent + 1);
-			output.add(methodOutput);
-		}
-		}
+		for (var inputContentLine : inputContentLines) {
+                var line = inputContentLine.strip();
+                if (!line.isEmpty()) {
+                    var methodOutput = compileStatement(line, indent + 1);
+                    output.add(methodOutput);
+                }
+            };
 		let outputContent = renderBlock(output, indent + 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
 		let rendered = List.of(
                     annotationsString,
                     renderMagmaFunction(name, modifierString, ": " + type, outputParamString, " => " + outputContent, annotationsString)
             );
-		let result : Result;
+		Result result;
 		if (modifiers.contains("static"){
 			result = new StaticResult(rendered);
 		}
 		else {
 			result = new InstanceResult(rendered);
 		}
-		return Optional.of(result);
+		return new Some<>(result);
 	}
 		else {
-		return Optional.empty();
+		return new None<>();
 	}
 	}
 	
-	private def compileParamString(let inputParamString : String): String => {
+	private def compileParamString(): String => {
 		let lines = inputParamString.split(",");
 		return Arrays.stream(lines)
                 .map(String::strip)
                 .filter(value -> !value.isEmpty())
                 .map(Main::compileDeclaration)
-                .flatMap(Optional::stream)
+                .flatMap(Options::stream)
                 .map(Definition::render)
                 .collect(Collectors.joining(", "));
 	}
 	
-	private def compileStatement(let line : String, let indent : I32): String => {
+	private def compileStatement(): String => {
 		return compileIf(line, indent)
-                .or(() -> compileElse(line, indent))
-                .or(() -> compileFor(line, indent))
-                .or(() -> compileTry(line, indent))
-                .or(() -> compileDeclaration(line)
+                .orLazy(() -> compileElse(line, indent))
+                .orLazy(() -> compileFor(line, indent))
+                .orLazy(() -> compileTry(line, indent))
+                .orLazy(() -> compileDeclaration(line)
                         .map(Definition::render)
                         .map(value -> value + ";"))
-                .or(() -> compileCatch(line, indent))
+                .orLazy(() -> compileCatch(line, indent))
                 .orElse(line + ";");
 	}
 	
-	private def compileInterface(let input : String, let indent : I32): Optional<Result> => {
-		if (!input.startsWith("interface ")) return Optional.empty();
+	private def compileInterface(): Option<Result> => {
+		if (!input.startsWith("interface ")) return new None<>();
 		let start = input.indexOf('{');
 		let end = input.lastIndexOf('}');
 		let name = input.substring("interface ".length(), start).strip();
 		let content = Strings.split(input.substring(start + 1, end));
 		let members = getMultipleResult(content, indent);
-		return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers, indent + 1)));
+		return new Some<>(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers(), indent + 1)));
 	}
 	
-	private def compileFor(let line : String, let indent : I32): Optional<String> => {
-		if (!line.startsWith("for ")) return Optional.empty();
+	private def compileFor(): Option<String> => {
+		if (!line.startsWith("for ")) return new None<>();
 		let paramString = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
-		let content : String = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
+		String content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let splitContent = Strings.split(content);
 		let cache = ArrayList<String>();
-		for (let __temp__ = 0; i < splitContent.size(); i++){
-		let s = splitContent.get(__temp__)
-		let statement = compileStatement(s, indent);
-		cache.add(statement);
-	}
+		for (String s : splitContent) {
+            var statement = compileStatement(s, indent);
+            cache.add(statement);
+        };
 		let separator = paramString.indexOf(':');
 		if (separator == -1){
 		let statements = renderBlock(cache, indent);
-		return Optional.of("for (" + paramString + ")" + statements);
+		return new Some<>("for (" + paramString + ")" + statements);
 	}
 		let substring = paramString.substring(0, separator);
 		let declaration = compileDeclaration(substring);
-		if (declaration.isEmpty()) return Optional.empty();
+		if (declaration.isEmpty()) return new None<>();
 		let container = paramString.substring(separator + 1).strip();
 		let generatedName = "__temp__";
-		cache.add(0, new Definition(declaration.get().name, Optional.empty(), Optional.of(container + ".get(" + generatedName + ")")).render());
+		cache.add(0, new Definition(declaration.orElseNull().name(), new None<>(), new Some<>(container + ".get(" + generatedName + ")")).render());
 		let statements = renderBlock(cache, indent);
-		return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
+		return new Some<>("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
 	}
 	
-	private def compileIf(let line : String, let indent : I32): Optional<String> => {
-		if (!line.startsWith("if")) return Optional.empty();
+	private def compileIf(): Option<String> => {
+		if (!line.startsWith("if")) return new None<>();
 		let substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let compiled = compileValue(substring);
 		let start = line.indexOf('{');
@@ -272,115 +218,112 @@ export object Main {
 		if (end == -1){
 		let value = line.substring(line.indexOf(')') + 1);
 		let compiledValue = compileValue(value);
-		return Optional.of("if (" + compiled + ")" + compiledValue + ";");
+		return new Some<>("if (" + compiled + ")" + compiledValue + ";");
 	}
 		let content = line.substring(start + 1, end);
 		let rendered = compileStatements(content, indent);
-		return Optional.of("if (" + compiled + ")" + rendered);
+		return new Some<>("if (" + compiled + ")" + rendered);
 	}
 	
-	private def compileCatch(let line : String, let indent : I32): Optional<String> => {
-		if (!line.startsWith("catch ")) return Optional.empty();
+	private def compileCatch(): Option<String> => {
+		if (!line.startsWith("catch ")) return new None<>();
 		let substring = line.substring(line.indexOf('(') + 1, line.indexOf(')'));
 		let compiled = compileDeclaration(substring)
                 .map(Definition::render)
                 .orElse(substring);
 		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let rendered = compileStatements(content, indent);
-		return Optional.of("catch (" + compiled + ")" + rendered);
+		return new Some<>("catch (" + compiled + ")" + rendered);
 	}
 	
-	private def compileStatements(let content : String, let indent : I32): String => {
+	private def compileStatements(): String => {
 		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
-		for (let __temp__ = 0; i < splitContent.size(); i++){
-		let s = splitContent.get(__temp__)
-		let statement = compileStatement(s, indent);
-		builder.add(statement);
-	}
+		for (String s : splitContent) {
+            var statement = compileStatement(s, indent);
+            builder.add(statement);
+        };
 		return renderBlock(builder, indent);
 	}
 	
-	private def compileElse(let line : String, let indent : I32): Optional<String> => {
-		if (!line.startsWith("else ")) return Optional.empty();
+	private def compileElse(): Option<String> => {
+		if (!line.startsWith("else ")) return new None<>();
 		let blockStart = line.indexOf('{');
 		let blockEnd = line.lastIndexOf('}');
 		if (blockEnd == -1){
 		let value = line.substring("else ".length());
 		let compiledValue = compileValue(value);
-		return Optional.of("else " + compiledValue);
+		return new Some<>("else " + compiledValue);
 	}
 		let content = line.substring(blockStart + 1, blockEnd);
 		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
-		for (let __temp__ = 0; i < splitContent.size(); i++){
-		let s = splitContent.get(__temp__)
-		let statement = compileStatement(s, indent + 1);
-		builder.add(statement);
-	}
-		return Optional.of("else " + renderBlock(builder, indent));
+		for (String s : splitContent) {
+            var statement = compileStatement(s, indent + 1);
+            builder.add(statement);
+        };
+		return new Some<>("else " + renderBlock(builder, indent));
 	}
 	
-	private def compileTry(let line : String, let indent : I32): Optional<String> => {
-		if (!line.startsWith("try ")) return Optional.empty();
+	private def compileTry(): Option<String> => {
+		if (!line.startsWith("try ")) return new None<>();
 		let content = line.substring(line.indexOf('{') + 1, line.lastIndexOf('}'));
 		let splitContent = Strings.split(content);
 		let builder = ArrayList<String>();
-		for (let __temp__ = 0; i < splitContent.size(); i++){
-		let s = splitContent.get(__temp__)
-		let statement = compileStatement(s, indent + 1);
-		builder.add(statement);
-	}
-		return Optional.of("try " + renderBlock(builder, indent));
+		for (String s : splitContent) {
+            var statement = compileStatement(s, indent + 1);
+            builder.add(statement);
+        };
+		return new Some<>("try " + renderBlock(builder, indent));
 	}
 	
-	private def compileDeclaration(let line : String): Optional<Definition> => {
+	private def compileDeclaration(): Option<Definition> => {
 		let valueSeparator = line.indexOf('=');
 		let before = line.substring(0, valueSeparator == -1 ? line.length() : valueSeparator).strip();
 		let lastSpace = before.lastIndexOf(' ');
 		if (lastSpace == -1){
-		return Optional.empty();
+		return new None<>();
 	}
 		let type = before.substring(0, lastSpace).strip();
 		let definitionName = before.substring(lastSpace).strip();
-		if (!isAlphaNumeric(definitionName)) return Optional.empty();
-		let typeString : Optional<String>;
-		if (type.equals("var")) typeString = Optional.empty();
+		if (!isAlphaNumeric(definitionName)) return new None<>();
+		Option<String> typeString;
+		if (type.equals("var")) typeString = new None<>();
 		else {
 		typeString = compileType(type);
-		if (typeString.isEmpty()) return Optional.empty();
+		if (typeString.isEmpty()) return new None<>();
 	}
-		let value : Optional<String>;
+		Option<String> value;
 		if (valueSeparator != -1){
 		let stripped = line.substring(valueSeparator + 1).strip();
-		value = Optional.of(compileValue(stripped));
+		value = new Some<>(compileValue(stripped));
 	}
 		else {
-		value = Optional.empty();
+		value = new None<>();
 	}
-		return Optional.of(new Definition(definitionName, typeString, value));
+		return new Some<>(new Definition(definitionName, typeString, value));
 	}
 	
-	private def compileValue(let stripped : String): String => {
-		let outputValue : String;
+	private def compileValue(): String => {
+		String outputValue;
 		if (stripped.startsWith("new "){
 		outputValue = stripped.substring("new ".length());
 	}
 		else {
 		outputValue = stripped;
 	}
-		let outputValue : return;
+		return outputValue;
 	}
 	
-	private def isAlphaNumeric(let definitionName : String): boolean => {
+	private def isAlphaNumeric(): boolean => {
 		for (int i = 0; i < definitionName.length(){
 		let c = definitionName.charAt(i);
 		if (!Character.isAlphabetic(c) && !Character.isDigit(c)) return false;
 	}
-		let true : return;
+		return true;
 	}
 	
-	private def compileType(let type : String): Optional<String> => {
+	private def compileType(): Option<String> => {
 		let genStart = type.indexOf('<');
 		let genEnd = type.lastIndexOf('>');
 		if (genStart != -1 && genEnd != -1){
@@ -389,12 +332,24 @@ export object Main {
 		let parentType = compileType(parent);
 		return parentType.map(s -> s + "<" + substring + ">");
 	}
-		if (type.equals("int")) return Optional.of("I32");
-		if (!isAlphaNumeric(type)) return Optional.empty();
-		else return Optional.of(type)
+		return extracted(type).orLazy(() -> {
+            return lexStringType(type);
+        }).flatMap(node -> new PrimitiveRenderer(node).render());
 	}
 	
-	private def renderMagmaFunction(let name : String, let modifiers : String, let typeString : String, let paramString : String, let contentString : String, let annotationsString : String): String => {
+	private def extracted(): Option<MapNode> => {
+		return type.equals("int")
+                ? new Some<>(new MapNode("primitive-type", Map.of("value", "I32")))
+                : new None<>();
+	}
+	
+	private def lexStringType(): Option<MapNode> => {
+		return isAlphaNumeric(type)
+                ? new Some<>(new MapNode("primitive-type", Map.of("value", type)))
+                : new None<>();
+	}
+	
+	private def renderMagmaFunction(): String => {
 		return modifiers + "def " + name + "(" + paramString + ")" + typeString + contentString;
 	}
 }
