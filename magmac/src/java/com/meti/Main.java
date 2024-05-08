@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
 
@@ -57,8 +56,8 @@ public class Main {
 
         var members = getMultipleResult(inputContent, 0);
 
-        var instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers, 0), "");
-        var renderedObject = members.staticMembers.isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers, 0);
+        var instanceOutput = renderMagmaFunction(name, "export class ", "", "", " => " + renderBlock(members.instanceMembers(), 0), "");
+        var renderedObject = members.staticMembers().isEmpty() ? "" : "\nexport object " + name + " " + renderBlock(members.staticMembers(), 0);
         return Optional.of(instanceOutput + renderedObject);
     }
 
@@ -71,8 +70,8 @@ public class Main {
                     .or(() -> compileMethod(line, indent))
                     .orElse(new InstanceResult(Collections.singletonList(line)));
 
-            members.instanceMembers.addAll(result.instanceValue());
-            members.staticMembers.addAll(result.staticValue());
+            members.instanceMembers().addAll(result.instanceValue());
+            members.staticMembers().addAll(result.staticValue());
         }
         return members;
     }
@@ -86,7 +85,7 @@ public class Main {
         var split = Strings.split(line.substring(line.indexOf('{') + 1, line.lastIndexOf('}')));
 
         var results = getMultipleResult(split, indent);
-        var renderedContent = renderBlock(results.instanceMembers, indent + 1);
+        var renderedContent = renderBlock(results.instanceMembers(), indent + 1);
 
         return Optional.of(new InstanceResult(renderMagmaFunction(name, "class ", "", compiledParameters, " => " + renderedContent, "")));
     }
@@ -207,7 +206,7 @@ public class Main {
         var content = Strings.split(input.substring(start + 1, end));
         var members = getMultipleResult(content, indent);
 
-        return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers, indent + 1)));
+        return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers(), indent + 1)));
     }
 
     private static Optional<String> compileFor(String line, int indent) {
@@ -234,7 +233,7 @@ public class Main {
 
         var container = paramString.substring(separator + 1).strip();
         var generatedName = "__temp__";
-        cache.add(0, new Definition(declaration.get().name, Optional.empty(), Optional.of(container + ".get(" + generatedName + ")")).render());
+        cache.add(0, new Definition(declaration.get().name(), Optional.empty(), Optional.of(container + ".get(" + generatedName + ")")).render());
 
         var statements = renderBlock(cache, indent);
         return Optional.of("for (let " + generatedName + " = 0; i < " + container + ".size(); i++)" + statements);
@@ -389,67 +388,5 @@ public class Main {
 
     private static String renderMagmaFunction(String name, String modifiers, String typeString, String paramString, String contentString, String annotationsString) {
         return modifiers + "def " + name + "(" + paramString + ")" + typeString + contentString;
-    }
-
-    interface Result {
-        List<String> staticValue();
-
-        List<String> instanceValue();
-    }
-
-    record MultipleResult(List<String> instanceMembers, List<String> staticMembers) implements Result {
-        @Override
-        public List<String> staticValue() {
-            return staticMembers;
-        }
-
-        @Override
-        public List<String> instanceValue() {
-            return instanceMembers;
-        }
-    }
-
-    record Definition(String name, Optional<String> type, Optional<String> value) {
-        String render() {
-            var typeString = type.map(type -> " : " + type).orElse("");
-            var valueString = value.map(value -> " = " + value).orElse("");
-            return "let " + name + typeString + valueString;
-        }
-    }
-
-    record StaticResult(List<String> value) implements Result {
-        StaticResult(String value) {
-            this(Collections.singletonList(value));
-        }
-
-        @Override
-        public List<String> staticValue() {
-            return value;
-        }
-
-        @Override
-        public List<String> instanceValue() {
-            return Collections.emptyList();
-        }
-    }
-
-    record InstanceResult(List<String> value) implements Result {
-        InstanceResult(String value) {
-            this(Collections.singletonList(value));
-        }
-
-        InstanceResult(List<String> value) {
-            this.value = value;
-        }
-
-        @Override
-        public List<String> staticValue() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public List<String> instanceValue() {
-            return value;
-        }
     }
 }
