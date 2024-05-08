@@ -43,7 +43,7 @@ public class Main {
             return Optional.of("import { " + child + " } from " + parent + ";\n");
         }
 
-        return Optional.empty();
+        return Optional.of(stripped);
     }
 
     private static ArrayList<String> split(String input) {
@@ -52,7 +52,7 @@ public class Main {
             current = processChar(input.charAt(i), current);
         }
 
-        return current.lines;
+        return current.advance().lines;
     }
 
     private static SplitState processChar(char c, SplitState current) {
@@ -70,7 +70,7 @@ public class Main {
         }
 
         private SplitState append(char c) {
-            return new SplitState(depth - 1, lines, this.builder.append(c));
+            return new SplitState(depth, lines, this.builder.append(c));
         }
 
         private SplitState exit() {
