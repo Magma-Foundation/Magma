@@ -12,6 +12,6 @@ public record ImportLexer(String stripped) implements Lexer {
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
         var map = Map.of("parent", parent, "child", child);
-        return Optional.of(new MapNode(map));
+        return Optional.of(new MapNode("import", map));
     }
 }

@@ -2,7 +2,9 @@ import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { * } from java.util;
+import { Function } from java.util.function;
 import { Collectors } from java.util.stream;
+import { Stream } from java.util.stream;
 export class def Main() => {
 	struct Result {
 		List<String> staticValue()
@@ -57,14 +59,15 @@ export class def Main() => {
 }
 export object Main {
 	
-	private def compileImport(let stripped : String): Optional<String> => {
-		if (!stripped.startsWith("import ")) return Optional.empty();
-		let segments = stripped.substring("import ".length());
-		let separator = segments.lastIndexOf('.');
-		let parent = segments.substring(0, separator);
-		let child = segments.substring(separator + 1);
-		let rendered = "import { " + child + " } from " + parent + ";\n";
-		return Optional.of(rendered);
+	private def lex(let input : String): Optional<MapNode> => {
+		return new ImportLexer(input).lex();
+	}
+	
+	private def render(let node : MapNode): Optional<String> => {
+		return Map.<String, Function<MapNode, ImportRenderer>>of("import", ImportRenderer::new)
+                .get(node.name())
+                .apply(node)
+                .render();
 	}
 	
 	def main(): void => {
@@ -78,7 +81,8 @@ export object Main {
 			let line = lines.get(__temp__)
 			let stripped = line.strip();
 			if (stripped.startsWith("package ")) continue;
-			outputLines.add(compileImport(stripped)
+			outputLines.add(lex(stripped)
+                        .flatMap(Main::render)
                         .or(() -> compileClass(stripped))
                         .orElse(stripped));
 		}
@@ -223,12 +227,12 @@ export object Main {
                 .orElse(line + ";");
 	}
 	
-	private def compileInterface(let line : String, let indent : I32): Optional<Result> => {
-		if (!line.startsWith("interface ")) return Optional.empty();
-		let start = line.indexOf('{');
-		let end = line.lastIndexOf('}');
-		let name = line.substring("interface ".length(), start).strip();
-		let content = Strings.split(line.substring(start + 1, end));
+	private def compileInterface(let input : String, let indent : I32): Optional<Result> => {
+		if (!input.startsWith("interface ")) return Optional.empty();
+		let start = input.indexOf('{');
+		let end = input.lastIndexOf('}');
+		let name = input.substring("interface ".length(), start).strip();
+		let content = Strings.split(input.substring(start + 1, end));
 		let members = getMultipleResult(content, indent);
 		return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers, indent + 1)));
 	}
@@ -383,8 +387,7 @@ export object Main {
 		let parent = type.substring(0, genStart).strip();
 		let substring = type.substring(genStart + 1, genEnd).strip();
 		let parentType = compileType(parent);
-		if (parentType.isEmpty()) return Optional.empty();
-		return Optional.of(parentType.get() + "<" + substring + ">");
+		return parentType.map(s -> s + "<" + substring + ">");
 	}
 		if (type.equals("int")) return Optional.of("I32");
 		if (!isAlphaNumeric(type)) return Optional.empty();

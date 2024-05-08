@@ -4,11 +4,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
-    private static Optional<String> compileImport(String stripped) {
-        return new ImportLexer(stripped).lex().flatMap(node -> new ImportRenderer(node).render());
+
+    private static Optional<MapNode> lex(String input) {
+        return new ImportLexer(input).lex();
+    }
+
+    private static Optional<String> render(MapNode node) {
+        return Map.<String, Function<MapNode, ImportRenderer>>of("import", ImportRenderer::new)
+                .get(node.name())
+                .apply(node)
+                .render();
     }
 
     public static void main(String[] args) {
@@ -22,7 +32,8 @@ public class Main {
             for (var line : lines) {
                 var stripped = line.strip();
                 if (stripped.startsWith("package ")) continue;
-                outputLines.add(compileImport(stripped)
+                outputLines.add(lex(stripped)
+                        .flatMap(Main::render)
                         .or(() -> compileClass(stripped))
                         .orElse(stripped));
             }
@@ -187,13 +198,13 @@ public class Main {
                 .orElse(line + ";");
     }
 
-    private static Optional<Result> compileInterface(String line, int indent) {
-        if (!line.startsWith("interface ")) return Optional.empty();
-        var start = line.indexOf('{');
-        var end = line.lastIndexOf('}');
+    private static Optional<Result> compileInterface(String input, int indent) {
+        if (!input.startsWith("interface ")) return Optional.empty();
+        var start = input.indexOf('{');
+        var end = input.lastIndexOf('}');
 
-        var name = line.substring("interface ".length(), start).strip();
-        var content = Strings.split(line.substring(start + 1, end));
+        var name = input.substring("interface ".length(), start).strip();
+        var content = Strings.split(input.substring(start + 1, end));
         var members = getMultipleResult(content, indent);
 
         return Optional.of(new InstanceResult("struct " + name + " " + renderBlock(members.instanceMembers, indent + 1)));
@@ -367,9 +378,8 @@ public class Main {
             var substring = type.substring(genStart + 1, genEnd).strip();
 
             var parentType = compileType(parent);
-            if (parentType.isEmpty()) return Optional.empty();
+            return parentType.map(s -> s + "<" + substring + ">");
 
-            return Optional.of(parentType.get() + "<" + substring + ">");
         }
 
         if (type.equals("int")) return Optional.of("I32");
