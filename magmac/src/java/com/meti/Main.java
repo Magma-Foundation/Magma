@@ -47,21 +47,44 @@ public class Main {
     }
 
     private static ArrayList<String> split(String input) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
+        var current = new SplitState();
         for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            if (c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                builder.append(c);
-            }
+            current = processChar(input.charAt(i), current);
         }
-        lines.add(builder.toString());
-        return lines;
+
+        return current.lines;
+    }
+
+    private static SplitState processChar(char c, SplitState current) {
+        if (c == ';' && current.depth == 0) return current.advance();
+        return switch (c) {
+            case '{' -> current.enter().append(c);
+            case '}' -> current.exit().append(c);
+            default -> current.append(c);
+        };
+    }
+
+    private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder) {
+        public SplitState() {
+            this(0, new ArrayList<>(), new StringBuilder());
+        }
+
+        private SplitState append(char c) {
+            return new SplitState(depth - 1, lines, this.builder.append(c));
+        }
+
+        private SplitState exit() {
+            return new SplitState(depth - 1, lines, builder);
+        }
+
+        private SplitState enter() {
+            return new SplitState(depth + 1, lines, builder);
+        }
+
+        private SplitState advance() {
+            var copy = new ArrayList<>(lines);
+            copy.add(builder.toString());
+            return new SplitState(depth, copy, new StringBuilder());
+        }
     }
 }
