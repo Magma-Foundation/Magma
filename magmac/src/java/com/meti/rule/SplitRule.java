@@ -30,7 +30,7 @@ public abstract class SplitRule implements Rule {
         for (String inputLine : input) {
             var optional = childRule.fromString(inputLine);
             if (optional.isEmpty()) {
-                throw new RuleException(inputLine);
+                return Optional.empty();
             }
 
             var tuple = optional.get();

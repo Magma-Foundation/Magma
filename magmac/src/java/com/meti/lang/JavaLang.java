@@ -30,9 +30,12 @@ public class JavaLang {
     public static final Rule JAVA_ROOT;
 
     public static final TypeRule PACKAGE = Type("package ", Left("package ", $("namespace")));
-    public static final TypeRule DECLARATION_RULE = Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value"))));
+    public static final TypeRule DECLARATION_RULE;
 
     static {
+        var declarationHeader = First(Strip(Last(Delimit("modifier", " "), " ", $("type"))), " ", $("name"));
+        DECLARATION_RULE = Type("declaration", Or(First(Strip(declarationHeader), "=", Strip($("value"))), declarationHeader));
+
         var segments = Last($("parent"), ".", $("child"));
         IMPORT = Type("import", Left("import ", Or(Left("static ", segments), segments)));
 
