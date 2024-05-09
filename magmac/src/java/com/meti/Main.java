@@ -43,7 +43,12 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        return split(input).stream().map(String::strip).map(Main::compileRootElement).flatMap(Optional::stream).collect(Collectors.toList());
+        return split(input)
+                .stream()
+                .map(String::strip)
+                .map(Main::compileRootElement)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
     }
 
     private static Optional<String> compileRootElement(String stripped) {
