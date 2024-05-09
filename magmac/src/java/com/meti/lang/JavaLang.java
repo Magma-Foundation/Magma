@@ -36,8 +36,12 @@ public class JavaLang {
         var methodParam = Strip(First($("param-type"), " ", $("param-name")));
         var methodParams = Left("(", Right(methodParam, ")"));
 
-        var before = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
-        METHOD = Type("method", Strip(FirstIncludeRight(before, "(", FirstIncludeLeft(methodParams, ")", $("content")))));
+        var methodBeforeParams = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
+        var methodMembers = Or(Type("content", $("value")));
+
+        var methodContent = Strip(Left("{", Right(Nodes("children", methodMembers), "}")));
+
+        METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")", methodContent))));
 
         CLASS_MEMBER = Or(
                 METHOD,
