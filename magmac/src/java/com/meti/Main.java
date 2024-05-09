@@ -77,11 +77,10 @@ public class Main {
             return new Some<>(new Tuple<>(child, state.enter()));
         }
 
-        if (child.is("method")) {
-            return new Some<>(new Tuple<>(attachIndent(child, state), state));
-        }
-
-        if (child.is("declaration")) {
+        if (child.is("catch")
+            || child.is("declaration")
+            || child.is("method")
+            || child.is("try")){
             return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 

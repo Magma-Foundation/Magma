@@ -62,6 +62,7 @@ public class JavaLang {
 
         var methodMembers = Or(
                 Type("try", Strip(Left("try", lazy))),
+                Type("catch", Strip(Left("catch", First(Strip(Left("(", $("condition"))),")", lazy)))),
                 Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value")))),
                 Type("content", $("value"))
         );

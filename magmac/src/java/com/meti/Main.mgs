@@ -27,9 +27,11 @@ class def Main() => {
 
             Files.writeString(target, output)
 		}
- catch (IOException e) {
-            throw new RuntimeException(source.toAbsolutePath().toString(), e);
-        }
+		catch (IOException e){
+
+            throw new RuntimeException(source.toAbsolutePath().toString(), e)
+		}
+
 	}
 	def compile(input : String): List<String> => {
 		let inputAST : var = JAVA_ROOT.fromString(input)
@@ -73,11 +75,10 @@ class def Main() => {
             return new Some<>(new Tuple<>(child, state.enter()));
         }
 
-        if (child.is("method")) {
-            return new Some<>(new Tuple<>(attachIndent(child, state), state));
-        }
-
-        if (child.is("declaration")) {
+        if (child.is("catch")
+            || child.is("declaration")
+            || child.is("method")
+            || child.is("try")){
             return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 

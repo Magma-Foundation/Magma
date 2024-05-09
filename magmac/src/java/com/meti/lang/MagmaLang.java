@@ -46,7 +46,8 @@ public class MagmaLang {
         var lazy = new LazyRule();
 
         var methodContent = Nodes("children", Or(
-                Type("try", Strip(Left("\t\ttry ", lazy))),
+                Type("try", Strip(First($("indent"), "try ", lazy))),
+                Type("catch", Strip(First($("indent"), "catch ", First(Strip(Left("(", $("condition"))),")", lazy)))),
                 DECLARATION,
                 Type("content", $("value"))
         ));
