@@ -46,6 +46,8 @@ public class Main {
                     Files.writeString(target, output);
                 } catch (RuntimeException e) {
                     System.out.printf("%s.%s: Unknown token: %s%n", String.join(".", namespace), name, e.getMessage());
+                    e.printStackTrace();
+                    return;
                 }
             }
 

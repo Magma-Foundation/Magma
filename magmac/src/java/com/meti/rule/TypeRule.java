@@ -14,7 +14,11 @@ public record TypeRule(String type, Rule rule) implements Rule {
 
     @Override
     public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        return rule.fromString(value).map(tuple1 -> tuple1.replaceRight(Optional.of(type)));
+        try {
+            return rule.fromString(value).map(tuple1 -> tuple1.replaceRight(Optional.of(type)));
+        } catch (RuleException e) {
+            throw new RuleException("Failed to build node '" + type + "': " + value, e);
+        }
     }
 
     @Override

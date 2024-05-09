@@ -30,6 +30,7 @@ public class JavaLang {
     public static final Rule JAVA_ROOT;
 
     public static final TypeRule PACKAGE = Type("package ", Left("package ", $("namespace")));
+    public static final TypeRule DECLARATION_RULE = Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value"))));
 
     static {
         var segments = Last($("parent"), ".", $("child"));
@@ -44,6 +45,7 @@ public class JavaLang {
         METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")", methodContent))));
 
         CLASS_MEMBER = Or(
+                DECLARATION_RULE,
                 METHOD,
                 Type("content", $("value"))
         );
@@ -66,7 +68,7 @@ public class JavaLang {
         var methodMembers = Or(
                 Type("try", Strip(Left("try", lazy))),
                 Type("catch", Strip(Left("catch", First(Strip(Left("(", $("condition"))), ")", lazy)))),
-                Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value")))),
+                DECLARATION_RULE,
                 Type("content", $("value"))
         );
 

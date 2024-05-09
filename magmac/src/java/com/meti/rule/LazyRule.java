@@ -7,7 +7,6 @@ import com.meti.node.NodeAttributes;
 import java.util.Optional;
 
 public class LazyRule implements Rule {
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Optional<Rule> parent = Optional.empty();
 
     public void setRule(Rule rule) {

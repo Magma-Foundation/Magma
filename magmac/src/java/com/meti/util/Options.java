@@ -19,7 +19,7 @@ public class Options {
         throw new OptionException();
     }
 
-    public static <T> Option<T> fromNative(@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<T> listOfNodes1) {
+    public static <T> Option<T> fromNative(Optional<T> listOfNodes1) {
         return listOfNodes1.<Option<T>>map(Some::new).orElse(new None<>());
     }
 }

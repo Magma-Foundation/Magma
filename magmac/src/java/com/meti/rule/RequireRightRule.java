@@ -15,9 +15,13 @@ public record RequireRightRule(Rule right, String slice) implements Rule {
     public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         if (!value.endsWith(this.slice)) return Optional.empty();
 
-        var endIndex = value.length() - this.slice.length();
-        var segments = value.substring(0, endIndex);
-        return this.right.fromString(segments);
+        try {
+            var endIndex = value.length() - this.slice.length();
+            var segments = value.substring(0, endIndex);
+            return this.right.fromString(segments);
+        } catch (RuleException e) {
+            throw new RuleException(value, e);
+        }
     }
 
     @Override

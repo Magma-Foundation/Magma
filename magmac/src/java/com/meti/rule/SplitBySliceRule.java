@@ -23,20 +23,24 @@ public abstract class SplitBySliceRule implements Rule {
 
     @Override
     public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        var separator = applyOperation(value);
-        if (separator == -1) return Optional.empty();
+        try {
+            var separator = applyOperation(value);
+            if (separator == -1) return Optional.empty();
 
-        var left = value.substring(0, separator + computeLeftOffset());
-        var leftMap = leftRule.fromString(left).map(Tuple::left);
-        if (leftMap.isEmpty()) return Optional.empty();
+            var left = value.substring(0, separator + computeLeftOffset());
+            var leftMap = leftRule.fromString(left).map(Tuple::left);
+            if (leftMap.isEmpty()) return Optional.empty();
 
-        var right = value.substring(separator + computeRightOffset());
-        var rightMap = rightRule.fromString(right).map(Tuple::left);
+            var right = value.substring(separator + computeRightOffset());
+            var rightMap = rightRule.fromString(right).map(Tuple::left);
 
-        if (rightMap.isEmpty()) return Optional.empty();
+            if (rightMap.isEmpty()) return Optional.empty();
 
-        var attributes = leftMap.orElseThrow().add(rightMap.orElseThrow());
-        return Optional.of(new Tuple<>(attributes, Optional.empty()));
+            var attributes = leftMap.orElseThrow().add(rightMap.orElseThrow());
+            return Optional.of(new Tuple<>(attributes, Optional.empty()));
+        } catch (RuleException e) {
+            throw new RuleException(value, e);
+        }
     }
 
     protected abstract int computeLeftOffset();

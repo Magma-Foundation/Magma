@@ -15,8 +15,12 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
     public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         if (!value.startsWith(this.slice)) return Optional.empty();
 
-        var segments = value.substring(this.slice.length());
-        return this.right.fromString(segments);
+        try {
+            var segments = value.substring(this.slice.length());
+            return this.right.fromString(segments);
+        } catch (RuleException e) {
+            throw new RuleException(value, e);
+        }
     }
 
     @Override
