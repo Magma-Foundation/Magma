@@ -8,9 +8,7 @@ import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { split } from com.meti.rule.NodeSplitRule;
-class def Main() => {
-
-    public static void main(String[] args) {
+class def Main() => {class def main(String[] args) => {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
             var input = Files.readString(source);
@@ -24,17 +22,22 @@ class def Main() => {
     }
 
     private static List<String> compile(String input) {
-        return split(input)
+        var nodes = split(input)
                 .stream()
                 .map(String::strip)
                 .map(Main::compileRootElement)
                 .flatMap(Optional::stream)
+                .toList();
+
+        return nodes.stream()
+                .map(MAGMA_ROOT::toString)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
 
-    private static Optional<String> compileRootElement(String stripped) {
+    private static Optional<MapNode> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped).flatMap(MAGMA_ROOT::toString);
+        return lex(stripped);
     }
 
     private static Optional<MapNode> lex(String stripped) {

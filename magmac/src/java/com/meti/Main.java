@@ -29,17 +29,22 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        return split(input)
+        var nodes = split(input)
                 .stream()
                 .map(String::strip)
                 .map(Main::compileRootElement)
                 .flatMap(Optional::stream)
+                .toList();
+
+        return nodes.stream()
+                .map(MAGMA_ROOT::toString)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
 
-    private static Optional<String> compileRootElement(String stripped) {
+    private static Optional<MapNode> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped).flatMap(MAGMA_ROOT::toString);
+        return lex(stripped);
     }
 
     private static Optional<MapNode> lex(String stripped) {
