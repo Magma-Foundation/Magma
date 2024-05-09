@@ -49,8 +49,7 @@ public class JavaLang {
 
         CLASS_MEMBER = Or(
                 DECLARATION_RULE,
-                METHOD,
-                Type("content", $("value"))
+                METHOD
         );
 
         CLASS = Type("class", First(Empty, "class ", FirstIncludeRight(Strip($("name")), "{",
