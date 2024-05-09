@@ -20,20 +20,16 @@ public final class NodeAttributes {
         return new NodeAttributes(copy);
     }
 
-    @Deprecated
-    public Map<String, String> map() {
-        var copy = new HashMap<String, String>();
-        for (var stringStringEntry : map.entrySet()) {
-            copy.put(stringStringEntry.getKey(), stringStringEntry.getValue().asString().orElse(""));
-        }
-
-        return copy;
-    }
-
     public Optional<Attribute> apply(String name) {
         if(map.containsKey(name)) {
             return Optional.of(map.get(name));
         }
         return Optional.empty();
+    }
+
+    public NodeAttributes add(NodeAttributes other) {
+        var copy = new HashMap<>(map);
+        copy.putAll(other.map);
+        return new NodeAttributes(copy);
     }
 }

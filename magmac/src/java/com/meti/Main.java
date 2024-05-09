@@ -15,17 +15,21 @@ import java.util.stream.Collectors;
 
 import static com.meti.rule.DiscardRule.Discard;
 import static com.meti.rule.ExtractRule.$;
-import static com.meti.rule.NamingRule.Named;
+import static com.meti.rule.NamingRule.Name;
+import static com.meti.rule.NodeRule.Node;
 import static com.meti.rule.RequireLeftRule.Left;
 import static com.meti.rule.RequireRightRule.Right;
+import static com.meti.rule.SplitByFirstSliceInclusiveRule.FirstInclusive;
 import static com.meti.rule.SplitByFirstSliceRule.First;
 import static com.meti.rule.SplitByLastSliceRule.Last;
 import static com.meti.rule.StripRule.Strip;
 
 public class Main {
-    public static final Rule IMPORT_RULE = Named("import", Left("import ", Last($("parent"), ".", $("child"))));
-    public static final Rule CLASS_RULE = Named("class", First(Discard, "class ", First(Strip($("name")),
-            "{", Right($("content"), "}"))));
+    public static final Rule IMPORT_RULE = Name("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule BLOCK_RULE = Strip(Left("{", Right($("lines"), "}")));
+    public static final Rule CLASS_RULE = Name("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
+            Node("content", Name("block", BLOCK_RULE)))));
+
     public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
             IMPORT_RULE,
             CLASS_RULE));

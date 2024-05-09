@@ -11,8 +11,11 @@ public record ClassRenderer(MapNode node) implements Renderer {
         if (!node().type().equals("class")) return Optional.empty();
 
         var name = node.apply("name").flatMap(Attribute::asString).orElse("");
-        var content = node.apply("content").flatMap(Attribute::asString).orElse("");
+        var renderedContent = node.apply("content").flatMap(Attribute::asNode)
+                .flatMap(content -> content.apply("lines"))
+                .flatMap(Attribute::asString)
+                .orElse("");
 
-        return Optional.of("class def " + name + "() => {" + content + "}");
+        return Optional.of("class def " + name + "() => {" + renderedContent + "}");
     }
 }

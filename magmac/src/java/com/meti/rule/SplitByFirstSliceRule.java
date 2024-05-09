@@ -13,4 +13,9 @@ public final class SplitByFirstSliceRule extends SplitBySliceRule {
     protected int applyOperation(String value) {
         return value.indexOf(slice);
     }
+
+    @Override
+    protected int computeOffset() {
+        return slice.length();
+    }
 }

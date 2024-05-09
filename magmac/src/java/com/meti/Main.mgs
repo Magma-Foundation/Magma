@@ -11,16 +11,20 @@ import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { Discard } from static com.meti.rule.DiscardRule;
 import { $ } from static com.meti.rule.ExtractRule;
-import { Named } from static com.meti.rule.NamingRule;
+import { Name } from static com.meti.rule.NamingRule;
+import { Node } from static com.meti.rule.NodeRule;
 import { Left } from static com.meti.rule.RequireLeftRule;
 import { Right } from static com.meti.rule.RequireRightRule;
+import { FirstInclusive } from static com.meti.rule.SplitByFirstSliceInclusiveRule;
 import { First } from static com.meti.rule.SplitByFirstSliceRule;
 import { Last } from static com.meti.rule.SplitByLastSliceRule;
 import { Strip } from static com.meti.rule.StripRule;
 class def Main() => {
-    public static final Rule IMPORT_RULE = Named("import", Left("import ", Last($("parent"), ".", $("child"))));
-    public static final Rule CLASS_RULE = Named("class", First(Discard, "class ", First(Strip($("name")),
-            "{", Right($("content"), "}"))));
+    public static final Rule IMPORT_RULE = Name("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule BLOCK_RULE = Strip(Left("{", Right($("lines"), "}")));
+    public static final Rule CLASS_RULE = Name("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
+            Node("content", Name("block", BLOCK_RULE)))));
+
     public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
             IMPORT_RULE,
             CLASS_RULE));
