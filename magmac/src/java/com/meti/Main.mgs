@@ -7,7 +7,7 @@ import { Paths } from java.nio.file;
 import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
-import { * } from static com.meti.rule.NodeSplitRule;
+import { * } from com.meti.rule.NodeSplitRule;
 class def Main() => {
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -37,7 +37,7 @@ class def Main() => {
     }
 
     private static Optional<MapNode> lex(String stripped) {
-        return JavaLang.RULES.get("root")
+        return JavaLang.ROOT_RULES.get("root")
                 .stream()
                 .map(rule -> rule.apply(stripped))
                 .flatMap(Optional::stream)

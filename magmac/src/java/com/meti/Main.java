@@ -42,7 +42,7 @@ public class Main {
     }
 
     private static Optional<MapNode> lex(String stripped) {
-        return JavaLang.RULES.get("root")
+        return JavaLang.ROOT_RULES.get("root")
                 .stream()
                 .map(rule -> rule.apply(stripped))
                 .flatMap(Optional::stream)
