@@ -1,13 +1,13 @@
-import { Attribute } from com.meti.node;
+import { * } from com.meti.node;
+import { Option } from com.meti.util;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
-import { Collections } from java.util;
-import { List } from java.util;
-import { Optional } from java.util;
+import { * } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
+import { * } from com.meti.util.Options;
 class def Main() => {
 	def main(args : String[]): void => {
 		let source : var = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -24,16 +24,49 @@ class def Main() => {
         }
 	}
 	def compile(input : String): List<String> => {
-		let nodes : var = JAVA_ROOT.fromString(input)
+		let inputAST : var = JAVA_ROOT.fromString(input)
                 .map(Tuple::left)
-                .flatMap(tuple -> tuple.apply("roots"))
-                .flatMap(Attribute::asListOfNodes)
+                .flatMap(tuple -> toNative(tuple.apply("roots")))
+                .flatMap(attribute -> toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList());
+		let outputAST : var = new ArrayList<MapNode>();
+		let (MapNode child : inputAST) {
+            var outputChild : for = transform(child).orElse(child);
+            outputAST.add(outputChild);
+        };
 
 
-        return nodes.stream()
+        return outputAST.stream()
                 .map(MAGMA_ROOT::toString)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList())
+	}
+	def transform(child : MapNode): Option<MapNode> => {
+		let $Option(() -> {
+            if (!child.is("class")) return $$();
+
+            var inputContent : return = child
+                    .apply("content").$()
+                    .asNode().$()
+                    .apply("children").$()
+                    .asListOfNodes().$();
+
+            var outputContent = new ArrayList<MapNode>();
+            for (var input : inputContent) {
+                MapNode output;
+                if (input.is("method")) {
+                    output = input.with("indent", new StringAttribute("\t"));
+                } else {
+                    output = input;
+                }
+
+                outputContent.add(output);
+            }
+
+            return child.with("content", new NodeAttribute(new MapNode("block", new NodeAttributes(Map.of(
+                    "children", new NodeListAttribute(outputContent)
+            )))));
+        };
+)
 	}
 }

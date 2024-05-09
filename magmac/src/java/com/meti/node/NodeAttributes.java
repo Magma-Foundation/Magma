@@ -1,8 +1,11 @@
 package com.meti.node;
 
+import com.meti.util.None;
+import com.meti.util.Option;
+import com.meti.util.Some;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public final class NodeAttributes {
     private final Map<String, Attribute> map;
@@ -20,16 +23,21 @@ public final class NodeAttributes {
         return new NodeAttributes(copy);
     }
 
-    public Optional<Attribute> apply(String name) {
-        if(map.containsKey(name)) {
-            return Optional.of(map.get(name));
-        }
-        return Optional.empty();
+    public Option<Attribute> apply(String name) {
+        return map.containsKey(name)
+                ? new Some<>(map.get(name))
+                : new None<>();
     }
 
     public NodeAttributes add(NodeAttributes other) {
         var copy = new HashMap<>(map);
         copy.putAll(other.map);
+        return new NodeAttributes(copy);
+    }
+
+    public NodeAttributes with(String key, Attribute value) {
+        var copy = new HashMap<>(map);
+        copy.put(key, value);
         return new NodeAttributes(copy);
     }
 }

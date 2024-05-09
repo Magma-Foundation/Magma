@@ -1,15 +1,17 @@
 package com.meti.node;
 
-import com.meti.Tuple;
-
-import java.util.Optional;
+import com.meti.util.Option;
 
 public record MapNode(String type, NodeAttributes node) {
-    public static Optional<MapNode> fromTuple(Tuple<NodeAttributes, Optional<String>> tuple) {
-        return tuple.right().map(name -> new MapNode(name, tuple.left()));
+    public Option<Attribute> apply(String name) {
+        return node.apply(name);
     }
 
-    public Optional<Attribute> apply(String name) {
-        return node.apply(name);
+    public boolean is(String type) {
+        return this.type.equals(type);
+    }
+
+    public MapNode with(String key, Attribute attribute) {
+        return new MapNode(type, node.with(key, attribute));
     }
 }

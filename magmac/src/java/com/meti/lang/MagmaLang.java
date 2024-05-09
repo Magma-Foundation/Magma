@@ -29,8 +29,7 @@ public class MagmaLang {
 
         var left = First(methodReturnTypeRule, " => ", right);
 
-        var methodRule = Type("method", Strip(Left("\tdef ",
-                FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
+        var methodRule = Type("method", Strip(First($("indent"), "def ", FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
 
         Rule child = Or(methodRule, Type("content", $("value")));
         var blockRule = Strip(Left("{\n", Right(Nodes("children", child), "}")));

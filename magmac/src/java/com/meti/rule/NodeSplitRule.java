@@ -4,6 +4,7 @@ import com.meti.Tuple;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.NodeListAttribute;
+import com.meti.util.Options;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,10 +70,10 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
 
     @Override
     public Optional<String> toString(MapNode node) {
-        var optional = node.apply(propertyName);
+        var optional = Options.toNative(node.apply(propertyName));
         if (optional.isEmpty()) return Optional.empty();
 
-        var nodeList = optional.get().asListOfNodes();
+        var nodeList = Options.toNative(optional.get().asListOfNodes());
         if (nodeList.isEmpty()) return Optional.empty();
 
         var list = nodeList.get();

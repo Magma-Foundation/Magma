@@ -4,6 +4,7 @@ import com.meti.Tuple;
 import com.meti.node.Attribute;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
+import com.meti.util.Options;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,6 @@ public record ExtractRule(String key) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        return node.apply(key).flatMap(Attribute::asString);
+        return Options.toNative(node.apply(key)).flatMap(Attribute::asString);
     }
 }

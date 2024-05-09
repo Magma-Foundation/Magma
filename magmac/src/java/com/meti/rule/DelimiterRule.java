@@ -5,6 +5,7 @@ import com.meti.node.Attribute;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.StringListAttribute;
+import com.meti.util.Options;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,6 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        return node.apply(name).flatMap(Attribute::asListOfStrings).map(list -> String.join(delimiter, list));
+        return Options.toNative(node.apply(name)).flatMap(Attribute::asListOfStrings).map(list -> String.join(delimiter, list));
     }
 }

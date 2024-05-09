@@ -4,6 +4,7 @@ import com.meti.Tuple;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttribute;
 import com.meti.node.NodeAttributes;
+import com.meti.util.Options;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,10 +28,10 @@ public record NodeRule(String name, Rule parent) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        var apply = node.apply(name);
+        var apply = Options.toNative(node.apply(name));
         if (apply.isEmpty()) return Optional.empty();
 
-        var childNode = apply.get().asNode();
+        var childNode = Options.toNative(apply.get().asNode());
         if (childNode.isEmpty()) return Optional.empty();
 
         return parent.toString(childNode.get());

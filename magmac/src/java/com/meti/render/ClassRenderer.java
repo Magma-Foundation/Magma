@@ -2,6 +2,7 @@ package com.meti.render;
 
 import com.meti.node.Attribute;
 import com.meti.node.MapNode;
+import com.meti.util.Options;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -12,13 +13,13 @@ public record ClassRenderer(MapNode node) implements Renderer {
     public Optional<String> render() {
         if (!node().type().equals("class")) return Optional.empty();
 
-        var name = node.apply("name").flatMap(Attribute::asString).orElse("");
-        var renderedContent = node.apply("content").flatMap(Attribute::asNode)
-                .flatMap(content -> content.apply("children"))
-                .flatMap(Attribute::asListOfNodes)
+        var name = Options.toNative(node.apply("name")).flatMap(Attribute::asString).orElse("");
+        var renderedContent = Options.toNative(node.apply("content")).flatMap(attribute1 -> Options.toNative(attribute1.asNode()))
+                .flatMap(content -> Options.toNative(content.apply("children")))
+                .flatMap(attribute -> Options.toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList())
                 .stream()
-                .map(node -> node.apply("value")).flatMap(Optional::stream)
+                .map(node -> Options.toNative(node.apply("value"))).flatMap(Optional::stream)
                 .map(Attribute::asString)
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining());

@@ -1,17 +1,17 @@
 package com.meti;
 
-import com.meti.node.Attribute;
+import com.meti.node.*;
+import com.meti.util.Option;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
+import static com.meti.util.Options.*;
 
 public class Main {
 
@@ -29,15 +29,49 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        var nodes = JAVA_ROOT.fromString(input)
+        var inputAST = JAVA_ROOT.fromString(input)
                 .map(Tuple::left)
-                .flatMap(tuple -> tuple.apply("roots"))
-                .flatMap(Attribute::asListOfNodes)
+                .flatMap(tuple -> toNative(tuple.apply("roots")))
+                .flatMap(attribute -> toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList());
 
-        return nodes.stream()
+        var outputAST = new ArrayList<MapNode>();
+        for (MapNode child : inputAST) {
+            var outputChild = transform(child).orElse(child);
+            outputAST.add(outputChild);
+        }
+
+        return outputAST.stream()
                 .map(MAGMA_ROOT::toString)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
+    }
+
+    private static Option<MapNode> transform(MapNode child) {
+        return $Option(() -> {
+            if (!child.is("class")) return $$();
+
+            var inputContent = child
+                    .apply("content").$()
+                    .asNode().$()
+                    .apply("children").$()
+                    .asListOfNodes().$();
+
+            var outputContent = new ArrayList<MapNode>();
+            for (var input : inputContent) {
+                MapNode output;
+                if (input.is("method")) {
+                    output = input.with("indent", new StringAttribute("\t"));
+                } else {
+                    output = input;
+                }
+
+                outputContent.add(output);
+            }
+
+            return child.with("content", new NodeAttribute(new MapNode("block", new NodeAttributes(Map.of(
+                    "children", new NodeListAttribute(outputContent)
+            )))));
+        });
     }
 }
