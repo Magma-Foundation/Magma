@@ -35,8 +35,8 @@ public class JavaLang {
         var methodParam = Strip(First($("param-type"), " ", $("param-name")));
         var methodParams = Left("(", Right(methodParam, ")"));
 
-        METHOD = Type("method", Strip(Left("public static void ",
-                FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", $("content"))))));
+        var right = FirstIncludeRight(Last(Discard, " ", $("name")), "(", FirstIncludeLeft(methodParams, ")", $("content")));
+        METHOD = Type("method", Strip(right));
 
         CLASS_MEMBER = Or(
                 METHOD,
