@@ -7,7 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 public record NodeListAttribute(List<MapNode> nodes) implements Attribute {
+    public static final String KEY = "node-list";
     public static final AttributeFactory<List<MapNode>> NodeListFactory = new AttributeFactory<>() {
+        @Override
+        public boolean accepts(Attribute attribute) {
+            return attribute.is(KEY);
+        }
+
         @Override
         public Attribute toAttribute(List<MapNode> value) {
             return new NodeListAttribute(value);
@@ -35,5 +41,10 @@ public record NodeListAttribute(List<MapNode> nodes) implements Attribute {
     @Override
     public Option<MapNode> asNode() {
         return Options.fromNative(asNode1());
+    }
+
+    @Override
+    public boolean is(String key) {
+        return key.equals(KEY);
     }
 }

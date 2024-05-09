@@ -5,7 +5,9 @@ import com.meti.util.Option;
 import com.meti.util.Some;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class NodeAttributes {
     private final Map<String, Attribute> map;
@@ -39,5 +41,13 @@ public final class NodeAttributes {
         var copy = new HashMap<>(map);
         copy.put(key, value);
         return new NodeAttributes(copy);
+    }
+
+    public <T> List<String> filter(AttributeFactory<T> factory) {
+        return map.entrySet()
+                .stream()
+                .filter(entry-> factory.accepts(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }

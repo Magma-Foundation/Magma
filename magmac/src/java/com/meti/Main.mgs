@@ -12,8 +12,71 @@ import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
-import { DECLARATION } from com.meti.lang.MagmaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { NodeFactory } from com.meti.node.NodeAttribute;
 import { NodeListFactory } from com.meti.node.NodeListAttribute;
 import { toNative } from com.meti.util.Options;
+class def Main() => {
+	def main(args : String[]): void => {
+		let source : var = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
+		try {
+		let input : var = Files.readString(source);
+		let target : var = source.resolveSibling("Main.mgs");
+		let outputContent : var = compile(input);
+		let output : var = String.join("", outputContent);
+
+            Files.writeString(target, output)
+	}
+ catch (IOException e) {
+            throw new RuntimeException(source.toAbsolutePath().toString(), e);
+        }
+	}
+	def compile(input : String): List<String> => {
+		let inputAST : var = JAVA_ROOT.fromString(input)
+                .map(Tuple::left)
+                .flatMap(tuple -> toNative(tuple.apply("roots")))
+                .flatMap(attribute -> toNative(attribute.asListOfNodes()))
+                .orElse(Collections.emptyList());
+		let outputAST : var = new ArrayList<MapNode>();
+		let (MapNode child : inputAST) {
+            var outputChild : for = transform(child).orElse(child);
+            outputAST.add(outputChild);
+        };
+
+
+        return outputAST.stream()
+                .map(MAGMA_ROOT::toString)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList())
+	}
+	def transform(child : MapNode): Option<MapNode> => {
+
+        return new Some<>(transformAST(child))
+	}
+	def transformAST(child : MapNode): MapNode => {
+		let transformed : var = transformPreVisit(child).orElse(child);
+
+        return transformed.map(NodeFactory, Main::visitChild).map(NodeListFactory, Main::visitChildren)
+	}
+	def transformPreVisit(child : MapNode): Option<MapNode> => {
+
+        if(child.is("method")) {
+            return new Some<>(child.with("indent", new StringAttribute("\t")));
+        }
+
+        if (child.is("declaration")) {
+            return new Some<>(child.with("indent", new StringAttribute("\t\t")));
+        }
+        return new None<>()
+	}
+	def visitChildren(mapNodes : List<MapNode>): Option<List<MapNode>> => {
+
+        return new Some<>(mapNodes.stream()
+                .map(Main::transformAST)
+                .collect(Collectors.toList()))
+	}
+	def visitChild(node : MapNode): Option<MapNode> => {
+
+        return new Some<>(transformAST(node))
+	}
+}

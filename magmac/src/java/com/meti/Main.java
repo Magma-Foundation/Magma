@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
-import static com.meti.lang.MagmaLang.DECLARATION;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
 import static com.meti.node.NodeAttribute.NodeFactory;
 import static com.meti.node.NodeListAttribute.NodeListFactory;
@@ -56,31 +55,32 @@ public class Main {
     }
 
     private static Option<MapNode> transform(MapNode child) {
-        if (!child.is("class")) return new None<>();
-
-        return child.map("content", NodeFactory, Main::parseContentChildren);
+        return new Some<>(transformAST(child));
     }
 
-    private static Option<MapNode> parseContentChildren(MapNode content) {
-        return content.map("children", NodeListFactory, Main::parseContentChild);
+    private static MapNode transformAST(MapNode child) {
+        var transformed = transformPreVisit(child).orElse(child);
+        return transformed.map(NodeFactory, Main::visitChild).map(NodeListFactory, Main::visitChildren);
     }
 
-    private static Some<List<MapNode>> parseContentChild(List<MapNode> inputContent) {
-        var outputContent = new ArrayList<MapNode>();
-        for (var input : inputContent) {
-            outputContent.add(attachIndent(input).orElse(input));
+    private static Option<MapNode> transformPreVisit(MapNode child) {
+        if(child.is("method")) {
+            return new Some<>(child.with("indent", new StringAttribute("\t")));
         }
 
-        return new Some<>(outputContent);
+        if (child.is("declaration")) {
+            return new Some<>(child.with("indent", new StringAttribute("\t\t")));
+        }
+        return new None<>();
     }
 
-    private static Option<MapNode> attachIndent(MapNode previous) {
-        if (!previous.is("method")) return new None<>();
+    private static Option<List<MapNode>> visitChildren(List<MapNode> mapNodes) {
+        return new Some<>(mapNodes.stream()
+                .map(Main::transformAST)
+                .collect(Collectors.toList()));
+    }
 
-        return previous.with("indent", new StringAttribute("\t")).map("children", NodeListFactory, children -> {
-            return new Some<>(children.stream()
-                    .map(child -> child.with("indent", new StringAttribute("\t\t")))
-                    .collect(Collectors.toList()));
-        });
+    private static Option<MapNode> visitChild(MapNode node) {
+        return new Some<>(transformAST(node));
     }
 }

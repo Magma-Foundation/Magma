@@ -17,6 +17,10 @@ public record MapNode(String type, NodeAttributes node) {
         return new MapNode(type, node.with(key, attribute));
     }
 
+    public <T> MapNode map(AttributeFactory<T> factory, Function<T, Option<T>> mapper) {
+        return node.filter(factory).stream().reduce(this, (current, key) -> current.map(key, factory, mapper).orElse(current), (node, node2) -> node2);
+    }
+
     public <T> Option<MapNode> map(String key, AttributeFactory<T> factory, Function<T, Option<T>> mapper) {
         return apply(key)
                 .flatMap(factory::fromAttribute)

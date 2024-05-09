@@ -20,4 +20,8 @@ public interface Attribute {
     }
 
     Option<MapNode> asNode();
+
+    default boolean is(String key) {
+        return false;
+    }
 }
