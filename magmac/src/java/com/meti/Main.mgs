@@ -1,34 +1,14 @@
+import { JavaLang } from com.meti.lang;
 import { MapNode } from com.meti.node;
 import { MagmaRenderer } from com.meti.render;
-import { Rule } from com.meti.rule;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
-import { ArrayList } from java.util;
 import { List } from java.util;
-import { Map } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
-import { Discard } from static com.meti.rule.DiscardRule;
-import { $ } from static com.meti.rule.ExtractRule;
-import { Name } from static com.meti.rule.NamingRule;
-import { Node } from static com.meti.rule.NodeRule;
-import { Left } from static com.meti.rule.RequireLeftRule;
-import { Right } from static com.meti.rule.RequireRightRule;
-import { FirstInclusive } from static com.meti.rule.SplitByFirstSliceInclusiveRule;
-import { First } from static com.meti.rule.SplitByFirstSliceRule;
-import { Last } from static com.meti.rule.SplitByLastSliceRule;
-import { Strip } from static com.meti.rule.StripRule;
+import { * } from static com.meti.rule.NodeSplitRule;
 class def Main() => {
-    public static final Rule IMPORT_RULE = Name("import", Left("import ", Last($("parent"), ".", $("child"))));
-    public static final Rule BLOCK_RULE = Strip(Left("{", Right($("lines"), "}")));
-    public static final Rule CLASS_RULE = Name("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
-            Node("content", Name("block", BLOCK_RULE)))));
-
-    public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
-            IMPORT_RULE,
-            CLASS_RULE));
-
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -57,52 +37,10 @@ class def Main() => {
     }
 
     private static Optional<MapNode> lex(String stripped) {
-        return RULES.get("root")
+        return JavaLang.RULES.get("root")
                 .stream()
                 .map(rule -> rule.apply(stripped))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);
-    }
-
-    private static ArrayList<String> split(String input) {
-        var current = new SplitState();
-        for (int i = 0; i < input.length(); i++) {
-            current = processChar(input.charAt(i), current);
-        }
-
-        return current.advance().lines;
-    }
-
-    private static SplitState processChar(char c, SplitState current) {
-        if (c == ';' && current.depth == 0) return current.advance();
-        return switch (c) {
-            case '{' -> current.enter().append(c);
-            case '}' -> current.exit().append(c);
-            default -> current.append(c);
-        };
-    }
-
-    private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder) {
-        public SplitState() {
-            this(0, new ArrayList<>(), new StringBuilder());
-        }
-
-        private SplitState append(char c) {
-            return new SplitState(depth, lines, this.builder.append(c));
-        }
-
-        private SplitState exit() {
-            return new SplitState(depth - 1, lines, builder);
-        }
-
-        private SplitState enter() {
-            return new SplitState(depth + 1, lines, builder);
-        }
-
-        private SplitState advance() {
-            var copy = new ArrayList<>(lines);
-            copy.add(builder.toString());
-            return new SplitState(depth, copy, new StringBuilder());
-        }
     }}

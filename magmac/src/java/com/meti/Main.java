@@ -1,39 +1,19 @@
 package com.meti;
 
+import com.meti.lang.JavaLang;
 import com.meti.node.MapNode;
 import com.meti.render.MagmaRenderer;
-import com.meti.rule.Rule;
-import com.meti.rule.NodeSplitRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.meti.rule.DiscardRule.Discard;
-import static com.meti.rule.ExtractRule.$;
-import static com.meti.rule.NamingRule.Name;
-import static com.meti.rule.NodeRule.Node;
-import static com.meti.rule.RequireLeftRule.Left;
-import static com.meti.rule.RequireRightRule.Right;
-import static com.meti.rule.SplitByFirstSliceInclusiveRule.FirstInclusive;
-import static com.meti.rule.SplitByFirstSliceRule.First;
-import static com.meti.rule.SplitByLastSliceRule.Last;
-import static com.meti.rule.StripRule.Strip;
+import static com.meti.rule.NodeSplitRule.*;
 
 public class Main {
-    public static final Rule IMPORT_RULE = Name("import", Left("import ", Last($("parent"), ".", $("child"))));
-    public static final Rule BLOCK_RULE = Strip(Left("{", Right($("lines"), "}")));
-    public static final Rule CLASS_RULE = Name("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
-            Node("content", Name("block", BLOCK_RULE)))));
-
-    public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
-            IMPORT_RULE,
-            CLASS_RULE));
-
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -48,7 +28,7 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        return NodeSplitRule.split(input)
+        return split(input)
                 .stream()
                 .map(String::strip)
                 .map(Main::compileRootElement)
@@ -62,7 +42,7 @@ public class Main {
     }
 
     private static Optional<MapNode> lex(String stripped) {
-        return RULES.get("root")
+        return JavaLang.RULES.get("root")
                 .stream()
                 .map(rule -> rule.apply(stripped))
                 .flatMap(Optional::stream)

@@ -24,7 +24,18 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
     }
 
     private static SplitState processChar(char c, SplitState current) {
+        if(c == '\"') {
+            return current.toggleQuotes().append(c);
+        }
+
+        if(current.isWithinQuotes()){
+            return current.append(c);
+        }
+
         if (c == ';' && current.depth == 0) return current.advance();
+        if(c == '}' && current.depth == 1) {
+            return current.append(c).exit().advance();
+        }
         return switch (c) {
             case '{' -> current.enter().append(c);
             case '}' -> current.exit().append(c);
@@ -52,27 +63,35 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
         return Optional.of(new Tuple<>(attributes, Optional.empty()));
     }
 
-    private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder) {
+    private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder, boolean withinQuotes) {
         public SplitState() {
-            this(0, new ArrayList<>(), new StringBuilder());
+            this(0, new ArrayList<>(), new StringBuilder(), false);
         }
 
         private SplitState append(char c) {
-            return new SplitState(depth, lines, this.builder.append(c));
+            return new SplitState(depth, lines, this.builder.append(c), withinQuotes);
         }
 
         private SplitState exit() {
-            return new SplitState(depth - 1, lines, builder);
+            return new SplitState(depth - 1, lines, builder, withinQuotes);
         }
 
         private SplitState enter() {
-            return new SplitState(depth + 1, lines, builder);
+            return new SplitState(depth + 1, lines, builder, withinQuotes);
         }
 
         private SplitState advance() {
             var copy = new ArrayList<>(lines);
             copy.add(builder.toString());
-            return new SplitState(depth, copy, new StringBuilder());
+            return new SplitState(depth, copy, new StringBuilder(), withinQuotes);
+        }
+
+        public boolean isWithinQuotes() {
+            return withinQuotes;
+        }
+
+        public SplitState toggleQuotes() {
+            return new SplitState(depth, lines, builder, !withinQuotes);
         }
     }
 }
