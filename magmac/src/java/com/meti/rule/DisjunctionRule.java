@@ -22,6 +22,11 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        for (Rule rule : rules) {
+            var optional = rule.toString(node);
+            if(optional.isPresent()) return optional;
+        }
+
+        return Optional.empty();
     }
 }

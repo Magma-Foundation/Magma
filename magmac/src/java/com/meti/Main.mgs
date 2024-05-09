@@ -1,13 +1,12 @@
-import { JavaLang } from com.meti.lang;
-import { MagmaLang } from com.meti.lang;
 import { MapNode } from com.meti.node;
-import { MagmaRenderer } from com.meti.render;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
+import { JAVA_ROOT } from com.meti.lang.JavaLang;
+import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { split } from com.meti.rule.NodeSplitRule;
 class def Main() => {
 
@@ -35,16 +34,11 @@ class def Main() => {
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped).flatMap(Main::renderImpl);
-    }
-
-    private static Optional<String> renderImpl(MapNode node) {
-        return MagmaLang.IMPORT.toString(node)
-                .or(() -> MagmaLang.FUNCTION.toString(node));
+        return lex(stripped).flatMap(MAGMA_ROOT::toString);
     }
 
     private static Optional<MapNode> lex(String stripped) {
-        return JavaLang.ROOT_RULES.get("root")
+        return JAVA_ROOT.get("root")
                 .stream()
                 .map(rule -> rule.fromString(stripped))
                 .flatMap(Optional::stream)
