@@ -56,16 +56,20 @@ public class Main {
         var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
         var withNodes = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
         var withNodeLists = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
-        var tuple = transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
-        return tuple;
+        return transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
     }
 
     private static Option<Tuple<MapNode, State>> transformPostVisit(MapNode child, State state) {
         if (child.is("block")) {
-            return new Some<>(new Tuple<>(child, state.exit()));
+            var exited = state.exit();
+            return new Some<>(new Tuple<>(attachIndent(child, exited), exited));
         }
 
         return new None<>();
+    }
+
+    private static MapNode attachIndent(MapNode child, State state) {
+        return child.with("indent", new StringAttribute("\t".repeat(state.depth)));
     }
 
     private static Option<Tuple<MapNode, State>> transformPreVisit(MapNode child, State state) {
@@ -74,11 +78,11 @@ public class Main {
         }
 
         if (child.is("method")) {
-            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t")), state));
+            return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 
         if (child.is("declaration")) {
-            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t\t")), state));
+            return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 
         return new None<>();

@@ -20,13 +20,13 @@ class def Main() => {
 	def main(args : String[]): void => {
 		let source : var = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
 		try {
-		let input : var = Files.readString(source);
-		let target : var = source.resolveSibling("Main.mgs");
-		let outputContent : var = compile(input);
-		let output : var = String.join("", outputContent);
+			let input : var = Files.readString(source);
+			let target : var = source.resolveSibling("Main.mgs");
+			let outputContent : var = compile(input);
+			let output : var = String.join("", outputContent);
 
             Files.writeString(target, output)
-	}
+		}
  catch (IOException e) {
             throw new RuntimeException(source.toAbsolutePath().toString(), e);
         }
@@ -48,23 +48,24 @@ class def Main() => {
                 .collect(Collectors.toList())
 	}
 	def transformAST(child, State state : MapNode): State> => {
-
-        System.out.println("\t".repeat(state.depth) + child.type())		let preVisited : var = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
+		let preVisited : var = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
 		let withNodes : var = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
 		let withNodeLists : var = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
-		let tuple : var = transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
 
-
-        System.out.println("\t".repeat(state.depth) + child.type())
-        return tuple
+        return transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists)
 	}
 	def transformPostVisit(child, State state : MapNode): State>> => {
+		let (child.is("block")) {
+            var exited : if = state.exit();
+            return new Some<>(new Tuple<>(attachIndent(child, exited), exited));
+        };
 
-        if (child.is("block")) {
-            return new Some<>(new Tuple<>(child, state.exit()));
-        }
 
         return new None<>()
+	}
+	def attachIndent(child, State state : MapNode): MapNode => {
+
+        return child.with("indent", new StringAttribute("\t".repeat(state.depth)))
 	}
 	def transformPreVisit(child, State state : MapNode): State>> => {
 
@@ -73,11 +74,11 @@ class def Main() => {
         }
 
         if (child.is("method")) {
-            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t")), state));
+            return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 
         if (child.is("declaration")) {
-            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t\t")), state));
+            return new Some<>(new Tuple<>(attachIndent(child, state), state));
         }
 
         return new None<>()

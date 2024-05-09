@@ -51,7 +51,8 @@ public class MagmaLang {
                 Type("content", $("value"))
         ));
 
-        var root = Node("value", Type("block", Right(Left("{\n", methodContent), "\n\t}\n")));
+        var rule = First(Left("{\n", methodContent), "\n", Right($("indent"), "}\n"));
+        var root = Node("value", Type("block", rule));
         lazy.setRule(root);
         return root;
     }
