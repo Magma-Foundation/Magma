@@ -1,10 +1,12 @@
 package com.meti.node;
 
+import com.meti.Tuple;
 import com.meti.util.Option;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public record MapNode(String type, NodeAttributes node) {
+
     public Option<Attribute> apply(String name) {
         return node.apply(name);
     }
@@ -17,15 +19,24 @@ public record MapNode(String type, NodeAttributes node) {
         return new MapNode(type, node.with(key, attribute));
     }
 
-    public <T> MapNode map(AttributeFactory<T> factory, Function<T, Option<T>> mapper) {
-        return node.filter(factory).stream().reduce(this, (current, key) -> current.map(key, factory, mapper).orElse(current), (node, node2) -> node2);
+    public <T, S> Tuple<MapNode, S> map(
+            AttributeFactory<T> factory,
+            BiFunction<S, T, Option<Tuple<T, S>>> mapper,
+            S state) {
+        return node.filter(factory)
+                .stream()
+                .reduce(new Tuple<>(this, state), (current, key) -> current.left().map(key, factory, mapper, current.right()).orElse(current), (node, node2) -> node2);
     }
 
-    public <T> Option<MapNode> map(String key, AttributeFactory<T> factory, Function<T, Option<T>> mapper) {
+    public <T, S> Option<Tuple<MapNode, S>> map(
+            String key,
+            AttributeFactory<T> factory,
+            BiFunction<S, T, Option<Tuple<T, S>>> mapper,
+            S state) {
         return apply(key)
                 .flatMap(factory::fromAttribute)
-                .flatMap(mapper)
-                .map(factory::toAttribute)
-                .map(attribute -> with(key, attribute));
+                .flatMap(value -> mapper.apply(state, value))
+                .map((Tuple<T, S> value1) -> value1.mapLeft(factory::toAttribute))
+                .map(attribute -> attribute.mapLeft(left -> with(key, left)));
     }
 }

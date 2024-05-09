@@ -37,11 +37,9 @@ class def Main() => {
                 .flatMap(tuple -> toNative(tuple.apply("roots")))
                 .flatMap(attribute -> toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList());
-		let outputAST : var = new ArrayList<MapNode>();
-		let (MapNode child : inputAST) {
-            var outputChild : for = transform(child).orElse(child);
-            outputAST.add(outputChild);
-        };
+		let outputAST : var = visitChildren(inputAST, new State())
+                .map(Tuple::left)
+                .orElse(Collections.emptyList());
 
 
         return outputAST.stream()
@@ -49,34 +47,69 @@ class def Main() => {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList())
 	}
-	def transform(child : MapNode): Option<MapNode> => {
+	def transformAST(child, State state : MapNode): State> => {
 
-        return new Some<>(transformAST(child))
+        System.out.println("\t".repeat(state.depth) + child.type())		let preVisited : var = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
+		let withNodes : var = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
+		let withNodeLists : var = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
+		let tuple : var = transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
+
+
+        System.out.println("\t".repeat(state.depth) + child.type())
+        return tuple
 	}
-	def transformAST(child : MapNode): MapNode => {
-		let transformed : var = transformPreVisit(child).orElse(child);
+	def transformPostVisit(child, State state : MapNode): State>> => {
 
-        return transformed.map(NodeFactory, Main::visitChild).map(NodeListFactory, Main::visitChildren)
+        if (child.is("block")) {
+            return new Some<>(new Tuple<>(child, state.exit()));
+        }
+
+        return new None<>()
 	}
-	def transformPreVisit(child : MapNode): Option<MapNode> => {
+	def transformPreVisit(child, State state : MapNode): State>> => {
 
-        if(child.is("method")) {
-            return new Some<>(child.with("indent", new StringAttribute("\t")));
+        if (child.is("block")) {
+            return new Some<>(new Tuple<>(child, state.enter()));
+        }
+
+        if (child.is("method")) {
+            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t")), state));
         }
 
         if (child.is("declaration")) {
-            return new Some<>(child.with("indent", new StringAttribute("\t\t")));
+            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t\t")), state));
         }
+
         return new None<>()
 	}
-	def visitChildren(mapNodes : List<MapNode>): Option<List<MapNode>> => {
+	def visitChildren(mapNodes, State state : List<MapNode>): State>> => {
+		let list : var = new ArrayList<MapNode>();
+		let current : var = state;
+		let (MapNode child : mapNodes) {
+            var tuple : for = transformAST(child, state);
+            list.add(tuple.left());
+            current = tuple.right();
+        };
 
-        return new Some<>(mapNodes.stream()
-                .map(Main::transformAST)
-                .collect(Collectors.toList()))
+
+        return new Some<>(new Tuple<>(list, current))
 	}
-	def visitChild(node : MapNode): Option<MapNode> => {
+	def visitChild(node, State state : MapNode): State>> => {
 
-        return new Some<>(transformAST(node))
+        return new Some<>(transformAST(node, state))
+	}
+	def State(depth : int): record => {
+
+        public State() {
+            this(0);
+        }
+
+        public State enter() {
+            return new State(depth + 1);
+        }
+
+        public State exit() {
+            return new State(depth - 1);
+        }
 	}
 }

@@ -42,11 +42,9 @@ public class Main {
                 .flatMap(attribute -> toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList());
 
-        var outputAST = new ArrayList<MapNode>();
-        for (MapNode child : inputAST) {
-            var outputChild = transform(child).orElse(child);
-            outputAST.add(outputChild);
-        }
+        var outputAST = visitChildren(inputAST, new State())
+                .map(Tuple::left)
+                .orElse(Collections.emptyList());
 
         return outputAST.stream()
                 .map(MAGMA_ROOT::toString)
@@ -54,33 +52,66 @@ public class Main {
                 .collect(Collectors.toList());
     }
 
-    private static Option<MapNode> transform(MapNode child) {
-        return new Some<>(transformAST(child));
+    private static Tuple<MapNode, State> transformAST(MapNode child, State state) {
+        var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
+        var withNodes = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
+        var withNodeLists = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
+        var tuple = transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
+        return tuple;
     }
 
-    private static MapNode transformAST(MapNode child) {
-        var transformed = transformPreVisit(child).orElse(child);
-        return transformed.map(NodeFactory, Main::visitChild).map(NodeListFactory, Main::visitChildren);
-    }
-
-    private static Option<MapNode> transformPreVisit(MapNode child) {
-        if(child.is("method")) {
-            return new Some<>(child.with("indent", new StringAttribute("\t")));
+    private static Option<Tuple<MapNode, State>> transformPostVisit(MapNode child, State state) {
+        if (child.is("block")) {
+            return new Some<>(new Tuple<>(child, state.exit()));
         }
 
-        if (child.is("declaration")) {
-            return new Some<>(child.with("indent", new StringAttribute("\t\t")));
-        }
         return new None<>();
     }
 
-    private static Option<List<MapNode>> visitChildren(List<MapNode> mapNodes) {
-        return new Some<>(mapNodes.stream()
-                .map(Main::transformAST)
-                .collect(Collectors.toList()));
+    private static Option<Tuple<MapNode, State>> transformPreVisit(MapNode child, State state) {
+        if (child.is("block")) {
+            return new Some<>(new Tuple<>(child, state.enter()));
+        }
+
+        if (child.is("method")) {
+            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t")), state));
+        }
+
+        if (child.is("declaration")) {
+            return new Some<>(new Tuple<>(child.with("indent", new StringAttribute("\t\t")), state));
+        }
+
+        return new None<>();
     }
 
-    private static Option<MapNode> visitChild(MapNode node) {
-        return new Some<>(transformAST(node));
+    private static Option<Tuple<List<MapNode>, State>> visitChildren(List<MapNode> mapNodes, State state) {
+        var list = new ArrayList<MapNode>();
+        var current = state;
+
+        for (MapNode child : mapNodes) {
+            var tuple = transformAST(child, state);
+            list.add(tuple.left());
+            current = tuple.right();
+        }
+
+        return new Some<>(new Tuple<>(list, current));
+    }
+
+    private static Option<Tuple<MapNode, State>> visitChild(MapNode node, State state) {
+        return new Some<>(transformAST(node, state));
+    }
+
+    private record State(int depth) {
+        public State() {
+            this(0);
+        }
+
+        public State enter() {
+            return new State(depth + 1);
+        }
+
+        public State exit() {
+            return new State(depth - 1);
+        }
     }
 }

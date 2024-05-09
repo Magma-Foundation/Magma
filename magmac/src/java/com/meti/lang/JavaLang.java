@@ -40,7 +40,7 @@ public class JavaLang {
         var methodBeforeParams = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
         var methodContent = blockOfStatements();
 
-        METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")", methodContent))));
+        METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")",methodContent))));
 
         CLASS_MEMBER = Or(
                 METHOD,
@@ -66,7 +66,7 @@ public class JavaLang {
                 Type("content", $("value"))
         );
 
-        var strip = Strip(Left("{", Right(Nodes("children", methodMembers), "}")));
+        var strip = Node("value", Type("block", Strip(Left("{", Right(Nodes("children", methodMembers), "}")))));
         lazy.setRule(strip);
         return strip;
     }
