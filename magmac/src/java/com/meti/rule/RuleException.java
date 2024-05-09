@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.rule;
 
 public class RuleException extends RuntimeException {
     public RuleException(String message) {

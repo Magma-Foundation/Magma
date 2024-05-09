@@ -30,14 +30,14 @@ public abstract class SplitRule implements Rule {
         for (String inputLine : input) {
             var optional = childRule.fromString(inputLine);
             if (optional.isEmpty()) {
-                throw new RuntimeException(inputLine);
+                throw new RuleException(inputLine);
             }
 
             var tuple = optional.get();
             var left = tuple.left();
             var right = tuple.right();
             if (right.isEmpty()) {
-                throw new RuntimeException("No name present for: " + inputLine);
+                throw new RuleException("No name present for: " + inputLine);
             }
 
             output.add(new MapNode(right.get(), left));
