@@ -3,11 +3,11 @@ package com.meti;
 import com.meti.node.MapNode;
 import com.meti.render.MagmaRenderer;
 import com.meti.rule.Rule;
+import com.meti.rule.NodeSplitRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        return split(input)
+        return NodeSplitRule.split(input)
                 .stream()
                 .map(String::strip)
                 .map(Main::compileRootElement)
@@ -68,47 +68,5 @@ public class Main {
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);
-    }
-
-    private static ArrayList<String> split(String input) {
-        var current = new SplitState();
-        for (int i = 0; i < input.length(); i++) {
-            current = processChar(input.charAt(i), current);
-        }
-
-        return current.advance().lines;
-    }
-
-    private static SplitState processChar(char c, SplitState current) {
-        if (c == ';' && current.depth == 0) return current.advance();
-        return switch (c) {
-            case '{' -> current.enter().append(c);
-            case '}' -> current.exit().append(c);
-            default -> current.append(c);
-        };
-    }
-
-    private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder) {
-        public SplitState() {
-            this(0, new ArrayList<>(), new StringBuilder());
-        }
-
-        private SplitState append(char c) {
-            return new SplitState(depth, lines, this.builder.append(c));
-        }
-
-        private SplitState exit() {
-            return new SplitState(depth - 1, lines, builder);
-        }
-
-        private SplitState enter() {
-            return new SplitState(depth + 1, lines, builder);
-        }
-
-        private SplitState advance() {
-            var copy = new ArrayList<>(lines);
-            copy.add(builder.toString());
-            return new SplitState(depth, copy, new StringBuilder());
-        }
     }
 }
