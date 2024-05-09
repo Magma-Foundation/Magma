@@ -1,5 +1,6 @@
+import { MapNode } from com.meti.node;
+import { NodeAttributes } from com.meti.node;
 import { MagmaRenderer } from com.meti.render;
-import { NamingRule } from com.meti.rule;
 import { Rule } from com.meti.rule;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
@@ -11,15 +12,16 @@ import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { Discard } from static com.meti.rule.DiscardRule;
 import { $ } from static com.meti.rule.ExtractRule;
+import { Named } from static com.meti.rule.NamingRule;
 import { Left } from static com.meti.rule.RequireLeftRule;
 import { Right } from static com.meti.rule.RequireRightRule;
 import { First } from static com.meti.rule.SplitByFirstSliceRule;
 import { Last } from static com.meti.rule.SplitByLastSliceRule;
 import { Strip } from static com.meti.rule.StripRule;
 class def Main() => {
-    public static final Rule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
-    public static final Rule CLASS_RULE = new NamingRule("class", First(Discard, "class ",
-            First(Strip($("name")), "{", Right($("content"), "}"))));
+    public static final Rule IMPORT_RULE = Named("import", Left("import ", Last($("parent"), ".", $("child"))));
+    public static final Rule CLASS_RULE = Named("class", First(Discard, "class ", First(Strip($("name")),
+            "{", Right($("content"), "}"))));
     public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
             IMPORT_RULE,
             CLASS_RULE));
@@ -38,7 +40,12 @@ class def Main() => {
     }
 
     private static List<String> compile(String input) {
-        return split(input).stream().map(String::strip).map(Main::compileRootElement).flatMap(Optional::stream).collect(Collectors.toList());
+        return split(input)
+                .stream()
+                .map(String::strip)
+                .map(Main::compileRootElement)
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
     }
 
     private static Optional<String> compileRootElement(String stripped) {
@@ -49,7 +56,7 @@ class def Main() => {
     private static Optional<MapNode> lex(String stripped) {
         return RULES.get("root")
                 .stream()
-                .map(rule -> rule.apply(stripped))
+                .map(rule -> rule.apply(stripped).map(tuple -> tuple.mapLeft(NodeAttributes::map)))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);

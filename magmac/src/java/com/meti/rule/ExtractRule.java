@@ -18,6 +18,6 @@ public record ExtractRule(String key) implements Rule {
 
     @Override
     public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
-        return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::new));
+        return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
     }
 }
