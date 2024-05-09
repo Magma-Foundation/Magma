@@ -1,6 +1,6 @@
 package com.meti.render;
 
-import com.meti.MapNode;
+import com.meti.node.MapNode;
 
 import java.util.Optional;
 

@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.node.MapNode;
+import com.meti.node.NodeAttributes;
 import com.meti.render.MagmaRenderer;
 import com.meti.rule.Rule;
 
@@ -59,7 +61,7 @@ public class Main {
     private static Optional<MapNode> lex(String stripped) {
         return RULES.get("root")
                 .stream()
-                .map(rule -> rule.apply(stripped))
+                .map(rule -> rule.apply(stripped).map(tuple -> tuple.mapLeft(NodeAttributes::map)))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);

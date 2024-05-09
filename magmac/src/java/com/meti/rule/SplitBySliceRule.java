@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.node.NodeAttributes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,17 +18,16 @@ public abstract class SplitBySliceRule implements Rule {
         this.rightRule = rightRule;
     }
 
-    @Override
-    public Optional<Tuple<Map<String, String>, Optional<String>>> apply(String value) {
+    private Optional<Tuple<Map<String, String>, Optional<String>>> apply2(String value) {
         var separator = applyOperation(value);
         if (separator == -1) return Optional.empty();
 
         var parent = value.substring(0, separator);
-        var firstMap = leftRule.apply(parent).map(Tuple::a);
+        var firstMap = leftRule.apply(parent).map(tuple1 -> tuple1.mapLeft(NodeAttributes::map)).map(Tuple::left);
         if (firstMap.isEmpty()) return Optional.empty();
 
         var child = value.substring(separator + slice.length());
-        var secondMap = rightRule.apply(child).map(Tuple::a);
+        var secondMap = rightRule.apply(child).map(tuple -> tuple.mapLeft(NodeAttributes::map)).map(Tuple::left);
         if (secondMap.isEmpty()) return Optional.empty();
 
         var attributes = new HashMap<String, String>();
@@ -37,4 +37,9 @@ public abstract class SplitBySliceRule implements Rule {
     }
 
     protected abstract int applyOperation(String value);
+
+    @Override
+    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
+        return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::new));
+    }
 }
