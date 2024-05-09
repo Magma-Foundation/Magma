@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
+import static com.meti.lang.MagmaLang.DECLARATION;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
 import static com.meti.node.NodeAttribute.NodeFactory;
 import static com.meti.node.NodeListAttribute.NodeListFactory;
@@ -73,11 +74,13 @@ public class Main {
         return new Some<>(outputContent);
     }
 
-    private static Option<MapNode> attachIndent(MapNode input) {
-        if (input.is("method")) {
-            return new Some<>(input.with("indent", new StringAttribute("\t")));
-        } else {
-            return new None<>();
-        }
+    private static Option<MapNode> attachIndent(MapNode previous) {
+        if (!previous.is("method")) return new None<>();
+
+        return previous.with("indent", new StringAttribute("\t")).map("children", NodeListFactory, children -> {
+            return new Some<>(children.stream()
+                    .map(child -> child.with("indent", new StringAttribute("\t\t")))
+                    .collect(Collectors.toList()));
+        });
     }
 }

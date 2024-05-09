@@ -19,6 +19,9 @@ public record TypeRule(String type, Rule rule) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        return node.type().equals(type) ? rule.toString(node) : Optional.empty();
+        if (node.type().equals(type)) {
+            return rule.toString(node);
+        }
+        return Optional.empty();
     }
 }

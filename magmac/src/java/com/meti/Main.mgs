@@ -12,68 +12,8 @@ import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
+import { DECLARATION } from com.meti.lang.MagmaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { NodeFactory } from com.meti.node.NodeAttribute;
 import { NodeListFactory } from com.meti.node.NodeListAttribute;
 import { toNative } from com.meti.util.Options;
-class def Main() => {
-	def main(args : String[]): void => {
-		let source : var = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
-		try {
-		let input : var = Files.readString(source);
-		let target : var = source.resolveSibling("Main.mgs");
-		let outputContent : var = compile(input);
-		let output : var = String.join("", outputContent);
-
-            Files.writeString(target, output)
-	}
- catch (IOException e) {
-            throw new RuntimeException(source.toAbsolutePath().toString(), e);
-        }
-	}
-	def compile(input : String): List<String> => {
-		let inputAST : var = JAVA_ROOT.fromString(input)
-                .map(Tuple::left)
-                .flatMap(tuple -> toNative(tuple.apply("roots")))
-                .flatMap(attribute -> toNative(attribute.asListOfNodes()))
-                .orElse(Collections.emptyList());
-		let outputAST : var = new ArrayList<MapNode>();
-		let (MapNode child : inputAST) {
-            var outputChild : for = transform(child).orElse(child);
-            outputAST.add(outputChild);
-        };
-
-
-        return outputAST.stream()
-                .map(MAGMA_ROOT::toString)
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList())
-	}
-	def transform(child : MapNode): Option<MapNode> => {
-
-        if (!child.is("class")) return new None<>()
-
-        return child.map("content", NodeFactory, Main::parseContentChildren)
-	}
-	def parseContentChildren(content : MapNode): Option<MapNode> => {
-
-        return content.map("children", NodeListFactory, Main::parseContentChild)
-	}
-	def parseContentChild(inputContent : List<MapNode>): Some<List<MapNode>> => {
-		let outputContent : var = new ArrayList<MapNode>();
-
-        for (var input : inputContent) {
-            outputContent.add(attachIndent(input).orElse(input));
-        }
-
-        return new Some<>(outputContent)
-	}
-	def attachIndent(input : MapNode): Option<MapNode> => {
-
-        if (input.is("method")) {
-            return new Some<>(input.with("indent", new StringAttribute("\t")));
-        } else {
-            return new None<>();
-        }
-	}
-}

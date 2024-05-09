@@ -2,6 +2,7 @@ package com.meti.lang;
 
 import com.meti.rule.LazyRule;
 import com.meti.rule.Rule;
+import com.meti.rule.TypeRule;
 
 import static com.meti.rule.DiscardRule.Empty;
 import static com.meti.rule.DisjunctionRule.Or;
@@ -19,6 +20,7 @@ import static com.meti.rule.TypeRule.Type;
 
 public class MagmaLang {
     public static final Rule MAGMA_ROOT;
+    public static final TypeRule DECLARATION = Type("declaration", First(Strip(First(First($("indent"), "let ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n"))));
 
     static {
         var methodParam = Strip(First($("param-name"), " : ", $("param-type")));
@@ -45,7 +47,7 @@ public class MagmaLang {
 
         var methodContent = Nodes("children", Or(
                 Type("try", Strip(Left("\t\ttry ", lazy))),
-                Type("declaration", First(Strip(First(Left("\t\tlet ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n")))),
+                DECLARATION,
                 Type("content", $("value"))
         ));
 
