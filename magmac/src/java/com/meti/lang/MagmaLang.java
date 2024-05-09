@@ -1,5 +1,6 @@
 package com.meti.lang;
 
+import com.meti.rule.LazyRule;
 import com.meti.rule.Rule;
 
 import static com.meti.rule.DiscardRule.Empty;
@@ -24,12 +25,9 @@ public class MagmaLang {
         var methodParams = Left("(", Right(methodParam, ")"));
 
         var methodReturnTypeRule = Or(Left(": ", $("return-type")), Empty);
-        var methodContent = Nodes("children", Or(
-                Type("declaration", First(Strip(First(Left("\t\tlet ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n")))),
-                Type("content", $("value"))
-        ));
+        var right = blockOfStatements();
 
-        var left = First(methodReturnTypeRule, " => ", Right(Left("{\n", methodContent), "\n\t}\n"));
+        var left = First(methodReturnTypeRule, " => ", right);
 
         var methodRule = Type("method", Strip(Left("\tdef ",
                 FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
@@ -41,5 +39,19 @@ public class MagmaLang {
 
         var importRule = Type("import", Left("import ", Right(Last(Left("{ ", Right($("child"), " }")), " from ", $("parent")), ";\n")));
         MAGMA_ROOT = Or(importRule, functionRule);
+    }
+
+    private static Rule blockOfStatements() {
+        var lazy = new LazyRule();
+
+        var methodContent = Nodes("children", Or(
+                Type("try", Strip(Left("\t\ttry ", lazy))),
+                Type("declaration", First(Strip(First(Left("\t\tlet ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n")))),
+                Type("content", $("value"))
+        ));
+
+        var root = Right(Left("{\n", methodContent), "\n\t}\n");
+        lazy.setRule(root);
+        return root;
     }
 }

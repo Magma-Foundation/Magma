@@ -1,5 +1,6 @@
 package com.meti.lang;
 
+import com.meti.rule.LazyRule;
 import com.meti.rule.Rule;
 import com.meti.rule.TypeRule;
 
@@ -37,12 +38,7 @@ public class JavaLang {
         var methodParams = Left("(", Right(methodParam, ")"));
 
         var methodBeforeParams = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
-        var methodMembers = Or(
-                Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value")))),
-                Type("content", $("value"))
-        );
-
-        var methodContent = Strip(Left("{", Right(Nodes("children", methodMembers), "}")));
+        var methodContent = blockOfStatements();
 
         METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")", methodContent))));
 
@@ -59,5 +55,19 @@ public class JavaLang {
                 IMPORT,
                 CLASS
         )));
+    }
+
+    private static Rule blockOfStatements() {
+        var lazy = new LazyRule();
+
+        var methodMembers = Or(
+                Type("try", Strip(Left("try", lazy))),
+                Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value")))),
+                Type("content", $("value"))
+        );
+
+        var strip = Strip(Left("{", Right(Nodes("children", methodMembers), "}")));
+        lazy.setRule(strip);
+        return strip;
     }
 }
