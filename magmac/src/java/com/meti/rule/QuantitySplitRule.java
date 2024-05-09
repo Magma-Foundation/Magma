@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class QuantitySplitRule extends SplitRule implements Rule {
     public QuantitySplitRule(String propertyName, Rule childRule) {
@@ -13,7 +14,10 @@ public class QuantitySplitRule extends SplitRule implements Rule {
 
     @Override
     public List<String> split(String input) {
-        return List.of(input.split(","));
+        return List.of(input.split(","))
+                .stream()
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toList());
     }
 
     @Override

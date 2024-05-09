@@ -1,7 +1,6 @@
 package com.meti;
 
-import com.meti.node.MapNode;
-import com.meti.node.StringAttribute;
+import com.meti.node.*;
 import com.meti.util.None;
 import com.meti.util.Option;
 import com.meti.util.Some;
@@ -10,11 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
@@ -35,13 +30,14 @@ public class Main {
                     .toList();
 
             for (PathSource pathSource : sources) {
+                var namespace = pathSource.computeNamespace();
+                var name = pathSource.computeName();
+
                 try {
                     var input = pathSource.read();
-                    var namespace = pathSource.computeNamespace();
-                    var name = pathSource.computeName();
 
                     var targetParent = namespace.stream().reduce(targetDirectory, Path::resolve, (previous, next) -> next);
-                    if(!Files.exists(targetParent)) Files.createDirectories(targetParent);
+                    if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
 
                     var target = targetParent.resolve(name + ".mgs");
 
@@ -49,7 +45,7 @@ public class Main {
                     var output = String.join("", outputContent);
                     Files.writeString(target, output);
                 } catch (RuntimeException e) {
-                    e.printStackTrace();
+                    System.out.printf("%s.%s: Unknown token: %s%n", String.join(".", namespace), name, e.getMessage());
                 }
             }
 
@@ -77,6 +73,16 @@ public class Main {
         if (child.is("block")) {
             var exited = state.exit();
             return new Some<>(new Tuple<>(attachIndent(child, exited), exited));
+        }
+
+        if (child.is("record")) {
+            var mapNode = new MapNode("block", new NodeAttributes(Map.of("children", new NodeListAttribute(Collections.emptyList()))));
+
+            var function = child.rename("function")
+                    .with("indent", new StringAttribute(""))
+                    .with("value", new NodeAttribute(mapNode));
+
+            return new Some<>(new Tuple<>(function, state));
         }
 
         return new None<>();

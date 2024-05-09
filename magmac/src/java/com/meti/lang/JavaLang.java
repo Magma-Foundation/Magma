@@ -55,7 +55,8 @@ public class JavaLang {
                 PACKAGE,
                 IMPORT,
                 CLASS,
-                Type("interface", First(Empty, "interface ", FirstIncludeRight($("name"), "{", $("content"))))
+                Type("interface", First(Empty, "interface ", FirstIncludeRight($("name"), "{", $("content")))),
+                Type("record", FirstIncludeRight(Strip(Last(Empty, " ", $("name"))), "(", FirstIncludeLeft(Empty, ")", $("content"))))
         )));
     }
 

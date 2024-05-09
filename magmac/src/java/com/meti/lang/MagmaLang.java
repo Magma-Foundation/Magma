@@ -25,16 +25,17 @@ public class MagmaLang {
 
     static {
         var methodParam = Type("param", Strip(First($("param-name"), " : ", $("param-type"))));
-        var methodParams = Left("(", Right(Quantities("params", methodParam), ")"));
+        var methodParams = Left("(", Right(Or(Quantities("params", methodParam), Empty), ")"));
 
         var methodReturnTypeRule = Or(Left(": ", $("return-type")), Empty);
         var right = blockOfStatements();
 
         var left = First(methodReturnTypeRule, " => ", right);
 
-        var methodRule = Type("method", Strip(First($("indent"), "def ", FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
+        var methodFunctionRule = Strip(First($("indent"), "def ", FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left))));
+        var methodRule = Type("method", methodFunctionRule);
 
-        Rule child = Or(methodRule, Type("content", $("value")));
+        var child = Or(methodRule, Type("content", $("value")));
         var blockRule = Strip(Left("{\n", Right(Nodes("children", child), "}")));
 
         var functionRule = Type("class", First(Empty, "class def ", First(Strip($("name")), "() => ", Node("content", Type("block", blockRule)))));
@@ -42,7 +43,10 @@ public class MagmaLang {
         var importRule = Type("import", Left("import ", Right(Last(Left("{ ", Right($("child"), " }")), " from ", $("parent")), ";\n")));
 
         var interfaceRule = Type("interface", First(Empty, "trait ", FirstIncludeRight($("name"), "{", $("content"))));
-        MAGMA_ROOT = Or(importRule, functionRule, interfaceRule);
+
+        var recordRule = Type("record", FirstIncludeRight(Strip(Last(Empty, " ", $("name"))), "(", FirstIncludeLeft(Empty, ")", $("content"))));
+
+        MAGMA_ROOT = Or(importRule, functionRule, interfaceRule, recordRule, Type("function", methodFunctionRule));
     }
 
     private static Rule blockOfStatements() {
@@ -50,7 +54,7 @@ public class MagmaLang {
 
         var methodContent = Nodes("children", Or(
                 Type("try", Strip(First($("indent"), "try ", lazy))),
-                Type("catch", Strip(First($("indent"), "catch ", First(Strip(Left("(", $("condition"))),")", lazy)))),
+                Type("catch", Strip(First($("indent"), "catch ", First(Strip(Left("(", $("condition"))), ")", lazy)))),
                 DECLARATION,
                 Type("content", $("value"))
         ));
