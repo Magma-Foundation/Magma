@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 
 import java.util.Collections;
@@ -18,7 +19,12 @@ public class DiscardRule implements Rule {
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
+    }
+
+    @Override
+    public Optional<String> toString(MapNode node) {
+        throw new UnsupportedOperationException();
     }
 }

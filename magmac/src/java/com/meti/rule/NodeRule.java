@@ -14,8 +14,8 @@ public record NodeRule(String name, Rule parent) implements Rule {
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
-        return parent.apply(value)
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+        return parent.fromString(value)
                 .flatMap(tuple -> tuple.right().map(right -> new MapNode(right, tuple.left())))
                 .map(this::toTuple);
     }
@@ -23,5 +23,10 @@ public record NodeRule(String name, Rule parent) implements Rule {
     private Tuple<NodeAttributes, Optional<String>> toTuple(MapNode node) {
         var attributes = new NodeAttributes(Map.of(name, new NodeAttribute(node)));
         return new Tuple<>(attributes, Optional.empty());
+    }
+
+    @Override
+    public Optional<String> toString(MapNode node) {
+        throw new UnsupportedOperationException();
     }
 }

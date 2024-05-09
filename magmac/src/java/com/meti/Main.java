@@ -44,7 +44,7 @@ public class Main {
     private static Optional<MapNode> lex(String stripped) {
         return JavaLang.ROOT_RULES.get("root")
                 .stream()
-                .map(rule -> rule.apply(stripped))
+                .map(rule -> rule.fromString(stripped))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);

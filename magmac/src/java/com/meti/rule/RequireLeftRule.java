@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 
 import java.util.Optional;
@@ -11,10 +12,15 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         if (!value.startsWith(this.slice)) return Optional.empty();
 
         var segments = value.substring(this.slice.length());
-        return this.right.apply(segments);
+        return this.right.fromString(segments);
+    }
+
+    @Override
+    public Optional<String> toString(MapNode node) {
+        throw new UnsupportedOperationException();
     }
 }

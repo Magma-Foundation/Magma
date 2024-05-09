@@ -44,12 +44,12 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         var input = split(value);
         var output = new ArrayList<MapNode>();
 
         for (String inputLine : input) {
-            var optional = childRule.apply(inputLine);
+            var optional = childRule.fromString(inputLine);
             if (optional.isEmpty()) return Optional.empty();
             var tuple = optional.get();
             var left = tuple.left();
@@ -61,6 +61,11 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
 
         var attributes = new NodeAttributes(Map.of(propertyName, new NodeListAttribute(output)));
         return Optional.of(new Tuple<>(attributes, Optional.empty()));
+    }
+
+    @Override
+    public Optional<String> toString(MapNode node) {
+        throw new UnsupportedOperationException();
     }
 
     private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder, boolean withinQuotes) {

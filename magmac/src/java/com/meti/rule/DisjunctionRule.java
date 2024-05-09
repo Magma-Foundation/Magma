@@ -1,6 +1,7 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 
 import java.util.List;
@@ -12,10 +13,15 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> apply(String value) {
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
         return rules.stream()
-                .map(rule -> rule.apply(value))
+                .map(rule -> rule.fromString(value))
                 .flatMap(Optional::stream)
                 .findFirst();
+    }
+
+    @Override
+    public Optional<String> toString(MapNode node) {
+        throw new UnsupportedOperationException();
     }
 }
