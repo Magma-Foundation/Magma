@@ -3,7 +3,7 @@ package com.meti.lang;
 import com.meti.rule.Rule;
 
 import static com.meti.lang.Lang.Block;
-import static com.meti.rule.DiscardRule.Discard;
+import static com.meti.rule.DiscardRule.Empty;
 import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.NodeRule.Node;
@@ -23,13 +23,15 @@ public class MagmaLang {
         var methodParam = Strip(First($("param-name"), " : ", $("param-type")));
         var methodParams = Left("(", Right(methodParam, ")"));
 
+        var methodReturnTypeRule = Or(Left(": ", $("return-type")), Empty);
+        var left = First(methodReturnTypeRule, " =>", $("content"));
+
         var methodRule = Type("method", Strip(Left("\n\tdef ",
-                FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", Left(" =>", $("content")))))));
+                FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
 
         var blockRule = Block(Or(methodRule, Type("content", $("value"))));
 
-
-        var functionRule = Type("class", First(Discard, "class def ", First(Strip($("name")), "() => ", Node("content", Type("block", blockRule)))));
+        var functionRule = Type("class", First(Empty, "class def ", First(Strip($("name")), "() => ", Node("content", Type("block", blockRule)))));
 
         var importRule = Type("import", Left("import ", Right(Last(Left("{ ", Right($("child"), " }")), " from ", $("parent")), ";\n")));
         MAGMA_ROOT = Or(importRule, functionRule);

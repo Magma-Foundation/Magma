@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.meti.lang.Lang.Block;
-import static com.meti.rule.DiscardRule.Discard;
+import static com.meti.rule.DelimiterRule.Delimit;
+import static com.meti.rule.DiscardRule.Empty;
 import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.NodeRule.Node;
@@ -35,15 +36,15 @@ public class JavaLang {
         var methodParam = Strip(First($("param-type"), " ", $("param-name")));
         var methodParams = Left("(", Right(methodParam, ")"));
 
-        METHOD = Type("method", Strip(Left("public static void ",
-                FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", $("content"))))));
+        var before = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
+        METHOD = Type("method", Strip(FirstIncludeRight(before, "(", FirstIncludeLeft(methodParams, ")", $("content")))));
 
         CLASS_MEMBER = Or(
                 METHOD,
                 Type("content", $("value"))
         );
 
-        CLASS = Type("class", First(Discard, "class ", FirstIncludeRight(Strip($("name")), "{",
+        CLASS = Type("class", First(Empty, "class ", FirstIncludeRight(Strip($("name")), "{",
                 Node("content", Type("block", Block(CLASS_MEMBER))))));
 
         JAVA_ROOT = Map.of("root", List.of(

@@ -7,8 +7,8 @@ import java.util.Optional;
 public final class NodeAttributes {
     private final Map<String, Attribute> map;
 
-    public NodeAttributes(Map<String, Attribute> map) {
-        this.map = map;
+    public NodeAttributes(Map<String, ? extends Attribute> map) {
+        this.map = new HashMap<>(map);
     }
 
     public static NodeAttributes fromStrings(Map<String, String> map) {

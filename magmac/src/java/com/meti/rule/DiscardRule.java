@@ -9,18 +9,14 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DiscardRule implements Rule {
-    public static final Rule Discard = new DiscardRule();
+    public static final Rule Empty = new DiscardRule();
 
     private DiscardRule() {
     }
 
-    private Optional<Tuple<Map<String, String>, Optional<String>>> apply2() {
-        return Optional.of(new Tuple<>(Collections.emptyMap(), Optional.empty()));
-    }
-
     @Override
     public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        return apply2().map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
+        return Optional.of(new Tuple<>(new NodeAttributes(Collections.emptyMap()), Optional.empty()));
     }
 
     @Override

@@ -9,7 +9,7 @@ import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { split } from com.meti.rule.NodeSplitRule;
 class def Main() => {
-	def main(args : String[]) => {
+	def main(args : String[]): void => {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
             var input = Files.readString(source);
@@ -21,8 +21,7 @@ class def Main() => {
             throw new RuntimeException(source.toAbsolutePath().toString(), e);
         }
     }
-
-    private static List<String> compile(String input) {
+	def compile(input : String): List<String> => {
         var nodes = split(input)
                 .stream()
                 .map(String::strip)
@@ -35,13 +34,11 @@ class def Main() => {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }
-
-    private static Optional<MapNode> compileRootElement(String stripped) {
+	def compileRootElement(stripped : String): Optional<MapNode> => {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
         return lex(stripped);
     }
-
-    private static Optional<MapNode> lex(String stripped) {
+	def lex(stripped : String): Optional<MapNode> => {
         return JAVA_ROOT.get("root")
                 .stream()
                 .map(rule -> rule.fromString(stripped))
