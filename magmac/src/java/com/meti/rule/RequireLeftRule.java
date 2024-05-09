@@ -21,6 +21,6 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        return right.toString(node).map(value -> slice + value);
     }
 }

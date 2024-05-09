@@ -1,14 +1,27 @@
 import { JavaLang } from com.meti.lang;
 import { MapNode } from com.meti.node;
 import { MagmaRenderer } from com.meti.render;
+import { TypeRule } from com.meti.rule;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
-import { * } from com.meti.rule.NodeSplitRule;
+import { $ } from com.meti.rule.ExtractRule;
+import { split } from com.meti.rule.NodeSplitRule;
+import { Left } from com.meti.rule.RequireLeftRule;
+import { Right } from com.meti.rule.RequireRightRule;
+import { Last } from com.meti.rule.SplitByLastSliceRule;
+import { Type } from com.meti.rule.TypeRule;
 class def Main() => {
+    public static final TypeRule IMPORT
+
+    static {
+        var last = Last(Left("{ ", Right($("child"), " }")), " from ", $("parent"));
+        IMPORT = Type("import", Left("import ", Right(last, ";\n")));
+    }
+
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -33,13 +46,21 @@ class def Main() => {
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped).map(MagmaRenderer::new).flatMap(MagmaRenderer::render);
+        return lex(stripped).flatMap(node -> renderImpl(node));
+    }
+
+    private static Optional<String> renderImpl(MapNode node) {
+        return IMPORT.toString(node).or(() -> getRender(node));
+    }
+
+    private static Optional<String> getRender(MapNode node) {
+        return new MagmaRenderer(node).render();
     }
 
     private static Optional<MapNode> lex(String stripped) {
         return JavaLang.ROOT_RULES.get("root")
                 .stream()
-                .map(rule -> rule.apply(stripped))
+                .map(rule -> rule.fromString(stripped))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);

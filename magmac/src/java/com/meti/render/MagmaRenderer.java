@@ -15,6 +15,6 @@ public record MagmaRenderer(MapNode node) implements Renderer {
     }
 
     private Stream<Renderer> createRenderers() {
-        return Stream.of(new ClassRenderer(node), new ImportRenderer(node));
+        return Stream.of(new ClassRenderer(node));
     }
 }

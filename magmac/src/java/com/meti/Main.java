@@ -3,6 +3,7 @@ package com.meti;
 import com.meti.lang.JavaLang;
 import com.meti.node.MapNode;
 import com.meti.render.MagmaRenderer;
+import com.meti.rule.TypeRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,9 +12,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.meti.rule.NodeSplitRule.*;
+import static com.meti.rule.ExtractRule.$;
+import static com.meti.rule.NodeSplitRule.split;
+import static com.meti.rule.RequireLeftRule.Left;
+import static com.meti.rule.RequireRightRule.Right;
+import static com.meti.rule.SplitByLastSliceRule.Last;
+import static com.meti.rule.TypeRule.Type;
 
 public class Main {
+    public static final TypeRule IMPORT;
+
+    static {
+        var last = Last(Left("{ ", Right($("child"), " }")), " from ", $("parent"));
+        IMPORT = Type("import", Left("import ", Right(last, ";\n")));
+    }
+
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
@@ -38,7 +51,15 @@ public class Main {
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped).map(MagmaRenderer::new).flatMap(MagmaRenderer::render);
+        return lex(stripped).flatMap(node -> renderImpl(node));
+    }
+
+    private static Optional<String> renderImpl(MapNode node) {
+        return IMPORT.toString(node).or(() -> getRender(node));
+    }
+
+    private static Optional<String> getRender(MapNode node) {
+        return new MagmaRenderer(node).render();
     }
 
     private static Optional<MapNode> lex(String stripped) {

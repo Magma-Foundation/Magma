@@ -41,6 +41,8 @@ public abstract class SplitBySliceRule implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        return leftRule.toString(node).flatMap(leftResult ->
+                rightRule.toString(node).map(rightResult ->
+                        leftResult + slice + rightResult));
     }
 }

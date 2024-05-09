@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public record NodeRule(String name, Rule parent) implements Rule {
-    public static NodeRule Node(String name, NamingRule name1) {
+    public static NodeRule Node(String name, TypeRule name1) {
         return new NodeRule(name, name1);
     }
 
