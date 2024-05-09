@@ -43,6 +43,8 @@ public abstract class SplitBySliceRule implements Rule {
     public Optional<String> toString(MapNode node) {
         return leftRule.toString(node).flatMap(leftResult ->
                 rightRule.toString(node).map(rightResult ->
-                        leftResult + slice + rightResult));
+                        leftResult + computeRight(rightResult)));
     }
+
+    protected abstract String computeRight(String rightResult);
 }

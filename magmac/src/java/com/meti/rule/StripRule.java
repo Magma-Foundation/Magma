@@ -18,6 +18,6 @@ public record StripRule(Rule next) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        return next.toString(node);
     }
 }

@@ -11,16 +11,13 @@ import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.TypeRule.Type;
 import static com.meti.rule.NodeRule.Node;
-import static com.meti.rule.NodeSplitRule.Nodes;
 import static com.meti.rule.RequireLeftRule.Left;
-import static com.meti.rule.RequireRightRule.Right;
 import static com.meti.rule.SplitByFirstSliceInclusiveRule.FirstInclusive;
 import static com.meti.rule.SplitByFirstSliceRule.First;
 import static com.meti.rule.SplitByLastSliceRule.Last;
 import static com.meti.rule.StripRule.Strip;
 
 public class JavaLang {
-    public static final Rule BLOCK = Strip(Left("{", Right(Nodes("children", Type("block-member", $("value"))), "}")));
     public static final TypeRule IMPORT;
 
     static {
@@ -29,8 +26,9 @@ public class JavaLang {
         IMPORT = Type("import", Left("import ", last));
     }
 
+    public static final TypeRule CLASS = Type("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
+            Node("content", Type("block", Lang.BLOCK)))));
     public static final Map<String, List<Rule>> ROOT_RULES = Map.of("root", List.of(
             IMPORT,
-            Type("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
-                    Node("content", Type("block", BLOCK)))))));
+            CLASS));
 }

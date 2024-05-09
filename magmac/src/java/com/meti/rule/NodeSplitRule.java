@@ -1,11 +1,13 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.node.Attribute;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.NodeListAttribute;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -65,7 +67,22 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        var optional = node.apply(propertyName);
+        if(optional.isEmpty()) return Optional.empty();
+
+        var nodeList = optional.get().asListOfNodes();
+        if(nodeList.isEmpty()) return Optional.empty();
+
+        var list = nodeList.get();
+        var builder = new StringBuilder();
+        for (MapNode child : list) {
+            var childString = childRule.toString(child);
+            if(childString.isEmpty()) return Optional.empty();
+
+            builder.append(childString.get());
+        }
+
+        return Optional.of(builder.toString());
     }
 
     private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder, boolean withinQuotes) {

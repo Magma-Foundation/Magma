@@ -27,6 +27,12 @@ public record NodeRule(String name, Rule parent) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        throw new UnsupportedOperationException();
+        var apply = node.apply(name);
+        if (apply.isEmpty()) return Optional.empty();
+
+        var childNode = apply.get().asNode();
+        if (childNode.isEmpty()) return Optional.empty();
+
+        return parent.toString(childNode.get());
     }
 }
