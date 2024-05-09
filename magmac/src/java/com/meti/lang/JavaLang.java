@@ -28,7 +28,7 @@ public class JavaLang {
 
     public static final TypeRule CLASS = Type("class", First(Discard, "class ", FirstInclusive(Strip($("name")), "{",
             Node("content", Type("block", Lang.BLOCK)))));
-    public static final Map<String, List<Rule>> ROOT_RULES = Map.of("root", List.of(
+    public static final Map<String, List<Rule>> JAVA_ROOT = Map.of("root", List.of(
             IMPORT,
             CLASS));
 }
