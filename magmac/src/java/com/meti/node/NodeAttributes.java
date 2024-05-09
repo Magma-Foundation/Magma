@@ -2,11 +2,12 @@ package com.meti.node;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class NodeAttributes {
     private final Map<String, Attribute> map;
 
-    private NodeAttributes(Map<String, Attribute> map) {
+    public NodeAttributes(Map<String, Attribute> map) {
         this.map = map;
     }
 
@@ -27,5 +28,12 @@ public final class NodeAttributes {
         }
 
         return copy;
+    }
+
+    public Optional<Attribute> apply(String name) {
+        if(map.containsKey(name)) {
+            return Optional.of(map.get(name));
+        }
+        return Optional.empty();
     }
 }

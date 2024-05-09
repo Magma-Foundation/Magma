@@ -3,5 +3,11 @@ package com.meti.node;
 import java.util.Optional;
 
 public interface Attribute {
-    Optional<String> asString();
+    default Optional<String> asString() {
+        return Optional.empty();
+    }
+
+    default Optional<MapNode> asNode() {
+        return Optional.empty();
+    }
 }
