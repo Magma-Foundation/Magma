@@ -3,15 +3,12 @@ package com.meti.lang;
 import com.meti.rule.Rule;
 import com.meti.rule.TypeRule;
 
-import java.util.List;
-import java.util.Map;
-
-import static com.meti.lang.Lang.Block;
 import static com.meti.rule.DelimiterRule.Delimit;
 import static com.meti.rule.DiscardRule.Empty;
 import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.NodeRule.Node;
+import static com.meti.rule.NodeSplitRule.Nodes;
 import static com.meti.rule.RequireLeftRule.Left;
 import static com.meti.rule.RequireRightRule.Right;
 import static com.meti.rule.SplitByFirstSliceLeftInclusiveRule.FirstIncludeLeft;
@@ -27,7 +24,10 @@ public class JavaLang {
     public static final Rule CLASS_MEMBER;
 
     public static final TypeRule CLASS;
-    public static final Map<String, List<Rule>> JAVA_ROOT;
+
+    public static final Rule JAVA_ROOT;
+
+    public static final TypeRule PACKAGE = Type("package ", Left("package ", $("namespace")));
 
     static {
         var segments = Last($("parent"), ".", $("child"));
@@ -45,10 +45,13 @@ public class JavaLang {
         );
 
         CLASS = Type("class", First(Empty, "class ", FirstIncludeRight(Strip($("name")), "{",
-                Node("content", Type("block", Block(CLASS_MEMBER))))));
+                Node("content", Type("block", Strip(Left("{", Right(Nodes("children", CLASS_MEMBER), "}"))))))));
 
-        JAVA_ROOT = Map.of("root", List.of(
+        JAVA_ROOT = Nodes("roots", Strip(Or(
+                PACKAGE,
                 IMPORT,
-                CLASS));
+                CLASS,
+                Empty
+        )));
     }
 }

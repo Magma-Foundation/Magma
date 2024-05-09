@@ -1,17 +1,17 @@
 package com.meti;
 
-import com.meti.node.MapNode;
+import com.meti.node.Attribute;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
-import static com.meti.rule.NodeSplitRule.split;
 
 public class Main {
 
@@ -29,30 +29,15 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        var nodes = split(input)
-                .stream()
-                .map(String::strip)
-                .map(Main::compileRootElement)
-                .flatMap(Optional::stream)
-                .toList();
+        var nodes = JAVA_ROOT.fromString(input)
+                .map(Tuple::left)
+                .flatMap(tuple -> tuple.apply("roots"))
+                .flatMap(Attribute::asListOfNodes)
+                .orElse(Collections.emptyList());
 
         return nodes.stream()
                 .map(MAGMA_ROOT::toString)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-    }
-
-    private static Optional<MapNode> compileRootElement(String stripped) {
-        if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped);
-    }
-
-    private static Optional<MapNode> lex(String stripped) {
-        return JAVA_ROOT.get("root")
-                .stream()
-                .map(rule -> rule.fromString(stripped))
-                .flatMap(Optional::stream)
-                .findFirst()
-                .flatMap(MapNode::fromTuple);
     }
 }

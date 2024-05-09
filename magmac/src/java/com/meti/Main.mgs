@@ -1,13 +1,13 @@
-import { MapNode } from com.meti.node;
+import { Attribute } from com.meti.node;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
+import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
-import { split } from com.meti.rule.NodeSplitRule;
 class def Main() => {
 	def main(args : String[]): void => {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -22,28 +22,15 @@ class def Main() => {
         }
     }
 	def compile(input : String): List<String> => {
-        var nodes = split(input)
-                .stream()
-                .map(String::strip)
-                .map(Main::compileRootElement)
-                .flatMap(Optional::stream)
-                .toList();
+        var nodes = JAVA_ROOT.fromString(input)
+                .map(Tuple::left)
+                .flatMap(tuple -> tuple.apply("roots"))
+                .flatMap(Attribute::asListOfNodes)
+                .orElse(Collections.emptyList());
 
         return nodes.stream()
                 .map(MAGMA_ROOT::toString)
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
-    }
-	def compileRootElement(stripped : String): Optional<MapNode> => {
-        if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        return lex(stripped);
-    }
-	def lex(stripped : String): Optional<MapNode> => {
-        return JAVA_ROOT.get("root")
-                .stream()
-                .map(rule -> rule.fromString(stripped))
-                .flatMap(Optional::stream)
-                .findFirst()
-                .flatMap(MapNode::fromTuple);
     }
 }

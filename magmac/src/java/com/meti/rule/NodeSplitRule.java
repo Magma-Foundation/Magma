@@ -1,7 +1,6 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
-import com.meti.node.Attribute;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.NodeListAttribute;
@@ -10,15 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record NodeSplitRule(String propertyName, Rule childRule) implements Rule {
-    public static ArrayList<String> split(String input) {
+    public static List<String> split(String input) {
         var current = new SplitState();
         for (int i = 0; i < input.length(); i++) {
             current = processChar(input.charAt(i), current);
         }
 
-        return current.advance().lines;
+        return current.advance().lines.stream()
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toList());
     }
 
     public static Rule Nodes(String propertyName, Rule childRule) {
@@ -26,16 +28,16 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
     }
 
     private static SplitState processChar(char c, SplitState current) {
-        if(c == '\"') {
+        if (c == '\"') {
             return current.toggleQuotes().append(c);
         }
 
-        if(current.isWithinQuotes()){
+        if (current.isWithinQuotes()) {
             return current.append(c);
         }
 
         if (c == ';' && current.depth == 0) return current.advance();
-        if(c == '}' && current.depth == 1) {
+        if (c == '}' && current.depth == 1) {
             return current.append(c).exit().advance();
         }
         return switch (c) {
@@ -68,16 +70,16 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
     @Override
     public Optional<String> toString(MapNode node) {
         var optional = node.apply(propertyName);
-        if(optional.isEmpty()) return Optional.empty();
+        if (optional.isEmpty()) return Optional.empty();
 
         var nodeList = optional.get().asListOfNodes();
-        if(nodeList.isEmpty()) return Optional.empty();
+        if (nodeList.isEmpty()) return Optional.empty();
 
         var list = nodeList.get();
         var builder = new StringBuilder();
         for (MapNode child : list) {
             var childString = childRule.toString(child);
-            if(childString.isEmpty()) return Optional.empty();
+            if (childString.isEmpty()) return Optional.empty();
 
             builder.append(childString.get());
         }
