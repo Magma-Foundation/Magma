@@ -10,6 +10,7 @@ import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.NodeRule.Node;
 import static com.meti.rule.NodeSplitRule.Nodes;
+import static com.meti.rule.QuantitySplitRule.Quantities;
 import static com.meti.rule.RequireLeftRule.Left;
 import static com.meti.rule.RequireRightRule.Right;
 import static com.meti.rule.SplitByFirstSliceLeftInclusiveRule.FirstIncludeLeft;
@@ -34,13 +35,13 @@ public class JavaLang {
         var segments = Last($("parent"), ".", $("child"));
         IMPORT = Type("import", Left("import ", Or(Left("static ", segments), segments)));
 
-        var methodParam = Strip(First($("param-type"), " ", $("param-name")));
-        var methodParams = Left("(", Right(methodParam, ")"));
+        var methodParam = Type("param", Strip(First($("param-type"), " ", $("param-name"))));
+        var methodParams = Left("(", Right(Strip(Quantities("params", methodParam)), ")"));
 
         var methodBeforeParams = Strip(Last(Strip(Last(Strip(Delimit("modifiers", " ")), " ", $("return-type"))), " ", $("name")));
         var methodContent = blockOfStatements();
 
-        METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")",methodContent))));
+        METHOD = Type("method", Strip(FirstIncludeRight(methodBeforeParams, "(", FirstIncludeLeft(methodParams, ")", methodContent))));
 
         CLASS_MEMBER = Or(
                 METHOD,
@@ -62,7 +63,7 @@ public class JavaLang {
 
         var methodMembers = Or(
                 Type("try", Strip(Left("try", lazy))),
-                Type("catch", Strip(Left("catch", First(Strip(Left("(", $("condition"))),")", lazy)))),
+                Type("catch", Strip(Left("catch", First(Strip(Left("(", $("condition"))), ")", lazy)))),
                 Type("declaration", First(Strip(First($("type"), " ", $("name"))), "=", Strip($("value")))),
                 Type("content", $("value"))
         );

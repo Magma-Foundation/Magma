@@ -9,6 +9,7 @@ import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
 import static com.meti.rule.NodeRule.Node;
 import static com.meti.rule.NodeSplitRule.Nodes;
+import static com.meti.rule.QuantitySplitRule.Quantities;
 import static com.meti.rule.RequireLeftRule.Left;
 import static com.meti.rule.RequireRightRule.Right;
 import static com.meti.rule.SplitByFirstSliceLeftInclusiveRule.FirstIncludeLeft;
@@ -23,8 +24,8 @@ public class MagmaLang {
     public static final TypeRule DECLARATION = Type("declaration", First(Strip(First(First($("indent"), "let ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n"))));
 
     static {
-        var methodParam = Strip(First($("param-name"), " : ", $("param-type")));
-        var methodParams = Left("(", Right(methodParam, ")"));
+        var methodParam = Type("param", Strip(First($("param-name"), " : ", $("param-type"))));
+        var methodParams = Left("(", Right(Quantities("params", methodParam), ")"));
 
         var methodReturnTypeRule = Or(Left(": ", $("return-type")), Empty);
         var right = blockOfStatements();

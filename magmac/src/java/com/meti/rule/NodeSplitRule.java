@@ -1,27 +1,12 @@
 package com.meti.rule;
 
-import com.meti.Tuple;
-import com.meti.node.MapNode;
-import com.meti.node.NodeAttributes;
-import com.meti.node.NodeListAttribute;
-import com.meti.util.Options;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record NodeSplitRule(String propertyName, Rule childRule) implements Rule {
-    public static List<String> split(String input) {
-        var current = new SplitState();
-        for (int i = 0; i < input.length(); i++) {
-            current = processChar(input.charAt(i), current);
-        }
-
-        return current.advance().lines.stream()
-                .filter(value -> !value.isBlank())
-                .collect(Collectors.toList());
+public final class NodeSplitRule extends SplitRule {
+    public NodeSplitRule(String propertyName, Rule childRule) {
+        super(propertyName, childRule);
     }
 
     public static Rule Nodes(String propertyName, Rule childRule) {
@@ -49,43 +34,20 @@ public record NodeSplitRule(String propertyName, Rule childRule) implements Rule
     }
 
     @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        var input = split(value);
-        var output = new ArrayList<MapNode>();
-
-        for (String inputLine : input) {
-            var optional = childRule.fromString(inputLine);
-            if (optional.isEmpty()) return Optional.empty();
-            var tuple = optional.get();
-            var left = tuple.left();
-            var right = tuple.right();
-            if (right.isEmpty()) return Optional.empty();
-
-            output.add(new MapNode(right.get(), left));
+    public List<String> split(String input) {
+        var current = new SplitState();
+        for (int i = 0; i < input.length(); i++) {
+            current = processChar(input.charAt(i), current);
         }
 
-        var attributes = new NodeAttributes(Map.of(propertyName, new NodeListAttribute(output)));
-        return Optional.of(new Tuple<>(attributes, Optional.empty()));
+        return current.advance().lines.stream()
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<String> toString(MapNode node) {
-        var optional = Options.toNative(node.apply(propertyName));
-        if (optional.isEmpty()) return Optional.empty();
-
-        var nodeList = Options.toNative(optional.get().asListOfNodes());
-        if (nodeList.isEmpty()) return Optional.empty();
-
-        var list = nodeList.get();
-        var builder = new StringBuilder();
-        for (MapNode child : list) {
-            var childString = childRule.toString(child);
-            if (childString.isEmpty()) return Optional.empty();
-
-            builder.append(childString.get());
-        }
-
-        return Optional.of(builder.toString());
+    protected String computeDelimiter() {
+        return "";
     }
 
     private record SplitState(int depth, ArrayList<String> lines, StringBuilder builder, boolean withinQuotes) {

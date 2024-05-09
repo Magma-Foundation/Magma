@@ -49,14 +49,14 @@ class def Main() => {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList())
 	}
-	def transformAST(child, State state : MapNode): State> => {
+	def transformAST(child : MapNode, state : State): State> => {
 		let preVisited : var = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
 		let withNodes : var = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
 		let withNodeLists : var = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
 
         return transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists)
 	}
-	def transformPostVisit(child, State state : MapNode): State>> => {
+	def transformPostVisit(child : MapNode, state : State): State>> => {
 		let (child.is("block")) {
             var exited : if = state.exit();
             return new Some<>(new Tuple<>(attachIndent(child, exited), exited));
@@ -65,11 +65,11 @@ class def Main() => {
 
         return new None<>()
 	}
-	def attachIndent(child, State state : MapNode): MapNode => {
+	def attachIndent(child : MapNode, state : State): MapNode => {
 
         return child.with("indent", new StringAttribute("\t".repeat(state.depth)))
 	}
-	def transformPreVisit(child, State state : MapNode): State>> => {
+	def transformPreVisit(child : MapNode, state : State): State>> => {
 
         if (child.is("block")) {
             return new Some<>(new Tuple<>(child, state.enter()));
@@ -84,7 +84,7 @@ class def Main() => {
 
         return new None<>()
 	}
-	def visitChildren(mapNodes, State state : List<MapNode>): State>> => {
+	def visitChildren(mapNodes : List<MapNode>, state : State): State>> => {
 		let list : var = new ArrayList<MapNode>();
 		let current : var = state;
 		let (MapNode child : mapNodes) {
@@ -96,7 +96,7 @@ class def Main() => {
 
         return new Some<>(new Tuple<>(list, current))
 	}
-	def visitChild(node, State state : MapNode): State>> => {
+	def visitChild(node : MapNode, state : State): State>> => {
 
         return new Some<>(transformAST(node, state))
 	}
