@@ -1,16 +1,21 @@
-import { * } from com.meti.node;
+import { MapNode } from com.meti.node;
+import { StringAttribute } from com.meti.node;
 import { None } from com.meti.util;
 import { Option } from com.meti.util;
 import { Some } from com.meti.util;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
-import { * } from java.util;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
+import { List } from java.util;
+import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
+import { NodeFactory } from com.meti.node.NodeAttribute;
 import { NodeListFactory } from com.meti.node.NodeListAttribute;
-import { * } from com.meti.util.Options;
+import { toNative } from com.meti.util.Options;
 class def Main() => {
 	def main(args : String[]): void => {
 		let source : var = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -45,22 +50,23 @@ class def Main() => {
                 .collect(Collectors.toList())
 	}
 	def transform(child : MapNode): Option<MapNode> => {
-		let $Option(() -> {
-            if (!child.is("class")) return $$();
 
-            var content : return = child.apply("content").$().asNode().$();
-            var newContent = content.map("children", NodeListFactory, inputContent -> {
-                var outputContent = new ArrayList<MapNode>();
-                for (var input : inputContent) {
-                    outputContent.add(attachIndent(input).orElse(input));
-                }
+        if (!child.is("class")) return new None<>()
 
-                return outputContent;
-            }).$();
+        return child.map("content", NodeFactory, Main::parseContentChildren)
+	}
+	def parseContentChildren(content : MapNode): Option<MapNode> => {
 
-            return child.with("content", new NodeAttribute(newContent));
-        };
-)
+        return content.map("children", NodeListFactory, Main::parseContentChild)
+	}
+	def parseContentChild(inputContent : List<MapNode>): Some<List<MapNode>> => {
+		let outputContent : var = new ArrayList<MapNode>();
+
+        for (var input : inputContent) {
+            outputContent.add(attachIndent(input).orElse(input));
+        }
+
+        return new Some<>(outputContent)
 	}
 	def attachIndent(input : MapNode): Option<MapNode> => {
 

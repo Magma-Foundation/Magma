@@ -1,6 +1,7 @@
 package com.meti;
 
-import com.meti.node.*;
+import com.meti.node.MapNode;
+import com.meti.node.StringAttribute;
 import com.meti.util.None;
 import com.meti.util.Option;
 import com.meti.util.Some;
@@ -8,13 +9,17 @@ import com.meti.util.Some;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
+import static com.meti.node.NodeAttribute.NodeFactory;
 import static com.meti.node.NodeListAttribute.NodeListFactory;
-import static com.meti.util.Options.*;
+import static com.meti.util.Options.toNative;
 
 public class Main {
     public static void main(String[] args) {
@@ -50,21 +55,22 @@ public class Main {
     }
 
     private static Option<MapNode> transform(MapNode child) {
-        return $Option(() -> {
-            if (!child.is("class")) return $$();
+        if (!child.is("class")) return new None<>();
 
-            var content = child.apply("content").$().asNode().$();
-            var newContent = content.map("children", NodeListFactory, inputContent -> {
-                var outputContent = new ArrayList<MapNode>();
-                for (var input : inputContent) {
-                    outputContent.add(attachIndent(input).orElse(input));
-                }
+        return child.map("content", NodeFactory, Main::parseContentChildren);
+    }
 
-                return outputContent;
-            }).$();
+    private static Option<MapNode> parseContentChildren(MapNode content) {
+        return content.map("children", NodeListFactory, Main::parseContentChild);
+    }
 
-            return child.with("content", new NodeAttribute(newContent));
-        });
+    private static Some<List<MapNode>> parseContentChild(List<MapNode> inputContent) {
+        var outputContent = new ArrayList<MapNode>();
+        for (var input : inputContent) {
+            outputContent.add(attachIndent(input).orElse(input));
+        }
+
+        return new Some<>(outputContent);
     }
 
     private static Option<MapNode> attachIndent(MapNode input) {

@@ -17,11 +17,10 @@ public record MapNode(String type, NodeAttributes node) {
         return new MapNode(type, node.with(key, attribute));
     }
 
-    public <T> Option<MapNode> map(String key, AttributeFactory<T> factory, Function<T, T> mapper) {
+    public <T> Option<MapNode> map(String key, AttributeFactory<T> factory, Function<T, Option<T>> mapper) {
         return apply(key)
                 .flatMap(factory::fromAttribute)
-                .map(mapper)
-                .map(mapper)
+                .flatMap(mapper)
                 .map(factory::toAttribute)
                 .map(attribute -> with(key, attribute));
     }
