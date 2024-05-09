@@ -57,8 +57,7 @@ public class JavaLang {
         JAVA_ROOT = Nodes("roots", Strip(Or(
                 PACKAGE,
                 IMPORT,
-                CLASS,
-                Empty
+                CLASS
         )));
     }
 }
