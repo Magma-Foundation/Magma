@@ -7,6 +7,18 @@ import java.util.List;
 import java.util.Optional;
 
 public record NodeListAttribute(List<MapNode> nodes) implements Attribute {
+    public static final AttributeFactory<List<MapNode>> NodeListFactory = new AttributeFactory<>() {
+        @Override
+        public Attribute toAttribute(List<MapNode> value) {
+            return new NodeListAttribute(value);
+        }
+
+        @Override
+        public Option<List<MapNode>> fromAttribute(Attribute attribute) {
+            return attribute.asListOfNodes();
+        }
+    };
+
     private Optional<List<MapNode>> asListOfNodes1() {
         return Optional.of(nodes);
     }

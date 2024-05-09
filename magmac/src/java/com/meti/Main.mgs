@@ -1,5 +1,7 @@
 import { * } from com.meti.node;
+import { None } from com.meti.util;
 import { Option } from com.meti.util;
+import { Some } from com.meti.util;
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
@@ -7,6 +9,7 @@ import { * } from java.util;
 import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
+import { NodeListFactory } from com.meti.node.NodeListAttribute;
 import { * } from com.meti.util.Options;
 class def Main() => {
 	def main(args : String[]): void => {
@@ -45,28 +48,26 @@ class def Main() => {
 		let $Option(() -> {
             if (!child.is("class")) return $$();
 
-            var inputContent : return = child
-                    .apply("content").$()
-                    .asNode().$()
-                    .apply("children").$()
-                    .asListOfNodes().$();
-
-            var outputContent = new ArrayList<MapNode>();
-            for (var input : inputContent) {
-                MapNode output;
-                if (input.is("method")) {
-                    output = input.with("indent", new StringAttribute("\t"));
-                } else {
-                    output = input;
+            var content : return = child.apply("content").$().asNode().$();
+            var newContent = content.map("children", NodeListFactory, inputContent -> {
+                var outputContent = new ArrayList<MapNode>();
+                for (var input : inputContent) {
+                    outputContent.add(attachIndent(input).orElse(input));
                 }
 
-                outputContent.add(output);
-            }
+                return outputContent;
+            }).$();
 
-            return child.with("content", new NodeAttribute(new MapNode("block", new NodeAttributes(Map.of(
-                    "children", new NodeListAttribute(outputContent)
-            )))));
+            return child.with("content", new NodeAttribute(newContent));
         };
 )
+	}
+	def attachIndent(input : MapNode): Option<MapNode> => {
+
+        if (input.is("method")) {
+            return new Some<>(input.with("indent", new StringAttribute("\t")));
+        } else {
+            return new None<>();
+        }
 	}
 }

@@ -2,6 +2,8 @@ package com.meti.node;
 
 import com.meti.util.Option;
 
+import java.util.function.Function;
+
 public record MapNode(String type, NodeAttributes node) {
     public Option<Attribute> apply(String name) {
         return node.apply(name);
@@ -13,5 +15,14 @@ public record MapNode(String type, NodeAttributes node) {
 
     public MapNode with(String key, Attribute attribute) {
         return new MapNode(type, node.with(key, attribute));
+    }
+
+    public <T> Option<MapNode> map(String key, AttributeFactory<T> factory, Function<T, T> mapper) {
+        return apply(key)
+                .flatMap(factory::fromAttribute)
+                .map(mapper)
+                .map(mapper)
+                .map(factory::toAttribute)
+                .map(attribute -> with(key, attribute));
     }
 }
