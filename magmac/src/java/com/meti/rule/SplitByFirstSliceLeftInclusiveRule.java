@@ -1,12 +1,12 @@
 package com.meti.rule;
 
-public final class SplitByFirstSliceRule extends SplitBySliceRule {
-    public SplitByFirstSliceRule(Rule leftRule, String slice, Rule rightRule) {
+public final class SplitByFirstSliceLeftInclusiveRule extends SplitBySliceRule {
+    public SplitByFirstSliceLeftInclusiveRule(Rule leftRule, String slice, Rule rightRule) {
         super(leftRule, slice, rightRule);
     }
 
-    public static Rule First(Rule parent, String slice, Rule child) {
-        return new SplitByFirstSliceRule(parent, slice, child);
+    public static Rule FirstIncludeLeft(Rule parent, String slice, Rule child) {
+        return new SplitByFirstSliceLeftInclusiveRule(parent, slice, child);
     }
 
     @Override
@@ -21,11 +21,11 @@ public final class SplitByFirstSliceRule extends SplitBySliceRule {
 
     @Override
     protected String computeRight(String rightResult) {
-        return slice + rightResult;
+        return rightResult;
     }
 
     @Override
     protected int computeLeftOffset() {
-        return 0;
+        return slice.length();
     }
 }

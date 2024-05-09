@@ -8,7 +8,8 @@ import { Collectors } from java.util.stream;
 import { JAVA_ROOT } from com.meti.lang.JavaLang;
 import { MAGMA_ROOT } from com.meti.lang.MagmaLang;
 import { split } from com.meti.rule.NodeSplitRule;
-class def Main() => {class def main(String[] args) => {
+class def Main() => {
+	def main(args : String[]) => {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
             var input = Files.readString(source);
@@ -47,4 +48,5 @@ class def Main() => {class def main(String[] args) => {
                 .flatMap(Optional::stream)
                 .findFirst()
                 .flatMap(MapNode::fromTuple);
-    }}
+    }
+}
