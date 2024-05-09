@@ -54,7 +54,8 @@ public class JavaLang {
         JAVA_ROOT = Nodes("roots", Strip(Or(
                 PACKAGE,
                 IMPORT,
-                CLASS
+                CLASS,
+                Type("interface", First(Empty, "interface ", FirstIncludeRight($("name"), "{", $("content"))))
         )));
     }
 

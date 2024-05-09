@@ -40,7 +40,9 @@ public class MagmaLang {
         var functionRule = Type("class", First(Empty, "class def ", First(Strip($("name")), "() => ", Node("content", Type("block", blockRule)))));
 
         var importRule = Type("import", Left("import ", Right(Last(Left("{ ", Right($("child"), " }")), " from ", $("parent")), ";\n")));
-        MAGMA_ROOT = Or(importRule, functionRule);
+
+        var interfaceRule = Type("interface", First(Empty, "trait ", FirstIncludeRight($("name"), "{", $("content"))));
+        MAGMA_ROOT = Or(importRule, functionRule, interfaceRule);
     }
 
     private static Rule blockOfStatements() {
