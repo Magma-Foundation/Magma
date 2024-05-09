@@ -9,10 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.meti.rule.DiscardRule.Discard;
 import static com.meti.rule.ExtractRule.$;
@@ -26,6 +25,9 @@ public class Main {
     public static final Rule IMPORT_RULE = new NamingRule("import", Left("import ", Last($("parent"), ".", $("child"))));
     public static final Rule CLASS_RULE = new NamingRule("class", First(Discard, "class ",
             First(Strip($("name")), "{", Right($("content"), "}"))));
+    public static final Map<String, List<Rule>> RULES = Map.of("root", List.of(
+            IMPORT_RULE,
+            CLASS_RULE));
 
     public static void main(String[] args) {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
@@ -46,22 +48,16 @@ public class Main {
 
     private static Optional<String> compileRootElement(String stripped) {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return Optional.empty();
-        var value = Stream.<Supplier<Optional<String>>>of(() -> compileImport(stripped), () -> compileClass(stripped)).map(Supplier::get).flatMap(Optional::stream).findFirst().orElse(stripped);
-        return Optional.of(value);
+        return lex(stripped).map(MagmaRenderer::new).flatMap(MagmaRenderer::render);
     }
 
-    private static Optional<String> compileClass(String stripped) {
-        return CLASS_RULE.apply(stripped)
-                .flatMap(MapNode::fromTuple)
-                .map(MagmaRenderer::new)
-                .flatMap(MagmaRenderer::render);
-    }
-
-    private static Optional<String> compileImport(String stripped) {
-        return IMPORT_RULE.apply(stripped)
-                .flatMap(MapNode::fromTuple)
-                .map(MagmaRenderer::new)
-                .flatMap(MagmaRenderer::render);
+    private static Optional<MapNode> lex(String stripped) {
+        return RULES.get("root")
+                .stream()
+                .map(rule -> rule.apply(stripped))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .flatMap(MapNode::fromTuple);
     }
 
     private static ArrayList<String> split(String input) {
