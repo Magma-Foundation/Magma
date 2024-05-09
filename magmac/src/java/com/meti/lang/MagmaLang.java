@@ -24,9 +24,12 @@ public class MagmaLang {
         var methodParams = Left("(", Right(methodParam, ")"));
 
         var methodReturnTypeRule = Or(Left(": ", $("return-type")), Empty);
-        var content = Nodes("children", Or(Type("content", $("value"))));
+        var methodContent = Nodes("children", Or(
+                Type("declaration", First(Strip(First(Left("\t\tlet ", $("name")), " : ", $("type"))), " = ", Strip(Right($("value"), ";\n")))),
+                Type("content", $("value"))
+        ));
 
-        var left = First(methodReturnTypeRule, " => ", Right(Left("{", content), "\n\t}\n"));
+        var left = First(methodReturnTypeRule, " => ", Right(Left("{\n", methodContent), "\n\t}\n"));
 
         var methodRule = Type("method", Strip(Left("\tdef ",
                 FirstIncludeRight($("name"), "(", FirstIncludeLeft(methodParams, ")", left)))));
