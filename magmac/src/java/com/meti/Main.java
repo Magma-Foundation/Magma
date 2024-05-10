@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
@@ -68,7 +70,10 @@ public class Main {
                 .flatMap(attribute -> toNative(attribute.asListOfNodes()))
                 .orElse(Collections.emptyList());
 
-        var outputAST = visitChildren(inputAST, new State()).map(Tuple::left).orElse(Collections.emptyList());
+        var outputAST = visitChildren(inputAST, new State())
+                .flatMap(Tuple::left)
+                .orElse(Collections.emptyList());
+
         var builder = new ArrayList<String>();
         for (MapNode mapNode : outputAST) {
             var rendered = MAGMA_ROOT.toString(mapNode);
@@ -82,28 +87,38 @@ public class Main {
         return builder;
     }
 
-    private static Tuple<MapNode, State> transformAST(MapNode child, State state) {
-        var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(child, state));
-        var withNodes = preVisited.left().map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right());
-        var withNodeLists = withNodes.left().map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
-        return transformPostVisit(withNodeLists.left(), withNodeLists.right()).orElse(withNodeLists);
+    private static Tuple<Option<MapNode>, State> transformAST(MapNode child, State state) {
+        var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(new Some<>(child), state));
+        var withNodes = preVisited.left()
+                .map(node1 -> node1.map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right()))
+                .orElse(preVisited);
+
+        var withNodeLists = withNodes.left()
+                .map(inner -> {
+                    return inner.map(NodeListFactory, (node, state1) -> visitChildren(state1, node), withNodes.right());
+                })
+                .orElse(withNodes);
+
+        return withNodeLists.left().flatMap(left -> {
+            return transformPostVisit(left, withNodeLists.right());
+        }).orElse(withNodeLists);
     }
 
-    private static Option<Tuple<MapNode, State>> transformPostVisit(MapNode child, State state) {
+    private static Option<Tuple<Option<MapNode>, State>> transformPostVisit(MapNode child, State state) {
         if (child.is("block")) {
             var exited = state.exit();
-            return new Some<>(new Tuple<>(attachIndent(child, exited), exited));
+            return new Some<>(new Tuple<>(new Some<>(attachIndent(child, exited)), exited));
         }
 
-        if (child.is("record")) {
+/*        if (child.is("record")) {
             var mapNode = new MapNode("block", new NodeAttributes(Map.of("children", new NodeListAttribute(Collections.emptyList()))));
 
             var function = child.rename("function")
                     .with("indent", new StringAttribute(""))
                     .with("value", new NodeAttribute(mapNode));
 
-            return new Some<>(new Tuple<>(function, state));
-        }
+            return new Some<>(new Tuple<>(new Some<>(function), state));
+        }*/
 
         return new None<>();
     }
@@ -112,32 +127,36 @@ public class Main {
         return child.with("indent", new StringAttribute("\t".repeat(state.depth)));
     }
 
-    private static Option<Tuple<MapNode, State>> transformPreVisit(MapNode child, State state) {
+    private static Option<Tuple<Option<MapNode>, State>> transformPreVisit(MapNode child, State state) {
         if (child.is("block")) {
-            return new Some<>(new Tuple<>(child, state.enter()));
+            return new Some<>(new Tuple<>(new Some<>(child), state.enter()));
         }
 
         if (child.is("catch") || child.is("declaration") || child.is("method") || child.is("try")) {
-            return new Some<>(new Tuple<>(attachIndent(child, state), state));
+            return new Some<>(new Tuple<>(new Some<>(attachIndent(child, state)), state));
+        }
+
+        if (child.is("package")) {
+            return new Some<>(new Tuple<>(new None<>(), state));
         }
 
         return new None<>();
     }
 
-    private static Option<Tuple<List<MapNode>, State>> visitChildren(List<MapNode> mapNodes, State state) {
+    private static Option<Tuple<Option<List<MapNode>>, State>> visitChildren(List<MapNode> mapNodes, State state) {
         var list = new ArrayList<MapNode>();
         var current = state;
 
         for (MapNode child : mapNodes) {
             var tuple = transformAST(child, state);
-            list.add(tuple.left());
+            tuple.left().ifPresent(list::add);
             current = tuple.right();
         }
 
-        return new Some<>(new Tuple<>(list, current));
+        return new Some<>(new Tuple<>(new Some<>(list), current));
     }
 
-    private static Option<Tuple<MapNode, State>> visitChild(MapNode node, State state) {
+    private static Option<Tuple<Option<MapNode>, State>> visitChild(MapNode node, State state) {
         return new Some<>(transformAST(node, state));
     }
 

@@ -30,7 +30,7 @@ public class JavaLang {
 
     public static final Rule JAVA_ROOT;
 
-    public static final TypeRule PACKAGE = Type("package ", Left("package ", $("namespace")));
+    public static final TypeRule PACKAGE = Type("package", Left("package ", $("namespace")));
     public static final TypeRule DECLARATION_RULE;
 
     static {

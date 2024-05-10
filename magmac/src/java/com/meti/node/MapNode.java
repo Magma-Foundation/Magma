@@ -2,6 +2,7 @@ package com.meti.node;
 
 import com.meti.Tuple;
 import com.meti.util.Option;
+import com.meti.util.Some;
 
 import java.util.function.BiFunction;
 
@@ -19,25 +20,31 @@ public record MapNode(String type, NodeAttributes attributes) {
         return new MapNode(type, attributes.with(key, attribute));
     }
 
-    public <T, S> Tuple<MapNode, S> map(
+    public <T, S> Tuple<Option<MapNode>, S> map(
             AttributeFactory<T> factory,
-            BiFunction<S, T, Option<Tuple<T, S>>> mapper,
+            BiFunction<S, T, Option<Tuple<Option<T>, S>>> mapper,
             S state) {
         return attributes.filter(factory)
                 .stream()
-                .reduce(new Tuple<>(this, state), (current, key) -> current.left().map(key, factory, mapper, current.right()).orElse(current), (node, node2) -> node2);
+                .reduce(new Tuple<>(new Some<>(this), state),
+                        (current, key) -> {
+                            var map = current.left()
+                                    .flatMap(inner -> inner.map(key, factory, mapper, current.right()));
+                            return map.orElse(current);
+                        },
+                        (node, node2) -> node2);
     }
 
-    public <T, S> Option<Tuple<MapNode, S>> map(
+    public <T, S> Option<Tuple<Option<MapNode>, S>> map(
             String key,
             AttributeFactory<T> factory,
-            BiFunction<S, T, Option<Tuple<T, S>>> mapper,
+            BiFunction<S, T, Option<Tuple<Option<T>, S>>> mapper,
             S state) {
         return apply(key)
                 .flatMap(factory::fromAttribute)
                 .flatMap(value -> mapper.apply(state, value))
-                .map((Tuple<T, S> value1) -> value1.mapLeft(factory::toAttribute))
-                .map(attribute -> attribute.mapLeft(left -> with(key, left)));
+                .map((Tuple<Option<T>, S> value1) -> value1.mapLeft((Option<T> value2) -> value2.map(factory::toAttribute)))
+                .map(attribute -> attribute.mapLeft(left0 -> left0.map(left -> with(key, left))));
     }
 
     public MapNode rename(String name) {
