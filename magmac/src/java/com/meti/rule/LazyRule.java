@@ -24,6 +24,6 @@ public class LazyRule implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return new RuleResult(fromString1(value));
+        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
     }
 }

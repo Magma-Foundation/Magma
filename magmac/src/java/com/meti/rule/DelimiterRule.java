@@ -25,11 +25,11 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
     public RuleResult fromString(String value) {
         var members = value.split(delimiter);
         if (members.length == 0) {
-            return new RuleResult("No delineated items present.");
+            return new ErrorRuleResult("No delineated items present.", "");
         } else {
             var attribute = new StringListAttribute(List.of(members));
             var attributes = Map.of(name, attribute);
-            return new RuleResult(Optional.of(new Tuple<>(new NodeAttributes(attributes), Optional.empty())));
+            return Optional.<Tuple<NodeAttributes, Optional<String>>>of(new Tuple<>(new NodeAttributes(attributes), Optional.empty())).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
         }
     }
 }
