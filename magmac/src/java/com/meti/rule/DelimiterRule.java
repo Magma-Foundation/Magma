@@ -16,15 +16,6 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
         return new DelimiterRule(name, delimiter);
     }
 
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        var members = value.split(delimiter);
-        if (members.length == 0) return Optional.empty();
-
-        var attribute = new StringListAttribute(List.of(members));
-        var attributes = Map.of(name, attribute);
-        return Optional.of(new Tuple<>(new NodeAttributes(attributes), Optional.empty()));
-    }
-
     @Override
     public Optional<String> toString(MapNode node) {
         return Options.toNative(node.apply(name)).flatMap(Attribute::asListOfStrings).map(list -> String.join(delimiter, list));
@@ -32,6 +23,13 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return new RuleResult(fromString1(value));
+        var members = value.split(delimiter);
+        if (members.length == 0) {
+            return new RuleResult("No delineated items present.");
+        } else {
+            var attribute = new StringListAttribute(List.of(members));
+            var attributes = Map.of(name, attribute);
+            return new RuleResult(Optional.of(new Tuple<>(new NodeAttributes(attributes), Optional.empty())));
+        }
     }
 }

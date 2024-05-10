@@ -15,12 +15,8 @@ public record ExtractRule(String key) implements Rule {
         return new ExtractRule(parent);
     }
 
-    private Optional<Tuple<Map<String, String>, Optional<String>>> apply2(String value) {
-        return Optional.of(Map.of(key, value)).map(map -> new Tuple<>(map, Optional.empty()));
-    }
-
     private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
+        return Optional.of(Map.of(key, value)).<Tuple<Map<String, String>, Optional<String>>>map(map -> new Tuple<>(map, Optional.empty())).map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
     }
 
     @Override
