@@ -1,8 +1,6 @@
 package com.meti.rule;
 
-import com.meti.Tuple;
 import com.meti.node.MapNode;
-import com.meti.node.NodeAttributes;
 
 import java.util.Optional;
 
@@ -13,10 +11,6 @@ public class LazyRule implements Rule {
         parent = Optional.of(rule);
     }
 
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        return parent.flatMap(inner -> inner.fromString(value).unwrap());
-    }
-
     @Override
     public Optional<String> toString(MapNode node) {
         return parent.flatMap(inner -> inner.toString(node));
@@ -24,6 +18,6 @@ public class LazyRule implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        return parent.map(inner -> inner.fromString(value)).orElseGet(() -> new ErrorRuleResult("No parent rule was set for lazy rule.", value));
     }
 }
