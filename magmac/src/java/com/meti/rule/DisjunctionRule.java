@@ -1,9 +1,8 @@
 package com.meti.rule;
 
-import com.meti.Tuple;
 import com.meti.node.MapNode;
-import com.meti.node.NodeAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,18 +11,11 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
         return new DisjunctionRule(List.of(rules));
     }
 
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        return rules.stream()
-                .map(rule -> rule.fromString(value).unwrap())
-                .flatMap(Optional::stream)
-                .findFirst();
-    }
-
     @Override
     public Optional<String> toString(MapNode node) {
         for (Rule rule : rules) {
             var optional = rule.toString(node);
-            if(optional.isPresent()) return optional;
+            if (optional.isPresent()) return optional;
         }
 
         return Optional.empty();
@@ -31,6 +23,17 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        var errors = new ArrayList<RuleResult>();
+
+        for (Rule rule : rules) {
+            var result = rule.fromString(value);
+            if (result.isValid()) {
+                return result;
+            } else {
+                errors.add(result);
+            }
+        }
+
+        return new ParentRuleResult("Disjunction invalid.", value, errors);
     }
 }
