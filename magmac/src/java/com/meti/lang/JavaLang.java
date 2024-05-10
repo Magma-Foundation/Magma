@@ -18,6 +18,7 @@ import static com.meti.rule.SplitByFirstSliceRightInclusiveRule.FirstIncludeRigh
 import static com.meti.rule.SplitByFirstSliceRule.First;
 import static com.meti.rule.SplitByLastSliceRule.Last;
 import static com.meti.rule.StripRule.Strip;
+import static com.meti.rule.SymbolRule.Symbol;
 import static com.meti.rule.TypeRule.Type;
 
 public class JavaLang {
@@ -59,7 +60,7 @@ public class JavaLang {
                 PACKAGE,
                 IMPORT,
                 CLASS,
-                Type("interface", First(Empty, "interface ", FirstIncludeRight($("name"), "{", $("content")))),
+                Type("interface", First(Strip(Delimit("modifier", " ")), "interface ", FirstIncludeRight(Symbol("name"), "{", $("content")))),
                 Type("record", FirstIncludeRight(Strip(Last(Empty, " ", $("name"))), "(", FirstIncludeLeft(Empty, ")", $("content"))))
         )));
     }
