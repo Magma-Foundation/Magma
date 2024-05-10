@@ -2,7 +2,6 @@ package com.meti.rule;
 
 import com.meti.Tuple;
 import com.meti.node.MapNode;
-import com.meti.node.NodeAttributes;
 
 import java.util.Optional;
 
@@ -21,27 +20,6 @@ public abstract class SplitBySliceRule implements Rule {
 
     protected abstract int applyOperation(String value);
 
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        try {
-            var separator = applyOperation(value);
-            if (separator == -1) return Optional.empty();
-
-            var left = value.substring(0, separator + computeLeftOffset());
-            var leftMap = leftRule.fromString(left).unwrap().map(Tuple::left);
-            if (leftMap.isEmpty()) return Optional.empty();
-
-            var right = value.substring(separator + computeRightOffset());
-            var rightMap = rightRule.fromString(right).unwrap().map(Tuple::left);
-
-            if (rightMap.isEmpty()) return Optional.empty();
-
-            var attributes = leftMap.orElseThrow().add(rightMap.orElseThrow());
-            return Optional.of(new Tuple<>(attributes, Optional.empty()));
-        } catch (RuleException e) {
-            throw new RuleException(value, e);
-        }
-    }
-
     protected abstract int computeLeftOffset();
 
     @Override
@@ -55,6 +33,21 @@ public abstract class SplitBySliceRule implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        var separator = applyOperation(value);
+        if (separator == -1)
+            return new ErrorRuleResult("Delimiter '" + slice + "' could not be found in value.", value);
+
+        var left = value.substring(0, separator + computeLeftOffset());
+        var leftResult = leftRule.fromString(left);
+        var leftMap = leftResult.getAttributes();
+        if (leftMap.isEmpty()) return new ParentRuleResult("Left side is invalid.", value, leftResult);
+
+        var right = value.substring(separator + computeRightOffset());
+        var rightResult = rightRule.fromString(right);
+        var rightMap = rightResult.getAttributes();
+        if (rightMap.isEmpty()) return new ParentRuleResult("Right side is invalid.", value, rightResult);
+
+        var attributes = leftMap.orElseThrow().add(rightMap.orElseThrow());
+        return new NodeRuleResult(new Tuple<>(attributes, Optional.empty()));
     }
 }
