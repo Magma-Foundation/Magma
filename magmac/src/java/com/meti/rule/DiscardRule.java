@@ -13,10 +13,6 @@ public class DiscardRule implements Rule {
     private DiscardRule() {
     }
 
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        return Optional.of(new Tuple<>(new NodeAttributes(Collections.emptyMap()), Optional.empty()));
-    }
-
     @Override
     public Optional<String> toString(MapNode node) {
         return Optional.of("");
@@ -24,6 +20,6 @@ public class DiscardRule implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        return new NodeRuleResult(new Tuple<>(new NodeAttributes(Collections.emptyMap()), Optional.empty()));
     }
 }
