@@ -2,11 +2,8 @@ package com.meti.rule;
 
 import com.meti.Tuple;
 import com.meti.node.MapNode;
-import com.meti.node.NodeAttribute;
-import com.meti.node.NodeAttributes;
 import com.meti.util.Options;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static com.meti.node.NodeAttributes.NodeAttributesBuilder;
@@ -35,7 +32,7 @@ public record NodeRule(String name, Rule content) implements Rule {
             return new ParentRuleResult("Content result was invalid.", value, parentResult);
         }
 
-        var name = parentResult.getName();
+        var name = parentResult.getType();
         if (name.isEmpty()) {
             return new ParentRuleResult("Usage of '" + getClass().getName() + "' requires a name to be present in the content, which was not provided.", value, parentResult);
         }

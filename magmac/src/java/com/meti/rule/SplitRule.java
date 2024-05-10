@@ -61,7 +61,7 @@ public abstract class SplitRule implements Rule {
                 return new ParentRuleResult("No valid child.", inputLine, childResult);
             }
 
-            var right = childResult.getName();
+            var right = childResult.getType();
             if (right.isEmpty()) {
                 throw new RuleException("No name present for: " + inputLine);
             }

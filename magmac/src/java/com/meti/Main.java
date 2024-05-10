@@ -57,11 +57,29 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        var inputAST = JAVA_ROOT.fromString(input).unwrap().map(Tuple::left).flatMap(tuple -> toNative(tuple.apply("roots"))).flatMap(attribute -> toNative(attribute.asListOfNodes())).orElse(Collections.emptyList());
+        var rootResult = JAVA_ROOT.fromString(input);
+        var attributes = rootResult.getAttributes();
+        if (attributes.isEmpty()) {
+            throw rootResult.toException();
+        }
+
+        var inputAST = attributes
+                .flatMap(tuple -> toNative(tuple.apply("roots")))
+                .flatMap(attribute -> toNative(attribute.asListOfNodes()))
+                .orElse(Collections.emptyList());
 
         var outputAST = visitChildren(inputAST, new State()).map(Tuple::left).orElse(Collections.emptyList());
+        var builder = new ArrayList<String>();
+        for (MapNode mapNode : outputAST) {
+            var rendered = MAGMA_ROOT.toString(mapNode);
+            if (rendered.isPresent()) {
+                builder.add(rendered.get());
+            } else {
+                throw new UnsupportedOperationException("Cannot render: " + mapNode);
+            }
+        }
 
-        return outputAST.stream().map(MAGMA_ROOT::toString).flatMap(Optional::stream).collect(Collectors.toList());
+        return builder;
     }
 
     private static Tuple<MapNode, State> transformAST(MapNode child, State state) {

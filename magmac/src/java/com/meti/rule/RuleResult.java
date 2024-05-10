@@ -3,21 +3,22 @@ package com.meti.rule;
 import com.meti.Tuple;
 import com.meti.node.NodeAttributes;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RuleResult {
     @Deprecated
     Optional<Tuple<NodeAttributes, Optional<String>>> unwrap();
 
-    default boolean isValid() {
-        return unwrap().isPresent();
-    }
+    boolean isValid();
 
-    default Optional<NodeAttributes> getAttributes() {
-        return unwrap().map(Tuple::left);
-    }
+    Optional<NodeAttributes> getAttributes();
 
-    default Optional<String> getName() {
-        return unwrap().flatMap(Tuple::right);
-    }
+    Optional<String> getType();
+
+    RuleResult withType(String type);
+
+    List<RuleResult> getCauses();
+
+    RuleException toException();
 }

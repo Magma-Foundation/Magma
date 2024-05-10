@@ -57,6 +57,9 @@ public final class NodeAttributes {
     }
 
     public record Builder(Map<String, Attribute> attributeMap) {
+        public Builder withString(String key, String value) {
+            return with(key, new StringAttribute(value));
+        }
 
         public Builder withNode(String key, String nodeName, NodeAttributes attributes) {
             return with(key, new NodeAttribute(new MapNode(nodeName, attributes)));
