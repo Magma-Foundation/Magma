@@ -13,13 +13,17 @@ public class LazyRule implements Rule {
         parent = Optional.of(rule);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        return parent.flatMap(inner -> inner.fromString(value));
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
+        return parent.flatMap(inner -> inner.fromString(value).unwrap());
     }
 
     @Override
     public Optional<String> toString(MapNode node) {
         return parent.flatMap(inner -> inner.toString(node));
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

@@ -11,13 +11,12 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
         return new RequireLeftRule(slice, right);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         if (!value.startsWith(this.slice)) return Optional.empty();
 
         try {
             var segments = value.substring(this.slice.length());
-            return this.right.fromString(segments);
+            return this.right.fromString(segments).unwrap();
         } catch (RuleException e) {
             throw new RuleException(value, e);
         }
@@ -26,5 +25,10 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
     @Override
     public Optional<String> toString(MapNode node) {
         return right.toString(node).map(value -> slice + value);
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

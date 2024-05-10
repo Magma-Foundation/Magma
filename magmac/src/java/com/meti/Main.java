@@ -57,7 +57,7 @@ public class Main {
     }
 
     private static List<String> compile(String input) {
-        var inputAST = JAVA_ROOT.fromString(input).map(Tuple::left).flatMap(tuple -> toNative(tuple.apply("roots"))).flatMap(attribute -> toNative(attribute.asListOfNodes())).orElse(Collections.emptyList());
+        var inputAST = JAVA_ROOT.fromString(input).unwrap().map(Tuple::left).flatMap(tuple -> toNative(tuple.apply("roots"))).flatMap(attribute -> toNative(attribute.asListOfNodes())).orElse(Collections.emptyList());
 
         var outputAST = visitChildren(inputAST, new State()).map(Tuple::left).orElse(Collections.emptyList());
 

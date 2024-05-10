@@ -12,10 +12,9 @@ public record TypeRule(String type, Rule rule) implements Rule {
         return new TypeRule(type, left);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         try {
-            return rule.fromString(value).map(tuple1 -> tuple1.replaceRight(Optional.of(type)));
+            return rule.fromString(value).unwrap().map(tuple1 -> tuple1.replaceRight(Optional.of(type)));
         } catch (RuleException e) {
             throw new RuleException("Failed to build node '" + type + "': " + value, e);
         }
@@ -27,5 +26,10 @@ public record TypeRule(String type, Rule rule) implements Rule {
             return rule.toString(node);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

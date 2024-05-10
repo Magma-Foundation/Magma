@@ -12,10 +12,9 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
         return new DisjunctionRule(List.of(rules));
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         return rules.stream()
-                .map(rule -> rule.fromString(value))
+                .map(rule -> rule.fromString(value).unwrap())
                 .flatMap(Optional::stream)
                 .findFirst();
     }
@@ -28,5 +27,10 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

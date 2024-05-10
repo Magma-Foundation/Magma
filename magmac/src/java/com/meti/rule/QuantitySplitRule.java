@@ -40,4 +40,9 @@ public class QuantitySplitRule extends SplitRule implements Rule {
     protected String computeDelimiter() {
         return ", ";
     }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
+    }
 }

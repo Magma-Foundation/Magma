@@ -22,13 +22,12 @@ public abstract class SplitRule implements Rule {
 
     public abstract List<String> split(String input);
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         var input = split(value);
         var output = new ArrayList<MapNode>();
 
         for (String inputLine : input) {
-            var optional = childRule.fromString(inputLine);
+            var optional = childRule.fromString(inputLine).unwrap();
             if (optional.isEmpty()) {
                 return Optional.empty();
             }
@@ -73,4 +72,9 @@ public abstract class SplitRule implements Rule {
     }
 
     protected abstract String computeDelimiter();
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
+    }
 }

@@ -14,9 +14,8 @@ public record NodeRule(String name, Rule parent) implements Rule {
         return new NodeRule(name, name1);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        return parent.fromString(value)
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
+        return parent.fromString(value).unwrap()
                 .flatMap(tuple -> tuple.right().map(right -> new MapNode(right, tuple.left())))
                 .map(this::toTuple);
     }
@@ -35,5 +34,10 @@ public record NodeRule(String name, Rule parent) implements Rule {
         if (childNode.isEmpty()) return Optional.empty();
 
         return parent.toString(childNode.get());
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

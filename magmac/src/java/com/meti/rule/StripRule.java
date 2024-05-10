@@ -11,13 +11,17 @@ public record StripRule(Rule next) implements Rule {
         return new StripRule(rule);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
-        return next.fromString(value.strip());
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
+        return next.fromString(value.strip()).unwrap();
     }
 
     @Override
     public Optional<String> toString(MapNode node) {
         return next.toString(node);
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

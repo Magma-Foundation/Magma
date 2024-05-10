@@ -21,18 +21,17 @@ public abstract class SplitBySliceRule implements Rule {
 
     protected abstract int applyOperation(String value);
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         try {
             var separator = applyOperation(value);
             if (separator == -1) return Optional.empty();
 
             var left = value.substring(0, separator + computeLeftOffset());
-            var leftMap = leftRule.fromString(left).map(Tuple::left);
+            var leftMap = leftRule.fromString(left).unwrap().map(Tuple::left);
             if (leftMap.isEmpty()) return Optional.empty();
 
             var right = value.substring(separator + computeRightOffset());
-            var rightMap = rightRule.fromString(right).map(Tuple::left);
+            var rightMap = rightRule.fromString(right).unwrap().map(Tuple::left);
 
             if (rightMap.isEmpty()) return Optional.empty();
 
@@ -53,4 +52,9 @@ public abstract class SplitBySliceRule implements Rule {
     }
 
     protected abstract String computeRight(String rightResult);
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
+    }
 }

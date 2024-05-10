@@ -15,8 +15,7 @@ public record SymbolRule(String key) implements Rule {
         return new SymbolRule(parent);
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         if(!isSymbol(value)) return Optional.empty();
 
         return Optional.of(Map.of(key, value))
@@ -41,5 +40,10 @@ public record SymbolRule(String key) implements Rule {
     @Override
     public Optional<String> toString(MapNode node) {
         return Options.toNative(node.apply(key)).flatMap(Attribute::asString);
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }

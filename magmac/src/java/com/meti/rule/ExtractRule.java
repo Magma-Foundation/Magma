@@ -19,13 +19,17 @@ public record ExtractRule(String key) implements Rule {
         return Optional.of(Map.of(key, value)).map(map -> new Tuple<>(map, Optional.empty()));
     }
 
-    @Override
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString(String value) {
+    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
         return apply2(value).map(tuple -> tuple.mapLeft(NodeAttributes::fromStrings));
     }
 
     @Override
     public Optional<String> toString(MapNode node) {
         return Options.toNative(node.apply(key)).flatMap(Attribute::asString);
+    }
+
+    @Override
+    public RuleResult fromString(String value) {
+        return new RuleResult(fromString1(value));
     }
 }
