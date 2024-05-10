@@ -6,6 +6,7 @@ import com.meti.node.NodeAttributes;
 import java.util.Optional;
 
 public interface RuleResult {
+    @Deprecated
     Optional<Tuple<NodeAttributes, Optional<String>>> unwrap();
 
     default boolean isValid() {

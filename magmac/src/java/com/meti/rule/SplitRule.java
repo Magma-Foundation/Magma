@@ -22,30 +22,6 @@ public abstract class SplitRule implements Rule {
 
     public abstract List<String> split(String input);
 
-    public Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        var input = split(value);
-        var output = new ArrayList<MapNode>();
-
-        for (String inputLine : input) {
-            var optional = childRule.fromString(inputLine).unwrap();
-            if (optional.isEmpty()) {
-                return Optional.empty();
-            }
-
-            var tuple = optional.get();
-            var left = tuple.left();
-            var right = tuple.right();
-            if (right.isEmpty()) {
-                throw new RuleException("No name present for: " + inputLine);
-            }
-
-            output.add(new MapNode(right.get(), left));
-        }
-
-        var attributes = new NodeAttributes(Map.of(propertyName, new NodeListAttribute(output)));
-        return Optional.of(new Tuple<>(attributes, Optional.empty()));
-    }
-
     @Override
     public Optional<String> toString(MapNode node) {
         var optional = Options.toNative(node.apply(propertyName));
@@ -75,6 +51,25 @@ public abstract class SplitRule implements Rule {
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        var input = split(value);
+        var output = new ArrayList<MapNode>();
+
+        for (String inputLine : input) {
+            var childResult = childRule.fromString(inputLine);
+            var left = childResult.getAttributes();
+            if (left.isEmpty()) {
+                return new ParentRuleResult("No valid child.", inputLine, childResult);
+            }
+
+            var right = childResult.getName();
+            if (right.isEmpty()) {
+                throw new RuleException("No name present for: " + inputLine);
+            }
+
+            output.add(new MapNode(right.get(), left.get()));
+        }
+
+        var attributes = new NodeAttributes(Map.of(propertyName, new NodeListAttribute(output)));
+        return new NodeRuleResult(new Tuple<>(attributes, Optional.empty()));
     }
 }
