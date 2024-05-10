@@ -24,12 +24,10 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
     @Override
     public RuleResult fromString(String value) {
         var members = value.split(delimiter);
-        if (members.length == 0) {
-            return new ErrorRuleResult("No delineated items present.", "");
-        } else {
-            var attribute = new StringListAttribute(List.of(members));
-            var attributes = Map.of(name, attribute);
-            return Optional.<Tuple<NodeAttributes, Optional<String>>>of(new Tuple<>(new NodeAttributes(attributes), Optional.empty())).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
-        }
+        if (members.length == 0) return new ErrorRuleResult("No delineated items present.", value);
+
+        var attribute = new StringListAttribute(List.of(members));
+        var attributes = Map.of(name, attribute);
+        return new NodeRuleResult(new Tuple<>(new NodeAttributes(attributes), Optional.empty()));
     }
 }
