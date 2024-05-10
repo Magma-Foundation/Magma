@@ -9,20 +9,11 @@ import com.meti.util.Options;
 import java.util.Map;
 import java.util.Optional;
 
-public record NodeRule(String name, Rule parent) implements Rule {
-    public static NodeRule Node(String name, TypeRule name1) {
+import static com.meti.node.NodeAttributes.NodeAttributesBuilder;
+
+public record NodeRule(String name, Rule content) implements Rule {
+    public static Rule Node(String name, TypeRule name1) {
         return new NodeRule(name, name1);
-    }
-
-    private Optional<Tuple<NodeAttributes, Optional<String>>> fromString1(String value) {
-        return parent.fromString(value).unwrap()
-                .flatMap(tuple -> tuple.right().map(right -> new MapNode(right, tuple.left())))
-                .map(this::toTuple);
-    }
-
-    private Tuple<NodeAttributes, Optional<String>> toTuple(MapNode node) {
-        var attributes = new NodeAttributes(Map.of(name, new NodeAttribute(node)));
-        return new Tuple<>(attributes, Optional.empty());
     }
 
     @Override
@@ -33,11 +24,26 @@ public record NodeRule(String name, Rule parent) implements Rule {
         var childNode = Options.toNative(apply.get().asNode());
         if (childNode.isEmpty()) return Optional.empty();
 
-        return parent.toString(childNode.get());
+        return content.toString(childNode.get());
     }
 
     @Override
     public RuleResult fromString(String value) {
-        return fromString1(value).<RuleResult>map(NodeRuleResult::new).orElseGet(() -> new ErrorRuleResult("", ""));
+        var parentResult = content.fromString(value);
+        var attributes = parentResult.getAttributes();
+        if (attributes.isEmpty()) {
+            return new ParentRuleResult("Content result was invalid.", value, parentResult);
+        }
+
+        var name = parentResult.getName();
+        if (name.isEmpty()) {
+            return new ParentRuleResult("Usage of '" + getClass().getName() + "' requires a name to be present in the content, which was not provided.", value, parentResult);
+        }
+
+        var wrappedAttributes = NodeAttributesBuilder()
+                .withNode(this.name, name.get(), attributes.get())
+                .complete();
+
+        return new NodeRuleResult(new Tuple<>(wrappedAttributes, Optional.empty()));
     }
 }

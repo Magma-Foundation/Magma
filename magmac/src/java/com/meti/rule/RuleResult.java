@@ -11,4 +11,12 @@ public interface RuleResult {
     default boolean isValid() {
         return unwrap().isPresent();
     }
+
+    default Optional<NodeAttributes> getAttributes() {
+        return unwrap().map(Tuple::left);
+    }
+
+    default Optional<String> getName() {
+        return unwrap().flatMap(Tuple::right);
+    }
 }

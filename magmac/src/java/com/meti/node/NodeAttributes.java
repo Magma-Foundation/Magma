@@ -4,6 +4,7 @@ import com.meti.util.None;
 import com.meti.util.Option;
 import com.meti.util.Some;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,10 @@ public final class NodeAttributes {
         }
 
         return new NodeAttributes(copy);
+    }
+
+    public static Builder NodeAttributesBuilder() {
+        return new Builder(Collections.emptyMap());
     }
 
     public Option<Attribute> apply(String name) {
@@ -46,8 +51,25 @@ public final class NodeAttributes {
     public <T> List<String> filter(AttributeFactory<T> factory) {
         return map.entrySet()
                 .stream()
-                .filter(entry-> factory.accepts(entry.getValue()))
+                .filter(entry -> factory.accepts(entry.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+    }
+
+    public record Builder(Map<String, Attribute> attributeMap) {
+
+        public Builder withNode(String key, String nodeName, NodeAttributes attributes) {
+            return with(key, new NodeAttribute(new MapNode(nodeName, attributes)));
+        }
+
+        public Builder with(String key, Attribute attribute) {
+            var copy = new HashMap<>(attributeMap);
+            copy.put(key, attribute);
+            return new Builder(copy);
+        }
+
+        public NodeAttributes complete() {
+            return new NodeAttributes(attributeMap);
+        }
     }
 }
