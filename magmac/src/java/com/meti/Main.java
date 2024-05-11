@@ -61,8 +61,8 @@ public class Main {
                     lines.add(buffer.toString());
                     buffer = new StringBuilder();
                 } else {
-                    if (c == '{') depth++;
-                    if (c == '}') depth--;
+                    if (c == '{' || c == '(') depth++;
+                    if (c == '}' || c == ')') depth--;
                     buffer.append(c);
                 }
             } else {
@@ -105,15 +105,24 @@ public class Main {
             return modifierString + "class def " + name + "() => {\n" + output + "}";
         }
 
-        throw createUnknownInputError(input);
+        throw createUnknownInputError(input, "root member");
     }
 
-    private static CompileException createUnknownInputError(String input) {
-        return new CompileException("Unknown input: " + input);
+    private static CompileException createUnknownInputError(String input, String type) {
+        return new CompileException("Unknown " + type + ": " + input);
     }
 
     private static String compileClassMember(String input) throws CompileException {
-        return compileMethod(input).orElseThrow(() -> createUnknownInputError(input));
+        try {
+            return compileMethod(input)
+                    .orElseThrow(() -> createUnknownInputError(input, "input"));
+        } catch (CompileException e) {
+            throw createFail(input, e);
+        }
+    }
+
+    private static CompileException createFail(String input, CompileException e) {
+        return new CompileException("Failed to compile: " + input, e);
     }
 
     private static Optional<String> compileMethod(String input) throws CompileException {
@@ -139,16 +148,34 @@ public class Main {
     }
 
     private static String compileStatement(String input) throws CompileException {
-        return compileFor(input)
-                .or(() -> compileCatch(input))
-                .or(() -> compileReturn(input))
-                .or(() -> compileDeclaration(input))
-                .orElseThrow(() -> createUnknownInputError(input));
+        try {
+            return compileFor(input)
+                    .or(() -> compileCatch(input))
+                    .or(() -> compileReturn(input))
+                    .or(() -> compileInvocation(input))
+                    .or(() -> compileDeclaration(input))
+                    .orElseThrow(() -> createUnknownInputError(input, "statement"));
+        } catch (CompileException e) {
+            throw createFail(input, e);
+        }
+    }
+
+    private static Optional<String> compileInvocation(String input) {
+        var start = input.indexOf('(');
+        if (start == -1) return Optional.empty();
+
+        var end = input.lastIndexOf(')');
+        if (end == -1) return Optional.empty();
+
+        var caller = input.substring(0, start);
+        var argument = input.substring(start + 1, end);
+
+        return Optional.of(caller + "(" + argument + ")");
     }
 
     private static Optional<String> compileReturn(String input) {
         var stripped = input.strip();
-        if(stripped.startsWith("return ")) {
+        if (stripped.startsWith("return ")) {
             return Optional.of("return 0");
         } else {
             return Optional.empty();
@@ -198,6 +225,10 @@ public class Main {
     static class CompileException extends Exception {
         public CompileException(String message) {
             super(message);
+        }
+
+        public CompileException(String message, Exception cause) {
+            super(message, cause);
         }
     }
 }

@@ -4,12 +4,113 @@ import { Paths } from java.nio.file;
 import { ArrayList } from java.util;
 import { Optional } from java.util;
 export class def Main () => {
-	def main() => {}
-	def compile() => {}
-	def split() => {}
-	def compileRootMember() => {}
-	def createUnknownInputError() => {}
-	def compileClassMember() => {}
-	def compileMethod() => {}
-	def CompileException() => {}
+	def main() => {
+        var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java")
+        try {
+            var input = Files.readString(source);
+            var target = source.resolveSibling("Main.mgs");
+            Files.writeString(target, compile(input))catch () {}}
+	def compile() => {
+        var lines = split(input)
+
+        var output = new StringBuilder()for (){}return 0}
+	def split() => {
+        var lines = new ArrayList<String>()
+        var buffer = new StringBuilder()let depth = 0let inQuotes = 0for (){}
+        lines.add(buffer.toString())return 0}
+	def compileRootMember() => {
+        if (input.isBlank() || input.startsWith("package "))
+
+        var stripped = input.strip()
+        if (stripped.startsWith("import ")) {
+            var segments = stripped.substring("import ".length());
+            var separator = segments.lastIndexOf('.');
+            var parent = segments.substring(0, separator);
+            var child = segments.substring(separator + 1)
+
+        var classIndex = stripped.indexOf("class ")
+        if (classIndex != -1) {
+            var contentStart = stripped.indexOf('{');
+            var name = stripped.substring(classIndex + "class ".length(), contentStart);
+            var modifierString = stripped.startsWith("public ") ? "export " : "";
+
+            var content = stripped.substring(contentStart + 1, stripped.lastIndexOf('}'));
+            var splitContent = split(content);
+            var output = new StringBuilder();
+            for (String s : splitContent) {
+                if (!s.isBlank()) {
+                    output.append(compileClassMember(s));
+                }
+            }
+
+            return modifierString + "class def " + name + "()
+
+        throw createUnknownInputError(input, "root member")}
+	def createUnknownInputError() => {return 0}
+	def compileClassMember() => {
+        try {
+            return compileMethod(input)
+                    .orElseThrow(() -> createUnknownInputError(input, "input"))catch () {}}
+	def createFail() => {return 0}
+	def compileMethod() => {
+        var paramStart = input.indexOf('(')
+        if (paramStart == -1) return Optional.empty()
+
+        var keys = input.substring(0, paramStart).strip()
+        var separator = keys.lastIndexOf(' ')
+        if (separator == -1) return Optional.empty()
+
+        var name = keys.substring(separator + 1)
+        var contentStart = input.indexOf('{')
+        var contentEnd = input.lastIndexOf('}')
+        var inputContent = split(input.substring(contentStart + 1, contentEnd))
+        var outputContent = new StringBuilder()for (){}return 0}
+	def compileStatement() => {
+        try {
+            return compileFor(input)
+                    .or(() -> compileCatch(input))
+                    .or(() -> compileReturn(input))
+                    .or(() -> compileInvocation(input))
+                    .or(() -> compileDeclaration(input))
+                    .orElseThrow(() -> createUnknownInputError(input, "statement"))catch () {}}
+	def compileInvocation() => {
+        var start = input.indexOf('(')
+        if (start == -1) return Optional.empty()
+
+        var end = input.lastIndexOf(')')
+        if (end == -1) return Optional.empty()
+
+        var caller = input.substring(0, start)
+        var argument = input.substring(start + 1, end)return 0}
+	def compileReturn() => {
+        var stripped = input.strip()
+        if (stripped.startsWith("return ")) {
+            return Optional.of("return 0") else {
+            return Optional.empty()}
+	def compileFor() => {
+        var stripped = input.strip()
+        if (stripped.startsWith("for ")) {
+            return Optional.of("for (){}")return 0}
+	def compileCatch() => {
+        var stripped = input.strip()
+        if (stripped.startsWith("catch ")) {
+            return Optional.of("catch () {}") else {
+            return Optional.empty()}
+	def compileDeclaration() => {
+        var separator = input.indexOf('=')
+        if (separator == -1) return Optional.empty()
+
+        var slice = input.substring(0, separator).strip()
+        var nameSeparator = slice.lastIndexOf(' ')
+        var name = slice.substring(nameSeparator + 1).strip()
+        if (name.isEmpty()) return Optional.empty()
+
+        var first = name.charAt(0)
+        if (!Character.isLetter(first)) return Optional.empty()for (){}return 0}
+	def CompileException() => {
+        public CompileException(String message) {
+            super(message)
+
+        public CompileException(String message, Exception cause) {
+            super(message, cause)}
 }
