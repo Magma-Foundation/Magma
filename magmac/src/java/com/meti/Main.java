@@ -18,12 +18,28 @@ public class Main {
     }
 
     private static String compile(String input) throws CompileException {
+        var lines = split(input);
+
+        var output = new StringBuilder();
+        for (String line : lines) {
+            output.append(compileRootMember(line));
+        }
+
+        return output.toString();
+    }
+
+    private static ArrayList<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (c == ';' && depth == 0) {
+                lines.add(buffer.toString());
+                buffer = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                buffer.append(c);
+                depth = 0;
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {
@@ -33,16 +49,10 @@ public class Main {
             }
         }
         lines.add(buffer.toString());
-
-        var output = new StringBuilder();
-        for (String line : lines) {
-            output.append(compileClassMember(line));
-        }
-
-        return output.toString();
+        return lines;
     }
 
-    private static String compileClassMember(String input) throws CompileException {
+    private static String compileRootMember(String input) throws CompileException {
         if (input.isBlank() || input.startsWith("package ")) {
             return "";
         }
@@ -58,12 +68,29 @@ public class Main {
 
         var classIndex = stripped.indexOf("class ");
         if (classIndex != -1) {
-            var name = stripped.substring(classIndex + "class ".length(), stripped.indexOf('{'));
+            var contentStart = stripped.indexOf('{');
+            var name = stripped.substring(classIndex + "class ".length(), contentStart);
             var modifierString = stripped.startsWith("public ") ? "export " : "";
-            return modifierString + "class def " + name + "() => {}";
+
+            var content = stripped.substring(contentStart + 1, stripped.lastIndexOf('}'));
+            var splitContent = split(content);
+            var output = new StringBuilder();
+            for (String s : splitContent) {
+                output.append(compileClassMember(s));
+            }
+
+            return modifierString + "class def " + name + "() => {" + output + "}";
         }
 
+        return throwUnknownInputException(input);
+    }
+
+    private static String throwUnknownInputException(String input) throws CompileException {
         throw new CompileException("Unknown input: " + input);
+    }
+
+    private static String compileClassMember(String input) throws CompileException {
+        return throwUnknownInputException(input);
     }
 
     static class CompileException extends Exception {
