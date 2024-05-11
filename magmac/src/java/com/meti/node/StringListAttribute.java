@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public record StringListAttribute(List<String> values) implements Attribute {
-    @Override
-    public Optional<List<String>> asListOfStrings() {
+    private Optional<List<String>> asListOfStrings0() {
         return Optional.of(values);
     }
 
@@ -28,5 +27,10 @@ public record StringListAttribute(List<String> values) implements Attribute {
     @Override
     public Option<MapNode> asNode() {
         return Options.fromNative(asNode1());
+    }
+
+    @Override
+    public Option<List<String>> asListOfStrings() {
+        return Options.fromNative(asListOfStrings0());
     }
 }

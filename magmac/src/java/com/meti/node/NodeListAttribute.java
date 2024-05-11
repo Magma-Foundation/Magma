@@ -47,4 +47,13 @@ public record NodeListAttribute(List<MapNode> nodes) implements Attribute {
     public boolean is(String key) {
         return key.equals(KEY);
     }
+
+    private Optional<List<String>> asListOfStrings0() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Option<List<String>> asListOfStrings() {
+        return Options.fromNative(asListOfStrings0());
+    }
 }

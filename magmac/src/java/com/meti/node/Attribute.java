@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Attribute {
-    default Optional<List<String>> asListOfStrings() {
-        return Optional.empty();
-    }
+    Option<List<String>> asListOfStrings();
 
     default Option<List<MapNode>> asListOfNodes() {
         return new None<>();

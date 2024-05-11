@@ -1,13 +1,13 @@
-package com.meti.rule;
+package com.meti.rule.string;
 
 import com.meti.Tuple;
-import com.meti.api.result.Result;
+import com.meti.api.option.Options;
 import com.meti.api.option.ThrowableOption;
-import com.meti.node.Attribute;
+import com.meti.api.result.Result;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.StringListAttribute;
-import com.meti.api.option.Options;
+import com.meti.rule.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,12 +16,6 @@ import java.util.Optional;
 public record DelimiterRule(String name, String delimiter) implements Rule {
     public static Rule Delimit(String name, String delimiter) {
         return new DelimiterRule(name, delimiter);
-    }
-
-    private Optional<String> toString1(MapNode node) {
-        return Options.toNative(node.apply(name))
-                .flatMap(Attribute::asListOfStrings)
-                .map(list -> String.join(delimiter, list));
     }
 
     @Override
@@ -36,7 +30,9 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
 
     @Override
     public Result<String, RuleException> toString(MapNode node) {
-        return Options.fromNative(toString1(node))
+        return Options.fromNative(Options.toNative(node.apply(name))
+                        .flatMap(attribute -> Options.toNative(attribute.asListOfStrings()))
+                        .map(list -> String.join(delimiter, list)))
                 .into(ThrowableOption::new)
                 .orElseThrow(() -> new RuleException("No value present."));
     }

@@ -29,4 +29,13 @@ public record StringAttribute(String value) implements Attribute {
     public Option<MapNode> asNode() {
         return Options.fromNative(asNode1());
     }
+
+    private Optional<List<String>> asListOfStrings0() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Option<List<String>> asListOfStrings() {
+        return Options.fromNative(asListOfStrings0());
+    }
 }

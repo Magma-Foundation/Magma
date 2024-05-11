@@ -4,7 +4,7 @@ import com.meti.rule.LazyRule;
 import com.meti.rule.Rule;
 import com.meti.rule.TypeRule;
 
-import static com.meti.rule.DelimiterRule.Delimit;
+import static com.meti.rule.string.DelimiterRule.Delimit;
 import static com.meti.rule.DiscardRule.Empty;
 import static com.meti.rule.DisjunctionRule.Or;
 import static com.meti.rule.ExtractRule.$;
