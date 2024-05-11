@@ -9,7 +9,8 @@ public class Main {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
         try {
             var input = Files.readString(source);
-            Files.writeString(source.resolve("Main.mgs"), input);
+            var target = source.resolveSibling("Main.mgs");
+            Files.writeString(target, input);
         } catch (IOException e) {
             throw new RuntimeException(source.toAbsolutePath().toString(), e);
         }
