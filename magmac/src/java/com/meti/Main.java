@@ -56,6 +56,12 @@ public class Main {
             return "import { " + child + " } from " + parent + ";\n";
         }
 
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex != -1) {
+            var name = stripped.substring(classIndex + "class ".length(), stripped.indexOf('{'));
+            return "class def " + name + "() => {}";
+        }
+
         throw new CompileException("Unknown input: " + input);
     }
 
