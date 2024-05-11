@@ -26,8 +26,8 @@ public record NodeAttribute(MapNode value) implements Attribute {
     };
 
     @Override
-    public boolean is(String key) {
-        return key.equals(KEY);
+    public boolean is(String type) {
+        return type.equals(KEY);
     }
 
     private Optional<MapNode> asNode1() {
