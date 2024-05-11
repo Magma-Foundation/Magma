@@ -59,7 +59,8 @@ public class Main {
         var classIndex = stripped.indexOf("class ");
         if (classIndex != -1) {
             var name = stripped.substring(classIndex + "class ".length(), stripped.indexOf('{'));
-            return "class def " + name + "() => {}";
+            var modifierString = stripped.startsWith("public ") ? "export " : "";
+            return modifierString + "class def " + name + "() => {}";
         }
 
         throw new CompileException("Unknown input: " + input);
