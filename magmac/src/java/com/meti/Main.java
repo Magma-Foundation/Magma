@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {
@@ -32,19 +33,39 @@ public class Main {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
         var depth = 0;
+        var inQuotes = false;
+
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == ';' && depth == 0) {
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
-            } else if (c == '}' && depth == 1) {
-                buffer.append(c);
-                depth = 0;
-                lines.add(buffer.toString());
-                buffer = new StringBuilder();
+            if (c == '\'') {
+                inQuotes = !inQuotes;
+            }
+
+            if (inQuotes && c == '\\') {
+                buffer.append(c); // Append the backslash
+                i++; // Move to the next character
+                if (i < input.length()) { // Check if it is not the end of the string
+                    c = input.charAt(i);
+                    buffer.append(c); // Append the escaped character
+                    continue; // Skip further checks and continue
+                }
+            }
+
+            if (!inQuotes) {
+                if (c == ';' && depth == 0) {
+                    lines.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else if (c == '}' && depth == 1) {
+                    buffer.append(c);
+                    depth = 0;
+                    lines.add(buffer.toString());
+                    buffer = new StringBuilder();
+                } else {
+                    if (c == '{') depth++;
+                    if (c == '}') depth--;
+                    buffer.append(c);
+                }
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
                 buffer.append(c);
             }
         }
@@ -76,21 +97,35 @@ public class Main {
             var splitContent = split(content);
             var output = new StringBuilder();
             for (String s : splitContent) {
-                output.append(compileClassMember(s));
+                if (!s.isBlank()) {
+                    output.append(compileClassMember(s));
+                }
             }
 
-            return modifierString + "class def " + name + "() => {" + output + "}";
+            return modifierString + "class def " + name + "() => {\n" + output + "}";
         }
 
-        return throwUnknownInputException(input);
+        throw createUnknownInputError(input);
     }
 
-    private static String throwUnknownInputException(String input) throws CompileException {
-        throw new CompileException("Unknown input: " + input);
+    private static CompileException createUnknownInputError(String input) {
+        return new CompileException("Unknown input: " + input);
     }
 
     private static String compileClassMember(String input) throws CompileException {
-        return throwUnknownInputException(input);
+        return compileMethod(input).orElseThrow(() -> createUnknownInputError(input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        var paramStart = input.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
+
+        var keys = input.substring(0, paramStart).strip();
+        var separator = keys.lastIndexOf(' ');
+        if (separator == -1) return Optional.empty();
+
+        var name = keys.substring(separator + 1);
+        return Optional.of("\tdef " + name + "() => {}\n");
     }
 
     static class CompileException extends Exception {
