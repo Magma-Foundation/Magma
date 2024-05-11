@@ -1,6 +1,7 @@
 package com.meti;
 
-import com.meti.node.*;
+import com.meti.node.MapNode;
+import com.meti.node.StringAttribute;
 import com.meti.util.None;
 import com.meti.util.Option;
 import com.meti.util.Some;
@@ -12,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
@@ -25,35 +25,43 @@ public class Main {
         var sourceDirectory = Paths.get(".", "magmac", "src", "java");
         var targetDirectory = Paths.get(".", "magmac", "build");
 
-        try {
-            var stream = Files.walk(sourceDirectory);
+        try (var stream = Files.walk(sourceDirectory)) {
             var sources = stream.filter(Files::isRegularFile)
                     .map(file -> new PathSource(sourceDirectory, file))
                     .toList();
 
-            for (PathSource pathSource : sources) {
-                var namespace = pathSource.computeNamespace();
-                var name = pathSource.computeName();
-
-                try {
-                    var input = pathSource.read();
-
-                    var targetParent = namespace.stream().reduce(targetDirectory, Path::resolve, (previous, next) -> next);
-                    if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
-
-                    var target = targetParent.resolve(name + ".mgs");
-
-                    var outputContent = compile(input);
-                    var output = String.join("", outputContent);
-                    Files.writeString(target, output);
-                } catch (RuntimeException e) {
-                    System.out.printf("%s.%s: Unknown token: %s%n", String.join(".", namespace), name, e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-            }
-
+            compileSources(sources, targetDirectory);
         } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }
+    }
+
+    private static void compileSources(List<PathSource> sources, Path targetDirectory) throws IOException {
+        for (PathSource pathSource : sources) {
+            compileSource(targetDirectory, pathSource);
+        }
+    }
+
+    private static void compileSource(Path targetDirectory, PathSource pathSource) throws IOException {
+        var namespace = pathSource.computeNamespace();
+        var name = pathSource.computeName();
+
+        try {
+            var input = pathSource.read();
+
+            var targetParent = namespace.stream().reduce(targetDirectory, Path::resolve, (previous, next) -> next);
+            if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
+
+            var target = targetParent.resolve(name + ".mgs");
+
+            var outputContent = compile(input);
+            var output = String.join("", outputContent);
+            Files.writeString(target, output);
+        } catch (RuntimeException e) {
+            System.out.printf("%s.%s: Unknown token: %s%n", String.join(".", namespace), name, e.getMessage());
+
+            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
@@ -90,7 +98,7 @@ public class Main {
     private static Tuple<Option<MapNode>, State> transformAST(MapNode child, State state) {
         var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(new Some<>(child), state));
         var withNodes = preVisited.left()
-                .map(node1 -> node1. map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right()))
+                .map(node1 -> node1.map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right()))
                 .orElse(preVisited);
 
         var withNodeLists = withNodes.left()
