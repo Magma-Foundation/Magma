@@ -32,55 +32,74 @@ public class Main {
     private static ArrayList<String> split(String input) {
         var lines = new ArrayList<String>();
         var buffer = new StringBuilder();
-        var depth = 0;
+        var depth = 0; // depth for brackets and braces
+        var parenDepth = 0; // separate depth counter for parentheses
         var inQuotes = false;
         char quoteType = '\0'; // to track the type of quotes used
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
 
-            // Toggle inQuotes and set quoteType on encountering quote characters
+            // Handle quotes
             if ((c == '"' || c == '\'') && (i == 0 || input.charAt(i - 1) != '\\')) {
                 if (!inQuotes) {
                     inQuotes = true;
-                    quoteType = c; // Set the type of quotes used
+                    quoteType = c;
                 } else if (c == quoteType) {
                     inQuotes = false;
                 }
             }
 
             if (inQuotes) {
+                // Handle escape sequences within quotes
                 if (c == '\\') {
-                    buffer.append(c); // Append the backslash
-                    i++; // Move to the next character
-                    if (i < input.length()) { // Check if it is not the end of the string
+                    buffer.append(c);
+                    i++;
+                    if (i < input.length()) {
                         c = input.charAt(i);
-                        buffer.append(c); // Append the escaped character
-                        continue; // Skip further checks and continue
+                        buffer.append(c);
+                        continue;
                     }
                 }
                 buffer.append(c);
             } else {
-                if (c == ';' && depth == 0) {
-                    lines.add(buffer.toString().trim()); // Add the line and trim whitespace
-                    buffer = new StringBuilder(); // Reset the buffer
-                } else if (c == '}' && depth == 1) {
+                if (c == '(') {
+                    parenDepth++;
+                } else if (c == ')') {
+                    parenDepth--;
+                }
+
+                if (parenDepth > 0) {
+                    // Anything within parentheses is added directly
                     buffer.append(c);
-                    depth = 0;
-                    lines.add(buffer.toString().trim()); // Add the line and trim whitespace
-                    buffer = new StringBuilder(); // Reset the buffer
                 } else {
-                    if (c == '{' || c == '(') depth++;
-                    if (c == '}' || c == ')') depth--;
+                    // Process other characters based on structural depth and parentheses
+                    if (c == ';') {
+                        if (depth == 0) {
+                            lines.add(buffer.toString().trim());
+                            buffer = new StringBuilder();
+                            continue;
+                        }
+                    } else if (c == '{') {
+                        depth++;
+                    } else if (c == '}') {
+                        depth--;
+                        if (depth < 0) depth = 0; // Prevent depth from going negative
+                    }
+
                     buffer.append(c);
+
+                    if (c == '}' && depth == 0) {
+                        lines.add(buffer.toString().trim());
+                        buffer = new StringBuilder();
+                    }
                 }
             }
         }
 
-        if (!buffer.isEmpty()) {
-            lines.add(buffer.toString().trim()); // Add the final line
+        if (buffer.length() > 0) {
+            lines.add(buffer.toString().trim());
         }
-
         return lines;
     }
 
