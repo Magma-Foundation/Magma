@@ -2,9 +2,9 @@ package com.meti;
 
 import com.meti.node.MapNode;
 import com.meti.node.StringAttribute;
-import com.meti.util.None;
-import com.meti.util.Option;
-import com.meti.util.Some;
+import com.meti.api.None;
+import com.meti.api.Option;
+import com.meti.api.Some;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +18,7 @@ import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
 import static com.meti.node.NodeAttribute.NodeFactory;
 import static com.meti.node.NodeListAttribute.NodeListFactory;
-import static com.meti.util.Options.toNative;
+import static com.meti.api.Options.toNative;
 
 public class Main {
     public static void main(String[] args) {
@@ -84,7 +84,7 @@ public class Main {
 
         var builder = new ArrayList<String>();
         for (var mapNode : outputAST) {
-            var rendered = MAGMA_ROOT.toString(mapNode);
+            var rendered = toNative(MAGMA_ROOT.toString(mapNode).value());
             if (rendered.isPresent()) {
                 builder.add(rendered.get());
             } else {

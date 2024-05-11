@@ -1,9 +1,11 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.Attribute;
 import com.meti.node.MapNode;
-import com.meti.util.Options;
+import com.meti.api.Options;
 
 import java.util.Optional;
 
@@ -29,8 +31,7 @@ public record SymbolRule(String key) implements Rule {
         return true;
     }
 
-    @Override
-    public Optional<String> toString(MapNode node) {
+    private Optional<String> toString1(MapNode node) {
         return Options.toNative(node.apply(key)).flatMap(Attribute::asString);
     }
 
@@ -40,5 +41,12 @@ public record SymbolRule(String key) implements Rule {
 
         var attributes = NodeAttributesBuilder().withString(key, value).complete();
         return new NodeRuleResult(new Tuple<>(attributes, Optional.empty()));
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

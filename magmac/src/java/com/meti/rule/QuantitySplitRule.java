@@ -1,5 +1,10 @@
 package com.meti.rule;
 
+import com.meti.api.Options;
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
+import com.meti.node.MapNode;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,5 +44,12 @@ public class QuantitySplitRule extends SplitRule implements Rule {
     @Override
     protected String computeDelimiter() {
         return ", ";
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

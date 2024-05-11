@@ -1,8 +1,10 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.MapNode;
-import com.meti.util.Options;
+import com.meti.api.Options;
 
 import java.util.Optional;
 
@@ -13,15 +15,14 @@ public record NodeRule(String name, Rule content) implements Rule {
         return new NodeRule(name, name1);
     }
 
-    @Override
-    public Optional<String> toString(MapNode node) {
+    private Optional<String> toString1(MapNode node) {
         var apply = Options.toNative(node.apply(name));
         if (apply.isEmpty()) return Optional.empty();
 
         var childNode = Options.toNative(apply.get().asNode());
         if (childNode.isEmpty()) return Optional.empty();
 
-        return content.toString(childNode.get());
+        return Options.toNative(content.toString(childNode.get()).value());
     }
 
     @Override
@@ -42,5 +43,12 @@ public record NodeRule(String name, Rule content) implements Rule {
                 .complete();
 
         return new NodeRuleResult(new Tuple<>(wrappedAttributes, Optional.empty()));
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

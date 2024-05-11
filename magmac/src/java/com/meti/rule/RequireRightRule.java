@@ -1,6 +1,9 @@
 package com.meti.rule;
 
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.MapNode;
+import com.meti.api.Options;
 
 import java.util.Optional;
 
@@ -9,9 +12,8 @@ public record RequireRightRule(Rule right, String slice) implements Rule {
         return new RequireRightRule(right, slice);
     }
 
-    @Override
-    public Optional<String> toString(MapNode node) {
-        return right.toString(node).map(value -> value + slice);
+    private Optional<String> toString1(MapNode node) {
+        return Options.toNative(right.toString(node).value()).map(value -> value + slice);
     }
 
     @Override
@@ -22,5 +24,12 @@ public record RequireRightRule(Rule right, String slice) implements Rule {
         var endIndex = value.length() - this.slice.length();
         var segments = value.substring(0, endIndex);
         return this.right.fromString(segments);
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

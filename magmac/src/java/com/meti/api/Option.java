@@ -1,4 +1,4 @@
-package com.meti.util;
+package com.meti.api;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,4 +16,10 @@ public interface Option<T> {
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
     void ifPresent(Consumer<T> consumer);
+
+    default <R> R into(Function<Option<T>, R> mapper) {
+        return mapper.apply(this);
+    }
+
+    T orElseGet(Supplier<T> other);
 }

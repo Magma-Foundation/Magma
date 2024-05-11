@@ -1,10 +1,12 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 import com.meti.node.NodeListAttribute;
-import com.meti.util.Options;
+import com.meti.api.Options;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +24,7 @@ public abstract class SplitRule implements Rule {
 
     public abstract List<String> split(String input);
 
-    @Override
-    public Optional<String> toString(MapNode node) {
+    public Optional<String> toString1(MapNode node) {
         var optional = Options.toNative(node.apply(propertyName));
         if (optional.isEmpty()) return Optional.empty();
 
@@ -33,7 +34,7 @@ public abstract class SplitRule implements Rule {
         var list = nodeList.get();
         var builder = Optional.<StringBuilder>empty();
         for (MapNode child : list) {
-            var childString = childRule.toString(child);
+            var childString = Options.toNative(childRule.toString(child).value());
             if (childString.isEmpty()) return Optional.empty();
 
             var value = childString.get();
@@ -71,5 +72,12 @@ public abstract class SplitRule implements Rule {
 
         var attributes = new NodeAttributes(Map.of(propertyName, new NodeListAttribute(output)));
         return new NodeRuleResult(new Tuple<>(attributes, Optional.empty()));
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

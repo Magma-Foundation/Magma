@@ -1,6 +1,9 @@
 package com.meti.rule;
 
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.MapNode;
+import com.meti.api.Options;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +14,9 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
         return new DisjunctionRule(List.of(rules));
     }
 
-    @Override
-    public Optional<String> toString(MapNode node) {
+    private Optional<String> toString1(MapNode node) {
         for (Rule rule : rules) {
-            var optional = rule.toString(node);
+            var optional = Options.toNative(rule.toString(node).value());
             if (optional.isPresent()) return optional;
         }
 
@@ -35,5 +37,12 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
         }
 
         return new ParentRuleResult("Disjunction invalid.", value, errors);
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

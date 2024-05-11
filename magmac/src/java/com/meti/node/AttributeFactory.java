@@ -1,6 +1,6 @@
 package com.meti.node;
 
-import com.meti.util.Option;
+import com.meti.api.Option;
 
 public interface AttributeFactory<T> {
     boolean accepts(Attribute attribute);

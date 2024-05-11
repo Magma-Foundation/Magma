@@ -1,7 +1,10 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
+import com.meti.api.Result;
+import com.meti.api.ThrowableOption;
 import com.meti.node.MapNode;
+import com.meti.api.Options;
 
 import java.util.Optional;
 
@@ -22,10 +25,9 @@ public abstract class SplitBySliceRule implements Rule {
 
     protected abstract int computeLeftOffset();
 
-    @Override
-    public Optional<String> toString(MapNode node) {
-        return leftRule.toString(node).flatMap(leftResult ->
-                rightRule.toString(node).map(rightResult ->
+    private Optional<String> toString1(MapNode node) {
+        return Options.toNative(leftRule.toString(node).value()).flatMap(leftResult ->
+                Options.toNative(rightRule.toString(node).value()).map(rightResult ->
                         leftResult + computeRight(rightResult)));
     }
 
@@ -49,5 +51,12 @@ public abstract class SplitBySliceRule implements Rule {
 
         var attributes = leftMap.orElseThrow().add(rightMap.orElseThrow());
         return new NodeRuleResult(new Tuple<>(attributes, Optional.empty()));
+    }
+
+    @Override
+    public Result<String, RuleException> toString(MapNode node) {
+        return Options.fromNative(toString1(node))
+                .into(ThrowableOption::new)
+                .orElseThrow(() -> new RuleException("No value present."));
     }
 }

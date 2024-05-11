@@ -1,7 +1,7 @@
 package com.meti.node;
 
-import com.meti.util.Option;
-import com.meti.util.Options;
+import com.meti.api.Option;
+import com.meti.api.Options;
 
 import java.util.List;
 import java.util.Optional;

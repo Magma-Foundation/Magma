@@ -1,8 +1,8 @@
 package com.meti.node;
 
-import com.meti.util.None;
-import com.meti.util.Option;
-import com.meti.util.Some;
+import com.meti.api.None;
+import com.meti.api.Option;
+import com.meti.api.Some;
 
 import java.util.Collections;
 import java.util.HashMap;
