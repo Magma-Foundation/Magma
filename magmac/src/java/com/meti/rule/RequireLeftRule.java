@@ -13,7 +13,7 @@ public record RequireLeftRule(String slice, Rule right) implements Rule {
     }
 
     private Optional<String> toString1(MapNode node) {
-        return Options.toNative(right.toString(node).value()).map(value -> slice + value);
+        return Options.toNative(right.toString(node).findValue()).map(value -> slice + value);
     }
 
     @Override

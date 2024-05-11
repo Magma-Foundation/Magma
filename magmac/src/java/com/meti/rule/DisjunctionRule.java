@@ -16,7 +16,7 @@ public record DisjunctionRule(List<Rule> rules) implements Rule {
 
     private Optional<String> toString1(MapNode node) {
         for (Rule rule : rules) {
-            var optional = Options.toNative(rule.toString(node).value());
+            var optional = Options.toNative(rule.toString(node).findValue());
             if (optional.isPresent()) return optional;
         }
 

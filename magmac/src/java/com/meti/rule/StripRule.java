@@ -13,7 +13,7 @@ public record StripRule(Rule next) implements Rule {
     }
 
     private Optional<String> toString1(MapNode node) {
-        return Options.toNative(next.toString(node).value());
+        return Options.toNative(next.toString(node).findValue());
     }
 
     @Override

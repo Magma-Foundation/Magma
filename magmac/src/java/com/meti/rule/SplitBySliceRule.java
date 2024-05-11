@@ -26,8 +26,8 @@ public abstract class SplitBySliceRule implements Rule {
     protected abstract int computeLeftOffset();
 
     private Optional<String> toString1(MapNode node) {
-        return Options.toNative(leftRule.toString(node).value()).flatMap(leftResult ->
-                Options.toNative(rightRule.toString(node).value()).map(rightResult ->
+        return Options.toNative(leftRule.toString(node).findValue()).flatMap(leftResult ->
+                Options.toNative(rightRule.toString(node).findValue()).map(rightResult ->
                         leftResult + computeRight(rightResult)));
     }
 

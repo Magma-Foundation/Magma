@@ -34,7 +34,7 @@ public abstract class SplitRule implements Rule {
         var list = nodeList.get();
         var builder = Optional.<StringBuilder>empty();
         for (MapNode child : list) {
-            var childString = Options.toNative(childRule.toString(child).value());
+            var childString = Options.toNative(childRule.toString(child).findValue());
             if (childString.isEmpty()) return Optional.empty();
 
             var value = childString.get();

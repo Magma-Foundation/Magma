@@ -15,7 +15,7 @@ public class LazyRule implements Rule {
     }
 
     private Optional<String> toString1(MapNode node) {
-        return parent.flatMap(inner -> Options.toNative(inner.toString(node).value()));
+        return parent.flatMap(inner -> Options.toNative(inner.toString(node).findValue()));
     }
 
     @Override

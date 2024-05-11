@@ -34,4 +34,9 @@ public class None<T> implements Option<T> {
     public void ifPresent(Consumer<T> consumer) {
 
     }
+
+    @Override
+    public T orElseGet(Supplier<T> other) {
+        return other.get();
+    }
 }

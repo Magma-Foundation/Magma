@@ -11,6 +11,11 @@ public record Some<T>(T value) implements Option<T> {
     }
 
     @Override
+    public T orElseGet(Supplier<T> other) {
+        return value;
+    }
+
+    @Override
     public <R> R match(Function<T, R> mapper, Supplier<R> supplier) {
         return mapper.apply(value);
     }

@@ -84,7 +84,7 @@ public class Main {
 
         var builder = new ArrayList<String>();
         for (var mapNode : outputAST) {
-            var rendered = toNative(MAGMA_ROOT.toString(mapNode).value());
+            var rendered = toNative(MAGMA_ROOT.toString(mapNode).findValue());
             if (rendered.isPresent()) {
                 builder.add(rendered.get());
             } else {

@@ -10,6 +10,10 @@ public record ThrowableOption<T>(Option<T> parent) implements Option<T> {
         return parent.$();
     }
 
+    @Override
+    public T orElseGet(Supplier<T> other) {
+        return parent.orElseGet(other);
+    }
 
     @Override
     public <R> R match(Function<T, R> mapper, Supplier<R> supplier) {

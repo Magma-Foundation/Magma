@@ -22,7 +22,7 @@ public record NodeRule(String name, Rule content) implements Rule {
         var childNode = Options.toNative(apply.get().asNode());
         if (childNode.isEmpty()) return Optional.empty();
 
-        return Options.toNative(content.toString(childNode.get()).value());
+        return Options.toNative(content.toString(childNode.get()).findValue());
     }
 
     @Override
