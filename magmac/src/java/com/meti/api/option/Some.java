@@ -1,46 +1,42 @@
-package com.meti.api;
+package com.meti.api.option;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record ThrowableOption<T>(Option<T> parent) implements Option<T> {
+public record Some<T>(T value) implements Option<T> {
     @Override
-    public T $() throws OptionException {
-        return parent.$();
+    public T $() {
+        return value;
     }
 
     @Override
     public T orElseGet(Supplier<T> other) {
-        return parent.orElseGet(other);
+        return value;
     }
 
     @Override
     public <R> R match(Function<T, R> mapper, Supplier<R> supplier) {
-        return parent.match(mapper, supplier);
+        return mapper.apply(value);
     }
 
     @Override
     public T orElse(T other) {
-        return parent.orElse(other);
+        return value;
     }
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return parent.map(mapper);
+        return new Some<>(mapper.apply(value));
     }
 
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return parent.flatMap(mapper);
+        return mapper.apply(value);
     }
 
     @Override
     public void ifPresent(Consumer<T> consumer) {
-        parent.ifPresent(consumer);
-    }
-
-    public <E> Result<T, E> orElseThrow(Supplier<E> errSupplier) {
-        return parent.<Result<T, E>>map(Ok::new).orElseGet(() -> new Err<>(errSupplier.get()));
+        consumer.accept(value);
     }
 }

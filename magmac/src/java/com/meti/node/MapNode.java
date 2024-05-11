@@ -1,8 +1,8 @@
 package com.meti.node;
 
 import com.meti.Tuple;
-import com.meti.api.Option;
-import com.meti.api.Some;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.util.function.BiFunction;
 

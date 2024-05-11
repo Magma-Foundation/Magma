@@ -1,42 +1,42 @@
-package com.meti.api;
+package com.meti.api.option;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public record Some<T>(T value) implements Option<T> {
+public class None<T> implements Option<T> {
     @Override
-    public T $() {
-        return value;
-    }
-
-    @Override
-    public T orElseGet(Supplier<T> other) {
-        return value;
+    public T $() throws OptionException {
+        throw new OptionException();
     }
 
     @Override
     public <R> R match(Function<T, R> mapper, Supplier<R> supplier) {
-        return mapper.apply(value);
+        return supplier.get();
     }
 
     @Override
     public T orElse(T other) {
-        return value;
+        return other;
     }
 
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return new Some<>(mapper.apply(value));
+        return new None<>();
     }
 
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return mapper.apply(value);
+        return new None<>();
     }
 
     @Override
     public void ifPresent(Consumer<T> consumer) {
-        consumer.accept(value);
+
+    }
+
+    @Override
+    public T orElseGet(Supplier<T> other) {
+        return other.get();
     }
 }

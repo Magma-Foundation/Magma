@@ -2,9 +2,9 @@ package com.meti;
 
 import com.meti.node.MapNode;
 import com.meti.node.StringAttribute;
-import com.meti.api.None;
-import com.meti.api.Option;
-import com.meti.api.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +18,7 @@ import static com.meti.lang.JavaLang.JAVA_ROOT;
 import static com.meti.lang.MagmaLang.MAGMA_ROOT;
 import static com.meti.node.NodeAttribute.NodeFactory;
 import static com.meti.node.NodeListAttribute.NodeListFactory;
-import static com.meti.api.Options.toNative;
+import static com.meti.api.option.Options.toNative;
 
 public class Main {
     public static void main(String[] args) {

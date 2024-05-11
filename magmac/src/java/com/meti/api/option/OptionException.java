@@ -1,4 +1,4 @@
-package com.meti.api;
+package com.meti.api.option;
 
 public class OptionException extends Exception {
 }

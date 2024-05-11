@@ -1,9 +1,9 @@
 package com.meti.rule;
 
 import com.meti.Tuple;
-import com.meti.api.Options;
-import com.meti.api.Result;
-import com.meti.api.ThrowableOption;
+import com.meti.api.option.Options;
+import com.meti.api.result.Result;
+import com.meti.api.option.ThrowableOption;
 import com.meti.node.MapNode;
 import com.meti.node.NodeAttributes;
 

@@ -1,4 +1,4 @@
-package com.meti.api;
+package com.meti.api.option;
 
 import java.util.function.Consumer;
 import java.util.function.Function;

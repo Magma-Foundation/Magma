@@ -1,4 +1,7 @@
-package com.meti.api;
+package com.meti.api.result;
+
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public record Ok<T, E>(T value) implements Result<T, E> {
     @Override
