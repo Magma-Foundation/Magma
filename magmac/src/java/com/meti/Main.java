@@ -116,7 +116,7 @@ public class Main {
         return compileMethod(input).orElseThrow(() -> createUnknownInputError(input));
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<String> compileMethod(String input) throws CompileException {
         var paramStart = input.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
@@ -125,7 +125,41 @@ public class Main {
         if (separator == -1) return Optional.empty();
 
         var name = keys.substring(separator + 1);
-        return Optional.of("\tdef " + name + "() => {}\n");
+        var contentStart = input.indexOf('{');
+        var contentEnd = input.lastIndexOf('}');
+        var inputContent = split(input.substring(contentStart + 1, contentEnd));
+        var outputContent = new StringBuilder();
+        for (String s : inputContent) {
+            outputContent.append(compileStatement(s));
+        }
+
+        return Optional.of("\tdef " + name + "() => {" + outputContent + "}\n");
+    }
+
+    private static String compileStatement(String input) throws CompileException {
+        return compileDeclaration(input).orElseThrow(() -> createUnknownInputError(input));
+    }
+
+    private static Optional<String> compileDeclaration(String input) {
+        var separator = input.indexOf('=');
+        if (separator == -1) return Optional.empty();
+
+        var slice = input.substring(0, separator).strip();
+        var nameSeparator = slice.lastIndexOf(' ');
+        var name = slice.substring(nameSeparator + 1).strip();
+        if (name.isEmpty()) return Optional.empty();
+
+        var first = name.charAt(0);
+        if(!Character.isLetter(first)) return Optional.empty();
+
+        for (int i = 1; i < name.length(); i++) {
+            var c = name.charAt(i);
+            if(!Character.isLetter(c) && !Character.isDigit(c)) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of("let " + name + " = 0");
     }
 
     static class CompileException extends Exception {
