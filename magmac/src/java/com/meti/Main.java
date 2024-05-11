@@ -152,14 +152,15 @@ public class Main {
         var outputContent = new StringBuilder();
         for (String s : inputContent) {
             if (!s.isBlank()) {
-                outputContent.append(compileStatement(s));
+                var result = compileStatement(s).$();
+                outputContent.append(result);
             }
         }
 
         return Optional.of("\tdef " + name + "() => {\n" + outputContent + "\t}\n");
     }
 
-    private static String compileStatement(String input) throws CompileException {
+    private static Result<String, CompileException> compileStatement(String input) {
         try {
             return compileFor(input)
                     .or(() -> compileCatch(input))
@@ -168,11 +169,11 @@ public class Main {
                     .or(() -> compileInvocation(input))
                     .orElseThrow(() -> createUnknownInputError(input, "statement"));
         } catch (CompileException e) {
-            throw createFail(input, e);
+            return new Err<>(createFail(input, e));
         }
     }
 
-    private static Optional<String> compileInvocation(String input) {
+    private static Optional<Result<String, CompileException>> compileInvocation(String input) {
         var start = input.indexOf('(');
         if (start == -1) return Optional.empty();
 
@@ -182,37 +183,48 @@ public class Main {
         var caller = input.substring(0, start);
         var argument = input.substring(start + 1, end);
 
-        return Optional.of(caller + "(" + argument + ");\n");
+        Result<String, CompileException> result;
+        try {
+            var rendered = compileValue(caller) + "(" + compileValue(argument) + ");\n";
+            result = new Ok<>(rendered);
+        } catch (CompileException e) {
+            result = new Err<>(e);
+        }
+        return Optional.of(result);
     }
 
-    private static Optional<String> compileReturn(String input) {
+    private static String compileValue(String caller) throws CompileException {
+        throw createUnknownInputError(caller, "value");
+    }
+
+    private static Optional<Result<String, CompileException>> compileReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return Optional.of("\t\treturn 0;\n");
+            return Optional.of(new Ok<>("\t\treturn 0;\n"));
         } else {
             return Optional.empty();
         }
     }
 
-    private static Optional<String> compileFor(String input) {
+    private static Optional<Result<String, CompileException>> compileFor(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("for ")) {
-            return Optional.of("\t\tfor (){}\n");
+            return Optional.of(new Ok<>("\t\tfor (){}\n"));
         }
 
         return Optional.empty();
     }
 
-    private static Optional<String> compileCatch(String input) {
+    private static Optional<Result<String, CompileException>> compileCatch(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("catch ")) {
-            return Optional.of("\t\tcatch () {}\n");
+            return Optional.of(new Ok<>("\t\tcatch () {}\n"));
         } else {
             return Optional.empty();
         }
     }
 
-    private static Optional<String> compileDeclaration(String input) {
+    private static Optional<Result<String, CompileException>> compileDeclaration(String input) {
         var separator = input.indexOf('=');
         if (separator == -1) return Optional.empty();
 
@@ -231,7 +243,25 @@ public class Main {
             }
         }
 
-        return Optional.of("\t\tlet " + name + " = 0;\n");
+        return Optional.of(new Ok<>("\t\tlet " + name + " = 0;\n"));
+    }
+
+    interface Result<T, E extends Throwable> {
+        T $() throws E;
+    }
+
+    record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
+        @Override
+        public T $() {
+            return value;
+        }
+    }
+
+    record Err<T, E extends Throwable>(E value) implements Result<T, E> {
+        @Override
+        public T $() throws E {
+            throw value;
+        }
     }
 
     static class CompileException extends Exception {
