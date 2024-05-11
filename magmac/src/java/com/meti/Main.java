@@ -34,44 +34,56 @@ public class Main {
         var buffer = new StringBuilder();
         var depth = 0;
         var inQuotes = false;
+        char quoteType = '\0'; // to track the type of quotes used
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (c == '\'') {
-                inQuotes = !inQuotes;
-            }
 
-            if (inQuotes && c == '\\') {
-                buffer.append(c); // Append the backslash
-                i++; // Move to the next character
-                if (i < input.length()) { // Check if it is not the end of the string
-                    c = input.charAt(i);
-                    buffer.append(c); // Append the escaped character
-                    continue; // Skip further checks and continue
+            // Toggle inQuotes and set quoteType on encountering quote characters
+            if ((c == '"' || c == '\'') && (i == 0 || input.charAt(i - 1) != '\\')) {
+                if (!inQuotes) {
+                    inQuotes = true;
+                    quoteType = c; // Set the type of quotes used
+                } else if (c == quoteType) {
+                    inQuotes = false;
                 }
             }
 
-            if (!inQuotes) {
+            if (inQuotes) {
+                if (c == '\\') {
+                    buffer.append(c); // Append the backslash
+                    i++; // Move to the next character
+                    if (i < input.length()) { // Check if it is not the end of the string
+                        c = input.charAt(i);
+                        buffer.append(c); // Append the escaped character
+                        continue; // Skip further checks and continue
+                    }
+                }
+                buffer.append(c);
+            } else {
                 if (c == ';' && depth == 0) {
-                    lines.add(buffer.toString());
-                    buffer = new StringBuilder();
+                    lines.add(buffer.toString().trim()); // Add the line and trim whitespace
+                    buffer = new StringBuilder(); // Reset the buffer
                 } else if (c == '}' && depth == 1) {
                     buffer.append(c);
                     depth = 0;
-                    lines.add(buffer.toString());
-                    buffer = new StringBuilder();
+                    lines.add(buffer.toString().trim()); // Add the line and trim whitespace
+                    buffer = new StringBuilder(); // Reset the buffer
                 } else {
                     if (c == '{' || c == '(') depth++;
                     if (c == '}' || c == ')') depth--;
                     buffer.append(c);
                 }
-            } else {
-                buffer.append(c);
             }
         }
-        lines.add(buffer.toString());
+
+        if (!buffer.isEmpty()) {
+            lines.add(buffer.toString().trim()); // Add the final line
+        }
+
         return lines;
     }
+
 
     private static String compileRootMember(String input) throws CompileException {
         if (input.isBlank() || input.startsWith("package ")) {
