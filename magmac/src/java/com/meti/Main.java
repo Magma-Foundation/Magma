@@ -130,14 +130,27 @@ public class Main {
         var inputContent = split(input.substring(contentStart + 1, contentEnd));
         var outputContent = new StringBuilder();
         for (String s : inputContent) {
-            outputContent.append(compileStatement(s));
+            if (!s.isBlank()) {
+                outputContent.append(compileStatement(s));
+            }
         }
 
         return Optional.of("\tdef " + name + "() => {" + outputContent + "}\n");
     }
 
     private static String compileStatement(String input) throws CompileException {
-        return compileDeclaration(input).orElseThrow(() -> createUnknownInputError(input));
+        return compileDeclaration(input)
+                .or(() -> compileCatch(input))
+                .orElseThrow(() -> createUnknownInputError(input));
+    }
+
+    private static Optional<String> compileCatch(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("catch ")) {
+            return Optional.of("catch () {}");
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<String> compileDeclaration(String input) {
@@ -150,11 +163,11 @@ public class Main {
         if (name.isEmpty()) return Optional.empty();
 
         var first = name.charAt(0);
-        if(!Character.isLetter(first)) return Optional.empty();
+        if (!Character.isLetter(first)) return Optional.empty();
 
         for (int i = 1; i < name.length(); i++) {
             var c = name.charAt(i);
-            if(!Character.isLetter(c) && !Character.isDigit(c)) {
+            if (!Character.isLetter(c) && !Character.isDigit(c)) {
                 return Optional.empty();
             }
         }
