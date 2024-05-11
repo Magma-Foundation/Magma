@@ -27,8 +27,8 @@ public class Main {
                 lines.add(buffer.toString());
                 buffer = new StringBuilder();
             } else {
-                if(c == '{') depth++;
-                if(c == '}') depth--;
+                if (c == '{') depth++;
+                if (c == '}') depth--;
                 buffer.append(c);
             }
         }
@@ -43,6 +43,19 @@ public class Main {
     }
 
     private static String compileClassMember(String input) throws CompileException {
+        if (input.isBlank() || input.startsWith("package ")) {
+            return "";
+        }
+
+        var stripped = input.strip();
+        if (stripped.startsWith("import ")) {
+            var segments = stripped.substring("import ".length());
+            var separator = segments.lastIndexOf('.');
+            var parent = segments.substring(0, separator);
+            var child = segments.substring(separator + 1);
+            return "import { " + child + " } from " + parent + ";\n";
+        }
+
         throw new CompileException("Unknown input: " + input);
     }
 
