@@ -90,7 +90,7 @@ public class Main {
     private static Tuple<Option<MapNode>, State> transformAST(MapNode child, State state) {
         var preVisited = transformPreVisit(child, state).orElse(new Tuple<>(new Some<>(child), state));
         var withNodes = preVisited.left()
-                .map(node1 -> node1.map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right()))
+                .map(node1 -> node1. map(NodeFactory, (node, state1) -> visitChild(state1, node), preVisited.right()))
                 .orElse(preVisited);
 
         var withNodeLists = withNodes.left()
