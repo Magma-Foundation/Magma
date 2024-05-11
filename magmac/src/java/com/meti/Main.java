@@ -139,9 +139,29 @@ public class Main {
     }
 
     private static String compileStatement(String input) throws CompileException {
-        return compileDeclaration(input)
+        return compileFor(input)
                 .or(() -> compileCatch(input))
+                .or(() -> compileReturn(input))
+                .or(() -> compileDeclaration(input))
                 .orElseThrow(() -> createUnknownInputError(input));
+    }
+
+    private static Optional<String> compileReturn(String input) {
+        var stripped = input.strip();
+        if(stripped.startsWith("return ")) {
+            return Optional.of("return 0");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileFor(String input) {
+        var stripped = input.strip();
+        if (stripped.startsWith("for ")) {
+            return Optional.of("for (){}");
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<String> compileCatch(String input) {
