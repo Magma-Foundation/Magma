@@ -144,7 +144,7 @@ public class Main {
             }
         }
 
-        return Optional.of("\tdef " + name + "() => {" + outputContent + "}\n");
+        return Optional.of("\tdef " + name + "() => {\n" + outputContent + "\t}\n");
     }
 
     private static String compileStatement(String input) throws CompileException {
@@ -152,8 +152,8 @@ public class Main {
             return compileFor(input)
                     .or(() -> compileCatch(input))
                     .or(() -> compileReturn(input))
-                    .or(() -> compileInvocation(input))
                     .or(() -> compileDeclaration(input))
+                    .or(() -> compileInvocation(input))
                     .orElseThrow(() -> createUnknownInputError(input, "statement"));
         } catch (CompileException e) {
             throw createFail(input, e);
@@ -170,13 +170,13 @@ public class Main {
         var caller = input.substring(0, start);
         var argument = input.substring(start + 1, end);
 
-        return Optional.of(caller + "(" + argument + ")");
+        return Optional.of(caller + "(" + argument + ");\n");
     }
 
     private static Optional<String> compileReturn(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("return ")) {
-            return Optional.of("return 0");
+            return Optional.of("\t\treturn 0;\n");
         } else {
             return Optional.empty();
         }
@@ -185,7 +185,7 @@ public class Main {
     private static Optional<String> compileFor(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("for ")) {
-            return Optional.of("for (){}");
+            return Optional.of("\t\tfor (){}\n");
         }
 
         return Optional.empty();
@@ -194,7 +194,7 @@ public class Main {
     private static Optional<String> compileCatch(String input) {
         var stripped = input.strip();
         if (stripped.startsWith("catch ")) {
-            return Optional.of("catch () {}");
+            return Optional.of("\t\tcatch () {}\n");
         } else {
             return Optional.empty();
         }
@@ -219,7 +219,7 @@ public class Main {
             }
         }
 
-        return Optional.of("let " + name + " = 0");
+        return Optional.of("\t\tlet " + name + " = 0;\n");
     }
 
     static class CompileException extends Exception {

@@ -5,30 +5,33 @@ import { ArrayList } from java.util;
 import { Optional } from java.util;
 export class def Main () => {
 	def main() => {
-        var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java")
-        try {
-            var input = Files.readString(source);
-            var target = source.resolveSibling("Main.mgs");
-            Files.writeString(target, compile(input))catch () {}}
+		let source = 0;
+		let input = 0;
+		catch () {}
+	}
 	def compile() => {
-        var lines = split(input)
-
-        var output = new StringBuilder()for (){}return 0}
+		let lines = 0;
+		let output = 0;
+		for (){}
+		return 0;
+	}
 	def split() => {
-        var lines = new ArrayList<String>()
-        var buffer = new StringBuilder()let depth = 0let inQuotes = 0for (){}
-        lines.add(buffer.toString())return 0}
+		let lines = 0;
+		let buffer = 0;
+		let depth = 0;
+		let inQuotes = 0;
+		for (){}
+
+        lines.add(buffer.toString());
+		return 0;
+	}
 	def compileRootMember() => {
-        if (input.isBlank() || input.startsWith("package "))
 
-        var stripped = input.strip()
-        if (stripped.startsWith("import ")) {
-            var segments = stripped.substring("import ".length());
-            var separator = segments.lastIndexOf('.');
-            var parent = segments.substring(0, separator);
-            var child = segments.substring(separator + 1)
+        if (input.isBlank() || input.startsWith("package "));
+		let stripped = 0;
+		let segments = 0;
+		let classIndex = 0;
 
-        var classIndex = stripped.indexOf("class ")
         if (classIndex != -1) {
             var contentStart = stripped.indexOf('{');
             var name = stripped.substring(classIndex + "class ".length(), contentStart);
@@ -43,74 +46,107 @@ export class def Main () => {
                 }
             }
 
-            return modifierString + "class def " + name + "()
+            return modifierString + "class def " + name + "();
 
-        throw createUnknownInputError(input, "root member")}
-	def createUnknownInputError() => {return 0}
+
+        throw createUnknownInputError(input, "root member");
+	}
+	def createUnknownInputError() => {
+		return 0;
+	}
 	def compileClassMember() => {
+
         try {
             return compileMethod(input)
-                    .orElseThrow(() -> createUnknownInputError(input, "input"))catch () {}}
-	def createFail() => {return 0}
+                    .orElseThrow(() -> createUnknownInputError(input, "input"));
+		catch () {}
+	}
+	def createFail() => {
+		return 0;
+	}
 	def compileMethod() => {
-        var paramStart = input.indexOf('(')
-        if (paramStart == -1) return Optional.empty()
+		let paramStart = 0;
 
-        var keys = input.substring(0, paramStart).strip()
-        var separator = keys.lastIndexOf(' ')
-        if (separator == -1) return Optional.empty()
+        if (paramStart == -1) return Optional.empty();
+		let keys = 0;
+		let separator = 0;
 
-        var name = keys.substring(separator + 1)
-        var contentStart = input.indexOf('{')
-        var contentEnd = input.lastIndexOf('}')
-        var inputContent = split(input.substring(contentStart + 1, contentEnd))
-        var outputContent = new StringBuilder()for (){}return 0}
+        if (separator == -1) return Optional.empty();
+		let name = 0;
+		let contentStart = 0;
+		let contentEnd = 0;
+		let inputContent = 0;
+		let outputContent = 0;
+		for (){}
+		return 0;
+	}
 	def compileStatement() => {
+
         try {
             return compileFor(input)
                     .or(() -> compileCatch(input))
                     .or(() -> compileReturn(input))
-                    .or(() -> compileInvocation(input))
                     .or(() -> compileDeclaration(input))
-                    .orElseThrow(() -> createUnknownInputError(input, "statement"))catch () {}}
+                    .or(() -> compileInvocation(input))
+                    .orElseThrow(() -> createUnknownInputError(input, "statement"));
+		catch () {}
+	}
 	def compileInvocation() => {
-        var start = input.indexOf('(')
-        if (start == -1) return Optional.empty()
+		let start = 0;
 
-        var end = input.lastIndexOf(')')
-        if (end == -1) return Optional.empty()
+        if (start == -1) return Optional.empty();
+		let end = 0;
 
-        var caller = input.substring(0, start)
-        var argument = input.substring(start + 1, end)return 0}
+        if (end == -1) return Optional.empty();
+		let caller = 0;
+		let argument = 0;
+		return 0;
+	}
 	def compileReturn() => {
-        var stripped = input.strip()
+		let stripped = 0;
+
         if (stripped.startsWith("return ")) {
-            return Optional.of("return 0") else {
-            return Optional.empty()}
+            return Optional.of("\t\treturn 0;\n");
+ else {
+            return Optional.empty();
+	}
 	def compileFor() => {
-        var stripped = input.strip()
+		let stripped = 0;
+
         if (stripped.startsWith("for ")) {
-            return Optional.of("for (){}")return 0}
+            return Optional.of("\t\tfor (){}\n");
+		return 0;
+	}
 	def compileCatch() => {
-        var stripped = input.strip()
+		let stripped = 0;
+
         if (stripped.startsWith("catch ")) {
-            return Optional.of("catch () {}") else {
-            return Optional.empty()}
+            return Optional.of("\t\tcatch () {}\n");
+ else {
+            return Optional.empty();
+	}
 	def compileDeclaration() => {
-        var separator = input.indexOf('=')
-        if (separator == -1) return Optional.empty()
+		let separator = 0;
 
-        var slice = input.substring(0, separator).strip()
-        var nameSeparator = slice.lastIndexOf(' ')
-        var name = slice.substring(nameSeparator + 1).strip()
-        if (name.isEmpty()) return Optional.empty()
+        if (separator == -1) return Optional.empty();
+		let slice = 0;
+		let nameSeparator = 0;
+		let name = 0;
 
-        var first = name.charAt(0)
-        if (!Character.isLetter(first)) return Optional.empty()for (){}return 0}
+        if (name.isEmpty()) return Optional.empty();
+		let first = 0;
+
+        if (!Character.isLetter(first)) return Optional.empty();
+		for (){}
+		return 0;
+	}
 	def CompileException() => {
+
         public CompileException(String message) {
-            super(message)
+            super(message);
+
 
         public CompileException(String message, Exception cause) {
-            super(message, cause)}
+            super(message, cause);
+	}
 }
