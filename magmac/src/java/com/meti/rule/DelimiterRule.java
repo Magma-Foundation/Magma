@@ -18,7 +18,9 @@ public record DelimiterRule(String name, String delimiter) implements Rule {
 
     @Override
     public Optional<String> toString(MapNode node) {
-        return Options.toNative(node.apply(name)).flatMap(Attribute::asListOfStrings).map(list -> String.join(delimiter, list));
+        return Options.toNative(node.apply(name))
+                .flatMap(Attribute::asListOfStrings)
+                .map(list -> String.join(delimiter, list));
     }
 
     @Override

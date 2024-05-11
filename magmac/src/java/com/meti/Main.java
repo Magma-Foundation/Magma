@@ -83,7 +83,7 @@ public class Main {
                 .orElse(Collections.emptyList());
 
         var builder = new ArrayList<String>();
-        for (MapNode mapNode : outputAST) {
+        for (var mapNode : outputAST) {
             var rendered = MAGMA_ROOT.toString(mapNode);
             if (rendered.isPresent()) {
                 builder.add(rendered.get());
