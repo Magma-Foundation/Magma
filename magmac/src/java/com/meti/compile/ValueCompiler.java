@@ -20,8 +20,10 @@ public record ValueCompiler(String input) {
         var inputArguments = stripped.substring(start + 1, end).split(",");
         var outputArguments = Optional.<StringBuilder>empty();
         for (String inputArgument : inputArguments) {
+            if(inputArgument.isBlank()) continue;
+
             try {
-                var compiledValue = compileValue(new ValueCompiler(inputArgument));
+                var compiledValue = new ValueCompiler(inputArgument).compile();
                 outputArguments = Optional.of(outputArguments
                         .map(inner -> inner.append(", ").append(compiledValue))
                         .orElse(new StringBuilder(compiledValue)));
@@ -35,21 +37,10 @@ public record ValueCompiler(String input) {
             var suffix = indent == 0 ? "" : ";\n";
             var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-            return Optional.of(new Ok<>("\t".repeat(indent) + compileValue(new ValueCompiler(caller)) + "(" + renderedArguments + ")" + suffix));
+            return Optional.of(new Ok<>("\t".repeat(indent) + new ValueCompiler(caller).compile() + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
-    }
-
-    static String compileValue(ValueCompiler valueCompiler) throws CompileException {
-        var stripped = valueCompiler.input().strip();
-
-        return compileString(stripped)
-                .or(() -> compileAccess(stripped))
-                .or(() -> compileSymbol(stripped))
-                .or(() -> compileInvocation(stripped, 0))
-                .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
-                .$();
     }
 
     private static Optional<Result<String, CompileException>> compileSymbol(String stripped) {
@@ -64,22 +55,33 @@ public record ValueCompiler(String input) {
         var separator = stripped.indexOf('.');
         if (separator == -1) return Optional.empty();
 
-        var parent = stripped.substring(0, separator);
+        var objectString = stripped.substring(0, separator);
         var child = stripped.substring(separator + 1);
 
-        String compiledParent;
+        String compiledObject;
         try {
-            compiledParent = compileValue(new ValueCompiler(parent));
+            compiledObject = new ValueCompiler(objectString).compile();
         } catch (CompileException e) {
-            return Optional.of(new Err<>(e));
+            return Optional.of(new Err<>(new CompileException("Failed to compile object reference: " + objectString, e)));
         }
 
-        return Optional.of(new Ok<>(compiledParent + "." + child));
+        return Optional.of(new Ok<>(compiledObject + "." + child));
     }
 
     private static Optional<Result<String, CompileException>> compileString(String stripped) {
         return stripped.startsWith("\"") && stripped.endsWith("\"")
                 ? Optional.of(new Ok<>(stripped))
                 : Optional.empty();
+    }
+
+    String compile() throws CompileException {
+        var stripped = input().strip();
+
+        return compileString(stripped)
+                .or(() -> compileAccess(stripped))
+                .or(() -> compileSymbol(stripped))
+                .or(() -> compileInvocation(stripped, 0))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
+                .$();
     }
 }
