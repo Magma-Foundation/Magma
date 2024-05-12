@@ -116,25 +116,27 @@ public record StatementCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileCatch(String stripped) {
-        if (stripped.startsWith("catch")) {
-            var typeStart = stripped.indexOf('(');
-            var typeEnd = stripped.indexOf(')');
-            var type = stripped.substring(typeStart + 1, typeEnd).strip();
-            var separator = type.lastIndexOf(' ');
-            var catchType = type.substring(0, separator);
-            var catchName = type.substring(separator + 1);
+        if (!stripped.startsWith("catch")) return Optional.empty();
 
-            Result<String, CompileException> result;
-            try {
-                var compiledBlock = compileBlock(stripped);
-                result = new Ok<>("catch (" + catchName + " : " + catchType + ")" + compiledBlock);
-            } catch (CompileException e) {
-                result = new Err<>(e);
-            }
+        var typeStart = stripped.indexOf('(');
+        if (typeStart == -1) return Optional.empty();
 
-            return Optional.of(result);
+        var typeEnd = stripped.indexOf(')');
+        if (typeEnd == -1) return Optional.empty();
+
+        var type = stripped.substring(typeStart + 1, typeEnd).strip();
+        var separator = type.lastIndexOf(' ');
+        var catchType = type.substring(0, separator);
+        var catchName = type.substring(separator + 1);
+
+        Result<String, CompileException> result;
+        try {
+            var compiledBlock = compileBlock(stripped);
+            result = new Ok<>("catch (" + catchName + " : " + catchType + ")" + compiledBlock);
+        } catch (CompileException e) {
+            result = new Err<>(e);
         }
 
-        return Optional.empty();
+        return Optional.of(result);
     }
 }
