@@ -133,8 +133,26 @@ public record ClassCompiler(String input) implements Compiler {
 
         return compileString(stripped)
                 .or(() -> compileAccess(stripped))
+                .or(() -> compileSymbol(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private static Optional<Result<String, CompileException>> compileSymbol(String stripped) {
+        if (stripped.isEmpty()) return Optional.empty();
+
+        var first = stripped.charAt(0);
+        if (!Character.isLetter(first)) return Optional.empty();
+
+        for (int i = 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (!Character.isLetter(c) && !Character.isDigit(c)) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(new Ok<>(stripped));
+
     }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
