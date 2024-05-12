@@ -3,12 +3,7 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Compiler {
     static void compile(String sourceExtension, String targetExtension) throws IOException, CompileException {
@@ -21,7 +16,7 @@ public class Compiler {
     }
 
     static String compile(String input, String sourceExtension, String targetExtension) throws CompileException {
-        var lines = split(input);
+        var lines = Splitter.split(input);
         var output = new StringBuilder();
         for (var line : lines) {
             output.append(compileRoot(line, sourceExtension, targetExtension));
@@ -58,18 +53,20 @@ public class Compiler {
         } else if (targetExtension.equals("d.ts")) {
             output = isExported ? "export function " + name + "() : {};" : "";
         } else {
-            var structType = "struct " + name + "_t";
-            var structString = structType + " {\n}\n";
-            if (targetExtension.equals("c")) {
-                var structString1 = isExported ? "" : structString;
-                output = structString1 + structType + " " + name + "(){\n"
-                         + "\t" + structType + " this;\n\treturn this;\n}";
-            } else {
-                if (isExported) output = structString + structType + " " + name + "();\n";
-                else output = "";
-            }
+            output = transformMagmaFunctionToC(targetExtension, name, isExported);
         }
         return Optional.of(output);
+    }
+
+    private static String transformMagmaFunctionToC(String targetExtension, String name, boolean isExported) {
+        var structType = "struct " + name + "_t";
+        var structString = structType + " {\n}\n";
+        if (targetExtension.equals("c")) {
+            var structString1 = isExported ? "" : structString;
+            return structString1 + structType + " " + name + "(){\n\t" + structType + " this;\n\treturn this;\n}";
+        } else {
+            return isExported ? structString + structType + " " + name + "();\n" : "";
+        }
     }
 
     static Optional<String> compileMagmaImport(String line, String targetExtension) {
@@ -89,32 +86,6 @@ public class Compiler {
             output = "";
         }
         return Optional.of(output);
-    }
-
-    static List<String> split(String input) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-
-        var inputLines = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        while (!inputLines.isEmpty()) {
-            var c = inputLines.pop();
-
-            if (c == ';' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
-                builder.append(c);
-            }
-        }
-
-        lines.add(builder.toString());
-        return lines;
     }
 
     static String compileJavaRoot(String input) throws CompileException {
