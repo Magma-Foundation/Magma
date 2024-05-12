@@ -17,4 +17,9 @@ public record Err<T, E extends Throwable>(E value) implements Result<T, E> {
     public <R> R match(Function<T, R> valueMapper, Function<E, R> errMapper) {
         return errMapper.apply(value);
     }
+
+    @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Err<>(mapper.apply(value));
+    }
 }

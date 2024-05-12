@@ -17,4 +17,9 @@ public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
     public <R> R match(Function<T, R> valueMapper, Function<E, R> errMapper) {
         return valueMapper.apply(value);
     }
+
+    @Override
+    public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Ok<>(value);
+    }
 }

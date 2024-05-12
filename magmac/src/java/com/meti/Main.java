@@ -82,23 +82,24 @@ public class Main {
                 .$();
     }
 
-    private static Optional<Result<String, CompileException>> compileClass(String stripped) {
-        var classIndex = stripped.indexOf("class");
+    private static Optional<Result<String, CompileException>> compileClass(String input) {
+        var classIndex = input.indexOf("class");
         if (classIndex == -1) return Optional.empty();
 
-        var contentStart = stripped.indexOf('{');
+        var contentStart = input.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var name = stripped.substring(classIndex + "class".length(), contentStart).strip();
-        var modifierString = stripped.startsWith("public ") ? "export " : "";
+        var name = input.substring(classIndex + "class".length(), contentStart).strip();
+        var modifierString = input.startsWith("public ") ? "export " : "";
 
-        var contentEnd = stripped.lastIndexOf('}');
+        var contentEnd = input.lastIndexOf('}');
         if (contentEnd == -1) return Optional.empty();
 
-        var content = stripped.substring(contentStart + 1, contentEnd).strip();
+        var content = input.substring(contentStart + 1, contentEnd).strip();
         var inputContent = split(content);
 
         return compileClassMembers(inputContent)
+                .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
                 .mapValue(output -> Optional.of(modifierString + "class def " + name + "(){" + output + "}"))
                 .into(Results::unwrapOptional);
 

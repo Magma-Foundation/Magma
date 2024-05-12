@@ -12,4 +12,6 @@ public interface Result<T, E extends Throwable> {
     }
 
     <R> R match(Function<T, R> valueMapper, Function<E, R> errMapper);
+
+    <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 }
