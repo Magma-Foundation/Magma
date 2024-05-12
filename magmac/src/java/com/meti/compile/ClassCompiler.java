@@ -188,6 +188,7 @@ public record ClassCompiler(String input) implements Compiler {
         var inputStatements = Strings.splitMembers(after);
         var output = new StringBuilder();
         for (String inputStatement : inputStatements) {
+            if(inputStatement.isBlank()) continue;
             output.append(compileStatement(inputStatement));
         }
 
