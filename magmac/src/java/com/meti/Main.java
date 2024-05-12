@@ -118,7 +118,19 @@ public class Main {
     }
 
     private static String compileClassMember(String input) throws CompileException {
-        throw new CompileException("Unknown class member: " + input);
+        return compileMethod(input).orElseThrow(() -> new CompileException("Unknown class member: " + input));
+    }
+
+    private static Optional<String> compileMethod(String input) {
+        var paramStart = input.indexOf('(');
+        if (paramStart != -1) {
+            var before = input.substring(0, paramStart).strip();
+            var separator = before.lastIndexOf(' ');
+            var name = before.substring(separator + 1);
+            return Optional.of("def " + name + "() => {}");
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<Result<String, CompileException>> compileImport(String stripped) {
