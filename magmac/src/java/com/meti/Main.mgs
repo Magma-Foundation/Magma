@@ -1,3 +1,6 @@
 import { IOException } from java.io;
 import { compile } from com.meti.Compiler;
-export class def Main() => {}
+export class def Main() => {
+	def main() => {
+	}
+}

@@ -2,19 +2,25 @@ package com.meti;
 
 import java.util.Optional;
 
+import static com.meti.Splitter.split;
+
 public class JavaCompiler {
     static String compileJavaRoot(String input) throws CompileException {
         if (input.isBlank() || input.startsWith("package ")) return "";
 
         return compileJavaImport(input)
                 .or(() -> compileJavaClass(input))
-                .orElseThrow(() -> new CompileException(input));
+                .orElseGet(() -> new Err<>(new CompileException(input)))
+                .$();
     }
 
-    static Optional<String> compileJavaClass(String input) {
+    static Optional<Result<String, CompileException>> compileJavaClass(String input) {
         var stripped = input.strip();
         var contentStart = stripped.indexOf('{');
         if (contentStart == -1) return Optional.empty();
+
+        var contentEnd = stripped.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
 
         var classIndex = stripped.indexOf("class ");
         if (classIndex == -1) return Optional.empty();
@@ -22,10 +28,32 @@ public class JavaCompiler {
         var name = stripped.substring(classIndex + "class ".length(), contentStart).strip();
         var exportString = stripped.startsWith("public ") ? "export " : "";
 
-        return Optional.of(exportString + "class def " + name + "() => {}");
+        var inputContent = split(stripped.substring(contentStart + 1, contentEnd));
+        var outputContent = new StringBuilder();
+        for (String s : inputContent) {
+            try {
+                outputContent.append(compileClassMember(s));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        }
+
+        return Optional.of(new Ok<>(exportString + "class def " + name + "() => {\n" + outputContent + "}"));
     }
 
-    static Optional<String> compileJavaImport(String input) {
+    private static String compileClassMember(String input) throws CompileException {
+        var paramStart = input.indexOf('(');
+        if (paramStart != -1) {
+            var before = input.substring(0, paramStart).strip();
+            var space = before.lastIndexOf(' ');
+            var name = before.substring(space + 1);
+            return "\tdef " + name + "() => {\n\t}\n";
+        }
+
+        throw new CompileException(input);
+    }
+
+    static Optional<Result<String, CompileException>> compileJavaImport(String input) {
         var stripped = input.strip();
         if (!stripped.startsWith("import ")) return Optional.empty();
 
@@ -39,6 +67,6 @@ public class JavaCompiler {
         var parent = segments.substring(0, last);
         var child = segments.substring(last + 1);
 
-        return Optional.of("import { " + child + " } from " + parent + ";\n");
+        return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
     }
 }
