@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -63,14 +64,31 @@ public class Main {
         var stripped = line.strip();
 
         if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
-        if (stripped.startsWith("import ")) {
-            var segments = stripped.substring("import ".length());
-            var separator = segments.lastIndexOf('.');
-            var parent = segments.substring(0, separator);
-            var child = segments.substring(separator + 1);
-            return "import { " + child + "} from " + parent + ";\n";
-        }
+        return compileImport(stripped)
+                .or(() -> compileClass(stripped))
+                .orElseThrow(() -> new CompileException(line));
+    }
 
-        throw new CompileException(line);
+    private static Optional<String> compileClass(String stripped) {
+        var classIndex = stripped.indexOf("class");
+        if (classIndex == -1) return Optional.empty();
+
+        var contentStart = stripped.indexOf('{');
+        if (contentStart == -1) return Optional.empty();
+
+        var name = stripped.substring(classIndex + "class".length(), contentStart).strip();
+        var modifierString = stripped.startsWith("public ") ? "export " : "";
+
+        return Optional.of(modifierString + "class def " + name + "(){}");
+    }
+
+    private static Optional<String> compileImport(String stripped) {
+        if (!stripped.startsWith("import ")) return Optional.empty();
+
+        var segments = stripped.substring("import ".length());
+        var separator = segments.lastIndexOf('.');
+        var parent = segments.substring(0, separator);
+        var child = segments.substring(separator + 1);
+        return Optional.of("import { " + child + " } from " + parent + ";\n");
     }
 }
