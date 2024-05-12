@@ -12,15 +12,19 @@ public class Main {
             compile("mgs", "d.ts");
             compile("mgs", "c");
             compile("mgs", "h");
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void compile(String sourceEnv, String targetEnv) throws IOException {
+    private static void compile(String sourceEnv, String targetEnv) throws IOException, CompileException {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main." + sourceEnv);
         var input = Files.readString(source);
         var target = source.resolveSibling("Main." + targetEnv);
-        Files.writeString(target, input);
+        Files.writeString(target, compile(input));
+    }
+
+    private static String compile(String input) throws CompileException {
+        throw new CompileException(input);
     }
 }
