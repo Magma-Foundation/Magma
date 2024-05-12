@@ -3,7 +3,19 @@ import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
 import { ArrayList } from java.util;
 import { LinkedList } from java.util;
+import { List } from java.util;
 import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { IntStream } from java.util.stream;
-export class def Main(){}
+export class def Main(){
+	def main() => {}
+	def compile() => {}
+	def compile() => {}
+	def split() => {}
+	def compileRoot() => {}
+	def compileClass() => {}
+	def compileClassMembers() => {}
+	def compileClassMember() => {}
+	def compileMethod() => {}
+	def compileImport() => {}
+}

@@ -52,6 +52,18 @@ public class Main {
         while (!queue.isEmpty()) {
             var c = queue.pop();
 
+            if (c == '\'') {
+                builder.append(c);
+                var next = queue.pop();
+                builder.append(next);
+                if(next== '\\') {
+                    builder.append(queue.pop());
+                }
+
+                builder.append(queue.pop());
+                continue;
+            }
+
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
@@ -100,7 +112,7 @@ public class Main {
 
         return compileClassMembers(inputContent)
                 .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
-                .mapValue(output -> Optional.of(modifierString + "class def " + name + "(){" + output + "}"))
+                .mapValue(output -> Optional.of(modifierString + "class def " + name + "(){\n" + output + "}"))
                 .into(Results::unwrapOptional);
 
     }
@@ -108,6 +120,8 @@ public class Main {
     private static Result<String, CompileException> compileClassMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (var input : inputContent) {
+            if (input.isBlank()) continue;
+
             try {
                 outputContent.append(compileClassMember(input));
             } catch (CompileException e) {
@@ -128,7 +142,7 @@ public class Main {
             var before = input.substring(0, paramStart).strip();
             var separator = before.lastIndexOf(' ');
             var name = before.substring(separator + 1);
-            return Optional.of("def " + name + "() => {}");
+            return Optional.of("\tdef " + name + "() => {}\n");
         }
 
         return Optional.empty();
@@ -139,6 +153,8 @@ public class Main {
 
         var segments = stripped.substring("import ".length());
         var separator = segments.lastIndexOf('.');
+        if(separator ==-1) return Optional.empty();
+
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
         return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
