@@ -97,16 +97,24 @@ public class Main {
 
         var content = stripped.substring(contentStart + 1, contentEnd).strip();
         var inputContent = split(content);
+
+        return compileClassMembers(inputContent)
+                .mapValue(output -> Optional.of(modifierString + "class def " + name + "(){" + output + "}"))
+                .into(Results::unwrapOptional);
+
+    }
+
+    private static Result<String, CompileException> compileClassMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
-        for (String input1 : inputContent) {
+        for (var input : inputContent) {
             try {
-                outputContent.append(compileClassMember(input1));
+                outputContent.append(compileClassMember(input));
             } catch (CompileException e) {
-                return Optional.of(new Err<>(e));
+                return new Err<>(e);
             }
         }
 
-        return Optional.of(new Ok<>(modifierString + "class def " + name + "(){" + outputContent + "}"));
+        return new Ok<>(outputContent.toString());
     }
 
     private static String compileClassMember(String input) throws CompileException {
