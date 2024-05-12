@@ -12,23 +12,55 @@ import java.util.stream.IntStream;
 public class Main {
     public static void main(String[] args) {
         try {
-            extracted("java", "mgs");
-            extracted("mgs", "js");
-            extracted("mgs", "d.ts");
-            extracted("mgs", "c");
-            extracted("mgs", "h");
+            compile("java", "mgs");
+            compile("mgs", "js");
+            compile("mgs", "d.ts");
+            compile("mgs", "c");
+            compile("mgs", "h");
         } catch (IOException | CompileException e) {
             e.printStackTrace();
         }
     }
 
-    private static void extracted(String sourceExtension, String targetExtension) throws IOException, CompileException {
+    private static void compile(String sourceExtension, String targetExtension) throws IOException, CompileException {
         var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main." + sourceExtension);
         var input = Files.readString(source);
-        Files.writeString(source.resolveSibling("Main." + targetExtension), compile(input));
+
+        var compileImpl = compile(input, sourceExtension, targetExtension);
+
+        Files.writeString(source.resolveSibling("Main." + targetExtension), compileImpl);
     }
 
-    private static String compile(String input) throws CompileException {
+    private static String compile(String input, String sourceExtension, String targetExtension) throws CompileException {
+        var lines = split(input);
+        var output = new StringBuilder();
+        for (var line : lines) {
+            String str;
+            if (sourceExtension.equals("java")) {
+                str = compileJavaRoot(line);
+            } else {
+                str = compileMagmaRoot(line);
+            }
+            output.append(str);
+        }
+
+        return output.toString();
+    }
+
+    private static String compileMagmaRoot(String line) {
+        var stripped = line.strip();
+        if(stripped.startsWith("import ")) {
+            var childStart = stripped.indexOf('{');
+            var childEnd = stripped.indexOf('}');
+            var child = stripped.substring(childStart + 1, childEnd).strip();
+            var parent = stripped.substring(stripped.indexOf("from") + "from".length()).strip();
+            return "import { " + child + " } from \"" + parent + "\";\n";
+        } else {
+            return "";
+        }
+    }
+
+    private static ArrayList<String> split(String input) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -51,16 +83,10 @@ public class Main {
         }
 
         lines.add(builder.toString());
-
-        var output = new StringBuilder();
-        for (var line : lines) {
-            output.append(compileRoot(line));
-        }
-
-        return output.toString();
+        return lines;
     }
 
-    private static String compileRoot(String input) throws CompileException {
+    private static String compileJavaRoot(String input) throws CompileException {
         if (input.isBlank() || input.startsWith("package ")) return "";
 
         return compileImport(input)

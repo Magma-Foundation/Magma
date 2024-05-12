@@ -1,9 +1,8 @@
-import { io } from { IOException } from java;
-import { file } from { Files } from java.nio;
-import { file } from { Paths } from java.nio;
-import { util } from { ArrayList } from java;
-import { util } from { LinkedList } from java;
-import { util } from { Optional } from java;
-import { stream } from { Collectors } from java.util;
-import { stream } from { IntStream } from java.util;
-class def =>() => {}
+import { IOException } from "java.io";
+import { Files } from "java.nio.file";
+import { Paths } from "java.nio.file";
+import { ArrayList } from "java.util";
+import { LinkedList } from "java.util";
+import { Optional } from "java.util";
+import { Collectors } from "java.util.stream";
+import { IntStream } from "java.util.stream";
