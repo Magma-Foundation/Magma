@@ -80,7 +80,8 @@ public class Main {
 
     private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members) {
         var joinedInstance = String.join("", members.instanceMembers);
-        return modifierString + "class def " + name + "(){\n" + joinedInstance + "}\n";
+
+        return renderFunction(modifierString + "class ", name, "", "", 0, joinedInstance);
     }
 
     private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {
@@ -139,17 +140,25 @@ public class Main {
         var type = modifiersAndType.get(modifiersAndType.size() - 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = "\t" +
-                       modifierString +
-                       "def " + name + "(" + renderedParams + ")" +
-                       ": " + type +
-                       " => {\n\t}\n";
+        var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, "");
 
         var state = modifiers.contains("static")
                 ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
                 : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
         return Optional.of(state);
+    }
+
+    private static String renderFunction(String modifierString, String name, String renderedParams, String typeString, int indent, String content) {
+        var indentString = "\t".repeat(indent);
+
+        return indentString +
+               modifierString +
+               "def " + name + "(" + renderedParams + ")" +
+               typeString +
+               " => {\n" +
+               content +
+               indentString + "}\n";
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
