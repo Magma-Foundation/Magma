@@ -5,9 +5,8 @@ import { ArrayList } from java.util;
 import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
+import { renderFunction } from static com.meti.MagmaLang;
 export class def Main() => {
-	def ClassMemberResult(instanceMembers : List<String>, staticMembers : List<String>): record => {
-	}
 }
 export object Main {
 	def main(args : String[]): void => {
@@ -20,19 +19,11 @@ export object Main {
 	}
 	private def compileClass(input : String): Optional<Result<String, CompileException>> => {
 	}
-	private def renderClass(modifierString : String, name : String, members : ClassMemberResult): String => {
-	}
-	private def renderInstanceClassContent(modifierString : String, name : String, members : ClassMemberResult): String => {
-	}
-	private def renderStaticClassContent(modifierString : String, name : String, members : ClassMemberResult): String => {
-	}
 	private def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
 	}
 	private def compileClassMember(input : String): ClassMemberResult => {
 	}
 	private def compileMethod(input : String): Optional<ClassMemberResult> => {
-	}
-	private def renderFunction(modifierString : String, name : String, renderedParams : String, typeString : String, indent : int, content : String): String => {
 	}
 	private def compileMethodParams(paramStrings : List<String>): String => {
 	}
