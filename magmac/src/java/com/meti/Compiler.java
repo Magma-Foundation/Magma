@@ -40,18 +40,21 @@ public class Compiler {
 
     static String compileMagmaRoot(String line, String targetExtension) throws CompileException {
         return compileMagmaImport(line, targetExtension)
-                .or(() -> compileFunction(line, targetExtension))
+                .or(() -> compileMagmaFunction(line, targetExtension))
                 .orElseThrow(() -> new CompileException(line));
     }
 
-    static Optional<String> compileFunction(String line, String targetExtension) {
-        var def = line.indexOf("def ");
+    static Optional<String> compileMagmaFunction(String line, String targetExtension) {
+        var stripped = line.strip();
+        var def = stripped.indexOf("def ");
         if (def == -1) return Optional.empty();
 
-        var name = line.substring(def + "def ".length(), line.indexOf('(')).strip();
+        var isExported = stripped.startsWith("export ");
+        var name = stripped.substring(def + "def ".length(), stripped.indexOf('(')).strip();
         String output;
         if (targetExtension.equals("js")) {
-            output = "function " + name + "(){\n\treturn {};\n}";
+            var exportedString = isExported ? "module.exports = {\n\t" + name + "\n}\n" : "";
+            output = "function " + name + "(){\n\treturn {};\n}\n" + exportedString;
         } else if (targetExtension.equals("c")) {
             var structType = "struct " + name + "_t";
             output = structType + " {\n}\n" + structType + " " + name + "(){\n"
