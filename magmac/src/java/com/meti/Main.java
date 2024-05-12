@@ -48,7 +48,7 @@ public class Main {
     }
 
     private static String compileMagmaRoot(String line, String targetExtension) throws CompileException {
-        return compileMagmaImport(line)
+        return compileMagmaImport(line, targetExtension)
                 .or(() -> compileFunction(line, targetExtension))
                 .orElseThrow(() -> new CompileException(line));
     }
@@ -69,14 +69,22 @@ public class Main {
         }
     }
 
-    private static Optional<String> compileMagmaImport(String line) {
+    private static Optional<String> compileMagmaImport(String line, String targetExtension) {
         var stripped = line.strip();
         if (stripped.startsWith("import ")) {
             var childStart = stripped.indexOf('{');
             var childEnd = stripped.indexOf('}');
             var child = stripped.substring(childStart + 1, childEnd).strip();
             var parent = stripped.substring(stripped.indexOf("from") + "from".length()).strip();
-            return Optional.of("import { " + child + " } from \"" + parent + "\";\n");
+            String output;
+            if (targetExtension.equals("js") || targetExtension.equals("d.ts")) {
+                output = "import { " + child + " } from \"" + parent + "\";\n";
+            } else if (targetExtension.equals("h")) {
+                output = "#include <" + parent + "/" + child + ".h>\n";
+            } else {
+                output = "";
+            }
+            return Optional.of(output);
         }
         return Optional.empty();
     }
