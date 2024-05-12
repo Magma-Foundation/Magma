@@ -90,21 +90,26 @@ public class Main {
     }
 
     private static Optional<String> compileMethod(String input) {
-        var paramStart = input.indexOf('(');
+        var stripped = input.strip();
+
+        var paramStart = stripped.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
-        var paramEnd = input.indexOf(')');
+        var paramEnd = stripped.indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
-        var paramString = input.substring(paramStart + 1, paramEnd);
+        var paramString = stripped.substring(paramStart + 1, paramEnd);
         var paramStrings = List.of(paramString.split(","));
         var renderedParams = compileMethodParams(paramStrings);
 
-        var before = input.substring(0, paramStart).strip();
+        var before = stripped.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
         var name = before.substring(separator + 1);
 
-        return Optional.of("\tdef " + name + "(" + renderedParams + ") => {}\n");
+        var modifierString = stripped.startsWith("private ") ? "private " : "";
+        return Optional.of("\t" +
+                           modifierString +
+                           "def " + name + "(" + renderedParams + ") => {}\n");
     }
 
     private static String compileMethodParams(List<String> paramStrings) {

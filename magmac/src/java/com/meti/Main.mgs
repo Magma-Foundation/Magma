@@ -1,21 +1,17 @@
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
-import { ArrayList } from java.util;
-import { LinkedList } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-import { Collectors } from java.util.stream;
-import { IntStream } from java.util.stream;
 export class def Main(){
 	def main(args : String[]) => {}
-	def compile(sourceEnv : String, targetEnv : String) => {}
-	def compile(input : String) => {}
-	def split(input : String) => {}
-	def compileRoot(line : String) => {}
-	def compileClass(input : String) => {}
-	def compileClassMembers(inputContent : List<String>) => {}
-	def compileClassMember(input : String) => {}
-	def compileMethod(input : String) => {}
-	def compileImport(stripped : String) => {}
+	private def compile(sourceEnv : String, targetEnv : String) => {}
+	private def compile(input : String) => {}
+	private def compileRoot(line : String) => {}
+	private def compileClass(input : String) => {}
+	private def compileClassMembers(inputContent : List<String>) => {}
+	private def compileClassMember(input : String) => {}
+	private def compileMethod(input : String) => {}
+	private def compileMethodParams(paramStrings : List<String>) => {}
+	private def compileImport(stripped : String) => {}
 }
