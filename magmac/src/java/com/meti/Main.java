@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.meti.MagmaLang.renderFunction;
+
 public class Main {
     public static void main(String[] args) {
         try {
@@ -67,28 +69,9 @@ public class Main {
 
         return compileClassMembers(inputContent)
                 .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
-                .mapValue(output -> Optional.of(renderClass(modifierString, name, output)))
+                .mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output)))
                 .into(Results::unwrapOptional);
 
-    }
-
-    private static String renderClass(String modifierString, String name, ClassMemberResult members) {
-        var instanceContent = renderInstanceClassContent(modifierString, name, members);
-        var staticContent = renderStaticClassContent(modifierString, name, members);
-        return instanceContent + staticContent;
-    }
-
-    private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members) {
-        var joinedInstance = String.join("", members.instanceMembers);
-
-        return renderFunction(modifierString + "class ", name, "", "", 0, joinedInstance);
-    }
-
-    private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {
-        if (members.staticMembers.isEmpty()) return "";
-
-        var joinedStatic = String.join("", members.staticMembers);
-        return modifierString + "object " + name + " {\n" + joinedStatic + "}";
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMembers(List<String> inputContent) {
@@ -100,8 +83,8 @@ public class Main {
 
             try {
                 var result = compileClassMember(input);
-                instanceContent.addAll(result.instanceMembers);
-                staticContent.addAll(result.staticMembers);
+                instanceContent.addAll(result.instanceMembers());
+                staticContent.addAll(result.staticMembers());
             } catch (CompileException e) {
                 return new Err<>(e);
             }
@@ -149,18 +132,6 @@ public class Main {
         return Optional.of(state);
     }
 
-    private static String renderFunction(String modifierString, String name, String renderedParams, String typeString, int indent, String content) {
-        var indentString = "\t".repeat(indent);
-
-        return indentString +
-               modifierString +
-               "def " + name + "(" + renderedParams + ")" +
-               typeString +
-               " => {\n" +
-               content +
-               indentString + "}\n";
-    }
-
     private static String compileMethodParams(List<String> paramStrings) {
         var outputParams = Optional.<StringBuilder>empty();
         for (String string : paramStrings) {
@@ -189,8 +160,5 @@ public class Main {
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
         return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
-    }
-
-    record ClassMemberResult(List<String> instanceMembers, List<String> staticMembers) {
     }
 }
