@@ -129,11 +129,35 @@ public record ClassCompiler(String input) implements Compiler {
     }
 
     private static String compileValue(String input) throws CompileException {
-        if (input.startsWith("\"") && input.endsWith("\"")) {
-            return input;
+        var stripped = input.strip();
+
+        return compileString(stripped)
+                .or(() -> compileAccess(stripped))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
+                .$();
+    }
+
+    private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
+        var separator = stripped.indexOf('.');
+        if (separator == -1) return Optional.empty();
+
+        var parent = stripped.substring(0, separator);
+        var child = stripped.substring(separator + 1);
+
+        String compiledParent;
+        try {
+            compiledParent = compileValue(parent);
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
         }
 
-        throw new CompileException("Unknown value: " + input);
+        return Optional.of(new Ok<>(compiledParent + "." + child));
+    }
+
+    private static Optional<Result<String, CompileException>> compileString(String stripped) {
+        return stripped.startsWith("\"") && stripped.endsWith("\"")
+                ? Optional.of(new Ok<>(stripped))
+                : Optional.empty();
     }
 
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
