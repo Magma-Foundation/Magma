@@ -81,13 +81,17 @@ public class MagmaCompiler {
                 return new InnerResult(isExported ? structString + structType + " " + name + "();\n" : "");
             }
         } else {
-            var afterName = IntStream.range(0, stack.size())
-                    .map(index -> stack.size() - index - 1)
-                    .mapToObj(stack::get)
-                    .map(value -> "_" + value)
-                    .collect(Collectors.joining());
+            if (targetExtension.equals("c")) {
+                var afterName = IntStream.range(0, stack.size())
+                        .map(index -> stack.size() - index - 1)
+                        .mapToObj(stack::get)
+                        .map(value -> "_" + value)
+                        .collect(Collectors.joining());
 
-            return new OuterResult(renderCFunction("void", name + afterName, ""));
+                return new OuterResult(renderCFunction("void", name + afterName, ""));
+            } else {
+                return new EmptyResult();
+            }
         }
     }
 
