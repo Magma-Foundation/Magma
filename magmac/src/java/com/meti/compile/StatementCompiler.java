@@ -86,6 +86,10 @@ public record StatementCompiler(String input) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
+        return Optional.of(new Ok<>("try " + compileBlock(stripped)));
+    }
+
+    private static String compileBlock(String stripped) throws CompileException {
         var contentStart = stripped.indexOf('{');
         var contentEnd = stripped.lastIndexOf('}');
         var after = stripped.substring(contentStart + 1, contentEnd);
@@ -97,16 +101,40 @@ public record StatementCompiler(String input) {
             output.append(new StatementCompiler(inputStatement).compile());
         }
 
-        return Optional.of(new Ok<>("try {" + output + "}"));
+        return "{" + output + "}";
     }
 
     String compile() throws CompileException {
         var stripped = input.strip();
 
         return compileTry(stripped)
+                .or(() -> compileCatch(stripped))
                 .or(() -> compileInvocation(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileCatch(String stripped) {
+        if (stripped.startsWith("catch")) {
+            var typeStart = stripped.indexOf('(');
+            var typeEnd = stripped.indexOf(')');
+            var type = stripped.substring(typeStart + 1, typeEnd).strip();
+            var separator = type.lastIndexOf(' ');
+            var catchType = type.substring(0, separator);
+            var catchName = type.substring(separator + 1);
+
+            Result<String, CompileException> result;
+            try {
+                var compiledBlock = compileBlock(stripped);
+                result = new Ok<>("catch (" + catchName + " : " + catchType + ")" + compiledBlock);
+            } catch (CompileException e) {
+                result = new Err<>(e);
+            }
+
+            return Optional.of(result);
+        }
+
+        return Optional.empty();
     }
 }
