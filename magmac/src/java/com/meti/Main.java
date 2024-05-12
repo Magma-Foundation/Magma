@@ -3,7 +3,6 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,7 +108,7 @@ public class Main {
         var modifiersAndTypeString = before.substring(0, separator).strip();
         var name = before.substring(separator + 1).strip();
 
-        var modifiersAndType = split(modifiersAndTypeString);
+        var modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
         if (modifiersAndType.isEmpty()) return Optional.empty();
 
         var type = modifiersAndType.get(modifiersAndType.size() - 1);
@@ -120,28 +119,6 @@ public class Main {
                            "def " + name + "(" + renderedParams + ")" +
                            ": " + type +
                            " => {}\n");
-    }
-
-    private static List<String> split(String modifiersAndType) {
-        var lines = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-
-        for (int i = 0; i < modifiersAndType.length(); i++) {
-            var c = modifiersAndType.charAt(i);
-
-            if (c == ' ' && depth == 0) {
-                lines.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '<') depth++;
-                if (c == '>') depth--;
-                builder.append(c);
-            }
-        }
-
-        lines.add(builder.toString());
-        return lines;
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
