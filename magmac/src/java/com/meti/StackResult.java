@@ -6,7 +6,7 @@ import java.util.Optional;
 public interface StackResult {
     Optional<List<Node>> findInner();
 
-    Optional<String> findOuter();
+    Optional<List<Node>> findOuter();
 
     StackResult withOuter(String outer);
 

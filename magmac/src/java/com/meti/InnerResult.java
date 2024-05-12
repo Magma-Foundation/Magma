@@ -8,8 +8,7 @@ record InnerResult(String inner) implements StackResult {
         return Optional.of(inner);
     }
 
-    @Override
-    public Optional<String> findOuter() {
+    private Optional<String> findOuter0() {
         return Optional.empty();
     }
 
@@ -26,5 +25,10 @@ record InnerResult(String inner) implements StackResult {
     @Override
     public Optional<List<Node>> findInner() {
         return findInner0().map(value -> List.of(new Content(value)));
+    }
+
+    @Override
+    public Optional<List<Node>> findOuter() {
+        return findOuter0().map(value -> List.of(new Content(value)));
     }
 }

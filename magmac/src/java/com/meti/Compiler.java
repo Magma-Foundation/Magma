@@ -21,7 +21,10 @@ public class Compiler {
         var output = new StringBuilder();
         for (var line : lines) {
             var result = compileRoot(line, sourceExtension, targetExtension);
-            output.append(result.findOuter().orElse(""))
+            output.append(result.findOuter().map(list1 -> list1.stream()
+                            .map(Node::findValue)
+                            .flatMap(Optional::stream)
+                            .collect(Collectors.joining())).orElse(""))
                     .append(result.findInner().map(list -> list.stream()
                             .map(Node::findValue)
                             .flatMap(Optional::stream)
