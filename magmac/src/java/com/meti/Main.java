@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -30,6 +31,17 @@ public class Main {
     }
 
     private static String compile(String input) throws CompileException {
+        var lines = split(input);
+
+        var output = new StringBuilder();
+        for (String line : lines) {
+            output.append(compileRoot(line));
+        }
+
+        return output.toString();
+    }
+
+    private static List<String> split(String input) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -43,6 +55,12 @@ public class Main {
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
+            } else if (c == '}' && depth == 1) {
+                builder.append(c);
+                depth = 0;
+
+                lines.add(builder.toString());
+                builder = new StringBuilder();
             } else {
                 if (c == '{') depth++;
                 if (c == '}') depth--;
@@ -51,13 +69,7 @@ public class Main {
         }
 
         lines.add(builder.toString());
-
-        var output = new StringBuilder();
-        for (String line : lines) {
-            output.append(compileRoot(line));
-        }
-
-        return output.toString();
+        return lines;
     }
 
     private static String compileRoot(String line) throws CompileException {
@@ -66,10 +78,11 @@ public class Main {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
         return compileImport(stripped)
                 .or(() -> compileClass(stripped))
-                .orElseThrow(() -> new CompileException(line));
+                .orElseGet(() -> new Err<>(new CompileException(line)))
+                .$();
     }
 
-    private static Optional<String> compileClass(String stripped) {
+    private static Optional<Result<String, CompileException>> compileClass(String stripped) {
         var classIndex = stripped.indexOf("class");
         if (classIndex == -1) return Optional.empty();
 
@@ -79,16 +92,34 @@ public class Main {
         var name = stripped.substring(classIndex + "class".length(), contentStart).strip();
         var modifierString = stripped.startsWith("public ") ? "export " : "";
 
-        return Optional.of(modifierString + "class def " + name + "(){}");
+        var contentEnd = stripped.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var content = stripped.substring(contentStart + 1, contentEnd).strip();
+        var inputContent = split(content);
+        var outputContent = new StringBuilder();
+        for (String input1 : inputContent) {
+            try {
+                outputContent.append(compileClassMember(input1));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        }
+
+        return Optional.of(new Ok<>(modifierString + "class def " + name + "(){" + outputContent + "}"));
     }
 
-    private static Optional<String> compileImport(String stripped) {
+    private static String compileClassMember(String input) throws CompileException {
+        throw new CompileException("Unknown class member: " + input);
+    }
+
+    private static Optional<Result<String, CompileException>> compileImport(String stripped) {
         if (!stripped.startsWith("import ")) return Optional.empty();
 
         var segments = stripped.substring("import ".length());
         var separator = segments.lastIndexOf('.');
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
-        return Optional.of("import { " + child + " } from " + parent + ";\n");
+        return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
     }
 }
