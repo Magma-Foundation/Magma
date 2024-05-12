@@ -1,29 +1,56 @@
 package com.meti;
 
+import java.util.List;
 import java.util.Optional;
 
 public class MagmaCompiler {
     static String compileMagmaRoot(String line, String targetExtension) throws CompileException {
         return compileMagmaImport(line, targetExtension)
-                .or(() -> compileMagmaFunction(line, targetExtension))
-                .orElseThrow(() -> new CompileException(line));
+                .or(() -> compileMagmaFunction(line, targetExtension, 0))
+                .orElseGet(() -> new Err<>(new CompileException(line)))
+                .$();
     }
 
-    static Optional<String> compileMagmaFunction(String line, String targetExtension) {
+    static Optional<Result<String, CompileException>> compileMagmaFunction(String line, String targetExtension, int indent) {
         var stripped = line.strip();
-        var def = stripped.indexOf("def ");
-        if (def == -1) return Optional.empty();
+        var functionKeyword = stripped.indexOf("def ");
+        if (functionKeyword == -1) return Optional.empty();
 
         var isExported = stripped.startsWith("export ");
-        var name = stripped.substring(def + "def ".length(), stripped.indexOf('(')).strip();
-        var output = renderMagmaFunction(targetExtension, isExported, name);
-        return Optional.of(output);
+        var modifiers = List.of(stripped.substring(0, functionKeyword).strip().split(" "));
+        var name = stripped.substring(functionKeyword + "def ".length(), stripped.indexOf('(')).strip();
+
+        var contentStart = stripped.indexOf('{');
+        var contentEnd = stripped.lastIndexOf('}');
+        var content = stripped.substring(contentStart + 1, contentEnd);
+        var inputContent = Splitter.split(content);
+        var outputContent = new StringBuilder();
+        for (String s : inputContent) {
+            if (!s.isBlank()) {
+                try {
+                    outputContent.append(compileMagmaFunctionMember(targetExtension, s, 1));
+                } catch (CompileException e) {
+                    return Optional.of(new Err<>(e));
+                }
+            }
+        }
+
+        var output = renderMagmaFunction(targetExtension, isExported, name, outputContent.toString(), modifiers.contains("class"), indent);
+        return Optional.of(new Ok<>(output));
     }
 
-    static String renderMagmaFunction(String targetExtension, boolean isExported, String name) {
+    private static String compileMagmaFunctionMember(String targetExtension, String input, int indent) throws CompileException {
+        return compileMagmaFunction(input, targetExtension, indent)
+                .orElseGet(() -> new Err<>(new CompileException(input)))
+                .$();
+    }
+
+    static String renderMagmaFunction(String targetExtension, boolean isExported, String name, String content, boolean isClass, int indent) {
         if (targetExtension.equals("js")) {
             var exportedString = isExported ? "module.exports = {\n\t" + name + "\n}\n" : "";
-            return "function " + name + "(){\n\treturn {};\n}\n" + exportedString;
+            var classString = isClass ? "\treturn {};\n" : "";
+
+            return "\t".repeat(indent) + "function " + name + "(){\n" + content + classString + "\t".repeat(indent) + "}\n" + exportedString;
         } else if (targetExtension.equals("d.ts")) {
             return isExported ? "export function " + name + "() : {};" : "";
         } else {
@@ -42,7 +69,7 @@ public class MagmaCompiler {
         }
     }
 
-    static Optional<String> compileMagmaImport(String line, String targetExtension) {
+    static Optional<Result<String, CompileException>> compileMagmaImport(String line, String targetExtension) {
         var stripped = line.strip();
         if (!stripped.startsWith("import ")) return Optional.empty();
 
@@ -51,7 +78,7 @@ public class MagmaCompiler {
         var child = stripped.substring(childStart + 1, childEnd).strip();
         var parent = stripped.substring(stripped.indexOf("from") + "from".length()).strip();
         var output = renderMagmaImport(targetExtension, child, parent);
-        return Optional.of(output);
+        return Optional.of(new Ok<>(output));
     }
 
     static String renderMagmaImport(String targetExtension, String child, String parent) {
