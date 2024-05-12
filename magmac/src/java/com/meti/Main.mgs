@@ -4,14 +4,14 @@ import { Paths } from java.nio.file;
 import { List } from java.util;
 import { Optional } from java.util;
 export class def Main(){
-	def main(args : String[]) => {}
-	private def compile(sourceEnv : String, targetEnv : String) => {}
-	private def compile(input : String) => {}
-	private def compileRoot(line : String) => {}
-	private def compileClass(input : String) => {}
-	private def compileClassMembers(inputContent : List<String>) => {}
-	private def compileClassMember(input : String) => {}
-	private def compileMethod(input : String) => {}
-	private def compileMethodParams(paramStrings : List<String>) => {}
-	private def compileImport(stripped : String) => {}
+	def main(args : String[]): void => {}
+	private def compile(sourceEnv : String, targetEnv : String): void => {}
+	private def compile(input : String): String => {}
+	private def compileRoot(line : String): String => {}
+	private def compileClass(input : String): CompileException>> => {}
+	private def compileClassMembers(inputContent : List<String>): CompileException> => {}
+	private def compileClassMember(input : String): String => {}
+	private def compileMethod(input : String): Optional<String> => {}
+	private def compileMethodParams(paramStrings : List<String>): String => {}
+	private def compileImport(stripped : String): CompileException>> => {}
 }

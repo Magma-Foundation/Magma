@@ -104,12 +104,24 @@ public class Main {
 
         var before = stripped.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
-        var name = before.substring(separator + 1);
+
+        var modifiersAndType = before.substring(0, separator).strip();
+        var name = before.substring(separator + 1).strip();
+
+        String type;
+        var typeSeparator = modifiersAndType.lastIndexOf(' ');
+        if (typeSeparator == -1) {
+            type = modifiersAndType;
+        } else {
+            type = modifiersAndType.substring(typeSeparator + 1).strip();
+        }
 
         var modifierString = stripped.startsWith("private ") ? "private " : "";
         return Optional.of("\t" +
                            modifierString +
-                           "def " + name + "(" + renderedParams + ") => {}\n");
+                           "def " + name + "(" + renderedParams + ")" +
+                           ": " + type +
+                           " => {}\n");
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
