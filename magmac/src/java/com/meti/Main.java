@@ -47,17 +47,32 @@ public class Main {
         return output.toString();
     }
 
-    private static String compileMagmaRoot(String line) {
+    private static String compileMagmaRoot(String line) throws CompileException {
+        return compileMagmaImport(line)
+                .or(() -> compileFunction(line))
+                .orElseThrow(() -> new CompileException(line));
+    }
+
+    private static Optional<String> compileFunction(String line) {
+        var def = line.indexOf("def ");
+        if (def != -1) {
+            var name = line.substring(def + "def ".length(), line.indexOf('(')).strip();
+            return Optional.of("function " + name + "(){}");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> compileMagmaImport(String line) {
         var stripped = line.strip();
-        if(stripped.startsWith("import ")) {
+        if (stripped.startsWith("import ")) {
             var childStart = stripped.indexOf('{');
             var childEnd = stripped.indexOf('}');
             var child = stripped.substring(childStart + 1, childEnd).strip();
             var parent = stripped.substring(stripped.indexOf("from") + "from".length()).strip();
-            return "import { " + child + " } from \"" + parent + "\";\n";
-        } else {
-            return "";
+            return Optional.of("import { " + child + " } from \"" + parent + "\";\n");
         }
+        return Optional.empty();
     }
 
     private static ArrayList<String> split(String input) {
