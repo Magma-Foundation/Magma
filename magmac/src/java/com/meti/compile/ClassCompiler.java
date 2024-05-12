@@ -95,7 +95,57 @@ public record ClassCompiler(String input) implements Compiler {
     }
 
     private static String compileStatement(String input) throws CompileException {
-        throw new CompileException("Unknown statement: " + input);
+        var stripped = input.strip();
+
+        return compileTry(stripped)
+                .or(() -> compileInvocation(stripped))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
+                .$();
+    }
+
+    private static Optional<Result<String, CompileException>> compileInvocation(String stripped) {
+        var start = stripped.indexOf('(');
+        if (start == -1) return Optional.empty();
+
+        var end = stripped.lastIndexOf(')');
+        if (end == -1) return Optional.empty();
+
+        var caller = stripped.substring(0, start);
+        var inputArguments = stripped.substring(start + 1, end).split(",");
+        var outputArguments = new StringBuilder();
+        for (String inputArgument : inputArguments) {
+            try {
+                outputArguments.append(compileValue(inputArgument));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        }
+
+        try {
+            return Optional.of(new Ok<>(compileValue(caller) + "(" + outputArguments + ")"));
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
+        }
+    }
+
+    private static String compileValue(String input) throws CompileException {
+        throw new CompileException("Unknown value: " + input);
+    }
+
+    private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
+        if (!stripped.startsWith("try ")) return Optional.empty();
+
+        var contentStart = stripped.indexOf('{');
+        var contentEnd = stripped.lastIndexOf('}');
+        var after = stripped.substring(contentStart + 1, contentEnd);
+
+        var inputStatements = Strings.splitMembers(after);
+        var output = new StringBuilder();
+        for (String inputStatement : inputStatements) {
+            output.append(compileStatement(inputStatement));
+        }
+
+        return Optional.of(new Ok<>("try {" + output + "}"));
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
