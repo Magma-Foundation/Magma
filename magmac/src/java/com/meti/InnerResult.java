@@ -12,8 +12,7 @@ record InnerResult(String inner) implements StackResult {
         return Optional.empty();
     }
 
-    @Override
-    public StackResult withOuter(String outer) {
+    private StackResult withOuter0(String outer) {
         return new CompoundResult(inner, outer);
     }
 
@@ -30,5 +29,10 @@ record InnerResult(String inner) implements StackResult {
     @Override
     public Optional<List<Node>> findOuter() {
         return findOuter0().map(value -> List.of(new Content(value)));
+    }
+
+    @Override
+    public StackResult withOuter(Node outer) {
+        return outer.findValue().map(this::withOuter0).orElse(this);
     }
 }

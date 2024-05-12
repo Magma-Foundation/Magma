@@ -8,7 +8,7 @@ public interface StackResult {
 
     Optional<List<Node>> findOuter();
 
-    StackResult withOuter(String outer);
+    StackResult withOuter(Node outer);
 
     StackResult withInner(String inner);
 }

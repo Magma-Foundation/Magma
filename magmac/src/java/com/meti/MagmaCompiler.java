@@ -46,8 +46,8 @@ public class MagmaCompiler {
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining())).orElse("");
 
-        var output = renderMagmaFunction(targetExtension, isExported, name, innerContent, modifiers.contains("class"), indent, stack, children)
-                .withOuter(outerContent);
+        StackResult stackResult = renderMagmaFunction(targetExtension, isExported, name, innerContent, modifiers.contains("class"), indent, stack, children);
+        var output = stackResult.withOuter(new Content(outerContent));
 
         return Optional.of(new Ok<>(output));
     }
@@ -69,7 +69,7 @@ public class MagmaCompiler {
                 var withOuter = result.findOuter().map(list -> list.stream()
                         .map(Node::findValue)
                         .flatMap(Optional::stream)
-                        .collect(Collectors.joining())).map(currentResult::withOuter).orElse(currentResult);
+                        .collect(Collectors.joining())).map(outer -> currentResult.withOuter(new Content(outer))).orElse(currentResult);
                 currentResult = withOuter.withInner(inner);
             } catch (CompileException e) {
                 return new Err<>(e);

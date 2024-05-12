@@ -16,8 +16,7 @@ public record CompoundResult(String inner, String outer) implements StackResult 
         return Optional.of(outer);
     }
 
-    @Override
-    public StackResult withOuter(String outer) {
+    private StackResult withOuter0(String outer) {
         return new CompoundResult(inner, this.outer + outer);
     }
 
@@ -34,6 +33,11 @@ public record CompoundResult(String inner, String outer) implements StackResult 
     @Override
     public Optional<List<Node>> findOuter() {
         return findOuter0().map(value -> List.of(new Content(value)));
+    }
+
+    @Override
+    public StackResult withOuter(Node outer) {
+        return outer.findValue().map(this::withOuter0).orElse(this);
     }
 }
 
