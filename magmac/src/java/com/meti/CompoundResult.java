@@ -20,8 +20,7 @@ public record CompoundResult(String inner, String outer) implements StackResult 
         return new CompoundResult(inner, this.outer + outer);
     }
 
-    @Override
-    public StackResult withInner(String inner) {
+    private StackResult withInner0(String inner) {
         return new CompoundResult(this.inner + inner, outer);
     }
 
@@ -38,6 +37,11 @@ public record CompoundResult(String inner, String outer) implements StackResult 
     @Override
     public StackResult withOuter(Node outer) {
         return outer.findValue().map(this::withOuter0).orElse(this);
+    }
+
+    @Override
+    public StackResult withInner(Node inner) {
+        return inner.findValue().map(this::withInner0).orElse(this);
     }
 }
 

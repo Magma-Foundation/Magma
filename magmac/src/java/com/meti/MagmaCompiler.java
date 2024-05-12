@@ -70,7 +70,7 @@ public class MagmaCompiler {
                         .map(Node::findValue)
                         .flatMap(Optional::stream)
                         .collect(Collectors.joining())).map(outer -> currentResult.withOuter(new Content(outer))).orElse(currentResult);
-                currentResult = withOuter.withInner(inner);
+                currentResult = withOuter.withInner(new Content(inner));
             } catch (CompileException e) {
                 return new Err<>(e);
             }

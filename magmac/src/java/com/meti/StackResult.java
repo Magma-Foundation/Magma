@@ -10,5 +10,5 @@ public interface StackResult {
 
     StackResult withOuter(Node outer);
 
-    StackResult withInner(String inner);
+    StackResult withInner(Node inner);
 }
