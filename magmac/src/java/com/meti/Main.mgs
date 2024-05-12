@@ -1,9 +1,15 @@
 import { IOException } from java.io;
 import { Files } from java.nio.file;
 import { Paths } from java.nio.file;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
 export class def Main(){
+	def ClassMemberResult(instanceMembers : List<String>, staticMembers : List<String>): record => {
+	}
+}
+export object Main {
 	def main(args : String[]): void => {
 	}
 	private def compile(sourceEnv : String, targetEnv : String): void => {
@@ -14,11 +20,11 @@ export class def Main(){
 	}
 	private def compileClass(input : String): Optional<Result<String, CompileException>> => {
 	}
-	private def compileClassMembers(inputContent : List<String>): Result<String, CompileException> => {
+	private def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
 	}
-	private def compileClassMember(input : String): String => {
+	private def compileClassMember(input : String): ClassMemberResult => {
 	}
-	private def compileMethod(input : String): Optional<String> => {
+	private def compileMethod(input : String): Optional<ClassMemberResult> => {
 	}
 	private def compileMethodParams(paramStrings : List<String>): String => {
 	}

@@ -3,6 +3,8 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,31 +67,49 @@ public class Main {
 
         return compileClassMembers(inputContent)
                 .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
-                .mapValue(output -> Optional.of(modifierString + "class def " + name + "(){\n" + output + "}"))
+                .mapValue(output -> {
+                    var joinedInstance = String.join("", output.instanceMembers);
+                    var instanceContent = modifierString + "class def " + name + "(){\n" + joinedInstance + "}\n";
+
+                    String staticContent;
+                    if (output.staticMembers.isEmpty()) {
+                        staticContent = "";
+                    } else {
+                        var joinedStatic = String.join("", output.staticMembers);
+                        staticContent = modifierString + "object " + name + " {\n" + joinedStatic + "}";
+                    }
+
+                    var rendered = instanceContent + staticContent;
+                    return Optional.of(rendered);
+                })
                 .into(Results::unwrapOptional);
 
     }
 
-    private static Result<String, CompileException> compileClassMembers(List<String> inputContent) {
-        var outputContent = new StringBuilder();
+    private static Result<ClassMemberResult, CompileException> compileClassMembers(List<String> inputContent) {
+        var instanceContent = new ArrayList<String>();
+        var staticContent = new ArrayList<String>();
+
         for (var input : inputContent) {
             if (input.isBlank()) continue;
 
             try {
-                outputContent.append(compileClassMember(input));
+                var result = compileClassMember(input);
+                instanceContent.addAll(result.instanceMembers);
+                staticContent.addAll(result.staticMembers);
             } catch (CompileException e) {
                 return new Err<>(e);
             }
         }
 
-        return new Ok<>(outputContent.toString());
+        return new Ok<>(new ClassMemberResult(instanceContent, staticContent));
     }
 
-    private static String compileClassMember(String input) throws CompileException {
+    private static ClassMemberResult compileClassMember(String input) throws CompileException {
         return compileMethod(input).orElseThrow(() -> new CompileException("Unknown class member: " + input));
     }
 
-    private static Optional<String> compileMethod(String input) {
+    private static Optional<ClassMemberResult> compileMethod(String input) {
         var stripped = input.strip();
 
         var paramStart = stripped.indexOf('(');
@@ -111,14 +131,21 @@ public class Main {
         var modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
         if (modifiersAndType.isEmpty()) return Optional.empty();
 
+        var modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
         var type = modifiersAndType.get(modifiersAndType.size() - 1);
 
-        var modifierString = stripped.startsWith("private ") ? "private " : "";
-        return Optional.of("\t" +
-                           modifierString +
-                           "def " + name + "(" + renderedParams + ")" +
-                           ": " + type +
-                           " => {\n\t}\n");
+        var modifierString = modifiers.contains("private") ? "private " : "";
+        var rendered = "\t" +
+                       modifierString +
+                       "def " + name + "(" + renderedParams + ")" +
+                       ": " + type +
+                       " => {\n\t}\n";
+
+        var state = modifiers.contains("static")
+                ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
+                : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
+
+        return Optional.of(state);
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
@@ -149,5 +176,8 @@ public class Main {
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
         return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
+    }
+
+    record ClassMemberResult(List<String> instanceMembers, List<String> staticMembers) {
     }
 }
