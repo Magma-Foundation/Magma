@@ -88,7 +88,7 @@ public class Main {
             var last = segments.lastIndexOf('.');
             var parent = segments.substring(0, last);
             var child = segments.substring(last + 1);
-            return Optional.of("import { " + child + "} from " + parent + ";\n");
+            return Optional.of("import { " + child + " } from " + parent + ";\n");
         }
         return Optional.empty();
     }
