@@ -105,7 +105,7 @@ public class Compiler {
     static String compileJavaRoot(String input) throws CompileException {
         if (input.isBlank() || input.startsWith("package ")) return "";
 
-        return compileImport(input)
+        return compileJavaImport(input)
                 .or(() -> compileClass(input))
                 .orElseThrow(() -> new CompileException(input));
     }
@@ -123,14 +123,20 @@ public class Compiler {
         return Optional.of("class def " + name + "() => {}");
     }
 
-    private static Optional<String> compileImport(String input) {
+    private static Optional<String> compileJavaImport(String input) {
         var stripped = input.strip();
         if (!stripped.startsWith("import ")) return Optional.empty();
 
-        var segments = stripped.substring("import ".length());
+        var segmentsStart = stripped.startsWith("import static ")
+                ? "import static ".length()
+                : "import ".length();
+
+        var segments = stripped.substring(segmentsStart);
+
         var last = segments.lastIndexOf('.');
         var parent = segments.substring(0, last);
         var child = segments.substring(last + 1);
+
         return Optional.of("import { " + child + " } from " + parent + ";\n");
     }
 }

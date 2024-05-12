@@ -2,14 +2,16 @@ package com.meti;
 
 import java.io.IOException;
 
+import static com.meti.Compiler.compile;
+
 public class Main {
     public static void main(String[] args) {
         try {
-            Compiler.compile("java", "mgs");
-            Compiler.compile("mgs", "js");
-            Compiler.compile("mgs", "d.ts");
-            Compiler.compile("mgs", "c");
-            Compiler.compile("mgs", "h");
+            compile("java", "mgs");
+            compile("mgs", "js");
+            compile("mgs", "d.ts");
+            compile("mgs", "c");
+            compile("mgs", "h");
         } catch (IOException | CompileException e) {
             e.printStackTrace();
         }
