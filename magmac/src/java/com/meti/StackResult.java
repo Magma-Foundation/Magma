@@ -8,4 +8,6 @@ public interface StackResult {
     Optional<String> findOuter();
 
     StackResult withOuter(String outer);
+
+    StackResult withInner(String inner);
 }

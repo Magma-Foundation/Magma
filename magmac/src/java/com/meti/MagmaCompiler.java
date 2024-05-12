@@ -1,6 +1,8 @@
 package com.meti;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,28 +27,40 @@ public class MagmaCompiler {
         var contentEnd = stripped.lastIndexOf('}');
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Splitter.split(content);
-        var outputContent = new StringBuilder();
 
-        var outerContent = new StringBuilder();
-        for (String s : inputContent) {
-            if (!s.isBlank()) {
-                try {
-                    stack.push(name);
+        StackResult currentResult;
+        try {
+            currentResult = compileMagmaFunctionMembers(targetExtension, stack, inputContent, name).$();
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
+        }
 
-                    var result = compileMagmaFunctionMember(targetExtension, s, 1, stack);
-                    var inner = result.findInner().orElse("");
-                    result.findOuter().ifPresent(outerContent::append);
-                    outputContent.append(inner);
-                } catch (CompileException e) {
-                    return Optional.of(new Err<>(e));
-                }
+        var innerContent = currentResult.findInner().orElse("");
+        var outerContent = currentResult.findOuter().orElse("");
+
+        var output = renderMagmaFunction(targetExtension, isExported, name, innerContent, modifiers.contains("class"), indent, stack).withOuter(outerContent);
+        return Optional.of(new Ok<>(output));
+    }
+
+    private static Result<StackResult, CompileException> compileMagmaFunctionMembers(String targetExtension, LinkedList<String> stack, List<String> inputContent, String name) {
+        StackResult currentResult = new CompoundResult();
+        for (String line : inputContent) {
+            if (line.isBlank()) continue;
+
+            try {
+                stack.push(name);
+
+                var result = compileMagmaFunctionMember(targetExtension, line, 1, stack);
+                var inner = result.findInner().orElse("");
+
+                var withOuter = result.findOuter().map(currentResult::withOuter).orElse(currentResult);
+                currentResult = withOuter.withInner(inner);
+            } catch (CompileException e) {
+                return new Err<>(e);
             }
         }
 
-        var output = renderMagmaFunction(targetExtension, isExported, name, outputContent.toString(), modifiers.contains("class"), indent, stack)
-                .withOuter(outerContent.toString());
-
-        return Optional.of(new Ok<>(output));
+        return new Ok<>(currentResult);
     }
 
     private static StackResult compileMagmaFunctionMember(String targetExtension, String input, int indent, LinkedList<String> stack) throws CompileException {
@@ -68,7 +82,13 @@ public class MagmaCompiler {
         }
     }
 
-    static StackResult transformMagmaFunctionToC(String targetExtension, String name, boolean isExported, String content, boolean isClass, LinkedList<String> stack) {
+    static StackResult transformMagmaFunctionToC(
+            String targetExtension,
+            String name,
+            boolean isExported,
+            String content,
+            boolean isClass,
+            LinkedList<String> stack) {
         if (isClass) {
             var structType = "struct " + name + "_t";
             var structString = structType + " {\n}\n";

@@ -17,4 +17,9 @@ public class EmptyResult implements StackResult {
     public StackResult withOuter(String outer) {
         return new OuterResult(outer);
     }
+
+    @Override
+    public StackResult withInner(String inner) {
+        return new InnerResult(inner);
+    }
 }

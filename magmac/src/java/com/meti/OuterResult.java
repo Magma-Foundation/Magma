@@ -17,4 +17,9 @@ record OuterResult(String outer) implements StackResult {
     public StackResult withOuter(String outer) {
         return new OuterResult(this.outer + outer);
     }
+
+    @Override
+    public StackResult withInner(String inner) {
+        return new CompoundResult(inner, outer);
+    }
 }
