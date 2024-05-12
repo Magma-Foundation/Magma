@@ -2,7 +2,7 @@ package com.meti;
 
 import java.util.Optional;
 
-record InnerResult(String inner) implements StackResult {
+public record CompoundResult(String inner, String outer) implements StackResult {
     @Override
     public Optional<String> findInner() {
         return Optional.of(inner);
@@ -10,11 +10,12 @@ record InnerResult(String inner) implements StackResult {
 
     @Override
     public Optional<String> findOuter() {
-        return Optional.empty();
+        return Optional.of(outer);
     }
 
     @Override
     public StackResult withOuter(String outer) {
-        return new CompoundResult(inner, outer);
+        return new CompoundResult(inner, this.outer + outer);
     }
 }
+

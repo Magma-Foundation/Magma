@@ -12,4 +12,9 @@ record OuterResult(String outer) implements StackResult {
     public Optional<String> findOuter() {
         return Optional.of(outer);
     }
+
+    @Override
+    public StackResult withOuter(String outer) {
+        return new OuterResult(this.outer + outer);
+    }
 }

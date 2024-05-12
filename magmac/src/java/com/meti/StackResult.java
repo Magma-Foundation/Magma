@@ -6,4 +6,6 @@ interface StackResult {
     Optional<String> findInner();
 
     Optional<String> findOuter();
+
+    StackResult withOuter(String outer);
 }

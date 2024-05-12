@@ -25,17 +25,24 @@ public class MagmaCompiler {
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Splitter.split(content);
         var outputContent = new StringBuilder();
+
+        var outerContent = new StringBuilder();
         for (String s : inputContent) {
             if (!s.isBlank()) {
                 try {
-                    outputContent.append(compileMagmaFunctionMember(targetExtension, s, 1));
+                    var result = compileMagmaFunctionMember(targetExtension, s, 1);
+                    var inner = result.findInner().orElse("");
+                    result.findOuter().ifPresent(outerContent::append);
+                    outputContent.append(inner);
                 } catch (CompileException e) {
                     return Optional.of(new Err<>(e));
                 }
             }
         }
 
-        var output = renderMagmaFunction(targetExtension, isExported, name, outputContent.toString(), modifiers.contains("class"), indent);
+        var output = renderMagmaFunction(targetExtension, isExported, name, outputContent.toString(), modifiers.contains("class"), indent)
+                .withOuter(outerContent.toString());
+
         return Optional.of(new Ok<>(output));
     }
 
@@ -54,19 +61,29 @@ public class MagmaCompiler {
         } else if (targetExtension.equals("d.ts")) {
             return new InnerResult(isExported ? "export function " + name + "() : {};" : "");
         } else {
-            return transformMagmaFunctionToC(targetExtension, name, isExported);
+            return transformMagmaFunctionToC(targetExtension, name, isExported, content, isClass);
         }
     }
 
-    static StackResult transformMagmaFunctionToC(String targetExtension, String name, boolean isExported) {
-        var structType = "struct " + name + "_t";
-        var structString = structType + " {\n}\n";
-        if (targetExtension.equals("c")) {
-            var structString1 = isExported ? "" : structString;
-            return new InnerResult(structString1 + structType + " " + name + "(){\n\t" + structType + " this;\n\treturn this;\n}");
+    static StackResult transformMagmaFunctionToC(String targetExtension, String name, boolean isExported, String content, boolean isClass) {
+        if (isClass) {
+            var structType = "struct " + name + "_t";
+            var structString = structType + " {\n}\n";
+            if (targetExtension.equals("c")) {
+                var structString1 = isExported ? "" : structString;
+                return new InnerResult(structString1 + renderCFunction(structType, name, "\t" + structType + " this;\n" +
+                                                                                         content +
+                                                                                         "\treturn this;\n"));
+            } else {
+                return new InnerResult(isExported ? structString + structType + " " + name + "();\n" : "");
+            }
         } else {
-            return new InnerResult(isExported ? structString + structType + " " + name + "();\n" : "");
+            return new OuterResult(renderCFunction("void", name, ""));
         }
+    }
+
+    private static String renderCFunction(String structType, String name, String content) {
+        return structType + " " + name + "(){\n" + content + "}\n";
     }
 
     static Optional<Result<StackResult, CompileException>> compileMagmaImport(String line, String targetExtension) {
