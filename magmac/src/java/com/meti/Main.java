@@ -145,6 +145,16 @@ public class Main {
 
         var paramString = input.substring(paramStart + 1, paramEnd);
         var paramStrings = List.of(paramString.split(","));
+        var renderedParams = compileMethodParams(paramStrings);
+
+        var before = input.substring(0, paramStart).strip();
+        var separator = before.lastIndexOf(' ');
+        var name = before.substring(separator + 1);
+
+        return Optional.of("\tdef " + name + "(" + renderedParams + ") => {}\n");
+    }
+
+    private static String compileMethodParams(List<String> paramStrings) {
         var outputParams = Optional.<StringBuilder>empty();
         for (String string : paramStrings) {
             if (string.isBlank()) continue;
@@ -159,14 +169,7 @@ public class Main {
                     .orElse(new StringBuilder(next)));
         }
 
-        var before = input.substring(0, paramStart).strip();
-        var separator = before.lastIndexOf(' ');
-        var name = before.substring(separator + 1);
-        var renderedParams = outputParams.orElse(new StringBuilder());
-
-        return Optional.of("\tdef " + name + "(" +
-                           renderedParams +
-                           ") => {}\n");
+        return outputParams.orElse(new StringBuilder()).toString();
     }
 
     private static Optional<Result<String, CompileException>> compileImport(String stripped) {
