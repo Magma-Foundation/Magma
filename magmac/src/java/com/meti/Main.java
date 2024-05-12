@@ -39,7 +39,7 @@ public class Main {
             if (sourceExtension.equals("java")) {
                 str = compileJavaRoot(line);
             } else {
-                str = compileMagmaRoot(line);
+                str = compileMagmaRoot(line, targetExtension);
             }
             output.append(str);
         }
@@ -47,17 +47,23 @@ public class Main {
         return output.toString();
     }
 
-    private static String compileMagmaRoot(String line) throws CompileException {
+    private static String compileMagmaRoot(String line, String targetExtension) throws CompileException {
         return compileMagmaImport(line)
-                .or(() -> compileFunction(line))
+                .or(() -> compileFunction(line, targetExtension))
                 .orElseThrow(() -> new CompileException(line));
     }
 
-    private static Optional<String> compileFunction(String line) {
+    private static Optional<String> compileFunction(String line, String targetExtension) {
         var def = line.indexOf("def ");
         if (def != -1) {
             var name = line.substring(def + "def ".length(), line.indexOf('(')).strip();
-            return Optional.of("function " + name + "(){}");
+            String output;
+            if (targetExtension.equals("js")) {
+                output = "function " + name + "(){}";
+            } else {
+                output = "";
+            }
+            return Optional.of(output);
         } else {
             return Optional.empty();
         }
