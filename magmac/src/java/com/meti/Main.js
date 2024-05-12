@@ -3,7 +3,8 @@ import { compile } from "com.meti.Compiler";
 function Main(){
 	function main(){
 	}
-	return {};
+	return {
+	};
 }
 module.exports = {
 	Main

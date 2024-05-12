@@ -29,7 +29,7 @@ public class MagmaCompiler {
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Splitter.split(content);
 
-        var children = Collections.emptyList();
+        var children = Collections.<String>emptyList();
         StackResult currentResult;
         try {
             currentResult = compileMagmaFunctionMembers(targetExtension, stack, inputContent, name).$();
@@ -66,10 +66,11 @@ public class MagmaCompiler {
                         .flatMap(Optional::stream)
                         .collect(Collectors.joining())).orElse("");
 
+                StackResult finalCurrentResult = currentResult;
                 var withOuter = result.findOuter().map(list -> list.stream()
                         .map(Node::findValue)
                         .flatMap(Optional::stream)
-                        .collect(Collectors.joining())).map(outer -> currentResult.withOuter(new Content(outer))).orElse(currentResult);
+                        .collect(Collectors.joining())).map(outer -> finalCurrentResult.withOuter(new Content(outer))).orElse(currentResult);
                 currentResult = withOuter.withInner(new Content(inner));
             } catch (CompileException e) {
                 return new Err<>(e);
@@ -92,7 +93,7 @@ public class MagmaCompiler {
                     .map(child -> "\t" + child + "\n")
                     .collect(Collectors.joining());
 
-            var classString = isClass ? "\treturn {\n" + childrenString + "};\n" : "";
+            var classString = isClass ? "\treturn {\n" + childrenString + "\t};\n" : "";
 
             return new InnerResult("\t".repeat(indent) + "function " + name + "(){\n" + content + classString + "\t".repeat(indent) + "}\n" + exportedString);
         } else if (targetExtension.equals("d.ts")) {
