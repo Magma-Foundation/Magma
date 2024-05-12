@@ -71,4 +71,19 @@ public class Strings {
         lines.add(builder.toString());
         return lines;
     }
+
+    static boolean isSymbol(String stripped) {
+        if (stripped.isEmpty()) return false;
+
+        var first = stripped.charAt(0);
+        if (!Character.isLetter(first)) return false;
+
+        for (int i = 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (!Character.isLetter(c) && !Character.isDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -53,20 +53,11 @@ public record ValueCompiler(String input) {
     }
 
     private static Optional<Result<String, CompileException>> compileSymbol(String stripped) {
-        if (stripped.isEmpty()) return Optional.empty();
-
-        var first = stripped.charAt(0);
-        if (!Character.isLetter(first)) return Optional.empty();
-
-        for (int i = 1; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (!Character.isLetter(c) && !Character.isDigit(c)) {
-                return Optional.empty();
-            }
+        if (Strings.isSymbol(stripped)) {
+            return Optional.of(new Ok<>(stripped));
+        } else {
+            return Optional.empty();
         }
-
-        return Optional.of(new Ok<>(stripped));
-
     }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {

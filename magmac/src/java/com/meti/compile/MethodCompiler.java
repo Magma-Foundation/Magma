@@ -50,6 +50,8 @@ public record MethodCompiler(String input) {
         String outputType;
         if (inputType.equals("void")) {
             outputType = "Void";
+        } else if(Strings.isSymbol(inputType)) {
+            outputType = inputType;
         } else {
             return Optional.of(new Err<>(new CompileException("Unknown type: " + inputType)));
         }
