@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        var sourceDirectory = Paths.get(".", "src", "java");
+        var sourceDirectory = Paths.get(".", "magmac", "src", "java");
 
         try {
             var sources = Files.walk(sourceDirectory)
@@ -28,7 +28,7 @@ public class Main {
                 Files.writeString(target, Application.compile(input));
             }
         } catch (IOException | CompileException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(sourceDirectory.toAbsolutePath().toString(), e);
         }
     }
 }
