@@ -129,6 +129,10 @@ public record ClassCompiler(String input) implements Compiler {
     }
 
     private static String compileValue(String input) throws CompileException {
+        if (input.startsWith("\"") && input.endsWith("\"")) {
+            return input;
+        }
+
         throw new CompileException("Unknown value: " + input);
     }
 
