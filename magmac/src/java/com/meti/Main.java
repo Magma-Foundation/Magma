@@ -67,23 +67,27 @@ public class Main {
 
         return compileClassMembers(inputContent)
                 .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
-                .mapValue(output -> {
-                    var joinedInstance = String.join("", output.instanceMembers);
-                    var instanceContent = modifierString + "class def " + name + "(){\n" + joinedInstance + "}\n";
-
-                    String staticContent;
-                    if (output.staticMembers.isEmpty()) {
-                        staticContent = "";
-                    } else {
-                        var joinedStatic = String.join("", output.staticMembers);
-                        staticContent = modifierString + "object " + name + " {\n" + joinedStatic + "}";
-                    }
-
-                    var rendered = instanceContent + staticContent;
-                    return Optional.of(rendered);
-                })
+                .mapValue(output -> Optional.of(renderClass(modifierString, name, output)))
                 .into(Results::unwrapOptional);
 
+    }
+
+    private static String renderClass(String modifierString, String name, ClassMemberResult members) {
+        var instanceContent = renderInstanceClassContent(modifierString, name, members);
+        var staticContent = renderStaticClassContent(modifierString, name, members);
+        return instanceContent + staticContent;
+    }
+
+    private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members) {
+        var joinedInstance = String.join("", members.instanceMembers);
+        return modifierString + "class def " + name + "(){\n" + joinedInstance + "}\n";
+    }
+
+    private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {
+        if (members.staticMembers.isEmpty()) return "";
+
+        var joinedStatic = String.join("", members.staticMembers);
+        return modifierString + "object " + name + " {\n" + joinedStatic + "}";
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMembers(List<String> inputContent) {
