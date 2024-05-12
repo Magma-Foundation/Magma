@@ -55,12 +55,19 @@ public class Compiler {
         if (targetExtension.equals("js")) {
             var exportedString = isExported ? "module.exports = {\n\t" + name + "\n}\n" : "";
             output = "function " + name + "(){\n\treturn {};\n}\n" + exportedString;
-        } else if (targetExtension.equals("c")) {
-            var structType = "struct " + name + "_t";
-            output = structType + " {\n}\n" + structType + " " + name + "(){\n"
-                     + "\t" + structType + " this;\n\treturn this;\n}";
+        } else if (targetExtension.equals("d.ts")) {
+            output = isExported ? "export function " + name + "() : {};" : "";
         } else {
-            output = "";
+            var structType = "struct " + name + "_t";
+            var structString = structType + " {\n}\n";
+            if (targetExtension.equals("c")) {
+                var structString1 = isExported ? "" : structString;
+                output = structString1 + structType + " " + name + "(){\n"
+                         + "\t" + structType + " this;\n\treturn this;\n}";
+            } else {
+                if (isExported) output = structString + structType + " " + name + "();\n";
+                else output = "";
+            }
         }
         return Optional.of(output);
     }
