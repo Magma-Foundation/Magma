@@ -3,7 +3,7 @@ import { IOException } from java.io;
 export class def Main() => {
 }
 export object Main {
-	def main(args : String[]): void => {
+	def main(args : String[]): Void => {
 		try {
 			Application.compile("java", "mgs");
 			Application.compile("mgs", "js");

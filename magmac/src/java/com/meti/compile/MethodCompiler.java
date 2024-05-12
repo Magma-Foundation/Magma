@@ -34,7 +34,7 @@ public record MethodCompiler(String input) {
         if (modifiersAndType.isEmpty()) return Optional.empty();
 
         var modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
-        var type = modifiersAndType.get(modifiersAndType.size() - 1);
+        var inputType = modifiersAndType.get(modifiersAndType.size() - 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
 
@@ -46,8 +46,16 @@ public record MethodCompiler(String input) {
 
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Strings.splitMembers(content);
+
+        String outputType;
+        if (inputType.equals("void")) {
+            outputType = "Void";
+        } else {
+            return Optional.of(new Err<>(new CompileException("Unknown type: " + inputType)));
+        }
+
         return Optional.of(compileMethodMembers(inputContent).mapValue(outputContent -> {
-            var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, outputContent);
+            var rendered = renderFunction(modifierString, name, renderedParams, ": " + outputType, 1, outputContent);
 
             return modifiers.contains("static")
                     ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
@@ -58,7 +66,7 @@ public record MethodCompiler(String input) {
     private static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
-            if(inputMember.isBlank()) continue;
+            if (inputMember.isBlank()) continue;
 
             try {
                 outputContent.append(new StatementCompiler(inputMember).compile());
