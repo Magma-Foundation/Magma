@@ -118,7 +118,7 @@ public class Main {
                            modifierString +
                            "def " + name + "(" + renderedParams + ")" +
                            ": " + type +
-                           " => {}\n");
+                           " => {\n\t}\n");
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
