@@ -58,6 +58,8 @@ public record MethodCompiler(String input) {
     private static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
+            if(inputMember.isBlank()) continue;
+
             try {
                 outputContent.append(new StatementCompiler(inputMember).compile());
             } catch (CompileException e) {

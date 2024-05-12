@@ -1,32 +1,18 @@
+import { CompileException } from com.meti.compile;
 import { IOException } from java.io;
-import { Files } from java.nio.file;
-import { Paths } from java.nio.file;
-import { ArrayList } from java.util;
-import { Collections } from java.util;
-import { List } from java.util;
-import { Optional } from java.util;
-import { renderFunction } from com.meti.MagmaLang;
 export class def Main() => {
 }
 export object Main {
 	def main(args : String[]): void => {
-	}
-	private def compile(sourceEnv : String, targetEnv : String): void => {
-	}
-	private def compile(input : String): String => {
-	}
-	private def compileRoot(line : String): String => {
-	}
-	private def compileClass(input : String): Optional<Result<String, CompileException>> => {
-	}
-	private def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
-	}
-	private def compileClassMember(input : String): ClassMemberResult => {
-	}
-	private def compileMethod(input : String): Optional<ClassMemberResult> => {
-	}
-	private def compileMethodParams(paramStrings : List<String>): String => {
-	}
-	private def compileImport(stripped : String): Optional<Result<String, CompileException>> => {
+		try {
+			Application.compile("java""mgs");
+			Application.compile("mgs""js");
+			Application.compile("mgs""d.ts");
+			Application.compile("mgs""c");
+			Application.compile("mgs""h");
+		}
+		catch (e : IOException | CompileException) {
+			throw RuntimeException(e);
+		}
 	}
 }

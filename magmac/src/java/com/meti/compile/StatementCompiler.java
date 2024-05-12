@@ -8,14 +8,16 @@ import java.util.Optional;
 
 public record StatementCompiler(String input) {
 
-    private static Optional<Result<String, CompileException>> compileInvocation(String stripped) {
+    private static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
+
         var start = stripped.indexOf('(');
         if (start == -1) return Optional.empty();
 
         var end = stripped.lastIndexOf(')');
         if (end == -1) return Optional.empty();
 
-        var caller = stripped.substring(0, start);
+        var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
+        var caller = stripped.substring(callerStart, start);
         var inputArguments = stripped.substring(start + 1, end).split(",");
         var outputArguments = new StringBuilder();
         for (String inputArgument : inputArguments) {
@@ -27,7 +29,9 @@ public record StatementCompiler(String input) {
         }
 
         try {
-            return Optional.of(new Ok<>(compileValue(caller) + "(" + outputArguments + ")"));
+            var suffix = indent == 0 ? "" : ";\n";
+
+            return Optional.of(new Ok<>("\t".repeat(indent) + compileValue(caller) + "(" + outputArguments + ")" + suffix));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
@@ -39,6 +43,7 @@ public record StatementCompiler(String input) {
         return compileString(stripped)
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
+                .or(() -> compileInvocation(stripped, 0))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
     }
@@ -86,7 +91,7 @@ public record StatementCompiler(String input) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
-        return Optional.of(new Ok<>("try " + compileBlock(stripped)));
+        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped)));
     }
 
     private static String compileBlock(String stripped) throws CompileException {
@@ -98,10 +103,11 @@ public record StatementCompiler(String input) {
         var output = new StringBuilder();
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
-            output.append(new StatementCompiler(inputStatement).compile());
+            var compiled = new StatementCompiler(inputStatement).compile();
+            output.append(compiled);
         }
 
-        return "{" + output + "}";
+        return "{\n" + output + "\t\t}\n";
     }
 
     String compile() throws CompileException {
@@ -109,10 +115,25 @@ public record StatementCompiler(String input) {
 
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
-                .or(() -> compileInvocation(stripped))
+                .or(() -> compileThrow(stripped))
+                .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileThrow(String stripped) {
+        if (!stripped.startsWith("throw ")) return Optional.empty();
+        var valueString = stripped.substring("throw ".length());
+
+        Result<String, CompileException> result;
+        try {
+            var compiledValue = compileValue(valueString);
+            result = new Ok<>("\t\t\tthrow " + compiledValue + ";\n");
+        } catch (CompileException e) {
+            result = new Err<>(e);
+        }
+        return Optional.of(result);
     }
 
     private Optional<? extends Result<String, CompileException>> compileCatch(String stripped) {
@@ -132,7 +153,7 @@ public record StatementCompiler(String input) {
         Result<String, CompileException> result;
         try {
             var compiledBlock = compileBlock(stripped);
-            result = new Ok<>("catch (" + catchName + " : " + catchType + ")" + compiledBlock);
+            result = new Ok<>("\t\tcatch (" + catchName + " : " + catchType + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }
