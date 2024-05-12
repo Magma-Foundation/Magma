@@ -132,22 +132,26 @@ public class Main {
 
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Strings.splitMembers(content);
+        return Optional.of(compileMethodMembers(inputContent).mapValue(outputContent -> {
+            var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, outputContent);
+
+            return modifiers.contains("static")
+                    ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
+                    : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
+        }));
+    }
+
+    private static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             try {
                 outputContent.append(compileStatement(inputMember));
             } catch (CompileException e) {
-                return Optional.of(new Err<>(e));
+                return new Err<>(e);
             }
         }
 
-        var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, outputContent.toString());
-
-        var state = modifiers.contains("static")
-                ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
-                : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
-
-        return Optional.of(new Ok<>(state));
+        return new Ok<>(outputContent.toString());
     }
 
     private static String compileStatement(String input) throws CompileException {
