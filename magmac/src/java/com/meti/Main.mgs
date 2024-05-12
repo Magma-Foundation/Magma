@@ -1,27 +1,17 @@
-import { IOException } from java.io;
-import { Files } from java.nio.file;
-import { Paths } from java.nio.file;
-import { ArrayList } from java.util;
-import { Optional } from java.util;
-export class def Main () => {
-	def main() => {
-		let source = 0;
-		let input = 0;
-		catch () {}
-	}
-	def compile() => {
-		let lines = 0;
-		let output = 0;
-		for (){}
-		return 0;
-	}
-	def split() => {
-		let lines = 0;
-		let buffer = 0;
-		let depth = 0;
-		let parenDepth = 0;
-		let inQuotes = 0;
-		let quoteType = 0;
-		let i = 0;
-	}
+package com.meti;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            var source = Paths.get(".", "magmac", "src", "java", "com", "meti", "Main.java");
+            var input = Files.readString(source);
+            Files.writeString(source.resolveSibling("Main.mgs"), input);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
