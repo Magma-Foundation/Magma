@@ -116,16 +116,17 @@ public class Compiler {
     }
 
     static Optional<String> compileJavaClass(String input) {
-        var contentStart = input.indexOf('{');
+        var stripped = input.strip();
+        var contentStart = stripped.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var values = input.substring(0, contentStart).strip();
-        var space = values.lastIndexOf(' ');
-        if (space == -1) return Optional.empty();
+        var classIndex = stripped.indexOf("class ");
+        if (classIndex == -1) return Optional.empty();
 
-        var name = values.substring(space + 1);
+        var name = stripped.substring(classIndex + "class ".length(), contentStart).strip();
+        var exportString = stripped.startsWith("public ") ? "export " : "";
 
-        return Optional.of("class def " + name + "() => {}");
+        return Optional.of(exportString + "class def " + name + "() => {}");
     }
 
     private static Optional<String> compileJavaImport(String input) {
