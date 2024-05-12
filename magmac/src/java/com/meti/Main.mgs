@@ -5,11 +5,11 @@ export class def Main() => {
 export object Main {
 	def main(args : String[]): void => {
 		try {
-			Application.compile("java""mgs");
-			Application.compile("mgs""js");
-			Application.compile("mgs""d.ts");
-			Application.compile("mgs""c");
-			Application.compile("mgs""h");
+			Application.compile("java", "mgs");
+			Application.compile("mgs", "js");
+			Application.compile("mgs", "d.ts");
+			Application.compile("mgs", "c");
+			Application.compile("mgs", "h");
 		}
 		catch (e : IOException | CompileException) {
 			throw RuntimeException(e);

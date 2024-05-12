@@ -19,10 +19,14 @@ public record StatementCompiler(String input) {
         var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
         var caller = stripped.substring(callerStart, start);
         var inputArguments = stripped.substring(start + 1, end).split(",");
-        var outputArguments = new StringBuilder();
+        var outputArguments = Optional.<StringBuilder>empty();
         for (String inputArgument : inputArguments) {
             try {
-                outputArguments.append(compileValue(inputArgument));
+                var compiledValue = compileValue(inputArgument);
+                outputArguments = Optional.of(outputArguments
+                        .map(inner -> inner.append(", ").append(compiledValue))
+                        .orElse(new StringBuilder(compiledValue)));
+
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
@@ -30,8 +34,9 @@ public record StatementCompiler(String input) {
 
         try {
             var suffix = indent == 0 ? "" : ";\n";
+            var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-            return Optional.of(new Ok<>("\t".repeat(indent) + compileValue(caller) + "(" + outputArguments + ")" + suffix));
+            return Optional.of(new Ok<>("\t".repeat(indent) + compileValue(caller) + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
