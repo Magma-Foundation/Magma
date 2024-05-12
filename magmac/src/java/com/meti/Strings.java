@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Strings {
-    static List<String> split(String input) {
+    static List<String> splitMembers(String input) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;

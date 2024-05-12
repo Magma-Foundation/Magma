@@ -31,7 +31,7 @@ public class Main {
     }
 
     private static String compile(String input) throws CompileException {
-        var lines = Strings.split(input);
+        var lines = Strings.splitMembers(input);
 
         var output = new StringBuilder();
         for (String line : lines) {
@@ -65,7 +65,7 @@ public class Main {
         if (contentEnd == -1) return Optional.empty();
 
         var content = input.substring(contentStart + 1, contentEnd).strip();
-        var inputContent = Strings.split(content);
+        var inputContent = Strings.splitMembers(content);
 
         return compileClassMembers(inputContent)
                 .mapErr(err -> new CompileException("Failed to compile class body: " + input, err))
@@ -82,7 +82,7 @@ public class Main {
             if (input.isBlank()) continue;
 
             try {
-                var result = compileClassMember(input);
+                var result = compileClassMember(input).$();
                 instanceContent.addAll(result.instanceMembers());
                 staticContent.addAll(result.staticMembers());
             } catch (CompileException e) {
@@ -93,11 +93,11 @@ public class Main {
         return new Ok<>(new ClassMemberResult(instanceContent, staticContent));
     }
 
-    private static ClassMemberResult compileClassMember(String input) throws CompileException {
-        return compileMethod(input).orElseThrow(() -> new CompileException("Unknown class member: " + input));
+    private static Result<ClassMemberResult, CompileException> compileClassMember(String input) {
+        return compileMethod(input).orElseGet(() -> new Err<>(new CompileException("Unknown class member: " + input)));
     }
 
-    private static Optional<ClassMemberResult> compileMethod(String input) {
+    private static Optional<Result<ClassMemberResult, CompileException>> compileMethod(String input) {
         var stripped = input.strip();
 
         var paramStart = stripped.indexOf('(');
@@ -123,13 +123,35 @@ public class Main {
         var type = modifiersAndType.get(modifiersAndType.size() - 1);
 
         var modifierString = modifiers.contains("private") ? "private " : "";
-        var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, "");
+
+        var contentStart = stripped.indexOf("{");
+        if (contentStart == -1) return Optional.empty();
+
+        var contentEnd = stripped.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var content = stripped.substring(contentStart + 1, contentEnd);
+        var inputContent = Strings.splitMembers(content);
+        var outputContent = new StringBuilder();
+        for (String inputMember : inputContent) {
+            try {
+                outputContent.append(compileStatement(inputMember));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        }
+
+        var rendered = renderFunction(modifierString, name, renderedParams, ": " + type, 1, outputContent.toString());
 
         var state = modifiers.contains("static")
                 ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
                 : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
-        return Optional.of(state);
+        return Optional.of(new Ok<>(state));
+    }
+
+    private static String compileStatement(String input) throws CompileException {
+        throw new CompileException("Unknown statement: " + input);
     }
 
     private static String compileMethodParams(List<String> paramStrings) {
