@@ -38,7 +38,11 @@ public class JavaCompiler {
             }
         }
 
-        return Optional.of(new Ok<>(exportString + "class def " + name + "() => {\n" + outputContent + "}"));
+        return Optional.of(new Ok<>(exportString + "class " + renderFunction(name, outputContent.toString(), 0)));
+    }
+
+    private static String renderFunction(String name, String content, int indent) {
+        return "\t".repeat(indent) + "def " + name + "() => {\n" + content + "\t".repeat(indent) + "}\n";
     }
 
     private static String compileClassMember(String input) throws CompileException {
@@ -47,7 +51,7 @@ public class JavaCompiler {
             var before = input.substring(0, paramStart).strip();
             var space = before.lastIndexOf(' ');
             var name = before.substring(space + 1);
-            return "\tdef " + name + "() => {\n\t}\n";
+            return renderFunction(name, "", 1);
         }
 
         throw new CompileException(input);
