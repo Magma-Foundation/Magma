@@ -6,6 +6,8 @@ import com.meti.result.Result;
 
 import java.util.Optional;
 
+import static com.meti.compile.ValueCompiler.compileInvocation;
+
 public record StatementCompiler(String input) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
@@ -35,31 +37,40 @@ public record StatementCompiler(String input) {
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
                 .or(() -> compileThrow(stripped))
-                .or(() -> compileDeclaration(stripped))
-                .or(() -> ValueCompiler.compileInvocation(stripped, 3))
+                .or(() -> DeclarationCompiler.compileDeclaration(new DeclarationCompiler(stripped)))
+                .or(() -> compileFor(stripped))
+                .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileDeclaration(String stripped) {
-        var valueSeparator = stripped.indexOf('=');
-        if (valueSeparator == -1) return Optional.empty();
+    private Optional<? extends Result<String, CompileException>> compileFor(String stripped) {
+        if (!stripped.startsWith("for")) return Optional.empty();
 
-        var before = stripped.substring(0, valueSeparator).strip();
-        var separator = before.lastIndexOf(' ');
-        var name = before.substring(separator + 1).strip();
+        var conditionStart = stripped.indexOf('(');
+        if (conditionStart == -1) return Optional.empty();
 
-        var after = stripped.substring(valueSeparator + 1).strip();
-        Result<String, CompileException> rendered;
+        var conditionEnd = stripped.indexOf(')');
+        if (conditionEnd == -1) return Optional.empty();
+
+        var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
+        var separator = condition.lastIndexOf(':');
+
+        var conditionDeclarationString = condition.substring(0, separator);
+        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString);
+
+        var container = condition.substring(separator + 1);
+
+        Result<String, CompileException> result;
         try {
-            var compiledValue = new ValueCompiler(after).compile();
-            rendered = new Ok<>("let " + name + " = " + compiledValue);
+            var compiledBlock = compileBlock(stripped);
+            result = new Ok<>("\t\tfor (" + compiledConditionDeclaration + " : " + container + ") " + compiledBlock);
         } catch (CompileException e) {
-            rendered = new Err<>(e);
+            result = new Err<>(e);
         }
 
-        return Optional.of(rendered);
+        return Optional.of(result);
     }
 
     private Optional<? extends Result<String, CompileException>> compileThrow(String stripped) {
