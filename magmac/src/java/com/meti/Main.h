@@ -1,6 +1,6 @@
 #include <java.io/IOException.h>
 #include <com.meti.Compiler/compile.h>
-void main(){
+void main_Main(){
 }
 struct Main_t {
 }
