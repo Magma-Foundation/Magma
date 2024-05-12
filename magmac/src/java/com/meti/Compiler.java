@@ -3,6 +3,8 @@ package com.meti;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Compiler {
     static void compile(String sourceExtension, String targetExtension) throws IOException, CompileException {
@@ -20,7 +22,10 @@ public class Compiler {
         for (var line : lines) {
             var result = compileRoot(line, sourceExtension, targetExtension);
             output.append(result.findOuter().orElse(""))
-                    .append(result.findInner().orElse(""));
+                    .append(result.findInner().map(list -> list.stream()
+                            .map(Node::findValue)
+                            .flatMap(Optional::stream)
+                            .collect(Collectors.joining())).orElse(""));
         }
 
         return output.toString();

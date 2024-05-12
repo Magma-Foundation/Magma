@@ -1,10 +1,10 @@
 package com.meti;
 
+import java.util.List;
 import java.util.Optional;
 
 record InnerResult(String inner) implements StackResult {
-    @Override
-    public Optional<String> findInner() {
+    private Optional<String> findInner0() {
         return Optional.of(inner);
     }
 
@@ -21,5 +21,10 @@ record InnerResult(String inner) implements StackResult {
     @Override
     public StackResult withInner(String inner) {
         return new InnerResult(this.inner + inner);
+    }
+
+    @Override
+    public Optional<List<Node>> findInner() {
+        return findInner0().map(value -> List.of(new Content(value)));
     }
 }

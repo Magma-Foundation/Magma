@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.List;
 import java.util.Optional;
 
 public record CompoundResult(String inner, String outer) implements StackResult {
@@ -7,8 +8,7 @@ public record CompoundResult(String inner, String outer) implements StackResult 
         this("", "");
     }
 
-    @Override
-    public Optional<String> findInner() {
+    private Optional<String> findInner0() {
         return Optional.of(inner);
     }
 
@@ -25,6 +25,11 @@ public record CompoundResult(String inner, String outer) implements StackResult 
     @Override
     public StackResult withInner(String inner) {
         return new CompoundResult(this.inner + inner, outer);
+    }
+
+    @Override
+    public Optional<List<Node>> findInner() {
+        return findInner0().map(value -> List.of(new Content(value)));
     }
 }
 

@@ -1,5 +1,6 @@
 package com.meti;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class MagmaCompiler {
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Splitter.split(content);
 
+        var children = Collections.emptyList();
         StackResult currentResult;
         try {
             currentResult = compileMagmaFunctionMembers(targetExtension, stack, inputContent, name).$();
@@ -35,10 +37,15 @@ public class MagmaCompiler {
             return Optional.of(new Err<>(e));
         }
 
-        var innerContent = currentResult.findInner().orElse("");
+        var innerContent = currentResult.findInner().map(list -> list.stream()
+                .map(Node::findValue)
+                .flatMap(Optional::stream)
+                .collect(Collectors.joining())).orElse("");
         var outerContent = currentResult.findOuter().orElse("");
 
-        var output = renderMagmaFunction(targetExtension, isExported, name, innerContent, modifiers.contains("class"), indent, stack).withOuter(outerContent);
+        var output = renderMagmaFunction(targetExtension, isExported, name, innerContent, modifiers.contains("class"), indent, stack, children)
+                .withOuter(outerContent);
+
         return Optional.of(new Ok<>(output));
     }
 
@@ -51,7 +58,10 @@ public class MagmaCompiler {
                 stack.push(name);
 
                 var result = compileMagmaFunctionMember(targetExtension, line, 1, stack);
-                var inner = result.findInner().orElse("");
+                var inner = result.findInner().map(list -> list.stream()
+                        .map(Node::findValue)
+                        .flatMap(Optional::stream)
+                        .collect(Collectors.joining())).orElse("");
 
                 var withOuter = result.findOuter().map(currentResult::withOuter).orElse(currentResult);
                 currentResult = withOuter.withInner(inner);
@@ -69,10 +79,14 @@ public class MagmaCompiler {
                 .$();
     }
 
-    static StackResult renderMagmaFunction(String targetExtension, boolean isExported, String name, String content, boolean isClass, int indent, LinkedList<String> stack) {
+    static StackResult renderMagmaFunction(String targetExtension, boolean isExported, String name, String content, boolean isClass, int indent, LinkedList<String> stack, List<String> children) {
         if (targetExtension.equals("js")) {
             var exportedString = isExported ? "module.exports = {\n\t" + name + "\n}\n" : "";
-            var classString = isClass ? "\treturn {};\n" : "";
+            var childrenString = children.stream()
+                    .map(child -> "\t" + child + "\n")
+                    .collect(Collectors.joining());
+
+            var classString = isClass ? "\treturn {\n" + childrenString + "};\n" : "";
 
             return new InnerResult("\t".repeat(indent) + "function " + name + "(){\n" + content + classString + "\t".repeat(indent) + "}\n" + exportedString);
         } else if (targetExtension.equals("d.ts")) {
