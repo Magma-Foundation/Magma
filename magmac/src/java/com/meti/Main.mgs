@@ -5,7 +5,7 @@ import { ArrayList } from java.util;
 import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-import { renderFunction } from static com.meti.MagmaLang;
+import { renderFunction } from com.meti.MagmaLang;
 export class def Main() => {
 }
 export object Main {

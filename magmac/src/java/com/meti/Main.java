@@ -153,7 +153,8 @@ public class Main {
     private static Optional<Result<String, CompileException>> compileImport(String stripped) {
         if (!stripped.startsWith("import ")) return Optional.empty();
 
-        var segments = stripped.substring("import ".length());
+        var segmentsStart = stripped.startsWith("import static ") ? "import static ".length() : "import ".length();
+        var segments = stripped.substring(segmentsStart);
         var separator = segments.lastIndexOf('.');
         if (separator == -1) return Optional.empty();
 
