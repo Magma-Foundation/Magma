@@ -56,7 +56,7 @@ public class Main {
                 builder.append(c);
                 var next = queue.pop();
                 builder.append(next);
-                if(next== '\\') {
+                if (next == '\\') {
                     builder.append(queue.pop());
                 }
 
@@ -138,14 +138,35 @@ public class Main {
 
     private static Optional<String> compileMethod(String input) {
         var paramStart = input.indexOf('(');
-        if (paramStart != -1) {
-            var before = input.substring(0, paramStart).strip();
-            var separator = before.lastIndexOf(' ');
-            var name = before.substring(separator + 1);
-            return Optional.of("\tdef " + name + "() => {}\n");
+        if (paramStart == -1) return Optional.empty();
+
+        var paramEnd = input.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var paramString = input.substring(paramStart + 1, paramEnd);
+        var paramStrings = List.of(paramString.split(","));
+        var outputParams = Optional.<StringBuilder>empty();
+        for (String string : paramStrings) {
+            if (string.isBlank()) continue;
+
+            var strippedParam = string.strip();
+            var separator = strippedParam.lastIndexOf(' ');
+            var type = strippedParam.substring(0, separator);
+            var name = strippedParam.substring(separator + 1);
+
+            var next = name + " : " + type;
+            outputParams = Optional.of(outputParams.map(value -> value.append(", ").append(next))
+                    .orElse(new StringBuilder(next)));
         }
 
-        return Optional.empty();
+        var before = input.substring(0, paramStart).strip();
+        var separator = before.lastIndexOf(' ');
+        var name = before.substring(separator + 1);
+        var renderedParams = outputParams.orElse(new StringBuilder());
+
+        return Optional.of("\tdef " + name + "(" +
+                           renderedParams +
+                           ") => {}\n");
     }
 
     private static Optional<Result<String, CompileException>> compileImport(String stripped) {
@@ -153,7 +174,7 @@ public class Main {
 
         var segments = stripped.substring("import ".length());
         var separator = segments.lastIndexOf('.');
-        if(separator ==-1) return Optional.empty();
+        if (separator == -1) return Optional.empty();
 
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);

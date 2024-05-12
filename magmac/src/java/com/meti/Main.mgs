@@ -8,14 +8,14 @@ import { Optional } from java.util;
 import { Collectors } from java.util.stream;
 import { IntStream } from java.util.stream;
 export class def Main(){
-	def main() => {}
-	def compile() => {}
-	def compile() => {}
-	def split() => {}
-	def compileRoot() => {}
-	def compileClass() => {}
-	def compileClassMembers() => {}
-	def compileClassMember() => {}
-	def compileMethod() => {}
-	def compileImport() => {}
+	def main(args : String[]) => {}
+	def compile(sourceEnv : String, targetEnv : String) => {}
+	def compile(input : String) => {}
+	def split(input : String) => {}
+	def compileRoot(line : String) => {}
+	def compileClass(input : String) => {}
+	def compileClassMembers(inputContent : List<String>) => {}
+	def compileClassMember(input : String) => {}
+	def compileMethod(input : String) => {}
+	def compileImport(stripped : String) => {}
 }
