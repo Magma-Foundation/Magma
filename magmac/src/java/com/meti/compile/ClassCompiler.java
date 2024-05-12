@@ -1,11 +1,16 @@
-package com.meti;
+package com.meti.compile;
+
+import com.meti.result.Err;
+import com.meti.result.Ok;
+import com.meti.result.Result;
+import com.meti.result.Results;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.meti.MagmaLang.renderFunction;
+import static com.meti.compile.MagmaLang.renderFunction;
 
 public record ClassCompiler(String input) implements Compiler {
 

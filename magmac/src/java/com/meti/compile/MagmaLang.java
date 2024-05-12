@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 public class MagmaLang {
     static String renderFunction(String modifierString, String name, String renderedParams, String typeString, int indent, String content) {

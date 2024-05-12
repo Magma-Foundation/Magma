@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.meti.compile.CompileException;
+
 import java.io.IOException;
 
 public class Main {

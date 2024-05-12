@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.result;
 
 import java.util.function.Function;
 

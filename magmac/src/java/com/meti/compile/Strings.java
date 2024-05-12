@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.compile;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Strings {
-    static List<String> splitMembers(String input) {
+    public static List<String> splitMembers(String input) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
