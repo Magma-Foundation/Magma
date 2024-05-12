@@ -101,11 +101,12 @@ public record StatementCompiler(String input) {
     }
 
     String compile() throws CompileException {
-        var stripped = input().strip();
+        var stripped = input.strip();
 
         return compileTry(stripped)
                 .or(() -> compileInvocation(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
+                .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
     }
 }
