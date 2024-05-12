@@ -60,6 +60,17 @@ public class Main {
     }
 
     private static String compileRoot(String line) throws CompileException {
+        var stripped = line.strip();
+
+        if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
+        if (stripped.startsWith("import ")) {
+            var segments = stripped.substring("import ".length());
+            var separator = segments.lastIndexOf('.');
+            var parent = segments.substring(0, separator);
+            var child = segments.substring(separator + 1);
+            return "import { " + child + "} from " + parent + ";\n";
+        }
+
         throw new CompileException(line);
     }
 }
