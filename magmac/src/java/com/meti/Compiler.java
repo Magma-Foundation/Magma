@@ -18,15 +18,17 @@ public class Compiler {
         var lines = Splitter.split(input);
         var output = new StringBuilder();
         for (var line : lines) {
-            output.append(compileRoot(line, sourceExtension, targetExtension));
+            var result = compileRoot(line, sourceExtension, targetExtension);
+            output.append(result.findOuter().orElse(""))
+                    .append(result.findInner().orElse(""));
         }
 
         return output.toString();
     }
 
-    static String compileRoot(String line, String sourceExtension, String targetExtension) throws CompileException {
+    static StackResult compileRoot(String line, String sourceExtension, String targetExtension) throws CompileException {
         if (sourceExtension.equals("java")) {
-            return JavaCompiler.compileJavaRoot(line);
+            return new InnerResult(JavaCompiler.compileJavaRoot(line));
         } else {
             return MagmaCompiler.compileMagmaRoot(line, targetExtension);
         }
