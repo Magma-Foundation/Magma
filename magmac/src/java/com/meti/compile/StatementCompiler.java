@@ -37,12 +37,27 @@ public record StatementCompiler(String input) {
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
                 .or(() -> compileThrow(stripped))
-                .or(() -> DeclarationCompiler.compileDeclaration(new DeclarationCompiler(stripped)))
+                .or(() -> new DeclarationCompiler(stripped).compile())
                 .or(() -> compileFor(stripped))
+                .or(() -> compileReturn(stripped))
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileReturn(String stripped) {
+        if(stripped.startsWith("return ")) {
+            try {
+                var valueString = stripped.substring("return ".length()).strip();
+                var compiledValue = new ValueCompiler(valueString).compile();
+                return Optional.of(new Ok<>("return " + compiledValue + ";"));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileFor(String stripped) {
