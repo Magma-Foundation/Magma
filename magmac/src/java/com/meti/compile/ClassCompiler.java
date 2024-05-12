@@ -41,10 +41,12 @@ public record ClassCompiler(String input) implements Compiler {
         var classIndex = input().indexOf("class");
         if (classIndex == -1) return Optional.empty();
 
-        var contentStart = input().indexOf('{');
+        var classEnd = classIndex + "class".length();
+
+        var contentStart = input().indexOf('{', classEnd);
         if (contentStart == -1) return Optional.empty();
 
-        var name = input().substring(classIndex + "class".length(), contentStart).strip();
+        var name = input.substring(classEnd, contentStart).strip();
         var modifierString = input().startsWith("public ") ? "export " : "";
 
         var contentEnd = input().lastIndexOf('}');
