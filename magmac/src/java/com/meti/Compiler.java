@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,7 +51,11 @@ public class Compiler {
         var name = line.substring(def + "def ".length(), line.indexOf('(')).strip();
         String output;
         if (targetExtension.equals("js")) {
-            output = "function " + name + "(){}";
+            output = "function " + name + "(){\n\treturn {};\n}";
+        } else if (targetExtension.equals("c")) {
+            var structType = "struct " + name + "_t";
+            output = structType + " {\n}\n" + structType + " " + name + "(){\n"
+                     + "\t" + structType + " this;\n\treturn this;\n}";
         } else {
             output = "";
         }
@@ -76,7 +81,7 @@ public class Compiler {
         return Optional.of(output);
     }
 
-    static ArrayList<String> split(String input) {
+    static List<String> split(String input) {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
@@ -106,11 +111,11 @@ public class Compiler {
         if (input.isBlank() || input.startsWith("package ")) return "";
 
         return compileJavaImport(input)
-                .or(() -> compileClass(input))
+                .or(() -> compileJavaClass(input))
                 .orElseThrow(() -> new CompileException(input));
     }
 
-    static Optional<String> compileClass(String input) {
+    static Optional<String> compileJavaClass(String input) {
         var contentStart = input.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
