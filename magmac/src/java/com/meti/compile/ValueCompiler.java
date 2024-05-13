@@ -66,7 +66,7 @@ public record ValueCompiler(String input) {
             var compiledCaller = new ValueCompiler(caller).compile();
             return Optional.of(new Ok<>("\t".repeat(indent) + compiledCaller + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
-            return Optional.of(new Err<>(e));
+            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
         }
     }
 
