@@ -9,6 +9,7 @@ export class def DeclarationCompiler(stripped : String, indent : int) => {
 		let header = stripped().substring(0, headerEnd).strip();
 		let separator = header.lastIndexOf(' ');
 		let name = header.substring(separator + 1).strip();
+		if (Strings.isSymbol(name)) 		return Optional.empty();
 		let rendered;
 		try {
 			let valueString;
@@ -20,8 +21,7 @@ export class def DeclarationCompiler(stripped : String, indent : int) => {
 		try {
 			valueString = "";
 		}
-			let suffix = indent == 0 ? "" : ";
-			let \n";
+			let suffix = indent == 0 ? "" : ";\n";
 			rendered = Ok("\t".repeat(indent) + "let " + name + valueString + suffix);
 		}
 		catch (e : CompileException) {

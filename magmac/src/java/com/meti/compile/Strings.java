@@ -31,6 +31,8 @@ public class Strings {
             }
 
             if (c == '\"') {
+                builder.append(c);
+
                 while (!queue.isEmpty()) {
                     var next = queue.pop();
                     builder.append(next);

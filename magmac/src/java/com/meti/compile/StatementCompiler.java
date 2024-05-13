@@ -92,8 +92,15 @@ public record StatementCompiler(String input, int indent) {
         if (stripped.startsWith("return ")) {
             try {
                 var valueString = stripped.substring("return ".length()).strip();
-                var compiledValue = new ValueCompiler(valueString).compile();
-                return Optional.of(new Ok<>("\t\treturn " + compiledValue + ";\n"));
+                String outputValueString;
+                if (valueString.isEmpty()) {
+                    outputValueString = "";
+                } else {
+                    var compiledValue = new ValueCompiler(valueString).compile();
+                    outputValueString = " " + compiledValue;
+                }
+
+                return Optional.of(new Ok<>("\t\treturn" + outputValueString + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
