@@ -1,4 +1,4 @@
-import { Compiler } from com.meti.compile;
+import { RootCompiler } from com.meti.compile;
 import { * } from com.meti.compile;
 import { Err } from com.meti.result;
 import { Optional } from java.util;
@@ -17,16 +17,17 @@ export object Application {
 	private def compileRoot(line : String): String => {
 		let stripped = line.strip();
 		let "";
-		return streamCompilers(stripped).map(Compiler::compile)
+		return streamCompilers(stripped).map(RootCompiler::compile)
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> new Err<>(new CompileException(line)))
                 .$();
 	}
-	private def streamCompilers(stripped : String): Stream<Compiler> => {
+	private def streamCompilers(stripped : String): Stream<RootCompiler> => {
 		return Stream.of(
                 new ImportCompiler(stripped),
                 new ClassCompiler(stripped),
-                new RecordCompiler(stripped));
+                new RecordCompiler(stripped),
+                new InterfaceCompiler(stripped));
 	}
 }

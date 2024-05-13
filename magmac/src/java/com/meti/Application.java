@@ -1,6 +1,6 @@
 package com.meti;
 
-import com.meti.compile.Compiler;
+import com.meti.compile.RootCompiler;
 import com.meti.compile.*;
 import com.meti.result.Err;
 
@@ -26,17 +26,18 @@ public class Application {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
 
         return streamCompilers(stripped)
-                .map(Compiler::compile)
+                .map(RootCompiler::compile)
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> new Err<>(new CompileException(line)))
                 .$();
     }
 
-    private static Stream<Compiler> streamCompilers(String stripped) {
+    private static Stream<RootCompiler> streamCompilers(String stripped) {
         return Stream.of(
                 new ImportCompiler(stripped),
                 new ClassCompiler(stripped),
-                new RecordCompiler(stripped));
+                new RecordCompiler(stripped),
+                new InterfaceCompiler(stripped));
     }
 }

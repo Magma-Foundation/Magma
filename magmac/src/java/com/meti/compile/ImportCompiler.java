@@ -5,7 +5,7 @@ import com.meti.result.Result;
 
 import java.util.Optional;
 
-public record ImportCompiler(String stripped) implements Compiler {
+public record ImportCompiler(String stripped) implements RootCompiler {
     @Override
     public Optional<Result<String, CompileException>> compile() {
         if (!stripped().startsWith("import ")) return Optional.empty();

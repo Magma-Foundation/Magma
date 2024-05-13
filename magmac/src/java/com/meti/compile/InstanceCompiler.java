@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class InstanceCompiler implements Compiler {
+public abstract class InstanceCompiler implements RootCompiler {
     protected final String input;
 
     public InstanceCompiler(String input) {
@@ -53,7 +53,7 @@ public abstract class InstanceCompiler implements Compiler {
         var contentStart = input.indexOf('{', classEnd);
         if (contentStart == -1) return Optional.empty();
 
-        var name = input.substring(classEnd, computeContentStart(input, contentStart)).strip();
+        var name = input.substring(classEnd, computeNameEnd(input, contentStart)).strip();
         var modifierString = input.startsWith("public ") ? "export " : "";
 
         var contentEnd = input.lastIndexOf('}');
@@ -76,7 +76,7 @@ public abstract class InstanceCompiler implements Compiler {
 
     }
 
-    protected abstract int computeContentStart(String input, int contentStart);
+    protected abstract int computeNameEnd(String input, int contentStart);
 
     protected abstract Optional<String> computeParamString(String input);
 }

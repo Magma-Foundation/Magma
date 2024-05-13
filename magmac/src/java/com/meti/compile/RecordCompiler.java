@@ -27,7 +27,7 @@ public final class RecordCompiler extends InstanceCompiler {
     }
 
     @Override
-    protected int computeContentStart(String input, int contentStart) {
+    protected int computeNameEnd(String input, int contentStart) {
         return input.indexOf('(');
     }
 }

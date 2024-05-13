@@ -9,7 +9,7 @@ export class def ClassCompiler extends InstanceCompiler() => {
 	def computeParamString(input : String): Optional<String> => {
 		return Optional.of("");
 	}
-	def computeContentStart(input : String, contentStart : int): int => {
+	def computeNameEnd(input : String, contentStart : int): int => {
 		return contentStart;
 	}
 }
