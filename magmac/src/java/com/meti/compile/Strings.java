@@ -39,7 +39,7 @@ public class Strings {
                     if (next == '\\') {
                         builder.append(queue.pop());
                     }
-                    if(next == '\"') {
+                    if (next == '\"') {
                         break;
                     }
                 }
@@ -57,8 +57,8 @@ public class Strings {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if (c == '{') depth++;
-                if (c == '}') depth--;
+                if (c == '{' || c == '(') depth++;
+                if (c == '}' || c == ')') depth--;
                 builder.append(c);
             }
         }
