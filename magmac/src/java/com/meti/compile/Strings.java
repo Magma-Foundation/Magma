@@ -11,9 +11,7 @@ public class Strings {
         var lines = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
-        var queue = IntStream.range(0, input.length())
-                .mapToObj(input::charAt)
-                .collect(Collectors.toCollection(LinkedList::new));
+        var queue = toQueue(input);
 
         while (!queue.isEmpty()) {
             var c = queue.pop();
@@ -65,6 +63,13 @@ public class Strings {
 
         lines.add(builder.toString());
         return lines;
+    }
+
+    static LinkedList<Character> toQueue(String input) {
+        var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+        return queue;
     }
 
     static List<String> splitTypeString(String modifiersAndType) {

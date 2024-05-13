@@ -5,6 +5,7 @@ import com.meti.result.Ok;
 import com.meti.result.Result;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -97,18 +98,34 @@ public record ValueCompiler(String input) {
     }
 
     private static int findInvocationStart(String stripped) {
+        var queue = Strings.toQueue(stripped);
+        Collections.reverse(queue);
+        queue.pop();
+
         var start = -1;
         var depth = 0;
-        for (int i = stripped.length() - 2; i >= 0; i--) {
-            var c = stripped.charAt(i);
+        var index = stripped.length() - 1;
+
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+            index--;
+
+            if(c == '\'') {
+                queue.pop();
+                queue.pop();
+                index--;
+                index--;
+            }
+
             if (c == '(' && depth == 0) {
-                start = i;
+                start = index;
                 break;
             } else {
                 if (c == ')') depth++;
                 if (c == '(') depth--;
             }
         }
+
         return start;
     }
 
@@ -209,8 +226,8 @@ public record ValueCompiler(String input) {
             /*
             Pull params
              */
-        } else if(paramStart == -1 && paramEnd == -1){
-            if(Strings.isSymbol(before)) {
+        } else if (paramStart == -1 && paramEnd == -1) {
+            if (Strings.isSymbol(before)) {
                 params.add(before);
             } else {
                 return Optional.empty();
