@@ -53,6 +53,16 @@ public record StatementCompiler(String input, int indent) {
         return "{\n" + output + "\t\t}\n";
     }
 
+    private static boolean isAssignable(String token) {
+        if (Strings.isSymbol(token)) return true;
+
+        var separator = token.indexOf('.');
+        if (separator == -1) return false;
+
+        return isAssignable(token.substring(0, separator).strip()) &&
+               Strings.isSymbol(token.substring(separator + 1).strip());
+    }
+
     String compile() throws CompileException {
         var stripped = input.strip();
 
@@ -75,7 +85,9 @@ public record StatementCompiler(String input, int indent) {
         var separator = stripped.indexOf('=');
         if (separator != -1) {
             var left = stripped.substring(0, separator).strip();
-            if (!Strings.isSymbol(left)) return Optional.empty();
+            if (!isAssignable(left)) {
+                return Optional.empty();
+            }
 
             var right = stripped.substring(separator + 1).strip();
             try {
