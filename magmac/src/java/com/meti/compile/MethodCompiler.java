@@ -4,6 +4,7 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -74,9 +75,36 @@ public record MethodCompiler(String input) {
         if (genEnd == -1) return Optional.empty();
 
         var parent = inputType.substring(0, genStart);
-        var child = inputType.substring(genStart + 1, genEnd);
+        var childrenString = inputType.substring(genStart + 1, genEnd);
+        var children = new ArrayList<String>();
+        var builder = new StringBuilder();
+        var depth = 0;
+        for (int i = 0; i < childrenString.length(); i++) {
+            var c = childrenString.charAt(i);
+            if (c == ',' && depth == 0) {
+                children.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                if (c == '<') depth++;
+                if (c == '>') depth--;
+                builder.append(c);
+            }
+        }
+        children.add(builder.toString());
 
-        return Optional.of(compileType(child).mapValue(value -> parent + "<" + value + ">"));
+        var newChildren = new ArrayList<String>();
+        for (String child : children) {
+            var stripped = child.strip();
+            if (stripped.isEmpty()) continue;
+
+            try {
+                newChildren.add(compileType(stripped).$());
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(new CompileException("Failed to compile generic type: " + inputType, e)));
+            }
+        }
+
+        return Optional.of(new Ok<>(parent + "<" + String.join(", ", newChildren) + ">"));
     }
 
     private static Optional<Result<String, CompileException>> compileSymbolType(String inputType) {
