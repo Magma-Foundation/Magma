@@ -24,6 +24,8 @@ public record DeclarationCompiler(String stripped, int indent) {
     private Result<String, CompileException> attachValue(List<String> stack, String name, int valueSeparator) {
         try {
             var valueString = computeValueString(stack, valueSeparator);
+            stack.add(name);
+
             var suffix = indent == 0 ? "" : ";\n";
             var s = "\t".repeat(indent) + "let " + name + valueString + suffix;
             return new Ok<>(s);

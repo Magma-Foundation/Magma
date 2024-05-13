@@ -14,7 +14,7 @@ public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped, int indent) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
-        return Optional.of(new Ok<>("\t".repeat(indent) + "try " + compileBlock(stripped, indent, 0)));
+        return Optional.of(new Ok<>("\t".repeat(indent) + "try " + compileBlock(stripped, indent, 0, Collections.emptyList())));
     }
 
     private static Optional<Result<String, CompileException>> compileElse(String stripped, int indent) {
@@ -23,7 +23,7 @@ public record StatementCompiler(String input, int indent) {
         try {
             String body;
             if (stripped.contains("{") && stripped.endsWith("}")) {
-                body = compileBlock(stripped, 2, 0);
+                body = compileBlock(stripped, 2, 0, Collections.emptyList());
             } else {
                 var value = stripped.substring("else ".length());
                 body = new StatementCompiler(value, 0).compile(Collections.emptyList());
@@ -34,7 +34,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private static String compileBlock(String stripped, int indent, int blockStart) throws CompileException {
+    private static String compileBlock(String stripped, int indent, int blockStart, List<String> stack) throws CompileException {
         var contentStart = stripped.indexOf('{', blockStart);
         if (contentStart == -1) {
             throw new CompileException("Not a block: " + stripped);
@@ -52,7 +52,7 @@ public record StatementCompiler(String input, int indent) {
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
             try {
-                var compiled = new StatementCompiler(inputStatement, indent + 1).compile(Collections.emptyList());
+                var compiled = new StatementCompiler(inputStatement, indent + 1).compile(stack);
                 output.append(compiled);
             } catch (CompileException e) {
                 throw new CompileException("Failed to compile block: " + stripped, e);
@@ -233,7 +233,7 @@ public record StatementCompiler(String input, int indent) {
                 var terminating = ValueCompiler.createValueCompiler(terminatingString, 0).compileRequired(stack);
                 var increment = new StatementCompiler(incrementString, 0).compile(Collections.emptyList());
 
-                compiledBlock = compileBlock(stripped, indent, 0);
+                compiledBlock = compileBlock(stripped, indent, 0, Collections.emptyList());
                 conditionString = initial + ";" + terminating + increment;
             } else {
                 var initialString = condition.substring(0, separator);
@@ -244,13 +244,15 @@ public record StatementCompiler(String input, int indent) {
 
                 var container = condition.substring(separator + 1);
 
-                compiledBlock = compileBlock(stripped, indent, 0);
+                compiledBlock = compileBlock(stripped, indent, 0, stack);
                 conditionString = initial + " : " + container;
             }
 
             result = new Ok<>("\t".repeat(this.indent) + "for (" + conditionString + ") " + compiledBlock);
         } catch (CompileException e) {
-            result = new Err<>(e);
+            var format = "Failed to compile for-loop - %s: %s";
+            var message = format.formatted(stack, stripped);
+            result = new Err<>(new CompileException(message, e));
         }
 
         return Optional.of(result);
@@ -287,7 +289,7 @@ public record StatementCompiler(String input, int indent) {
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
-                compiledValue = compileBlock(stripped, indent, 0);
+                compiledValue = compileBlock(stripped, indent, 0, Collections.emptyList());
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 compiledValue = new StatementCompiler(valueString, 0).compile(Collections.emptyList());
@@ -316,7 +318,7 @@ public record StatementCompiler(String input, int indent) {
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
-                compiledValue = compileBlock(stripped, indent, conditionEnd);
+                compiledValue = compileBlock(stripped, indent, conditionEnd, Collections.emptyList());
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 compiledValue = new StatementCompiler(valueString, indent).compile(Collections.emptyList());
@@ -345,7 +347,7 @@ public record StatementCompiler(String input, int indent) {
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped, indent, 0);
+            var compiledBlock = compileBlock(stripped, indent, 0, Collections.emptyList());
             result = new Ok<>("\t".repeat(indent) + "catch (" + catchName + " : " + catchType + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
