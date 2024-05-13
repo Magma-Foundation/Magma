@@ -122,7 +122,19 @@ public record StatementCompiler(String input, int indent) {
         var conditionStart = stripped.indexOf('(');
         if (conditionStart == -1) return Optional.empty();
 
-        var conditionEnd = stripped.indexOf(')');
+        var conditionEnd = -1;
+        var depth = 0;
+        for (int i = conditionStart + 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (c == ')' && depth == 0) {
+                conditionEnd = i;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+
         if (conditionEnd == -1) return Optional.empty();
 
         Result<String, CompileException> result;
@@ -135,7 +147,7 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, 2);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new ValueCompiler(valueString).compile();
+                compiledValue = new StatementCompiler(valueString, 0).compile();
             }
             result = new Ok<>("\t\tif (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
