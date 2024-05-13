@@ -51,7 +51,7 @@ public record StatementCompiler(String input) {
             try {
                 var valueString = stripped.substring("return ".length()).strip();
                 var compiledValue = new ValueCompiler(valueString).compile();
-                return Optional.of(new Ok<>("return " + compiledValue + ";"));
+                return Optional.of(new Ok<>("\t\treturn " + compiledValue + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
