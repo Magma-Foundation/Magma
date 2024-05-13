@@ -21,7 +21,7 @@ public record DeclarationCompiler(String stripped, int indent) {
             String valueString;
             if (valueSeparator != -1) {
                 var after = stripped.substring(valueSeparator + 1).strip();
-                var compiledValue = new ValueCompiler(after).compile();
+                var compiledValue = new ValueCompiler(after).compileRequired();
                 valueString = " = " + compiledValue;
             } else {
                 valueString = "";

@@ -76,7 +76,7 @@ public record StatementCompiler(String input, int indent) {
 
         try {
             var value = stripped.substring(0, stripped.length() - 2);
-            var result = new ValueCompiler(value).compile();
+            var result = new ValueCompiler(value).compileRequired();
             return Optional.of(new Ok<>(result));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
@@ -93,7 +93,7 @@ public record StatementCompiler(String input, int indent) {
 
             var right = stripped.substring(separator + 1).strip();
             try {
-                return Optional.of(new Ok<>("\t".repeat(indent) + left + " = " + new ValueCompiler(right).compile() + ";\n"));
+                return Optional.of(new Ok<>("\t".repeat(indent) + left + " = " + new ValueCompiler(right).compileRequired() + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
@@ -110,7 +110,7 @@ public record StatementCompiler(String input, int indent) {
                 if (valueString.isEmpty()) {
                     outputValueString = "";
                 } else {
-                    var compiledValue = new ValueCompiler(valueString).compile();
+                    var compiledValue = new ValueCompiler(valueString).compileRequired();
                     outputValueString = " " + compiledValue;
                 }
 
@@ -168,7 +168,7 @@ public record StatementCompiler(String input, int indent) {
 
                 var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
 
-                var terminating = new ValueCompiler(terminatingString).compile();
+                var terminating = new ValueCompiler(terminatingString).compileRequired();
                 var increment = new StatementCompiler(incrementString, 0).compile();
 
                 compiledBlock = compileBlock(stripped, indent);
@@ -197,7 +197,7 @@ public record StatementCompiler(String input, int indent) {
 
         Result<String, CompileException> result;
         try {
-            var compiledValue = new ValueCompiler(valueString).compile();
+            var compiledValue = new ValueCompiler(valueString).compileRequired();
             result = new Ok<>("\t\t\tthrow " + compiledValue + ";\n");
         } catch (CompileException e) {
             result = new Err<>(e);
@@ -229,7 +229,7 @@ public record StatementCompiler(String input, int indent) {
         Result<String, CompileException> result;
         try {
             var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
-            var compiledCondition = new ValueCompiler(condition).compile();
+            var compiledCondition = new ValueCompiler(condition).compileRequired();
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {

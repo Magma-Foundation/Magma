@@ -93,11 +93,11 @@ public class Strings {
         if (stripped.isEmpty()) return false;
 
         var first = stripped.charAt(0);
-        if (!Character.isLetter(first)) return false;
+        if (!Character.isLetter(first) && first != '$') return false;
 
         for (int i = 1; i < stripped.length(); i++) {
             var c = stripped.charAt(i);
-            if (!Character.isLetter(c) && !Character.isDigit(c)) {
+            if (!Character.isLetter(c) && !Character.isDigit(c) && c != '$') {
                 return false;
             }
         }
