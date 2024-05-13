@@ -1,10 +1,10 @@
 export class def MagmaLang() => {
 }
 export object MagmaLang {
-	def renderDefinedFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => {
+	def renderDefinedFunction(indent : I32, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => {
 		return renderFunction(indent, Optional[Ok[value=modifierString + "def "]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=typeString]], Optional[Ok[value=" => " + content]]);
 	}
-	def renderFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, contentString : String): String => {
+	def renderFunction(indent : I32, modifierString : String, name : String, renderedParams : String, typeString : String, contentString : String): String => {
 		let indentString = "\t".repeat(indent);
 		return indentString + modifierString + name + "(" + renderedParams + ")" +
                typeString +

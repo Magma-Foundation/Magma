@@ -61,13 +61,25 @@ public record TypeCompiler(String inputType) {
         if (inputType.equals("void")) {
             return Optional.of(new Ok<>("Void"));
         }
+        if(inputType.equals("int")) {
+            return Optional.of(new Ok<>("I32"));
+        }
         return Optional.empty();
     }
 
     public Result<String, CompileException> compile() {
         return compilePrimitiveType(inputType())
-                .or(() -> compileSymbolType(inputType()))
-                .or(() -> compileGenericType(inputType()))
+                .or(() -> compileSymbolType(inputType))
+                .or(() -> compileGenericType(inputType))
+                .or(() -> compileArrayType(inputType))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown type: " + inputType())));
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileArrayType(String inputType) {
+        if(inputType.endsWith("[]")) {
+            var child = inputType.substring(0, inputType.length() - 2);
+            return Optional.of(new Ok<>("&" + child));
+        }
+        return Optional.empty();
     }
 }

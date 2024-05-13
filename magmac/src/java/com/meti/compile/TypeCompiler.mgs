@@ -5,10 +5,18 @@ import { ArrayList } from java.util;
 import { Optional } from java.util;
 export class def TypeCompiler(inputType : String) => {
 	def compile(): Result<String, CompileException> => {
-		return compilePrimitiveType(inputType()).or(() => compileSymbolType(inputType())
-).or(() => compileGenericType(inputType())
+		return compilePrimitiveType(inputType()).or(() => compileSymbolType(inputType)
+).or(() => compileGenericType(inputType)
+).or(() => compileArrayType(inputType)
 ).orElseGet(() => Err(CompileException("Unknown type: " + inputType()))
 );
+	}
+	private def compileArrayType(inputType : String): Optional<? extends Result<String, CompileException>> => {
+		if (inputType.endsWith("[]")) {
+			let child = inputType.substring(0, Optional[Ok[value=inputType.length() - 2]]);
+		return Optional.of(Ok("&" + child));
+		}
+		return Optional.empty();
 	}
 }
 export object TypeCompiler {
@@ -56,6 +64,9 @@ export object TypeCompiler {
 	private def compilePrimitiveType(inputType : String): Optional<Result<String, CompileException>> => {
 		if (inputType.equals("void")) {
 		return Optional.of(Ok("Void"));
+		}
+		if (inputType.equals("int")) {
+		return Optional.of(Ok("I32"));
 		}
 		return Optional.empty();
 	}

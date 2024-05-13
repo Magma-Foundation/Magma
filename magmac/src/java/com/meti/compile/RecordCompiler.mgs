@@ -15,7 +15,7 @@ export class def RecordCompiler extends InstanceCompiler() => {
 		let compiledParams = ParamsCompiler(slice).compile();
 		return Optional.of(compiledParams);
 	}
-	def computeNameEnd(input : String, contentStart : int): int => {
+	def computeNameEnd(input : String, contentStart : I32): I32 => {
 		return input.indexOf('(');
 	}
 }

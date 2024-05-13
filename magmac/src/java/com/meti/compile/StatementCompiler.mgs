@@ -3,7 +3,7 @@ import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { Optional } from java.util;
 import { compileInvocation } from com.meti.compile.ValueCompiler;
-export class def StatementCompiler(input : String, indent : int) => {
+export class def StatementCompiler(input : String, indent : I32) => {
 	def compile(): String => {
 		let stripped = input.strip();
 		return compileTry(stripped).or(() => compileCatch(stripped)
@@ -41,7 +41,7 @@ export class def StatementCompiler(input : String, indent : int) => {
 		return Optional.of(Err(CompileException("Failed to compile suffix operator: " + stripped, Optional[Ok[value=e]])));
 		}
 	}
-	private def compileAssignment(stripped : String, indent : int): Optional<? extends Result<String, CompileException>> => {
+	private def compileAssignment(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		let separator = stripped.indexOf('=');
 		if (separator != -1) {
 			let left = stripped.substring(0, Optional[Ok[value=separator]]).strip();
@@ -139,7 +139,7 @@ export class def StatementCompiler(input : String, indent : int) => {
 		}
 		return Optional.of(result);
 	}
-	private def compileWhile(stripped : String, indent : int): Optional<? extends Result<String, CompileException>> => {
+	private def compileWhile(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("while")) 		return Optional.empty();
 		let conditionStart = stripped.indexOf('(');
 		if (conditionStart == -1) 		return Optional.empty();
@@ -164,7 +164,7 @@ export class def StatementCompiler(input : String, indent : int) => {
 		}
 		return Optional.of(result);
 	}
-	private def compileIf(stripped : String, indent : int): Optional<? extends Result<String, CompileException>> => {
+	private def compileIf(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("if")) 		return Optional.empty();
 		let conditionStart = stripped.indexOf('(');
 		if (conditionStart == -1) 		return Optional.empty();
@@ -232,7 +232,7 @@ export object StatementCompiler {
 		return Optional.of(Err(e));
 		}
 	}
-	private def compileBlock(stripped : String, indent : int, blockStart : int): String => {
+	private def compileBlock(stripped : String, indent : I32, blockStart : I32): String => {
 		let contentStart = stripped.indexOf('{', Optional[Ok[value=blockStart]]);
 		if (contentStart == -1) {
 			throw CompileException("Not a block: " + stripped);
@@ -255,7 +255,7 @@ export object StatementCompiler {
 		}
 		return "{\n" + output + "\t\t}\n";
 	}
-	private def findIfEnd(stripped : String, paramStart : int): int => {
+	private def findIfEnd(stripped : String, paramStart : I32): I32 => {
 		let conditionEnd = -1;
 		let depth = 0;
 		let index = paramStart;

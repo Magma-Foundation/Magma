@@ -13,7 +13,8 @@ export class def ParamsCompiler(paramString : String) => {
 		}
 			let type = strippedParam.substring(0, Optional[Ok[value=separator]]);
 			let name = strippedParam.substring(separator + 1);
-			let next = name + " : " + type;
+			let compiledType = TypeCompiler(type).compile().$();
+			let next = name + " : " + compiledType;
 			outputParams = Optional.of(outputParams.map(() => value.append(", ").append(next)
 ).orElse(StringBuilder(next)));
 		}

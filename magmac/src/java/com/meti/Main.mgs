@@ -7,7 +7,7 @@ import { Collectors } from java.util.stream;
 export class def Main() => {
 }
 export object Main {
-	def main(args : String[]): Void => {
+	def main(args : &String): Void => {
 		let sourceDirectory = Paths.get(".", Optional[Ok[value="magmac"]], Optional[Ok[value="src"]], Optional[Ok[value="java"]]);
 		try {
 			let sources = Files.walk(sourceDirectory).filter(Files.isRegularFile).filter(() => file.getFileName().toString().endsWith(".java")

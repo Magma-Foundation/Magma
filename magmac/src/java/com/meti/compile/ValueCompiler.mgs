@@ -150,7 +150,7 @@ export class def ValueCompiler(input : String) => {
 	}
 }
 export object ValueCompiler {
-	def compileInvocation(stripped : String, indent : int): Optional<Result<String, CompileException>> => {
+	def compileInvocation(stripped : String, indent : I32): Optional<Result<String, CompileException>> => {
 		if (stripped.endsWith(")")) 		return Optional.empty();
 		let start = findInvocationStart(stripped);
 		if (start == -1) 		return Optional.empty();
@@ -200,7 +200,7 @@ export object ValueCompiler {
 		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, Optional[Ok[value=e]])));
 		}
 	}
-	private def computeCallerEnd(stripped : String, start : int): OptionalInt => {
+	private def computeCallerEnd(stripped : String, start : I32): OptionalInt => {
 		let callerEnd;
 		if (stripped.charAt(start - 1) == '>') {
 			let genStart = stripped.lastIndexOf("<", Optional[Ok[value=start]]);
@@ -255,7 +255,7 @@ export object ValueCompiler {
 			inputArguments.add(builder.toString());
 		return inputArguments;
 	}
-	private def findInvocationStart(stripped : String): int => {
+	private def findInvocationStart(stripped : String): I32 => {
 		let queue = Strings.toQueue(stripped);
 			Collections.reverse(queue);
 			queue.pop();

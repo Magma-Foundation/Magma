@@ -20,7 +20,8 @@ public record ParamsCompiler(String paramString) {
             var type = strippedParam.substring(0, separator);
             var name = strippedParam.substring(separator + 1);
 
-            var next = name + " : " + type;
+            var compiledType = new TypeCompiler(type).compile().$();
+            var next = name + " : " + compiledType;
             outputParams = Optional.of(outputParams.map(value -> value.append(", ").append(next))
                     .orElse(new StringBuilder(next)));
         }

@@ -39,7 +39,7 @@ let input	def InstanceCompiler(input : String): public => {
 ).mapValue(() => Optional.of(renderClass(modifierString, Optional[Ok[value=name]], Optional[Ok[value=output]], Optional[Ok[value=paramString.get()]]))
 ).into(Results.unwrapOptional);
 	}
-	def computeNameEnd(input : String, contentStart : int): int => ;
+	def computeNameEnd(input : String, contentStart : I32): I32 => ;
 	def computeParamString(input : String): Optional<String> => ;
 }
 export object InstanceCompiler implements RootCompiler {

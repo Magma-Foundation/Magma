@@ -7,7 +7,7 @@ export class def InterfaceCompiler extends InstanceCompiler() => {
 	def computeKeyword(): String => {
 		return "interface";
 	}
-	def computeNameEnd(input : String, contentStart : int): int => {
+	def computeNameEnd(input : String, contentStart : I32): I32 => {
 		return contentStart;
 	}
 	def computeParamString(input : String): Optional<String> => {
