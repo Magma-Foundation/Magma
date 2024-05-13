@@ -81,16 +81,14 @@ public record StatementCompiler(String input, int indent) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileSuffixOperator(String stripped) {
-        if(stripped.endsWith("++")) {
-            try {
-                var value = stripped.substring(0, stripped.length() - 2);
-                var result = new ValueCompiler(value).compile();
-                return Optional.of(new Ok<>(result));
-            } catch (CompileException e) {
-                return Optional.of(new Err<>(e));
-            }
-        } else {
-            return Optional.empty();
+        if (!stripped.endsWith("++") && !stripped.endsWith("--")) return Optional.empty();
+
+        try {
+            var value = stripped.substring(0, stripped.length() - 2);
+            var result = new ValueCompiler(value).compile();
+            return Optional.of(new Ok<>(result));
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
         }
     }
 
