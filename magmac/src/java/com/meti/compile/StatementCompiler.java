@@ -73,14 +73,18 @@ public record StatementCompiler(String input) {
         var separator = condition.lastIndexOf(':');
 
         var conditionDeclarationString = condition.substring(0, separator);
-        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString);
+        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString)
+                .compile();
+        if(compiledConditionDeclaration.isEmpty()) {
+            return Optional.empty();
+        }
 
         var container = condition.substring(separator + 1);
 
         Result<String, CompileException> result;
         try {
             var compiledBlock = compileBlock(stripped);
-            result = new Ok<>("\t\tfor (" + compiledConditionDeclaration + " : " + container + ") " + compiledBlock);
+            result = new Ok<>("\t\tfor (" + compiledConditionDeclaration.get().$() + " : " + container + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }

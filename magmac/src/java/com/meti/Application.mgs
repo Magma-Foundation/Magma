@@ -7,23 +7,17 @@ export class def Application() => {
 }
 export object Application {
 	def compile(input : String): String => {
-let lines = Strings.splitMembers(input)let output = StringBuilder()		for (DeclarationCompiler[stripped=String line ] :  lines) {
-			output.append(compileRoot(line));
-		}
-		return output.toString();
+		let lines = Strings.splitMembers(input);
+		let output = StringBuilder();
+		let };;
+		let output.toString();;
 	}
 	private def compileRoot(line : String): String => {
-let stripped = line.strip()			if(stripped.isEmpty() || stripped.startsWith("package "));
-		return streamCompilers(stripped).map(Compiler::compile)
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElseGet(() -> new Err<>(new CompileException(line)))
-                .$();
+		let stripped = line.strip();
+		let "";;
+		let .$();;
 	}
 	private def streamCompilers(stripped : String): Stream<Compiler> => {
-		return Stream.of(
-                new ImportCompiler(stripped),
-                new ClassCompiler(stripped),
-                new RecordCompiler(stripped));
+		let RecordCompiler(stripped));;
 	}
 }
