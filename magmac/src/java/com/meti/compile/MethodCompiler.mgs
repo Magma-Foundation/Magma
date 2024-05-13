@@ -45,7 +45,7 @@ export class def MethodCompiler(input : String) => {
 		}
 		try {
 			return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
-		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, ";");
+		let rendered = MagmaLang.renderFunction(1, modifierString + "def ", name, finalRenderedParams, ": " + outputType, ";");
 		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
 ));

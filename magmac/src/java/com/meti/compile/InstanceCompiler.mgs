@@ -11,7 +11,7 @@ export class def InstanceCompiler implements RootCompiler() => {
 let input	def InstanceCompiler(input : String): public => {
 		this.input = input;
 	}
-	def computeKeyword(): String => ;
+	def computeKeyword(): String;
 	def compile(): Optional<Result<String, CompileException>> => {
 		let classIndex = input.indexOf(computeKeyword());
 		if (classIndex == -1) return Optional.empty();
@@ -39,8 +39,8 @@ let input	def InstanceCompiler(input : String): public => {
 ).mapValue(() => Optional.of(renderClass(modifierString, name, output, paramString.get()))
 ).into(Results.unwrapOptional);
 	}
-	def computeNameEnd(input : String, contentStart : I32): I32 => ;
-	def computeParamString(input : String): Optional<String> => ;
+	def computeNameEnd(input : String, contentStart : I32): I32;
+	def computeParamString(input : String): Optional<String>;
 }
 export object InstanceCompiler implements RootCompiler {
 	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {

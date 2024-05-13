@@ -81,7 +81,8 @@ public record MethodCompiler(String input) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
 
-                var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, ";");
+                var rendered = MagmaLang.renderFunction(1, modifierString +
+                                                           "def ", name, finalRenderedParams, ": " + outputType, ";");
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
