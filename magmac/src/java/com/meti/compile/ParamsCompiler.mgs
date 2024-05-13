@@ -9,7 +9,7 @@ export class def ParamsCompiler(paramString : String) => {
 			if (string.isBlank()) let continue			let strippedParam = string.strip();
 			let separator = strippedParam.lastIndexOf(' ');
 			if (separator == -1) {
-			throw CompileException("Malformed parameter: " + strippedParam);
+				throw CompileException("Malformed parameter: " + strippedParam);
 		}
 			let type = strippedParam.substring(0, separator);
 			let name = strippedParam.substring(separator + 1);

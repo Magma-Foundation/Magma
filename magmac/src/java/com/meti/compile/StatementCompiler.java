@@ -113,7 +113,7 @@ public record StatementCompiler(String input, int indent) {
 
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
-                .or(() -> compileThrow(stripped))
+                .or(() -> compileThrow(stripped, indent))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped, indent))
                 .or(() -> compileIf(stripped, indent))
@@ -245,14 +245,14 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileThrow(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileThrow(String stripped, int indent) {
         if (!stripped.startsWith("throw ")) return Optional.empty();
         var valueString = stripped.substring("throw ".length());
 
         Result<String, CompileException> result;
         try {
             var compiledValue = new ValueCompiler(valueString).compileRequired();
-            result = new Ok<>("\t\t\tthrow " + compiledValue + ";\n");
+            result = new Ok<>("\t".repeat(indent) + "throw " + compiledValue + ";\n");
         } catch (CompileException e) {
             result = new Err<>(e);
         }

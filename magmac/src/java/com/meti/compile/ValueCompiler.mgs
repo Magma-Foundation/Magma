@@ -178,7 +178,7 @@ export object ValueCompiler {
 			if (inputArgument.isBlank()) let continue		try {
 			let compiledValue = ValueCompiler(inputArgument).compile();
 			if (compiledValue.isEmpty()) {
-			throw CompileException("Failed to compile argument: " + inputArgument);
+				throw CompileException("Failed to compile argument: " + inputArgument);
 		}
 			outputArguments = Optional.of(outputArguments.map(() => inner.append(", ").append(compiledValue.get().findValue().orElse(""))
 ).orElse(StringBuilder(compiledValue.get().$())));

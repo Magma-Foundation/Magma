@@ -7,7 +7,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 	def compile(): String => {
 		let stripped = input.strip();
 		return compileTry(stripped).or(() => compileCatch(stripped)
-).or(() => compileThrow(stripped)
+).or(() => compileThrow(stripped, indent)
 ).or(() => compileFor(stripped)
 ).or(() => compileReturn(stripped, indent)
 ).or(() => compileIf(stripped, indent)
@@ -126,13 +126,13 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		}
 		return Optional.of(result);
 	}
-	private def compileThrow(stripped : String): Optional<? extends Result<String, CompileException>> => {
+	private def compileThrow(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("throw ")) return Optional.empty();
 		let valueString = stripped.substring("throw ".length());
 		let result;
 		try {
 			let compiledValue = ValueCompiler(valueString).compileRequired();
-			result = Ok("\t\t\tthrow " + compiledValue + ";\n");
+			result = Ok("\t".repeat(indent) + "throw " + compiledValue + ";\n");
 		}
 		catch (e : CompileException) {
 			result = Err(e);
