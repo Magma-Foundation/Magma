@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class MagmaLang {
     static String function(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
-        return declareFunction(Map.of(
+        return renderFunctionDeclaration(Map.of(
                 "indent", new IntAttribute(indent),
                 "modifiers", new StringAttribute(modifierString + "def "),
                 "name", new StringAttribute(name),
@@ -17,7 +17,7 @@ public class MagmaLang {
         )) + " => " + content + "\n";
     }
 
-    static String declareFunction(Map<String, Attribute> node) {
+    static String renderFunctionDeclaration(Map<String, Attribute> node) {
         var indent1 = node.get("indent").asInt().orElseThrow();
         var modifiers1 = node.get("modifiers").asString().orElseThrow();
         var name1 = node.get("name").asString().orElseThrow();
