@@ -181,9 +181,13 @@ public record ValueCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileSymbol(String stripped, List<String> stack) {
         if (!Strings.isSymbol(stripped)) return Optional.empty();
 
-        var result = stack.contains(stripped)
-                ? new Ok<String, CompileException>(stripped)
-                : new Err<String, CompileException>(new CompileException(stripped + " is not defined."));
+        Result<String, CompileException> result;
+        if (stack.contains(stripped)) result = new Ok<>(stripped);
+        else {
+            var format = "'%s' is not defined.";
+            var message = format.formatted(stripped);
+            result = new Err<>(new CompileException(message));
+        }
 
         return Optional.of(result);
     }
