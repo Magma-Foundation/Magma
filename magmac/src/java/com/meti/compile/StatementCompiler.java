@@ -125,14 +125,19 @@ public record StatementCompiler(String input, int indent) {
         var conditionEnd = stripped.indexOf(')');
         if (conditionEnd == -1) return Optional.empty();
 
-
         Result<String, CompileException> result;
         try {
             var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
             var compiledCondition = new ValueCompiler(condition).compile();
 
-            var compiledBlock = compileBlock(stripped, 2);
-            result = new Ok<>("\t\tif (" + compiledCondition + ") " + compiledBlock);
+            String compiledValue;
+            if (stripped.contains("{") && stripped.endsWith("}")) {
+                compiledValue = compileBlock(stripped, 2);
+            } else {
+                var valueString = stripped.substring(conditionEnd + 1).strip();
+                compiledValue = new ValueCompiler(valueString).compile();
+            }
+            result = new Ok<>("\t\tif (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
             result = new Err<>(e);
         }
