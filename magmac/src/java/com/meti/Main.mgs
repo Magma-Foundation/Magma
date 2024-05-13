@@ -17,7 +17,8 @@ export object Main {
 				let name = fileName.substring(0, separator);
 				let input = Files.readString(source);
 				let target = source.resolveSibling(name + ".mgs");
-				Files.writeString(target, Application.compile(input));
+				Files.writeString(target, 				Application.compile(input);
+);
 			}
 		}
 		catch (e : IOException | CompileException) {

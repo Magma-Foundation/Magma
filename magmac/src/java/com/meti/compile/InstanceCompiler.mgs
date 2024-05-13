@@ -32,10 +32,9 @@ let input	def InstanceCompiler(input : String): public => {
 			return Optional.of(Err(e));
 		}
 		if (paramString.isEmpty()) return Optional.empty();
-		return compileClassMembers(inputContent).mapErr(() => 		let format = "Failed to compile %s body: %s";
-		let message = format.formatted(computeKeyword(), input);
-		return CompileException(message, err);
-).mapValue(() => Optional.of(renderClass(modifierString, name, output, paramString.get()))).into(Results.unwrapOptional);
+		return compileClassMembers(inputContent).mapErr(() => {
+let format = "Failed to compile %s body: %s"let message = format.formatted(computeKeyword(), input)return CompileException(message, err);
+}).mapValue(() => Optional.of(renderClass(modifierString, name, output, paramString.get()))).into(Results.unwrapOptional);
 	}
 	def computeNameEnd(input : String, contentStart : I32): I32;
 	def computeParamString(input : String): Optional<String>;
@@ -47,8 +46,10 @@ export object InstanceCompiler implements RootCompiler {
 		for (let input :  inputContent) {
 			if (input.isBlank()) let continue		try {
 			let result = compileClassMember(input).$();
-			instanceContent.addAll(result.instanceMembers());
-			staticContent.addAll(result.staticMembers());
+			instanceContent.addAll(			result.instanceMembers();
+);
+			staticContent.addAll(			result.staticMembers();
+);
 		}
 		catch (e : CompileException) {
 			return Err(e);
@@ -57,9 +58,12 @@ export object InstanceCompiler implements RootCompiler {
 		return Ok(ClassMemberResult(instanceContent, staticContent));
 	}
 	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => {
-		return MethodCompiler(input).compile().or(() => 		return DeclarationCompiler(input, 0).compile().map(() => 		return result.mapValue(() => 		return ClassMemberResult(List.of(value), Collections.emptyList());
-);
-);
-).orElseGet(() => Err(CompileException("Unknown class member: " + input)));
+		return MethodCompiler(input).compile().or(() => {
+return DeclarationCompiler(input, 0).compile().map(() => {
+return result.mapValue(() => {
+return ClassMemberResult(List.of(value), Collections.emptyList());
+});
+});
+}).orElseGet(() => Err(CompileException("Unknown class member: " + input)));
 	}
 }

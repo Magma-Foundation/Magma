@@ -44,7 +44,7 @@ public record ValueCompiler(String input, int indent) {
             if (inputArgument.isBlank()) continue;
 
             try {
-                var compiledValue = new ValueCompiler(inputArgument, 0).compile();
+                var compiledValue = new ValueCompiler(inputArgument, indent).compile();
                 if (compiledValue.isEmpty()) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
@@ -252,7 +252,7 @@ public record ValueCompiler(String input, int indent) {
         return compileString(stripped)
                 .or(() -> compileSymbol(stripped))
                 .or(() -> compileLambda(stripped, indent))
-                .or(() -> compileInvocation(stripped, 0))
+                .or(() -> compileInvocation(stripped, indent))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileTernary(stripped))
                 .or(() -> compileNumbers(stripped))
@@ -326,7 +326,7 @@ public record ValueCompiler(String input, int indent) {
             if (value.startsWith("{") && value.endsWith("}")) {
                 var inputContent = value.substring(1, value.length() - 1).strip();
                 var members = Strings.splitMembers(inputContent);
-                compiledValue = MethodCompiler.compileMethodMembers(members).$();
+                compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent).$() + "}";
             } else {
                 compiledValue = new ValueCompiler(value, indent).compileRequired();
             }

@@ -29,19 +29,22 @@ export object TypeCompiler {
 		for (Ok[value=let i = 0];i < childrenString.length()i) {
 			let c = childrenString.charAt(i);
 			if (c == ',' && depth == 0) {
-				children.add(builder.toString());
+				children.add(				builder.toString();
+);
 				builder = StringBuilder();
 			}
 		try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}
 		}
-		children.add(builder.toString());
+		children.add(		builder.toString();
+);
 		let newChildren = ArrayList();
 		for (let child :  children) {
 			let stripped = child.strip();
 			if (stripped.isEmpty()) let continue		try {
-			newChildren.add(TypeCompiler(stripped).compile().$());
+			newChildren.add(			TypeCompiler(stripped).compile().$();
+);
 		}
 		catch (e : CompileException) {
 			return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, e)));

@@ -13,13 +13,13 @@ import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
 
-    static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
+    static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember, 2).compile());
+                outputContent.append(new StatementCompiler(inputMember, indent).compile());
             } catch (CompileException e) {
                 return new Err<>(e);
             }
@@ -69,7 +69,7 @@ public record MethodCompiler(String input) {
 
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var outputContent = compileMethodMembers(inputContent).$();
+                var outputContent = compileMethodMembers(inputContent, 2).$();
 
                 var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 
