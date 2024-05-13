@@ -21,9 +21,9 @@ public record ValueCompiler(String input) {
 
         var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
 
-        var diamondOperator = stripped.indexOf("<>");
-        var compilerEnd = diamondOperator == -1 ? start : diamondOperator;
-        var caller = stripped.substring(callerStart, compilerEnd);
+        var genStart = stripped.indexOf("<");
+        var callerEnd = genStart == -1 ? start : genStart;
+        var caller = stripped.substring(callerStart, callerEnd);
 
         var inputArgumentStrings = stripped.substring(start + 1, end);
 
