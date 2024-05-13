@@ -42,8 +42,12 @@ public record StatementCompiler(String input, int indent) {
         var output = new StringBuilder();
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
-            var compiled = new StatementCompiler(inputStatement, indent + 1).compile();
-            output.append(compiled);
+            try {
+                var compiled = new StatementCompiler(inputStatement, indent + 1).compile();
+                output.append(compiled);
+            } catch (CompileException e) {
+                throw new CompileException("Failed to compile block: " + stripped, e);
+            }
         }
 
         return "{\n" + output + "\t\t}\n";
