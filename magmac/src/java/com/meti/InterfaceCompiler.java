@@ -21,6 +21,6 @@ public class InterfaceCompiler extends InstanceCompiler {
 
     @Override
     protected Optional<String> computeParamString(String input) {
-        return Optional.empty();
+        return Optional.of("");
     }
 }

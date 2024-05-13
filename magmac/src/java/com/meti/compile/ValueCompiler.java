@@ -88,7 +88,6 @@ public record ValueCompiler(String input) {
         var inputArguments = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
-        var index = 0;
         var queue = Strings.toQueue(inputArgumentStrings);
 
         while (!queue.isEmpty()) {
@@ -315,7 +314,10 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
+        return Stream.of("&&", "==", "!=", "+", "||", "<", "-")
+                .map(operator -> compileOperation(stripped, operator))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {

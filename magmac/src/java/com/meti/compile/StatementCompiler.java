@@ -53,6 +53,42 @@ public record StatementCompiler(String input, int indent) {
         return "{\n" + output + "\t\t}\n";
     }
 
+    private static int findIfEnd(String stripped, int paramStart) {
+        var conditionEnd = -1;
+        var depth = 0;
+        var index = paramStart;
+
+        var queue = Strings.toQueue(stripped.substring(paramStart + 1));
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+            index++;
+
+            if (c == '\'') {
+                var escaped = queue.pop();
+                index++;
+
+                if (escaped == '\\') {
+                    queue.pop();
+                    index++;
+                }
+
+                queue.pop();
+                index++;
+
+            }
+
+            if (c == ')' && depth == 0) {
+                conditionEnd = index;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+
+        return conditionEnd;
+    }
+
     String compile() throws CompileException {
         var stripped = input.strip();
 
@@ -79,7 +115,7 @@ public record StatementCompiler(String input, int indent) {
             var result = new ValueCompiler(value).compileRequired();
             return Optional.of(new Ok<>(result));
         } catch (CompileException e) {
-            return Optional.of(new Err<>(e));
+            return Optional.of(new Err<>(new CompileException("Failed to compile suffix operator: " + stripped, e)));
         }
     }
 
@@ -131,18 +167,7 @@ public record StatementCompiler(String input, int indent) {
             return Optional.of(new Err<>(new CompileException("No starting parentheses in for: " + stripped)));
         }
 
-        var conditionEnd = -1;
-        var depth = 0;
-        for (int i = conditionStart + 1; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (c == ')' && depth == 0) {
-                conditionEnd = i;
-                break;
-            } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
-            }
-        }
+        var conditionEnd = findIfEnd(stripped, conditionStart);
 
         if (conditionEnd == -1) {
             return Optional.of(new Err<>(new CompileException("No ending parentheses in for: " + stripped)));
@@ -211,18 +236,7 @@ public record StatementCompiler(String input, int indent) {
         var conditionStart = stripped.indexOf('(');
         if (conditionStart == -1) return Optional.empty();
 
-        var conditionEnd = -1;
-        var depth = 0;
-        for (int i = conditionStart + 1; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (c == ')' && depth == 0) {
-                conditionEnd = i;
-                break;
-            } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
-            }
-        }
+        var conditionEnd = findIfEnd(stripped, conditionStart);
 
         if (conditionEnd == -1) return Optional.empty();
 
