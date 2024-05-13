@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public record DeclarationCompiler(String stripped, int indent) {
     Optional<? extends Result<String, CompileException>> compile() {
-        var valueSeparator = stripped().indexOf('=');
+        var valueSeparator = stripped.indexOf('=');
 
         var headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;
         var header = stripped().substring(0, headerEnd).strip();
@@ -19,7 +19,7 @@ public record DeclarationCompiler(String stripped, int indent) {
         try {
             String valueString;
             if (valueSeparator != -1) {
-                var after = stripped().substring(valueSeparator + 1).strip();
+                var after = stripped.substring(valueSeparator + 1).strip();
                 var compiledValue = new ValueCompiler(after).compile();
                 valueString = " = " + compiledValue;
             } else {

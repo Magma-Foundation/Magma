@@ -100,7 +100,7 @@ public record MethodCompiler(String input) {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember).compile());
+                outputContent.append(new StatementCompiler(inputMember, 2).compile());
             } catch (CompileException e) {
                 return new Err<>(e);
             }

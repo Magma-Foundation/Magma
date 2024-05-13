@@ -8,14 +8,14 @@ import java.util.Optional;
 
 import static com.meti.compile.ValueCompiler.compileInvocation;
 
-public record StatementCompiler(String input) {
+public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
-        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped)));
+        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2)));
     }
 
-    private static String compileBlock(String stripped) throws CompileException {
+    private static String compileBlock(String stripped, int indent) throws CompileException {
         var contentStart = stripped.indexOf('{');
         var contentEnd = stripped.lastIndexOf('}');
         var after = stripped.substring(contentStart + 1, contentEnd);
@@ -24,7 +24,7 @@ public record StatementCompiler(String input) {
         var output = new StringBuilder();
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
-            var compiled = new StatementCompiler(inputStatement).compile();
+            var compiled = new StatementCompiler(inputStatement, indent + 1).compile();
             output.append(compiled);
         }
 
@@ -39,7 +39,7 @@ public record StatementCompiler(String input) {
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
-                .or(() -> new DeclarationCompiler(stripped, 2).compile())
+                .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
@@ -75,6 +75,7 @@ public record StatementCompiler(String input) {
         var conditionDeclarationString = condition.substring(0, separator);
         var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)
                 .compile();
+
         if(compiledConditionDeclaration.isEmpty()) {
             return Optional.empty();
         }
@@ -83,8 +84,8 @@ public record StatementCompiler(String input) {
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped);
-            result = new Ok<>("\t\tfor (" + compiledConditionDeclaration.get().$() + " : " + container + ") " + compiledBlock);
+            var compiledBlock = compileBlock(stripped, indent);
+            result = new Ok<>("\t".repeat(indent) + "for (" + compiledConditionDeclaration.get().$() + " : " + container + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }
@@ -122,7 +123,7 @@ public record StatementCompiler(String input) {
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped);
+            var compiledBlock = compileBlock(stripped, 2);
             result = new Ok<>("\t\tcatch (" + catchName + " : " + catchType + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
