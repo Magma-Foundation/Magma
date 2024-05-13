@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.meti.compile.MagmaLang.renderFunction;
+import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
     static Optional<Result<ClassMemberResult, CompileException>> compileMethod(MethodCompiler methodCompiler) {
@@ -46,10 +47,10 @@ public record MethodCompiler(String input) {
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Strings.splitMembers(content);
 
-        var outputType = compileType(inputType);
+        return Optional.of($Result(() -> {
+            var outputType = compileType(inputType).$();
+            var outputContent = compileMethodMembers(inputContent).$();
 
-
-        return Optional.of(compileMethodMembers(inputContent).mapValue(outputContent -> {
             var rendered = renderFunction(modifierString, name, renderedParams, ": " + outputType, 1, outputContent);
 
             return modifiers.contains("static")
