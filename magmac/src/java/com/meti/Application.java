@@ -1,11 +1,14 @@
 package com.meti;
 
+import com.meti.compile.ClassCompiler;
+import com.meti.compile.CompileException;
+import com.meti.compile.ImportCompiler;
+import com.meti.compile.RecordCompiler;
 import com.meti.compile.RootCompiler;
-import com.meti.compile.*;
+import com.meti.compile.Strings;
 import com.meti.result.Err;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
