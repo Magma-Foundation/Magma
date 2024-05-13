@@ -1,5 +1,5 @@
 import { Optional } from java.util;
-export class def Results() => 
+export class def Results() => {}
 export object Results {
 	def $Result(action : Action<T, E>): Result<T, E> => {
 		try {

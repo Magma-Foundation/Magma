@@ -1,2 +1,2 @@
-export class def Action<T, E extends Throwable>() => 	def run(): T => ;
-
+export class def Action<T, E extends Throwable>() => {	def run(): T => ;
+}

@@ -3,7 +3,7 @@ import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { Optional } from java.util;
 import { compileInvocation } from com.meti.compile.ValueCompiler;
-export class def StatementCompiler(input : String, indent : int) => 	def compile(): String => {
+export class def StatementCompiler(input : String, indent : int) => {	def compile(): String => {
 		let stripped = input.strip();
 		return compileTry(stripped).or(() => compileCatch(stripped)
 ).or(() => compileThrow(stripped)
@@ -208,7 +208,7 @@ export class def StatementCompiler(input : String, indent : int) => 	def compile
 		}
 		return Optional.of(result);
 	}
-
+}
 export object StatementCompiler {
 	private def compileTry(stripped : String): Optional<Result<String, CompileException>> => {
 		if (stripped.startsWith("try ")) 		return Optional.empty();

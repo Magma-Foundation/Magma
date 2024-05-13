@@ -1,5 +1,5 @@
 import { Optional } from java.util;
-export class def ClassCompiler extends InstanceCompiler() => 	def ClassCompiler(input : String): public => {
+export class def ClassCompiler extends InstanceCompiler() => {	def ClassCompiler(input : String): public => {
 			super(input);
 	}
 	def computeKeyword(): String => {
@@ -11,4 +11,4 @@ export class def ClassCompiler extends InstanceCompiler() => 	def ClassCompiler(
 	def computeNameEnd(input : String, contentStart : int): int => {
 		return contentStart;
 	}
-
+}

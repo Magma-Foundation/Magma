@@ -3,7 +3,7 @@ import { LinkedList } from java.util;
 import { List } from java.util;
 import { Collectors } from java.util.stream;
 import { IntStream } from java.util.stream;
-export class def Strings() => 
+export class def Strings() => {}
 export object Strings {
 	def splitMembers(input : String): List<String> => {
 		let lines = ArrayList();

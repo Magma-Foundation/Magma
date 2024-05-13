@@ -6,7 +6,8 @@ import { ArrayList } from java.util;
 import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-export class def InstanceCompiler implements RootCompiler() => let input	def InstanceCompiler(input : String): public => {
+import { renderClass } from com.meti.compile.MagmaLang;
+export class def InstanceCompiler implements RootCompiler() => {let input	def InstanceCompiler(input : String): public => {
 		this.input = input;
 	}
 	def computeKeyword(): String => ;
@@ -34,12 +35,12 @@ export class def InstanceCompiler implements RootCompiler() => let input	def Ins
 		let message = format.formatted(computeKeyword(), Optional[Ok[value=input]]);
 		return CompileException(message, Optional[Ok[value=err]]);
 
-).mapValue(() => Optional.of(MagmaLang.renderClass(modifierString, Optional[Ok[value=name]], Optional[Ok[value=output]], Optional[Ok[value=paramString.get()]]))
+).mapValue(() => Optional.of(renderClass(modifierString, Optional[Ok[value=name]], Optional[Ok[value=output]], Optional[Ok[value=paramString.get()]]))
 ).into(Results.unwrapOptional);
 	}
 	def computeNameEnd(input : String, contentStart : int): int => ;
 	def computeParamString(input : String): Optional<String> => ;
-
+}
 export object InstanceCompiler implements RootCompiler {
 	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
 		let instanceContent = ArrayList();

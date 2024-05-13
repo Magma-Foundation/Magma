@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.meti.compile.MagmaLang.renderClass;
+
 public abstract class InstanceCompiler implements RootCompiler {
     protected final String input;
 
@@ -82,7 +84,7 @@ public abstract class InstanceCompiler implements RootCompiler {
             var format = "Failed to compile %s body: %s";
             var message = format.formatted(computeKeyword(), input);
             return new CompileException(message, err);
-        }).mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get()))).into(Results::unwrapOptional);
+        }).mapValue(output -> Optional.of(renderClass(modifierString, name, output , paramString.get()))).into(Results::unwrapOptional);
 
     }
 

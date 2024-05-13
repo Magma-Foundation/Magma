@@ -7,7 +7,7 @@ import { Optional } from java.util;
 import { OptionalInt } from java.util;
 import { Stream } from java.util.stream;
 import { $Result } from com.meti.result.Results;
-export class def ValueCompiler(input : String) => 	def compileRequired(): String => {
+export class def ValueCompiler(input : String) => {	def compileRequired(): String => {
 		return compile().orElseGet(() => Err(CompileException("Unknown value: " + input))
 ).$();
 	}
@@ -147,7 +147,7 @@ export class def ValueCompiler(input : String) => 	def compileRequired(): String
 		let rendered = Ok[value=condition.get() + "] ? Ok[value=" + thenBlock.get() + "] : Ok[value=" + elseBlock].get();
 		return Optional.of(Ok(rendered));
 	}
-
+}
 export object ValueCompiler {
 	def compileInvocation(stripped : String, indent : int): Optional<Result<String, CompileException>> => {
 		if (stripped.endsWith(")")) 		return Optional.empty();

@@ -2,7 +2,6 @@ package com.meti.compile;
 
 public class MagmaLang {
     static String renderDefinedFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
-        var indentString = "\t".repeat(indent);
         return renderFunction(indent, modifierString +
                                       "def ", name, renderedParams, typeString, " => " + content);
     }
@@ -25,7 +24,7 @@ public class MagmaLang {
     private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members, String paramString) {
         var joinedInstance = String.join("", members.instanceMembers());
 
-        return renderDefinedFunction(0, modifierString + "class ", name, paramString, "", joinedInstance);
+        return renderDefinedFunction(0, modifierString + "class ", name, paramString, "", "{" + joinedInstance + "}");
     }
 
     private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {

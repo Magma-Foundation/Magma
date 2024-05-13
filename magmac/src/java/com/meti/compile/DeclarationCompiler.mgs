@@ -2,7 +2,7 @@ import { Err } from com.meti.result;
 import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { Optional } from java.util;
-export class def DeclarationCompiler(stripped : String, indent : int) => 	def compile(): Optional<? extends Result<String, CompileException>> => {
+export class def DeclarationCompiler(stripped : String, indent : int) => {	def compile(): Optional<? extends Result<String, CompileException>> => {
 		let valueSeparator = stripped.indexOf('=');
 		let headerEnd = Ok[value=valueSeparator == -1] ? Ok[value=stripped.length()] : Ok[value=valueSeparator];
 		let header = stripped().substring(0, Optional[Ok[value=headerEnd]]).strip();
@@ -28,4 +28,4 @@ export class def DeclarationCompiler(stripped : String, indent : int) => 	def co
 		}
 		return Optional.of(rendered);
 	}
-
+}

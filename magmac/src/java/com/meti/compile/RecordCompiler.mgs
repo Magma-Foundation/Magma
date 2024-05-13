@@ -1,5 +1,5 @@
 import { Optional } from java.util;
-export class def RecordCompiler extends InstanceCompiler() => 	def RecordCompiler(input : String): public => {
+export class def RecordCompiler extends InstanceCompiler() => {	def RecordCompiler(input : String): public => {
 			super(input);
 	}
 	def computeKeyword(): String => {
@@ -17,4 +17,4 @@ export class def RecordCompiler extends InstanceCompiler() => 	def RecordCompile
 	def computeNameEnd(input : String, contentStart : int): int => {
 		return input.indexOf('(');
 	}
-
+}
