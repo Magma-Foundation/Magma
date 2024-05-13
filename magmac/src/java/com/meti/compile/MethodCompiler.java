@@ -23,7 +23,7 @@ public final class MethodCompiler {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember, indent).compile(stack));
+                outputContent.append(StatementCompiler.compile(stack, inputMember, indent));
             } catch (CompileException e) {
                 var format = "Failed to compile method member - %s: %s";
                 var message = format.formatted(stack, inputMember);

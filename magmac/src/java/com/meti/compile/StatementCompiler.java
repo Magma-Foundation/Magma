@@ -26,7 +26,8 @@ public record StatementCompiler(String input, int indent) {
                 body = compileBlock(stripped, 2, 0, Collections.emptyList());
             } else {
                 var value = stripped.substring("else ".length());
-                body = new StatementCompiler(value, 0).compile(Collections.emptyList());
+                final StatementCompiler statementCompiler = new StatementCompiler(value, 0);
+                body = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             return Optional.of(new Ok<>("\t".repeat(indent) + "try " + body));
         } catch (CompileException e) {
@@ -52,7 +53,8 @@ public record StatementCompiler(String input, int indent) {
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
             try {
-                var compiled = new StatementCompiler(inputStatement, indent + 1).compile(stack);
+                final StatementCompiler statementCompiler = new StatementCompiler(inputStatement, indent + 1);
+                var compiled = StatementCompiler.compile(stack, statementCompiler.input, statementCompiler.indent);
                 output.append(compiled);
             } catch (CompileException e) {
                 throw new CompileException("Failed to compile block: " + stripped, e);
@@ -110,22 +112,22 @@ public record StatementCompiler(String input, int indent) {
         return conditionEnd;
     }
 
-    String compile(List<String> stack) throws CompileException {
+    static String compile(List<String> stack, String input, int indent) throws CompileException {
         var stripped = input.strip();
 
         return compileTry(stripped, indent)
-                .or(() -> compileCatch(stripped, indent))
-                .or(() -> compileThrow(stripped, indent))
-                .or(() -> compileFor(stripped, indent, stack))
-                .or(() -> compileReturn(stripped, indent))
-                .or(() -> compileIf(stripped, indent))
-                .or(() -> compileWhile(stripped, indent))
+                .or(() -> StatementCompiler.compileCatch(stripped, indent))
+                .or(() -> StatementCompiler.compileThrow(stripped, indent))
+                .or(() -> StatementCompiler.compileFor(stripped, indent, stack))
+                .or(() -> StatementCompiler.compileReturn(stripped, indent))
+                .or(() -> StatementCompiler.compileIf(stripped, indent))
+                .or(() -> StatementCompiler.compileWhile(stripped, indent))
                 .or(() -> compileElse(stripped, indent))
-                .or(() -> compileAssignment(stripped, indent))
+                .or(() -> StatementCompiler.compileAssignment(stripped, indent))
                 .or(() -> DeclarationCompiler.compile(stack, stripped, indent))
                 .or(() -> compileInvocation(stack, stripped, indent))
-                .or(() -> compileSuffixOperator(stripped))
-                .or(() -> compileComment(stripped))
+                .or(() -> StatementCompiler.compileSuffixOperator(stripped))
+                .or(() -> StatementCompiler.compileComment(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> {
                     var format = "Failed to compile statement - %s: %s";
@@ -134,7 +136,7 @@ public record StatementCompiler(String input, int indent) {
                 }).$();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileComment(String stripped) {
+    private static Optional<? extends Result<String, CompileException>> compileComment(String stripped) {
         if (stripped.startsWith("/*") && stripped.endsWith("*/")) {
             return Optional.of(new Ok<>(stripped));
         } else {
@@ -142,7 +144,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private Optional<? extends Result<String, CompileException>> compileSuffixOperator(String stripped) {
+    private static Optional<? extends Result<String, CompileException>> compileSuffixOperator(String stripped) {
         if (!stripped.endsWith("++") && !stripped.endsWith("--")) return Optional.empty();
 
         try {
@@ -154,7 +156,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileAssignment(String stripped, int indent) {
         var separator = stripped.indexOf('=');
         if (separator != -1) {
             var left = stripped.substring(0, separator).strip();
@@ -173,7 +175,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.empty();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileReturn(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileReturn(String stripped, int indent) {
         if (stripped.startsWith("return ")) {
             try {
                 var valueString = stripped.substring("return ".length()).strip();
@@ -194,7 +196,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private Optional<? extends Result<String, CompileException>> compileFor(String stripped, int indent, List<String> stack) {
+    private static Optional<? extends Result<String, CompileException>> compileFor(String stripped, int indent, List<String> stack) {
         if (!stripped.startsWith("for")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -231,7 +233,8 @@ public record StatementCompiler(String input, int indent) {
                         .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
 
                 var terminating = ValueCompiler.createValueCompiler(terminatingString, 0).compileRequired(stack);
-                var increment = new StatementCompiler(incrementString, 0).compile(Collections.emptyList());
+                final StatementCompiler statementCompiler1 = new StatementCompiler(incrementString, 0);
+                var increment = StatementCompiler.compile(Collections.emptyList(), statementCompiler1.input, statementCompiler1.indent);
 
                 compiledBlock = compileBlock(stripped, indent, 0, Collections.emptyList());
                 conditionString = initial + ";" + terminating + increment;
@@ -248,7 +251,7 @@ public record StatementCompiler(String input, int indent) {
                 conditionString = initial + " : " + container;
             }
 
-            result = new Ok<>("\t".repeat(this.indent) + "for (" + conditionString + ") " + compiledBlock);
+            result = new Ok<>("\t".repeat(indent) + "for (" + conditionString + ") " + compiledBlock);
         } catch (CompileException e) {
             var format = "Failed to compile for-loop - %s: %s";
             var message = format.formatted(stack, stripped);
@@ -258,7 +261,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileThrow(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileThrow(String stripped, int indent) {
         if (!stripped.startsWith("throw ")) return Optional.empty();
         var valueString = stripped.substring("throw ".length());
 
@@ -272,7 +275,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileWhile(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileWhile(String stripped, int indent) {
         if (!stripped.startsWith("while")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -292,7 +295,8 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, indent, 0, Collections.emptyList());
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new StatementCompiler(valueString, 0).compile(Collections.emptyList());
+                final StatementCompiler statementCompiler = new StatementCompiler(valueString, 0);
+                compiledValue = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             result = new Ok<>("\t".repeat(indent) + "while (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -302,7 +306,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileIf(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileIf(String stripped, int indent) {
         if (!stripped.startsWith("if")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -321,7 +325,8 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, indent, conditionEnd, Collections.emptyList());
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new StatementCompiler(valueString, indent).compile(Collections.emptyList());
+                final StatementCompiler statementCompiler = new StatementCompiler(valueString, indent);
+                compiledValue = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             result = new Ok<>("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -331,7 +336,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileCatch(String stripped, int indent) {
+    private static Optional<? extends Result<String, CompileException>> compileCatch(String stripped, int indent) {
         if (!stripped.startsWith("catch")) return Optional.empty();
 
         var typeStart = stripped.indexOf('(');
