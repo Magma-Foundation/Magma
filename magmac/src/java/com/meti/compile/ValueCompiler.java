@@ -4,10 +4,7 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.meti.result.Results.$Result;
@@ -94,7 +91,7 @@ public record ValueCompiler(String input, int indent) {
 
         while (!queue.isEmpty()) {
             var c = queue.pop();
-            if(c == '\'') {
+            if (c == '\'') {
                 builder.append(c);
                 builder.append(queue.pop());
                 try {
@@ -181,12 +178,14 @@ public record ValueCompiler(String input, int indent) {
         return start;
     }
 
-    private static Optional<Result<String, CompileException>> compileSymbol(String stripped) {
-        if (Strings.isSymbol(stripped)) {
-            return Optional.of(new Ok<>(stripped));
-        } else {
-            return Optional.empty();
-        }
+    private static Optional<Result<String, CompileException>> compileSymbol(String stripped, List<String> stack) {
+        if (!Strings.isSymbol(stripped)) return Optional.empty();
+
+        var result = stack.contains(stripped)
+                ? new Ok<String, CompileException>(stripped)
+                : new Err<String, CompileException>(new CompileException(stripped + " is not defined."));
+
+        return Optional.of(result);
     }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
@@ -250,7 +249,7 @@ public record ValueCompiler(String input, int indent) {
     Optional<Result<String, CompileException>> compile() {
         var stripped = input().strip();
         return compileString(stripped)
-                .or(() -> compileSymbol(stripped))
+                .or(() -> compileSymbol(stripped, Collections.emptyList()))
                 .or(() -> compileLambda(stripped, indent))
                 .or(() -> compileInvocation(stripped, indent))
                 .or(() -> compileAccess(stripped))
@@ -264,7 +263,7 @@ public record ValueCompiler(String input, int indent) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
-        if(stripped.startsWith("("))  {
+        if (stripped.startsWith("(")) {
             var end = stripped.indexOf(')');
             var type = stripped.substring(1, end);
 
