@@ -3,6 +3,7 @@ package com.meti.compile;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
+import com.meti.result.Results;
 
 import java.util.Optional;
 
@@ -20,7 +21,7 @@ public record ValueCompiler(String input) {
         var inputArguments = stripped.substring(start + 1, end).split(",");
         var outputArguments = Optional.<StringBuilder>empty();
         for (String inputArgument : inputArguments) {
-            if(inputArgument.isBlank()) continue;
+            if (inputArgument.isBlank()) continue;
 
             try {
                 var compiledValue = new ValueCompiler(inputArgument).compile();
@@ -62,7 +63,7 @@ public record ValueCompiler(String input) {
         try {
             compiledObject = new ValueCompiler(objectString).compile();
         } catch (CompileException e) {
-            return Optional.of(new Err<>(new CompileException("Failed to compile object reference: " + objectString, e)));
+            return Optional.of(new Err<>(new CompileException("Failed to compile object reference of access statement: " + objectString, e)));
         }
 
         return Optional.of(new Ok<>(compiledObject + "." + child));
@@ -78,10 +79,34 @@ public record ValueCompiler(String input) {
         var stripped = input().strip();
 
         return compileString(stripped)
+                .or(() -> compileTernary(stripped))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
                 .or(() -> compileInvocation(stripped, 0))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
+        var conditionMarker = stripped.indexOf('?');
+        if (conditionMarker == -1) return Optional.empty();
+
+        var statementMarker = stripped.indexOf(":", conditionMarker);
+        if (statementMarker == -1) return Optional.empty();
+
+        var rendered = Results.$Result(() -> {
+            var conditionString = stripped.substring(0, conditionMarker).strip();
+            var condition = new ValueCompiler(conditionString).compile();
+
+            var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
+            var thenBlock = new ValueCompiler(thenString).compile();
+
+            var elseString = stripped.substring(statementMarker + 1).strip();
+            var elseBlock = new ValueCompiler(elseString).compile();
+
+            return condition + " ? " + thenBlock + " : " + elseBlock;
+        });
+
+        return Optional.of(rendered);
     }
 }
