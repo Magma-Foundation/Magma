@@ -16,13 +16,10 @@ export object Application {
 	private def compileRoot(line : String): String => {
 		let stripped = line.strip();
 		if (stripped.isEmpty() || stripped.startsWith("package ")) 		return "";
-		return streamCompilers(stripped).map(RootCompiler::compile)
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElseGet(() -> new Err<>(new CompileException(line)))
-                .$();
+		return streamCompilers(stripped).map(RootCompiler.compile).flatMap(Optional.stream).findFirst().orElseGet(() => Err(CompileException(line))
+).$();
 	}
 	private def streamCompilers(stripped : String): Stream<RootCompiler> => {
-		return Stream.of(ImportCompiler(stripped), ClassCompiler(stripped), RecordCompiler(stripped), InterfaceCompiler(stripped));
+		return Stream.of(ImportCompiler(stripped), Optional[Ok[value=ClassCompiler(stripped)]], Optional[Ok[value=RecordCompiler(stripped)]], Optional[Ok[value=InterfaceCompiler(stripped)]]);
 	}
 }

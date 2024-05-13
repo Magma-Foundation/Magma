@@ -53,9 +53,7 @@ public record ValueCompiler(String input) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
 
-                outputArguments = Optional.of(outputArguments
-                        .map(inner -> inner.append(", ").append(compiledValue))
-                        .orElse(new StringBuilder(compiledValue.get().$())));
+                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue)).orElse(new StringBuilder(compiledValue.get().$())));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
             }
@@ -144,9 +142,7 @@ public record ValueCompiler(String input) {
     }
 
     private static Optional<Result<String, CompileException>> compileString(String stripped) {
-        return stripped.startsWith("\"") && stripped.endsWith("\"")
-                ? Optional.of(new Ok<>(stripped))
-                : Optional.empty();
+        return stripped.startsWith("\"") && stripped.endsWith("\"") ? Optional.of(new Ok<>(stripped)) : Optional.empty();
     }
 
     private static Optional<Result<String, CompileException>> compileOperation(String stripped, String operator) {
@@ -165,23 +161,29 @@ public record ValueCompiler(String input) {
     }
 
     String compileRequired() throws CompileException {
-        return compile()
-                .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input)))
-                .$();
+        return compile().orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
     }
 
     Optional<Result<String, CompileException>> compile() {
         var stripped = input().strip();
-        return compileString(stripped)
-                .or(() -> compileSymbol(stripped))
-                .or(() -> compileLambda(stripped))
-                .or(() -> compileInvocation(stripped, 0))
-                .or(() -> compileAccess(stripped))
-                .or(() -> compileTernary(stripped))
-                .or(() -> compileOperation(stripped))
-                .or(() -> compileNumbers(stripped))
-                .or(() -> compileChar(stripped))
-                .or(() -> compileNot(stripped));
+        return compileString(stripped).or(() -> compileSymbol(stripped)).or(() -> compileLambda(stripped)).or(() -> compileInvocation(stripped, 0)).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileOperation(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped));
+    }
+
+    private Optional<Result<String, CompileException>> compileMethodReference(String stripped) {
+        var index = stripped.indexOf("::");
+        if (index != -1) {
+            var before = stripped.substring(0, index);
+            var after = stripped.substring(index + "::".length());
+            if (!Strings.isSymbol(after)) return Optional.empty();
+
+            return new ValueCompiler(before).compile().map(value -> {
+                return value.mapValue(inner -> {
+                    return inner + "." + after;
+                });
+            });
+        }
+
+        return Optional.empty();
     }
 
     private Optional<? extends Result<String, CompileException>> compileLambda(String stripped) {
@@ -234,10 +236,7 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||")
-                .map(operator -> compileOperation(stripped, operator))
-                .flatMap(Optional::stream)
-                .findFirst();
+        return Stream.of("&&", "==", "!=", "+", "||").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {

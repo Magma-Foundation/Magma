@@ -5,7 +5,7 @@ import { Optional } from java.util;
 export class def DeclarationCompiler(stripped : String, indent : int) => 	def compile(): Optional<? extends Result<String, CompileException>> => {
 		let valueSeparator = stripped.indexOf('=');
 		let headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;
-		let header = stripped().substring(0, headerEnd).strip();
+		let header = stripped().substring(0, Optional[Ok[value=headerEnd]]).strip();
 		let separator = header.lastIndexOf(' ');
 		let name = header.substring(separator + 1).strip();
 		if (Strings.isSymbol(name)) 		return Optional.empty();
@@ -14,7 +14,7 @@ export class def DeclarationCompiler(stripped : String, indent : int) => 	def co
 			let valueString;
 			if (valueSeparator != -1) {
 				let after = stripped.substring(valueSeparator + 1).strip();
-				let compiledValue = ValueCompiler(after).compile();
+				let compiledValue = ValueCompiler(after).compileRequired();
 				valueString = " = " + compiledValue;
 		}
 		try {
@@ -24,7 +24,7 @@ export class def DeclarationCompiler(stripped : String, indent : int) => 	def co
 			rendered = Ok("\t".repeat(indent) + "let " + name + valueString + suffix);
 		}
 		catch (e : CompileException) {
-			rendered = Err(CompileException("Failed to compile declaration: " + stripped, e));
+			rendered = Err(CompileException("Failed to compile declaration: " + stripped, Optional[Ok[value=e]]));
 		}
 		return Optional.of(rendered);
 	}
