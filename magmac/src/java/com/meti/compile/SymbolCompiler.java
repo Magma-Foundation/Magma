@@ -16,8 +16,14 @@ public final class SymbolCompiler {
     private static Result<String, CompileException> computeResult(String input, List<String> stack) {
         if (stack.contains(input)) return new Ok<>(input);
 
-        var format = "'%s' is not defined: %s";
-        var message = format.formatted(input, stack);
-        return new Err<>(new CompileException(message));
+        try {
+            Class.forName("java.lang." + input);
+
+            return new Ok<>(input);
+        } catch (ClassNotFoundException e) {
+            var format = "'%s' is not defined: %s";
+            var message = format.formatted(input, stack);
+            return new Err<>(new CompileException(message));
+        }
     }
 }
