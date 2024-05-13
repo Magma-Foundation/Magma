@@ -84,8 +84,18 @@ public record ValueCompiler(String input) {
                 .or(() -> compileSymbol(stripped))
                 .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileOperation(stripped))
+                .or(() -> compileNumbers(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileNumbers(String stripped) {
+        try {
+            Integer.parseInt(stripped);
+            return Optional.of(new Ok<>(stripped));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
