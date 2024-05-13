@@ -11,8 +11,7 @@ import java.util.Optional;
 import static com.meti.compile.MagmaLang.renderDefinedFunction;
 import static com.meti.result.Results.$Result;
 
-public record MethodCompiler(String input) {
-
+public final class MethodCompiler {
     static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> stack) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
@@ -30,8 +29,8 @@ public record MethodCompiler(String input) {
         return new Ok<>(outputContent.toString());
     }
 
-    Optional<Result<ClassMemberResult, CompileException>> compile(List<String> stack) {
-        var stripped = input().strip();
+    static Optional<Result<ClassMemberResult, CompileException>> compile(String input, List<String> stack) {
+        var stripped = input.strip();
 
         var paramStart = stripped.indexOf('(');
         if (paramStart == -1) return Optional.empty();

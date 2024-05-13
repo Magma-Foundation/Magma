@@ -39,7 +39,7 @@ public abstract class InstanceCompiler implements RootCompiler {
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMember(String input, List<String> stack) {
-        return new MethodCompiler(input).compile(stack)
+        return MethodCompiler.compile(input, stack)
                 .or(() -> {
                     return new DeclarationCompiler(input, 0).compile(stack).map(result -> {
                         return result.mapValue(value -> {
