@@ -4,7 +4,7 @@ import { Optional } from java.util;
 export class def ImportCompiler(stripped : String) => {
 	def compile(): Optional<Result<String, CompileException>> => {
 		if (stripped().startsWith("import ")) 		return Optional.empty();
-		let segmentsStart = Ok[value=stripped().startsWith("import static ")] ? Ok[value="import static ".length()] : Ok[value="import "].length();
+		let segmentsStart = stripped().startsWith("import static ") ? "import static ".length() : "import ".length();
 		let segments = stripped().substring(segmentsStart);
 		let separator = segments.lastIndexOf('.');
 		if (separator == -1) 		return Optional.empty();

@@ -145,8 +145,9 @@ export class def ValueCompiler(input : String) => {
 		let elseString = stripped.substring(statementMarker + 1).strip();
 		let elseBlock = ValueCompiler(elseString).compile();
 		if (elseBlock.isEmpty()) 		return Optional.empty();
-		let rendered = Ok[value=condition.get() + "] ? Ok[value=" + thenBlock.get() + "] : Ok[value=" + elseBlock].get();
-		return Optional.of(Ok(rendered));
+		return Optional.of($Result(() => 		return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
+
+));
 	}
 }
 export object ValueCompiler {
@@ -186,7 +187,7 @@ export object ValueCompiler {
 		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, Optional[Ok[value=e]])));
 		}
 		}
-		let suffix = Ok[value=indent == 0] ? Ok[value=""] : Ok[value=";\n"];
+		let suffix = indent == 0 ? "" : ";\n";
 		let renderedArguments = outputArguments.orElse(StringBuilder());
 		let compiledCaller = ValueCompiler(caller).compile();
 		if (compiledCaller.isEmpty()) {
@@ -324,7 +325,7 @@ index					if (next == '\"') {
 		return Optional.of(Ok(compiledObject + "." + child));
 	}
 	private def compileString(stripped : String): Optional<Result<String, CompileException>> => {
-		return Ok[value=stripped.startsWith("\"") && stripped.endsWith("\"")] ? Ok[value=Optional.of(Ok(stripped))] : Ok[value=Optional].empty();
+		return stripped.startsWith("\"") && stripped.endsWith("\"") ? Optional.of(Ok(stripped)) : Optional.empty();
 	}
 	private def compileOperation(stripped : String, operator : String): Optional<Result<String, CompileException>> => {
 		let operatorIndex = stripped.indexOf(operator);

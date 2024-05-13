@@ -29,7 +29,7 @@ export class def MethodCompiler(input : String) => {
 		if (modifiersAndType.isEmpty()) 		return Optional.empty();
 		let modifiers = modifiersAndType.subList(0, Optional[Ok[value=modifiersAndType.size() - 1]]);
 		let inputType = modifiersAndType.get(modifiersAndType.size() - 1);
-		let modifierString = Ok[value=modifiers.contains("private")] ? Ok[value="private "] : Ok[value=""];
+		let modifierString = modifiers.contains("private") ? "private " : "";
 		let contentStart = stripped.indexOf("{");
 		let contentEnd = stripped.lastIndexOf('}');
 		let finalRenderedParams = renderedParams;
@@ -39,14 +39,14 @@ export class def MethodCompiler(input : String) => {
 		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let outputContent = compileMethodMembers(inputContent).$();
 		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value="{\n" + outputContent + "\t}"]]);
-		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
+		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]]) : ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]]);
 
 ));
 		}
 		try {
 		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value=";"]]);
-		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
+		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]]) : ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]]);
 
 ));
 		}

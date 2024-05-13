@@ -391,7 +391,8 @@ public record ValueCompiler(String input) {
         var elseBlock = new ValueCompiler(elseString).compile();
         if (elseBlock.isEmpty()) return Optional.empty();
 
-        var rendered = condition.get() + " ? " + thenBlock.get() + " : " + elseBlock.get();
-        return Optional.of(new Ok<>(rendered));
+        return Optional.of($Result(() -> {
+            return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
+        }));
     }
 }

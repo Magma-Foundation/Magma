@@ -19,7 +19,7 @@ let input	def InstanceCompiler(input : String): public => {
 		let contentStart = input.indexOf('{', Optional[Ok[value=classEnd]]);
 		if (contentStart == -1) 		return Optional.empty();
 		let name = input.substring(classEnd, Optional[Ok[value=computeNameEnd(input, Optional[Ok[value=contentStart]])]]).strip();
-		let modifierString = Ok[value=input.startsWith("public ")] ? Ok[value="export "] : Ok[value=""];
+		let modifierString = input.startsWith("public ") ? "export " : "";
 		let contentEnd = input.lastIndexOf('}');
 		if (contentEnd == -1) 		return Optional.empty();
 		let content = input.substring(contentStart + 1, Optional[Ok[value=contentEnd]]).strip();
