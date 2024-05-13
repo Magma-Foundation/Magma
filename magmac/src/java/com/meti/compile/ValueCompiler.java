@@ -112,8 +112,17 @@ public record ValueCompiler(String input) {
                 .or(() -> compileSymbol(stripped))
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
+                .or(() -> compileChar(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileChar(String stripped) {
+        if(stripped.startsWith("'") && stripped.endsWith("'")) {
+            return Optional.of(new Ok<>(stripped));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileNumbers(String stripped) {
