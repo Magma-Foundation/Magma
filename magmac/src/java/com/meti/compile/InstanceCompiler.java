@@ -41,7 +41,7 @@ public abstract class InstanceCompiler implements RootCompiler {
     private static Result<ClassMemberResult, CompileException> compileClassMember(String input) {
         return new MethodCompiler(input).compile()
                 .or(() -> {
-                    return new DeclarationCompiler(input, 0).compile().map(result -> {
+                    return new DeclarationCompiler(input, 0).compile(Collections.emptyList()).map(result -> {
                         return result.mapValue(value -> {
                             return new ClassMemberResult(List.of(value), Collections.emptyList());
                         });

@@ -19,7 +19,7 @@ public record MethodCompiler(String input) {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember, indent).compile());
+                outputContent.append(new StatementCompiler(inputMember, indent).compile(Collections.emptyList()));
             } catch (CompileException e) {
                 return new Err<>(e);
             }

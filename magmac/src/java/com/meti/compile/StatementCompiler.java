@@ -5,6 +5,7 @@ import com.meti.result.Ok;
 import com.meti.result.Result;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static com.meti.compile.ValueCompiler.compileInvocation;
@@ -25,7 +26,7 @@ public record StatementCompiler(String input, int indent) {
                 body = compileBlock(stripped, 2, 0);
             } else {
                 var value = stripped.substring("else ".length());
-                body = new StatementCompiler(value, 0).compile();
+                body = new StatementCompiler(value, 0).compile(Collections.emptyList());
             }
             return Optional.of(new Ok<>("\t".repeat(indent) + "try " + body));
         } catch (CompileException e) {
@@ -51,7 +52,7 @@ public record StatementCompiler(String input, int indent) {
         for (String inputStatement : inputStatements) {
             if (inputStatement.isBlank()) continue;
             try {
-                var compiled = new StatementCompiler(inputStatement, indent + 1).compile();
+                var compiled = new StatementCompiler(inputStatement, indent + 1).compile(Collections.emptyList());
                 output.append(compiled);
             } catch (CompileException e) {
                 throw new CompileException("Failed to compile block: " + stripped, e);
@@ -109,20 +110,20 @@ public record StatementCompiler(String input, int indent) {
         return conditionEnd;
     }
 
-    String compile() throws CompileException {
+    String compile(List<String> stack) throws CompileException {
         var stripped = input.strip();
 
         return compileTry(stripped, indent)
                 .or(() -> compileCatch(stripped, indent))
                 .or(() -> compileThrow(stripped, indent))
-                .or(() -> compileFor(stripped, indent))
+                .or(() -> compileFor(stripped, indent, stack))
                 .or(() -> compileReturn(stripped, indent))
                 .or(() -> compileIf(stripped, indent))
                 .or(() -> compileWhile(stripped, indent))
                 .or(() -> compileElse(stripped, indent))
                 .or(() -> compileAssignment(stripped, indent))
-                .or(() -> new DeclarationCompiler(stripped, indent).compile())
-                .or(() -> compileInvocation(stripped, indent, Collections.emptyList()))
+                .or(() -> new DeclarationCompiler(stripped, indent).compile(stack))
+                .or(() -> compileInvocation(stripped, indent, stack))
                 .or(() -> compileSuffixOperator(stripped))
                 .or(() -> compileComment(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
@@ -189,7 +190,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private Optional<? extends Result<String, CompileException>> compileFor(String stripped, int indent) {
+    private Optional<? extends Result<String, CompileException>> compileFor(String stripped, int indent, List<String> stack) {
         if (!stripped.startsWith("for")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -221,17 +222,19 @@ public record StatementCompiler(String input, int indent) {
                 var terminatingString = condition.substring(first + 1, second).strip();
                 var incrementString = condition.substring(second + 1).strip();
 
-                var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
+                var initial = new DeclarationCompiler(initialString, 0)
+                        .compile(stack)
+                        .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
 
-                var terminating = new ValueCompiler(terminatingString, 0).compileRequired(Collections.emptyList());
-                var increment = new StatementCompiler(incrementString, 0).compile();
+                var terminating = new ValueCompiler(terminatingString, 0).compileRequired(stack);
+                var increment = new StatementCompiler(incrementString, 0).compile(Collections.emptyList());
 
                 compiledBlock = compileBlock(stripped, indent, 0);
                 conditionString = initial + ";" + terminating + increment;
             } else {
                 var initialString = condition.substring(0, separator);
                 var initial = new DeclarationCompiler(initialString, 0)
-                        .compile()
+                        .compile(stack)
                         .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString))
                         .$();
 
@@ -283,7 +286,7 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, indent, 0);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new StatementCompiler(valueString, 0).compile();
+                compiledValue = new StatementCompiler(valueString, 0).compile(Collections.emptyList());
             }
             result = new Ok<>("\t".repeat(indent) + "while (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -312,7 +315,7 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, indent, conditionEnd);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new StatementCompiler(valueString, indent).compile();
+                compiledValue = new StatementCompiler(valueString, indent).compile(Collections.emptyList());
             }
             result = new Ok<>("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
