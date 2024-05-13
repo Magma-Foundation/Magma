@@ -6,7 +6,7 @@ import com.meti.result.Result;
 
 import java.util.Optional;
 
-public record DeclarationCompiler(String stripped) {
+public record DeclarationCompiler(String stripped, int indent) {
     Optional<? extends Result<String, CompileException>> compile() {
         var valueSeparator = stripped().indexOf('=');
 
@@ -23,9 +23,11 @@ public record DeclarationCompiler(String stripped) {
                 var compiledValue = new ValueCompiler(after).compile();
                 valueString = " = " + compiledValue;
             } else {
-                valueString = ";";
+                valueString = "";
             }
-            rendered = new Ok<>("\t\tlet " + name + valueString + ";\n");
+
+            var suffix = indent == 0 ? "" : ";\n";
+            rendered = new Ok<>("\t".repeat(indent) + "let " + name + valueString + suffix);
         } catch (CompileException e) {
             rendered = new Err<>(e);
         }

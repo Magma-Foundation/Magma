@@ -1,15 +1,15 @@
 import { Optional } from java.util;
 export class def ClassCompiler extends InstanceCompiler() => {
 	def ClassCompiler(input : String): public => {
-		let super(input);;
+		let super(input);
 	}
 	def computeKeyword(): String => {
-		let "class";;
+		return "class";
 	}
 	def computeParamString(input : String): Optional<String> => {
-		let Optional.of("");;
+		return Optional.of("");
 	}
 	def computeContentStart(input : String, contentStart : int): int => {
-		let contentStart;;
+		return contentStart;
 	}
 }

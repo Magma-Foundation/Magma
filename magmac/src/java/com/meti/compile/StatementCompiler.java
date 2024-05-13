@@ -37,9 +37,9 @@ public record StatementCompiler(String input) {
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
                 .or(() -> compileThrow(stripped))
-                .or(() -> new DeclarationCompiler(stripped).compile())
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
+                .or(() -> new DeclarationCompiler(stripped, 2).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
@@ -73,7 +73,7 @@ public record StatementCompiler(String input) {
         var separator = condition.lastIndexOf(':');
 
         var conditionDeclarationString = condition.substring(0, separator);
-        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString)
+        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)
                 .compile();
         if(compiledConditionDeclaration.isEmpty()) {
             return Optional.empty();
