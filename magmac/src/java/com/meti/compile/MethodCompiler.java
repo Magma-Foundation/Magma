@@ -76,7 +76,7 @@ public record MethodCompiler(String input) {
         return Optional.empty();
     }
 
-    private static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
+     static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             if (inputMember.isBlank()) continue;

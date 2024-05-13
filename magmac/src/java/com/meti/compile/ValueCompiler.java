@@ -166,7 +166,17 @@ public record ValueCompiler(String input) {
 
     Optional<Result<String, CompileException>> compile() {
         var stripped = input().strip();
-        return compileString(stripped).or(() -> compileSymbol(stripped)).or(() -> compileLambda(stripped)).or(() -> compileInvocation(stripped, 0)).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileOperation(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped));
+        return compileString(stripped)
+                .or(() -> compileSymbol(stripped))
+                .or(() -> compileLambda(stripped))
+                .or(() -> compileInvocation(stripped, 0))
+                .or(() -> compileAccess(stripped))
+                .or(() -> compileTernary(stripped))
+                .or(() -> compileOperation(stripped))
+                .or(() -> compileNumbers(stripped))
+                .or(() -> compileChar(stripped))
+                .or(() -> compileNot(stripped))
+                .or(() -> compileMethodReference(stripped));
     }
 
     private Optional<Result<String, CompileException>> compileMethodReference(String stripped) {
@@ -191,13 +201,34 @@ public record ValueCompiler(String input) {
         if (separator == -1) return Optional.empty();
 
         var before = stripped.substring(0, separator).strip();
-        if (!before.equals("()")) {
+        var paramStart = before.indexOf('(');
+        var paramEnd = before.lastIndexOf(')');
+
+        var params = new ArrayList<String>();
+        if (paramStart == 0 && paramEnd == before.length() - 1) {
+            /*
+            Pull params
+             */
+        } else if(paramStart == -1 && paramEnd == -1){
+            if(Strings.isSymbol(before)) {
+                params.add(before);
+            } else {
+                return Optional.empty();
+            }
+        } else {
             return Optional.empty();
         }
 
-        var value = stripped.substring(separator + "->".length());
+        var value = stripped.substring(separator + "->".length()).strip();
         try {
-            var compiledValue = new ValueCompiler(value).compileRequired();
+            String compiledValue;
+            if (value.startsWith("{") && value.endsWith("}")) {
+                var inputContent = value.substring(1, value.length() - 1).strip();
+                var members = Strings.splitMembers(inputContent);
+                compiledValue = MethodCompiler.compileMethodMembers(members).$();
+            } else {
+                compiledValue = new ValueCompiler(value).compileRequired();
+            }
             var rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {

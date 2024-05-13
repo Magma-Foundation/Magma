@@ -14,21 +14,22 @@ export class def InstanceCompiler implements RootCompiler() => let input	def Ins
 		let classIndex = input.indexOf(computeKeyword());
 		if (classIndex == -1) 		return Optional.empty();
 		let classEnd = classIndex + computeKeyword().length();
-		let contentStart = input.indexOf('{', classEnd);
+		let contentStart = input.indexOf('{', Optional[Ok[value=classEnd]]);
 		if (contentStart == -1) 		return Optional.empty();
-		let name = input.substring(classEnd, computeNameEnd(input, contentStart)).strip();
+		let name = input.substring(classEnd, Optional[Ok[value=computeNameEnd(input, Optional[Ok[value=contentStart]])]]).strip();
 		let modifierString = input.startsWith("public ") ? "export " : "";
 		let contentEnd = input.lastIndexOf('}');
 		if (contentEnd == -1) 		return Optional.empty();
-		let content = input.substring(contentStart + 1, contentEnd).strip();
+		let content = input.substring(contentStart + 1, Optional[Ok[value=contentEnd]]).strip();
 		let inputContent = Strings.splitMembers(content);
 		let paramString = computeParamString(input);
 		if (paramString.isEmpty()) 		return Optional.empty();
-		return compileClassMembers(inputContent).mapErr(err -> {
-            var format = "Failed to compile %s body: %s";
-            var message = format.formatted(computeKeyword(), input);
-            return new CompileException(message, err);
-        }).mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get()))).into(Results::unwrapOptional);
+		return compileClassMembers(inputContent).mapErr(() => 		let format = "Failed to compile %s body: %s";
+		let message = format.formatted(computeKeyword(), Optional[Ok[value=input]]);
+		return CompileException(message, Optional[Ok[value=err]]);
+
+).mapValue(() => Optional.of(MagmaLang.renderClass(modifierString, Optional[Ok[value=name]], Optional[Ok[value=output]], Optional[Ok[value=paramString.get()]]))
+).into(Results.unwrapOptional);
 	}
 	def computeNameEnd(input : String, contentStart : int): int => ;
 	def computeParamString(input : String): Optional<String> => ;
@@ -47,17 +48,16 @@ export object InstanceCompiler implements RootCompiler {
 		return Err(e);
 		}
 		}
-		return Ok(ClassMemberResult(instanceContent, staticContent));
+		return Ok(ClassMemberResult(instanceContent, Optional[Ok[value=staticContent]]));
 	}
 	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => {
-		return MethodCompiler(input).compile()
-                .or(() -> {
-                    return new DeclarationCompiler(input, 0).compile().map(result -> {
-                        return result.mapValue(value -> {
-                            return new ClassMemberResult(List.of(value), Collections.emptyList());
-                        });
-                    });
-                })
-                .orElseGet(() -> new Err<>(new CompileException("Unknown class member: " + input)));
+		return MethodCompiler(input).compile().or(() => 		return DeclarationCompiler(input, Optional[Ok[value=0]]).compile().map(() => 		return result.mapValue(() => 		return ClassMemberResult(List.of(value), Optional[Ok[value=Collections.emptyList()]]);
+
+);
+
+);
+
+).orElseGet(() => Err(CompileException("Unknown class member: " + input))
+);
 	}
 }
