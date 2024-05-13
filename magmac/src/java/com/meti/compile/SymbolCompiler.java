@@ -7,18 +7,17 @@ import com.meti.result.Result;
 import java.util.List;
 import java.util.Optional;
 
-public record SymbolCompiler(String stripped, List<String> stack) {
-    Optional<Result<String, CompileException>> compileSymbol() {
-        if (!Strings.isSymbol(stripped())) return Optional.empty();
+public final class SymbolCompiler {
+    static Optional<Result<String, CompileException>> compile(List<String> stack, String stripped) {
+        if (!Strings.isSymbol(stripped)) return Optional.empty();
+        return Optional.of(SymbolCompiler.computeResult(stripped, stack));
+    }
 
-        Result<String, CompileException> result;
-        if (stack().contains(stripped())) result = new Ok<>(stripped());
-        else {
-            var format = "'%s' is not defined.";
-            var message = format.formatted(stripped());
-            result = new Err<>(new CompileException(message));
-        }
+    private static Result<String, CompileException> computeResult(String input, List<String> stack) {
+        if (stack.contains(input)) return new Ok<>(input);
 
-        return Optional.of(result);
+        var format = "'%s' is not defined.";
+        var message = format.formatted(input);
+        return new Err<>(new CompileException(message));
     }
 }

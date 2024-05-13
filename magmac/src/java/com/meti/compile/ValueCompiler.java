@@ -41,13 +41,12 @@ public record ValueCompiler(String input, int indent) {
             if (inputArgument.isBlank()) continue;
 
             try {
-                var compiledValue = new ValueCompiler(inputArgument, indent).compile();
+                var compiledValue = new ValueCompiler(inputArgument, indent).compile(Collections.emptyList());
                 if (compiledValue.isEmpty()) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
 
-                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse("")))
-                        .orElse(new StringBuilder(compiledValue.get().$())));
+                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse(""))).orElse(new StringBuilder(compiledValue.get().$())));
 
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
@@ -58,7 +57,7 @@ public record ValueCompiler(String input, int indent) {
         var suffix = indent == 0 ? "" : ";\n";
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-        var compiledCaller = new ValueCompiler(caller, 0).compile();
+        var compiledCaller = new ValueCompiler(caller, 0).compile(Collections.emptyList());
         if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
@@ -233,23 +232,12 @@ public record ValueCompiler(String input, int indent) {
     }
 
     String compileRequired() throws CompileException {
-        return compile().orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+        return compile(Collections.emptyList()).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
     }
 
-    Optional<Result<String, CompileException>> compile() {
+    Optional<Result<String, CompileException>> compile(List<String> stack) {
         var stripped = input().strip();
-        return compileString(stripped)
-                .or(() -> new SymbolCompiler(stripped, Collections.emptyList()).compileSymbol())
-                .or(() -> compileLambda(stripped, indent))
-                .or(() -> compileInvocation(stripped, indent))
-                .or(() -> compileAccess(stripped))
-                .or(() -> compileTernary(stripped))
-                .or(() -> compileNumbers(stripped))
-                .or(() -> compileOperation(stripped))
-                .or(() -> compileChar(stripped))
-                .or(() -> compileNot(stripped))
-                .or(() -> compileMethodReference(stripped))
-                .or(() -> compileCast(stripped));
+        return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped)).or(() -> compileLambda(stripped, indent)).or(() -> compileInvocation(stripped, indent)).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -276,7 +264,7 @@ public record ValueCompiler(String input, int indent) {
             var after = stripped.substring(index + "::".length());
             if (!Strings.isSymbol(after)) return Optional.empty();
 
-            return new ValueCompiler(before, 0).compile().map(value -> {
+            return new ValueCompiler(before, 0).compile(Collections.emptyList()).map(value -> {
                 return value.mapValue(inner -> {
                     return inner + "." + after;
                 });
@@ -357,10 +345,7 @@ public record ValueCompiler(String input, int indent) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||", "<", "-")
-                .map(operator -> compileOperation(stripped, operator))
-                .flatMap(Optional::stream)
-                .findFirst();
+        return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
@@ -371,15 +356,15 @@ public record ValueCompiler(String input, int indent) {
         if (statementMarker == -1) return Optional.empty();
 
         var conditionString = stripped.substring(0, conditionMarker).strip();
-        var condition = new ValueCompiler(conditionString, 0).compile();
+        var condition = new ValueCompiler(conditionString, 0).compile(Collections.emptyList());
         if (condition.isEmpty()) return Optional.empty();
 
         var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-        var thenBlock = new ValueCompiler(thenString, 0).compile();
+        var thenBlock = new ValueCompiler(thenString, 0).compile(Collections.emptyList());
         if (thenBlock.isEmpty()) return Optional.empty();
 
         var elseString = stripped.substring(statementMarker + 1).strip();
-        var elseBlock = new ValueCompiler(elseString, 0).compile();
+        var elseBlock = new ValueCompiler(elseString, 0).compile(Collections.emptyList());
         if (elseBlock.isEmpty()) return Optional.empty();
 
         return Optional.of($Result(() -> {
