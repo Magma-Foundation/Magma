@@ -7,7 +7,7 @@ import com.meti.result.Result;
 import java.util.Optional;
 
 public record DeclarationCompiler(String stripped, int indent) {
-    Optional<? extends Result<String, CompileException>> compileInstance() {
+    Optional<? extends Result<String, CompileException>> compile() {
         var valueSeparator = stripped.indexOf('=');
 
         var headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;

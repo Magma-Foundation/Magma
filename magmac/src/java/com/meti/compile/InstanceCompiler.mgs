@@ -37,7 +37,7 @@ export object InstanceCompiler implements RootCompiler {
 	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
 		let instanceContent = ArrayList();
 		let staticContent = ArrayList();
-		for (let input :  inputContent) {
+		for (Ok[value=let input] :  inputContent) {
 			if (input.isBlank()) let continue		try {
 			let result = compileClassMember(input).$();
 			instanceContent.addAll(result.instanceMembers());
@@ -52,7 +52,7 @@ export object InstanceCompiler implements RootCompiler {
 	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => {
 		return MethodCompiler(input).compile()
                 .or(() -> {
-                    return new DeclarationCompiler(input, 0).compileInstance().map(result -> {
+                    return new DeclarationCompiler(input, 0).compile().map(result -> {
                         return result.mapValue(value -> {
                             return new ClassMemberResult(List.of(value), Collections.emptyList());
                         });

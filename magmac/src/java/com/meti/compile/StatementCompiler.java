@@ -59,8 +59,7 @@ public record StatementCompiler(String input, int indent) {
         var separator = token.indexOf('.');
         if (separator == -1) return false;
 
-        return isAssignable(token.substring(0, separator).strip()) &&
-               Strings.isSymbol(token.substring(separator + 1).strip());
+        return isAssignable(token.substring(0, separator).strip()) && Strings.isSymbol(token.substring(separator + 1).strip());
     }
 
     String compile() throws CompileException {
@@ -71,14 +70,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
-                .or(() -> compileIf(stripped, indent))
-                .or(() -> compileElse(stripped))
-                .or(() -> compileAssignment(stripped, indent))
-                .or(() -> new DeclarationCompiler(stripped, indent).compileInstance())
-                .or(() -> compileInvocation(stripped, 3))
-                .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
-                .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
-                .$();
+                .or(() -> compileIf(stripped, indent)).or(() -> compileElse(stripped)).or(() -> compileAssignment(stripped, indent)).or(() -> new DeclarationCompiler(stripped, indent).compile()).or(() -> compileInvocation(stripped, 3)).orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped))).mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err)).$();
     }
 
     private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped, int indent) {
@@ -125,29 +117,63 @@ public record StatementCompiler(String input, int indent) {
         if (!stripped.startsWith("for")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
-        if (conditionStart == -1) return Optional.empty();
-
-        var conditionEnd = stripped.indexOf(')');
-        if (conditionEnd == -1) return Optional.empty();
-
-        var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
-        var separator = condition.lastIndexOf(':');
-        if(separator == -1) return Optional.empty();
-
-        var conditionDeclarationString = condition.substring(0, separator);
-        var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)
-                .compileInstance();
-
-        if (compiledConditionDeclaration.isEmpty()) {
-            return Optional.empty();
+        if (conditionStart == -1) {
+            return Optional.of(new Err<>(new CompileException("No starting parentheses in for: " + stripped)));
         }
 
-        var container = condition.substring(separator + 1);
+        var conditionEnd = -1;
+        var depth = 0;
+        for (int i = conditionStart + 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (c == ')' && depth == 0) {
+                conditionEnd = i;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+
+        if (conditionEnd == -1) {
+            return Optional.of(new Err<>(new CompileException("No ending parentheses in for: " + stripped)));
+        }
+
+        var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped, indent);
-            result = new Ok<>("\t".repeat(indent) + "for (" + compiledConditionDeclaration.get().$() + " : " + container + ") " + compiledBlock);
+            var separator = condition.lastIndexOf(':');
+            String compiledBlock;
+            String conditionString;
+            if (separator == -1) {
+                var first = condition.indexOf(';');
+                if (first == -1) return Optional.empty();
+
+                var second = condition.indexOf(';', first + 1);
+                if (second == -1) return Optional.empty();
+
+                var initialString = condition.substring(0, first).strip();
+                var terminatingString = condition.substring(first + 1, second).strip();
+                var incrementString = condition.substring(second + 1).strip();
+
+                var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
+
+                var terminating = new ValueCompiler(terminatingString).compile();
+                var increment = new StatementCompiler(incrementString, 0).compile();
+
+                compiledBlock = compileBlock(stripped, indent);
+                conditionString = initial + ";" + terminating + increment;
+            } else {
+                var initialString = condition.substring(0, separator);
+                var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
+
+                var container = condition.substring(separator + 1);
+
+                compiledBlock = compileBlock(stripped, indent);
+                conditionString = initial + " : " + container;
+            }
+
+            result = new Ok<>("\t".repeat(indent) + "for (" + conditionString + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }
