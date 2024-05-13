@@ -178,20 +178,6 @@ public record ValueCompiler(String input, int indent) {
         return start;
     }
 
-    private static Optional<Result<String, CompileException>> compileSymbol(String stripped, List<String> stack) {
-        if (!Strings.isSymbol(stripped)) return Optional.empty();
-
-        Result<String, CompileException> result;
-        if (stack.contains(stripped)) result = new Ok<>(stripped);
-        else {
-            var format = "'%s' is not defined.";
-            var message = format.formatted(stripped);
-            result = new Err<>(new CompileException(message));
-        }
-
-        return Optional.of(result);
-    }
-
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
         var objectEnd = stripped.lastIndexOf('.');
         if (objectEnd == -1) return Optional.empty();
@@ -253,7 +239,7 @@ public record ValueCompiler(String input, int indent) {
     Optional<Result<String, CompileException>> compile() {
         var stripped = input().strip();
         return compileString(stripped)
-                .or(() -> compileSymbol(stripped, Collections.emptyList()))
+                .or(() -> new SymbolCompiler(stripped, Collections.emptyList()).compileSymbol())
                 .or(() -> compileLambda(stripped, indent))
                 .or(() -> compileInvocation(stripped, indent))
                 .or(() -> compileAccess(stripped))
