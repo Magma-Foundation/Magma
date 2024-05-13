@@ -4,7 +4,7 @@ import { Result } from com.meti.result;
 import { Optional } from java.util;
 export class def DeclarationCompiler(stripped : String, indent : int) => 	def compile(): Optional<? extends Result<String, CompileException>> => {
 		let valueSeparator = stripped.indexOf('=');
-		let headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;
+		let headerEnd = Ok[value=valueSeparator == -1] ? Ok[value=stripped.length()] : Ok[value=valueSeparator];
 		let header = stripped().substring(0, Optional[Ok[value=headerEnd]]).strip();
 		let separator = header.lastIndexOf(' ');
 		let name = header.substring(separator + 1).strip();
@@ -20,7 +20,7 @@ export class def DeclarationCompiler(stripped : String, indent : int) => 	def co
 		try {
 			valueString = "";
 		}
-			let suffix = indent == 0 ? "" : ";\n";
+			let suffix = Ok[value=indent == 0] ? Ok[value=""] : Ok[value=";\n"];
 			rendered = Ok("\t".repeat(indent) + "let " + name + valueString + suffix);
 		}
 		catch (e : CompileException) {

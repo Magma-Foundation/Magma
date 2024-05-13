@@ -110,7 +110,7 @@ public record ValueCompiler(String input) {
             var c = queue.pop();
             index--;
 
-            if(c == '\'') {
+            if (c == '\'') {
                 queue.pop();
                 queue.pop();
                 index--;
@@ -294,19 +294,19 @@ public record ValueCompiler(String input) {
         var statementMarker = stripped.indexOf(":", conditionMarker);
         if (statementMarker == -1) return Optional.empty();
 
-        var rendered = $Result(() -> {
-            var conditionString = stripped.substring(0, conditionMarker).strip();
-            var condition = new ValueCompiler(conditionString).compileRequired();
+        var conditionString = stripped.substring(0, conditionMarker).strip();
+        var condition = new ValueCompiler(conditionString).compile();
+        if(condition.isEmpty()) return Optional.empty();
 
-            var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-            var thenBlock = new ValueCompiler(thenString).compileRequired();
+        var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
+        var thenBlock = new ValueCompiler(thenString).compile();
+        if(thenBlock.isEmpty()) return Optional.empty();
 
-            var elseString = stripped.substring(statementMarker + 1).strip();
-            var elseBlock = new ValueCompiler(elseString).compileRequired();
+        var elseString = stripped.substring(statementMarker + 1).strip();
+        var elseBlock = new ValueCompiler(elseString).compile();
+        if(elseBlock.isEmpty()) return Optional.empty();
 
-            return condition + " ? " + thenBlock + " : " + elseBlock;
-        }).mapErr(err -> new CompileException("Failed to compile ternary statement: " + stripped, err));
-
-        return Optional.of(rendered);
+        var rendered = condition.get() + " ? " + thenBlock.get() + " : " + elseBlock.get();
+        return Optional.of(new Ok<>(rendered));
     }
 }

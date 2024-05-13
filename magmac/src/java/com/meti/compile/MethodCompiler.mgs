@@ -1,0 +1,117 @@
+import { Err } from com.meti.result;
+import { Ok } from com.meti.result;
+import { Result } from com.meti.result;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
+import { List } from java.util;
+import { Optional } from java.util;
+import { renderDefinedFunction } from com.meti.compile.MagmaLang;
+import { $Result } from com.meti.result.Results;
+export class def MethodCompiler(input : String) => 	def compile(): Optional<Result<ClassMemberResult, CompileException>> => {
+		let stripped = input().strip();
+		let paramStart = stripped.indexOf('(');
+		if (paramStart == -1) 		return Optional.empty();
+		let paramEnd = stripped.indexOf(')');
+		if (paramEnd == -1) 		return Optional.empty();
+		let paramString = stripped.substring(paramStart + 1, Optional[Ok[value=paramEnd]]);
+		let renderedParams = ParamsCompiler(paramString).compile();
+		let before = stripped.substring(0, Optional[Ok[value=paramStart]]).strip();
+		let separator = before.lastIndexOf(' ');
+		let modifiersAndTypeString = before.substring(0, Optional[Ok[value=separator]]).strip();
+		let name = before.substring(separator + 1).strip();
+		let modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
+		if (modifiersAndType.isEmpty()) 		return Optional.empty();
+		let modifiers = modifiersAndType.subList(0, Optional[Ok[value=modifiersAndType.size() - 1]]);
+		let inputType = modifiersAndType.get(modifiersAndType.size() - 1);
+		let modifierString = Ok[value=modifiers.contains("private")] ? Ok[value="private "] : Ok[value=""];
+		let contentStart = stripped.indexOf("{");
+		let contentEnd = stripped.lastIndexOf('}');
+		if (contentStart != -1 && contentEnd != -1) {
+			let content = stripped.substring(contentStart + 1, Optional[Ok[value=contentEnd]]);
+			let inputContent = Strings.splitMembers(content);
+		return Optional.of($Result(() => 		let outputType = compileType(inputType).$();
+		let outputContent = compileMethodMembers(inputContent).$();
+		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value="{\n" + outputContent + "\t}"]]);
+		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
+
+));
+		}
+		try {
+		return Optional.of($Result(() => 		let outputType = compileType(inputType).$();
+		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value=";"]]);
+		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
+
+));
+		}
+		try {
+		return Optional.empty();
+		}
+	}
+
+export object MethodCompiler {
+	private def compileType(inputType : String): Result<String, CompileException> => {
+		return compilePrimitiveType(inputType).or(() => compileSymbolType(inputType)
+).or(() => compileGenericType(inputType)
+).orElseGet(() => Err(CompileException("Unknown type: " + inputType))
+);
+	}
+	private def compileGenericType(inputType : String): Optional<Result<String, CompileException>> => {
+		let genStart = inputType.indexOf(' < ');
+		if (genStart == -1) 		return Optional.empty();
+		let genEnd = inputType.lastIndexOf('>');
+		if (genEnd == -1) 		return Optional.empty();
+		let parent = inputType.substring(0, Optional[Ok[value=genStart]]);
+		let childrenString = inputType.substring(genStart + 1, Optional[Ok[value=genEnd]]);
+		let children = ArrayList();
+		let builder = StringBuilder();
+		let depth = 0;
+		for (Ok[value=let i = 0];i < childrenString.length()i) {
+			let c = childrenString.charAt(i);
+			if (c == ',' && depth == 0) {
+			children.add(builder.toString());
+				builder = StringBuilder();
+		}
+		try {
+			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
+		}
+		}
+			children.add(builder.toString());
+		let newChildren = ArrayList();
+		for (Ok[value=let child] :  children) {
+			let stripped = child.strip();
+			if (stripped.isEmpty()) let continue		try {
+			newChildren.add(compileType(stripped).$());
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, Optional[Ok[value=e]])));
+		}
+		}
+		return Optional.of(Ok(parent + "<" + String.join(", ", newChildren) + ">"));
+	}
+	private def compileSymbolType(inputType : String): Optional<Result<String, CompileException>> => {
+		if (Strings.isSymbol(inputType)) {
+		return Optional.of(Ok(inputType));
+		}
+		try {
+		return Optional.empty();
+		}
+	}
+	private def compilePrimitiveType(inputType : String): Optional<Result<String, CompileException>> => {
+		if (inputType.equals("void")) {
+		return Optional.of(Ok("Void"));
+		}
+		return Optional.empty();
+	}
+	def compileMethodMembers(inputContent : List<String>): Result<String, CompileException> => {
+		let outputContent = StringBuilder();
+		for (Ok[value=let inputMember] :  inputContent) {
+			if (inputMember.isBlank()) let continue		try {
+			outputContent.append(StatementCompiler(inputMember, Optional[Ok[value=2]]).compile());
+		}
+		catch (e : CompileException) {
+		return Err(e);
+		}
+		}
+		return Ok(outputContent.toString());
+	}
+}
