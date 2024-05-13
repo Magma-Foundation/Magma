@@ -38,7 +38,7 @@ export object TypeCompiler {
 		}
 		children.add(builder.toString());
 		let newChildren = ArrayList();
-		for (Ok[value=let child] :  children) {
+		for (let child :  children) {
 			let stripped = child.strip();
 			if (stripped.isEmpty()) let continue		try {
 			newChildren.add(TypeCompiler(stripped).compile().$());

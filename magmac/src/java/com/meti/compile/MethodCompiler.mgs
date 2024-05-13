@@ -56,7 +56,7 @@ export class def MethodCompiler(input : String) => {
 export object MethodCompiler {
 	def compileMethodMembers(inputContent : List<String>): Result<String, CompileException> => {
 		let outputContent = StringBuilder();
-		for (Ok[value=let inputMember] :  inputContent) {
+		for (let inputMember :  inputContent) {
 			if (inputMember.isBlank()) let continue		try {
 			outputContent.append(StatementCompiler(inputMember, 2).compile());
 		}

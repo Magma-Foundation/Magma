@@ -5,7 +5,7 @@ export class def ParamsCompiler(paramString : String) => {
 	def compile(): String => {
 		let paramStrings = splitParams();
 		let outputParams = Optional.empty();
-		for (Ok[value=let string] :  paramStrings) {
+		for (let string :  paramStrings) {
 			if (string.isBlank()) let continue			let strippedParam = string.strip();
 			let separator = strippedParam.lastIndexOf(' ');
 			if (separator == -1) {

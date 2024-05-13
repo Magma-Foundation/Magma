@@ -157,7 +157,7 @@ export object ValueCompiler {
 		let inputArgumentStrings = stripped.substring(start + 1, end);
 		let inputArguments = splitInvocationArguments(inputArgumentStrings);
 		let outputArguments = Optional.empty();
-		for (Ok[value=let inputArgument] :  inputArguments) {
+		for (let inputArgument :  inputArguments) {
 			if (inputArgument.isBlank()) let continue		try {
 			let compiledValue = ValueCompiler(inputArgument, 0).compile();
 			if (compiledValue.isEmpty()) {

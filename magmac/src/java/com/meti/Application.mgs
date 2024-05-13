@@ -9,7 +9,7 @@ export object Application {
 	def compile(input : String): String => {
 		let lines = Strings.splitMembers(input);
 		let output = StringBuilder();
-		for (Ok[value=let line] :  lines) {
+		for (let line :  lines) {
 			output.append(compileRoot(line));
 		}
 		return output.toString();

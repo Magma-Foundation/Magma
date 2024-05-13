@@ -98,7 +98,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		}
 		try {
 			let initialString = condition.substring(0, separator);
-			let initial = DeclarationCompiler(initialString, 0).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString));
+			let initial = DeclarationCompiler(initialString, 0).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)).$();
 			let container = condition.substring(separator + 1);
 			compiledBlock = compileBlock(stripped, indent, 0);
 			conditionString = initial + " : " + container;
@@ -228,7 +228,7 @@ export object StatementCompiler {
 		let after = stripped.substring(contentStart + 1, contentEnd);
 		let inputStatements = Strings.splitMembers(after);
 		let output = StringBuilder();
-		for (Ok[value=let inputStatement] :  inputStatements) {
+		for (let inputStatement :  inputStatements) {
 			if (inputStatement.isBlank()) let continue		try {
 			let compiled = StatementCompiler(inputStatement, indent + 1).compile();
 			output.append(compiled);

@@ -44,7 +44,7 @@ export object InstanceCompiler implements RootCompiler {
 	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
 		let instanceContent = ArrayList();
 		let staticContent = ArrayList();
-		for (Ok[value=let input] :  inputContent) {
+		for (let input :  inputContent) {
 			if (input.isBlank()) let continue		try {
 			let result = compileClassMember(input).$();
 			instanceContent.addAll(result.instanceMembers());

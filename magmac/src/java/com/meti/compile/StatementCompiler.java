@@ -229,7 +229,10 @@ public record StatementCompiler(String input, int indent) {
                 conditionString = initial + ";" + terminating + increment;
             } else {
                 var initialString = condition.substring(0, separator);
-                var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
+                var initial = new DeclarationCompiler(initialString, 0)
+                        .compile()
+                        .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString))
+                        .$();
 
                 var container = condition.substring(separator + 1);
 
