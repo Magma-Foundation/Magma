@@ -30,6 +30,21 @@ public class Strings {
                 continue;
             }
 
+            if (c == '\"') {
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    builder.append(next);
+                    if (next == '\\') {
+                        builder.append(queue.pop());
+                    }
+                    if(next == '\"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
             if (c == ';' && depth == 0) {
                 lines.add(builder.toString());
                 builder = new StringBuilder();
