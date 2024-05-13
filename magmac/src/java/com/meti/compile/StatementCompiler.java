@@ -17,7 +17,15 @@ public record StatementCompiler(String input, int indent) {
 
     private static String compileBlock(String stripped, int indent) throws CompileException {
         var contentStart = stripped.indexOf('{');
+        if (contentStart == -1) {
+            throw new CompileException("Not a block: " + stripped);
+        }
+
         var contentEnd = stripped.lastIndexOf('}');
+        if (contentEnd == -1) {
+            throw new CompileException("Not a block: " + stripped);
+        }
+
         var after = stripped.substring(contentStart + 1, contentEnd);
 
         var inputStatements = Strings.splitMembers(after);
@@ -39,6 +47,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
+                .or(() -> compileIf(stripped))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
@@ -47,7 +56,7 @@ public record StatementCompiler(String input, int indent) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileReturn(String stripped) {
-        if(stripped.startsWith("return ")) {
+        if (stripped.startsWith("return ")) {
             try {
                 var valueString = stripped.substring("return ".length()).strip();
                 var compiledValue = new ValueCompiler(valueString).compile();
@@ -76,7 +85,7 @@ public record StatementCompiler(String input, int indent) {
         var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)
                 .compile();
 
-        if(compiledConditionDeclaration.isEmpty()) {
+        if (compiledConditionDeclaration.isEmpty()) {
             return Optional.empty();
         }
 
@@ -104,6 +113,30 @@ public record StatementCompiler(String input, int indent) {
         } catch (CompileException e) {
             result = new Err<>(e);
         }
+        return Optional.of(result);
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileIf(String stripped) {
+        if (!stripped.startsWith("if")) return Optional.empty();
+
+        var conditionStart = stripped.indexOf('(');
+        if (conditionStart == -1) return Optional.empty();
+
+        var conditionEnd = stripped.indexOf(')');
+        if (conditionEnd == -1) return Optional.empty();
+
+
+        Result<String, CompileException> result;
+        try {
+            var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
+            var compiledCondition = new ValueCompiler(condition).compile();
+
+            var compiledBlock = compileBlock(stripped, 2);
+            result = new Ok<>("\t\tif (" + compiledCondition + ") " + compiledBlock);
+        } catch (CompileException e) {
+            result = new Err<>(e);
+        }
+
         return Optional.of(result);
     }
 

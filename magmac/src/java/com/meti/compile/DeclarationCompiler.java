@@ -29,7 +29,7 @@ public record DeclarationCompiler(String stripped, int indent) {
             var suffix = indent == 0 ? "" : ";\n";
             rendered = new Ok<>("\t".repeat(indent) + "let " + name + valueString + suffix);
         } catch (CompileException e) {
-            rendered = new Err<>(e);
+            rendered = new Err<>(new CompileException("Failed to compile declaration: " + stripped, e));
         }
 
         return Optional.of(rendered);
