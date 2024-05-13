@@ -4,6 +4,8 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public record DeclarationCompiler(String stripped, int indent) {
@@ -21,7 +23,7 @@ public record DeclarationCompiler(String stripped, int indent) {
             String valueString;
             if (valueSeparator != -1) {
                 var after = stripped.substring(valueSeparator + 1).strip();
-                var compiledValue = new ValueCompiler(after, 0).compileRequired();
+                var compiledValue = new ValueCompiler(after, 0).compileRequired(List.of(name));
                 valueString = " = " + compiledValue;
             } else {
                 valueString = "";

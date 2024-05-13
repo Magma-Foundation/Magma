@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import static com.meti.result.Results.$Result;
 
 public record ValueCompiler(String input, int indent) {
-    static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
+    static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent, List<String> stack) {
         if (!stripped.endsWith(")")) return Optional.empty();
         var start = findInvocationStart(stripped);
         if (start == -1) return Optional.empty();
@@ -41,13 +41,16 @@ public record ValueCompiler(String input, int indent) {
             if (inputArgument.isBlank()) continue;
 
             try {
-                var compiledValue = new ValueCompiler(inputArgument, indent).compile(Collections.emptyList());
+                var compiledValue = new ValueCompiler(inputArgument, indent).compile(stack);
                 if (compiledValue.isEmpty()) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
 
-                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse(""))).orElse(new StringBuilder(compiledValue.get().$())));
+                var value = outputArguments
+                        .map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse("")))
+                        .orElse(new StringBuilder(compiledValue.get().$()));
 
+                outputArguments = Optional.of(value);
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
             }
@@ -57,7 +60,7 @@ public record ValueCompiler(String input, int indent) {
         var suffix = indent == 0 ? "" : ";\n";
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-        var compiledCaller = new ValueCompiler(caller, 0).compile(Collections.emptyList());
+        var compiledCaller = new ValueCompiler(caller, 0).compile(stack);
         if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
@@ -204,7 +207,7 @@ public record ValueCompiler(String input, int indent) {
 
         String compiledObject;
         try {
-            compiledObject = new ValueCompiler(objectString, 0).compileRequired();
+            compiledObject = new ValueCompiler(objectString, 0).compileRequired(Collections.emptyList());
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile object reference of access statement: " + objectString, e)));
         }
@@ -224,20 +227,21 @@ public record ValueCompiler(String input, int indent) {
         var right = stripped.substring(operatorIndex + operator.length());
 
         return Optional.of($Result(() -> {
-            var leftCompiled = new ValueCompiler(left, 0).compileRequired();
-            var rightCompiled = new ValueCompiler(right, 0).compileRequired();
+            var leftCompiled = new ValueCompiler(left, 0).compileRequired(Collections.emptyList());
+            var rightCompiled = new ValueCompiler(right, 0).compileRequired(Collections.emptyList());
 
             return leftCompiled + " " + operator + " " + rightCompiled;
         }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
     }
 
-    String compileRequired() throws CompileException {
-        return compile(Collections.emptyList()).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+    String compileRequired(List<String> stack) throws CompileException {
+        return compile(stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
     }
 
     Optional<Result<String, CompileException>> compile(List<String> stack) {
         var stripped = input().strip();
-        return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped)).or(() -> compileLambda(stripped, indent)).or(() -> compileInvocation(stripped, indent)).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
+        return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
+                .or(() -> compileLambda(stripped, indent)).or(() -> compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -249,7 +253,7 @@ public record ValueCompiler(String input, int indent) {
                 var outputType = new TypeCompiler(type).compile().$();
                 var valueString = stripped.substring(end + 1).strip();
 
-                var compiledValue = new ValueCompiler(valueString, 0).compileRequired();
+                var compiledValue = new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
                 return "(" + outputType + ") " + compiledValue;
             }));
         } else {
@@ -305,7 +309,7 @@ public record ValueCompiler(String input, int indent) {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent).$() + "}";
             } else {
-                compiledValue = new ValueCompiler(value, indent).compileRequired();
+                compiledValue = new ValueCompiler(value, indent).compileRequired(Collections.emptyList());
             }
             var rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));
@@ -318,7 +322,7 @@ public record ValueCompiler(String input, int indent) {
         if (stripped.startsWith("!")) {
             var valueString = stripped.substring(1).strip();
             try {
-                return Optional.of(new Ok<>(new ValueCompiler(valueString, 0).compileRequired()));
+                return Optional.of(new Ok<>(new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList())));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }

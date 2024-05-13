@@ -4,6 +4,7 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static com.meti.compile.ValueCompiler.compileInvocation;
@@ -121,7 +122,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileElse(stripped, indent))
                 .or(() -> compileAssignment(stripped, indent))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
-                .or(() -> compileInvocation(stripped, indent))
+                .or(() -> compileInvocation(stripped, indent, Collections.emptyList()))
                 .or(() -> compileSuffixOperator(stripped))
                 .or(() -> compileComment(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
@@ -141,7 +142,7 @@ public record StatementCompiler(String input, int indent) {
 
         try {
             var value = stripped.substring(0, stripped.length() - 2);
-            var result = new ValueCompiler(value, 0).compileRequired();
+            var result = new ValueCompiler(value, 0).compileRequired(Collections.emptyList());
             return Optional.of(new Ok<>(result));
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile suffix operator: " + stripped, e)));
@@ -158,7 +159,7 @@ public record StatementCompiler(String input, int indent) {
 
             var right = stripped.substring(separator + 1).strip();
             try {
-                return Optional.of(new Ok<>("\t".repeat(indent) + left + " = " + new ValueCompiler(right, 0).compileRequired() + ";\n"));
+                return Optional.of(new Ok<>("\t".repeat(indent) + left + " = " + new ValueCompiler(right, 0).compileRequired(Collections.emptyList()) + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
@@ -175,7 +176,7 @@ public record StatementCompiler(String input, int indent) {
                 if (valueString.isEmpty()) {
                     outputValueString = "";
                 } else {
-                    var compiledValue = new ValueCompiler(valueString, 0).compileRequired();
+                    var compiledValue = new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
                     outputValueString = " " + compiledValue;
                 }
 
@@ -222,7 +223,7 @@ public record StatementCompiler(String input, int indent) {
 
                 var initial = new DeclarationCompiler(initialString, 0).compile().orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
 
-                var terminating = new ValueCompiler(terminatingString, 0).compileRequired();
+                var terminating = new ValueCompiler(terminatingString, 0).compileRequired(Collections.emptyList());
                 var increment = new StatementCompiler(incrementString, 0).compile();
 
                 compiledBlock = compileBlock(stripped, indent, 0);
@@ -254,7 +255,7 @@ public record StatementCompiler(String input, int indent) {
 
         Result<String, CompileException> result;
         try {
-            var compiledValue = new ValueCompiler(valueString, 0).compileRequired();
+            var compiledValue = new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
             result = new Ok<>("\t".repeat(indent) + "throw " + compiledValue + ";\n");
         } catch (CompileException e) {
             result = new Err<>(e);
@@ -275,7 +276,7 @@ public record StatementCompiler(String input, int indent) {
         Result<String, CompileException> result;
         try {
             var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
-            var compiledCondition = new ValueCompiler(condition, 0).compileRequired();
+            var compiledCondition = new ValueCompiler(condition, 0).compileRequired(Collections.emptyList());
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
@@ -304,7 +305,7 @@ public record StatementCompiler(String input, int indent) {
         Result<String, CompileException> result;
         try {
             var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
-            var compiledCondition = new ValueCompiler(condition, 0).compileRequired();
+            var compiledCondition = new ValueCompiler(condition, 0).compileRequired(Collections.emptyList());
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
