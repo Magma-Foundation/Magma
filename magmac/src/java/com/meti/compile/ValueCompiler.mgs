@@ -1,0 +1,324 @@
+import { Err } from com.meti.result;
+import { Ok } from com.meti.result;
+import { Result } from com.meti.result;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
+import { Optional } from java.util;
+import { OptionalInt } from java.util;
+import { Stream } from java.util.stream;
+import { $Result } from com.meti.result.Results;
+export class def ValueCompiler(input : String) => 	def compileRequired(): String => {
+		return compile().orElseGet(() => Err(CompileException("Unknown value: " + input))
+).$();
+	}
+	def compile(): Optional<Result<String, CompileException>> => {
+		let stripped = input().strip();
+		return compileString(stripped).or(() => compileSymbol(stripped)
+).or(() => compileLambda(stripped)
+).or(() => compileInvocation(stripped, Optional[Ok[value=0]])
+).or(() => compileAccess(stripped)
+).or(() => compileTernary(stripped)
+).or(() => compileNumbers(stripped)
+).or(() => compileOperation(stripped)
+).or(() => compileChar(stripped)
+).or(() => compileNot(stripped)
+).or(() => compileMethodReference(stripped)
+);
+	}
+	private def compileMethodReference(stripped : String): Optional<Result<String, CompileException>> => {
+		let index = stripped.indexOf("::");
+		if (index != -1) {
+			let before = stripped.substring(0, Optional[Ok[value=index]]);
+			let after = stripped.substring(index + "::".length());
+			if (Strings.isSymbol(after)) 		return Optional.empty();
+		return ValueCompiler(before).compile().map(() => 		return value.mapValue(() => 		return inner + "." + after;
+
+);
+
+);
+		}
+		return Optional.empty();
+	}
+	private def compileLambda(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		let separator = stripped.indexOf("->");
+		if (separator == -1) 		return Optional.empty();
+		let before = stripped.substring(0, Optional[Ok[value=separator]]).strip();
+		let paramStart = before.indexOf('(');
+		let paramEnd = before.lastIndexOf(')');
+		let params = ArrayList();
+		if (paramStart == 0 && paramEnd == before.length() - 1) {
+/*
+            Pull params
+             */		}
+		try {
+			if (Strings.isSymbol(before)) {
+			params.add(before);
+		}
+		try {
+		return Optional.empty();
+		}
+		}
+		try {
+		return Optional.empty();
+		}
+		let value = stripped.substring(separator + "->".length()).strip();
+		try {
+			let compiledValue;
+			if (value.startsWith("{") && value.endsWith("}")) {
+				let inputContent = value.substring(1, Optional[Ok[value=value.length() - 1]]).strip();
+				let members = Strings.splitMembers(inputContent);
+				compiledValue = MethodCompiler.compileMethodMembers(members).$();
+		}
+		try {
+			compiledValue = ValueCompiler(value).compileRequired();
+		}
+			let rendered = MagmaLang.renderFunction(0, Optional[Ok[value=""]], Optional[Ok[value=""]], Optional[Ok[value=""]], Optional[Ok[value=""]], Optional[Ok[value=" => " + compiledValue]]);
+		return Optional.of(Ok(rendered));
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile lambda: " + stripped, Optional[Ok[value=e]])));
+		}
+	}
+	private def compileNot(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		if (stripped.startsWith("!")) {
+			let valueString = stripped.substring(1).strip();
+		try {
+		return Optional.of(Ok(ValueCompiler(valueString).compileRequired()));
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(e));
+		}
+		}
+		try {
+		return Optional.empty();
+		}
+	}
+	private def compileChar(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		if (stripped.startsWith("'") && stripped.endsWith("'")) {
+		return Optional.of(Ok(stripped));
+		}
+		try {
+		return Optional.empty();
+		}
+	}
+	private def compileNumbers(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		try {
+			Integer.parseInt(stripped);
+		return Optional.of(Ok(stripped));
+		}
+		catch (e : NumberFormatException) {
+		return Optional.empty();
+		}
+	}
+	private def compileOperation(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		return Stream.of("&&", Optional[Ok[value="=="]], Optional[Ok[value="!="]], Optional[Ok[value="+"]], Optional[Ok[value="||"]], Optional[Ok[value="<"]], Optional[Ok[value="-"]]).map(() => compileOperation(stripped, Optional[Ok[value=operator]])
+).flatMap(Optional.stream).findFirst();
+	}
+	private def compileTernary(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		let conditionMarker = stripped.indexOf('?');
+		if (conditionMarker == -1) 		return Optional.empty();
+		let statementMarker = stripped.indexOf(":", Optional[Ok[value=conditionMarker]]);
+		if (statementMarker == -1) 		return Optional.empty();
+		let conditionString = stripped.substring(0, Optional[Ok[value=conditionMarker]]).strip();
+		let condition = ValueCompiler(conditionString).compile();
+		if (condition.isEmpty()) 		return Optional.empty();
+		let thenString = stripped.substring(conditionMarker + 1, Optional[Ok[value=statementMarker]]).strip();
+		let thenBlock = ValueCompiler(thenString).compile();
+		if (thenBlock.isEmpty()) 		return Optional.empty();
+		let elseString = stripped.substring(statementMarker + 1).strip();
+		let elseBlock = ValueCompiler(elseString).compile();
+		if (elseBlock.isEmpty()) 		return Optional.empty();
+		let rendered = Ok[value=condition.get() + "] ? Ok[value=" + thenBlock.get() + "] : Ok[value=" + elseBlock].get();
+		return Optional.of(Ok(rendered));
+	}
+
+export object ValueCompiler {
+	def compileInvocation(stripped : String, indent : int): Optional<Result<String, CompileException>> => {
+		if (stripped.endsWith(")")) 		return Optional.empty();
+		let start = findInvocationStart(stripped);
+		if (start == -1) 		return Optional.empty();
+		let end = stripped.length() - 1;
+		let callerEnd = computeCallerEnd(stripped, Optional[Ok[value=start]]);
+		if (callerEnd.isEmpty()) 		return Optional.empty();
+		let caller;
+		if (stripped.startsWith("new ")) {
+			let temp = stripped.substring("new ".length(), Optional[Ok[value=callerEnd.getAsInt()]]);
+			if (Strings.isSymbol(temp)) {
+				caller = temp;
+		}
+		try {
+			caller = stripped.substring(0, Optional[Ok[value=callerEnd.getAsInt()]]);
+		}
+		}
+		try {
+			caller = stripped.substring(0, Optional[Ok[value=callerEnd.getAsInt()]]);
+		}
+		let inputArgumentStrings = stripped.substring(start + 1, Optional[Ok[value=end]]);
+		let inputArguments = splitInvocationArguments(inputArgumentStrings);
+		let outputArguments = Optional.empty();
+		for (Ok[value=let inputArgument] :  inputArguments) {
+			if (inputArgument.isBlank()) let continue		try {
+			let compiledValue = ValueCompiler(inputArgument).compile();
+			if (compiledValue.isEmpty()) {
+			throw CompileException("Failed to compile argument: " + inputArgument);
+		}
+			outputArguments = Optional.of(outputArguments.map(() => inner.append(", ").append(compiledValue)
+).orElse(StringBuilder(compiledValue.get().$())));
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, Optional[Ok[value=e]])));
+		}
+		}
+		let suffix = Ok[value=indent == 0] ? Ok[value=""] : Ok[value=";\n"];
+		let renderedArguments = outputArguments.orElse(StringBuilder());
+		let compiledCaller = ValueCompiler(caller).compile();
+		if (compiledCaller.isEmpty()) {
+		return Optional.empty();
+		}
+		try {
+			let stringCompileExceptionResult = compiledCaller.get().$();
+		return Optional.of(Ok("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, Optional[Ok[value=e]])));
+		}
+	}
+	private def computeCallerEnd(stripped : String, start : int): OptionalInt => {
+		let callerEnd;
+		if (stripped.charAt(start - 1) == '>') {
+			let genStart = stripped.lastIndexOf("<", Optional[Ok[value=start]]);
+			if (genStart == -1) 		return OptionalInt.empty();
+		try callerEnd = genStart;
+		}
+		try {
+			callerEnd = start;
+		}
+		return OptionalInt.of(callerEnd);
+	}
+	private def splitInvocationArguments(inputArgumentStrings : String): ArrayList<String> => {
+		let inputArguments = ArrayList();
+		let builder = StringBuilder();
+		let depth = 0;
+		let queue = Strings.toQueue(inputArgumentStrings);
+		while (queue.isEmpty()) {
+			let c = queue.pop();
+			if (c == '\'') {
+			builder.append(c);
+			builder.append(queue.pop());
+		try {
+			builder.append(queue.pop());
+		}
+		catch (e : Exception) {
+			throw RuntimeException(e);
+		}
+				let continue;
+		}
+			if (c == '\"') {
+			builder.append(c);
+				while (queue.isEmpty()) {
+					let next = queue.pop();
+			builder.append(next);
+					if (next == '\\') {
+			builder.append(queue.pop());
+		}
+					if (next == '\"') {
+						let break;
+		}
+		}
+				let continue;
+		}
+			if (c == ',' && depth == 0) {
+			inputArguments.add(builder.toString());
+				builder = StringBuilder();
+		}
+		try {
+			if (c == '(') depth			if (c == ')') depth			builder.append(c);
+		}
+		}
+			inputArguments.add(builder.toString());
+		return inputArguments;
+	}
+	private def findInvocationStart(stripped : String): int => {
+		let queue = Strings.toQueue(stripped);
+			Collections.reverse(queue);
+			queue.pop();
+		let start = -1;
+		let depth = 0;
+		let index = stripped.length() - 1;
+		while (queue.isEmpty()) {
+			let c = queue.pop();
+index			if (c == '\'') {
+			queue.pop();
+index			queue.pop();
+index		}
+			if (c == '\"') {
+				while (queue.isEmpty()) {
+					let next = queue.pop();
+index					if (next == '\"') {
+						let break;
+		}
+		}
+				let continue;
+		}
+			if (c == '(' && depth == 0) {
+				start = index;
+				let break;
+		}
+		try {
+			if (c == ')') depth			if (c == '(') depth		}
+		}
+		return start;
+	}
+	private def compileSymbol(stripped : String): Optional<Result<String, CompileException>> => {
+		if (Strings.isSymbol(stripped)) {
+		return Optional.of(Ok(stripped));
+		}
+		try {
+		return Optional.empty();
+		}
+	}
+	private def compileAccess(stripped : String): Optional<Result<String, CompileException>> => {
+		let objectEnd = stripped.lastIndexOf('.');
+		if (objectEnd == -1) 		return Optional.empty();
+		if (objectEnd == stripped.length() - 1) 		return Optional.empty();
+		let objectString = stripped.substring(0, Optional[Ok[value=objectEnd]]);
+		let childStart;
+		if (stripped.charAt(objectEnd + 1) != ' < ') childStart = objectEnd + 1;
+		try {
+			let newChildStart = stripped.indexOf('>');
+			if (newChildStart == -1) {
+		return Optional.empty();
+		}
+		try {
+			childStart = newChildStart + 1;
+		}
+		}
+		let child = stripped.substring(childStart);
+		if (Strings.isAssignable(child)) {
+		return Optional.empty();
+		}
+		let compiledObject;
+		try {
+			compiledObject = ValueCompiler(objectString).compileRequired();
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile object reference of access statement: " + objectString, Optional[Ok[value=e]])));
+		}
+		return Optional.of(Ok(compiledObject + "." + child));
+	}
+	private def compileString(stripped : String): Optional<Result<String, CompileException>> => {
+		return Ok[value=stripped.startsWith("\"") && stripped.endsWith("\"")] ? Ok[value=Optional.of(Ok(stripped))] : Ok[value=Optional].empty();
+	}
+	private def compileOperation(stripped : String, operator : String): Optional<Result<String, CompileException>> => {
+		let operatorIndex = stripped.indexOf(operator);
+		if (operatorIndex == -1) 		return Optional.empty();
+		let left = stripped.substring(0, Optional[Ok[value=operatorIndex]]).strip();
+		let right = stripped.substring(operatorIndex + operator.length());
+		return Optional.of($Result(() => 		let leftCompiled = ValueCompiler(left).compileRequired();
+		let rightCompiled = ValueCompiler(right).compileRequired();
+		return leftCompiled + " " + operator + " " + rightCompiled;
+
+).mapErr(() => CompileException("Failed to compile operation '" + operator + "': " + stripped, Optional[Ok[value=err]])
+));
+	}
+}

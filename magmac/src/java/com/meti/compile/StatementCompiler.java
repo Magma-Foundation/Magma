@@ -19,7 +19,14 @@ public record StatementCompiler(String input, int indent) {
         if (!stripped.startsWith("else ")) return Optional.empty();
 
         try {
-            return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2, 0)));
+            String body;
+            if (stripped.contains("{") && stripped.endsWith("}")) {
+                body = compileBlock(stripped, 2, 0);
+            } else {
+                var value = stripped.substring("else ".length());
+                body = new StatementCompiler(value, 0).compile();
+            }
+            return Optional.of(new Ok<>("\t\ttry " + body));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
@@ -116,8 +123,17 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .or(() -> compileSuffixOperator(stripped))
+                .or(() -> compileComment(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err)).$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileComment(String stripped) {
+        if(stripped.startsWith("/*") && stripped.endsWith("*/")) {
+            return Optional.of(new Ok<>(stripped));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileSuffixOperator(String stripped) {

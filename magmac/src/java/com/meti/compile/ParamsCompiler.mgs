@@ -1,7 +1,7 @@
 import { List } from java.util;
 import { Optional } from java.util;
 export class def ParamsCompiler(paramString : String) => 	def compile(): String => {
-		let paramStrings = List.of(paramString().split(", Optional[Ok[value="]]));
+		let paramStrings = List.of(paramString().split(","));
 		let outputParams = Optional.empty();
 		for (Ok[value=let string] :  paramStrings) {
 			if (string.isBlank()) let continue			let strippedParam = string.strip();
@@ -9,7 +9,7 @@ export class def ParamsCompiler(paramString : String) => 	def compile(): String 
 			let type = strippedParam.substring(0, Optional[Ok[value=separator]]);
 			let name = strippedParam.substring(separator + 1);
 			let next = name + " : " + type;
-			outputParams = Optional.of(outputParams.map(() => value.append(", Optional[Ok[value="]]).append(next)
+			outputParams = Optional.of(outputParams.map(() => value.append(", ").append(next)
 ).orElse(StringBuilder(next)));
 		}
 		return outputParams.orElse(StringBuilder()).toString();

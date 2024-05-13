@@ -16,9 +16,18 @@ export class def StatementCompiler(input : String, indent : int) => 	def compile
 ).or(() => DeclarationCompiler(stripped, Optional[Ok[value=indent]]).compile()
 ).or(() => compileInvocation(stripped, Optional[Ok[value=3]])
 ).or(() => compileSuffixOperator(stripped)
+).or(() => compileComment(stripped)
 ).orElseGet(() => Err(CompileException("Unknown statement: " + stripped))
 ).mapErr(() => CompileException("Failed to compile statement: " + stripped, Optional[Ok[value=err]])
 ).$();
+	}
+	private def compileComment(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		if (stripped.startsWith("/*") && stripped.endsWith("*/")) {
+		return Optional.of(Ok(stripped));
+		}
+		try {
+		return Optional.empty();
+		}
 	}
 	private def compileSuffixOperator(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.endsWith("++") && stripped.endsWith("--")) 		return Optional.empty();
@@ -208,7 +217,15 @@ export object StatementCompiler {
 	private def compileElse(stripped : String): Optional<Result<String, CompileException>> => {
 		if (stripped.startsWith("else ")) 		return Optional.empty();
 		try {
-		return Optional.of(Ok("\t\ttry " + compileBlock(stripped, Optional[Ok[value=2]], Optional[Ok[value=0]])));
+			let body;
+			if (stripped.contains("{") && stripped.endsWith("}")) {
+				body = compileBlock(stripped, Optional[Ok[value=2]], Optional[Ok[value=0]]);
+		}
+		try {
+			let value = stripped.substring("else ".length());
+			body = StatementCompiler(value, Optional[Ok[value=0]]).compile();
+		}
+		return Optional.of(Ok("\t\ttry " + body));
 		}
 		catch (e : CompileException) {
 		return Optional.of(Err(e));

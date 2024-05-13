@@ -95,7 +95,28 @@ public record ValueCompiler(String input) {
             if(c == '\'') {
                 builder.append(c);
                 builder.append(queue.pop());
-                builder.append(queue.pop());
+                try {
+                    builder.append(queue.pop());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                continue;
+            }
+
+            if (c == '\"') {
+                builder.append(c);
+
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    builder.append(next);
+                    if (next == '\\') {
+                        builder.append(queue.pop());
+                    }
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
                 continue;
             }
 
@@ -128,9 +149,22 @@ public record ValueCompiler(String input) {
 
             if (c == '\'') {
                 queue.pop();
+                index--;
+
                 queue.pop();
                 index--;
-                index--;
+            }
+
+            if (c == '\"') {
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    index--;
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
+                continue;
             }
 
             if (c == '(' && depth == 0) {
