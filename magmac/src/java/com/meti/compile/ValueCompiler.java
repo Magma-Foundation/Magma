@@ -241,7 +241,7 @@ public record ValueCompiler(String input, int indent) {
     Optional<Result<String, CompileException>> compile(List<String> stack) {
         var stripped = input().strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
-                .or(() -> compileLambda(stripped, indent)).or(() -> compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
+                .or(() -> compileLambda(stripped, indent, Collections.emptyList())).or(() -> compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -278,7 +278,7 @@ public record ValueCompiler(String input, int indent) {
         return Optional.empty();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileLambda(String stripped, int indent) {
+    private Optional<? extends Result<String, CompileException>> compileLambda(String stripped, int indent, List<String> stack) {
         var separator = stripped.indexOf("->");
         if (separator == -1) return Optional.empty();
 
@@ -307,9 +307,9 @@ public record ValueCompiler(String input, int indent) {
             if (value.startsWith("{") && value.endsWith("}")) {
                 var inputContent = value.substring(1, value.length() - 1).strip();
                 var members = Strings.splitMembers(inputContent);
-                compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent).$() + "}";
+                compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent, stack).$() + "}";
             } else {
-                compiledValue = new ValueCompiler(value, indent).compileRequired(Collections.emptyList());
+                compiledValue = new ValueCompiler(value, indent).compileRequired(stack);
             }
             var rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));

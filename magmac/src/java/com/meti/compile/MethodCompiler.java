@@ -13,13 +13,13 @@ import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
 
-    static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent) {
+    static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> params) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember, indent).compile(Collections.emptyList()));
+                outputContent.append(new StatementCompiler(inputMember, indent).compile(params));
             } catch (CompileException e) {
                 return new Err<>(e);
             }
@@ -28,7 +28,7 @@ public record MethodCompiler(String input) {
         return new Ok<>(outputContent.toString());
     }
 
-    Optional<Result<ClassMemberResult, CompileException>> compile() {
+    Optional<Result<ClassMemberResult, CompileException>> compile(List<String> stack) {
         var stripped = input().strip();
 
         var paramStart = stripped.indexOf('(');
@@ -69,8 +69,7 @@ public record MethodCompiler(String input) {
 
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var outputContent = compileMethodMembers(inputContent, 2).$();
-
+                var outputContent = compileMethodMembers(inputContent, 2, stack).$();
                 var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 
                 return modifiers.contains("static")
@@ -80,7 +79,6 @@ public record MethodCompiler(String input) {
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-
                 var rendered = MagmaLang.renderFunction(1, modifierString +
                                                            "def ", name, finalRenderedParams, ": " + outputType, ";");
 
@@ -88,8 +86,8 @@ public record MethodCompiler(String input) {
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
                         : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
             }));
-        } else {
-            return Optional.empty();
         }
+
+        return Optional.empty();
     }
 }

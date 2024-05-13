@@ -39,7 +39,7 @@ public abstract class InstanceCompiler implements RootCompiler {
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMember(String input) {
-        return new MethodCompiler(input).compile()
+        return new MethodCompiler(input).compile(Collections.emptyList())
                 .or(() -> {
                     return new DeclarationCompiler(input, 0).compile(Collections.emptyList()).map(result -> {
                         return result.mapValue(value -> {
