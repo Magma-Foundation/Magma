@@ -6,6 +6,7 @@ import com.meti.result.Result;
 import com.meti.result.Results;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,8 +37,14 @@ public abstract class InstanceCompiler implements RootCompiler {
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMember(String input) {
-        return MethodCompiler
-                .compileMethod(new MethodCompiler(input))
+        return MethodCompiler.compileMethod(new MethodCompiler(input))
+                .or(() -> {
+                    return new DeclarationCompiler(input, 0).compileInstance().map(result -> {
+                        return result.mapValue(value -> {
+                            return new ClassMemberResult(List.of(value), Collections.emptyList());
+                        });
+                    });
+                })
                 .orElseGet(() -> new Err<>(new CompileException("Unknown class member: " + input)));
     }
 
@@ -65,14 +72,11 @@ public abstract class InstanceCompiler implements RootCompiler {
         var paramString = computeParamString(input);
         if (paramString.isEmpty()) return Optional.empty();
 
-        return compileClassMembers(inputContent)
-                .mapErr(err -> {
-                    var format = "Failed to compile %s body: %s";
-                    var message = format.formatted(computeKeyword(), input);
-                    return new CompileException(message, err);
-                })
-                .mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get())))
-                .into(Results::unwrapOptional);
+        return compileClassMembers(inputContent).mapErr(err -> {
+            var format = "Failed to compile %s body: %s";
+            var message = format.formatted(computeKeyword(), input);
+            return new CompileException(message, err);
+        }).mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get()))).into(Results::unwrapOptional);
 
     }
 

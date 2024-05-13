@@ -64,7 +64,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileIf(stripped, indent))
                 .or(() -> compileElse(stripped))
                 .or(() -> compileAssignment(stripped, indent))
-                .or(() -> new DeclarationCompiler(stripped, indent).compile())
+                .or(() -> new DeclarationCompiler(stripped, indent).compileInstance())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
@@ -123,7 +123,7 @@ public record StatementCompiler(String input, int indent) {
 
         var conditionDeclarationString = condition.substring(0, separator);
         var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)
-                .compile();
+                .compileInstance();
 
         if (compiledConditionDeclaration.isEmpty()) {
             return Optional.empty();
