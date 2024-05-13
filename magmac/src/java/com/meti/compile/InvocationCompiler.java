@@ -51,7 +51,9 @@ public class InvocationCompiler {
             var stringCompileExceptionResult = compiledCaller.get().$();
             return Optional.of(new Ok<>("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
-            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
+            var format = "Failed to compile invocation - %s: %s";
+            var message = format.formatted(stack, stripped);
+            return Optional.of(new Err<>(new CompileException(message, e)));
         }
     }
 

@@ -9,6 +9,7 @@ import com.meti.compile.Strings;
 import com.meti.result.Err;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -18,20 +19,21 @@ public class Application {
         var lines = Strings.splitMembers(input);
 
         var output = new StringBuilder();
+        var stack = new ArrayList<String>();
         for (String line : lines) {
-            output.append(compileRoot(line));
+            output.append(compileRoot(line, stack));
         }
 
         return output.toString();
     }
 
-    private static String compileRoot(String line) throws CompileException {
+    private static String compileRoot(String line, List<String> stack) throws CompileException {
         var stripped = line.strip();
 
         if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
 
         return streamCompilers(stripped)
-                .map(rootCompiler -> rootCompiler.compile(new ArrayList<>()))
+                .map(rootCompiler -> rootCompiler.compile(stack))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> new Err<>(new CompileException(line)))

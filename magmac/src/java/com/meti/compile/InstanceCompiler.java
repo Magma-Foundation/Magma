@@ -81,8 +81,8 @@ public abstract class InstanceCompiler implements RootCompiler {
         if (paramString.isEmpty()) return Optional.empty();
 
         return compileClassMembers(inputContent, stack).mapErr(err -> {
-            var format = "Failed to compile %s body: %s";
-            var message = format.formatted(computeKeyword(), input);
+            var format = "Failed to compile %s body - %s: %s";
+            var message = format.formatted(computeKeyword(), stack, input);
             return new CompileException(message, err);
         }).mapValue(output -> Optional.of(renderClass(modifierString, name, output , paramString.get()))).into(Results::unwrapOptional);
 

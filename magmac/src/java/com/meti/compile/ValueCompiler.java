@@ -18,7 +18,7 @@ public final class ValueCompiler {
         this.indent = indent;
     }
 
-    private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
+    private static Optional<Result<String, CompileException>> compileAccess(String stripped, List<String> stack) {
         var objectEnd = stripped.lastIndexOf('.');
         if (objectEnd == -1) return Optional.empty();
 
@@ -43,14 +43,14 @@ public final class ValueCompiler {
             return Optional.empty();
         }
 
-        String compiledObject;
         try {
-            compiledObject = createValueCompiler(objectString, 0).compileRequired(Collections.emptyList());
+            var compiledObject = createValueCompiler(objectString, 0).compileRequired(stack);
+            return Optional.of(new Ok<>(compiledObject + "." + child));
         } catch (CompileException e) {
-            return Optional.of(new Err<>(new CompileException("Failed to compile object reference of access statement: " + objectString, e)));
+            var format = "Failed to compile object reference of access statement - %s: %s";
+            var message = format.formatted(stack, objectString);
+            return Optional.of(new Err<>(new CompileException(message, e)));
         }
-
-        return Optional.of(new Ok<>(compiledObject + "." + child));
     }
 
     private static Optional<Result<String, CompileException>> compileString(String stripped) {
@@ -89,7 +89,7 @@ public final class ValueCompiler {
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
                 .or(() -> valueCompiler.compileLambda(stripped, valueCompiler.indent, stack))
                 .or(() -> InvocationCompiler.compileInvocation(stack, stripped, valueCompiler.indent))
-                .or(() -> compileAccess(stripped))
+                .or(() -> compileAccess(stripped, stack))
                 .or(() -> valueCompiler.compileTernary(stripped))
                 .or(() -> valueCompiler.compileNumbers(stripped))
                 .or(() -> valueCompiler.compileOperation(stripped))

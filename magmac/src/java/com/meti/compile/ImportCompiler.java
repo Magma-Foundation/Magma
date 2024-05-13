@@ -18,6 +18,8 @@ public record ImportCompiler(String stripped) implements RootCompiler {
 
         var parent = segments.substring(0, separator);
         var child = segments.substring(separator + 1);
+        stack.add(child);
+
         return Optional.of(new Ok<>("import { " + child + " } from " + parent + ";\n"));
     }
 }
