@@ -4,15 +4,19 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.meti.result.Results.$Result;
 
-public record ValueCompiler(String input, int indent) {
+public final class ValueCompiler {
+    private final String input;
+    private final int indent;
+
+    private ValueCompiler(String input, int indent) {
+        this.input = input;
+        this.indent = indent;
+    }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
         var objectEnd = stripped.lastIndexOf('.');
@@ -41,7 +45,7 @@ public record ValueCompiler(String input, int indent) {
 
         String compiledObject;
         try {
-            compiledObject = new ValueCompiler(objectString, 0).compileRequired(Collections.emptyList());
+            compiledObject = createValueCompiler(objectString, 0).compileRequired(Collections.emptyList());
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile object reference of access statement: " + objectString, e)));
         }
@@ -61,21 +65,29 @@ public record ValueCompiler(String input, int indent) {
         var right = stripped.substring(operatorIndex + operator.length());
 
         return Optional.of($Result(() -> {
-            var leftCompiled = new ValueCompiler(left, 0).compileRequired(Collections.emptyList());
-            var rightCompiled = new ValueCompiler(right, 0).compileRequired(Collections.emptyList());
+            var leftCompiled = createValueCompiler(left, 0).compileRequired(Collections.emptyList());
+            var rightCompiled = createValueCompiler(right, 0).compileRequired(Collections.emptyList());
 
             return leftCompiled + " " + operator + " " + rightCompiled;
         }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
     }
 
-    String compileRequired(List<String> stack) throws CompileException {
-        return compile(stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+    public static ValueCompiler createValueCompiler(String input, int indent) {
+        return new ValueCompiler(input, indent);
     }
 
-    Optional<Result<String, CompileException>> compile(List<String> stack) {
-        var stripped = input().strip();
+    static Optional<Result<String, CompileException>> compile(List<String> stack, String argString, int indent) {
+        return compile(createValueCompiler(argString, indent), stack);
+    }
+
+    String compileRequired(List<String> stack) throws CompileException {
+        return compile(this, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+    }
+
+    static Optional<Result<String, CompileException>> compile(ValueCompiler valueCompiler, List<String> stack) {
+        var stripped = valueCompiler.input().strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
-                .or(() -> compileLambda(stripped, indent, Collections.emptyList())).or(() -> InvocationCompiler.compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
+                .or(() -> valueCompiler.compileLambda(stripped, valueCompiler.indent, Collections.emptyList())).or(() -> InvocationCompiler.compileInvocation(Collections.emptyList(), stripped, valueCompiler.indent)).or(() -> compileAccess(stripped)).or(() -> valueCompiler.compileTernary(stripped)).or(() -> valueCompiler.compileNumbers(stripped)).or(() -> valueCompiler.compileOperation(stripped)).or(() -> valueCompiler.compileChar(stripped)).or(() -> valueCompiler.compileNot(stripped)).or(() -> valueCompiler.compileMethodReference(stripped)).or(() -> valueCompiler.compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -87,7 +99,7 @@ public record ValueCompiler(String input, int indent) {
                 var outputType = new TypeCompiler(type).compile().$();
                 var valueString = stripped.substring(end + 1).strip();
 
-                var compiledValue = new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
+                var compiledValue = createValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
                 return "(" + outputType + ") " + compiledValue;
             }));
         } else {
@@ -102,7 +114,7 @@ public record ValueCompiler(String input, int indent) {
             var after = stripped.substring(index + "::".length());
             if (!Strings.isSymbol(after)) return Optional.empty();
 
-            return new ValueCompiler(before, 0).compile(Collections.emptyList()).map(value -> {
+            return ValueCompiler.compile(createValueCompiler(before, 0), Collections.emptyList()).map(value -> {
                 return value.mapValue(inner -> {
                     return inner + "." + after;
                 });
@@ -143,7 +155,7 @@ public record ValueCompiler(String input, int indent) {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent, stack).$() + "}";
             } else {
-                compiledValue = new ValueCompiler(value, indent).compileRequired(stack);
+                compiledValue = createValueCompiler(value, indent).compileRequired(stack);
             }
             var rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));
@@ -156,7 +168,7 @@ public record ValueCompiler(String input, int indent) {
         if (stripped.startsWith("!")) {
             var valueString = stripped.substring(1).strip();
             try {
-                return Optional.of(new Ok<>(new ValueCompiler(valueString, 0).compileRequired(Collections.emptyList())));
+                return Optional.of(new Ok<>(createValueCompiler(valueString, 0).compileRequired(Collections.emptyList())));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
@@ -194,19 +206,49 @@ public record ValueCompiler(String input, int indent) {
         if (statementMarker == -1) return Optional.empty();
 
         var conditionString = stripped.substring(0, conditionMarker).strip();
-        var condition = new ValueCompiler(conditionString, 0).compile(Collections.emptyList());
+        var condition = ValueCompiler.compile(createValueCompiler(conditionString, 0), Collections.emptyList());
         if (condition.isEmpty()) return Optional.empty();
 
         var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-        var thenBlock = new ValueCompiler(thenString, 0).compile(Collections.emptyList());
+        var thenBlock = ValueCompiler.compile(createValueCompiler(thenString, 0), Collections.emptyList());
         if (thenBlock.isEmpty()) return Optional.empty();
 
         var elseString = stripped.substring(statementMarker + 1).strip();
-        var elseBlock = new ValueCompiler(elseString, 0).compile(Collections.emptyList());
+        var elseBlock = ValueCompiler.compile(createValueCompiler(elseString, 0), Collections.emptyList());
         if (elseBlock.isEmpty()) return Optional.empty();
 
         return Optional.of($Result(() -> {
             return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
         }));
     }
+
+    public String input() {
+        return input;
+    }
+
+    public int indent() {
+        return indent;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ValueCompiler) obj;
+        return Objects.equals(this.input, that.input) &&
+               this.indent == that.indent;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(input, indent);
+    }
+
+    @Override
+    public String toString() {
+        return "ValueCompiler[" +
+               "input=" + input + ", " +
+               "indent=" + indent + ']';
+    }
+
 }

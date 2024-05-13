@@ -7,7 +7,7 @@ import com.meti.result.Result;
 import java.util.*;
 
 public class InvocationCompiler {
-    static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent, List<String> stack) {
+    static Optional<Result<String, CompileException>> compileInvocation(List<String> stack, String stripped, int indent) {
         if (!stripped.endsWith(")")) return Optional.empty();
         var start = findInvocationStart(stripped);
         if (start == -1) return Optional.empty();
@@ -20,41 +20,46 @@ public class InvocationCompiler {
 
         var inputArgumentStrings = stripped.substring(start + 1, end);
 
-        var inputArguments = splitInvocationArguments(inputArgumentStrings);
+        var argStrings = splitInvocationArguments(inputArgumentStrings);
         var outputArguments = Optional.<StringBuilder>empty();
-        for (String inputArgument : inputArguments) {
-            if (inputArgument.isBlank()) continue;
-
-            try {
-                var compiledValue = new ValueCompiler(inputArgument, indent).compile(stack);
-                if (compiledValue.isEmpty()) {
-                    throw new CompileException("Failed to compile argument: " + inputArgument);
-                }
+        try {
+            for (var argString : argStrings) {
+                if (argString.isBlank()) continue;
+                var compiledArg = compileArgument(stack, argString, indent);
 
                 var value = outputArguments
-                        .map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse("")))
-                        .orElse(new StringBuilder(compiledValue.get().$()));
+                        .map(inner -> inner.append(", ").append(compiledArg))
+                        .orElse(new StringBuilder(compiledArg));
 
                 outputArguments = Optional.of(value);
-            } catch (CompileException e) {
-                return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
             }
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
         }
 
         var suffix = indent == 0 ? "" : ";\n";
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-        var compiledCaller = new ValueCompiler(caller, 0).compile(stack);
+        var compiledCaller = ValueCompiler.compile(stack, caller, 0);
         if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
 
         try {
             var stringCompileExceptionResult = compiledCaller.get().$();
-            return Optional.of(new Ok<String, CompileException>("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
+            return Optional.of(new Ok<>("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
-            return Optional.of(new Err<String, CompileException>(new CompileException("Failed to compile invocation: " + stripped, e)));
+            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
         }
+    }
+
+    private static String compileArgument(List<String> stack, String argString, int indent) throws CompileException {
+        var compiledArgOptional = ValueCompiler.compile(stack, argString, indent);
+        if (compiledArgOptional.isEmpty())
+            throw new CompileException("Failed to compile argument: " + argString);
+
+        var compiledArg = compiledArgOptional.get().$();
+        return compiledArg;
     }
 
     private static String computeCaller(String stripped, OptionalInt callerEnd) {

@@ -36,7 +36,7 @@ public record DeclarationCompiler(String stripped, int indent) {
         if (valueSeparator == -1) return "";
 
         var after = stripped.substring(valueSeparator + 1).strip();
-        var compiledValue = new ValueCompiler(after, 0).compileRequired(stack);
+        var compiledValue = ValueCompiler.createValueCompiler(after, 0).compileRequired(stack);
         return " = " + compiledValue;
     }
 
