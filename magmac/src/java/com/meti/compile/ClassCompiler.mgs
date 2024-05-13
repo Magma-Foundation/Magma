@@ -1,10 +1,14 @@
 import { Optional } from java.util;
-export class def ClassCompiler extends InstanceCompiler() => 	def ClassCompiler(input : String): public => 			super(input);
-
-	def computeKeyword(): String => 		return "class";
-
-	def computeParamString(input : String): Optional<String> => 		return Optional.of("");
-
-	def computeNameEnd(input : String, contentStart : int): int => 		return contentStart;
-
+export class def ClassCompiler extends InstanceCompiler() => 	def ClassCompiler(input : String): public => {
+			super(input);
+	}
+	def computeKeyword(): String => {
+		return "class";
+	}
+	def computeParamString(input : String): Optional<String> => {
+		return Optional.of("");
+	}
+	def computeNameEnd(input : String, contentStart : int): int => {
+		return contentStart;
+	}
 

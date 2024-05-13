@@ -128,7 +128,7 @@ public record MethodCompiler(String input) {
                 var outputType = compileType(inputType).$();
                 var outputContent = compileMethodMembers(inputContent).$();
 
-                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, outputContent);
+                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))

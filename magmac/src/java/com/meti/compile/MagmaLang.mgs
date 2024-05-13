@@ -1,22 +1,27 @@
 export class def MagmaLang() => 
 export object MagmaLang {
-	def renderDefinedFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => 		let indentString = "\t".repeat(indent);
+	def renderDefinedFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => {
+		let indentString = "\t".repeat(indent);
 		return renderFunction(indent, modifierString + "def ", name, renderedParams, typeString, " => " + content);
-
-	def renderFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, contentString : String): String => 		let indentString = "\t".repeat(indent);
+	}
+	def renderFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, contentString : String): String => {
+		let indentString = "\t".repeat(indent);
 		return indentString + modifierString + name + "(" + renderedParams + ")" +
                typeString +
                contentString + "\n";
-
-	def renderClass(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => 		let instanceContent = renderInstanceClassContent(modifierString, name, members, paramString);
+	}
+	def renderClass(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => {
+		let instanceContent = renderInstanceClassContent(modifierString, name, members, paramString);
 		let staticContent = renderStaticClassContent(modifierString, name, members);
 		return instanceContent + staticContent;
-
-	private def renderInstanceClassContent(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => 		let joinedInstance = String.join("", members.instanceMembers());
+	}
+	private def renderInstanceClassContent(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => {
+		let joinedInstance = String.join("", members.instanceMembers());
 		return renderDefinedFunction(0, modifierString + "class ", name, paramString, "", joinedInstance);
-
-	private def renderStaticClassContent(modifierString : String, name : String, members : ClassMemberResult): String => 		if (members.staticMembers().isEmpty()) 		return "";
+	}
+	private def renderStaticClassContent(modifierString : String, name : String, members : ClassMemberResult): String => {
+		if (members.staticMembers().isEmpty()) 		return "";
 		let joinedStatic = String.join("", members.staticMembers());
 		return modifierString + "object " + name + " {\n" + joinedStatic + "}";
-
+	}
 }

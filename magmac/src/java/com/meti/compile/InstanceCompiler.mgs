@@ -6,10 +6,12 @@ import { ArrayList } from java.util;
 import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-export class def InstanceCompiler implements RootCompiler() => let input	def InstanceCompiler(input : String): public => 		this.input = input;
-
+export class def InstanceCompiler implements RootCompiler() => let input	def InstanceCompiler(input : String): public => {
+		this.input = input;
+	}
 	def computeKeyword(): String => ;
-	def compile(): Optional<Result<String, CompileException>> => 		let classIndex = input.indexOf(computeKeyword());
+	def compile(): Optional<Result<String, CompileException>> => {
+		let classIndex = input.indexOf(computeKeyword());
 		if (classIndex == -1) 		return Optional.empty();
 		let classEnd = classIndex + computeKeyword().length();
 		let contentStart = input.indexOf('{', classEnd);
@@ -27,12 +29,13 @@ export class def InstanceCompiler implements RootCompiler() => let input	def Ins
             var message = format.formatted(computeKeyword(), input);
             return new CompileException(message, err);
         }).mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get()))).into(Results::unwrapOptional);
-
+	}
 	def computeNameEnd(input : String, contentStart : int): int => ;
 	def computeParamString(input : String): Optional<String> => ;
 
 export object InstanceCompiler implements RootCompiler {
-	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => 		let instanceContent = ArrayList();
+	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => {
+		let instanceContent = ArrayList();
 		let staticContent = ArrayList();
 		for (let input :  inputContent) {
 			if (input.isBlank()) let continue		try {
@@ -45,8 +48,9 @@ export object InstanceCompiler implements RootCompiler {
 		}
 		}
 		return Ok(ClassMemberResult(instanceContent, staticContent));
-
-	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => 		return MethodCompiler(input).compile()
+	}
+	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => {
+		return MethodCompiler(input).compile()
                 .or(() -> {
                     return new DeclarationCompiler(input, 0).compileInstance().map(result -> {
                         return result.mapValue(value -> {
@@ -55,5 +59,5 @@ export object InstanceCompiler implements RootCompiler {
                     });
                 })
                 .orElseGet(() -> new Err<>(new CompileException("Unknown class member: " + input)));
-
+	}
 }

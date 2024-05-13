@@ -5,21 +5,24 @@ import { Optional } from java.util;
 import { Stream } from java.util.stream;
 export class def Application() => 
 export object Application {
-	def compile(input : String): String => 		let lines = Strings.splitMembers(input);
+	def compile(input : String): String => {
+		let lines = Strings.splitMembers(input);
 		let output = StringBuilder();
 		for (let line :  lines) {
 			output.append(compileRoot(line));
 		}
 		return output.toString();
-
-	private def compileRoot(line : String): String => 		let stripped = line.strip();
+	}
+	private def compileRoot(line : String): String => {
+		let stripped = line.strip();
 		if (stripped.isEmpty() || stripped.startsWith("package ")) 		return "";
 		return streamCompilers(stripped).map(RootCompiler::compile)
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> new Err<>(new CompileException(line)))
                 .$();
-
-	private def streamCompilers(stripped : String): Stream<RootCompiler> => 		return Stream.of(ImportCompiler(stripped), ClassCompiler(stripped), RecordCompiler(stripped), InterfaceCompiler(stripped));
-
+	}
+	private def streamCompilers(stripped : String): Stream<RootCompiler> => {
+		return Stream.of(ImportCompiler(stripped), ClassCompiler(stripped), RecordCompiler(stripped), InterfaceCompiler(stripped));
+	}
 }

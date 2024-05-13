@@ -2,7 +2,8 @@ import { Err } from com.meti.result;
 import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { Optional } from java.util;
-export class def DeclarationCompiler(stripped : String, indent : int) => 	def compileInstance(): Optional<? extends Result<String, CompileException>> => 		let valueSeparator = stripped.indexOf('=');
+export class def DeclarationCompiler(stripped : String, indent : int) => 	def compileInstance(): Optional<? extends Result<String, CompileException>> => {
+		let valueSeparator = stripped.indexOf('=');
 		let headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;
 		let header = stripped().substring(0, headerEnd).strip();
 		let separator = header.lastIndexOf(' ');
@@ -26,5 +27,5 @@ export class def DeclarationCompiler(stripped : String, indent : int) => 	def co
 			rendered = Err(CompileException("Failed to compile declaration: " + stripped, e));
 		}
 		return Optional.of(rendered);
-
+	}
 
