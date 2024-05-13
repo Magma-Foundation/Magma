@@ -14,6 +14,7 @@ public record DeclarationCompiler(String stripped, int indent) {
         var header = stripped().substring(0, headerEnd).strip();
         var separator = header.lastIndexOf(' ');
         var name = header.substring(separator + 1).strip();
+        if(!Strings.isSymbol(name)) return Optional.empty();
 
         Result<String, CompileException> rendered;
         try {

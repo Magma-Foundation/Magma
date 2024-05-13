@@ -143,8 +143,22 @@ public record ValueCompiler(String input) {
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
                 .or(() -> compileChar(stripped))
+                .or(() -> compileNot(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileNot(String stripped) {
+        if (stripped.startsWith("!")) {
+            var valueString = stripped.substring(1).strip();
+            try {
+                return Optional.of(new Ok<>(new ValueCompiler(valueString).compile()));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileChar(String stripped) {

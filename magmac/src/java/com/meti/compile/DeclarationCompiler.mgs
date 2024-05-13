@@ -12,10 +12,10 @@ export class def DeclarationCompiler(stripped : String, indent : int) => {
 		let rendered;
 		try {
 			let valueString;
-		if (valueSeparator != -1) {
-			let after = stripped.substring(valueSeparator + 1).strip();
-			let compiledValue = ValueCompiler(after).compile();
-			valueString = " = " + compiledValue;
+			if (valueSeparator != -1) {
+				let after = stripped.substring(valueSeparator + 1).strip();
+				let compiledValue = ValueCompiler(after).compile();
+				valueString = " = " + compiledValue;
 		}
 		try {
 			valueString = "";

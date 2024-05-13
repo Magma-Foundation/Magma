@@ -57,7 +57,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
-                .or(() -> compileIf(stripped))
+                .or(() -> compileIf(stripped, indent))
                 .or(() -> compileElse(stripped))
                 .or(() -> compileAssignment(stripped, indent))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
@@ -145,7 +145,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileIf(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileIf(String stripped, int indent) {
         if (!stripped.startsWith("if")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -173,12 +173,12 @@ public record StatementCompiler(String input, int indent) {
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
-                compiledValue = compileBlock(stripped, 2);
+                compiledValue = compileBlock(stripped, indent);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 compiledValue = new StatementCompiler(valueString, 0).compile();
             }
-            result = new Ok<>("\t\tif (" + compiledCondition + ") " + compiledValue);
+            result = new Ok<>("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
             result = new Err<>(e);
         }
