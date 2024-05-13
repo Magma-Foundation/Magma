@@ -76,7 +76,7 @@ public record MethodCompiler(String input) {
         return Optional.empty();
     }
 
-     static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
+    static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             if (inputMember.isBlank()) continue;
@@ -101,7 +101,12 @@ public record MethodCompiler(String input) {
         if (paramEnd == -1) return Optional.empty();
 
         var paramString = stripped.substring(paramStart + 1, paramEnd);
-        var renderedParams = new ParamsCompiler(paramString).compile();
+        String renderedParams;
+        try {
+            renderedParams = new ParamsCompiler(paramString).compile();
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
+        }
 
         var before = stripped.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
@@ -120,6 +125,7 @@ public record MethodCompiler(String input) {
         var contentStart = stripped.indexOf("{");
         var contentEnd = stripped.lastIndexOf('}');
 
+        String finalRenderedParams = renderedParams;
         if (contentStart != -1 && contentEnd != -1) {
             var content = stripped.substring(contentStart + 1, contentEnd);
             var inputContent = Strings.splitMembers(content);
@@ -128,7 +134,7 @@ public record MethodCompiler(String input) {
                 var outputType = compileType(inputType).$();
                 var outputContent = compileMethodMembers(inputContent).$();
 
-                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
+                var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
@@ -138,7 +144,7 @@ public record MethodCompiler(String input) {
             return Optional.of($Result(() -> {
                 var outputType = compileType(inputType).$();
 
-                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, ";");
+                var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, ";");
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))

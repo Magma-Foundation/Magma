@@ -69,7 +69,13 @@ public abstract class InstanceCompiler implements RootCompiler {
         var content = input.substring(contentStart + 1, contentEnd).strip();
         var inputContent = Strings.splitMembers(content);
 
-        var paramString = computeParamString(input);
+        Optional<String> paramString;
+        try {
+            paramString = computeParamString(input);
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
+        }
+
         if (paramString.isEmpty()) return Optional.empty();
 
         return compileClassMembers(inputContent).mapErr(err -> {
@@ -82,5 +88,5 @@ public abstract class InstanceCompiler implements RootCompiler {
 
     protected abstract int computeNameEnd(String input, int contentStart);
 
-    protected abstract Optional<String> computeParamString(String input);
+    protected abstract Optional<String> computeParamString(String input) throws CompileException;
 }

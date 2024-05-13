@@ -14,7 +14,13 @@ export class def MethodCompiler(input : String) => 	def compile(): Optional<Resu
 		let paramEnd = stripped.indexOf(')');
 		if (paramEnd == -1) 		return Optional.empty();
 		let paramString = stripped.substring(paramStart + 1, Optional[Ok[value=paramEnd]]);
-		let renderedParams = ParamsCompiler(paramString).compile();
+		let renderedParams;
+		try {
+			renderedParams = ParamsCompiler(paramString).compile();
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(CompileException("Failed to compile parameters: " + paramString, Optional[Ok[value=e]])));
+		}
 		let before = stripped.substring(0, Optional[Ok[value=paramStart]]).strip();
 		let separator = before.lastIndexOf(' ');
 		let modifiersAndTypeString = before.substring(0, Optional[Ok[value=separator]]).strip();
@@ -26,19 +32,20 @@ export class def MethodCompiler(input : String) => 	def compile(): Optional<Resu
 		let modifierString = Ok[value=modifiers.contains("private")] ? Ok[value="private "] : Ok[value=""];
 		let contentStart = stripped.indexOf("{");
 		let contentEnd = stripped.lastIndexOf('}');
+		let finalRenderedParams = renderedParams;
 		if (contentStart != -1 && contentEnd != -1) {
 			let content = stripped.substring(contentStart + 1, Optional[Ok[value=contentEnd]]);
 			let inputContent = Strings.splitMembers(content);
 		return Optional.of($Result(() => 		let outputType = compileType(inputType).$();
 		let outputContent = compileMethodMembers(inputContent).$();
-		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value="{\n" + outputContent + "\t}"]]);
+		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value="{\n" + outputContent + "\t}"]]);
 		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
 
 ));
 		}
 		try {
 		return Optional.of($Result(() => 		let outputType = compileType(inputType).$();
-		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value=";"]]);
+		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value=";"]]);
 		return Ok[value=modifiers.contains("static")] ? Ok[value=ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]])] : Ok[value=ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]])];
 
 ));

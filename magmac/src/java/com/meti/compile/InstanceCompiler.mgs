@@ -22,7 +22,13 @@ export class def InstanceCompiler implements RootCompiler() => let input	def Ins
 		if (contentEnd == -1) 		return Optional.empty();
 		let content = input.substring(contentStart + 1, Optional[Ok[value=contentEnd]]).strip();
 		let inputContent = Strings.splitMembers(content);
-		let paramString = computeParamString(input);
+		let paramString;
+		try {
+			paramString = computeParamString(input);
+		}
+		catch (e : CompileException) {
+		return Optional.of(Err(e));
+		}
 		if (paramString.isEmpty()) 		return Optional.empty();
 		return compileClassMembers(inputContent).mapErr(() => 		let format = "Failed to compile %s body: %s";
 		let message = format.formatted(computeKeyword(), Optional[Ok[value=input]]);

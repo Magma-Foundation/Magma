@@ -13,7 +13,7 @@ public final class RecordCompiler extends InstanceCompiler {
     }
 
     @Override
-    protected Optional<String> computeParamString(String input) {
+    protected Optional<String> computeParamString(String input) throws CompileException {
         var paramStart = input.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
