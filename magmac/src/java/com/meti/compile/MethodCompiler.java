@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.meti.compile.MagmaLang.function;
+import static com.meti.compile.MagmaLang.renderFunction;
 import static com.meti.result.Results.$Result;
 
 public final class MethodCompiler {
@@ -75,7 +75,14 @@ public final class MethodCompiler {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
                 var outputContent = compileMethodMembers(inputContent, 2, stack).$();
-                var rendered = function(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
+                var rendered = renderFunction(Map.<String, Attribute>of(
+                        "indent", new IntAttribute(1),
+                        "modifiers", new StringAttribute(modifierString + "def "),
+                        "name", new StringAttribute(name),
+                        "params", new StringAttribute(finalRenderedParams),
+                        "type", new StringAttribute(": " + outputType),
+                        "content", new StringAttribute("{\n" + outputContent + "\t}")
+                ));
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
