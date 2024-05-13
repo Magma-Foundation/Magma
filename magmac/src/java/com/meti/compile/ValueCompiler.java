@@ -3,11 +3,12 @@ package com.meti.compile;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
-import com.meti.result.Results;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static com.meti.result.Results.$Result;
 
 public record ValueCompiler(String input) {
     static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
@@ -101,6 +102,8 @@ public record ValueCompiler(String input) {
         var objectString = stripped.substring(0, separator);
         var child = stripped.substring(separator + 1);
 
+        if(!Strings.isAssignable(child)) return Optional.empty();
+
         String compiledObject;
         try {
             compiledObject = new ValueCompiler(objectString).compile();
@@ -124,7 +127,7 @@ public record ValueCompiler(String input) {
         var left = stripped.substring(0, operatorIndex).strip();
         var right = stripped.substring(operatorIndex + operator.length());
 
-        return Optional.of(Results.$Result(() -> {
+        return Optional.of($Result(() -> {
             var leftCompiled = new ValueCompiler(left).compile();
             var rightCompiled = new ValueCompiler(right).compile();
 
@@ -136,11 +139,11 @@ public record ValueCompiler(String input) {
         var stripped = input().strip();
 
         return compileString(stripped)
-                .or(() -> compileTernary(stripped))
-                .or(() -> compileInvocation(stripped, 0))
-                .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
+                .or(() -> compileAccess(stripped))
+                .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileLambda(stripped))
+                .or(() -> compileTernary(stripped))
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
                 .or(() -> compileChar(stripped))
@@ -159,7 +162,7 @@ public record ValueCompiler(String input) {
             var rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {
-            return Optional.of(new Err<>(e));
+            return Optional.of(new Err<>(new CompileException("Failed to compile lambda: " + stripped, e)));
         }
     }
 
@@ -194,7 +197,7 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+")
+        return Stream.of("&&", "==", "!=", "+", "||")
                 .map(operator -> compileOperation(stripped, operator))
                 .flatMap(Optional::stream)
                 .findFirst();
@@ -207,7 +210,7 @@ public record ValueCompiler(String input) {
         var statementMarker = stripped.indexOf(":", conditionMarker);
         if (statementMarker == -1) return Optional.empty();
 
-        var rendered = Results.$Result(() -> {
+        var rendered = $Result(() -> {
             var conditionString = stripped.substring(0, conditionMarker).strip();
             var condition = new ValueCompiler(conditionString).compile();
 
@@ -218,7 +221,7 @@ public record ValueCompiler(String input) {
             var elseBlock = new ValueCompiler(elseString).compile();
 
             return condition + " ? " + thenBlock + " : " + elseBlock;
-        });
+        }).mapErr(err -> new CompileException("Failed to compile ternary statement: " + stripped, err));
 
         return Optional.of(rendered);
     }

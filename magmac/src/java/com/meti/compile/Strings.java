@@ -103,4 +103,13 @@ public class Strings {
         }
         return true;
     }
+
+    static boolean isAssignable(String token) {
+        if (isSymbol(token)) return true;
+
+        var separator = token.indexOf('.');
+        if (separator == -1) return false;
+
+        return isAssignable(token.substring(0, separator).strip()) && isSymbol(token.substring(separator + 1).strip());
+    }
 }
