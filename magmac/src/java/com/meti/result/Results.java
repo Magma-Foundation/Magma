@@ -7,7 +7,6 @@ public class Results {
         try {
             return new Ok<>(action.run());
         } catch (Throwable e) {
-            //noinspection unchecked
             return new Err<>((E) e);
         }
     }
