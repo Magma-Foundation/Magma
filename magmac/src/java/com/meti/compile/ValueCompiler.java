@@ -88,9 +88,18 @@ public record ValueCompiler(String input) {
         var inputArguments = new ArrayList<String>();
         var builder = new StringBuilder();
         var depth = 0;
+        var index = 0;
+        var queue = Strings.toQueue(inputArgumentStrings);
 
-        for (int i = 0; i < inputArgumentStrings.length(); i++) {
-            var c = inputArgumentStrings.charAt(i);
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+            if(c == '\'') {
+                builder.append(c);
+                builder.append(queue.pop());
+                builder.append(queue.pop());
+                continue;
+            }
+
             if (c == ',' && depth == 0) {
                 inputArguments.add(builder.toString());
                 builder = new StringBuilder();
@@ -100,6 +109,7 @@ public record ValueCompiler(String input) {
                 builder.append(c);
             }
         }
+
         inputArguments.add(builder.toString());
         return inputArguments;
     }

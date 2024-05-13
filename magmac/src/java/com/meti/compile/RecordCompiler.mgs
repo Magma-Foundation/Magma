@@ -1,0 +1,20 @@
+import { Optional } from java.util;
+export class def RecordCompiler extends InstanceCompiler() => 	def RecordCompiler(input : String): public => {
+			super(input);
+	}
+	def computeKeyword(): String => {
+		return "record";
+	}
+	def computeParamString(input : String): Optional<String> => {
+		let paramStart = input.indexOf('(');
+		if (paramStart == -1) 		return Optional.empty();
+		let paramEnd = input.indexOf(')', Optional[Ok[value=paramStart]]);
+		if (paramEnd == -1) 		return Optional.empty();
+		let slice = input.substring(paramStart + 1, Optional[Ok[value=paramEnd]]);
+		let compiledParams = ParamsCompiler(slice).compile();
+		return Optional.of(compiledParams);
+	}
+	def computeNameEnd(input : String, contentStart : int): int => {
+		return input.indexOf('(');
+	}
+
