@@ -82,8 +82,8 @@ public final class MethodCompiler {
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var rendered = MagmaLang.renderFunction(1, modifierString +
-                                                           "def ", name, finalRenderedParams, ": " + outputType, ";");
+                var rendered = MagmaLang.renderFunctionHeader(1, modifierString +
+                                                                 "def ", name, finalRenderedParams, ": " + outputType) + ";" + "\n";
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))

@@ -166,7 +166,7 @@ public final class ValueCompiler {
             } else {
                 compiledValue = createValueCompiler(value, indent).compileRequired(stack);
             }
-            var rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
+            var rendered = MagmaLang.renderFunctionHeader(0, "", "", "", "") + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile lambda: " + stripped, e)));

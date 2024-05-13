@@ -3,19 +3,12 @@ package com.meti.compile;
 public class MagmaLang {
     static String renderDefinedFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
 
-        var string = getString(indent, modifierString + "def ", name, renderedParams, typeString);
+        var string = renderFunctionHeader(indent, modifierString + "def ", name, renderedParams, typeString);
         return string + " => " + content + "\n";
     }
 
-    static String renderFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String contentString) {
-        return getString(indent, modifierString, name, renderedParams, typeString) + contentString + "\n";
-    }
-
-    static String getString(int indent, String modifierString, String name, String renderedParams, String typeString) {
-        var indentString = "\t".repeat(indent);
-        return indentString +
-               modifierString + name + "(" + renderedParams + ")" +
-               typeString;
+    static String renderFunctionHeader(int indent, String modifiers, String name, String renderedParams, String typeString) {
+        return "\t".repeat(indent) + modifiers + name + "(" + renderedParams + ")" + typeString;
     }
 
     static String renderClass(String modifierString, String name, ClassMemberResult members, String paramString) {
