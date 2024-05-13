@@ -4,181 +4,15 @@ import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.meti.result.Results.$Result;
 
 public record ValueCompiler(String input, int indent) {
-    static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent, List<String> stack) {
-        if (!stripped.endsWith(")")) return Optional.empty();
-        var start = findInvocationStart(stripped);
-        if (start == -1) return Optional.empty();
-
-        var end = stripped.length() - 1;
-
-        var callerEnd = computeCallerEnd(stripped, start);
-        if (callerEnd.isEmpty()) return Optional.empty();
-
-        String caller;
-        if (stripped.startsWith("new ")) {
-            var temp = stripped.substring("new ".length(), callerEnd.getAsInt());
-            if (Strings.isSymbol(temp)) {
-                caller = temp;
-            } else {
-                caller = stripped.substring(0, callerEnd.getAsInt());
-            }
-        } else {
-            caller = stripped.substring(0, callerEnd.getAsInt());
-        }
-
-
-        var inputArgumentStrings = stripped.substring(start + 1, end);
-
-        var inputArguments = splitInvocationArguments(inputArgumentStrings);
-        var outputArguments = Optional.<StringBuilder>empty();
-        for (String inputArgument : inputArguments) {
-            if (inputArgument.isBlank()) continue;
-
-            try {
-                var compiledValue = new ValueCompiler(inputArgument, indent).compile(stack);
-                if (compiledValue.isEmpty()) {
-                    throw new CompileException("Failed to compile argument: " + inputArgument);
-                }
-
-                var value = outputArguments
-                        .map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse("")))
-                        .orElse(new StringBuilder(compiledValue.get().$()));
-
-                outputArguments = Optional.of(value);
-            } catch (CompileException e) {
-                return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
-            }
-        }
-
-
-        var suffix = indent == 0 ? "" : ";\n";
-        var renderedArguments = outputArguments.orElse(new StringBuilder());
-
-        var compiledCaller = new ValueCompiler(caller, 0).compile(stack);
-        if (compiledCaller.isEmpty()) {
-            return Optional.empty();
-        }
-
-        try {
-            var stringCompileExceptionResult = compiledCaller.get().$();
-            return Optional.of(new Ok<>("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
-        } catch (CompileException e) {
-            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
-        }
-    }
-
-    private static OptionalInt computeCallerEnd(String stripped, int start) {
-        int callerEnd;
-        if (stripped.charAt(start - 1) == '>') {
-            var genStart = stripped.lastIndexOf("<", start);
-            if (genStart == -1) return OptionalInt.empty();
-            else callerEnd = genStart;
-        } else {
-            callerEnd = start;
-        }
-        return OptionalInt.of(callerEnd);
-    }
-
-    private static ArrayList<String> splitInvocationArguments(String inputArgumentStrings) {
-        var inputArguments = new ArrayList<String>();
-        var builder = new StringBuilder();
-        var depth = 0;
-        var queue = Strings.toQueue(inputArgumentStrings);
-
-        while (!queue.isEmpty()) {
-            var c = queue.pop();
-            if (c == '\'') {
-                builder.append(c);
-                builder.append(queue.pop());
-                try {
-                    builder.append(queue.pop());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                continue;
-            }
-
-            if (c == '\"') {
-                builder.append(c);
-
-                while (!queue.isEmpty()) {
-                    var next = queue.pop();
-                    builder.append(next);
-                    if (next == '\\') {
-                        builder.append(queue.pop());
-                    }
-                    if (next == '\"') {
-                        break;
-                    }
-                }
-
-                continue;
-            }
-
-            if (c == ',' && depth == 0) {
-                inputArguments.add(builder.toString());
-                builder = new StringBuilder();
-            } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
-                builder.append(c);
-            }
-        }
-
-        inputArguments.add(builder.toString());
-        return inputArguments;
-    }
-
-    private static int findInvocationStart(String stripped) {
-        var queue = Strings.toQueue(stripped);
-        Collections.reverse(queue);
-        queue.pop();
-
-        var start = -1;
-        var depth = 0;
-        var index = stripped.length() - 1;
-
-        while (!queue.isEmpty()) {
-            var c = queue.pop();
-            index--;
-
-            if (c == '\'') {
-                queue.pop();
-                index--;
-
-                queue.pop();
-                index--;
-            }
-
-            if (c == '\"') {
-                while (!queue.isEmpty()) {
-                    var next = queue.pop();
-                    index--;
-                    if (next == '\"') {
-                        break;
-                    }
-                }
-
-                continue;
-            }
-
-            if (c == '(' && depth == 0) {
-                start = index;
-                break;
-            } else {
-                if (c == ')') depth++;
-                if (c == '(') depth--;
-            }
-        }
-
-        return start;
-    }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
         var objectEnd = stripped.lastIndexOf('.');
@@ -241,7 +75,7 @@ public record ValueCompiler(String input, int indent) {
     Optional<Result<String, CompileException>> compile(List<String> stack) {
         var stripped = input().strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
-                .or(() -> compileLambda(stripped, indent, Collections.emptyList())).or(() -> compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
+                .or(() -> compileLambda(stripped, indent, Collections.emptyList())).or(() -> InvocationCompiler.compileInvocation(stripped, indent, Collections.emptyList())).or(() -> compileAccess(stripped)).or(() -> compileTernary(stripped)).or(() -> compileNumbers(stripped)).or(() -> compileOperation(stripped)).or(() -> compileChar(stripped)).or(() -> compileNot(stripped)).or(() -> compileMethodReference(stripped)).or(() -> compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.meti.compile.ValueCompiler.compileInvocation;
+import static com.meti.compile.InvocationCompiler.compileInvocation;
 
 public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped, int indent) throws CompileException {
