@@ -2,6 +2,7 @@ package com.meti;
 
 import com.meti.compile.InstanceCompiler;
 
+import java.util.List;
 import java.util.Optional;
 
 public class InterfaceCompiler extends InstanceCompiler {
@@ -20,7 +21,7 @@ public class InterfaceCompiler extends InstanceCompiler {
     }
 
     @Override
-    protected Optional<String> computeParamString(String input) {
+    protected Optional<String> computeParamString(String input, List<String> stack) {
         return Optional.of("");
     }
 }

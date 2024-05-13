@@ -87,7 +87,16 @@ public final class ValueCompiler {
     static Optional<Result<String, CompileException>> compile(ValueCompiler valueCompiler, List<String> stack) {
         var stripped = valueCompiler.input().strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
-                .or(() -> valueCompiler.compileLambda(stripped, valueCompiler.indent, Collections.emptyList())).or(() -> InvocationCompiler.compileInvocation(Collections.emptyList(), stripped, valueCompiler.indent)).or(() -> compileAccess(stripped)).or(() -> valueCompiler.compileTernary(stripped)).or(() -> valueCompiler.compileNumbers(stripped)).or(() -> valueCompiler.compileOperation(stripped)).or(() -> valueCompiler.compileChar(stripped)).or(() -> valueCompiler.compileNot(stripped)).or(() -> valueCompiler.compileMethodReference(stripped)).or(() -> valueCompiler.compileCast(stripped));
+                .or(() -> valueCompiler.compileLambda(stripped, valueCompiler.indent, stack))
+                .or(() -> InvocationCompiler.compileInvocation(stack, stripped, valueCompiler.indent))
+                .or(() -> compileAccess(stripped))
+                .or(() -> valueCompiler.compileTernary(stripped))
+                .or(() -> valueCompiler.compileNumbers(stripped))
+                .or(() -> valueCompiler.compileOperation(stripped))
+                .or(() -> valueCompiler.compileChar(stripped))
+                .or(() -> valueCompiler.compileNot(stripped))
+                .or(() -> valueCompiler.compileMethodReference(stripped))
+                .or(() -> valueCompiler.compileCast(stripped));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {

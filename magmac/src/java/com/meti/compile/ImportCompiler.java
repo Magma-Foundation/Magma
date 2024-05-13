@@ -3,11 +3,12 @@ package com.meti.compile;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
+import java.util.List;
 import java.util.Optional;
 
 public record ImportCompiler(String stripped) implements RootCompiler {
     @Override
-    public Optional<Result<String, CompileException>> compile() {
+    public Optional<Result<String, CompileException>> compile(List<String> stack) {
         if (!stripped().startsWith("import ")) return Optional.empty();
 
         var segmentsStart = stripped().startsWith("import static ") ? "import static ".length() : "import ".length();

@@ -42,7 +42,7 @@ public record MethodCompiler(String input) {
         var paramString = stripped.substring(paramStart + 1, paramEnd);
         String renderedParams;
         try {
-            renderedParams = new ParamsCompiler(paramString).compile();
+            renderedParams = new ParamsCompiler(paramString, stack).compile();
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
         }

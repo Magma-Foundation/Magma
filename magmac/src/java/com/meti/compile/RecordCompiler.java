@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class RecordCompiler extends InstanceCompiler {
@@ -13,7 +14,7 @@ public final class RecordCompiler extends InstanceCompiler {
     }
 
     @Override
-    protected Optional<String> computeParamString(String input) throws CompileException {
+    protected Optional<String> computeParamString(String input, List<String> stack) throws CompileException {
         var paramStart = input.indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
@@ -21,7 +22,7 @@ public final class RecordCompiler extends InstanceCompiler {
         if (paramEnd == -1) return Optional.empty();
 
         var slice = input.substring(paramStart + 1, paramEnd);
-        var compiledParams = new ParamsCompiler(slice).compile();
+        var compiledParams = new ParamsCompiler(slice, stack).compile();
 
         return Optional.of(compiledParams);
     }

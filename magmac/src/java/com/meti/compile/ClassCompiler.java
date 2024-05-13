@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class ClassCompiler extends InstanceCompiler {
@@ -13,7 +14,7 @@ public final class ClassCompiler extends InstanceCompiler {
     }
 
     @Override
-    protected Optional<String> computeParamString(String input) {
+    protected Optional<String> computeParamString(String input, List<String> stack) {
         return Optional.of("");
     }
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public record ParamsCompiler(String paramString) {
+public record ParamsCompiler(String paramString, List<String> stack) {
     String compile() throws CompileException {
         var paramStrings = splitParams();
         var outputParams = Optional.<StringBuilder>empty();
@@ -19,6 +19,7 @@ public record ParamsCompiler(String paramString) {
 
             var type = strippedParam.substring(0, separator);
             var name = strippedParam.substring(separator + 1);
+            stack.add(name);
 
             var compiledType = new TypeCompiler(type).compile().$();
             var next = name + " : " + compiledType;

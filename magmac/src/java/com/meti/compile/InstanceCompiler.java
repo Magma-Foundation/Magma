@@ -19,7 +19,7 @@ public abstract class InstanceCompiler implements RootCompiler {
         this.input = input;
     }
 
-    static Result<ClassMemberResult, CompileException> compileClassMembers(List<String> inputContent) {
+    static Result<ClassMemberResult, CompileException> compileClassMembers(List<String> inputContent, List<String> stack) {
         var instanceContent = new ArrayList<String>();
         var staticContent = new ArrayList<String>();
 
@@ -27,7 +27,7 @@ public abstract class InstanceCompiler implements RootCompiler {
             if (input.isBlank()) continue;
 
             try {
-                var result = compileClassMember(input).$();
+                var result = compileClassMember(input, stack).$();
                 instanceContent.addAll(result.instanceMembers());
                 staticContent.addAll(result.staticMembers());
             } catch (CompileException e) {
@@ -38,12 +38,12 @@ public abstract class InstanceCompiler implements RootCompiler {
         return new Ok<>(new ClassMemberResult(instanceContent, staticContent));
     }
 
-    private static Result<ClassMemberResult, CompileException> compileClassMember(String input) {
-        return new MethodCompiler(input).compile(Collections.emptyList())
+    private static Result<ClassMemberResult, CompileException> compileClassMember(String input, List<String> stack) {
+        return new MethodCompiler(input).compile(stack)
                 .or(() -> {
-                    return new DeclarationCompiler(input, 0).compile(Collections.emptyList()).map(result -> {
+                    return new DeclarationCompiler(input, 0).compile(stack).map(result -> {
                         return result.mapValue(value -> {
-                            return new ClassMemberResult(List.of(value), Collections.emptyList());
+                            return new ClassMemberResult(List.of(value), stack);
                         });
                     });
                 })
@@ -53,7 +53,7 @@ public abstract class InstanceCompiler implements RootCompiler {
     protected abstract String computeKeyword();
 
     @Override
-    public Optional<Result<String, CompileException>> compile() {
+    public Optional<Result<String, CompileException>> compile(List<String> stack) {
         var classIndex = input.indexOf(computeKeyword());
         if (classIndex == -1) return Optional.empty();
 
@@ -73,14 +73,14 @@ public abstract class InstanceCompiler implements RootCompiler {
 
         Optional<String> paramString;
         try {
-            paramString = computeParamString(input);
+            paramString = computeParamString(input, Collections.emptyList());
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
 
         if (paramString.isEmpty()) return Optional.empty();
 
-        return compileClassMembers(inputContent).mapErr(err -> {
+        return compileClassMembers(inputContent, stack).mapErr(err -> {
             var format = "Failed to compile %s body: %s";
             var message = format.formatted(computeKeyword(), input);
             return new CompileException(message, err);
@@ -90,5 +90,5 @@ public abstract class InstanceCompiler implements RootCompiler {
 
     protected abstract int computeNameEnd(String input, int contentStart);
 
-    protected abstract Optional<String> computeParamString(String input) throws CompileException;
+    protected abstract Optional<String> computeParamString(String input, List<String> stack) throws CompileException;
 }

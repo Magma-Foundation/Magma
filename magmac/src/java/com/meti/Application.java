@@ -4,6 +4,8 @@ import com.meti.compile.RootCompiler;
 import com.meti.compile.*;
 import com.meti.result.Err;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -26,7 +28,7 @@ public class Application {
         if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
 
         return streamCompilers(stripped)
-                .map(RootCompiler::compile)
+                .map(rootCompiler -> rootCompiler.compile(new ArrayList<>()))
                 .flatMap(Optional::stream)
                 .findFirst()
                 .orElseGet(() -> new Err<>(new CompileException(line)))
