@@ -25,4 +25,9 @@ public final class RecordCompiler extends InstanceCompiler {
 
         return Optional.of(compiledParams);
     }
+
+    @Override
+    protected int computeContentStart(String input, int contentStart) {
+        return input.indexOf('(');
+    }
 }

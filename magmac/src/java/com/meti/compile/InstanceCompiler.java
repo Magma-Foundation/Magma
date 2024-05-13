@@ -53,7 +53,7 @@ public abstract class InstanceCompiler implements Compiler {
         var contentStart = input.indexOf('{', classEnd);
         if (contentStart == -1) return Optional.empty();
 
-        var name = input.substring(classEnd, contentStart).strip();
+        var name = input.substring(classEnd, computeContentStart(input, contentStart)).strip();
         var modifierString = input.startsWith("public ") ? "export " : "";
 
         var contentEnd = input.lastIndexOf('}');
@@ -75,6 +75,8 @@ public abstract class InstanceCompiler implements Compiler {
                 .into(Results::unwrapOptional);
 
     }
+
+    protected abstract int computeContentStart(String input, int contentStart);
 
     protected abstract Optional<String> computeParamString(String input);
 }

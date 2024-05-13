@@ -16,4 +16,9 @@ public final class ClassCompiler extends InstanceCompiler {
     protected Optional<String> computeParamString(String input) {
         return Optional.of("");
     }
+
+    @Override
+    protected int computeContentStart(String input, int contentStart) {
+        return contentStart;
+    }
 }
