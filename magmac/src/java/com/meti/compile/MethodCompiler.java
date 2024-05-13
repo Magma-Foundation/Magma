@@ -6,15 +6,14 @@ import com.meti.node.StringAttribute;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
-import com.meti.result.Results;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.meti.compile.MagmaLang.renderFunction;
+import static com.meti.compile.MagmaLang.renderFunctionDeclaration;
 import static com.meti.result.Results.$Result;
 
 public final class MethodCompiler {
@@ -76,32 +75,36 @@ public final class MethodCompiler {
                 "name", new StringAttribute(name),
                 "params", new StringAttribute(renderedParams));
 
-        return attachValue(stack, node, inputType, stripped)
-                .into(Results::unwrapOptional)
+        Optional<Result<String, CompileException>> result1;
+        Node node1 = new Node(node);
+        try {
+            var node11 = node1.withString("type", ": " + new TypeCompiler(inputType).compile().$());
+            result1 = attachValue(stack, stripped, node11);
+        } catch (CompileException e) {
+            result1 = Optional.of(new Err<>(e));
+        }
+        return result1
                 .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack + ": " + input, err)))
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
-    private static Result<Optional<String>, CompileException> attachValue(List<String> stack, Map<String, Attribute> node, String inputType, String input) {
-        return $Result(() -> {
-            var copy = new HashMap<>(node);
-            copy.put("type", new StringAttribute(": " + new TypeCompiler(inputType).compile().$()));
-
-            var contentStart = input.indexOf("{");
-            var contentEnd = input.lastIndexOf('}');
-            if (contentStart != -1 && contentEnd != -1) {
+    private static Optional<Result<String, CompileException>> attachValue(List<String> stack, String input, Node node) {
+        var contentStart = input.indexOf("{");
+        var contentEnd = input.lastIndexOf('}');
+        if (contentStart != -1 && contentEnd != -1) {
+            return Optional.of($Result(() -> {
                 var content = input.substring(contentStart + 1, contentEnd);
                 var inputContent = Strings.splitMembers(content);
                 var outputContent = compileMethodMembers(inputContent, 2, stack).$();
-                copy.put("content", new StringAttribute("{\n" + outputContent + "\t}"));
+                var withContent = node.withString("content", "{\n" + outputContent + "\t}");
 
-                return Optional.of(renderFunction(copy));
-            } else if (contentStart == -1 && contentEnd == -1) {
-                return Optional.of(MagmaLang.renderFunctionDeclaration(copy) + ";" + "\n");
-            } else {
-                return Optional.empty();
-            }
-        });
+                return renderFunction(withContent);
+            }));
+        } else if (contentStart == -1 && contentEnd == -1) {
+            return Optional.of(new Ok<>(renderFunctionDeclaration(node) + ";" + "\n"));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static ClassMemberResult handleStatic(List<String> modifiers, String rendered) {

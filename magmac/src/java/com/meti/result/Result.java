@@ -17,4 +17,6 @@ public interface Result<T, E extends Throwable> {
     <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
 
     Optional<T> findValue();
+
+    <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper);
 }

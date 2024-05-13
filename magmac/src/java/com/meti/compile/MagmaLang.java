@@ -46,4 +46,12 @@ public class MagmaLang {
         var joinedStatic = String.join("", members.staticMembers());
         return modifierString + "object " + name + " {\n" + joinedStatic + "}";
     }
+
+    static String renderFunctionDeclaration(Node copy) {
+        return renderFunctionDeclaration(copy.node());
+    }
+
+    static String renderFunction(Node copy) {
+        return renderFunction(copy.node());
+    }
 }
