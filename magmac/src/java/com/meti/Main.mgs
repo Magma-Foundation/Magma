@@ -4,7 +4,8 @@ import { Files } from java.nio.file;
 import { Path } from java.nio.file;
 import { Paths } from java.nio.file;
 import { Collectors } from java.util.stream;
-export class def Main() => {}
+export class def Main() => {
+}
 export object Main {
 	def main(args : String[]): Void => {
 		let sourceDirectory = Paths.get(".", Optional[Ok[value="magmac"]], Optional[Ok[value="src"]], Optional[Ok[value="java"]]);

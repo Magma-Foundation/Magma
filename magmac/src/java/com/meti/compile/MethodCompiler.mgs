@@ -6,7 +6,8 @@ import { List } from java.util;
 import { Optional } from java.util;
 import { renderDefinedFunction } from com.meti.compile.MagmaLang;
 import { $Result } from com.meti.result.Results;
-export class def MethodCompiler(input : String) => {	def compile(): Optional<Result<ClassMemberResult, CompileException>> => {
+export class def MethodCompiler(input : String) => {
+	def compile(): Optional<Result<ClassMemberResult, CompileException>> => {
 		let stripped = input().strip();
 		let paramStart = stripped.indexOf('(');
 		if (paramStart == -1) 		return Optional.empty();

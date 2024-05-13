@@ -3,7 +3,8 @@ import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { ArrayList } from java.util;
 import { Optional } from java.util;
-export class def TypeCompiler(inputType : String) => {	def compile(): Result<String, CompileException> => {
+export class def TypeCompiler(inputType : String) => {
+	def compile(): Result<String, CompileException> => {
 		return compilePrimitiveType(inputType()).or(() => compileSymbolType(inputType())
 ).or(() => compileGenericType(inputType())
 ).orElseGet(() => Err(CompileException("Unknown type: " + inputType()))

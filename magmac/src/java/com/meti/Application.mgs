@@ -3,7 +3,8 @@ import { * } from com.meti.compile;
 import { Err } from com.meti.result;
 import { Optional } from java.util;
 import { Stream } from java.util.stream;
-export class def Application() => {}
+export class def Application() => {
+}
 export object Application {
 	def compile(input : String): String => {
 		let lines = Strings.splitMembers(input);

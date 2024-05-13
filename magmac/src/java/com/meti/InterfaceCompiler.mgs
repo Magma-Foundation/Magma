@@ -1,6 +1,7 @@
 import { InstanceCompiler } from com.meti.compile;
 import { Optional } from java.util;
-export class def InterfaceCompiler extends InstanceCompiler() => {	def InterfaceCompiler(input : String): public => {
+export class def InterfaceCompiler extends InstanceCompiler() => {
+	def InterfaceCompiler(input : String): public => {
 			super(input);
 	}
 	def computeKeyword(): String => {

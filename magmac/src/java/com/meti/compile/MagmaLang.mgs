@@ -1,4 +1,5 @@
-export class def MagmaLang() => {}
+export class def MagmaLang() => {
+}
 export object MagmaLang {
 	def renderDefinedFunction(indent : int, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => {
 		return renderFunction(indent, Optional[Ok[value=modifierString + "def "]], Optional[Ok[value=name]], Optional[Ok[value=renderedParams]], Optional[Ok[value=typeString]], Optional[Ok[value=" => " + content]]);
@@ -16,7 +17,7 @@ export object MagmaLang {
 	}
 	private def renderInstanceClassContent(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => {
 		let joinedInstance = String.join("", Optional[Ok[value=members.instanceMembers()]]);
-		return renderDefinedFunction(0, Optional[Ok[value=modifierString + "class "]], Optional[Ok[value=name]], Optional[Ok[value=paramString]], Optional[Ok[value=""]], Optional[Ok[value="{" + joinedInstance + "}"]]);
+		return renderDefinedFunction(0, Optional[Ok[value=modifierString + "class "]], Optional[Ok[value=name]], Optional[Ok[value=paramString]], Optional[Ok[value=""]], Optional[Ok[value="{\n" + joinedInstance + "}"]]);
 	}
 	private def renderStaticClassContent(modifierString : String, name : String, members : ClassMemberResult): String => {
 		if (members.staticMembers().isEmpty()) 		return "";

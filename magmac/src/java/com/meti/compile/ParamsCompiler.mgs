@@ -1,7 +1,8 @@
 import { ArrayList } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
-export class def ParamsCompiler(paramString : String) => {	def compile(): String => {
+export class def ParamsCompiler(paramString : String) => {
+	def compile(): String => {
 		let paramStrings = splitParams();
 		let outputParams = Optional.empty();
 		for (Ok[value=let string] :  paramStrings) {

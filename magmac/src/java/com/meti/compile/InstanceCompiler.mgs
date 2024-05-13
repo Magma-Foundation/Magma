@@ -7,7 +7,8 @@ import { Collections } from java.util;
 import { List } from java.util;
 import { Optional } from java.util;
 import { renderClass } from com.meti.compile.MagmaLang;
-export class def InstanceCompiler implements RootCompiler() => {let input	def InstanceCompiler(input : String): public => {
+export class def InstanceCompiler implements RootCompiler() => {
+let input	def InstanceCompiler(input : String): public => {
 		this.input = input;
 	}
 	def computeKeyword(): String => ;

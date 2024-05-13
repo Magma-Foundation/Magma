@@ -1,5 +1,6 @@
 import { Function } from java.util.function;
-export class def Err<T, E extends Throwable>(value : E) => {	def $(): T => {
+export class def Err<T, E extends Throwable>(value : E) => {
+	def $(): T => {
 			throw value;
 	}
 	def mapValue(mapper : Function<T, R>): Result<R, E> => {
