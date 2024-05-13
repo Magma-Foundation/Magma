@@ -189,8 +189,8 @@ public record ValueCompiler(String input) {
                 .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileTernary(stripped))
-                .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
+                .or(() -> compileOperation(stripped))
                 .or(() -> compileChar(stripped))
                 .or(() -> compileNot(stripped))
                 .or(() -> compileMethodReference(stripped));
@@ -284,7 +284,7 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||", "<").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
+        return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
