@@ -1,0 +1,3 @@
+import { List } from java.util;
+export class def ClassMemberResult(List<String> instanceMembers, List<String> staticMembers)(instanceMembers : List<String>, staticMembers : List<String>) => {
+}

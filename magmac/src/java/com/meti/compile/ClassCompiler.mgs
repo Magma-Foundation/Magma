@@ -1,0 +1,10 @@
+import { Optional } from java.util;
+export class def ClassCompiler extends InstanceCompiler() => {
+	def ClassCompiler(input : String): Ok[value=public] => {
+			super(input);
+	}
+	def computeKeyword(): Ok[value=String] => {
+return "class";	}
+	def computeParamString(input : String): Ok[value=Optional<String>] => {
+return Optional.of("");	}
+}

@@ -13,16 +13,16 @@ public class MagmaLang {
                indentString + "}\n";
     }
 
-    static String renderClass(String modifierString, String name, ClassMemberResult members) {
-        var instanceContent = renderInstanceClassContent(modifierString, name, members);
+    static String renderClass(String modifierString, String name, ClassMemberResult members, String paramString) {
+        var instanceContent = renderInstanceClassContent(modifierString, name, members, paramString);
         var staticContent = renderStaticClassContent(modifierString, name, members);
         return instanceContent + staticContent;
     }
 
-    private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members) {
+    private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members, String paramString) {
         var joinedInstance = String.join("", members.instanceMembers());
 
-        return renderFunction(modifierString + "class ", name, "", "", 0, joinedInstance);
+        return renderFunction(modifierString + "class ", name, paramString, "", 0, joinedInstance);
     }
 
     private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {

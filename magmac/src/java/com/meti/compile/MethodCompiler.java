@@ -21,8 +21,7 @@ public record MethodCompiler(String input) {
         if (paramEnd == -1) return Optional.empty();
 
         var paramString = stripped.substring(paramStart + 1, paramEnd);
-        var paramStrings = List.of(paramString.split(","));
-        var renderedParams = compileMethodParams(paramStrings);
+        var renderedParams = new ParamsCompiler(paramString).compile();
 
         var before = stripped.substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
@@ -47,14 +46,8 @@ public record MethodCompiler(String input) {
         var content = stripped.substring(contentStart + 1, contentEnd);
         var inputContent = Strings.splitMembers(content);
 
-        String outputType;
-        if (inputType.equals("void")) {
-            outputType = "Void";
-        } else if(Strings.isSymbol(inputType)) {
-            outputType = inputType;
-        } else {
-            return Optional.of(new Err<>(new CompileException("Unknown type: " + inputType)));
-        }
+        var outputType = compileType(inputType);
+
 
         return Optional.of(compileMethodMembers(inputContent).mapValue(outputContent -> {
             var rendered = renderFunction(modifierString, name, renderedParams, ": " + outputType, 1, outputContent);
@@ -63,6 +56,41 @@ public record MethodCompiler(String input) {
                     ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
                     : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
         }));
+    }
+
+    private static Result<String, CompileException> compileType(String inputType) {
+        return compilePrimitiveType(inputType)
+                .or(() -> compileSymbolType(inputType))
+                .or(() -> compileGenericType(inputType))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown type: " + inputType)));
+    }
+
+    private static Optional<Result<String, CompileException>> compileGenericType(String inputType) {
+        var genStart = inputType.indexOf('<');
+        if (genStart == -1) return Optional.empty();
+
+        var genEnd = inputType.lastIndexOf('>');
+        if (genEnd == -1) return Optional.empty();
+
+        var parent = inputType.substring(0, genStart);
+        var child = inputType.substring(genStart + 1, genEnd);
+
+        return Optional.of(compileType(child).mapValue(value -> parent + "<" + value + ">"));
+    }
+
+    private static Optional<Result<String, CompileException>> compileSymbolType(String inputType) {
+        if (Strings.isSymbol(inputType)) {
+            return Optional.of(new Ok<>(inputType));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<Result<String, CompileException>> compilePrimitiveType(String inputType) {
+        if (inputType.equals("void")) {
+            return Optional.of(new Ok<>("Void"));
+        }
+        return Optional.empty();
     }
 
     private static Result<String, CompileException> compileMethodMembers(List<String> inputContent) {
@@ -80,21 +108,4 @@ public record MethodCompiler(String input) {
         return new Ok<>(outputContent.toString());
     }
 
-    private static String compileMethodParams(List<String> paramStrings) {
-        var outputParams = Optional.<StringBuilder>empty();
-        for (String string : paramStrings) {
-            if (string.isBlank()) continue;
-
-            var strippedParam = string.strip();
-            var separator = strippedParam.lastIndexOf(' ');
-            var type = strippedParam.substring(0, separator);
-            var name = strippedParam.substring(separator + 1);
-
-            var next = name + " : " + type;
-            outputParams = Optional.of(outputParams.map(value -> value.append(", ").append(next))
-                    .orElse(new StringBuilder(next)));
-        }
-
-        return outputParams.orElse(new StringBuilder()).toString();
-    }
 }

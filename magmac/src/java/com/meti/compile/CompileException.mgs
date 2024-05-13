@@ -1,0 +1,8 @@
+export class def CompileException extends Exception() => {
+	def CompileException(message : String, cause : Throwable): Ok[value=public] => {
+			super(message, cause);
+	}
+	def CompileException(message : String): Ok[value=public] => {
+			super(message);
+	}
+}
