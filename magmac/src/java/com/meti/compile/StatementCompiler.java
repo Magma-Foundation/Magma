@@ -132,6 +132,7 @@ public record StatementCompiler(String input, int indent) {
 
         var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
         var separator = condition.lastIndexOf(':');
+        if(separator == -1) return Optional.empty();
 
         var conditionDeclarationString = condition.substring(0, separator);
         var compiledConditionDeclaration = new DeclarationCompiler(conditionDeclarationString, 0)

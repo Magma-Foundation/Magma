@@ -1,0 +1,59 @@
+import { Err } from com.meti.result;
+import { Ok } from com.meti.result;
+import { Result } from com.meti.result;
+import { Results } from com.meti.result;
+import { ArrayList } from java.util;
+import { Collections } from java.util;
+import { List } from java.util;
+import { Optional } from java.util;
+export class def InstanceCompiler implements RootCompiler() => let input	def InstanceCompiler(input : String): public => 		this.input = input;
+
+	def computeKeyword(): String => ;
+	def compile(): Optional<Result<String, CompileException>> => 		let classIndex = input.indexOf(computeKeyword());
+		if (classIndex == -1) 		return Optional.empty();
+		let classEnd = classIndex + computeKeyword().length();
+		let contentStart = input.indexOf('{', classEnd);
+		if (contentStart == -1) 		return Optional.empty();
+		let name = input.substring(classEnd, computeNameEnd(input, contentStart)).strip();
+		let modifierString = input.startsWith("public ") ? "export " : "";
+		let contentEnd = input.lastIndexOf('}');
+		if (contentEnd == -1) 		return Optional.empty();
+		let content = input.substring(contentStart + 1, contentEnd).strip();
+		let inputContent = Strings.splitMembers(content);
+		let paramString = computeParamString(input);
+		if (paramString.isEmpty()) 		return Optional.empty();
+		return compileClassMembers(inputContent).mapErr(err -> {
+            var format = "Failed to compile %s body: %s";
+            var message = format.formatted(computeKeyword(), input);
+            return new CompileException(message, err);
+        }).mapValue(output -> Optional.of(MagmaLang.renderClass(modifierString, name, output, paramString.get()))).into(Results::unwrapOptional);
+
+	def computeNameEnd(input : String, contentStart : int): int => ;
+	def computeParamString(input : String): Optional<String> => ;
+
+export object InstanceCompiler implements RootCompiler {
+	def compileClassMembers(inputContent : List<String>): Result<ClassMemberResult, CompileException> => 		let instanceContent = ArrayList();
+		let staticContent = ArrayList();
+		for (let input :  inputContent) {
+			if (input.isBlank()) let continue		try {
+			let result = compileClassMember(input).$();
+			instanceContent.addAll(result.instanceMembers());
+			staticContent.addAll(result.staticMembers());
+		}
+		catch (e : CompileException) {
+		return Err(e);
+		}
+		}
+		return Ok(ClassMemberResult(instanceContent, staticContent));
+
+	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => 		return MethodCompiler(input).compile()
+                .or(() -> {
+                    return new DeclarationCompiler(input, 0).compileInstance().map(result -> {
+                        return result.mapValue(value -> {
+                            return new ClassMemberResult(List.of(value), Collections.emptyList());
+                        });
+                    });
+                })
+                .orElseGet(() -> new Err<>(new CompileException("Unknown class member: " + input)));
+
+}
