@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 import static com.meti.result.Results.$Result;
 
-public record ValueCompiler(String input) {
+public record ValueCompiler(String input, int indent) {
     static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
         if (!stripped.endsWith(")")) return Optional.empty();
         var start = findInvocationStart(stripped);
@@ -44,7 +44,7 @@ public record ValueCompiler(String input) {
             if (inputArgument.isBlank()) continue;
 
             try {
-                var compiledValue = new ValueCompiler(inputArgument).compile();
+                var compiledValue = new ValueCompiler(inputArgument, 0).compile();
                 if (compiledValue.isEmpty()) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
@@ -61,7 +61,7 @@ public record ValueCompiler(String input) {
         var suffix = indent == 0 ? "" : ";\n";
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-        var compiledCaller = new ValueCompiler(caller).compile();
+        var compiledCaller = new ValueCompiler(caller, 0).compile();
         if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
@@ -216,7 +216,7 @@ public record ValueCompiler(String input) {
 
         String compiledObject;
         try {
-            compiledObject = new ValueCompiler(objectString).compileRequired();
+            compiledObject = new ValueCompiler(objectString, 0).compileRequired();
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile object reference of access statement: " + objectString, e)));
         }
@@ -236,8 +236,8 @@ public record ValueCompiler(String input) {
         var right = stripped.substring(operatorIndex + operator.length());
 
         return Optional.of($Result(() -> {
-            var leftCompiled = new ValueCompiler(left).compileRequired();
-            var rightCompiled = new ValueCompiler(right).compileRequired();
+            var leftCompiled = new ValueCompiler(left, 0).compileRequired();
+            var rightCompiled = new ValueCompiler(right, 0).compileRequired();
 
             return leftCompiled + " " + operator + " " + rightCompiled;
         }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
@@ -251,7 +251,7 @@ public record ValueCompiler(String input) {
         var stripped = input().strip();
         return compileString(stripped)
                 .or(() -> compileSymbol(stripped))
-                .or(() -> compileLambda(stripped))
+                .or(() -> compileLambda(stripped, indent))
                 .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileTernary(stripped))
@@ -272,7 +272,7 @@ public record ValueCompiler(String input) {
                 var outputType = new TypeCompiler(type).compile().$();
                 var valueString = stripped.substring(end + 1).strip();
 
-                var compiledValue = new ValueCompiler(valueString).compileRequired();
+                var compiledValue = new ValueCompiler(valueString, 0).compileRequired();
                 return "(" + outputType + ") " + compiledValue;
             }));
         } else {
@@ -287,7 +287,7 @@ public record ValueCompiler(String input) {
             var after = stripped.substring(index + "::".length());
             if (!Strings.isSymbol(after)) return Optional.empty();
 
-            return new ValueCompiler(before).compile().map(value -> {
+            return new ValueCompiler(before, 0).compile().map(value -> {
                 return value.mapValue(inner -> {
                     return inner + "." + after;
                 });
@@ -297,7 +297,7 @@ public record ValueCompiler(String input) {
         return Optional.empty();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileLambda(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileLambda(String stripped, int indent) {
         var separator = stripped.indexOf("->");
         if (separator == -1) return Optional.empty();
 
@@ -308,7 +308,7 @@ public record ValueCompiler(String input) {
         var params = new ArrayList<String>();
         if (paramStart == 0 && paramEnd == before.length() - 1) {
             /*
-            Pull params
+            TODO: Pull params
              */
         } else if (paramStart == -1 && paramEnd == -1) {
             if (Strings.isSymbol(before)) {
@@ -328,9 +328,9 @@ public record ValueCompiler(String input) {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = MethodCompiler.compileMethodMembers(members).$();
             } else {
-                compiledValue = new ValueCompiler(value).compileRequired();
+                compiledValue = new ValueCompiler(value, indent).compileRequired();
             }
-            var rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
+            var rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile lambda: " + stripped, e)));
@@ -341,7 +341,7 @@ public record ValueCompiler(String input) {
         if (stripped.startsWith("!")) {
             var valueString = stripped.substring(1).strip();
             try {
-                return Optional.of(new Ok<>(new ValueCompiler(valueString).compileRequired()));
+                return Optional.of(new Ok<>(new ValueCompiler(valueString, 0).compileRequired()));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
@@ -382,15 +382,15 @@ public record ValueCompiler(String input) {
         if (statementMarker == -1) return Optional.empty();
 
         var conditionString = stripped.substring(0, conditionMarker).strip();
-        var condition = new ValueCompiler(conditionString).compile();
+        var condition = new ValueCompiler(conditionString, 0).compile();
         if (condition.isEmpty()) return Optional.empty();
 
         var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-        var thenBlock = new ValueCompiler(thenString).compile();
+        var thenBlock = new ValueCompiler(thenString, 0).compile();
         if (thenBlock.isEmpty()) return Optional.empty();
 
         var elseString = stripped.substring(statementMarker + 1).strip();
-        var elseBlock = new ValueCompiler(elseString).compile();
+        var elseBlock = new ValueCompiler(elseString, 0).compile();
         if (elseBlock.isEmpty()) return Optional.empty();
 
         return Optional.of($Result(() -> {

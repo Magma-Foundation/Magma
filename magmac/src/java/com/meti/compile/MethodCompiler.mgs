@@ -40,14 +40,12 @@ export class def MethodCompiler(input : String) => {
 		let outputContent = compileMethodMembers(inputContent).$();
 		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
-
 ));
 		}
 		try {
 			return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let rendered = MagmaLang.renderFunction(1, modifierString + "def ", name, finalRenderedParams, ": " + outputType, ";");
 		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
-
 ));
 		}
 		try {

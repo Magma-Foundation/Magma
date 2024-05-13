@@ -15,8 +15,7 @@ export class def ParamsCompiler(paramString : String) => {
 			let name = strippedParam.substring(separator + 1);
 			let compiledType = TypeCompiler(type).compile().$();
 			let next = name + " : " + compiledType;
-			outputParams = Optional.of(outputParams.map(() => value.append(", ").append(next)
-).orElse(StringBuilder(next)));
+			outputParams = Optional.of(outputParams.map(() => value.append(", ").append(next)).orElse(StringBuilder(next)));
 		}
 		return outputParams.orElse(StringBuilder()).toString();
 	}
@@ -27,14 +26,14 @@ export class def ParamsCompiler(paramString : String) => {
 		for (Ok[value=let i = 0];i < paramString.length()i) {
 			let c = paramString.charAt(i);
 			if (c == ',' && depth == 0) {
-			list.add(builder.toString());
+				list.add(builder.toString());
 				builder = StringBuilder();
 		}
 		try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}
 		}
-			list.add(builder.toString());
+		list.add(builder.toString());
 		return list;
 	}
 }

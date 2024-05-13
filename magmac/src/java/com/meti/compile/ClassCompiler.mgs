@@ -1,7 +1,7 @@
 import { Optional } from java.util;
 export class def ClassCompiler extends InstanceCompiler() => {
 	def ClassCompiler(input : String): public => {
-			super(input);
+		super(input);
 	}
 	def computeKeyword(): String => {
 		return "class";

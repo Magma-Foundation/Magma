@@ -7,25 +7,13 @@ import { Optional } from java.util;
 import { OptionalInt } from java.util;
 import { Stream } from java.util.stream;
 import { $Result } from com.meti.result.Results;
-export class def ValueCompiler(input : String) => {
+export class def ValueCompiler(input : String, indent : I32) => {
 	def compileRequired(): String => {
-		return compile().orElseGet(() => Err(CompileException("Unknown value: " + input))
-).$();
+		return compile().orElseGet(() => Err(CompileException("Unknown value: " + input))).$();
 	}
 	def compile(): Optional<Result<String, CompileException>> => {
 		let stripped = input().strip();
-		return compileString(stripped).or(() => compileSymbol(stripped)
-).or(() => compileLambda(stripped)
-).or(() => compileInvocation(stripped, 0)
-).or(() => compileAccess(stripped)
-).or(() => compileTernary(stripped)
-).or(() => compileNumbers(stripped)
-).or(() => compileOperation(stripped)
-).or(() => compileChar(stripped)
-).or(() => compileNot(stripped)
-).or(() => compileMethodReference(stripped)
-).or(() => compileCast(stripped)
-);
+		return compileString(stripped).or(() => compileSymbol(stripped)).or(() => compileLambda(stripped, indent)).or(() => compileInvocation(stripped, 0)).or(() => compileAccess(stripped)).or(() => compileTernary(stripped)).or(() => compileNumbers(stripped)).or(() => compileOperation(stripped)).or(() => compileChar(stripped)).or(() => compileNot(stripped)).or(() => compileMethodReference(stripped)).or(() => compileCast(stripped));
 	}
 	private def compileCast(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("(")) {
@@ -33,9 +21,8 @@ export class def ValueCompiler(input : String) => {
 			let type = stripped.substring(1, end);
 			return Optional.of($Result(() => 		let outputType = TypeCompiler(type).compile().$();
 		let valueString = stripped.substring(end + 1).strip();
-		let compiledValue = ValueCompiler(valueString).compileRequired();
+		let compiledValue = ValueCompiler(valueString, 0).compileRequired();
 		return "(" + outputType + ") " + compiledValue;
-
 ));
 		}
 		try {
@@ -48,15 +35,13 @@ export class def ValueCompiler(input : String) => {
 			let before = stripped.substring(0, index);
 			let after = stripped.substring(index + "::".length());
 			if (Strings.isSymbol(after)) return Optional.empty();
-			return ValueCompiler(before).compile().map(() => 		return value.mapValue(() => 		return inner + "." + after;
-
+			return ValueCompiler(before, 0).compile().map(() => 		return value.mapValue(() => 		return inner + "." + after;
 );
-
 );
 		}
 		return Optional.empty();
 	}
-	private def compileLambda(stripped : String): Optional<? extends Result<String, CompileException>> => {
+	private def compileLambda(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		let separator = stripped.indexOf("->");
 		if (separator == -1) return Optional.empty();
 		let before = stripped.substring(0, separator).strip();
@@ -65,11 +50,11 @@ export class def ValueCompiler(input : String) => {
 		let params = ArrayList();
 		if (paramStart == 0 && paramEnd == before.length() - 1) {
 /*
-            Pull params
+            TODO: Pull params
              */		}
 		try {
 			if (Strings.isSymbol(before)) {
-			params.add(before);
+				params.add(before);
 		}
 		try {
 			return Optional.empty();
@@ -87,9 +72,9 @@ export class def ValueCompiler(input : String) => {
 				compiledValue = MethodCompiler.compileMethodMembers(members).$();
 		}
 		try {
-			compiledValue = ValueCompiler(value).compileRequired();
+			compiledValue = ValueCompiler(value, indent).compileRequired();
 		}
-			let rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
+			let rendered = MagmaLang.getString(0, "", "", "", "") + " => " + compiledValue;
 			return Optional.of(Ok(rendered));
 		}
 		catch (e : CompileException) {
@@ -100,7 +85,7 @@ export class def ValueCompiler(input : String) => {
 		if (stripped.startsWith("!")) {
 			let valueString = stripped.substring(1).strip();
 		try {
-			return Optional.of(Ok(ValueCompiler(valueString).compileRequired()));
+			return Optional.of(Ok(ValueCompiler(valueString, 0).compileRequired()));
 		}
 		catch (e : CompileException) {
 			return Optional.of(Err(e));
@@ -128,8 +113,7 @@ export class def ValueCompiler(input : String) => {
 		}
 	}
 	private def compileOperation(stripped : String): Optional<? extends Result<String, CompileException>> => {
-		return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(() => compileOperation(stripped, operator)
-).flatMap(Optional.stream).findFirst();
+		return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(() => compileOperation(stripped, operator)).flatMap(Optional.stream).findFirst();
 	}
 	private def compileTernary(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		let conditionMarker = stripped.indexOf('?');
@@ -137,16 +121,15 @@ export class def ValueCompiler(input : String) => {
 		let statementMarker = stripped.indexOf(":", conditionMarker);
 		if (statementMarker == -1) return Optional.empty();
 		let conditionString = stripped.substring(0, conditionMarker).strip();
-		let condition = ValueCompiler(conditionString).compile();
+		let condition = ValueCompiler(conditionString, 0).compile();
 		if (condition.isEmpty()) return Optional.empty();
 		let thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-		let thenBlock = ValueCompiler(thenString).compile();
+		let thenBlock = ValueCompiler(thenString, 0).compile();
 		if (thenBlock.isEmpty()) return Optional.empty();
 		let elseString = stripped.substring(statementMarker + 1).strip();
-		let elseBlock = ValueCompiler(elseString).compile();
+		let elseBlock = ValueCompiler(elseString, 0).compile();
 		if (elseBlock.isEmpty()) return Optional.empty();
 		return Optional.of($Result(() => 		return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
-
 ));
 	}
 }
@@ -176,12 +159,11 @@ export object ValueCompiler {
 		let outputArguments = Optional.empty();
 		for (Ok[value=let inputArgument] :  inputArguments) {
 			if (inputArgument.isBlank()) let continue		try {
-			let compiledValue = ValueCompiler(inputArgument).compile();
+			let compiledValue = ValueCompiler(inputArgument, 0).compile();
 			if (compiledValue.isEmpty()) {
 				throw CompileException("Failed to compile argument: " + inputArgument);
 		}
-			outputArguments = Optional.of(outputArguments.map(() => inner.append(", ").append(compiledValue.get().findValue().orElse(""))
-).orElse(StringBuilder(compiledValue.get().$())));
+			outputArguments = Optional.of(outputArguments.map(() => inner.append(", ").append(compiledValue.get().findValue().orElse(""))).orElse(StringBuilder(compiledValue.get().$())));
 		}
 		catch (e : CompileException) {
 			return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, e)));
@@ -189,7 +171,7 @@ export object ValueCompiler {
 		}
 		let suffix = indent == 0 ? "" : ";\n";
 		let renderedArguments = outputArguments.orElse(StringBuilder());
-		let compiledCaller = ValueCompiler(caller).compile();
+		let compiledCaller = ValueCompiler(caller, 0).compile();
 		if (compiledCaller.isEmpty()) {
 			return Optional.empty();
 		}
@@ -221,8 +203,8 @@ export object ValueCompiler {
 		while (queue.isEmpty()) {
 			let c = queue.pop();
 			if (c == '\'') {
-			builder.append(c);
-			builder.append(queue.pop());
+				builder.append(c);
+				builder.append(queue.pop());
 		try {
 			builder.append(queue.pop());
 		}
@@ -232,12 +214,12 @@ export object ValueCompiler {
 				let continue;
 		}
 			if (c == '\"') {
-			builder.append(c);
+				builder.append(c);
 				while (queue.isEmpty()) {
 					let next = queue.pop();
-			builder.append(next);
+					builder.append(next);
 					if (next == '\\') {
-			builder.append(queue.pop());
+						builder.append(queue.pop());
 		}
 					if (next == '\"') {
 						let break;
@@ -246,28 +228,28 @@ export object ValueCompiler {
 				let continue;
 		}
 			if (c == ',' && depth == 0) {
-			inputArguments.add(builder.toString());
+				inputArguments.add(builder.toString());
 				builder = StringBuilder();
 		}
 		try {
 			if (c == '(') depth			if (c == ')') depth			builder.append(c);
 		}
 		}
-			inputArguments.add(builder.toString());
+		inputArguments.add(builder.toString());
 		return inputArguments;
 	}
 	private def findInvocationStart(stripped : String): I32 => {
 		let queue = Strings.toQueue(stripped);
-			Collections.reverse(queue);
-			queue.pop();
+		Collections.reverse(queue);
+		queue.pop();
 		let start = -1;
 		let depth = 0;
 		let index = stripped.length() - 1;
 		while (queue.isEmpty()) {
 			let c = queue.pop();
 index			if (c == '\'') {
-			queue.pop();
-index			queue.pop();
+				queue.pop();
+index				queue.pop();
 index		}
 			if (c == '\"') {
 				while (queue.isEmpty()) {
@@ -317,7 +299,7 @@ index					if (next == '\"') {
 		}
 		let compiledObject;
 		try {
-			compiledObject = ValueCompiler(objectString).compileRequired();
+			compiledObject = ValueCompiler(objectString, 0).compileRequired();
 		}
 		catch (e : CompileException) {
 			return Optional.of(Err(CompileException("Failed to compile object reference of access statement: " + objectString, e)));
@@ -332,11 +314,9 @@ index					if (next == '\"') {
 		if (operatorIndex == -1) return Optional.empty();
 		let left = stripped.substring(0, operatorIndex).strip();
 		let right = stripped.substring(operatorIndex + operator.length());
-		return Optional.of($Result(() => 		let leftCompiled = ValueCompiler(left).compileRequired();
-		let rightCompiled = ValueCompiler(right).compileRequired();
+		return Optional.of($Result(() => 		let leftCompiled = ValueCompiler(left, 0).compileRequired();
+		let rightCompiled = ValueCompiler(right, 0).compileRequired();
 		return leftCompiled + " " + operator + " " + rightCompiled;
-
-).mapErr(() => CompileException("Failed to compile operation '" + operator + "': " + stripped, err)
-));
+).mapErr(() => CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
 	}
 }

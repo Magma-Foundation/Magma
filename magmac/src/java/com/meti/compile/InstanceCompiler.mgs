@@ -35,9 +35,7 @@ let input	def InstanceCompiler(input : String): public => {
 		return compileClassMembers(inputContent).mapErr(() => 		let format = "Failed to compile %s body: %s";
 		let message = format.formatted(computeKeyword(), input);
 		return CompileException(message, err);
-
-).mapValue(() => Optional.of(renderClass(modifierString, name, output, paramString.get()))
-).into(Results.unwrapOptional);
+).mapValue(() => Optional.of(renderClass(modifierString, name, output, paramString.get()))).into(Results.unwrapOptional);
 	}
 	def computeNameEnd(input : String, contentStart : I32): I32;
 	def computeParamString(input : String): Optional<String>;
@@ -60,12 +58,8 @@ export object InstanceCompiler implements RootCompiler {
 	}
 	private def compileClassMember(input : String): Result<ClassMemberResult, CompileException> => {
 		return MethodCompiler(input).compile().or(() => 		return DeclarationCompiler(input, 0).compile().map(() => 		return result.mapValue(() => 		return ClassMemberResult(List.of(value), Collections.emptyList());
-
 );
-
 );
-
-).orElseGet(() => Err(CompileException("Unknown class member: " + input))
-);
+).orElseGet(() => Err(CompileException("Unknown class member: " + input)));
 	}
 }

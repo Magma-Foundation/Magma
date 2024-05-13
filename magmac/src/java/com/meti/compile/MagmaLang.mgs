@@ -2,13 +2,15 @@ export class def MagmaLang() => {
 }
 export object MagmaLang {
 	def renderDefinedFunction(indent : I32, modifierString : String, name : String, renderedParams : String, typeString : String, content : String): String => {
-		return renderFunction(indent, modifierString + "def ", name, renderedParams, typeString, " => " + content);
+		let string = getString(indent, modifierString + "def ", name, renderedParams, typeString);
+		return string + " => " + content + "\n";
 	}
 	def renderFunction(indent : I32, modifierString : String, name : String, renderedParams : String, typeString : String, contentString : String): String => {
+		return getString(indent, modifierString, name, renderedParams, typeString) + contentString + "\n";
+	}
+	def getString(indent : I32, modifierString : String, name : String, renderedParams : String, typeString : String): String => {
 		let indentString = "\t".repeat(indent);
-		return indentString + modifierString + name + "(" + renderedParams + ")" +
-               typeString +
-               contentString + "\n";
+		return indentString + modifierString + name + "(" + renderedParams + ")" + typeString;
 	}
 	def renderClass(modifierString : String, name : String, members : ClassMemberResult, paramString : String): String => {
 		let instanceContent = renderInstanceClassContent(modifierString, name, members, paramString);

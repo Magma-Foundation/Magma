@@ -11,8 +11,6 @@ export object Results {
 		}
 	}
 	def unwrapOptional(result : Result<Optional<T>, E>): Optional<Result<T, E>> => {
-		return result.match(() => optional.map(Ok.new)
-, () => Optional.of(Err(err))
-);
+		return result.match(() => optional.map(Ok.new), () => Optional.of(Err(err)));
 	}
 }
