@@ -59,7 +59,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileReturn(stripped))
                 .or(() -> compileIf(stripped))
                 .or(() -> compileElse(stripped))
-                .or(() -> compileAssignment(stripped))
+                .or(() -> compileAssignment(stripped, indent))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
@@ -67,7 +67,7 @@ public record StatementCompiler(String input, int indent) {
                 .$();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped, int indent) {
         var separator = stripped.indexOf('=');
         if (separator != -1) {
             var left = stripped.substring(0, separator).strip();
@@ -75,7 +75,7 @@ public record StatementCompiler(String input, int indent) {
 
             var right = stripped.substring(separator + 1).strip();
             try {
-                return Optional.of(new Ok<>(left + " = " + new ValueCompiler(right).compile()));
+                return Optional.of(new Ok<>("\t".repeat(indent) + left + " = " + new ValueCompiler(right).compile() + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
