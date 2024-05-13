@@ -70,7 +70,28 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
-                .or(() -> compileIf(stripped, indent)).or(() -> compileElse(stripped)).or(() -> compileAssignment(stripped, indent)).or(() -> new DeclarationCompiler(stripped, indent).compile()).or(() -> compileInvocation(stripped, 3)).orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped))).mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err)).$();
+                .or(() -> compileIf(stripped, indent))
+                .or(() -> compileElse(stripped))
+                .or(() -> compileAssignment(stripped, indent))
+                .or(() -> new DeclarationCompiler(stripped, indent).compile())
+                .or(() -> compileInvocation(stripped, 3))
+                .or(() -> compileSuffixOperator(stripped))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
+                .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err)).$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileSuffixOperator(String stripped) {
+        if(stripped.endsWith("++")) {
+            try {
+                var value = stripped.substring(0, stripped.length() - 2);
+                var result = new ValueCompiler(value).compile();
+                return Optional.of(new Ok<>(result));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped, int indent) {
