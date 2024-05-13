@@ -1,5 +1,8 @@
 package com.meti.compile;
 
+import com.meti.node.Attribute;
+import com.meti.node.IntAttribute;
+import com.meti.node.StringAttribute;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
@@ -166,7 +169,13 @@ public final class ValueCompiler {
             } else {
                 compiledValue = createValueCompiler(value, indent).compileRequired(stack);
             }
-            var rendered = MagmaLang.declareFunction(0, "", "", "", "") + " => " + compiledValue;
+            var rendered = MagmaLang.declareFunction(Map.<String, Attribute>of(
+                    "indent", new IntAttribute(0),
+                    "modifiers", new StringAttribute(""),
+                    "name", new StringAttribute(""),
+                    "params", new StringAttribute(""),
+                    "type", new StringAttribute("")
+            )) + " => " + compiledValue;
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile lambda: " + stripped, e)));

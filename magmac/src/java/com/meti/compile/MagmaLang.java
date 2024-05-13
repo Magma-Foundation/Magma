@@ -1,12 +1,29 @@
 package com.meti.compile;
 
+import com.meti.node.Attribute;
+import com.meti.node.IntAttribute;
+import com.meti.node.StringAttribute;
+
+import java.util.Map;
+
 public class MagmaLang {
     static String function(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
-        return declareFunction(indent, modifierString + "def ", name, renderedParams, typeString) + " => " + content + "\n";
+        return declareFunction(Map.of(
+                "indent", new IntAttribute(indent),
+                "modifiers", new StringAttribute(modifierString + "def "),
+                "name", new StringAttribute(name),
+                "params", new StringAttribute(renderedParams),
+                "type", new StringAttribute(typeString)
+        )) + " => " + content + "\n";
     }
 
-    static String declareFunction(int indent, String modifiers, String name, String renderedParams, String typeString) {
-        return "\t".repeat(indent) + modifiers + name + "(" + renderedParams + ")" + typeString;
+    static String declareFunction(Map<String, Attribute> node) {
+        var indent1 = node.get("indent").asInt().orElseThrow();
+        var modifiers1 = node.get("modifiers").asString().orElseThrow();
+        var name1 = node.get("name").asString().orElseThrow();
+        var params1 = node.get("params").asString().orElseThrow();
+        var type1 = node.get("type").asString().orElseThrow();
+        return "\t".repeat(indent1) + modifiers1 + name1 + "(" + params1 + ")" + type1;
     }
 
     static String renderClass(String modifierString, String name, ClassMemberResult members, String paramString) {

@@ -1,11 +1,15 @@
 package com.meti.compile;
 
+import com.meti.node.Attribute;
+import com.meti.node.IntAttribute;
+import com.meti.node.StringAttribute;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.meti.compile.MagmaLang.function;
@@ -82,8 +86,14 @@ public final class MethodCompiler {
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var rendered = MagmaLang.declareFunction(1, modifierString +
-                                                            "def ", name, finalRenderedParams, ": " + outputType) + ";" + "\n";
+                var rendered = MagmaLang.declareFunction(Map.<String, Attribute>of(
+                        "indent", new IntAttribute(1),
+                        "modifiers", new StringAttribute(modifierString +
+                                                         "def "),
+                        "name", new StringAttribute(name),
+                        "params", new StringAttribute(finalRenderedParams),
+                        "type", new StringAttribute(": " + outputType)
+                )) + ";" + "\n";
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
