@@ -59,11 +59,29 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileReturn(stripped))
                 .or(() -> compileIf(stripped))
                 .or(() -> compileElse(stripped))
+                .or(() -> compileAssignment(stripped))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
                 .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileAssignment(String stripped) {
+        var separator = stripped.indexOf('=');
+        if (separator != -1) {
+            var left = stripped.substring(0, separator).strip();
+            if (!Strings.isSymbol(left)) return Optional.empty();
+
+            var right = stripped.substring(separator + 1).strip();
+            try {
+                return Optional.of(new Ok<>(left + " = " + new ValueCompiler(right).compile()));
+            } catch (CompileException e) {
+                return Optional.of(new Err<>(e));
+            }
+        }
+
+        return Optional.empty();
     }
 
     private Optional<? extends Result<String, CompileException>> compileReturn(String stripped) {

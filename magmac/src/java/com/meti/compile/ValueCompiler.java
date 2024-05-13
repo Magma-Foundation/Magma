@@ -10,12 +10,23 @@ import java.util.stream.Stream;
 
 public record ValueCompiler(String input) {
     static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
-
         var start = stripped.indexOf('(');
         if (start == -1) return Optional.empty();
 
-        var end = stripped.lastIndexOf(')');
-        if (end == -1) return Optional.empty();
+        var end = -1;
+        var depth = 0;
+        for (int i = start + 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (c == ')' && depth == 0) {
+                end = i;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+
+        if (end != stripped.length() - 1) return Optional.empty();
 
         var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
         var caller = stripped.substring(callerStart, start);
@@ -31,7 +42,7 @@ public record ValueCompiler(String input) {
                         .orElse(new StringBuilder(compiledValue)));
 
             } catch (CompileException e) {
-                return Optional.of(new Err<>(e));
+                return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
             }
         }
 
@@ -96,9 +107,9 @@ public record ValueCompiler(String input) {
 
         return compileString(stripped)
                 .or(() -> compileTernary(stripped))
+                .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
-                .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))

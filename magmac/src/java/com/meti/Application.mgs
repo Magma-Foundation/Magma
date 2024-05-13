@@ -24,10 +24,6 @@ export object Application {
                 .$();
 	}
 	private def streamCompilers(stripped : String): Stream<RootCompiler> => {
-		return Stream.of(
-                new ImportCompiler(stripped),
-                new ClassCompiler(stripped),
-                new RecordCompiler(stripped),
-                new InterfaceCompiler(stripped));
+		return Stream.of(ImportCompiler(stripped), ClassCompiler(stripped), RecordCompiler(stripped), InterfaceCompiler(stripped));
 	}
 }
