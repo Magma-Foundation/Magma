@@ -34,7 +34,9 @@ public class InvocationCompiler {
                 outputArguments = Optional.of(value);
             }
         } catch (CompileException e) {
-            return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
+            var format = "Failed to compile invocation - %s: %s";
+            var message = format.formatted(stack, stripped);
+            return Optional.of(new Err<>(new CompileException(message, e)));
         }
 
         var suffix = indent == 0 ? "" : ";\n";

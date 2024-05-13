@@ -28,7 +28,9 @@ public record DeclarationCompiler(String stripped, int indent) {
             var s = "\t".repeat(indent) + "let " + name + valueString + suffix;
             return new Ok<>(s);
         } catch (CompileException e) {
-            return new Err<>(new CompileException("Failed to compile declaration: " + stripped, e));
+            var format = "Failed to compile declaration - %s: %s";
+            var message = format.formatted(stack, stripped);
+            return new Err<>(new CompileException(message, e));
         }
     }
 

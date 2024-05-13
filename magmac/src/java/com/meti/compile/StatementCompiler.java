@@ -127,7 +127,11 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileSuffixOperator(stripped))
                 .or(() -> compileComment(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
-                .mapErr(err -> new CompileException("Failed to compile statement: " + stripped, err)).$();
+                .mapErr(err -> {
+                    var format = "Failed to compile statement - %s: %s";
+                    var message = format.formatted(stack, stripped);
+                    return new CompileException(message, err);
+                }).$();
     }
 
     private Optional<? extends Result<String, CompileException>> compileComment(String stripped) {

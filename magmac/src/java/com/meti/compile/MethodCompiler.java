@@ -13,15 +13,17 @@ import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
 
-    static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> params) {
+    static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> stack) {
         var outputContent = new StringBuilder();
         for (String inputMember : inputContent) {
             if (inputMember.isBlank()) continue;
 
             try {
-                outputContent.append(new StatementCompiler(inputMember, indent).compile(params));
+                outputContent.append(new StatementCompiler(inputMember, indent).compile(stack));
             } catch (CompileException e) {
-                return new Err<>(e);
+                var format = "Failed to compile method member - %s: %s";
+                var message = format.formatted(stack, inputMember);
+                return new Err<>(new CompileException(message, e));
             }
         }
 
@@ -75,6 +77,8 @@ public record MethodCompiler(String input) {
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
                         : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
+            })).map(result -> result.mapErr(err -> {
+                return new CompileException("Failed to compile method - " + stack + ": " + input, err);
             }));
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
