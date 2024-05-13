@@ -86,7 +86,7 @@ public final class MethodCompiler {
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var rendered = MagmaLang.declareFunction(Map.<String, Attribute>of(
+                var rendered = MagmaLang.renderFunctionDeclaration(Map.<String, Attribute>of(
                         "indent", new IntAttribute(1),
                         "modifiers", new StringAttribute(modifierString +
                                                          "def "),

@@ -169,7 +169,7 @@ public final class ValueCompiler {
             } else {
                 compiledValue = createValueCompiler(value, indent).compileRequired(stack);
             }
-            var rendered = MagmaLang.declareFunction(Map.<String, Attribute>of(
+            var rendered = MagmaLang.renderFunctionDeclaration(Map.<String, Attribute>of(
                     "indent", new IntAttribute(0),
                     "modifiers", new StringAttribute(""),
                     "name", new StringAttribute(""),
