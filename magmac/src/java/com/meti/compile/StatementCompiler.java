@@ -15,6 +15,16 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2)));
     }
 
+    private static Optional<Result<String, CompileException>> compileElse(String stripped) {
+        if (!stripped.startsWith("else ")) return Optional.empty();
+
+        try {
+            return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2)));
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
+        }
+    }
+
     private static String compileBlock(String stripped, int indent) throws CompileException {
         var contentStart = stripped.indexOf('{');
         if (contentStart == -1) {
@@ -48,6 +58,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
                 .or(() -> compileIf(stripped))
+                .or(() -> compileElse(stripped))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, 3))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown statement: " + stripped)))
