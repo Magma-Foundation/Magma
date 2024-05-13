@@ -13,7 +13,7 @@ export class def TypeCompiler(inputType : String) => {
 	}
 	private def compileArrayType(inputType : String): Optional<? extends Result<String, CompileException>> => {
 		if (inputType.endsWith("[]")) {
-			let child = inputType.substring(0, Optional[Ok[value=inputType.length() - 2]]);
+			let child = inputType.substring(0, inputType.length() - 2);
 		return Optional.of(Ok("&" + child));
 		}
 		return Optional.empty();
@@ -25,8 +25,8 @@ export object TypeCompiler {
 		if (genStart == -1) 		return Optional.empty();
 		let genEnd = inputType.lastIndexOf('>');
 		if (genEnd == -1) 		return Optional.empty();
-		let parent = inputType.substring(0, Optional[Ok[value=genStart]]);
-		let childrenString = inputType.substring(genStart + 1, Optional[Ok[value=genEnd]]);
+		let parent = inputType.substring(0, genStart);
+		let childrenString = inputType.substring(genStart + 1, genEnd);
 		let children = ArrayList();
 		let builder = StringBuilder();
 		let depth = 0;
@@ -48,7 +48,7 @@ export object TypeCompiler {
 			newChildren.add(TypeCompiler(stripped).compile().$());
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, Optional[Ok[value=e]])));
+		return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, e)));
 		}
 		}
 		return Optional.of(Ok(parent + "<" + String.join(", ", newChildren) + ">"));

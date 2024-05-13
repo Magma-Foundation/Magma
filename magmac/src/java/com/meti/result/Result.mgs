@@ -1,3 +1,4 @@
+import { Optional } from java.util;
 import { Function } from java.util.function;
 export class def Result<T, E extends Throwable>() => {
 	def $(): T => ;
@@ -7,4 +8,5 @@ export class def Result<T, E extends Throwable>() => {
 	}
 	def match(valueMapper : Function<T, R>, errMapper : Function<E, R>): R => ;
 	def mapErr(mapper : Function<E, R>): Result<T, R> => ;
+	def findValue(): Optional<T> => ;
 }

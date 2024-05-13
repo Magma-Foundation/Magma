@@ -1,5 +1,6 @@
 package com.meti.result;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
@@ -21,5 +22,10 @@ public record Ok<T, E extends Throwable>(T value) implements Result<T, E> {
     @Override
     public <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Ok<>(value);
+    }
+
+    @Override
+    public Optional<T> findValue() {
+        return Optional.of(value);
     }
 }

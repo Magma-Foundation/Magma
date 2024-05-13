@@ -8,7 +8,7 @@ export class def ImportCompiler(stripped : String) => {
 		let segments = stripped().substring(segmentsStart);
 		let separator = segments.lastIndexOf('.');
 		if (separator == -1) 		return Optional.empty();
-		let parent = segments.substring(0, Optional[Ok[value=separator]]);
+		let parent = segments.substring(0, separator);
 		let child = segments.substring(separator + 1);
 		return Optional.of(Ok("import { " + child + " } from " + parent + ";\n"));
 	}

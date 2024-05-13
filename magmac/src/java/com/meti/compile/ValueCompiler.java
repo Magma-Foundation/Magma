@@ -49,7 +49,9 @@ public record ValueCompiler(String input) {
                     throw new CompileException("Failed to compile argument: " + inputArgument);
                 }
 
-                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue)).orElse(new StringBuilder(compiledValue.get().$())));
+                outputArguments = Optional.of(outputArguments.map(inner -> inner.append(", ").append(compiledValue.get().findValue().orElse("")))
+                        .orElse(new StringBuilder(compiledValue.get().$())));
+
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
             }

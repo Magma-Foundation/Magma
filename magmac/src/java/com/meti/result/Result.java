@@ -1,5 +1,6 @@
 package com.meti.result;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface Result<T, E extends Throwable> {
@@ -14,4 +15,6 @@ public interface Result<T, E extends Throwable> {
     <R> R match(Function<T, R> valueMapper, Function<E, R> errMapper);
 
     <R extends Throwable> Result<T, R> mapErr(Function<E, R> mapper);
+
+    Optional<T> findValue();
 }

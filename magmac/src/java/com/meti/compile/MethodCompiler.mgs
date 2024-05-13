@@ -13,40 +13,40 @@ export class def MethodCompiler(input : String) => {
 		if (paramStart == -1) 		return Optional.empty();
 		let paramEnd = stripped.indexOf(')');
 		if (paramEnd == -1) 		return Optional.empty();
-		let paramString = stripped.substring(paramStart + 1, Optional[Ok[value=paramEnd]]);
+		let paramString = stripped.substring(paramStart + 1, paramEnd);
 		let renderedParams;
 		try {
 			renderedParams = ParamsCompiler(paramString).compile();
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile parameters: " + paramString, Optional[Ok[value=e]])));
+		return Optional.of(Err(CompileException("Failed to compile parameters: " + paramString, e)));
 		}
-		let before = stripped.substring(0, Optional[Ok[value=paramStart]]).strip();
+		let before = stripped.substring(0, paramStart).strip();
 		let separator = before.lastIndexOf(' ');
-		let modifiersAndTypeString = before.substring(0, Optional[Ok[value=separator]]).strip();
+		let modifiersAndTypeString = before.substring(0, separator).strip();
 		let name = before.substring(separator + 1).strip();
 		let modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
 		if (modifiersAndType.isEmpty()) 		return Optional.empty();
-		let modifiers = modifiersAndType.subList(0, Optional[Ok[value=modifiersAndType.size() - 1]]);
+		let modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
 		let inputType = modifiersAndType.get(modifiersAndType.size() - 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
 		let contentStart = stripped.indexOf("{");
 		let contentEnd = stripped.lastIndexOf('}');
 		let finalRenderedParams = renderedParams;
 		if (contentStart != -1 && contentEnd != -1) {
-			let content = stripped.substring(contentStart + 1, Optional[Ok[value=contentEnd]]);
+			let content = stripped.substring(contentStart + 1, contentEnd);
 			let inputContent = Strings.splitMembers(content);
 		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let outputContent = compileMethodMembers(inputContent).$();
-		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value="{\n" + outputContent + "\t}"]]);
-		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]]) : ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]]);
+		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
+		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
 ));
 		}
 		try {
 		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
-		let rendered = renderDefinedFunction(1, Optional[Ok[value=modifierString]], Optional[Ok[value=name]], Optional[Ok[value=finalRenderedParams]], Optional[Ok[value=": " + outputType]], Optional[Ok[value=";"]]);
-		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Optional[Ok[value=Collections.singletonList(rendered)]]) : ClassMemberResult(Collections.singletonList(rendered), Optional[Ok[value=Collections.emptyList()]]);
+		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, ";");
+		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
 ));
 		}
@@ -60,7 +60,7 @@ export object MethodCompiler {
 		let outputContent = StringBuilder();
 		for (Ok[value=let inputMember] :  inputContent) {
 			if (inputMember.isBlank()) let continue		try {
-			outputContent.append(StatementCompiler(inputMember, Optional[Ok[value=2]]).compile());
+			outputContent.append(StatementCompiler(inputMember, 2).compile());
 		}
 		catch (e : CompileException) {
 		return Err(e);

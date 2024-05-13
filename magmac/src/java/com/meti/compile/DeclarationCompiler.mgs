@@ -6,7 +6,7 @@ export class def DeclarationCompiler(stripped : String, indent : I32) => {
 	def compile(): Optional<? extends Result<String, CompileException>> => {
 		let valueSeparator = stripped.indexOf('=');
 		let headerEnd = valueSeparator == -1 ? stripped.length() : valueSeparator;
-		let header = stripped().substring(0, Optional[Ok[value=headerEnd]]).strip();
+		let header = stripped().substring(0, headerEnd).strip();
 		let separator = header.lastIndexOf(' ');
 		let name = header.substring(separator + 1).strip();
 		if (Strings.isSymbol(name)) 		return Optional.empty();
@@ -25,7 +25,7 @@ export class def DeclarationCompiler(stripped : String, indent : I32) => {
 			rendered = Ok("\t".repeat(indent) + "let " + name + valueString + suffix);
 		}
 		catch (e : CompileException) {
-			rendered = Err(CompileException("Failed to compile declaration: " + stripped, Optional[Ok[value=e]]));
+			rendered = Err(CompileException("Failed to compile declaration: " + stripped, e));
 		}
 		return Optional.of(rendered);
 	}

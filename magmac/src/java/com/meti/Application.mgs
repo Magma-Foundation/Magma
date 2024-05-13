@@ -21,6 +21,6 @@ export object Application {
 ).$();
 	}
 	private def streamCompilers(stripped : String): Stream<RootCompiler> => {
-		return Stream.of(ImportCompiler(stripped), Optional[Ok[value=ClassCompiler(stripped)]], Optional[Ok[value=RecordCompiler(stripped)]], Optional[Ok[value=InterfaceCompiler(stripped)]]);
+		return Stream.of(ImportCompiler(stripped), ClassCompiler(stripped), RecordCompiler(stripped), InterfaceCompiler(stripped));
 	}
 }

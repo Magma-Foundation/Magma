@@ -55,7 +55,7 @@ export object Strings {
 		return lines;
 	}
 	def toQueue(input : String): LinkedList<Character> => {
-		let queue = IntStream.range(0, Optional[Ok[value=input.length()]]).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		let queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		return queue;
 	}
 	def splitTypeString(modifiersAndType : String): List<String> => {
@@ -91,6 +91,6 @@ export object Strings {
 		if (isSymbol(token)) 		return true;
 		let separator = token.indexOf('.');
 		if (separator == -1) 		return false;
-		return isAssignable(token.substring(0, Optional[Ok[value=separator]]).strip()) && isSymbol(token.substring(separator + 1).strip());
+		return isAssignable(token.substring(0, separator).strip()) && isSymbol(token.substring(separator + 1).strip());
 	}
 }

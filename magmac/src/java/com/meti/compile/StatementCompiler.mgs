@@ -10,16 +10,16 @@ export class def StatementCompiler(input : String, indent : I32) => {
 ).or(() => compileThrow(stripped)
 ).or(() => compileFor(stripped)
 ).or(() => compileReturn(stripped)
-).or(() => compileIf(stripped, Optional[Ok[value=indent]])
-).or(() => compileWhile(stripped, Optional[Ok[value=indent]])
+).or(() => compileIf(stripped, indent)
+).or(() => compileWhile(stripped, indent)
 ).or(() => compileElse(stripped)
-).or(() => compileAssignment(stripped, Optional[Ok[value=indent]])
-).or(() => DeclarationCompiler(stripped, Optional[Ok[value=indent]]).compile()
-).or(() => compileInvocation(stripped, Optional[Ok[value=3]])
+).or(() => compileAssignment(stripped, indent)
+).or(() => DeclarationCompiler(stripped, indent).compile()
+).or(() => compileInvocation(stripped, 3)
 ).or(() => compileSuffixOperator(stripped)
 ).or(() => compileComment(stripped)
 ).orElseGet(() => Err(CompileException("Unknown statement: " + stripped))
-).mapErr(() => CompileException("Failed to compile statement: " + stripped, Optional[Ok[value=err]])
+).mapErr(() => CompileException("Failed to compile statement: " + stripped, err)
 ).$();
 	}
 	private def compileComment(stripped : String): Optional<? extends Result<String, CompileException>> => {
@@ -33,18 +33,18 @@ export class def StatementCompiler(input : String, indent : I32) => {
 	private def compileSuffixOperator(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.endsWith("++") && stripped.endsWith("--")) 		return Optional.empty();
 		try {
-			let value = stripped.substring(0, Optional[Ok[value=stripped.length() - 2]]);
+			let value = stripped.substring(0, stripped.length() - 2);
 			let result = ValueCompiler(value).compileRequired();
 		return Optional.of(Ok(result));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile suffix operator: " + stripped, Optional[Ok[value=e]])));
+		return Optional.of(Err(CompileException("Failed to compile suffix operator: " + stripped, e)));
 		}
 	}
 	private def compileAssignment(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		let separator = stripped.indexOf('=');
 		if (separator != -1) {
-			let left = stripped.substring(0, Optional[Ok[value=separator]]).strip();
+			let left = stripped.substring(0, separator).strip();
 			if (Strings.isAssignable(left)) {
 		return Optional.empty();
 		}
@@ -73,7 +73,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		return Optional.of(Ok("\t\treturn" + outputValueString + ";\n"));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile return statement: " + stripped, Optional[Ok[value=e]])));
+		return Optional.of(Err(CompileException("Failed to compile return statement: " + stripped, e)));
 		}
 		}
 		try {
@@ -86,11 +86,11 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		if (conditionStart == -1) {
 		return Optional.of(Err(CompileException("No starting parentheses in for: " + stripped)));
 		}
-		let conditionEnd = findIfEnd(stripped, Optional[Ok[value=conditionStart]]);
+		let conditionEnd = findIfEnd(stripped, conditionStart);
 		if (conditionEnd == -1) {
 		return Optional.of(Err(CompileException("No ending parentheses in for: " + stripped)));
 		}
-		let condition = stripped.substring(conditionStart + 1, Optional[Ok[value=conditionEnd]]).strip();
+		let condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
 		let result;
 		try {
 			let separator = condition.lastIndexOf(':');
@@ -99,24 +99,24 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			if (separator == -1) {
 				let first = condition.indexOf(';');
 				if (first == -1) 		return Optional.empty();
-				let second = condition.indexOf(';', Optional[Ok[value=first + 1]]);
+				let second = condition.indexOf(';', first + 1);
 				if (second == -1) 		return Optional.empty();
-				let initialString = condition.substring(0, Optional[Ok[value=first]]).strip();
-				let terminatingString = condition.substring(first + 1, Optional[Ok[value=second]]).strip();
+				let initialString = condition.substring(0, first).strip();
+				let terminatingString = condition.substring(first + 1, second).strip();
 				let incrementString = condition.substring(second + 1).strip();
-				let initial = DeclarationCompiler(initialString, Optional[Ok[value=0]]).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)
+				let initial = DeclarationCompiler(initialString, 0).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)
 );
 				let terminating = ValueCompiler(terminatingString).compileRequired();
-				let increment = StatementCompiler(incrementString, Optional[Ok[value=0]]).compile();
-				compiledBlock = compileBlock(stripped, Optional[Ok[value=indent]], Optional[Ok[value=0]]);
+				let increment = StatementCompiler(incrementString, 0).compile();
+				compiledBlock = compileBlock(stripped, indent, 0);
 				conditionString = initial + ";" + terminating + increment;
 		}
 		try {
-			let initialString = condition.substring(0, Optional[Ok[value=separator]]);
-			let initial = DeclarationCompiler(initialString, Optional[Ok[value=0]]).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)
+			let initialString = condition.substring(0, separator);
+			let initial = DeclarationCompiler(initialString, 0).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)
 );
 			let container = condition.substring(separator + 1);
-			compiledBlock = compileBlock(stripped, Optional[Ok[value=indent]], Optional[Ok[value=0]]);
+			compiledBlock = compileBlock(stripped, indent, 0);
 			conditionString = initial + " : " + container;
 		}
 			result = Ok("\t".repeat(indent) + "for (" + conditionString + ") " + compiledBlock);
@@ -143,19 +143,19 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		if (stripped.startsWith("while")) 		return Optional.empty();
 		let conditionStart = stripped.indexOf('(');
 		if (conditionStart == -1) 		return Optional.empty();
-		let conditionEnd = findIfEnd(stripped, Optional[Ok[value=conditionStart]]);
+		let conditionEnd = findIfEnd(stripped, conditionStart);
 		if (conditionEnd == -1) 		return Optional.empty();
 		let result;
 		try {
-			let condition = stripped.substring(conditionStart + 1, Optional[Ok[value=conditionEnd]]).strip();
+			let condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
 			let compiledCondition = ValueCompiler(condition).compileRequired();
 			let compiledValue;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
-				compiledValue = compileBlock(stripped, Optional[Ok[value=indent]], Optional[Ok[value=0]]);
+				compiledValue = compileBlock(stripped, indent, 0);
 		}
 		try {
 			let valueString = stripped.substring(conditionEnd + 1).strip();
-			compiledValue = StatementCompiler(valueString, Optional[Ok[value=0]]).compile();
+			compiledValue = StatementCompiler(valueString, 0).compile();
 		}
 			result = Ok("\t".repeat(indent) + "while (" + compiledCondition + ") " + compiledValue);
 		}
@@ -168,19 +168,19 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		if (stripped.startsWith("if")) 		return Optional.empty();
 		let conditionStart = stripped.indexOf('(');
 		if (conditionStart == -1) 		return Optional.empty();
-		let conditionEnd = findIfEnd(stripped, Optional[Ok[value=conditionStart]]);
+		let conditionEnd = findIfEnd(stripped, conditionStart);
 		if (conditionEnd == -1) 		return Optional.empty();
 		let result;
 		try {
-			let condition = stripped.substring(conditionStart + 1, Optional[Ok[value=conditionEnd]]).strip();
+			let condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
 			let compiledCondition = ValueCompiler(condition).compileRequired();
 			let compiledValue;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
-				compiledValue = compileBlock(stripped, Optional[Ok[value=indent]], Optional[Ok[value=conditionEnd]]);
+				compiledValue = compileBlock(stripped, indent, conditionEnd);
 		}
 		try {
 			let valueString = stripped.substring(conditionEnd + 1).strip();
-			compiledValue = StatementCompiler(valueString, Optional[Ok[value=0]]).compile();
+			compiledValue = StatementCompiler(valueString, 0).compile();
 		}
 			result = Ok("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
 		}
@@ -195,13 +195,13 @@ export class def StatementCompiler(input : String, indent : I32) => {
 		if (typeStart == -1) 		return Optional.empty();
 		let typeEnd = stripped.indexOf(')');
 		if (typeEnd == -1) 		return Optional.empty();
-		let type = stripped.substring(typeStart + 1, Optional[Ok[value=typeEnd]]).strip();
+		let type = stripped.substring(typeStart + 1, typeEnd).strip();
 		let separator = type.lastIndexOf(' ');
-		let catchType = type.substring(0, Optional[Ok[value=separator]]);
+		let catchType = type.substring(0, separator);
 		let catchName = type.substring(separator + 1);
 		let result;
 		try {
-			let compiledBlock = compileBlock(stripped, Optional[Ok[value=2]], Optional[Ok[value=0]]);
+			let compiledBlock = compileBlock(stripped, 2, 0);
 			result = Ok("\t\tcatch (" + catchName + " : " + catchType + ") " + compiledBlock);
 		}
 		catch (e : CompileException) {
@@ -213,18 +213,18 @@ export class def StatementCompiler(input : String, indent : I32) => {
 export object StatementCompiler {
 	private def compileTry(stripped : String): Optional<Result<String, CompileException>> => {
 		if (stripped.startsWith("try ")) 		return Optional.empty();
-		return Optional.of(Ok("\t\ttry " + compileBlock(stripped, Optional[Ok[value=2]], Optional[Ok[value=0]])));
+		return Optional.of(Ok("\t\ttry " + compileBlock(stripped, 2, 0)));
 	}
 	private def compileElse(stripped : String): Optional<Result<String, CompileException>> => {
 		if (stripped.startsWith("else ")) 		return Optional.empty();
 		try {
 			let body;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
-				body = compileBlock(stripped, Optional[Ok[value=2]], Optional[Ok[value=0]]);
+				body = compileBlock(stripped, 2, 0);
 		}
 		try {
 			let value = stripped.substring("else ".length());
-			body = StatementCompiler(value, Optional[Ok[value=0]]).compile();
+			body = StatementCompiler(value, 0).compile();
 		}
 		return Optional.of(Ok("\t\ttry " + body));
 		}
@@ -233,7 +233,7 @@ export object StatementCompiler {
 		}
 	}
 	private def compileBlock(stripped : String, indent : I32, blockStart : I32): String => {
-		let contentStart = stripped.indexOf('{', Optional[Ok[value=blockStart]]);
+		let contentStart = stripped.indexOf('{', blockStart);
 		if (contentStart == -1) {
 			throw CompileException("Not a block: " + stripped);
 		}
@@ -241,16 +241,16 @@ export object StatementCompiler {
 		if (contentEnd == -1) {
 			throw CompileException("Not a block: " + stripped);
 		}
-		let after = stripped.substring(contentStart + 1, Optional[Ok[value=contentEnd]]);
+		let after = stripped.substring(contentStart + 1, contentEnd);
 		let inputStatements = Strings.splitMembers(after);
 		let output = StringBuilder();
 		for (Ok[value=let inputStatement] :  inputStatements) {
 			if (inputStatement.isBlank()) let continue		try {
-			let compiled = StatementCompiler(inputStatement, Optional[Ok[value=indent + 1]]).compile();
+			let compiled = StatementCompiler(inputStatement, indent + 1).compile();
 			output.append(compiled);
 		}
 		catch (e : CompileException) {
-			throw CompileException("Failed to compile block: " + stripped, Optional[Ok[value=e]]);
+			throw CompileException("Failed to compile block: " + stripped, e);
 		}
 		}
 		return "{\n" + output + "\t\t}\n";
