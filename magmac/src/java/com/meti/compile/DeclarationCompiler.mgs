@@ -9,7 +9,7 @@ export class def DeclarationCompiler(stripped : String, indent : I32) => {
 		let header = stripped().substring(0, headerEnd).strip();
 		let separator = header.lastIndexOf(' ');
 		let name = header.substring(separator + 1).strip();
-		if (Strings.isSymbol(name)) 		return Optional.empty();
+		if (Strings.isSymbol(name)) return Optional.empty();
 		let rendered;
 		try {
 			let valueString;

@@ -10,23 +10,23 @@ export class def MethodCompiler(input : String) => {
 	def compile(): Optional<Result<ClassMemberResult, CompileException>> => {
 		let stripped = input().strip();
 		let paramStart = stripped.indexOf('(');
-		if (paramStart == -1) 		return Optional.empty();
+		if (paramStart == -1) return Optional.empty();
 		let paramEnd = stripped.indexOf(')');
-		if (paramEnd == -1) 		return Optional.empty();
+		if (paramEnd == -1) return Optional.empty();
 		let paramString = stripped.substring(paramStart + 1, paramEnd);
 		let renderedParams;
 		try {
 			renderedParams = ParamsCompiler(paramString).compile();
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile parameters: " + paramString, e)));
+			return Optional.of(Err(CompileException("Failed to compile parameters: " + paramString, e)));
 		}
 		let before = stripped.substring(0, paramStart).strip();
 		let separator = before.lastIndexOf(' ');
 		let modifiersAndTypeString = before.substring(0, separator).strip();
 		let name = before.substring(separator + 1).strip();
 		let modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
-		if (modifiersAndType.isEmpty()) 		return Optional.empty();
+		if (modifiersAndType.isEmpty()) return Optional.empty();
 		let modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
 		let inputType = modifiersAndType.get(modifiersAndType.size() - 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
@@ -36,7 +36,7 @@ export class def MethodCompiler(input : String) => {
 		if (contentStart != -1 && contentEnd != -1) {
 			let content = stripped.substring(contentStart + 1, contentEnd);
 			let inputContent = Strings.splitMembers(content);
-		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
+			return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let outputContent = compileMethodMembers(inputContent).$();
 		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
@@ -44,14 +44,14 @@ export class def MethodCompiler(input : String) => {
 ));
 		}
 		try {
-		return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
+			return Optional.of($Result(() => 		let outputType = TypeCompiler(inputType).compile().$();
 		let rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, ";");
 		return modifiers.contains("static") ? ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered)) : ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
 
 ));
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 }
@@ -63,7 +63,7 @@ export object MethodCompiler {
 			outputContent.append(StatementCompiler(inputMember, 2).compile());
 		}
 		catch (e : CompileException) {
-		return Err(e);
+			return Err(e);
 		}
 		}
 		return Ok(outputContent.toString());

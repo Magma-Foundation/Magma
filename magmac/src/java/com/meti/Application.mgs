@@ -16,7 +16,7 @@ export object Application {
 	}
 	private def compileRoot(line : String): String => {
 		let stripped = line.strip();
-		if (stripped.isEmpty() || stripped.startsWith("package ")) 		return "";
+		if (stripped.isEmpty() || stripped.startsWith("package ")) return "";
 		return streamCompilers(stripped).map(RootCompiler.compile).flatMap(Optional.stream).findFirst().orElseGet(() => Err(CompileException(line))
 ).$();
 	}

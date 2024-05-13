@@ -14,7 +14,7 @@ export class def TypeCompiler(inputType : String) => {
 	private def compileArrayType(inputType : String): Optional<? extends Result<String, CompileException>> => {
 		if (inputType.endsWith("[]")) {
 			let child = inputType.substring(0, inputType.length() - 2);
-		return Optional.of(Ok("&" + child));
+			return Optional.of(Ok("&" + child));
 		}
 		return Optional.empty();
 	}
@@ -22,9 +22,9 @@ export class def TypeCompiler(inputType : String) => {
 export object TypeCompiler {
 	private def compileGenericType(inputType : String): Optional<Result<String, CompileException>> => {
 		let genStart = inputType.indexOf(' < ');
-		if (genStart == -1) 		return Optional.empty();
+		if (genStart == -1) return Optional.empty();
 		let genEnd = inputType.lastIndexOf('>');
-		if (genEnd == -1) 		return Optional.empty();
+		if (genEnd == -1) return Optional.empty();
 		let parent = inputType.substring(0, genStart);
 		let childrenString = inputType.substring(genStart + 1, genEnd);
 		let children = ArrayList();
@@ -48,25 +48,25 @@ export object TypeCompiler {
 			newChildren.add(TypeCompiler(stripped).compile().$());
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, e)));
+			return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, e)));
 		}
 		}
 		return Optional.of(Ok(parent + "<" + String.join(", ", newChildren) + ">"));
 	}
 	private def compileSymbolType(inputType : String): Optional<Result<String, CompileException>> => {
 		if (Strings.isSymbol(inputType)) {
-		return Optional.of(Ok(inputType));
+			return Optional.of(Ok(inputType));
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compilePrimitiveType(inputType : String): Optional<Result<String, CompileException>> => {
 		if (inputType.equals("void")) {
-		return Optional.of(Ok("Void"));
+			return Optional.of(Ok("Void"));
 		}
 		if (inputType.equals("int")) {
-		return Optional.of(Ok("I32"));
+			return Optional.of(Ok("I32"));
 		}
 		return Optional.empty();
 	}

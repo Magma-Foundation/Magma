@@ -4,10 +4,10 @@ export class def Results() => {
 export object Results {
 	def $Result(action : Action<T, E>): Result<T, E> => {
 		try {
-		return Ok(action.run());
+			return Ok(action.run());
 		}
 		catch (e : Throwable) {
-		return Err((E) e);
+			return Err((E) e);
 		}
 	}
 	def unwrapOptional(result : Result<Optional<T>, E>): Optional<Result<T, E>> => {

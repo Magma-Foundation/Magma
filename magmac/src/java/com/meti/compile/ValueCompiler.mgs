@@ -31,7 +31,7 @@ export class def ValueCompiler(input : String) => {
 		if (stripped.startsWith("(")) {
 			let end = stripped.indexOf(')');
 			let type = stripped.substring(1, end);
-		return Optional.of($Result(() => 		let outputType = TypeCompiler(type).compile().$();
+			return Optional.of($Result(() => 		let outputType = TypeCompiler(type).compile().$();
 		let valueString = stripped.substring(end + 1).strip();
 		let compiledValue = ValueCompiler(valueString).compileRequired();
 		return "(" + outputType + ") " + compiledValue;
@@ -39,7 +39,7 @@ export class def ValueCompiler(input : String) => {
 ));
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compileMethodReference(stripped : String): Optional<Result<String, CompileException>> => {
@@ -47,8 +47,8 @@ export class def ValueCompiler(input : String) => {
 		if (index != -1) {
 			let before = stripped.substring(0, index);
 			let after = stripped.substring(index + "::".length());
-			if (Strings.isSymbol(after)) 		return Optional.empty();
-		return ValueCompiler(before).compile().map(() => 		return value.mapValue(() => 		return inner + "." + after;
+			if (Strings.isSymbol(after)) return Optional.empty();
+			return ValueCompiler(before).compile().map(() => 		return value.mapValue(() => 		return inner + "." + after;
 
 );
 
@@ -58,7 +58,7 @@ export class def ValueCompiler(input : String) => {
 	}
 	private def compileLambda(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		let separator = stripped.indexOf("->");
-		if (separator == -1) 		return Optional.empty();
+		if (separator == -1) return Optional.empty();
 		let before = stripped.substring(0, separator).strip();
 		let paramStart = before.indexOf('(');
 		let paramEnd = before.lastIndexOf(')');
@@ -72,11 +72,11 @@ export class def ValueCompiler(input : String) => {
 			params.add(before);
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 		let value = stripped.substring(separator + "->".length()).strip();
 		try {
@@ -90,41 +90,41 @@ export class def ValueCompiler(input : String) => {
 			compiledValue = ValueCompiler(value).compileRequired();
 		}
 			let rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
-		return Optional.of(Ok(rendered));
+			return Optional.of(Ok(rendered));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile lambda: " + stripped, e)));
+			return Optional.of(Err(CompileException("Failed to compile lambda: " + stripped, e)));
 		}
 	}
 	private def compileNot(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("!")) {
 			let valueString = stripped.substring(1).strip();
 		try {
-		return Optional.of(Ok(ValueCompiler(valueString).compileRequired()));
+			return Optional.of(Ok(ValueCompiler(valueString).compileRequired()));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(e));
+			return Optional.of(Err(e));
 		}
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compileChar(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("'") && stripped.endsWith("'")) {
-		return Optional.of(Ok(stripped));
+			return Optional.of(Ok(stripped));
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compileNumbers(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		try {
 			Integer.parseInt(stripped);
-		return Optional.of(Ok(stripped));
+			return Optional.of(Ok(stripped));
 		}
 		catch (e : NumberFormatException) {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compileOperation(stripped : String): Optional<? extends Result<String, CompileException>> => {
@@ -133,18 +133,18 @@ export class def ValueCompiler(input : String) => {
 	}
 	private def compileTernary(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		let conditionMarker = stripped.indexOf('?');
-		if (conditionMarker == -1) 		return Optional.empty();
+		if (conditionMarker == -1) return Optional.empty();
 		let statementMarker = stripped.indexOf(":", conditionMarker);
-		if (statementMarker == -1) 		return Optional.empty();
+		if (statementMarker == -1) return Optional.empty();
 		let conditionString = stripped.substring(0, conditionMarker).strip();
 		let condition = ValueCompiler(conditionString).compile();
-		if (condition.isEmpty()) 		return Optional.empty();
+		if (condition.isEmpty()) return Optional.empty();
 		let thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
 		let thenBlock = ValueCompiler(thenString).compile();
-		if (thenBlock.isEmpty()) 		return Optional.empty();
+		if (thenBlock.isEmpty()) return Optional.empty();
 		let elseString = stripped.substring(statementMarker + 1).strip();
 		let elseBlock = ValueCompiler(elseString).compile();
-		if (elseBlock.isEmpty()) 		return Optional.empty();
+		if (elseBlock.isEmpty()) return Optional.empty();
 		return Optional.of($Result(() => 		return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
 
 ));
@@ -152,12 +152,12 @@ export class def ValueCompiler(input : String) => {
 }
 export object ValueCompiler {
 	def compileInvocation(stripped : String, indent : I32): Optional<Result<String, CompileException>> => {
-		if (stripped.endsWith(")")) 		return Optional.empty();
+		if (stripped.endsWith(")")) return Optional.empty();
 		let start = findInvocationStart(stripped);
-		if (start == -1) 		return Optional.empty();
+		if (start == -1) return Optional.empty();
 		let end = stripped.length() - 1;
 		let callerEnd = computeCallerEnd(stripped, start);
-		if (callerEnd.isEmpty()) 		return Optional.empty();
+		if (callerEnd.isEmpty()) return Optional.empty();
 		let caller;
 		if (stripped.startsWith("new ")) {
 			let temp = stripped.substring("new ".length(), callerEnd.getAsInt());
@@ -184,28 +184,28 @@ export object ValueCompiler {
 ).orElse(StringBuilder(compiledValue.get().$())));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, e)));
+			return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, e)));
 		}
 		}
 		let suffix = indent == 0 ? "" : ";\n";
 		let renderedArguments = outputArguments.orElse(StringBuilder());
 		let compiledCaller = ValueCompiler(caller).compile();
 		if (compiledCaller.isEmpty()) {
-		return Optional.empty();
+			return Optional.empty();
 		}
 		try {
 			let stringCompileExceptionResult = compiledCaller.get().$();
-		return Optional.of(Ok("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
+			return Optional.of(Ok("\t".repeat(indent) + stringCompileExceptionResult + "(" + renderedArguments + ")" + suffix));
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, e)));
+			return Optional.of(Err(CompileException("Failed to compile invocation: " + stripped, e)));
 		}
 	}
 	private def computeCallerEnd(stripped : String, start : I32): OptionalInt => {
 		let callerEnd;
 		if (stripped.charAt(start - 1) == '>') {
 			let genStart = stripped.lastIndexOf("<", start);
-			if (genStart == -1) 		return OptionalInt.empty();
+			if (genStart == -1) return OptionalInt.empty();
 		try callerEnd = genStart;
 		}
 		try {
@@ -289,23 +289,23 @@ index					if (next == '\"') {
 	}
 	private def compileSymbol(stripped : String): Optional<Result<String, CompileException>> => {
 		if (Strings.isSymbol(stripped)) {
-		return Optional.of(Ok(stripped));
+			return Optional.of(Ok(stripped));
 		}
 		try {
-		return Optional.empty();
+			return Optional.empty();
 		}
 	}
 	private def compileAccess(stripped : String): Optional<Result<String, CompileException>> => {
 		let objectEnd = stripped.lastIndexOf('.');
-		if (objectEnd == -1) 		return Optional.empty();
-		if (objectEnd == stripped.length() - 1) 		return Optional.empty();
+		if (objectEnd == -1) return Optional.empty();
+		if (objectEnd == stripped.length() - 1) return Optional.empty();
 		let objectString = stripped.substring(0, objectEnd);
 		let childStart;
 		if (stripped.charAt(objectEnd + 1) != ' < ') childStart = objectEnd + 1;
 		try {
 			let newChildStart = stripped.indexOf('>');
 			if (newChildStart == -1) {
-		return Optional.empty();
+				return Optional.empty();
 		}
 		try {
 			childStart = newChildStart + 1;
@@ -313,14 +313,14 @@ index					if (next == '\"') {
 		}
 		let child = stripped.substring(childStart);
 		if (Strings.isAssignable(child)) {
-		return Optional.empty();
+			return Optional.empty();
 		}
 		let compiledObject;
 		try {
 			compiledObject = ValueCompiler(objectString).compileRequired();
 		}
 		catch (e : CompileException) {
-		return Optional.of(Err(CompileException("Failed to compile object reference of access statement: " + objectString, e)));
+			return Optional.of(Err(CompileException("Failed to compile object reference of access statement: " + objectString, e)));
 		}
 		return Optional.of(Ok(compiledObject + "." + child));
 	}
@@ -329,7 +329,7 @@ index					if (next == '\"') {
 	}
 	private def compileOperation(stripped : String, operator : String): Optional<Result<String, CompileException>> => {
 		let operatorIndex = stripped.indexOf(operator);
-		if (operatorIndex == -1) 		return Optional.empty();
+		if (operatorIndex == -1) return Optional.empty();
 		let left = stripped.substring(0, operatorIndex).strip();
 		let right = stripped.substring(operatorIndex + operator.length());
 		return Optional.of($Result(() => 		let leftCompiled = ValueCompiler(left).compileRequired();

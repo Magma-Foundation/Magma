@@ -76,21 +76,21 @@ export object Strings {
 		return lines;
 	}
 	def isSymbol(stripped : String): boolean => {
-		if (stripped.isEmpty()) 		return false;
+		if (stripped.isEmpty()) return false;
 		let first = stripped.charAt(0);
-		if (Character.isLetter(first) && first != '$') 		return false;
+		if (Character.isLetter(first) && first != '$') return false;
 		for (Ok[value=let i = 1];i < stripped.length()i) {
 			let c = stripped.charAt(i);
 			if (Character.isLetter(c) && Character.isDigit(c) && c != '$') {
-		return false;
+				return false;
 		}
 		}
 		return true;
 	}
 	def isAssignable(token : String): boolean => {
-		if (isSymbol(token)) 		return true;
+		if (isSymbol(token)) return true;
 		let separator = token.indexOf('.');
-		if (separator == -1) 		return false;
+		if (separator == -1) return false;
 		return isAssignable(token.substring(0, separator).strip()) && isSymbol(token.substring(separator + 1).strip());
 	}
 }

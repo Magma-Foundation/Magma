@@ -115,7 +115,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileCatch(stripped))
                 .or(() -> compileThrow(stripped))
                 .or(() -> compileFor(stripped))
-                .or(() -> compileReturn(stripped))
+                .or(() -> compileReturn(stripped, indent))
                 .or(() -> compileIf(stripped, indent))
                 .or(() -> compileWhile(stripped, indent))
                 .or(() -> compileElse(stripped))
@@ -167,7 +167,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.empty();
     }
 
-    private Optional<? extends Result<String, CompileException>> compileReturn(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileReturn(String stripped, int indent) {
         if (stripped.startsWith("return ")) {
             try {
                 var valueString = stripped.substring("return ".length()).strip();
@@ -179,7 +179,7 @@ public record StatementCompiler(String input, int indent) {
                     outputValueString = " " + compiledValue;
                 }
 
-                return Optional.of(new Ok<>("\t\treturn" + outputValueString + ";\n"));
+                return Optional.of(new Ok<>("\t".repeat(indent) + "return" + outputValueString + ";\n"));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile return statement: " + stripped, e)));
             }
