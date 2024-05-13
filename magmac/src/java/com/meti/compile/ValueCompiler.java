@@ -7,6 +7,7 @@ import com.meti.result.Result;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import static com.meti.result.Results.$Result;
@@ -19,25 +20,19 @@ public record ValueCompiler(String input) {
 
         var end = stripped.length() - 1;
 
-        int callerEnd;
-        if (stripped.charAt(start - 1) == '>') {
-            var genStart = stripped.lastIndexOf("<", start);
-            if (genStart == -1) return Optional.empty();
-            else callerEnd = genStart;
-        } else {
-            callerEnd = start;
-        }
+        var callerEnd = computeCallerEnd(stripped, start);
+        if (callerEnd.isEmpty()) return Optional.empty();
 
         String caller;
         if (stripped.startsWith("new ")) {
-            var temp = stripped.substring("new ".length(), callerEnd);
+            var temp = stripped.substring("new ".length(), callerEnd.getAsInt());
             if (Strings.isSymbol(temp)) {
                 caller = temp;
             } else {
-                caller = stripped.substring(0, callerEnd);
+                caller = stripped.substring(0, callerEnd.getAsInt());
             }
         } else {
-            caller = stripped.substring(0, callerEnd);
+            caller = stripped.substring(0, callerEnd.getAsInt());
         }
 
 
@@ -75,6 +70,18 @@ public record ValueCompiler(String input) {
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile invocation: " + stripped, e)));
         }
+    }
+
+    private static OptionalInt computeCallerEnd(String stripped, int start) {
+        int callerEnd;
+        if (stripped.charAt(start - 1) == '>') {
+            var genStart = stripped.lastIndexOf("<", start);
+            if (genStart == -1) return OptionalInt.empty();
+            else callerEnd = genStart;
+        } else {
+            callerEnd = start;
+        }
+        return OptionalInt.of(callerEnd);
     }
 
     private static ArrayList<String> splitInvocationArguments(String inputArgumentStrings) {
@@ -138,11 +145,25 @@ public record ValueCompiler(String input) {
     }
 
     private static Optional<Result<String, CompileException>> compileAccess(String stripped) {
-        var separator = stripped.lastIndexOf('.');
-        if (separator == -1) return Optional.empty();
+        var objectEnd = stripped.lastIndexOf('.');
+        if (objectEnd == -1) return Optional.empty();
 
-        var objectString = stripped.substring(0, separator);
-        var child = stripped.substring(separator + 1);
+        if (objectEnd == stripped.length() - 1) return Optional.empty();
+
+        var objectString = stripped.substring(0, objectEnd);
+
+        int childStart;
+        if (stripped.charAt(objectEnd + 1) != '<') childStart = objectEnd + 1;
+        else {
+            var newChildStart = stripped.indexOf('>');
+            if (newChildStart == -1) {
+                return Optional.empty();
+            } else {
+                childStart = newChildStart + 1;
+            }
+        }
+
+        var child = stripped.substring(childStart);
 
         if (!Strings.isAssignable(child)) {
             return Optional.empty();
@@ -296,15 +317,15 @@ public record ValueCompiler(String input) {
 
         var conditionString = stripped.substring(0, conditionMarker).strip();
         var condition = new ValueCompiler(conditionString).compile();
-        if(condition.isEmpty()) return Optional.empty();
+        if (condition.isEmpty()) return Optional.empty();
 
         var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
         var thenBlock = new ValueCompiler(thenString).compile();
-        if(thenBlock.isEmpty()) return Optional.empty();
+        if (thenBlock.isEmpty()) return Optional.empty();
 
         var elseString = stripped.substring(statementMarker + 1).strip();
         var elseBlock = new ValueCompiler(elseString).compile();
-        if(elseBlock.isEmpty()) return Optional.empty();
+        if (elseBlock.isEmpty()) return Optional.empty();
 
         var rendered = condition.get() + " ? " + thenBlock.get() + " : " + elseBlock.get();
         return Optional.of(new Ok<>(rendered));
