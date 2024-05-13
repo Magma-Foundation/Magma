@@ -12,21 +12,21 @@ public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
-        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2)));
+        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2, 0)));
     }
 
     private static Optional<Result<String, CompileException>> compileElse(String stripped) {
         if (!stripped.startsWith("else ")) return Optional.empty();
 
         try {
-            return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2)));
+            return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2, 0)));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
     }
 
-    private static String compileBlock(String stripped, int indent) throws CompileException {
-        var contentStart = stripped.indexOf('{');
+    private static String compileBlock(String stripped, int indent, int blockStart) throws CompileException {
+        var contentStart = stripped.indexOf('{', blockStart);
         if (contentStart == -1) {
             throw new CompileException("Not a block: " + stripped);
         }
@@ -74,7 +74,19 @@ public record StatementCompiler(String input, int indent) {
 
                 queue.pop();
                 index++;
+                continue;
+            }
 
+            if (c == '\"') {
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    index++;
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
+                continue;
             }
 
             if (c == ')' && depth == 0) {
@@ -98,6 +110,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileFor(stripped))
                 .or(() -> compileReturn(stripped))
                 .or(() -> compileIf(stripped, indent))
+                .or(() -> compileWhile(stripped, indent))
                 .or(() -> compileElse(stripped))
                 .or(() -> compileAssignment(stripped, indent))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
@@ -196,7 +209,7 @@ public record StatementCompiler(String input, int indent) {
                 var terminating = new ValueCompiler(terminatingString).compileRequired();
                 var increment = new StatementCompiler(incrementString, 0).compile();
 
-                compiledBlock = compileBlock(stripped, indent);
+                compiledBlock = compileBlock(stripped, indent, 0);
                 conditionString = initial + ";" + terminating + increment;
             } else {
                 var initialString = condition.substring(0, separator);
@@ -204,7 +217,7 @@ public record StatementCompiler(String input, int indent) {
 
                 var container = condition.substring(separator + 1);
 
-                compiledBlock = compileBlock(stripped, indent);
+                compiledBlock = compileBlock(stripped, indent, 0);
                 conditionString = initial + " : " + container;
             }
 
@@ -230,8 +243,8 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileIf(String stripped, int indent) {
-        if (!stripped.startsWith("if")) return Optional.empty();
+    private Optional<? extends Result<String, CompileException>> compileWhile(String stripped, int indent) {
+        if (!stripped.startsWith("while")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
         if (conditionStart == -1) return Optional.empty();
@@ -247,7 +260,36 @@ public record StatementCompiler(String input, int indent) {
 
             String compiledValue;
             if (stripped.contains("{") && stripped.endsWith("}")) {
-                compiledValue = compileBlock(stripped, indent);
+                compiledValue = compileBlock(stripped, indent, 0);
+            } else {
+                var valueString = stripped.substring(conditionEnd + 1).strip();
+                compiledValue = new StatementCompiler(valueString, 0).compile();
+            }
+            result = new Ok<>("\t".repeat(indent) + "while (" + compiledCondition + ") " + compiledValue);
+        } catch (CompileException e) {
+            result = new Err<>(e);
+        }
+
+        return Optional.of(result);
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileIf(String stripped, int indent) {
+        if (!stripped.startsWith("if")) return Optional.empty();
+
+        var conditionStart = stripped.indexOf('(');
+        if (conditionStart == -1) return Optional.empty();
+
+        var conditionEnd = findIfEnd(stripped, conditionStart);
+        if (conditionEnd == -1) return Optional.empty();
+
+        Result<String, CompileException> result;
+        try {
+            var condition = stripped.substring(conditionStart + 1, conditionEnd).strip();
+            var compiledCondition = new ValueCompiler(condition).compileRequired();
+
+            String compiledValue;
+            if (stripped.contains("{") && stripped.endsWith("}")) {
+                compiledValue = compileBlock(stripped, indent, conditionEnd);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 compiledValue = new StatementCompiler(valueString, 0).compile();
@@ -276,7 +318,7 @@ public record StatementCompiler(String input, int indent) {
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped, 2);
+            var compiledBlock = compileBlock(stripped, 2, 0);
             result = new Ok<>("\t\tcatch (" + catchName + " : " + catchType + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);

@@ -1,0 +1,95 @@
+import { ArrayList } from java.util;
+import { LinkedList } from java.util;
+import { List } from java.util;
+import { Collectors } from java.util.stream;
+import { IntStream } from java.util.stream;
+export class def Strings() => 
+export object Strings {
+	def splitMembers(input : String): List<String> => {
+		let lines = ArrayList();
+		let builder = StringBuilder();
+		let depth = 0;
+		let queue = toQueue(input);
+		while (queue.isEmpty()) {
+			let c = queue.pop();
+			if (c == '\'') {
+			builder.append(c);
+				let next = queue.pop();
+			builder.append(next);
+				if (next == '\\') {
+			builder.append(queue.pop());
+		}
+			builder.append(queue.pop());
+				let continue;
+		}
+			if (c == '\"') {
+			builder.append(c);
+				while (queue.isEmpty()) {
+					let next = queue.pop();
+			builder.append(next);
+					if (next == '\\') {
+			builder.append(queue.pop());
+		}
+					if (next == '\"') {
+						let break;
+		}
+		}
+				let continue;
+		}
+			if (c == ';' && depth == 0) {
+			lines.add(builder.toString());
+				builder = StringBuilder();
+		}
+		try {
+			builder.append(c);
+			depth = 0;
+			lines.add(builder.toString());
+			builder = StringBuilder();
+		}
+		try {
+			if (c == '{' || c == '(') depth			if (c == '}' || c == ')') depth			builder.append(c);
+		}
+		}
+			lines.add(builder.toString());
+		return lines;
+	}
+	def toQueue(input : String): LinkedList<Character> => {
+		let queue = IntStream.range(0, Optional[Ok[value=input.length()]]).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		return queue;
+	}
+	def splitTypeString(modifiersAndType : String): List<String> => {
+		let lines = ArrayList();
+		let builder = StringBuilder();
+		let depth = 0;
+		for (Ok[value=let i = 0];i < modifiersAndType.length()i) {
+			let c = modifiersAndType.charAt(i);
+			if (c == ' ' && depth == 0) {
+			lines.add(builder.toString());
+				builder = StringBuilder();
+		}
+		try {
+			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
+		}
+		}
+			lines.add(builder.toString());
+		return lines;
+	}
+	def isSymbol(stripped : String): boolean => {
+		if (stripped.isEmpty()) 		return false;
+		let first = stripped.charAt(0);
+		if (Character.isLetter(first) && first != '$') 		return false;
+		for (Ok[value=let i = 1];i < stripped.length()i) {
+			let c = stripped.charAt(i);
+			if (Character.isLetter(c) && Character.isDigit(c) && c != '$') {
+		return false;
+		}
+		}
+		return true;
+	}
+	def isAssignable(token : String): boolean => {
+		if (isSymbol(token)) 		return true;
+		let separator = token.indexOf('.');
+		if (separator == -1) 		return false;
+		return isAssignable(token.substring(0, Optional[Ok[value=separator]]).strip()) && isSymbol(token.substring(separator + 1).strip());
+	}
+}
