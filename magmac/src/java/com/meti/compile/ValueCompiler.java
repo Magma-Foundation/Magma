@@ -6,6 +6,7 @@ import com.meti.result.Result;
 import com.meti.result.Results;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public record ValueCompiler(String input) {
     static Optional<Result<String, CompileException>> compileInvocation(String stripped, int indent) {
@@ -75,6 +76,21 @@ public record ValueCompiler(String input) {
                 : Optional.empty();
     }
 
+    private static Optional<Result<String, CompileException>> compileOperation(String stripped, String operator) {
+        var operatorIndex = stripped.indexOf(operator);
+        if (operatorIndex == -1) return Optional.empty();
+
+        var left = stripped.substring(0, operatorIndex).strip();
+        var right = stripped.substring(operatorIndex + operator.length());
+
+        return Optional.of(Results.$Result(() -> {
+            var leftCompiled = new ValueCompiler(left).compile();
+            var rightCompiled = new ValueCompiler(right).compile();
+
+            return leftCompiled + " " + operator + " " + rightCompiled;
+        }));
+    }
+
     String compile() throws CompileException {
         var stripped = input().strip();
 
@@ -99,20 +115,10 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        var operatorIndex = stripped.indexOf("==");
-        if (operatorIndex != -1) {
-            var left = stripped.substring(0, operatorIndex).strip();
-            var right = stripped.substring(operatorIndex + "==".length());
-
-            return Optional.of(Results.$Result(() -> {
-                var leftCompiled = new ValueCompiler(left).compile();
-                var rightCompiled = new ValueCompiler(right).compile();
-
-                return leftCompiled + " == " + rightCompiled;
-            }));
-        }
-
-        return Optional.empty();
+        return Stream.of("==", "!=", "+")
+                .map(operator -> compileOperation(stripped, operator))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
