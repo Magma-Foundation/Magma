@@ -22,7 +22,7 @@ export object MagmaLang {
 		return renderDefinedFunction(0, modifierString + "class ", name, paramString, "", "{\n" + joinedInstance + "}");
 	}
 	private def renderStaticClassContent(modifierString : String, name : String, members : ClassMemberResult): String => {
-		if (members.staticMembers().isEmpty()) return "";
+		if (members.staticMembers().isEmpty()) 		return "";
 		let joinedStatic = String.join("", members.staticMembers());
 		return modifierString + "object " + name + " {\n" + joinedStatic + "}";
 	}

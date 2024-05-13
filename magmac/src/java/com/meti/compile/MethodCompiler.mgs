@@ -10,9 +10,9 @@ export class def MethodCompiler(input : String) => {
 	def compile(): Optional<Result<ClassMemberResult, CompileException>> => {
 		let stripped = input().strip();
 		let paramStart = stripped.indexOf('(');
-		if (paramStart == -1) return Optional.empty();
+		if (paramStart == -1) 		return Optional.empty();
 		let paramEnd = stripped.indexOf(')');
-		if (paramEnd == -1) return Optional.empty();
+		if (paramEnd == -1) 		return Optional.empty();
 		let paramString = stripped.substring(paramStart + 1, paramEnd);
 		let renderedParams;
 		try {
@@ -26,7 +26,7 @@ export class def MethodCompiler(input : String) => {
 		let modifiersAndTypeString = before.substring(0, separator).strip();
 		let name = before.substring(separator + 1).strip();
 		let modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
-		if (modifiersAndType.isEmpty()) return Optional.empty();
+		if (modifiersAndType.isEmpty()) 		return Optional.empty();
 		let modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
 		let inputType = modifiersAndType.get(modifiersAndType.size() - 1);
 		let modifierString = modifiers.contains("private") ? "private " : "";
@@ -54,13 +54,14 @@ export object MethodCompiler {
 	def compileMethodMembers(inputContent : List<String>, indent : I32): Result<String, CompileException> => {
 		let outputContent = StringBuilder();
 		for (let inputMember :  inputContent) {
-			if (inputMember.isBlank()) let continue		try {
-			outputContent.append(			StatementCompiler(inputMember, indent).compile();
+			if (inputMember.isBlank()) 			let continue;
+			try {
+				outputContent.append(				StatementCompiler(inputMember, indent).compile();
 );
-		}
-		catch (e : CompileException) {
-			return Err(e);
-		}
+			}
+			catch (e : CompileException) {
+				return Err(e);
+			}
 		}
 		return Ok(outputContent.toString());
 	}

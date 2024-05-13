@@ -6,7 +6,8 @@ export class def ParamsCompiler(paramString : String) => {
 		let paramStrings = splitParams();
 		let outputParams = Optional.empty();
 		for (let string :  paramStrings) {
-			if (string.isBlank()) let continue			let strippedParam = string.strip();
+			if (string.isBlank()) 			let continue;
+			let strippedParam = string.strip();
 			let separator = strippedParam.lastIndexOf(' ');
 			if (separator == -1) {
 				throw CompileException("Malformed parameter: " + strippedParam);
@@ -30,7 +31,7 @@ export class def ParamsCompiler(paramString : String) => {
 );
 				builder = StringBuilder();
 			}
-		try {
+			try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}
 		}

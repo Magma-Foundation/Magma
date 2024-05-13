@@ -9,13 +9,13 @@ import java.util.Optional;
 import static com.meti.compile.ValueCompiler.compileInvocation;
 
 public record StatementCompiler(String input, int indent) {
-    private static Optional<Result<String, CompileException>> compileTry(String stripped) throws CompileException {
+    private static Optional<Result<String, CompileException>> compileTry(String stripped, int indent) throws CompileException {
         if (!stripped.startsWith("try ")) return Optional.empty();
 
-        return Optional.of(new Ok<>("\t\ttry " + compileBlock(stripped, 2, 0)));
+        return Optional.of(new Ok<>("\t".repeat(indent) + "try " + compileBlock(stripped, indent, 0)));
     }
 
-    private static Optional<Result<String, CompileException>> compileElse(String stripped) {
+    private static Optional<Result<String, CompileException>> compileElse(String stripped, int indent) {
         if (!stripped.startsWith("else ")) return Optional.empty();
 
         try {
@@ -26,7 +26,7 @@ public record StatementCompiler(String input, int indent) {
                 var value = stripped.substring("else ".length());
                 body = new StatementCompiler(value, 0).compile();
             }
-            return Optional.of(new Ok<>("\t\ttry " + body));
+            return Optional.of(new Ok<>("\t".repeat(indent) + "try " + body));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
@@ -111,14 +111,14 @@ public record StatementCompiler(String input, int indent) {
     String compile() throws CompileException {
         var stripped = input.strip();
 
-        return compileTry(stripped)
-                .or(() -> compileCatch(stripped))
+        return compileTry(stripped, indent)
+                .or(() -> compileCatch(stripped, indent))
                 .or(() -> compileThrow(stripped, indent))
                 .or(() -> compileFor(stripped, indent))
                 .or(() -> compileReturn(stripped, indent))
                 .or(() -> compileIf(stripped, indent))
                 .or(() -> compileWhile(stripped, indent))
-                .or(() -> compileElse(stripped))
+                .or(() -> compileElse(stripped, indent))
                 .or(() -> compileAssignment(stripped, indent))
                 .or(() -> new DeclarationCompiler(stripped, indent).compile())
                 .or(() -> compileInvocation(stripped, indent))
@@ -311,7 +311,7 @@ public record StatementCompiler(String input, int indent) {
                 compiledValue = compileBlock(stripped, indent, conditionEnd);
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
-                compiledValue = new StatementCompiler(valueString, 0).compile();
+                compiledValue = new StatementCompiler(valueString, indent).compile();
             }
             result = new Ok<>("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -321,7 +321,7 @@ public record StatementCompiler(String input, int indent) {
         return Optional.of(result);
     }
 
-    private Optional<? extends Result<String, CompileException>> compileCatch(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileCatch(String stripped, int indent) {
         if (!stripped.startsWith("catch")) return Optional.empty();
 
         var typeStart = stripped.indexOf('(');
@@ -337,8 +337,8 @@ public record StatementCompiler(String input, int indent) {
 
         Result<String, CompileException> result;
         try {
-            var compiledBlock = compileBlock(stripped, 2, 0);
-            result = new Ok<>("\t\tcatch (" + catchName + " : " + catchType + ") " + compiledBlock);
+            var compiledBlock = compileBlock(stripped, indent, 0);
+            result = new Ok<>("\t".repeat(indent) + "catch (" + catchName + " : " + catchType + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }

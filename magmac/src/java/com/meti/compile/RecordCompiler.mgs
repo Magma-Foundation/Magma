@@ -8,9 +8,9 @@ export class def RecordCompiler extends InstanceCompiler() => {
 	}
 	def computeParamString(input : String): Optional<String> => {
 		let paramStart = input.indexOf('(');
-		if (paramStart == -1) return Optional.empty();
+		if (paramStart == -1) 		return Optional.empty();
 		let paramEnd = input.indexOf(')', paramStart);
-		if (paramEnd == -1) return Optional.empty();
+		if (paramEnd == -1) 		return Optional.empty();
 		let slice = input.substring(paramStart + 1, paramEnd);
 		let compiledParams = ParamsCompiler(slice).compile();
 		return Optional.of(compiledParams);
