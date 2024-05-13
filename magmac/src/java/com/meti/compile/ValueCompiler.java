@@ -156,7 +156,7 @@ public record ValueCompiler(String input) {
         var value = stripped.substring(separator + "->".length());
         try {
             var compiledValue = new ValueCompiler(value).compile();
-            var rendered = MagmaLang.renderFunction(0, "", "", "", "", compiledValue + "}");
+            var rendered = MagmaLang.renderFunction(0, "", "", "", "", " => " + compiledValue);
             return Optional.of(new Ok<>(rendered));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));

@@ -1,9 +1,7 @@
 import { Ok } from com.meti.result;
 import { Result } from com.meti.result;
 import { Optional } from java.util;
-export class def ImportCompiler(stripped : String) => {
-	def compile(): Optional<Result<String, CompileException>> => {
-		if (stripped().startsWith("import ")) 		return Optional.empty();
+export class def ImportCompiler(stripped : String) => 	def compile(): Optional<Result<String, CompileException>> => 		if (stripped().startsWith("import ")) 		return Optional.empty();
 		let segmentsStart = stripped().startsWith("import static ") ? "import static ".length() : "import ".length();
 		let segments = stripped().substring(segmentsStart);
 		let separator = segments.lastIndexOf('.');
@@ -11,5 +9,5 @@ export class def ImportCompiler(stripped : String) => {
 		let parent = segments.substring(0, separator);
 		let child = segments.substring(separator + 1);
 		return Optional.of(new Ok(Ok("import { " + child + " } from " + parent + ";\n"));
-	}
-}
+
+

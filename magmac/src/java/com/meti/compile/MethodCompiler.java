@@ -13,52 +13,6 @@ import static com.meti.compile.MagmaLang.renderDefinedFunction;
 import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
-    static Optional<Result<ClassMemberResult, CompileException>> compileMethod(MethodCompiler methodCompiler) {
-        var stripped = methodCompiler.input().strip();
-
-        var paramStart = stripped.indexOf('(');
-        if (paramStart == -1) return Optional.empty();
-
-        var paramEnd = stripped.indexOf(')');
-        if (paramEnd == -1) return Optional.empty();
-
-        var paramString = stripped.substring(paramStart + 1, paramEnd);
-        var renderedParams = new ParamsCompiler(paramString).compile();
-
-        var before = stripped.substring(0, paramStart).strip();
-        var separator = before.lastIndexOf(' ');
-
-        var modifiersAndTypeString = before.substring(0, separator).strip();
-        var name = before.substring(separator + 1).strip();
-
-        var modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
-        if (modifiersAndType.isEmpty()) return Optional.empty();
-
-        var modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
-        var inputType = modifiersAndType.get(modifiersAndType.size() - 1);
-
-        var modifierString = modifiers.contains("private") ? "private " : "";
-
-        var contentStart = stripped.indexOf("{");
-        if (contentStart == -1) return Optional.empty();
-
-        var contentEnd = stripped.lastIndexOf('}');
-        if (contentEnd == -1) return Optional.empty();
-
-        var content = stripped.substring(contentStart + 1, contentEnd);
-        var inputContent = Strings.splitMembers(content);
-
-        return Optional.of($Result(() -> {
-            var outputType = compileType(inputType).$();
-            var outputContent = compileMethodMembers(inputContent).$();
-
-            var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, outputContent);
-
-            return modifiers.contains("static")
-                    ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
-                    : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
-        }));
-    }
 
     private static Result<String, CompileException> compileType(String inputType) {
         return compilePrimitiveType(inputType)
@@ -137,4 +91,61 @@ public record MethodCompiler(String input) {
         return new Ok<>(outputContent.toString());
     }
 
+    Optional<Result<ClassMemberResult, CompileException>> compile() {
+        var stripped = input().strip();
+
+        var paramStart = stripped.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
+
+        var paramEnd = stripped.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var paramString = stripped.substring(paramStart + 1, paramEnd);
+        var renderedParams = new ParamsCompiler(paramString).compile();
+
+        var before = stripped.substring(0, paramStart).strip();
+        var separator = before.lastIndexOf(' ');
+
+        var modifiersAndTypeString = before.substring(0, separator).strip();
+        var name = before.substring(separator + 1).strip();
+
+        var modifiersAndType = Strings.splitTypeString(modifiersAndTypeString);
+        if (modifiersAndType.isEmpty()) return Optional.empty();
+
+        var modifiers = modifiersAndType.subList(0, modifiersAndType.size() - 1);
+        var inputType = modifiersAndType.get(modifiersAndType.size() - 1);
+
+        var modifierString = modifiers.contains("private") ? "private " : "";
+
+        var contentStart = stripped.indexOf("{");
+        var contentEnd = stripped.lastIndexOf('}');
+
+        if (contentStart != -1 && contentEnd != -1) {
+            var content = stripped.substring(contentStart + 1, contentEnd);
+            var inputContent = Strings.splitMembers(content);
+
+            return Optional.of($Result(() -> {
+                var outputType = compileType(inputType).$();
+                var outputContent = compileMethodMembers(inputContent).$();
+
+                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, outputContent);
+
+                return modifiers.contains("static")
+                        ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
+                        : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
+            }));
+        } else if (contentStart == -1 && contentEnd == -1) {
+            return Optional.of($Result(() -> {
+                var outputType = compileType(inputType).$();
+
+                var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, ";");
+
+                return modifiers.contains("static")
+                        ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
+                        : new ClassMemberResult(Collections.singletonList(rendered), Collections.emptyList());
+            }));
+        } else {
+            return Optional.empty();
+        }
+    }
 }

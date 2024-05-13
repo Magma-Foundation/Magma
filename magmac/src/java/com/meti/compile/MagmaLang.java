@@ -4,18 +4,16 @@ public class MagmaLang {
     static String renderDefinedFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
         var indentString = "\t".repeat(indent);
         return renderFunction(indent, modifierString +
-                                      "def ", name, renderedParams, typeString, "{\n" +
-                                                                                content +
-                                                                                indentString + "}");
+                                      "def ", name, renderedParams, typeString, " => " + content);
     }
 
-    static String renderFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
+    static String renderFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String contentString) {
         var indentString = "\t".repeat(indent);
 
         return indentString +
                modifierString + name + "(" + renderedParams + ")" +
                typeString +
-               " => " + content + "\n";
+               contentString + "\n";
     }
 
     static String renderClass(String modifierString, String name, ClassMemberResult members, String paramString) {
