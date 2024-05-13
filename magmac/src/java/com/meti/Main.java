@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
         var sourceDirectory = Paths.get(".", "magmac", "src", "java");
+        var targetDirectory = Paths.get(".", "magmac", "build");
 
         try {
             var sources = Files.walk(sourceDirectory)
@@ -24,7 +24,15 @@ public class Main {
                 var name = fileName.substring(0, separator);
 
                 var input = Files.readString(source);
-                var target = source.resolveSibling(name + ".mgs");
+
+                var relativized = sourceDirectory.relativize(source);
+                var inTarget = targetDirectory.resolve(relativized);
+                var target = inTarget.resolveSibling(name + ".mgs");
+                var parent = target.getParent();
+                if(!Files.exists(parent)) {
+                    Files.createDirectories(parent);
+                }
+
                 Files.writeString(target, Application.compile(input));
             }
         } catch (IOException | CompileException e) {
