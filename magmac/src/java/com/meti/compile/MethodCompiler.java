@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.meti.compile.MagmaLang.renderFunction;
+import static com.meti.compile.MagmaLang.renderDefinedFunction;
 import static com.meti.result.Results.$Result;
 
 public record MethodCompiler(String input) {
@@ -52,7 +52,7 @@ public record MethodCompiler(String input) {
             var outputType = compileType(inputType).$();
             var outputContent = compileMethodMembers(inputContent).$();
 
-            var rendered = renderFunction(modifierString, name, renderedParams, ": " + outputType, 1, outputContent);
+            var rendered = renderDefinedFunction(1, modifierString, name, renderedParams, ": " + outputType, outputContent);
 
             return modifiers.contains("static")
                     ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))

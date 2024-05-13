@@ -1,16 +1,21 @@
 package com.meti.compile;
 
 public class MagmaLang {
-    static String renderFunction(String modifierString, String name, String renderedParams, String typeString, int indent, String content) {
+    static String renderDefinedFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
+        var indentString = "\t".repeat(indent);
+        return renderFunction(indent, modifierString +
+                                      "def ", name, renderedParams, typeString, "{\n" +
+                                                                                content +
+                                                                                indentString + "}");
+    }
+
+    static String renderFunction(int indent, String modifierString, String name, String renderedParams, String typeString, String content) {
         var indentString = "\t".repeat(indent);
 
         return indentString +
-               modifierString +
-               "def " + name + "(" + renderedParams + ")" +
+               modifierString + name + "(" + renderedParams + ")" +
                typeString +
-               " => {\n" +
-               content +
-               indentString + "}\n";
+               " => " + content + "\n";
     }
 
     static String renderClass(String modifierString, String name, ClassMemberResult members, String paramString) {
@@ -22,7 +27,7 @@ public class MagmaLang {
     private static String renderInstanceClassContent(String modifierString, String name, ClassMemberResult members, String paramString) {
         var joinedInstance = String.join("", members.instanceMembers());
 
-        return renderFunction(modifierString + "class ", name, paramString, "", 0, joinedInstance);
+        return renderDefinedFunction(0, modifierString + "class ", name, paramString, "", joinedInstance);
     }
 
     private static String renderStaticClassContent(String modifierString, String name, ClassMemberResult members) {

@@ -140,12 +140,27 @@ public record ValueCompiler(String input) {
                 .or(() -> compileInvocation(stripped, 0))
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
+                .or(() -> compileLambda(stripped))
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileNumbers(stripped))
                 .or(() -> compileChar(stripped))
                 .or(() -> compileNot(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileLambda(String stripped) {
+        var separator = stripped.indexOf("->");
+        if (separator == -1) return Optional.empty();
+
+        var value = stripped.substring(separator + "->".length());
+        try {
+            var compiledValue = new ValueCompiler(value).compile();
+            var rendered = MagmaLang.renderFunction(0, "", "", "", "", compiledValue + "}");
+            return Optional.of(new Ok<>(rendered));
+        } catch (CompileException e) {
+            return Optional.of(new Err<>(e));
+        }
     }
 
     private Optional<? extends Result<String, CompileException>> compileNot(String stripped) {
