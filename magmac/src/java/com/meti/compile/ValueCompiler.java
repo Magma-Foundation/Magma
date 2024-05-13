@@ -5,6 +5,7 @@ import com.meti.result.Ok;
 import com.meti.result.Result;
 import com.meti.result.Results;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -13,24 +14,36 @@ public record ValueCompiler(String input) {
         var start = stripped.indexOf('(');
         if (start == -1) return Optional.empty();
 
-        var end = -1;
+        var end = findInvocationEnd(stripped, start);
+        if (end != stripped.length() - 1) {
+            return Optional.empty();
+        }
+
+        var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
+
+        var diamondOperator = stripped.indexOf("<>");
+        var compilerEnd = diamondOperator == -1 ? start : diamondOperator;
+        var caller = stripped.substring(callerStart, compilerEnd);
+
+        var inputArgumentStrings = stripped.substring(start + 1, end);
+
+        var inputArguments = new ArrayList<String>();
+        var builder = new StringBuilder();
         var depth = 0;
-        for (int i = start + 1; i < stripped.length(); i++) {
-            var c = stripped.charAt(i);
-            if (c == ')' && depth == 0) {
-                end = i;
-                break;
+
+        for (int i = 0; i < inputArgumentStrings.length(); i++) {
+            var c = inputArgumentStrings.charAt(i);
+            if (c == ',' && depth == 0) {
+                inputArguments.add(builder.toString());
+                builder = new StringBuilder();
             } else {
                 if (c == '(') depth++;
                 if (c == ')') depth--;
+                builder.append(c);
             }
         }
+        inputArguments.add(builder.toString());
 
-        if (end != stripped.length() - 1) return Optional.empty();
-
-        var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
-        var caller = stripped.substring(callerStart, start);
-        var inputArguments = stripped.substring(start + 1, end).split(",");
         var outputArguments = Optional.<StringBuilder>empty();
         for (String inputArgument : inputArguments) {
             if (inputArgument.isBlank()) continue;
@@ -50,10 +63,27 @@ public record ValueCompiler(String input) {
             var suffix = indent == 0 ? "" : ";\n";
             var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-            return Optional.of(new Ok<>("\t".repeat(indent) + new ValueCompiler(caller).compile() + "(" + renderedArguments + ")" + suffix));
+            var compiledCaller = new ValueCompiler(caller).compile();
+            return Optional.of(new Ok<>("\t".repeat(indent) + compiledCaller + "(" + renderedArguments + ")" + suffix));
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
+    }
+
+    private static int findInvocationEnd(String stripped, int start) {
+        var end = -1;
+        var depth = 0;
+        for (int i = start + 1; i < stripped.length(); i++) {
+            var c = stripped.charAt(i);
+            if (c == ')' && depth == 0) {
+                end = i;
+                break;
+            } else {
+                if (c == '(') depth++;
+                if (c == ')') depth--;
+            }
+        }
+        return end;
     }
 
     private static Optional<Result<String, CompileException>> compileSymbol(String stripped) {
@@ -118,7 +148,7 @@ public record ValueCompiler(String input) {
     }
 
     private Optional<? extends Result<String, CompileException>> compileChar(String stripped) {
-        if(stripped.startsWith("'") && stripped.endsWith("'")) {
+        if (stripped.startsWith("'") && stripped.endsWith("'")) {
             return Optional.of(new Ok<>(stripped));
         } else {
             return Optional.empty();
