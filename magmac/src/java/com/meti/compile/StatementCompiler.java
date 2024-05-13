@@ -116,7 +116,7 @@ public record StatementCompiler(String input, int indent) {
 
                 return Optional.of(new Ok<>("\t\treturn" + outputValueString + ";\n"));
             } catch (CompileException e) {
-                return Optional.of(new Err<>(e));
+                return Optional.of(new Err<>(new CompileException("Failed to compile return statement: " + stripped, e)));
             }
         } else {
             return Optional.empty();

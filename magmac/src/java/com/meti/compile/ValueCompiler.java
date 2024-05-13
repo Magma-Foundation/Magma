@@ -18,8 +18,6 @@ public record ValueCompiler(String input) {
 
         var end = stripped.length() - 1;
 
-        var callerStart = stripped.startsWith("new ") ? "new ".length() : 0;
-
         int callerEnd;
         if (stripped.charAt(start - 1) == '>') {
             var genStart = stripped.lastIndexOf("<", start);
@@ -29,7 +27,18 @@ public record ValueCompiler(String input) {
             callerEnd = start;
         }
 
-        var caller = stripped.substring(callerStart, callerEnd);
+        String caller;
+        if (stripped.startsWith("new ")) {
+            var temp = stripped.substring("new ".length(), callerEnd);
+            if(Strings.isSymbol(temp)) {
+                caller = temp;
+            } else {
+                caller = stripped.substring(0, callerEnd);
+            }
+        } else {
+            caller = stripped.substring(0, callerEnd);
+        }
+
 
         var inputArgumentStrings = stripped.substring(start + 1, end);
 
@@ -178,6 +187,11 @@ public record ValueCompiler(String input) {
     private Optional<? extends Result<String, CompileException>> compileLambda(String stripped) {
         var separator = stripped.indexOf("->");
         if (separator == -1) return Optional.empty();
+
+        var before = stripped.substring(0, separator).strip();
+        if(!before.equals("()")) {
+            return Optional.empty();
+        }
 
         var value = stripped.substring(separator + "->".length());
         try {
