@@ -23,7 +23,23 @@ export class def ValueCompiler(input : String) => 	def compileRequired(): String
 ).or(() => compileChar(stripped)
 ).or(() => compileNot(stripped)
 ).or(() => compileMethodReference(stripped)
+).or(() => compileCast(stripped)
 );
+	}
+	private def compileCast(stripped : String): Optional<? extends Result<String, CompileException>> => {
+		if (stripped.startsWith("(")) {
+			let end = stripped.indexOf(')');
+			let type = stripped.substring(1, Optional[Ok[value=end]]);
+		return Optional.of($Result(() => 		let outputType = TypeCompiler(type).compile().$();
+		let valueString = stripped.substring(end + 1).strip();
+		let compiledValue = ValueCompiler(valueString).compileRequired();
+		return "(" + outputType + ") " + compiledValue;
+
+));
+		}
+		try {
+		return Optional.empty();
+		}
 	}
 	private def compileMethodReference(stripped : String): Optional<Result<String, CompileException>> => {
 		let index = stripped.indexOf("::");

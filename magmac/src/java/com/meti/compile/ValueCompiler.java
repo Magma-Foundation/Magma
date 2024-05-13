@@ -257,7 +257,25 @@ public record ValueCompiler(String input) {
                 .or(() -> compileOperation(stripped))
                 .or(() -> compileChar(stripped))
                 .or(() -> compileNot(stripped))
-                .or(() -> compileMethodReference(stripped));
+                .or(() -> compileMethodReference(stripped))
+                .or(() -> compileCast(stripped));
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
+        if(stripped.startsWith("("))  {
+            var end = stripped.indexOf(')');
+            var type = stripped.substring(1, end);
+
+            return Optional.of($Result(() -> {
+                var outputType = new TypeCompiler(type).compile().$();
+                var valueString = stripped.substring(end + 1).strip();
+
+                var compiledValue = new ValueCompiler(valueString).compileRequired();
+                return "(" + outputType + ") " + compiledValue;
+            }));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Optional<Result<String, CompileException>> compileMethodReference(String stripped) {
