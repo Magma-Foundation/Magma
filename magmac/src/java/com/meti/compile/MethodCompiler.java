@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.meti.compile.MagmaLang.renderDefinedFunction;
+import static com.meti.compile.MagmaLang.function;
 import static com.meti.result.Results.$Result;
 
 public final class MethodCompiler {
@@ -71,7 +71,7 @@ public final class MethodCompiler {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
                 var outputContent = compileMethodMembers(inputContent, 2, stack).$();
-                var rendered = renderDefinedFunction(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
+                var rendered = function(1, modifierString, name, finalRenderedParams, ": " + outputType, "{\n" + outputContent + "\t}");
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
@@ -82,8 +82,8 @@ public final class MethodCompiler {
         } else if (contentStart == -1 && contentEnd == -1) {
             return Optional.of($Result(() -> {
                 var outputType = new TypeCompiler(inputType).compile().$();
-                var rendered = MagmaLang.renderFunctionHeader(1, modifierString +
-                                                                 "def ", name, finalRenderedParams, ": " + outputType) + ";" + "\n";
+                var rendered = MagmaLang.declareFunction(1, modifierString +
+                                                            "def ", name, finalRenderedParams, ": " + outputType) + ";" + "\n";
 
                 return modifiers.contains("static")
                         ? new ClassMemberResult(Collections.emptyList(), Collections.singletonList(rendered))
