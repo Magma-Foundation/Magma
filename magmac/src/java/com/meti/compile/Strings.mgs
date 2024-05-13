@@ -19,10 +19,10 @@ export object Strings {
 				builder.append(next);
 				if (next == '\\') {
 					builder.append(queue.pop());
-		}
+				}
 				builder.append(queue.pop());
 				let continue;
-		}
+			}
 			if (c == '\"') {
 				builder.append(c);
 				while (queue.isEmpty()) {
@@ -30,17 +30,17 @@ export object Strings {
 					builder.append(next);
 					if (next == '\\') {
 						builder.append(queue.pop());
-		}
+					}
 					if (next == '\"') {
 						let break;
-		}
-		}
+					}
+				}
 				let continue;
-		}
+			}
 			if (c == ';' && depth == 0) {
 				lines.add(builder.toString());
 				builder = StringBuilder();
-		}
+			}
 		try {
 			builder.append(c);
 			depth = 0;
@@ -67,7 +67,7 @@ export object Strings {
 			if (c == ' ' && depth == 0) {
 				lines.add(builder.toString());
 				builder = StringBuilder();
-		}
+			}
 		try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}
@@ -83,7 +83,7 @@ export object Strings {
 			let c = stripped.charAt(i);
 			if (Character.isLetter(c) && Character.isDigit(c) && c != '$') {
 				return false;
-		}
+			}
 		}
 		return true;
 	}

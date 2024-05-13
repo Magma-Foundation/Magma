@@ -10,7 +10,7 @@ export class def ParamsCompiler(paramString : String) => {
 			let separator = strippedParam.lastIndexOf(' ');
 			if (separator == -1) {
 				throw CompileException("Malformed parameter: " + strippedParam);
-		}
+			}
 			let type = strippedParam.substring(0, separator);
 			let name = strippedParam.substring(separator + 1);
 			let compiledType = TypeCompiler(type).compile().$();
@@ -28,7 +28,7 @@ export class def ParamsCompiler(paramString : String) => {
 			if (c == ',' && depth == 0) {
 				list.add(builder.toString());
 				builder = StringBuilder();
-		}
+			}
 		try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}

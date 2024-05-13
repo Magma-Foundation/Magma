@@ -17,7 +17,7 @@ export class def DeclarationCompiler(stripped : String, indent : I32) => {
 				let after = stripped.substring(valueSeparator + 1).strip();
 				let compiledValue = ValueCompiler(after, 0).compileRequired();
 				valueString = " = " + compiledValue;
-		}
+			}
 		try {
 			valueString = "";
 		}

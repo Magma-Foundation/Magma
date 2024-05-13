@@ -6,7 +6,7 @@ import { compileInvocation } from com.meti.compile.ValueCompiler;
 export class def StatementCompiler(input : String, indent : I32) => {
 	def compile(): String => {
 		let stripped = input.strip();
-		return compileTry(stripped).or(() => compileCatch(stripped)).or(() => compileThrow(stripped, indent)).or(() => compileFor(stripped)).or(() => compileReturn(stripped, indent)).or(() => compileIf(stripped, indent)).or(() => compileWhile(stripped, indent)).or(() => compileElse(stripped)).or(() => compileAssignment(stripped, indent)).or(() => DeclarationCompiler(stripped, indent).compile()).or(() => compileInvocation(stripped, indent)).or(() => compileSuffixOperator(stripped)).or(() => compileComment(stripped)).orElseGet(() => Err(CompileException("Unknown statement: " + stripped))).mapErr(() => CompileException("Failed to compile statement: " + stripped, err)).$();
+		return compileTry(stripped).or(() => compileCatch(stripped)).or(() => compileThrow(stripped, indent)).or(() => compileFor(stripped, indent)).or(() => compileReturn(stripped, indent)).or(() => compileIf(stripped, indent)).or(() => compileWhile(stripped, indent)).or(() => compileElse(stripped)).or(() => compileAssignment(stripped, indent)).or(() => DeclarationCompiler(stripped, indent).compile()).or(() => compileInvocation(stripped, indent)).or(() => compileSuffixOperator(stripped)).or(() => compileComment(stripped)).orElseGet(() => Err(CompileException("Unknown statement: " + stripped))).mapErr(() => CompileException("Failed to compile statement: " + stripped, err)).$();
 	}
 	private def compileComment(stripped : String): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("/*") && stripped.endsWith("*/")) {
@@ -33,7 +33,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			let left = stripped.substring(0, separator).strip();
 			if (Strings.isAssignable(left)) {
 				return Optional.empty();
-		}
+			}
 			let right = stripped.substring(separator + 1).strip();
 		try {
 			return Optional.of(Ok("\t".repeat(indent) + left + " = " + new ValueCompiler(right, 0).compileRequired() + ";\n"));
@@ -51,7 +51,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			let outputValueString;
 			if (valueString.isEmpty()) {
 				outputValueString = "";
-		}
+			}
 		try {
 			let compiledValue = ValueCompiler(valueString, 0).compileRequired();
 			outputValueString = " " + compiledValue;
@@ -66,7 +66,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			return Optional.empty();
 		}
 	}
-	private def compileFor(stripped : String): Optional<? extends Result<String, CompileException>> => {
+	private def compileFor(stripped : String, indent : I32): Optional<? extends Result<String, CompileException>> => {
 		if (stripped.startsWith("for")) return Optional.empty();
 		let conditionStart = stripped.indexOf('(');
 		if (conditionStart == -1) {
@@ -95,7 +95,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 				let increment = StatementCompiler(incrementString, 0).compile();
 				compiledBlock = compileBlock(stripped, indent, 0);
 				conditionString = initial + ";" + terminating + increment;
-		}
+			}
 		try {
 			let initialString = condition.substring(0, separator);
 			let initial = DeclarationCompiler(initialString, 0).compile().orElseThrow(() => CompileException("Invalid initial assignment: " + initialString)).$();
@@ -103,7 +103,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			compiledBlock = compileBlock(stripped, indent, 0);
 			conditionString = initial + " : " + container;
 		}
-			result = Ok("\t".repeat(indent) + "for (" + conditionString + ") " + compiledBlock);
+			result = Ok("\t".repeat(this.indent) + "for (" + conditionString + ") " + compiledBlock);
 		}
 		catch (e : CompileException) {
 			result = Err(e);
@@ -136,7 +136,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			let compiledValue;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
 				compiledValue = compileBlock(stripped, indent, 0);
-		}
+			}
 		try {
 			let valueString = stripped.substring(conditionEnd + 1).strip();
 			compiledValue = StatementCompiler(valueString, 0).compile();
@@ -161,7 +161,7 @@ export class def StatementCompiler(input : String, indent : I32) => {
 			let compiledValue;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
 				compiledValue = compileBlock(stripped, indent, conditionEnd);
-		}
+			}
 		try {
 			let valueString = stripped.substring(conditionEnd + 1).strip();
 			compiledValue = StatementCompiler(valueString, 0).compile();
@@ -205,7 +205,7 @@ export object StatementCompiler {
 			let body;
 			if (stripped.contains("{") && stripped.endsWith("}")) {
 				body = compileBlock(stripped, 2, 0);
-		}
+			}
 		try {
 			let value = stripped.substring("else ".length());
 			body = StatementCompiler(value, 0).compile();
@@ -237,7 +237,7 @@ export object StatementCompiler {
 			throw CompileException("Failed to compile block: " + stripped, e);
 		}
 		}
-		return "{\n" + output + "\t\t}\n";
+		return "{\n" + output + "\t".repeat(indent) + "}\n";
 	}
 	private def findIfEnd(stripped : String, paramStart : I32): I32 => {
 		let conditionEnd = -1;
@@ -250,23 +250,23 @@ index			if (c == '\'') {
 				let escaped = queue.pop();
 index				if (escaped == '\\') {
 					queue.pop();
-index		}
+index				}
 				queue.pop();
 index				let continue;
-		}
+			}
 			if (c == '\"') {
 				while (queue.isEmpty()) {
 					let next = queue.pop();
 index					if (next == '\"') {
 						let break;
-		}
-		}
+					}
+				}
 				let continue;
-		}
+			}
 			if (c == ')' && depth == 0) {
 				conditionEnd = index;
 				let break;
-		}
+			}
 		try {
 			if (c == '(') depth			if (c == ')') depth		}
 		}

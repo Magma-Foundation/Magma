@@ -57,7 +57,7 @@ public record StatementCompiler(String input, int indent) {
             }
         }
 
-        return "{\n" + output + "\t\t}\n";
+        return "{\n" + output + "\t".repeat(indent) + "}\n";
     }
 
     private static int findIfEnd(String stripped, int paramStart) {
@@ -114,7 +114,7 @@ public record StatementCompiler(String input, int indent) {
         return compileTry(stripped)
                 .or(() -> compileCatch(stripped))
                 .or(() -> compileThrow(stripped, indent))
-                .or(() -> compileFor(stripped))
+                .or(() -> compileFor(stripped, indent))
                 .or(() -> compileReturn(stripped, indent))
                 .or(() -> compileIf(stripped, indent))
                 .or(() -> compileWhile(stripped, indent))
@@ -188,7 +188,7 @@ public record StatementCompiler(String input, int indent) {
         }
     }
 
-    private Optional<? extends Result<String, CompileException>> compileFor(String stripped) {
+    private Optional<? extends Result<String, CompileException>> compileFor(String stripped, int indent) {
         if (!stripped.startsWith("for")) return Optional.empty();
 
         var conditionStart = stripped.indexOf('(');
@@ -240,7 +240,7 @@ public record StatementCompiler(String input, int indent) {
                 conditionString = initial + " : " + container;
             }
 
-            result = new Ok<>("\t".repeat(indent) + "for (" + conditionString + ") " + compiledBlock);
+            result = new Ok<>("\t".repeat(this.indent) + "for (" + conditionString + ") " + compiledBlock);
         } catch (CompileException e) {
             result = new Err<>(e);
         }

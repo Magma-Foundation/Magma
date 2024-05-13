@@ -55,7 +55,7 @@ export class def ValueCompiler(input : String, indent : I32) => {
 		try {
 			if (Strings.isSymbol(before)) {
 				params.add(before);
-		}
+			}
 		try {
 			return Optional.empty();
 		}
@@ -70,7 +70,7 @@ export class def ValueCompiler(input : String, indent : I32) => {
 				let inputContent = value.substring(1, value.length() - 1).strip();
 				let members = Strings.splitMembers(inputContent);
 				compiledValue = MethodCompiler.compileMethodMembers(members).$();
-		}
+			}
 		try {
 			compiledValue = ValueCompiler(value, indent).compileRequired();
 		}
@@ -146,7 +146,7 @@ export object ValueCompiler {
 			let temp = stripped.substring("new ".length(), callerEnd.getAsInt());
 			if (Strings.isSymbol(temp)) {
 				caller = temp;
-		}
+			}
 		try {
 			caller = stripped.substring(0, callerEnd.getAsInt());
 		}
@@ -162,7 +162,7 @@ export object ValueCompiler {
 			let compiledValue = ValueCompiler(inputArgument, 0).compile();
 			if (compiledValue.isEmpty()) {
 				throw CompileException("Failed to compile argument: " + inputArgument);
-		}
+			}
 			outputArguments = Optional.of(outputArguments.map(() => inner.append(", ").append(compiledValue.get().findValue().orElse(""))).orElse(StringBuilder(compiledValue.get().$())));
 		}
 		catch (e : CompileException) {
@@ -212,7 +212,7 @@ export object ValueCompiler {
 			throw RuntimeException(e);
 		}
 				let continue;
-		}
+			}
 			if (c == '\"') {
 				builder.append(c);
 				while (queue.isEmpty()) {
@@ -220,17 +220,17 @@ export object ValueCompiler {
 					builder.append(next);
 					if (next == '\\') {
 						builder.append(queue.pop());
-		}
+					}
 					if (next == '\"') {
 						let break;
-		}
-		}
+					}
+				}
 				let continue;
-		}
+			}
 			if (c == ',' && depth == 0) {
 				inputArguments.add(builder.toString());
 				builder = StringBuilder();
-		}
+			}
 		try {
 			if (c == '(') depth			if (c == ')') depth			builder.append(c);
 		}
@@ -250,20 +250,20 @@ export object ValueCompiler {
 index			if (c == '\'') {
 				queue.pop();
 index				queue.pop();
-index		}
+index			}
 			if (c == '\"') {
 				while (queue.isEmpty()) {
 					let next = queue.pop();
 index					if (next == '\"') {
 						let break;
-		}
-		}
+					}
+				}
 				let continue;
-		}
+			}
 			if (c == '(' && depth == 0) {
 				start = index;
 				let break;
-		}
+			}
 		try {
 			if (c == ')') depth			if (c == '(') depth		}
 		}
@@ -288,7 +288,7 @@ index					if (next == '\"') {
 			let newChildStart = stripped.indexOf('>');
 			if (newChildStart == -1) {
 				return Optional.empty();
-		}
+			}
 		try {
 			childStart = newChildStart + 1;
 		}

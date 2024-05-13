@@ -31,7 +31,7 @@ export object TypeCompiler {
 			if (c == ',' && depth == 0) {
 				children.add(builder.toString());
 				builder = StringBuilder();
-		}
+			}
 		try {
 			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
 		}
