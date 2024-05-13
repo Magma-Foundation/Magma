@@ -83,8 +83,26 @@ public record ValueCompiler(String input) {
                 .or(() -> compileAccess(stripped))
                 .or(() -> compileSymbol(stripped))
                 .or(() -> compileInvocation(stripped, 0))
+                .or(() -> compileOperation(stripped))
                 .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
                 .$();
+    }
+
+    private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
+        var operatorIndex = stripped.indexOf("==");
+        if (operatorIndex != -1) {
+            var left = stripped.substring(0, operatorIndex).strip();
+            var right = stripped.substring(operatorIndex + "==".length());
+
+            return Optional.of(Results.$Result(() -> {
+                var leftCompiled = new ValueCompiler(left).compile();
+                var rightCompiled = new ValueCompiler(right).compile();
+
+                return leftCompiled + " == " + rightCompiled;
+            }));
+        }
+
+        return Optional.empty();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
