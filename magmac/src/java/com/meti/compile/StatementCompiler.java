@@ -122,7 +122,7 @@ public record StatementCompiler(String input, int indent) {
                 .or(() -> compileWhile(stripped, indent))
                 .or(() -> compileElse(stripped, indent))
                 .or(() -> compileAssignment(stripped, indent))
-                .or(() -> new DeclarationCompiler(stripped, indent).compile(stack))
+                .or(() -> final DeclarationCompiler declarationCompiler = new DeclarationCompiler(stripped, indent);DeclarationCompiler.compile(stack, declarationCompiler.stripped, declarationCompiler.indent))
                 .or(() -> compileInvocation(stack, stripped, indent))
                 .or(() -> compileSuffixOperator(stripped))
                 .or(() -> compileComment(stripped))
@@ -226,8 +226,9 @@ public record StatementCompiler(String input, int indent) {
                 var terminatingString = condition.substring(first + 1, second).strip();
                 var incrementString = condition.substring(second + 1).strip();
 
-                var initial = new DeclarationCompiler(initialString, 0)
-                        .compile(stack)
+                final DeclarationCompiler declarationCompiler = new DeclarationCompiler(initialString, 0);
+                var initial = DeclarationCompiler
+                        .compile(stack, declarationCompiler.stripped, declarationCompiler.indent)
                         .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString));
 
                 var terminating = ValueCompiler.createValueCompiler(terminatingString, 0).compileRequired(stack);
@@ -237,8 +238,9 @@ public record StatementCompiler(String input, int indent) {
                 conditionString = initial + ";" + terminating + increment;
             } else {
                 var initialString = condition.substring(0, separator);
-                var initial = new DeclarationCompiler(initialString, 0)
-                        .compile(stack)
+                final DeclarationCompiler declarationCompiler = new DeclarationCompiler(initialString, 0);
+                var initial = DeclarationCompiler
+                        .compile(stack, declarationCompiler.stripped, declarationCompiler.indent)
                         .orElseThrow(() -> new CompileException("Invalid initial assignment: " + initialString))
                         .$();
 
