@@ -30,7 +30,7 @@ public record ValueCompiler(String input) {
         String caller;
         if (stripped.startsWith("new ")) {
             var temp = stripped.substring("new ".length(), callerEnd);
-            if(Strings.isSymbol(temp)) {
+            if (Strings.isSymbol(temp)) {
                 caller = temp;
             } else {
                 caller = stripped.substring(0, callerEnd);
@@ -49,7 +49,9 @@ public record ValueCompiler(String input) {
 
             try {
                 var compiledValue = new ValueCompiler(inputArgument).compile();
-                if (compiledValue.isEmpty()) return Optional.empty();
+                if (compiledValue.isEmpty()) {
+                    throw new CompileException("Failed to compile argument: " + inputArgument);
+                }
 
                 outputArguments = Optional.of(outputArguments
                         .map(inner -> inner.append(", ").append(compiledValue))
@@ -64,7 +66,7 @@ public record ValueCompiler(String input) {
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
         var compiledCaller = new ValueCompiler(caller).compile();
-        if(compiledCaller.isEmpty()) {
+        if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
 
@@ -163,10 +165,8 @@ public record ValueCompiler(String input) {
     }
 
     String compileRequired() throws CompileException {
-        var stripped = input().strip();
-
-        var or = compile();
-        return or.orElseGet(() -> new Err<>(new CompileException("Unknown value: " + stripped)))
+        return compile()
+                .orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input)))
                 .$();
     }
 
@@ -189,7 +189,7 @@ public record ValueCompiler(String input) {
         if (separator == -1) return Optional.empty();
 
         var before = stripped.substring(0, separator).strip();
-        if(!before.equals("()")) {
+        if (!before.equals("()")) {
             return Optional.empty();
         }
 
