@@ -46,9 +46,11 @@ public final class MethodCompiler {
         if (paramEnd == -1) return Optional.empty();
 
         var paramString = stripped.substring(paramStart + 1, paramEnd);
+
         String renderedParams;
         try {
-            renderedParams = new ParamsCompiler(paramString, stack).compile();
+            ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack);
+            renderedParams = paramsCompiler.compile().$();
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
         }

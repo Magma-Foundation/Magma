@@ -22,7 +22,8 @@ public final class RecordCompiler extends InstanceCompiler {
         if (paramEnd == -1) return Optional.empty();
 
         var slice = input.substring(paramStart + 1, paramEnd);
-        var compiledParams = new ParamsCompiler(slice, stack).compile();
+        ParamsCompiler paramsCompiler = new ParamsCompiler(slice, stack);
+        var compiledParams = paramsCompiler.compile().$();
 
         return Optional.of(compiledParams);
     }
