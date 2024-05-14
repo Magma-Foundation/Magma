@@ -1,6 +1,7 @@
 package com.meti.compile;
 
 import com.meti.ExceptionalStream;
+import com.meti.Index;
 import com.meti.JavaList;
 import com.meti.Streams;
 import com.meti.node.Attribute;
@@ -34,22 +35,27 @@ public final class MethodCompiler {
     }
 
     static Optional<Result<ClassMemberResult, CompileException>> compile(JavaString input, JavaList<JavaString> stack) {
-        List<String> stack1 = stack.stream()
-                .map(JavaString::unwrap)
-                .collect(Collectors.toNativeList());
         var stripped = input.strip();
 
-        var paramStart = stripped.unwrap().indexOf('(');
+        var paramStart = stripped.firstIndexOfChar('(')
+                .map(Index::value)
+                .orElse(-1);
+
         if (paramStart == -1) return Optional.empty();
 
-        var paramEnd = stripped.unwrap().indexOf(')');
+        var paramEnd = stripped.firstIndexOfChar(')')
+                .map(Index::value)
+                .orElse(-1);
+
         if (paramEnd == -1) return Optional.empty();
 
         var paramString = stripped.unwrap().substring(paramStart + 1, paramEnd);
 
         String renderedParams;
         try {
-            ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack1);
+            ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack.stream()
+                    .map(JavaString::unwrap)
+                    .collect(Collectors.toNativeList()));
             renderedParams = paramsCompiler.compile().$();
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
@@ -79,12 +85,16 @@ public final class MethodCompiler {
         Node node1 = new Node(node);
         try {
             var node11 = node1.withString("type", ": " + new TypeCompiler(inputType).compile().$());
-            result1 = attachValue(stack1, stripped.unwrap(), node11);
+            result1 = attachValue(stack.stream()
+                    .map(JavaString::unwrap)
+                    .collect(Collectors.toNativeList()), stripped.unwrap(), node11);
         } catch (CompileException e) {
             result1 = Optional.of(new Err<>(e));
         }
         return result1
-                .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack1 + ": " + input.unwrap(), err)))
+                .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack.stream()
+                        .map(JavaString::unwrap)
+                        .collect(Collectors.toNativeList()) + ": " + input.unwrap(), err)))
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
