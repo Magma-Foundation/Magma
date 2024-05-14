@@ -1,15 +1,15 @@
 package com.meti.compile;
 
-import com.meti.result.Err;
-import com.meti.result.Ok;
-import com.meti.result.Result;
+import com.meti.api.result.Err;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static com.meti.compile.InvocationCompiler.compileInvocation;
-import static com.meti.result.Results.$Result;
+import static com.meti.api.result.Results.$Result;
 
 public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped, int indent) throws CompileException {

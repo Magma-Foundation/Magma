@@ -1,8 +1,8 @@
-package com.meti;
+package com.meti.api;
 
 import com.meti.compile.Option;
-import com.meti.result.Ok;
-import com.meti.result.Result;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
 
 import java.util.function.Function;
 import java.util.function.Predicate;

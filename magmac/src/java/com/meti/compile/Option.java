@@ -1,6 +1,6 @@
 package com.meti.compile;
 
-import com.meti.result.Tuple;
+import com.meti.api.result.Tuple;
 
 import java.util.function.Function;
 

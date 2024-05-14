@@ -1,7 +1,7 @@
 package com.meti.compile;
 
-import com.meti.Collector;
-import com.meti.JavaList;
+import com.meti.api.Collector;
+import com.meti.api.JavaList;
 
 import java.util.ArrayList;
 import java.util.List;

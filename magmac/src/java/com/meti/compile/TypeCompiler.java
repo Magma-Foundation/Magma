@@ -1,8 +1,8 @@
 package com.meti.compile;
 
-import com.meti.result.Err;
-import com.meti.result.Ok;
-import com.meti.result.Result;
+import com.meti.api.result.Err;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
 
 import java.util.ArrayList;
 import java.util.Optional;

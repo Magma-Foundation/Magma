@@ -1,10 +1,10 @@
 package com.meti.compile;
 
-import com.meti.Streams;
-import com.meti.result.Err;
-import com.meti.result.Ok;
-import com.meti.result.Result;
-import com.meti.result.Results;
+import com.meti.api.Streams;
+import com.meti.api.result.Err;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
+import com.meti.api.result.Results;
 
 import java.util.ArrayList;
 import java.util.Collections;

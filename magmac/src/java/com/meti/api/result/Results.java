@@ -1,4 +1,4 @@
-package com.meti.result;
+package com.meti.api.result;
 
 import java.util.Optional;
 

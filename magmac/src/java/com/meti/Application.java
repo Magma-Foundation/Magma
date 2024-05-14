@@ -6,7 +6,7 @@ import com.meti.compile.ImportCompiler;
 import com.meti.compile.RecordCompiler;
 import com.meti.compile.RootCompiler;
 import com.meti.compile.Strings;
-import com.meti.result.Err;
+import com.meti.api.result.Err;
 
 import java.util.ArrayList;
 import java.util.List;

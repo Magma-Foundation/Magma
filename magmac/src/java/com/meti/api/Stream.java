@@ -1,8 +1,6 @@
-package com.meti;
+package com.meti.api;
 
-import com.meti.compile.CompileException;
 import com.meti.compile.Option;
-import com.meti.result.Result;
 
 import java.util.function.Function;
 import java.util.function.Predicate;

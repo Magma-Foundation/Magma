@@ -1,6 +1,6 @@
 package com.meti.compile;
 
-import com.meti.result.Result;
+import com.meti.api.result.Result;
 
 import java.util.List;
 import java.util.Optional;

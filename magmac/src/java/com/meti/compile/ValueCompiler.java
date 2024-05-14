@@ -3,14 +3,14 @@ package com.meti.compile;
 import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
 import com.meti.node.StringAttribute;
-import com.meti.result.Err;
-import com.meti.result.Ok;
-import com.meti.result.Result;
+import com.meti.api.result.Err;
+import com.meti.api.result.Ok;
+import com.meti.api.result.Result;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.meti.result.Results.$Result;
+import static com.meti.api.result.Results.$Result;
 
 public final class ValueCompiler {
     private final String input;
