@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.Streams;
 import com.meti.result.Err;
 import com.meti.result.Ok;
 import com.meti.result.Result;
@@ -39,7 +40,10 @@ public abstract class InstanceCompiler implements RootCompiler {
     }
 
     private static Result<ClassMemberResult, CompileException> compileClassMember(String input, List<String> stack) {
-        return MethodCompiler.compile(input, stack)
+        JavaString javaString = new JavaString(input);
+        return MethodCompiler.compile(javaString, Streams.fromNativeList(stack)
+                        .map(JavaString::new)
+                        .collect(Collectors.toList()))
                 .or(() -> {
                     return DeclarationCompiler.compile(stack, input, 0).map(result -> {
                         return result.mapValue(value -> {

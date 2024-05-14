@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class Streams {
-    public static <T> Stream<T> fromList(List<T> items) {
+    public static <T> Stream<T> fromNativeList(List<T> items) {
         return new AbstractStream<>() {
             private int counter = 0;
 
@@ -100,6 +100,6 @@ public class Streams {
     }
 
     private static <T> Stream<T> from(T... values) {
-        return fromList(List.of(values));
+        return fromNativeList(List.of(values));
     }
 }

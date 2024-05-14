@@ -1,6 +1,7 @@
 package com.meti.compile;
 
 import com.meti.ExceptionalStream;
+import com.meti.JavaList;
 import com.meti.Streams;
 import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
@@ -20,7 +21,7 @@ import static com.meti.result.Results.$Result;
 
 public final class MethodCompiler {
     static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> stack) {
-        return Streams.fromList(inputContent)
+        return Streams.fromNativeList(inputContent)
                 .filter(member -> !member.isBlank())
                 .map(member -> StatementCompiler.compile(indent, stack, member).mapErr(err -> {
                     var format = "Failed to compile method member - %s: %s";
@@ -32,30 +33,29 @@ public final class MethodCompiler {
                 .mapValue(value -> value.orElse(""));
     }
 
-    static Optional<Result<ClassMemberResult, CompileException>> compile(String input, List<String> stack) {
-        return compile1(input, stack);
-    }
-
-    private static Optional<Result<ClassMemberResult, CompileException>> compile1(String input, List<String> stack) {
+    static Optional<Result<ClassMemberResult, CompileException>> compile(JavaString input, JavaList<JavaString> stack) {
+        List<String> stack1 = stack.stream()
+                .map(JavaString::unwrap)
+                .collect(Collectors.toNativeList());
         var stripped = input.strip();
 
-        var paramStart = stripped.indexOf('(');
+        var paramStart = stripped.unwrap().indexOf('(');
         if (paramStart == -1) return Optional.empty();
 
-        var paramEnd = stripped.indexOf(')');
+        var paramEnd = stripped.unwrap().indexOf(')');
         if (paramEnd == -1) return Optional.empty();
 
-        var paramString = stripped.substring(paramStart + 1, paramEnd);
+        var paramString = stripped.unwrap().substring(paramStart + 1, paramEnd);
 
         String renderedParams;
         try {
-            ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack);
+            ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack1);
             renderedParams = paramsCompiler.compile().$();
         } catch (CompileException e) {
             return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
         }
 
-        var before = stripped.substring(0, paramStart).strip();
+        var before = stripped.unwrap().substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
 
         var modifiersAndTypeString = before.substring(0, separator).strip();
@@ -79,12 +79,12 @@ public final class MethodCompiler {
         Node node1 = new Node(node);
         try {
             var node11 = node1.withString("type", ": " + new TypeCompiler(inputType).compile().$());
-            result1 = attachValue(stack, stripped, node11);
+            result1 = attachValue(stack1, stripped.unwrap(), node11);
         } catch (CompileException e) {
             result1 = Optional.of(new Err<>(e));
         }
         return result1
-                .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack + ": " + input, err)))
+                .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack1 + ": " + input.unwrap(), err)))
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
