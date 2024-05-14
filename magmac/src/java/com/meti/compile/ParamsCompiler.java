@@ -28,7 +28,8 @@ public record ParamsCompiler(String paramString, List<String> stack) {
 
             String compiledType;
             try {
-                compiledType = new TypeCompiler(type).compile().$();
+                final TypeCompiler typeCompiler = new TypeCompiler(type);
+                compiledType = TypeCompiler.compile(typeCompiler.inputType).$();
             } catch (CompileException e) {
                 return new Err<>(e);
             }

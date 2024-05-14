@@ -108,7 +108,8 @@ public final class ValueCompiler {
             var type = stripped.substring(1, end);
 
             return Optional.of($Result(() -> {
-                var outputType = new TypeCompiler(type).compile().$();
+                final TypeCompiler typeCompiler = new TypeCompiler(type);
+                var outputType = TypeCompiler.compile(typeCompiler.inputType).$();
                 var valueString = stripped.substring(end + 1).strip();
 
                 var compiledValue = createValueCompiler(valueString, 0).compileRequired(Collections.emptyList());

@@ -4,21 +4,21 @@ import com.meti.api.ExceptionalStream;
 import com.meti.api.Index;
 import com.meti.api.JavaList;
 import com.meti.api.Streams;
-import com.meti.node.Attribute;
-import com.meti.node.IntAttribute;
-import com.meti.node.StringAttribute;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.node.Attribute;
+import com.meti.node.IntAttribute;
+import com.meti.node.StringAttribute;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.meti.api.result.Results.$Result;
 import static com.meti.compile.MagmaLang.renderFunction;
 import static com.meti.compile.MagmaLang.renderFunctionDeclaration;
-import static com.meti.api.result.Results.$Result;
 
 public final class MethodCompiler {
     static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> stack) {
@@ -49,6 +49,7 @@ public final class MethodCompiler {
 
         if (paramEnd == -1) return Optional.empty();
 
+        var before = stripped.unwrap().substring(0, paramStart).strip();
         var paramString = stripped.unwrap().substring(paramStart + 1, paramEnd);
 
         String renderedParams;
@@ -61,7 +62,6 @@ public final class MethodCompiler {
             return Optional.of(new Err<>(new CompileException("Failed to compile parameters: " + paramString, e)));
         }
 
-        var before = stripped.unwrap().substring(0, paramStart).strip();
         var separator = before.lastIndexOf(' ');
 
         var modifiersAndTypeString = before.substring(0, separator).strip();
@@ -84,10 +84,11 @@ public final class MethodCompiler {
         Optional<Result<String, CompileException>> result1;
         Node node1 = new Node(node);
         try {
-            var node11 = node1.withString("type", ": " + new TypeCompiler(inputType).compile().$());
+            var node11 = node1.withString("type", ": " + TypeCompiler.compile(inputType).$());
             result1 = attachValue(stack.stream()
                     .map(JavaString::unwrap)
                     .collect(Collectors.toNativeList()), stripped.unwrap(), node11);
+
         } catch (CompileException e) {
             result1 = Optional.of(new Err<>(e));
         }

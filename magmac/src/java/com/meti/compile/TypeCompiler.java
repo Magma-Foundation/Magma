@@ -40,7 +40,8 @@ public record TypeCompiler(String inputType) {
             if (stripped.isEmpty()) continue;
 
             try {
-                newChildren.add(new TypeCompiler(stripped).compile().$());
+                final TypeCompiler typeCompiler = new TypeCompiler(stripped);
+                newChildren.add(TypeCompiler.compile(typeCompiler.inputType).$());
             } catch (CompileException e) {
                 return Optional.of(new Err<>(new CompileException("Failed to compile generic type: " + inputType, e)));
             }
@@ -67,15 +68,15 @@ public record TypeCompiler(String inputType) {
         return Optional.empty();
     }
 
-    public Result<String, CompileException> compile() {
-        return compilePrimitiveType(inputType())
-                .or(() -> compileSymbolType(inputType))
-                .or(() -> compileGenericType(inputType))
-                .or(() -> compileArrayType(inputType))
-                .orElseGet(() -> new Err<>(new CompileException("Unknown type: " + inputType())));
+    public static Result<String, CompileException> compile(String input) {
+        return compilePrimitiveType(input)
+                .or(() -> compileSymbolType(input))
+                .or(() -> compileGenericType(input))
+                .or(() -> TypeCompiler.compileArrayType(input))
+                .orElseGet(() -> new Err<>(new CompileException("Unknown type: " + input)));
     }
 
-    private Optional<? extends Result<String, CompileException>> compileArrayType(String inputType) {
+    private static Optional<? extends Result<String, CompileException>> compileArrayType(String inputType) {
         if(inputType.endsWith("[]")) {
             var child = inputType.substring(0, inputType.length() - 2);
             return Optional.of(new Ok<>("&" + child));
