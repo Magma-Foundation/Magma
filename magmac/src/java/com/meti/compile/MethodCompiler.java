@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.ExceptionalStream;
+import com.meti.Streams;
 import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
 import com.meti.node.StringAttribute;
@@ -18,20 +20,16 @@ import static com.meti.result.Results.$Result;
 
 public final class MethodCompiler {
     static Result<String, CompileException> compileMethodMembers(List<String> inputContent, int indent, List<String> stack) {
-        var outputContent = new StringBuilder();
-        for (String inputMember : inputContent) {
-            if (inputMember.isBlank()) continue;
-
-            try {
-                outputContent.append(StatementCompiler.compile(stack, inputMember, indent));
-            } catch (CompileException e) {
-                var format = "Failed to compile method member - %s: %s";
-                var message = format.formatted(stack, inputMember);
-                return new Err<>(new CompileException(message, e));
-            }
-        }
-
-        return new Ok<>(outputContent.toString());
+        return Streams.fromList(inputContent)
+                .filter(member -> !member.isBlank())
+                .map(member -> StatementCompiler.compile(indent, stack, member).mapErr(err -> {
+                    var format = "Failed to compile method member - %s: %s";
+                    var message = format.formatted(stack, member);
+                    return new CompileException(message, err);
+                }))
+                .into(ExceptionalStream::new)
+                .collectExceptionally(Collectors.joining())
+                .mapValue(value -> value.orElse(""));
     }
 
     static Optional<Result<ClassMemberResult, CompileException>> compile(String input, List<String> stack) {

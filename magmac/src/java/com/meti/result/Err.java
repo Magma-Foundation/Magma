@@ -15,6 +15,16 @@ public record Err<T, E extends Throwable>(E value) implements Result<T, E> {
     }
 
     @Override
+    public <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper) {
+        return new Err<>(value);
+    }
+
+    @Override
+    public <R> Result<Tuple<T, R>, E> and(Result<R, E> other) {
+        return new Err<>(value);
+    }
+
+    @Override
     public <R> Result<R, E> mapValue(Function<T, R> mapper) {
         return new Err<>(value);
     }

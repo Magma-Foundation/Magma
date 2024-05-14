@@ -19,4 +19,6 @@ public interface Result<T, E extends Throwable> {
     Optional<T> findValue();
 
     <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper);
+
+    <R> Result<Tuple<T, R>, E> and(Result<R, E> other);
 }

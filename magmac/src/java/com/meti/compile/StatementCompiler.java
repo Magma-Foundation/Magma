@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.meti.compile.InvocationCompiler.compileInvocation;
+import static com.meti.result.Results.$Result;
 
 public record StatementCompiler(String input, int indent) {
     private static Optional<Result<String, CompileException>> compileTry(String stripped, int indent) throws CompileException {
@@ -27,7 +28,7 @@ public record StatementCompiler(String input, int indent) {
             } else {
                 var value = stripped.substring("else ".length());
                 final StatementCompiler statementCompiler = new StatementCompiler(value, 0);
-                body = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
+                body = StatementCompiler.compileUnsafe(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             return Optional.of(new Ok<>("\t".repeat(indent) + "try " + body));
         } catch (CompileException e) {
@@ -54,7 +55,7 @@ public record StatementCompiler(String input, int indent) {
             if (inputStatement.isBlank()) continue;
             try {
                 final StatementCompiler statementCompiler = new StatementCompiler(inputStatement, indent + 1);
-                var compiled = StatementCompiler.compile(stack, statementCompiler.input, statementCompiler.indent);
+                var compiled = StatementCompiler.compileUnsafe(stack, statementCompiler.input, statementCompiler.indent);
                 output.append(compiled);
             } catch (CompileException e) {
                 throw new CompileException("Failed to compile block: " + stripped, e);
@@ -112,7 +113,7 @@ public record StatementCompiler(String input, int indent) {
         return conditionEnd;
     }
 
-    static String compile(List<String> stack, String input, int indent) throws CompileException {
+    static String compileUnsafe(List<String> stack, String input, int indent) throws CompileException {
         var stripped = input.strip();
 
         return compileTry(stripped, indent)
@@ -234,7 +235,7 @@ public record StatementCompiler(String input, int indent) {
 
                 var terminating = ValueCompiler.createValueCompiler(terminatingString, 0).compileRequired(stack);
                 final StatementCompiler statementCompiler1 = new StatementCompiler(incrementString, 0);
-                var increment = StatementCompiler.compile(Collections.emptyList(), statementCompiler1.input, statementCompiler1.indent);
+                var increment = StatementCompiler.compileUnsafe(Collections.emptyList(), statementCompiler1.input, statementCompiler1.indent);
 
                 compiledBlock = compileBlock(stripped, indent, 0, Collections.emptyList());
                 conditionString = initial + ";" + terminating + increment;
@@ -296,7 +297,7 @@ public record StatementCompiler(String input, int indent) {
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 final StatementCompiler statementCompiler = new StatementCompiler(valueString, 0);
-                compiledValue = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
+                compiledValue = StatementCompiler.compileUnsafe(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             result = new Ok<>("\t".repeat(indent) + "while (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -326,7 +327,7 @@ public record StatementCompiler(String input, int indent) {
             } else {
                 var valueString = stripped.substring(conditionEnd + 1).strip();
                 final StatementCompiler statementCompiler = new StatementCompiler(valueString, indent);
-                compiledValue = StatementCompiler.compile(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
+                compiledValue = StatementCompiler.compileUnsafe(Collections.emptyList(), statementCompiler.input, statementCompiler.indent);
             }
             result = new Ok<>("\t".repeat(indent) + "if (" + compiledCondition + ") " + compiledValue);
         } catch (CompileException e) {
@@ -360,4 +361,8 @@ public record StatementCompiler(String input, int indent) {
 
         return Optional.of(result);
     }
+
+    static Result<String, CompileException> compile(int indent, List<String> stack, String inputMember) {
+       return $Result(() -> compileUnsafe(stack, inputMember, indent));
+   }
 }
