@@ -14,7 +14,9 @@ public final class SymbolCompiler {
     }
 
     private static Result<String, CompileException> computeResult(String input, List<String> stack) {
-        if (stack.contains(input)) return new Ok<>(input);
+        return new Ok<>(input);
+
+/*        if (stack.contains(input)) return new Ok<>(input);
 
         try {
             Class.forName("java.lang." + input);
@@ -24,6 +26,6 @@ public final class SymbolCompiler {
             var format = "'%s' is not defined: %s";
             var message = format.formatted(input, stack);
             return new Err<>(new CompileException(message));
-        }
+        }*/
     }
 }
