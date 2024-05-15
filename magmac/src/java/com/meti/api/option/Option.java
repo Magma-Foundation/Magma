@@ -2,7 +2,9 @@ package com.meti.api.option;
 
 import com.meti.api.result.Tuple;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface Option<T> {
     boolean isEmpty();
@@ -14,4 +16,6 @@ public interface Option<T> {
     Tuple<Boolean, T> toTuple(T other);
 
     boolean isPresent();
+
+    <U, R> Option<R> xnor(Option<U> contentEnd, BiFunction<T, U, R> mapper, Supplier<R> supplier);
 }

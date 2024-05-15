@@ -4,6 +4,9 @@ import com.meti.api.ExceptionalStream;
 import com.meti.api.Index;
 import com.meti.api.JavaList;
 import com.meti.api.Streams;
+import com.meti.api.option.Option;
+import com.meti.api.option.Options;
+import com.meti.api.option.Some;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
@@ -81,42 +84,35 @@ public final class MethodCompiler {
                 "name", new StringAttribute(name),
                 "params", new StringAttribute(renderedParams));
 
-        Optional<Result<String, CompileException>> result1;
+        Option<Result<String, CompileException>> result1;
         Node node1 = new Node(node);
         try {
             var node11 = node1.withString("type", ": " + TypeCompiler.compile(inputType).$());
             result1 = attachValue(stack.stream()
-                    .map(JavaString::unwrap)
-                    .collect(Collectors.toNativeList()), new com.meti.java.JavaString(stripped.unwrap()), node11);
+                            .map(JavaString::unwrap)
+                            .collect(Collectors.toNativeList()),
+                    new com.meti.java.JavaString(stripped.unwrap()), node11);
 
         } catch (CompileException e) {
-            result1 = Optional.of(new Err<>(e));
+            result1 = new Some<>(new Err<>(e));
+
         }
-        return result1
+        return Options.toNative(result1)
                 .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack.stream()
                         .map(JavaString::unwrap)
                         .collect(Collectors.toNativeList()) + ": " + input.unwrap(), err)))
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
-    private static Optional<Result<String, CompileException>> attachValue(List<String> stack, com.meti.java.JavaString javaString, Node node) {
-        var contentStart = javaString.firstIndexOfChar('{');
-        var contentEnd = javaString.lastIndexOfChar('}');
+    private static Option<Result<String, CompileException>> attachValue(List<String> stack, com.meti.java.JavaString javaString, Node node) {
+        return javaString.firstIndexOfChar('{').xnor(javaString.lastIndexOfChar('}'), (first, second) -> $Result(() -> {
+            var content = javaString.input().substring(first + 1, second);
+            var inputContent = Strings.splitMembers(content);
+            var outputContent = compileMethodMembers(inputContent, 2, stack).$();
+            var withContent = node.withString("content", "{\n" + outputContent + "\t}");
 
-        if (contentStart.orElse(-1) != -1 && contentEnd.orElse(-1) != -1) {
-            return Optional.of($Result(() -> {
-                var content = javaString.input().substring(contentStart.orElse(-1) + 1, contentEnd.orElse(-1));
-                var inputContent = Strings.splitMembers(content);
-                var outputContent = compileMethodMembers(inputContent, 2, stack).$();
-                var withContent = node.withString("content", "{\n" + outputContent + "\t}");
-
-                return renderFunction(withContent);
-            }));
-        } else if (contentStart.orElse(-1) == -1 && contentEnd.orElse(-1) == -1) {
-            return Optional.of(new Ok<>(renderFunctionDeclaration(node) + ";" + "\n"));
-        } else {
-            return Optional.empty();
-        }
+            return renderFunction(withContent);
+        }), () -> new Ok<>(renderFunctionDeclaration(node) + ";" + "\n"));
     }
 
     private static ClassMemberResult handleStatic(List<String> modifiers, String rendered) {
