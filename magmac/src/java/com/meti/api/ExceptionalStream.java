@@ -1,6 +1,6 @@
 package com.meti.api;
 
-import com.meti.compile.Option;
+import com.meti.api.option.Option;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
 

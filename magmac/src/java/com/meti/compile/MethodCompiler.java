@@ -102,6 +102,7 @@ public final class MethodCompiler {
     private static Optional<Result<String, CompileException>> attachValue(List<String> stack, com.meti.java.JavaString javaString, Node node) {
         var contentStart = javaString.firstIndexOfChar('{');
         var contentEnd = javaString.lastIndexOfChar('}');
+
         if (contentStart.orElse(-1) != -1 && contentEnd.orElse(-1) != -1) {
             return Optional.of($Result(() -> {
                 var content = javaString.input().substring(contentStart.orElse(-1) + 1, contentEnd.orElse(-1));

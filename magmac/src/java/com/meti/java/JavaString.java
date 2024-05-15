@@ -1,17 +1,19 @@
 package com.meti.java;
 
-import java.util.Optional;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public record JavaString(String input) {
-    public Optional<Integer> lastIndexOfChar(char c) {
+    private static Option<Integer> wrapIndex(int index) {
+        return index == -1 ? new None<>() : new Some<>(index);
+    }
+
+    public Option<Integer> lastIndexOfChar(char c) {
         return wrapIndex(this.input().lastIndexOf(c));
     }
 
-    private static Optional<Integer> wrapIndex(int index) {
-        return index == -1 ? Optional.empty() : Optional.of(index);
-    }
-
-    public Optional<Integer> firstIndexOfChar(char c) {
+    public Option<Integer> firstIndexOfChar(char c) {
         return wrapIndex(this.input().indexOf(c));
     }
 }

@@ -1,6 +1,9 @@
 package com.meti.compile;
 
 import com.meti.api.Index;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 public record JavaString(String unwrap) {
     Option<Index> firstIndexOfChar(char c) {

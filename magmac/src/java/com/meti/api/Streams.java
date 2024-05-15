@@ -1,8 +1,8 @@
 package com.meti.api;
 
-import com.meti.compile.None;
-import com.meti.compile.Option;
-import com.meti.compile.Some;
+import com.meti.api.option.None;
+import com.meti.api.option.Option;
+import com.meti.api.option.Some;
 
 import java.util.List;
 import java.util.function.BiFunction;
