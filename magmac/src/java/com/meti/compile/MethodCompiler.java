@@ -87,7 +87,7 @@ public final class MethodCompiler {
             var node11 = node1.withString("type", ": " + TypeCompiler.compile(inputType).$());
             result1 = attachValue(stack.stream()
                     .map(JavaString::unwrap)
-                    .collect(Collectors.toNativeList()), stripped.unwrap(), node11);
+                    .collect(Collectors.toNativeList()), new com.meti.java.JavaString(stripped.unwrap()), node11);
 
         } catch (CompileException e) {
             result1 = Optional.of(new Err<>(e));
@@ -99,19 +99,19 @@ public final class MethodCompiler {
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
-    private static Optional<Result<String, CompileException>> attachValue(List<String> stack, String input, Node node) {
-        var contentStart = input.indexOf("{");
-        var contentEnd = input.lastIndexOf('}');
-        if (contentStart != -1 && contentEnd != -1) {
+    private static Optional<Result<String, CompileException>> attachValue(List<String> stack, com.meti.java.JavaString javaString, Node node) {
+        var contentStart = javaString.firstIndexOfChar("{");
+        var contentEnd = javaString.lastIndexOfChar('}');
+        if (contentStart.orElse(-1) != -1 && contentEnd.orElse(-1) != -1) {
             return Optional.of($Result(() -> {
-                var content = input.substring(contentStart + 1, contentEnd);
+                var content = javaString.input().substring(contentStart.orElse(-1) + 1, contentEnd.orElse(-1));
                 var inputContent = Strings.splitMembers(content);
                 var outputContent = compileMethodMembers(inputContent, 2, stack).$();
                 var withContent = node.withString("content", "{\n" + outputContent + "\t}");
 
                 return renderFunction(withContent);
             }));
-        } else if (contentStart == -1 && contentEnd == -1) {
+        } else if (contentStart.orElse(-1) == -1 && contentEnd.orElse(-1) == -1) {
             return Optional.of(new Ok<>(renderFunctionDeclaration(node) + ";" + "\n"));
         } else {
             return Optional.empty();
