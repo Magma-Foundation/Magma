@@ -18,4 +18,6 @@ public interface Option<T> {
     boolean isPresent();
 
     <U, R> Option<R> xnor(Option<U> contentEnd, BiFunction<T, U, R> mapper, Supplier<R> supplier);
+
+    T orElseGet(Supplier<T> supplier);
 }

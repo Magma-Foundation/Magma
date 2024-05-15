@@ -2,7 +2,9 @@ package com.meti.api.option;
 
 import com.meti.api.result.Tuple;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record Some<T>(T value) implements Option<T> {
     @Override
@@ -28,5 +30,15 @@ public record Some<T>(T value) implements Option<T> {
     @Override
     public boolean isPresent() {
         return true;
+    }
+
+    @Override
+    public <U, R> Option<R> xnor(Option<U> contentEnd, BiFunction<T, U, R> mapper, Supplier<R> supplier) {
+        return contentEnd.map(inner -> mapper.apply(value, inner));
+    }
+
+    @Override
+    public T orElseGet(Supplier<T> supplier) {
+        return value;
     }
 }
