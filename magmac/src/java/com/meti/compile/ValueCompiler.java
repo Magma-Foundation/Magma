@@ -1,13 +1,17 @@
 package com.meti.compile;
 
-import com.meti.node.Attribute;
-import com.meti.node.IntAttribute;
-import com.meti.node.StringAttribute;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.node.IntAttribute;
+import com.meti.node.StringAttribute;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.meti.api.result.Results.$Result;
@@ -83,10 +87,6 @@ public final class ValueCompiler {
         return compile(createValueCompiler(argString, indent), stack);
     }
 
-    String compileRequired(List<String> stack) throws CompileException {
-        return compile(this, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
-    }
-
     static Optional<Result<String, CompileException>> compile(ValueCompiler valueCompiler, List<String> stack) {
         var stripped = valueCompiler.input().strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
@@ -95,11 +95,35 @@ public final class ValueCompiler {
                 .or(() -> compileAccess(stripped, stack))
                 .or(() -> valueCompiler.compileTernary(stripped))
                 .or(() -> valueCompiler.compileNumbers(stripped))
+                .or(() -> compileAnonymousClass(stripped))
                 .or(() -> valueCompiler.compileOperation(stripped))
                 .or(() -> valueCompiler.compileChar(stripped))
                 .or(() -> valueCompiler.compileNot(stripped))
                 .or(() -> valueCompiler.compileMethodReference(stripped))
                 .or(() -> valueCompiler.compileCast(stripped));
+    }
+
+    private static Optional<? extends Result<String, CompileException>> compileAnonymousClass(String stripped) {
+        if (!stripped.startsWith("new ")) return Optional.empty();
+
+        var paramStart = stripped.indexOf('(');
+        if (paramStart == -1) return Optional.empty();
+
+        var paramEnd = stripped.indexOf(')');
+        if (paramEnd == -1) return Optional.empty();
+
+        var contentStart = stripped.indexOf('{');
+        if (contentStart == -1) return Optional.empty();
+
+        var contentEnd = stripped.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var name = stripped.substring("new ".length(), paramStart);
+        return Optional.of(new Ok<>("<" + name + ">{}"));
+    }
+
+    String compileRequired(List<String> stack) throws CompileException {
+        return compile(this, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -169,7 +193,7 @@ public final class ValueCompiler {
             } else {
                 compiledValue = createValueCompiler(value, indent).compileRequired(stack);
             }
-            var rendered = MagmaLang.renderFunctionDeclaration(Map.<String, Attribute>of(
+            var rendered = MagmaLang.renderFunctionDeclaration(Map.of(
                     "indent", new IntAttribute(0),
                     "modifiers", new StringAttribute(""),
                     "name", new StringAttribute(""),
@@ -213,7 +237,10 @@ public final class ValueCompiler {
     }
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||", "<", "-").map(operator -> compileOperation(stripped, operator)).flatMap(Optional::stream).findFirst();
+        return Stream.of("&&", "==", "!=", "+", "||", "<", "-")
+                .map(operator -> compileOperation(stripped, operator))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
