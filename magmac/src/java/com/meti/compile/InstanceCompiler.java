@@ -77,7 +77,7 @@ public abstract class InstanceCompiler implements RootCompiler {
 
         Optional<String> paramString;
         try {
-            paramString = computeParamString(input, Collections.emptyList());
+            paramString = computeParamString(input, stack);
         } catch (CompileException e) {
             return Optional.of(new Err<>(e));
         }
