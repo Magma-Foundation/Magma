@@ -11,7 +11,7 @@ public record JavaString(String input) {
         return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
-    public Optional<Integer> firstIndexOfChar(String c) {
+    public Optional<Integer> firstIndexOfChar(char c) {
         return wrapIndex(this.input().indexOf(c));
     }
 }
