@@ -178,8 +178,8 @@ public class InvocationCompiler {
                 inputArguments.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
+                if (c == '(' || c == '<') depth++;
+                if (c == ')' || c == '>') depth--;
                 builder.append(c);
             }
         }
