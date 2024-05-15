@@ -178,9 +178,14 @@ public class InvocationCompiler {
                 inputArguments.add(builder.toString());
                 builder = new StringBuilder();
             } else {
-                if (c == '(' || c == '<') depth++;
-                if (c == ')' || c == '>') depth--;
-                builder.append(c);
+                if(c == '-' && queue.peek() == '>') {
+                    builder.append(c);
+                    builder.append(queue.pop());
+                }else {
+                    if (c == '(' || c == '<') depth++;
+                    if (c == ')' || c == '>') depth--;
+                    builder.append(c);
+                }
             }
         }
 
