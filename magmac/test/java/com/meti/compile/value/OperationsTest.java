@@ -12,8 +12,9 @@ class OperationsTest {
     @Test
     void lex() throws OptionException {
         var expected = new Node()
-                .withSlice("left", "value()")
-                .withSlice("right", "amount");
+                .withSlice("left", "value() ")
+                .withSlice("operator", "+")
+                .withSlice("right", " amount");
 
         var actual = Operations.lex(new JavaString("value() + amount")).$();
         assertEquals(expected, actual);
