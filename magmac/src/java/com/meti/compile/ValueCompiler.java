@@ -51,7 +51,7 @@ public final class ValueCompiler {
         }
 
         try {
-            var compiledObject = createValueCompiler(objectString, 0).compileRequired(stack);
+            var compiledObject = ValueCompiler.compileRequired(createValueCompiler(objectString, 0), stack);
             return Optional.of(new Ok<>(compiledObject + "." + child));
         } catch (CompileException e) {
             var format = "Failed to compile object reference of access statement - %s: %s";
@@ -72,11 +72,15 @@ public final class ValueCompiler {
         var right = stripped.substring(operatorIndex + operator.length());
 
         return Optional.of($Result(() -> {
-            var leftCompiled = createValueCompiler(left, 0).compileRequired(Collections.emptyList());
-            var rightCompiled = createValueCompiler(right, 0).compileRequired(Collections.emptyList());
+            var leftCompiled = getLeftCompiled(left);
+            var rightCompiled = getLeftCompiled(right);
 
             return leftCompiled + " " + operator + " " + rightCompiled;
         }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
+    }
+
+    private static String getLeftCompiled(String left) throws CompileException {
+        return ValueCompiler.compileRequired(createValueCompiler(left, 0), Collections.emptyList());
     }
 
     public static ValueCompiler createValueCompiler(String input, int indent) {
@@ -122,8 +126,8 @@ public final class ValueCompiler {
         return Optional.of(new Ok<>("<" + name + ">{}"));
     }
 
-    String compileRequired(List<String> stack) throws CompileException {
-        return compile(this, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+    static String compileRequired(ValueCompiler valueCompiler, List<String> stack) throws CompileException {
+        return compile(valueCompiler, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + valueCompiler.input))).$();
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -135,7 +139,7 @@ public final class ValueCompiler {
                 var outputType = TypeCompiler.compile(type).$();
                 var valueString = stripped.substring(end + 1).strip();
 
-                var compiledValue = createValueCompiler(valueString, 0).compileRequired(Collections.emptyList());
+                var compiledValue = getLeftCompiled(valueString);
                 return "(" + outputType + ") " + compiledValue;
             }));
         } else {
@@ -191,7 +195,7 @@ public final class ValueCompiler {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent, stack).$() + "}";
             } else {
-                compiledValue = createValueCompiler(value, indent).compileRequired(stack);
+                compiledValue = ValueCompiler.compileRequired(createValueCompiler(value, indent), stack);
             }
             var rendered = MagmaLang.renderFunctionDeclaration(Map.of(
                     "indent", new IntAttribute(0),
@@ -210,7 +214,7 @@ public final class ValueCompiler {
         if (stripped.startsWith("!")) {
             var valueString = stripped.substring(1).strip();
             try {
-                return Optional.of(new Ok<>(createValueCompiler(valueString, 0).compileRequired(Collections.emptyList())));
+                return Optional.of(new Ok<>(getLeftCompiled(valueString)));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
