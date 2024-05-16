@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.api.JavaList;
+import com.meti.api.Streams;
 import com.meti.api.option.ErrorOption;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
@@ -28,40 +30,52 @@ public final class ValueCompiler {
         this.indent = indent;
     }
 
-    private static Optional<Result<String, CompileException>> compileAccess(String stripped, List<String> stack) {
-        var objectEnd = stripped.lastIndexOf('.');
-        if (objectEnd == -1) return Optional.empty();
-
-        if (objectEnd == stripped.length() - 1) return Optional.empty();
-
-        var objectString = stripped.substring(0, objectEnd);
-
-        int childStart;
-        if (stripped.charAt(objectEnd + 1) != '<') childStart = objectEnd + 1;
-        else {
-            var newChildStart = stripped.indexOf('>');
-            if (newChildStart == -1) {
-                return Optional.empty();
-            } else {
-                childStart = newChildStart + 1;
+    private static Option<Result<JavaString, CompileException>> compileAccess(JavaString stripped, JavaList<JavaString> stack) {
+        Optional<Result<String, CompileException>> result = Optional.empty();
+        boolean finished = false;
+        String stripped1 = stripped.value();
+        List<String> stack1 = stack.stream()
+                        .map(JavaString::value)
+                        .collect(Collectors.toNativeList());
+        var objectEnd = stripped1.lastIndexOf('.');
+        if (objectEnd == -1) {
+            result = Optional.empty();
+        } else if (objectEnd == stripped1.length() - 1) {
+            result = Optional.empty();
+        } else {
+            var objectString = stripped1.substring(0, objectEnd);
+            int childStart = 0;
+            if (stripped1.charAt(objectEnd + 1) != '<') childStart = objectEnd + 1;
+            else {
+                var newChildStart = stripped1.indexOf('>');
+                if (newChildStart == -1) {
+                    result = Optional.empty();
+                    finished = true;
+                } else {
+                    childStart = newChildStart + 1;
+                }
+            }
+            if (!finished) {
+                var child = stripped1.substring(childStart);
+                if (!Strings.isAssignable(child)) {
+                    result = Optional.empty();
+                } else {
+                    try {
+                        var compiledObject = compileRequired(createValueCompiler(objectString, 0), stack1,
+                                objectString, 0);
+                        result = Optional.of(new Ok<>(compiledObject + "." + child));
+                    } catch (CompileException e) {
+                        var format = "Failed to compile object reference of access statement - %s: %s";
+                        var message = format.formatted(stack1, objectString);
+                        result = Optional.of(new Err<>(new CompileException(message, e)));
+                    }
+                }
             }
         }
 
-        var child = stripped.substring(childStart);
-
-        if (!Strings.isAssignable(child)) {
-            return Optional.empty();
-        }
-
-        try {
-            var compiledObject = compileRequired(createValueCompiler(objectString, 0), stack,
-                    objectString, 0);
-            return Optional.of(new Ok<>(compiledObject + "." + child));
-        } catch (CompileException e) {
-            var format = "Failed to compile object reference of access statement - %s: %s";
-            var message = format.formatted(stack, objectString);
-            return Optional.of(new Err<>(new CompileException(message, e)));
-        }
+        return Options.fromNative(result)
+                .into(ErrorOption::new)
+                .mapValue(JavaString::new);
     }
 
     private static Optional<Result<String, CompileException>> compileString(String stripped) {
@@ -101,7 +115,12 @@ public final class ValueCompiler {
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
                 .or(() -> valueCompiler.compileLambda(stripped, indent, stack))
                 .or(() -> InvocationCompiler.compileInvocation(stack, stripped, indent))
-                .or(() -> compileAccess(stripped, stack))
+                .or(() -> compileAccess(new JavaString(stripped), Streams.fromNativeList(stack)
+                        .map(JavaString::new)
+                        .collect(Collectors.toList()))
+                        .into(ErrorOption::new)
+                        .mapValue(JavaString::value)
+                        .into(Options::toNative))
                 .or(() -> valueCompiler.compileTernary(stripped))
                 .or(() -> valueCompiler.compileNumbers(stripped))
                 .or(() -> compileAnonymousClass(stripped))
