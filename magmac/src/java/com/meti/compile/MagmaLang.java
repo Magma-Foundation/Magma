@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.api.option.Options;
 import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
 import com.meti.node.StringAttribute;
@@ -8,16 +9,21 @@ import java.util.Map;
 
 public class MagmaLang {
     static String renderFunction(Map<String, Attribute> node) {
-        var content1 = node.get("content").asString().orElseThrow();
+        Attribute attribute = node.get("content");
+        var content1 = Options.toNative(attribute.asString().map(JavaString::value)).orElseThrow();
         return renderFunctionDeclaration(node) + " => " + content1 + "\n";
     }
 
     static String renderFunctionDeclaration(Map<String, Attribute> node) {
         var indent1 = node.get("indent").asInt().orElseThrow();
-        var modifiers1 = node.get("modifiers").asString().orElseThrow();
-        var name1 = node.get("name").asString().orElseThrow();
-        var params1 = node.get("params").asString().orElseThrow();
-        var type1 = node.get("type").asString().orElseThrow();
+        Attribute attribute3 = node.get("modifiers");
+        var modifiers1 = Options.toNative(attribute3.asString().map(JavaString::value)).orElseThrow();
+        Attribute attribute2 = node.get("name");
+        var name1 = Options.toNative(attribute2.asString().map(JavaString::value)).orElseThrow();
+        Attribute attribute1 = node.get("params");
+        var params1 = Options.toNative(attribute1.asString().map(JavaString::value)).orElseThrow();
+        Attribute attribute = node.get("type");
+        var type1 = Options.toNative(attribute.asString().map(JavaString::value)).orElseThrow();
         return "\t".repeat(indent1) + modifiers1 + name1 + "(" + params1 + ")" + type1;
     }
 
@@ -48,10 +54,10 @@ public class MagmaLang {
     }
 
     static String renderFunctionDeclaration(Node copy) {
-        return renderFunctionDeclaration(copy.node());
+        return renderFunctionDeclaration(copy.attributes());
     }
 
     static String renderFunction(Node copy) {
-        return renderFunction(copy.node());
+        return renderFunction(copy.attributes());
     }
 }

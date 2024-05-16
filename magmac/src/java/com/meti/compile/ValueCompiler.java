@@ -6,6 +6,7 @@ import com.meti.api.option.Options;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
 import com.meti.node.StringAttribute;
 
@@ -67,16 +68,28 @@ public final class ValueCompiler {
     }
 
     private static Option<Result<JavaString, CompileException>> compileOperation(JavaString stripped, JavaString operator) {
+        return lexOperator(stripped, operator).map(node -> $Result(() -> {
+            var left = node.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+            var right = node.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+
+            var leftCompiled = compileNoIndent(left).$();
+            var rightCompiled = compileNoIndent(right).$();
+
+            return leftCompiled.concatSlice(" ")
+                    .concatOwned(operator)
+                    .concatSlice(" ")
+                    .concatOwned(rightCompiled);
+        }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
+    }
+
+    private static Option<Node> lexOperator(JavaString stripped, JavaString operator) {
         return stripped.splitAtFirstSlice(operator).map(tuple -> {
             var left = tuple.left();
             var right = tuple.right();
 
-            return $Result(() -> {
-                var leftCompiled = compileNoIndent(left).$();
-                var rightCompiled = compileNoIndent(right).$();
-
-                return leftCompiled.concatSlice(" ").concatOwned(operator).concatSlice(" ").concatOwned(rightCompiled);
-            }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err));
+            return new Node()
+                    .withString("left", left)
+                    .withString("right", right);
         });
     }
 

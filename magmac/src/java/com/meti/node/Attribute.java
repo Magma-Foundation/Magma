@@ -1,5 +1,8 @@
 package com.meti.node;
 
+import com.meti.api.option.Option;
+import com.meti.compile.JavaString;
+
 import java.util.Optional;
 
 public interface Attribute {
@@ -7,7 +10,5 @@ public interface Attribute {
         return Optional.empty();
     }
 
-    default Optional<String> asString() {
-        return Optional.empty();
-    }
+    Option<JavaString> asString();
 }

@@ -7,6 +7,8 @@ import com.meti.api.option.Some;
 import com.meti.api.result.Tuple;
 
 public record JavaString(String value) {
+    public static final JavaString EMPTY = new JavaString("");
+
     private static Option<Index> wrapIndex(int index) {
         return index == -1
                 ? new None<>()
