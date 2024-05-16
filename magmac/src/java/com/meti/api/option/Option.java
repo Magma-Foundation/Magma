@@ -1,6 +1,7 @@
 package com.meti.api.option;
 
 import com.meti.api.result.Tuple;
+import com.meti.compile.JavaString;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -20,4 +21,6 @@ public interface Option<T> {
     <U, R> Option<R> xnor(Option<U> contentEnd, BiFunction<T, U, R> mapper, Supplier<R> supplier);
 
     T orElseGet(Supplier<T> supplier);
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 }

@@ -52,13 +52,13 @@ public final class MethodCompiler {
 
         if (paramEnd == -1) return Optional.empty();
 
-        var before = stripped.unwrap().substring(0, paramStart).strip();
-        var paramString = stripped.unwrap().substring(paramStart + 1, paramEnd);
+        var before = stripped.value().substring(0, paramStart).strip();
+        var paramString = stripped.value().substring(paramStart + 1, paramEnd);
 
         String renderedParams;
         try {
             ParamsCompiler paramsCompiler = new ParamsCompiler(paramString, stack.stream()
-                    .map(JavaString::unwrap)
+                    .map(JavaString::value)
                     .collect(Collectors.toNativeList()));
             renderedParams = paramsCompiler.compile().$();
         } catch (CompileException e) {
@@ -89,9 +89,9 @@ public final class MethodCompiler {
         try {
             var node11 = node1.withString("type", ": " + TypeCompiler.compile(inputType).$());
             result1 = attachValue(stack.stream()
-                            .map(JavaString::unwrap)
+                            .map(JavaString::value)
                             .collect(Collectors.toNativeList()),
-                    new com.meti.java.JavaString(stripped.unwrap()), node11);
+                    new com.meti.java.JavaString(stripped.value()), node11);
 
         } catch (CompileException e) {
             result1 = new Some<>(new Err<>(e));
@@ -99,8 +99,8 @@ public final class MethodCompiler {
         }
         return Options.toNative(result1)
                 .map(result -> result.mapErr(err -> new CompileException("Failed to compile method - " + stack.stream()
-                        .map(JavaString::unwrap)
-                        .collect(Collectors.toNativeList()) + ": " + input.unwrap(), err)))
+                        .map(JavaString::value)
+                        .collect(Collectors.toNativeList()) + ": " + input.value(), err)))
                 .map(value -> value.mapValue(inner -> handleStatic(modifiers, inner)));
     }
 
