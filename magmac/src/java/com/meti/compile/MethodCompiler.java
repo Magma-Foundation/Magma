@@ -87,7 +87,7 @@ public final class MethodCompiler {
         Option<Result<String, CompileException>> result1;
         Node node1 = new Node(node);
         try {
-            var node11 = node1.withString("type", ": " + TypeCompiler.compile(inputType).$());
+            var node11 = node1.withSlice("type", ": " + TypeCompiler.compile(inputType).$());
             result1 = attachValue(stack.stream()
                             .map(JavaString::value)
                             .collect(Collectors.toNativeList()),
@@ -109,7 +109,7 @@ public final class MethodCompiler {
             var content = javaString.input().substring(first + 1, second);
             var inputContent = Strings.splitMembers(content);
             var outputContent = compileMethodMembers(inputContent, 2, stack).$();
-            var withContent = node.withString("content", "{\n" + outputContent + "\t}");
+            var withContent = node.withSlice("content", "{\n" + outputContent + "\t}");
 
             return renderFunction(withContent);
         }), () -> new Ok<>(renderFunctionDeclaration(node) + ";" + "\n"));

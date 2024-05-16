@@ -23,7 +23,9 @@ public interface Option<T> {
 
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
-    <R> R into(Function<Option<T>, R> mapper);
+    default <R> R into(Function<Option<T>, R> mapper) {
+        return mapper.apply(this);
+    }
 
     T $() throws OptionException;
 }

@@ -14,6 +14,11 @@ public record ErrorOption<T, E extends Throwable>(Option<Result<T, E>> parent) i
     }
 
     @Override
+    public Result<T, E> $() throws OptionException {
+        return parent.$();
+    }
+
+    @Override
     public <R> Option<R> map(Function<Result<T, E>, R> mapper) {
         return parent.map(mapper);
     }

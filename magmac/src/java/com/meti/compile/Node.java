@@ -15,14 +15,14 @@ public record Node(Map<String, Attribute> attributes) {
         this(Collections.emptyMap());
     }
 
-    Node withString(String key, String value) {
+    public Node withSlice(String key, String value) {
         var copy = new HashMap<>(attributes());
         copy.put(key, new StringAttribute(value));
         return new Node(copy);
     }
 
     public Node withString(String key, JavaString value) {
-        return withString(key, value.value());
+        return withSlice(key, value.value());
     }
 
     public Option<Attribute> apply(String key) {
