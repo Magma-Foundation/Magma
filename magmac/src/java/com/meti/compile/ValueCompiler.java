@@ -50,7 +50,7 @@ public final class ValueCompiler {
         }
 
         try {
-            var compiledObject = ValueCompiler.compileRequired(createValueCompiler(objectString, 0), stack,
+            var compiledObject = compileRequired(createValueCompiler(objectString, 0), stack,
                     objectString, 0);
             return Optional.of(new Ok<>(compiledObject + "." + child));
         } catch (CompileException e) {
@@ -72,16 +72,19 @@ public final class ValueCompiler {
         var right = stripped.substring(operatorIndex + operator.length());
 
         return Optional.of($Result(() -> {
-            var leftCompiled = getLeftCompiled(left);
-            var rightCompiled = getLeftCompiled(right);
+            var leftCompiled = compileNoIndent(new JavaString(left)).mapValue(JavaString::value).$();
+            var rightCompiled = compileNoIndent(new JavaString(right)).mapValue(JavaString::value).$();
 
             return leftCompiled + " " + operator + " " + rightCompiled;
         }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
     }
 
-    private static String getLeftCompiled(String left) throws CompileException {
-        return ValueCompiler.compileRequired(createValueCompiler(left, 0), Collections.emptyList(),
-                left, 0);
+    private static Result<JavaString, CompileException> compileNoIndent(JavaString left) {
+        return $Result(() -> compile(left.value(), 0)).mapValue(JavaString::new);
+    }
+
+    private static String compile(String left, int indent) throws CompileException {
+        return compileRequired(createValueCompiler(left, indent), Collections.emptyList(), left, indent);
     }
 
     public static ValueCompiler createValueCompiler(String input, int indent) {
@@ -140,7 +143,7 @@ public final class ValueCompiler {
                 var outputType = TypeCompiler.compile(type).$();
                 var valueString = stripped.substring(end + 1).strip();
 
-                var compiledValue = getLeftCompiled(valueString);
+                var compiledValue = compileNoIndent(new JavaString(valueString)).mapValue(JavaString::value).$();
                 return "(" + outputType + ") " + compiledValue;
             }));
         } else {
@@ -197,7 +200,7 @@ public final class ValueCompiler {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent, stack).$() + "}";
             } else {
-                compiledValue = ValueCompiler.compileRequired(createValueCompiler(value, indent), stack, createValueCompiler(value, indent).input, createValueCompiler(value, indent).indent);
+                compiledValue = compileRequired(createValueCompiler(value, indent), stack, createValueCompiler(value, indent).input, createValueCompiler(value, indent).indent);
             }
             var rendered = MagmaLang.renderFunctionDeclaration(Map.of(
                     "indent", new IntAttribute(0),
@@ -216,7 +219,7 @@ public final class ValueCompiler {
         if (stripped.startsWith("!")) {
             var valueString = stripped.substring(1).strip();
             try {
-                return Optional.of(new Ok<>(getLeftCompiled(valueString)));
+                return Optional.of(new Ok<>(compileNoIndent(new JavaString(valueString)).mapValue(JavaString::value).$()));
             } catch (CompileException e) {
                 return Optional.of(new Err<>(e));
             }
