@@ -36,6 +36,14 @@ public class Streams {
         };
     }
 
+    public static <T> Stream<T> from(T... values) {
+        return fromNativeList(List.of(values));
+    }
+
+    public static <T> Stream<T> fromOption(Option<T> option) {
+        return option.map(Streams::from).orElse(empty());
+    }
+
     private static abstract class AbstractStream<T> implements Stream<T> {
         @Override
         public Stream<T> filter(Predicate<T> predicate) {
@@ -97,9 +105,5 @@ public class Streams {
                 }
             }).orElse(empty());
         }
-    }
-
-    private static <T> Stream<T> from(T... values) {
-        return fromNativeList(List.of(values));
     }
 }

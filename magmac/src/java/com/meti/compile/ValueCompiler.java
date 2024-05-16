@@ -1,5 +1,6 @@
 package com.meti.compile;
 
+import com.meti.api.Streams;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.api.result.Err;
@@ -13,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.meti.api.result.Results.$Result;
 
@@ -105,7 +105,8 @@ public final class ValueCompiler {
                 .or(() -> valueCompiler.compileTernary(stripped))
                 .or(() -> valueCompiler.compileNumbers(stripped))
                 .or(() -> compileAnonymousClass(stripped))
-                .or(() -> valueCompiler.compileOperation(stripped))
+                .or(() -> Options.toNative(compileOperations(new JavaString(stripped)))
+                        .map(result -> result.mapValue(JavaString::value)))
                 .or(() -> valueCompiler.compileChar(stripped))
                 .or(() -> valueCompiler.compileNot(stripped))
                 .or(() -> valueCompiler.compileMethodReference(stripped))
@@ -133,6 +134,14 @@ public final class ValueCompiler {
 
     static String compileRequired(ValueCompiler valueCompiler, List<String> stack, String input, int indent) throws CompileException {
         return compile(valueCompiler, stack, input, indent).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
+    }
+
+    private static Option<Result<JavaString, CompileException>> compileOperations(JavaString stripped) {
+        return Streams.from("&&", "==", "!=", "+", "||", "-", "<=", "<")
+                .map(JavaString::new)
+                .map(operator -> compileOperation(stripped, operator))
+                .flatMap(Streams::fromOption)
+                .head();
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -244,14 +253,6 @@ public final class ValueCompiler {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
-    }
-
-    private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
-        return Stream.of("&&", "==", "!=", "+", "||", "-", "<=", "<")
-                .map(operator -> Options.toNative(compileOperation(new JavaString(stripped), new JavaString(operator)))
-                        .map(result -> result.mapValue(JavaString::value)))
-                .flatMap(Optional::stream)
-                .findFirst();
     }
 
     private Optional<? extends Result<String, CompileException>> compileTernary(String stripped) {
