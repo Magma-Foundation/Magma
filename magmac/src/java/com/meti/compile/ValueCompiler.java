@@ -1,6 +1,7 @@
 package com.meti.compile;
 
 import com.meti.api.Streams;
+import com.meti.api.option.ErrorOption;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.api.result.Err;
@@ -68,18 +69,31 @@ public final class ValueCompiler {
     }
 
     private static Option<Result<JavaString, CompileException>> compileOperation(JavaString stripped, JavaString operator) {
-        return lexOperator(stripped, operator).map(node -> $Result(() -> {
+        return lexOperator(stripped, operator)
+                .map(ValueCompiler::compileOperationValues)
+                .into(ErrorOption::new)
+                .mapValue(compiled -> renderOperation(operator, compiled))
+                .mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err));
+    }
+
+    private static JavaString renderOperation(JavaString operator, Node compiled) {
+        return compiled.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY)
+                .concatSlice(" ")
+                .concatOwned(operator)
+                .concatSlice(" ")
+                .concatOwned(compiled.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
+    }
+
+    private static Result<Node, CompileException> compileOperationValues(Node node) {
+        return $Result(() -> {
             var left = node.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
             var right = node.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
 
             var leftCompiled = compileNoIndent(left).$();
             var rightCompiled = compileNoIndent(right).$();
 
-            return leftCompiled.concatSlice(" ")
-                    .concatOwned(operator)
-                    .concatSlice(" ")
-                    .concatOwned(rightCompiled);
-        }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
+            return node.withString("left", leftCompiled).withString("right", rightCompiled);
+        });
     }
 
     private static Option<Node> lexOperator(JavaString stripped, JavaString operator) {
