@@ -65,7 +65,7 @@ public final class ValueCompiler {
                                 objectString, 0);
                         result = Optional.of(new Ok<>(compiledObject + "." + child));
                     } catch (CompileException e) {
-                        var format = "Failed to compile object reference of access statement - %s: %s";
+                        var format = "Failed to compile object reference o  f access statement - %s: %s";
                         var message = format.formatted(stack1, objectString);
                         result = Optional.of(new Err<>(new CompileException(message, e)));
                     }
