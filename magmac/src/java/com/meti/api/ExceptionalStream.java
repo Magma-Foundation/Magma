@@ -47,7 +47,7 @@ public record ExceptionalStream<T, E extends Throwable>(Stream<Result<T, E>> par
 
             @Override
             public Result<C, E> fold(Result<C, E> current, Result<T, E> next) {
-                return current.and(next).mapValue(tuple -> collector.fold(tuple.a(), tuple.b()));
+                return current.and(next).mapValue(tuple -> collector.fold(tuple.left(), tuple.right()));
             }
         });
     }

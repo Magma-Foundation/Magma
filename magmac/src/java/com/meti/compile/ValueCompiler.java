@@ -1,5 +1,7 @@
 package com.meti.compile;
 
+import com.meti.api.option.Option;
+import com.meti.api.option.Options;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
@@ -64,19 +66,18 @@ public final class ValueCompiler {
         return stripped.startsWith("\"") && stripped.endsWith("\"") ? Optional.of(new Ok<>(stripped)) : Optional.empty();
     }
 
-    private static Optional<Result<String, CompileException>> compileOperation(String stripped, String operator) {
-        var operatorIndex = stripped.indexOf(operator);
-        if (operatorIndex == -1) return Optional.empty();
+    private static Option<Result<JavaString, CompileException>> compileOperation(JavaString stripped, JavaString operator) {
+        return stripped.splitAtFirstSlice(operator).map(tuple -> {
+            var left = tuple.left();
+            var right = tuple.right();
 
-        var left = stripped.substring(0, operatorIndex).strip();
-        var right = stripped.substring(operatorIndex + operator.length());
+            return $Result(() -> {
+                var leftCompiled = compileNoIndent(left).$();
+                var rightCompiled = compileNoIndent(right).$();
 
-        return Optional.of($Result(() -> {
-            var leftCompiled = compileNoIndent(new JavaString(left)).mapValue(JavaString::value).$();
-            var rightCompiled = compileNoIndent(new JavaString(right)).mapValue(JavaString::value).$();
-
-            return leftCompiled + " " + operator + " " + rightCompiled;
-        }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err)));
+                return leftCompiled.concatSlice(" ").concatOwned(operator).concatSlice(" ").concatOwned(rightCompiled);
+            }).mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err));
+        });
     }
 
     private static Result<JavaString, CompileException> compileNoIndent(JavaString left) {
@@ -247,7 +248,8 @@ public final class ValueCompiler {
 
     private Optional<? extends Result<String, CompileException>> compileOperation(String stripped) {
         return Stream.of("&&", "==", "!=", "+", "||", "-", "<=", "<")
-                .map(operator -> compileOperation(stripped, operator))
+                .map(operator -> Options.toNative(compileOperation(new JavaString(stripped), new JavaString(operator)))
+                        .map(result -> result.mapValue(JavaString::value)))
                 .flatMap(Optional::stream)
                 .findFirst();
     }

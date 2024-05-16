@@ -65,8 +65,8 @@ public class Streams {
                         .map(head -> fold.apply(finalCurrent, head))
                         .toTuple(current);
 
-                if (tuple.a()) {
-                    current = tuple.b();
+                if (tuple.left()) {
+                    current = tuple.right();
                 } else {
                     return current;
                 }
@@ -88,8 +88,8 @@ public class Streams {
                                 .map(mapper)
                                 .toTuple(parent);
 
-                        if (tuple.a()) {
-                            parent = tuple.b();
+                        if (tuple.left()) {
+                            parent = tuple.right();
                         } else {
                             return new None<>();
                         }

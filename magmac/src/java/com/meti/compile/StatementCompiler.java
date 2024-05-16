@@ -39,12 +39,12 @@ public record StatementCompiler(String input, int indent) {
     private static String compileBlock(String stripped, int indent, int blockStart, List<String> stack) throws CompileException {
         var contentStart = stripped.indexOf('{', blockStart);
         if (contentStart == -1) {
-            throw new CompileException("Not a block: " + stripped);
+            throw new CompileException("Not left block: " + stripped);
         }
 
         var contentEnd = stripped.lastIndexOf('}');
         if (contentEnd == -1) {
-            throw new CompileException("Not a block: " + stripped);
+            throw new CompileException("Not left block: " + stripped);
         }
 
         var after = stripped.substring(contentStart + 1, contentEnd);

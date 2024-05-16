@@ -43,4 +43,30 @@ public record JavaString(String value) {
     private JavaString sliceTo(Index index) {
         return new JavaString(value.substring(0, index.value()));
     }
+
+    public Option<Index> firstIndexOfSlice(JavaString slice) {
+        return wrapIndex(this.value.indexOf(slice.value));
+    }
+
+    public Option<Tuple<JavaString, JavaString>> splitAtFirstSlice(JavaString slice) {
+        return firstIndexOfSlice(slice).flatMap(index -> {
+            var left = sliceTo(index);
+            return index.next(slice.length()).map(rightStart -> {
+                var right = sliceFrom(rightStart);
+                return new Tuple<>(left, right);
+            });
+        });
+    }
+
+    private int length() {
+        return this.value.length();
+    }
+
+    public JavaString concatSlice(String slice) {
+        return new JavaString(value + slice);
+    }
+
+    public JavaString concatOwned(JavaString owned) {
+        return new JavaString(value + owned.value);
+    }
 }
