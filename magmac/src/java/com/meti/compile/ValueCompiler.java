@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.meti.api.result.Results.$Result;
 
 public final class ValueCompiler {
-    private final String input;
-    private final int indent;
+    public final String input;
+    public final int indent;
 
     private ValueCompiler(String input, int indent) {
         this.input = input;
@@ -51,7 +50,8 @@ public final class ValueCompiler {
         }
 
         try {
-            var compiledObject = ValueCompiler.compileRequired(createValueCompiler(objectString, 0), stack);
+            var compiledObject = ValueCompiler.compileRequired(createValueCompiler(objectString, 0), stack,
+                    objectString, 0);
             return Optional.of(new Ok<>(compiledObject + "." + child));
         } catch (CompileException e) {
             var format = "Failed to compile object reference of access statement - %s: %s";
@@ -80,22 +80,23 @@ public final class ValueCompiler {
     }
 
     private static String getLeftCompiled(String left) throws CompileException {
-        return ValueCompiler.compileRequired(createValueCompiler(left, 0), Collections.emptyList());
+        return ValueCompiler.compileRequired(createValueCompiler(left, 0), Collections.emptyList(),
+                left, 0);
     }
 
     public static ValueCompiler createValueCompiler(String input, int indent) {
         return new ValueCompiler(input, indent);
     }
 
-    static Optional<Result<String, CompileException>> compile(List<String> stack, String argString, int indent) {
-        return compile(createValueCompiler(argString, indent), stack);
-    }
-
-    static Optional<Result<String, CompileException>> compile(ValueCompiler valueCompiler, List<String> stack) {
-        var stripped = valueCompiler.input().strip();
+    static Optional<Result<String, CompileException>> compile(
+            ValueCompiler valueCompiler,
+            List<String> stack,
+            String input,
+            int indent) {
+        var stripped = input.strip();
         return compileString(stripped).or(() -> SymbolCompiler.compile(stack, stripped))
-                .or(() -> valueCompiler.compileLambda(stripped, valueCompiler.indent, stack))
-                .or(() -> InvocationCompiler.compileInvocation(stack, stripped, valueCompiler.indent))
+                .or(() -> valueCompiler.compileLambda(stripped, indent, stack))
+                .or(() -> InvocationCompiler.compileInvocation(stack, stripped, indent))
                 .or(() -> compileAccess(stripped, stack))
                 .or(() -> valueCompiler.compileTernary(stripped))
                 .or(() -> valueCompiler.compileNumbers(stripped))
@@ -126,8 +127,8 @@ public final class ValueCompiler {
         return Optional.of(new Ok<>("<" + name + ">{}"));
     }
 
-    static String compileRequired(ValueCompiler valueCompiler, List<String> stack) throws CompileException {
-        return compile(valueCompiler, stack).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + valueCompiler.input))).$();
+    static String compileRequired(ValueCompiler valueCompiler, List<String> stack, String input, int indent) throws CompileException {
+        return compile(valueCompiler, stack, input, indent).orElseGet(() -> new Err<>(new CompileException("Unknown value: " + input))).$();
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
@@ -154,7 +155,8 @@ public final class ValueCompiler {
             var after = stripped.substring(index + "::".length());
             if (!Strings.isSymbol(after)) return Optional.empty();
 
-            return ValueCompiler.compile(createValueCompiler(before, 0), Collections.emptyList()).map(value -> {
+            ValueCompiler valueCompiler = createValueCompiler(before, 0);
+            return compile(valueCompiler, Collections.emptyList(), createValueCompiler(before, 0).input, valueCompiler.indent).map(value -> {
                 return value.mapValue(inner -> {
                     return inner + "." + after;
                 });
@@ -195,7 +197,7 @@ public final class ValueCompiler {
                 var members = Strings.splitMembers(inputContent);
                 compiledValue = "{\n" + MethodCompiler.compileMethodMembers(members, indent, stack).$() + "}";
             } else {
-                compiledValue = ValueCompiler.compileRequired(createValueCompiler(value, indent), stack);
+                compiledValue = ValueCompiler.compileRequired(createValueCompiler(value, indent), stack, createValueCompiler(value, indent).input, createValueCompiler(value, indent).indent);
             }
             var rendered = MagmaLang.renderFunctionDeclaration(Map.of(
                     "indent", new IntAttribute(0),
@@ -255,49 +257,18 @@ public final class ValueCompiler {
         if (statementMarker == -1) return Optional.empty();
 
         var conditionString = stripped.substring(0, conditionMarker).strip();
-        var condition = ValueCompiler.compile(createValueCompiler(conditionString, 0), Collections.emptyList());
+        ValueCompiler valueCompiler2 = createValueCompiler(conditionString, 0);
+        var condition = compile(valueCompiler2, Collections.emptyList(), createValueCompiler(conditionString, 0).input, valueCompiler2.indent);
         if (condition.isEmpty()) return Optional.empty();
 
         var thenString = stripped.substring(conditionMarker + 1, statementMarker).strip();
-        var thenBlock = ValueCompiler.compile(createValueCompiler(thenString, 0), Collections.emptyList());
+        ValueCompiler valueCompiler1 = createValueCompiler(thenString, 0);
+        var thenBlock = compile(valueCompiler1, Collections.emptyList(), createValueCompiler(thenString, 0).input, valueCompiler1.indent);
         if (thenBlock.isEmpty()) return Optional.empty();
 
         var elseString = stripped.substring(statementMarker + 1).strip();
-        var elseBlock = ValueCompiler.compile(createValueCompiler(elseString, 0), Collections.emptyList());
-        if (elseBlock.isEmpty()) return Optional.empty();
-
-        return Optional.of($Result(() -> {
-            return condition.get().$() + " ? " + thenBlock.get().$() + " : " + elseBlock.get().$();
-        }));
+        ValueCompiler valueCompiler = createValueCompiler(elseString, 0);
+        var elseBlock = compile(valueCompiler, Collections.emptyList(), createValueCompiler(elseString, 0).input, valueCompiler.indent);
+        return elseBlock.map(stringCompileExceptionResult -> $Result(() -> condition.get().$() + " ? " + thenBlock.get().$() + " : " + stringCompileExceptionResult.$()));
     }
-
-    public String input() {
-        return input;
-    }
-
-    public int indent() {
-        return indent;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ValueCompiler) obj;
-        return Objects.equals(this.input, that.input) &&
-               this.indent == that.indent;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(input, indent);
-    }
-
-    @Override
-    public String toString() {
-        return "ValueCompiler[" +
-               "input=" + input + ", " +
-               "indent=" + indent + ']';
-    }
-
 }

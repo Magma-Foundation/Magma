@@ -42,7 +42,7 @@ public class InvocationCompiler {
         var suffix = indent == 0 ? "" : ";\n";
         var renderedArguments = outputArguments.orElse(new StringBuilder());
 
-        var compiledCaller = ValueCompiler.compile(stack, caller, 0);
+        var compiledCaller = ValueCompiler.compile(ValueCompiler.createValueCompiler(caller, 0), stack, caller, 0);
         if (compiledCaller.isEmpty()) {
             return Optional.empty();
         }
@@ -58,7 +58,7 @@ public class InvocationCompiler {
     }
 
     private static String compileArgument(List<String> stack, String argString, int indent) throws CompileException {
-        var compiledArgOptional = ValueCompiler.compile(stack, argString, indent);
+        var compiledArgOptional = ValueCompiler.compile(ValueCompiler.createValueCompiler(argString, indent), stack, argString, indent);
         if (compiledArgOptional.isEmpty())
             throw new CompileException("Failed to compile argument: " + argString);
 

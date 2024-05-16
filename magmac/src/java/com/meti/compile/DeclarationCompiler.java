@@ -40,7 +40,7 @@ public record DeclarationCompiler(String stripped, int indent) {
         if (valueSeparator == -1) return "";
 
         var after = stripped.substring(valueSeparator + 1).strip();
-        var compiledValue = ValueCompiler.compileRequired(ValueCompiler.createValueCompiler(after, 0), stack);
+        var compiledValue = ValueCompiler.compileRequired(ValueCompiler.createValueCompiler(after, 0), stack, ValueCompiler.createValueCompiler(after, 0).input, ValueCompiler.createValueCompiler(after, 0).indent);
         return " = " + compiledValue;
     }
 
