@@ -68,20 +68,16 @@ public final class ValueCompiler {
         return stripped.startsWith("\"") && stripped.endsWith("\"") ? Optional.of(new Ok<>(stripped)) : Optional.empty();
     }
 
-    private static Option<Result<JavaString, CompileException>> compileOperation(JavaString stripped, JavaString operator) {
-        return lexOperator(stripped, operator)
-                .map(ValueCompiler::compileOperationValues)
-                .into(ErrorOption::new)
-                .mapValue(compiled -> renderOperation(operator, compiled))
-                .mapErr(err -> new CompileException("Failed to compile operation '" + operator + "': " + stripped, err));
-    }
+    private static JavaString renderOperation(Node compiled) {
+        var left = compiled.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var operator = compiled.apply("operator").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
+        var right = compiled.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
 
-    private static JavaString renderOperation(JavaString operator, Node compiled) {
-        return compiled.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY)
+        return left
                 .concatSlice(" ")
                 .concatOwned(operator)
                 .concatSlice(" ")
-                .concatOwned(compiled.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY));
+                .concatOwned(right);
     }
 
     private static Result<Node, CompileException> compileOperationValues(Node node) {
@@ -103,7 +99,8 @@ public final class ValueCompiler {
 
             return new Node()
                     .withString("left", left)
-                    .withString("right", right);
+                    .withString("right", right)
+                    .withString("operator", operator);
         });
     }
 
@@ -166,9 +163,12 @@ public final class ValueCompiler {
     private static Option<Result<JavaString, CompileException>> compileOperations(JavaString stripped) {
         return Streams.from("&&", "==", "!=", "+", "||", "-", "<=", "<")
                 .map(JavaString::new)
-                .map(operator -> compileOperation(stripped, operator))
+                .map(operator -> lexOperator(stripped, operator))
                 .flatMap(Streams::fromOption)
-                .head();
+                .head()
+                .map(ValueCompiler::compileOperationValues)
+                .into(ErrorOption::new)
+                .mapValue(ValueCompiler::renderOperation);
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {
