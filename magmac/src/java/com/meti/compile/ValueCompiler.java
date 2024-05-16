@@ -1,12 +1,12 @@
 package com.meti.compile;
 
-import com.meti.api.Streams;
 import com.meti.api.option.ErrorOption;
 import com.meti.api.option.Option;
 import com.meti.api.option.Options;
 import com.meti.api.result.Err;
 import com.meti.api.result.Ok;
 import com.meti.api.result.Result;
+import com.meti.compile.value.Operations;
 import com.meti.node.Attribute;
 import com.meti.node.IntAttribute;
 import com.meti.node.StringAttribute;
@@ -68,18 +68,6 @@ public final class ValueCompiler {
         return stripped.startsWith("\"") && stripped.endsWith("\"") ? Optional.of(new Ok<>(stripped)) : Optional.empty();
     }
 
-    private static JavaString renderOperation(Node compiled) {
-        var left = compiled.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-        var operator = compiled.apply("operator").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-        var right = compiled.apply("right").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
-
-        return left
-                .concatSlice(" ")
-                .concatOwned(operator)
-                .concatSlice(" ")
-                .concatOwned(right);
-    }
-
     private static Result<Node, CompileException> compileOperationValues(Node node) {
         return $Result(() -> {
             var left = node.apply("left").flatMap(Attribute::asString).orElse(JavaString.EMPTY);
@@ -89,18 +77,6 @@ public final class ValueCompiler {
             var rightCompiled = compileNoIndent(right).$();
 
             return node.withString("left", leftCompiled).withString("right", rightCompiled);
-        });
-    }
-
-    private static Option<Node> lexOperator(JavaString stripped, JavaString operator) {
-        return stripped.splitAtFirstSlice(operator).map(tuple -> {
-            var left = tuple.left();
-            var right = tuple.right();
-
-            return new Node()
-                    .withString("left", left)
-                    .withString("right", right)
-                    .withString("operator", operator);
         });
     }
 
@@ -161,14 +137,10 @@ public final class ValueCompiler {
     }
 
     private static Option<Result<JavaString, CompileException>> compileOperations(JavaString stripped) {
-        return Streams.from("&&", "==", "!=", "+", "||", "-", "<=", "<")
-                .map(JavaString::new)
-                .map(operator -> lexOperator(stripped, operator))
-                .flatMap(Streams::fromOption)
-                .head()
+        return Operations.lex(stripped)
                 .map(ValueCompiler::compileOperationValues)
                 .into(ErrorOption::new)
-                .mapValue(ValueCompiler::renderOperation);
+                .mapValue(compiled -> Operations.render(compiled).orElse(JavaString.EMPTY));
     }
 
     private Optional<? extends Result<String, CompileException>> compileCast(String stripped) {

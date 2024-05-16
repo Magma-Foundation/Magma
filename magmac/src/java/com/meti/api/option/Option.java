@@ -1,8 +1,6 @@
 package com.meti.api.option;
 
-import com.meti.api.result.Result;
 import com.meti.api.result.Tuple;
-import com.meti.compile.JavaString;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -26,4 +24,6 @@ public interface Option<T> {
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
     <R> R into(Function<Option<T>, R> mapper);
+
+    T $() throws OptionException;
 }
