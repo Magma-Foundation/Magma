@@ -35,8 +35,7 @@ public class Operations {
             var operator = compiled.apply("operator").flatMap(Attribute::asString).$();
             var right = compiled.apply("right").flatMap(Attribute::asString).$();
 
-            return left
-                    .concatSlice(" ")
+            return left.concatSlice(" ")
                     .concatOwned(operator)
                     .concatSlice(" ")
                     .concatOwned(right);

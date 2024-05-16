@@ -9,10 +9,10 @@ import com.meti.api.result.Tuple;
 public record JavaString(String value) {
     public static final JavaString EMPTY = new JavaString("");
 
-    private static Option<Index> wrapIndex(int index) {
+    private Option<Index> wrapIndex(int index) {
         return index == -1
                 ? new None<>()
-                : new Some<>(new Index(index));
+                : new Some<>(new Index(index, value.length()));
     }
 
     Option<Index> firstIndexOfChar(char c) {
