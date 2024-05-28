@@ -1,0 +1,73 @@
+import { Err } from com.meti.result;
+import { Ok } from com.meti.result;
+import { Result } from com.meti.result;
+import { ArrayList } from java.util;
+import { Optional } from java.util;
+export class def TypeCompiler(inputType : String) => {
+	def compile(): Result<String, CompileException> => {
+		return compilePrimitiveType(inputType()).or(() => compileSymbolType(inputType)).or(() => compileGenericType(inputType)).or(() => compileArrayType(inputType)).orElseGet(() => Err(CompileException("Unknown type: " + inputType())));
+	}
+	private def compileArrayType(inputType : String): Optional<? extends Result<String, CompileException>> => {
+		if (inputType.endsWith("[]")) {
+			let child = inputType.substring(0, inputType.length() - 2);
+			return Optional.of(Ok("&" + child));
+		}
+		return Optional.empty();
+	}
+}
+export object TypeCompiler {
+	private def compileGenericType(inputType : String): Optional<Result<String, CompileException>> => {
+		let genStart = inputType.indexOf(' < ');
+		if (genStart == -1) 		return Optional.empty();
+		let genEnd = inputType.lastIndexOf('>');
+		if (genEnd == -1) 		return Optional.empty();
+		let parent = inputType.substring(0, genStart);
+		let childrenString = inputType.substring(genStart + 1, genEnd);
+		let children = ArrayList();
+		let builder = StringBuilder();
+		let depth = 0;
+		for (Ok[value=let i = 0];i < childrenString.length()i) {
+			let c = childrenString.charAt(i);
+			if (c == ',' && depth == 0) {
+				children.add(				builder.toString();
+);
+				builder = StringBuilder();
+			}
+			try {
+			if (c == ' < ') depth			if (c == '>') depth			builder.append(c);
+		}
+		}
+		children.add(		builder.toString();
+);
+		let newChildren = ArrayList();
+		for (let child :  children) {
+			let stripped = child.strip();
+			if (stripped.isEmpty()) 			let continue;
+			try {
+				newChildren.add(				TypeCompiler(stripped).compile().$();
+);
+			}
+			catch (e : CompileException) {
+				return Optional.of(Err(CompileException("Failed to compile generic type: " + inputType, e)));
+			}
+		}
+		return Optional.of(Ok(parent + "<" + String.join(", ", newChildren) + ">"));
+	}
+	private def compileSymbolType(inputType : String): Optional<Result<String, CompileException>> => {
+		if (Strings.isSymbol(inputType)) {
+			return Optional.of(Ok(inputType));
+		}
+		try {
+			return Optional.empty();
+		}
+	}
+	private def compilePrimitiveType(inputType : String): Optional<Result<String, CompileException>> => {
+		if (inputType.equals("void")) {
+			return Optional.of(Ok("Void"));
+		}
+		if (inputType.equals("int")) {
+			return Optional.of(Ok("I32"));
+		}
+		return Optional.empty();
+	}
+}

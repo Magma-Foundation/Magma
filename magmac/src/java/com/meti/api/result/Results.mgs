@@ -1,0 +1,16 @@
+import { Optional } from java.util;
+export class def Results() => {
+}
+export object Results {
+	def $Result(action : Action<T, E>): Result<T, E> => {
+		try {
+			return Ok(action.run());
+		}
+		catch (e : Throwable) {
+			return Err((E) e);
+		}
+	}
+	def unwrapOptional(result : Result<Optional<T>, E>): Optional<Result<T, E>> => {
+		return result.match(() => optional.map(Ok.new), () => Optional.of(Err(err)));
+	}
+}

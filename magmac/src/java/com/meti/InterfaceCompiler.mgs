@@ -1,0 +1,16 @@
+import { InstanceCompiler } from com.meti.compile;
+import { Optional } from java.util;
+export class def InterfaceCompiler extends InstanceCompiler() => {
+	def InterfaceCompiler(input : String): public => {
+		super(input);
+	}
+	def computeKeyword(): String => {
+		return "interface";
+	}
+	def computeNameEnd(input : String, contentStart : I32): I32 => {
+		return contentStart;
+	}
+	def computeParamString(input : String): Optional<String> => {
+		return Optional.of("");
+	}
+}
