@@ -1,3 +1,0 @@
-export class def Action<T, E extends Throwable>() => {
-	def run(): T;
-}

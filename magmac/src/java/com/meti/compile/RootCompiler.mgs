@@ -1,5 +1,0 @@
-import { Result } from com.meti.result;
-import { Optional } from java.util;
-export class def RootCompiler() => {
-	def compile(): Optional<Result<String, CompileException>>;
-}
