@@ -43,26 +43,27 @@ public class Main {
                 .orElse(input);
     }
 
+    private static Optional<Integer> wrapIndex(int index) {
+        return index == -1 ? Optional.empty() : Optional.of(index);
+    }
+
     private static Optional<String> compileClass(String input) {
-        var keywordIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
-        if (keywordIndex == -1) return Optional.empty();
+        return wrapIndex(input.indexOf(CLASS_KEYWORD_WITH_SPACE)).flatMap(keywordIndex -> {
+            var inputModifiers = input.substring(0, keywordIndex).strip();
+            var afterKeyword = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length()).strip();
 
-        var inputModifiers = input.substring(0, keywordIndex).strip();
-        var afterKeyword = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length()).strip();
+            return wrapIndex(afterKeyword.indexOf('{')).flatMap(contentStart -> {
+                var name = afterKeyword.substring(0, contentStart).strip();
+                var afterContentStart = afterKeyword.substring(contentStart + 1).strip();
 
-        var contentStart = afterKeyword.indexOf('{');
-        if (contentStart == -1) return Optional.empty();
+                return wrapIndex(afterContentStart.lastIndexOf('}')).map(contentEnd -> {
+                    var outputModifiers = inputModifiers.equals("public") ? "export " : "";
+                    var content = afterContentStart.substring(0, contentEnd);
 
-        var name = afterKeyword.substring(0, contentStart).strip();
-        var afterContentStart = afterKeyword.substring(contentStart + 1).strip();
-
-        var contentEnd = afterContentStart.lastIndexOf('}');
-        if (contentEnd == -1) return Optional.empty();
-
-        var outputModifiers = inputModifiers.equals("public") ? "export " : "";
-        var content = afterContentStart.substring(0, contentEnd);
-
-        return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}");
+                    return outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}";
+                });
+            });
+        });
     }
 
     private static Optional<String> compileImport(String input) {
