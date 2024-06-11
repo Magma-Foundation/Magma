@@ -51,7 +51,7 @@ public class Main {
         return lexClass(input).map(Main::parseAndRender);
     }
 
-    private static Optional<ClassNode> lexClass(String input) {
+    private static Optional<Node> lexClass(String input) {
         return splitAtSlice(input, CLASS_KEYWORD_WITH_SPACE).flatMap(result -> {
             var inputModifiers = result.left().strip();
             var afterKeyword = result.right().strip();
@@ -68,13 +68,13 @@ public class Main {
         });
     }
 
-    private static String parseAndRender(ClassNode node) {
+    private static String parseAndRender(Node node) {
         var outputModifiers = node.modifiers().equals("public") ? "export " : "";
         return renderClass(node.withModifiers(outputModifiers));
     }
 
-    private static String renderClass(ClassNode classNode) {
-        return classNode.modifiers() + CLASS_KEYWORD_WITH_SPACE + "def " + classNode.name() + "() => {\n\t" + classNode.content() + "}";
+    private static String renderClass(Node node) {
+        return node.modifiers() + CLASS_KEYWORD_WITH_SPACE + "def " + node.name() + "() => {\n\t" + node.content() + "}";
     }
 
     private static Optional<Tuple> splitAtSlice(String input, String slice) {
