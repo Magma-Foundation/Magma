@@ -44,7 +44,7 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        return lexClass(input).map(Main::parseAndRender);
+        return lexClass(input).map(Main::parse).flatMap(Main::renderClass);
     }
 
     private static Optional<Node> lexClass(String input) {
@@ -55,7 +55,7 @@ public class Main {
         return new SplitAtSliceRule(new StripRule(modifiers), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(name, "{", new StripRule(new RightRule(content, "}"))))).toNode(input);
     }
 
-    private static String parseAndRender(Node node) {
+    private static Node parse(Node node) {
         var oldModifiers = node.apply("modifiers")
                 .flatMap(Attribute::asStringList)
                 .orElseThrow();
@@ -69,20 +69,16 @@ public class Main {
 
         newModifiers.add("class");
         newModifiers.add("def");
-        return renderClass(node.with("modifiers", new StringListAttribute(newModifiers)));
+
+        return node.with("modifiers", new StringListAttribute(newModifiers));
     }
 
-    private static String renderClass(Node node) {
-        var modifiers = new ExtractStringListRule("modifiers", " ")
-                .fromNode(node)
-                .orElseThrow();
+    private static Optional<String> renderClass(Node node) {
+        var modifiers = new ExtractStringListRule("modifiers", " ");
+        var name = new ExtractStringRule("name");
+        var content = new ExtractStringRule("content");
 
-        var name = new ExtractStringRule("name").fromNode(node).orElseThrow();
-        var content = new RightRule(new ExtractStringRule("content"), "}")
-                .fromNode(node)
-                .orElseThrow();
-
-        return modifiers + " " + name + "() => {\n\t" + content;
+        return new SplitAtSliceRule(modifiers, " ", new SplitAtSliceRule(name, "() => {\n\t", new RightRule(content, "}"))).fromNode(node);
     }
 
     private static Optional<String> compileImport(String input) {
