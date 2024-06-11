@@ -1,4 +1,7 @@
-package magma;
+package magma.compile;
+
+import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
 
 import java.util.Optional;
 import java.util.stream.Stream;

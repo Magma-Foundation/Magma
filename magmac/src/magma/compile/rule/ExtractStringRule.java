@@ -1,4 +1,7 @@
-package magma;
+package magma.compile.rule;
+
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringAttribute;
 
 import java.util.Optional;
 

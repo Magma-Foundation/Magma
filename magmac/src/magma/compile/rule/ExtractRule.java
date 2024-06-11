@@ -1,4 +1,8 @@
-package magma;
+package magma.compile.rule;
+
+import magma.compile.MapNode;
+import magma.compile.Node;
+import magma.compile.attribute.Attribute;
 
 import java.util.Optional;
 

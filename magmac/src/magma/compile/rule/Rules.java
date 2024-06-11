@@ -1,4 +1,6 @@
-package magma;
+package magma.compile.rule;
+
+import magma.api.Tuple;
 
 import java.util.Optional;
 

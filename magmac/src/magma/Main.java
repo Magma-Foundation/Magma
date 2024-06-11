@@ -1,5 +1,9 @@
 package magma;
 
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaToMagmaParser;
+import magma.compile.lang.MagmaLang;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

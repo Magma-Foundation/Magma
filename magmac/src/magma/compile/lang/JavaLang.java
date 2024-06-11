@@ -1,7 +1,14 @@
-package magma;
+package magma.compile.lang;
+
+import magma.Main;
+import magma.compile.rule.ExtractStringListRule;
+import magma.compile.rule.ExtractStringRule;
+import magma.compile.rule.RightRule;
+import magma.compile.rule.SplitAtSliceRule;
+import magma.compile.rule.StripRule;
 
 public class JavaLang {
-    static SplitAtSliceRule createClassRule() {
+    public static SplitAtSliceRule createClassRule() {
         var modifiers = new ExtractStringListRule("modifiers", " ");
         var name = new StripRule(new ExtractStringRule("name"));
         var content = new ExtractStringRule("content");

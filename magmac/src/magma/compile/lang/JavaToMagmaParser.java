@@ -1,4 +1,8 @@
-package magma;
+package magma.compile.lang;
+
+import magma.compile.Node;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringListAttribute;
 
 import java.util.ArrayList;
 
