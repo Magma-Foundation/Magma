@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {
@@ -32,19 +33,39 @@ public class Main {
     }
 
     private static String compileRootStatement(String input) {
-        if (input.isEmpty() || input.startsWith("package ")) {
-            return "";
-        }
+        return compileEmpty(input)
+                .or(() -> compilePackage(input))
+                .or(() -> compileImport(input))
+                .or(() -> compileClass(input))
+                .orElse(input);
+    }
 
-        if (input.startsWith("import ")) {
-            return input + "\n";
-        }
-
+    private static Optional<String> compileClass(String input) {
         if (input.contains("class")) {
-            return "class def Test() => {}";
+            return Optional.of("class def Test() => {}");
         }
+        return Optional.empty();
+    }
 
-        return input;
+    private static Optional<String> compileImport(String input) {
+        if (input.startsWith("import ")) {
+            return Optional.of(input + "\n");
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compilePackage(String input) {
+        if (input.startsWith("package ")) {
+            return Optional.of("");
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> compileEmpty(String input) {
+        if (input.isEmpty()) {
+            return Optional.of("");
+        }
+        return Optional.empty();
     }
 
     private static List<String> split(String input) {
