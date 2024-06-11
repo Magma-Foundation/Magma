@@ -48,20 +48,35 @@ public class Main {
     }
 
     private static Optional<Node> lexClass(String input) {
-        return new SplitAtSliceRule(new StripRule(new ExtractRule("modifiers")), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(new StripRule(new ExtractRule("name")), "{", new StripRule(new LastRule(new ExtractRule("content"), '}'))))).toNode(input);
+        return new SplitAtSliceRule(new StripRule(new ExtractStringListRule("modifiers", " ")), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(new StripRule(new ExtractStringRule("name")), "{", new StripRule(new LastRule(new ExtractStringRule("content"), '}'))))).toNode(input);
     }
 
     private static String parseAndRender(Node node) {
-        var outputModifiers = node.apply("modifiers").orElseThrow().equals("public") ? "export " : "";
-        return renderClass(node.with("modifiers", outputModifiers));
+        var oldModifiers = node.apply("modifiers")
+                .flatMap(Attribute::asStringList)
+                .orElseThrow();
+
+        var newModifiers = new ArrayList<String>();
+        for (var oldModifier : oldModifiers) {
+            if (oldModifier.equals("public")) {
+                newModifiers.add("export");
+            }
+        }
+
+        newModifiers.add("class");
+        newModifiers.add("def");
+        return renderClass(node.with("modifiers", new StringListAttribute(newModifiers)));
     }
 
     private static String renderClass(Node node) {
-        var modifiers = new ExtractRule("modifiers").fromNode(node).orElseThrow();
-        var name = new ExtractRule("name").fromNode(node).orElseThrow();
-        var content = new ExtractRule("content").fromNode(node).orElseThrow();
+        var modifiers = new ExtractStringListRule("modifiers", " ")
+                .fromNode(node)
+                .orElseThrow();
 
-        return modifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}";
+        var name = new ExtractStringRule("name").fromNode(node).orElseThrow();
+        var content = new ExtractStringRule("content").fromNode(node).orElseThrow();
+
+        return modifiers + " " + name + "() => {\n\t" + content + "}";
     }
 
     private static Optional<String> compileImport(String input) {

@@ -4,11 +4,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface Node {
-    Node with(String key, String value);
+    Node with(String key, Attribute value);
 
-    Optional<String> apply(String key);
+    Optional<Attribute> apply(String key);
 
     Node merge(Node other);
 
-    Stream<Tuple> streamEntries();
+    Stream<Tuple<String, Attribute>> streamEntries();
 }

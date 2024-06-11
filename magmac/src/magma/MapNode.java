@@ -7,20 +7,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record MapNode(Map<String, String> values) implements Node {
+public record MapNode(Map<String, Attribute> values) implements Node {
     public MapNode() {
         this(Collections.emptyMap());
     }
 
     @Override
-    public Node with(String key, String value) {
+    public Node with(String key, Attribute value) {
         var copy = new HashMap<>(values);
         copy.put(key, value);
         return new MapNode(copy);
     }
 
     @Override
-    public Optional<String> apply(String key) {
+    public Optional<Attribute> apply(String key) {
         return values.containsKey(key)
                 ? Optional.of(values.get(key))
                 : Optional.empty();
@@ -31,7 +31,7 @@ public record MapNode(Map<String, String> values) implements Node {
         var entries = other.streamEntries().collect(Collectors.toSet());
 
         Node current = this;
-        for (Tuple entry : entries) {
+        for (var entry : entries) {
             current = current.with(entry.left(), entry.right());
         }
 
@@ -39,9 +39,9 @@ public record MapNode(Map<String, String> values) implements Node {
     }
 
     @Override
-    public Stream<Tuple> streamEntries() {
+    public Stream<Tuple<String, Attribute>> streamEntries() {
         return values.entrySet()
                 .stream()
-                .map(entry -> new Tuple(entry.getKey(), entry.getValue()));
+                .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
     }
 }

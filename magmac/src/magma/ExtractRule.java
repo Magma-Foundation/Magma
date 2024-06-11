@@ -2,14 +2,24 @@ package magma;
 
 import java.util.Optional;
 
-public record ExtractRule(String key) implements Rule {
+public abstract class ExtractRule implements Rule {
+    protected final String key;
+
+    public ExtractRule(String key) {
+        this.key = key;
+    }
+
+    protected abstract Optional<String> fromAttribute(Attribute attribute);
+
+    protected abstract Attribute toAttribute(String content);
+
     @Override
-    public Optional<Node> toNode(String content) {
-        return Optional.of(new MapNode().with(key(), content));
+    public Optional<Node> toNode(String input) {
+        return Optional.of(new MapNode().with(key, toAttribute(input)));
     }
 
     @Override
     public Optional<String> fromNode(Node node) {
-        return node.apply(key);
+        return node.apply(key).flatMap(this::fromAttribute);
     }
 }

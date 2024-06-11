@@ -4,8 +4,8 @@ import java.util.Optional;
 
 public record StripRule(Rule child) implements Rule{
     @Override
-    public Optional<Node> toNode(String content) {
-        return child.toNode(content.strip());
+    public Optional<Node> toNode(String input) {
+        return child.toNode(input.strip());
     }
 
     @Override

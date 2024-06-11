@@ -1,4 +1,4 @@
 package magma;
 
-public record Tuple(String left, String right) {
+public record Tuple<L, R>(L left, R right) {
 }

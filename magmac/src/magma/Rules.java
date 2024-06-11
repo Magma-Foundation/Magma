@@ -7,11 +7,11 @@ public class Rules {
         return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
-    static Optional<Tuple> splitAtSlice(String input, String slice) {
+    static Optional<Tuple<String, String>> splitAtSlice(String input, String slice) {
         return wrapIndex(input.indexOf(slice)).map(keywordIndex -> {
             var left = input.substring(0, keywordIndex);
             var right = input.substring(keywordIndex + slice.length());
-            return new Tuple(left, right);
+            return new Tuple<>(left, right);
         });
     }
 }
