@@ -44,41 +44,10 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        return lexClass(input).map(Main::parse).flatMap(Main::renderClass);
-    }
+        var sourceRule = JavaLang.createClassRule();
+        var targetRule = MagmaLang.createFunctionRule();
 
-    private static Optional<Node> lexClass(String input) {
-        var modifiers = new ExtractStringListRule("modifiers", " ");
-        var name = new StripRule(new ExtractStringRule("name"));
-        var content = new ExtractStringRule("content");
-
-        return new SplitAtSliceRule(new StripRule(modifiers), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(name, "{", new StripRule(new RightRule(content, "}"))))).toNode(input);
-    }
-
-    private static Node parse(Node node) {
-        var oldModifiers = node.apply("modifiers")
-                .flatMap(Attribute::asStringList)
-                .orElseThrow();
-
-        var newModifiers = new ArrayList<String>();
-        for (var oldModifier : oldModifiers) {
-            if (oldModifier.equals("public")) {
-                newModifiers.add("export");
-            }
-        }
-
-        newModifiers.add("class");
-        newModifiers.add("def");
-
-        return node.with("modifiers", new StringListAttribute(newModifiers));
-    }
-
-    private static Optional<String> renderClass(Node node) {
-        var modifiers = new ExtractStringListRule("modifiers", " ");
-        var name = new ExtractStringRule("name");
-        var content = new ExtractStringRule("content");
-
-        return new SplitAtSliceRule(modifiers, " ", new SplitAtSliceRule(name, "() => {\n\t", new RightRule(content, "}"))).fromNode(node);
+        return sourceRule.toNode(input).map(JavaToMagmaParser::parse).flatMap(targetRule::fromNode);
     }
 
     private static Optional<String> compileImport(String input) {
