@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class Main {
+
+    public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
+
     public static void main(String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -41,14 +44,14 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        var keywordInput = input.indexOf("class ");
+        var keywordInput = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
         if (keywordInput == -1) return Optional.empty();
 
         var contentStart = input.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var name = input.substring(keywordInput + "class ".length(), contentStart).strip();
-        return Optional.of("class def " + name + "() => {}");
+        var name = input.substring(keywordInput + CLASS_KEYWORD_WITH_SPACE.length(), contentStart).strip();
+        return Optional.of(CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {}");
     }
 
     private static Optional<String> compileImport(String input) {
