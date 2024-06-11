@@ -48,6 +48,10 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
+        return lexClass(input).map(Main::parseAndRender);
+    }
+
+    private static Optional<ClassNode> lexClass(String input) {
         return splitAtSlice(input, CLASS_KEYWORD_WITH_SPACE).flatMap(result -> {
             var inputModifiers = result.left().strip();
             var afterKeyword = result.right().strip();
@@ -61,7 +65,7 @@ public class Main {
                     return new ClassNode(inputModifiers, name, content);
                 });
             });
-        }).map(Main::parseAndRender);
+        });
     }
 
     private static String parseAndRender(ClassNode node) {
