@@ -48,13 +48,13 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        return wrapIndex(input.indexOf(CLASS_KEYWORD_WITH_SPACE)).flatMap(keywordIndex -> {
-            var inputModifiers = input.substring(0, keywordIndex).strip();
-            var afterKeyword = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length()).strip();
+        return splitAtSlice(input, CLASS_KEYWORD_WITH_SPACE).flatMap(result -> {
+            var inputModifiers = result.left().strip();
+            var afterKeyword = result.right().strip();
 
-            return wrapIndex(afterKeyword.indexOf('{')).flatMap(contentStart -> {
-                var name = afterKeyword.substring(0, contentStart).strip();
-                var afterContentStart = afterKeyword.substring(contentStart + 1).strip();
+            return splitAtSlice(afterKeyword, "{").flatMap(contentStart -> {
+                var name = contentStart.left().strip();
+                var afterContentStart = contentStart.right().strip();
 
                 return wrapIndex(afterContentStart.lastIndexOf('}')).map(contentEnd -> {
                     var outputModifiers = inputModifiers.equals("public") ? "export " : "";
@@ -63,6 +63,14 @@ public class Main {
                     return outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}";
                 });
             });
+        });
+    }
+
+    private static Optional<Tuple> splitAtSlice(String input, String slice) {
+        return wrapIndex(input.indexOf(slice)).map(keywordIndex -> {
+            var left = input.substring(0, keywordIndex);
+            var right = input.substring(keywordIndex + slice.length());
+            return new Tuple(left, right);
         });
     }
 
@@ -102,6 +110,9 @@ public class Main {
         if (c == '{') return state.enter();
         if (c == '}') return state.exit();
         return state;
+    }
+
+    private record Tuple(String left, String right) {
     }
 
     record State(List<String> tokens, StringBuilder buffer, int depth) {
