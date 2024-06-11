@@ -1,4 +1,4 @@
-package magma;import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths;import java.util.ArrayList;import java.util.Collections;import java.util.List;public class Main {
+import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths;import java.util.ArrayList;import java.util.Collections;import java.util.List;public class Main {
     public static void main(String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -12,6 +12,20 @@ package magma;import java.io.IOException;import java.nio.file.Files;import java.
     }
 
     private static String compile(String input) {
+        var inputTokens = split(input);
+
+        var outputTokens = new ArrayList<String>();
+        for (var inputToken : inputTokens) {
+            var strippedInputToken = inputToken.strip();
+            if (!strippedInputToken.isEmpty() && !strippedInputToken.startsWith("package ")) {
+                outputTokens.add(strippedInputToken);
+            }
+        }
+
+        return String.join("", outputTokens);
+    }
+
+    private static List<String> split(String input) {
         var current = new State();
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -19,12 +33,7 @@ package magma;import java.io.IOException;import java.nio.file.Files;import java.
         }
 
         var inputTokens = current.advance().tokens;
-        var outputTokens = new ArrayList<String>();
-        for (String inputToken : inputTokens) {
-            outputTokens.add(inputToken.strip());
-        }
-
-        return String.join("", outputTokens);
+        return inputTokens;
     }
 
     private static State processChar(State state, char c) {

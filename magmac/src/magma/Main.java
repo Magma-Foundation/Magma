@@ -21,6 +21,20 @@ public class Main {
     }
 
     private static String compile(String input) {
+        var inputTokens = split(input);
+
+        var outputTokens = new ArrayList<String>();
+        for (var inputToken : inputTokens) {
+            var strippedInputToken = inputToken.strip();
+            if (!strippedInputToken.isEmpty() && !strippedInputToken.startsWith("package ")) {
+                outputTokens.add(strippedInputToken);
+            }
+        }
+
+        return String.join("", outputTokens);
+    }
+
+    private static List<String> split(String input) {
         var current = new State();
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -28,12 +42,7 @@ public class Main {
         }
 
         var inputTokens = current.advance().tokens;
-        var outputTokens = new ArrayList<String>();
-        for (String inputToken : inputTokens) {
-            outputTokens.add(inputToken.strip());
-        }
-
-        return String.join("", outputTokens);
+        return inputTokens;
     }
 
     private static State processChar(State state, char c) {
