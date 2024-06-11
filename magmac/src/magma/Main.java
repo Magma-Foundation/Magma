@@ -44,14 +44,17 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        var keywordInput = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
-        if (keywordInput == -1) return Optional.empty();
+        var keywordIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
+        if (keywordIndex == -1) return Optional.empty();
 
         var contentStart = input.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var name = input.substring(keywordInput + CLASS_KEYWORD_WITH_SPACE.length(), contentStart).strip();
-        return Optional.of(CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {}");
+        var inputModifiers = input.substring(0, keywordIndex).strip();
+        var outputModifiers = inputModifiers.equals("public") ? "export " : "";
+
+        var name = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length(), contentStart).strip();
+        return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {}");
     }
 
     private static Optional<String> compileImport(String input) {
