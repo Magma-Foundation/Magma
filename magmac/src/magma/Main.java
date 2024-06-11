@@ -57,13 +57,20 @@ public class Main {
                 var afterContentStart = contentStart.right().strip();
 
                 return wrapIndex(afterContentStart.lastIndexOf('}')).map(contentEnd -> {
-                    var outputModifiers = inputModifiers.equals("public") ? "export " : "";
                     var content = afterContentStart.substring(0, contentEnd);
-
-                    return outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}";
+                    return new ClassNode(inputModifiers, name, content);
                 });
             });
-        });
+        }).map(Main::parseAndRender);
+    }
+
+    private static String parseAndRender(ClassNode node) {
+        var outputModifiers = node.modifiers().equals("public") ? "export " : "";
+        return renderClass(node.withModifiers(outputModifiers));
+    }
+
+    private static String renderClass(ClassNode classNode) {
+        return classNode.modifiers() + CLASS_KEYWORD_WITH_SPACE + "def " + classNode.name() + "() => {\n\t" + classNode.content() + "}";
     }
 
     private static Optional<Tuple> splitAtSlice(String input, String slice) {
