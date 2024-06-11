@@ -7,4 +7,9 @@ public record StripRule(Rule child) implements Rule{
     public Optional<Node> toNode(String content) {
         return child.toNode(content.strip());
     }
+
+    @Override
+    public Optional<String> fromNode(Node node) {
+        throw new UnsupportedOperationException();
+    }
 }

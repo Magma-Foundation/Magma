@@ -57,7 +57,11 @@ public class Main {
     }
 
     private static String renderClass(Node node) {
-        return node.apply("modifiers").orElseThrow() + CLASS_KEYWORD_WITH_SPACE + "def " + node.apply("name").orElseThrow() + "() => {\n\t" + node.apply("content").orElseThrow() + "}";
+        var modifiers = new ExtractRule("modifiers").fromNode(node).orElseThrow();
+        var name = new ExtractRule("name").fromNode(node).orElseThrow();
+        var content = new ExtractRule("content").fromNode(node).orElseThrow();
+
+        return modifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}";
     }
 
     private static Optional<String> compileImport(String input) {

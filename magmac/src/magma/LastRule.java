@@ -10,4 +10,9 @@ public record LastRule(ExtractRule child, char c) implements Rule {
             return child.toNode(content);
         });
     }
+
+    @Override
+    public Optional<String> fromNode(Node node) {
+        throw new UnsupportedOperationException();
+    }
 }

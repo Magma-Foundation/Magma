@@ -12,4 +12,9 @@ public record SplitAtSliceRule(Rule leftRule, String c, Rule rightRule) implemen
             return leftRule().toNode(left).flatMap(leftResult -> rightRule().toNode(right).map(inner -> inner.merge(leftResult)));
         });
     }
+
+    @Override
+    public Optional<String> fromNode(Node node) {
+        throw new UnsupportedOperationException();
+    }
 }
