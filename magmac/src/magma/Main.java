@@ -47,13 +47,15 @@ public class Main {
         var keywordIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
         if (keywordIndex == -1) return Optional.empty();
 
-        var contentStart = input.indexOf('{');
+        var inputModifiers = input.substring(0, keywordIndex).strip();
+        var afterKeyword = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length()).strip();
+
+        var contentStart = afterKeyword.indexOf('{');
         if (contentStart == -1) return Optional.empty();
 
-        var inputModifiers = input.substring(0, keywordIndex).strip();
+        var name = afterKeyword.substring(0, contentStart).strip();
         var outputModifiers = inputModifiers.equals("public") ? "export " : "";
 
-        var name = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length(), contentStart).strip();
         return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {}");
     }
 
