@@ -1,6 +1,6 @@
 package magma.compile.lang;
 
-import magma.compile.Attributes;
+import magma.compile.attribute.Attributes;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
 

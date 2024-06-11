@@ -1,7 +1,6 @@
-package magma.compile;
+package magma.compile.attribute;
 
 import magma.api.Tuple;
-import magma.compile.attribute.Attribute;
 
 import java.util.Collections;
 import java.util.HashMap;

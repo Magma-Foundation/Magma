@@ -54,13 +54,13 @@ public class Main {
         var sourceRule = JavaLang.createClassRule();
         var targetRule = MagmaLang.createFunctionRule();
 
-        return sourceRule.toNode(input).map(JavaToMagmaParser::parse).flatMap(targetRule::fromNode);
+        return sourceRule.toNode(input).findAttributes().map(JavaToMagmaParser::parse).flatMap(targetRule::fromNode);
     }
 
     private static Optional<String> compileImport(String input) {
         var sourceRule = new LeftRule("import ", new ExtractStringRule("value"));
         var rightRule = new RightRule(sourceRule, "\n");
-        return sourceRule.toNode(input).flatMap(rightRule::fromNode);
+        return sourceRule.toNode(input).findAttributes().flatMap(rightRule::fromNode);
     }
 
     private static Optional<String> compilePackage(String input) {
