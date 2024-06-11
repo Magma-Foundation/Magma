@@ -2,10 +2,10 @@ package magma;
 
 import java.util.Optional;
 
-public record LastRule(ExtractRule child, char c) implements Rule {
+public record RightRule(ExtractRule child, String slice) implements Rule {
     @Override
     public Optional<Node> toNode(String input) {
-        return Rules.wrapIndex(input.lastIndexOf(c)).flatMap(contentEnd -> {
+        return Rules.wrapIndex(input.lastIndexOf(slice)).flatMap(contentEnd -> {
             var content = input.substring(0, contentEnd);
             return child.toNode(content);
         });
@@ -13,6 +13,6 @@ public record LastRule(ExtractRule child, char c) implements Rule {
 
     @Override
     public Optional<String> fromNode(Node node) {
-        throw new UnsupportedOperationException();
+        return child.fromNode(node).map(inner -> inner + slice);
     }
 }

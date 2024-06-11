@@ -48,7 +48,11 @@ public class Main {
     }
 
     private static Optional<Node> lexClass(String input) {
-        return new SplitAtSliceRule(new StripRule(new ExtractStringListRule("modifiers", " ")), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(new StripRule(new ExtractStringRule("name")), "{", new StripRule(new LastRule(new ExtractStringRule("content"), '}'))))).toNode(input);
+        var modifiers = new ExtractStringListRule("modifiers", " ");
+        var name = new StripRule(new ExtractStringRule("name"));
+        var content = new ExtractStringRule("content");
+
+        return new SplitAtSliceRule(new StripRule(modifiers), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(name, "{", new StripRule(new RightRule(content, "}"))))).toNode(input);
     }
 
     private static String parseAndRender(Node node) {
@@ -74,9 +78,11 @@ public class Main {
                 .orElseThrow();
 
         var name = new ExtractStringRule("name").fromNode(node).orElseThrow();
-        var content = new ExtractStringRule("content").fromNode(node).orElseThrow();
+        var content = new RightRule(new ExtractStringRule("content"), "}")
+                .fromNode(node)
+                .orElseThrow();
 
-        return modifiers + " " + name + "() => {\n\t" + content + "}";
+        return modifiers + " " + name + "() => {\n\t" + content;
     }
 
     private static Optional<String> compileImport(String input) {
