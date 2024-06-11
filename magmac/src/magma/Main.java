@@ -54,9 +54,15 @@ public class Main {
         if (contentStart == -1) return Optional.empty();
 
         var name = afterKeyword.substring(0, contentStart).strip();
-        var outputModifiers = inputModifiers.equals("public") ? "export " : "";
+        var afterContentStart = afterKeyword.substring(contentStart + 1).strip();
 
-        return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {}");
+        var contentEnd = afterContentStart.lastIndexOf('}');
+        if (contentEnd == -1) return Optional.empty();
+
+        var outputModifiers = inputModifiers.equals("public") ? "export " : "";
+        var content = afterContentStart.substring(0, contentEnd);
+
+        return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}");
     }
 
     private static Optional<String> compileImport(String input) {
