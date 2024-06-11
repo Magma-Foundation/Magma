@@ -3,6 +3,9 @@ package magma;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaParser;
 import magma.compile.lang.MagmaLang;
+import magma.compile.rule.ExtractStringRule;
+import magma.compile.rule.LeftRule;
+import magma.compile.rule.RightRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,10 +58,9 @@ public class Main {
     }
 
     private static Optional<String> compileImport(String input) {
-        if (input.startsWith("import ")) {
-            return Optional.of(input + "\n");
-        }
-        return Optional.empty();
+        var sourceRule = new LeftRule("import ", new ExtractStringRule("value"));
+        var rightRule = new RightRule(sourceRule, "\n");
+        return sourceRule.toNode(input).flatMap(rightRule::fromNode);
     }
 
     private static Optional<String> compilePackage(String input) {
