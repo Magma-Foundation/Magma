@@ -5,4 +5,4 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-class def Test() => {}
+class def Main() => {}

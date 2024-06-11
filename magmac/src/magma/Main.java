@@ -41,10 +41,14 @@ public class Main {
     }
 
     private static Optional<String> compileClass(String input) {
-        if (input.contains("class")) {
-            return Optional.of("class def Test() => {}");
-        }
-        return Optional.empty();
+        var keywordInput = input.indexOf("class ");
+        if (keywordInput == -1) return Optional.empty();
+
+        var contentStart = input.indexOf('{');
+        if (contentStart == -1) return Optional.empty();
+
+        var name = input.substring(keywordInput + "class ".length(), contentStart).strip();
+        return Optional.of("class def " + name + "() => {}");
     }
 
     private static Optional<String> compileImport(String input) {
