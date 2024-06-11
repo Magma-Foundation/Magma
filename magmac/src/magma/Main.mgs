@@ -40,25 +40,20 @@ export class def Main() => {
     }
 
     private static Optional<String> compileClass(String input) {
-        var keywordIndex = input.indexOf(CLASS_KEYWORD_WITH_SPACE);
-        if (keywordIndex == -1) return Optional.empty();
+        return lexClass(input).map(Main::parseAndRender);
+    }
 
-        var inputModifiers = input.substring(0, keywordIndex).strip();
-        var afterKeyword = input.substring(keywordIndex + CLASS_KEYWORD_WITH_SPACE.length()).strip();
+    private static Optional<Node> lexClass(String input) {
+        return new SplitAtSliceRule(new StripRule(new ExtractRule("modifiers")), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(new StripRule(new ExtractRule("name")), "{", new StripRule(new LastRule(new ExtractRule("content"), '}'))))).toNode(input);
+    }
 
-        var contentStart = afterKeyword.indexOf('{');
-        if (contentStart == -1) return Optional.empty();
+    private static String parseAndRender(Node node) {
+        var outputModifiers = node.apply("modifiers").orElseThrow().equals("public") ? "export " : "";
+        return renderClass(node.with("modifiers", outputModifiers));
+    }
 
-        var name = afterKeyword.substring(0, contentStart).strip();
-        var afterContentStart = afterKeyword.substring(contentStart + 1).strip();
-
-        var contentEnd = afterContentStart.lastIndexOf('}');
-        if (contentEnd == -1) return Optional.empty();
-
-        var outputModifiers = inputModifiers.equals("public") ? "export " : "";
-        var content = afterContentStart.substring(0, contentEnd);
-
-        return Optional.of(outputModifiers + CLASS_KEYWORD_WITH_SPACE + "def " + name + "() => {\n\t" + content + "}");
+    private static String renderClass(Node node) {
+        return node.apply("modifiers").orElseThrow() + CLASS_KEYWORD_WITH_SPACE + "def " + node.apply("name").orElseThrow() + "() => {\n\t" + node.apply("content").orElseThrow() + "}";
     }
 
     private static Optional<String> compileImport(String input) {

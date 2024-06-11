@@ -43,32 +43,12 @@ public class Main {
                 .orElse(input);
     }
 
-    private static Optional<Integer> wrapIndex(int index) {
-        return index == -1 ? Optional.empty() : Optional.of(index);
-    }
-
     private static Optional<String> compileClass(String input) {
         return lexClass(input).map(Main::parseAndRender);
     }
 
     private static Optional<Node> lexClass(String input) {
-        return splitAtSlice(input, CLASS_KEYWORD_WITH_SPACE).flatMap(result -> {
-            var inputModifiers = result.left().strip();
-            var afterKeyword = result.right().strip();
-
-            return splitAtSlice(afterKeyword, "{").flatMap(contentStart -> {
-                var name = contentStart.left().strip();
-                var afterContentStart = contentStart.right().strip();
-
-                return wrapIndex(afterContentStart.lastIndexOf('}')).map(contentEnd -> {
-                    var content = afterContentStart.substring(0, contentEnd);
-                    return new MapNode()
-                            .with("modifiers", inputModifiers)
-                            .with("name", name)
-                            .with("content", content);
-                });
-            });
-        });
+        return new SplitAtSliceRule(new StripRule(new ExtractRule("modifiers")), CLASS_KEYWORD_WITH_SPACE, new StripRule(new SplitAtSliceRule(new StripRule(new ExtractRule("name")), "{", new StripRule(new LastRule(new ExtractRule("content"), '}'))))).toNode(input);
     }
 
     private static String parseAndRender(Node node) {
@@ -78,14 +58,6 @@ public class Main {
 
     private static String renderClass(Node node) {
         return node.apply("modifiers").orElseThrow() + CLASS_KEYWORD_WITH_SPACE + "def " + node.apply("name").orElseThrow() + "() => {\n\t" + node.apply("content").orElseThrow() + "}";
-    }
-
-    private static Optional<Tuple> splitAtSlice(String input, String slice) {
-        return wrapIndex(input.indexOf(slice)).map(keywordIndex -> {
-            var left = input.substring(0, keywordIndex);
-            var right = input.substring(keywordIndex + slice.length());
-            return new Tuple(left, right);
-        });
     }
 
     private static Optional<String> compileImport(String input) {
@@ -124,9 +96,6 @@ public class Main {
         if (c == '{') return state.enter();
         if (c == '}') return state.exit();
         return state;
-    }
-
-    private record Tuple(String left, String right) {
     }
 
     record State(List<String> tokens, StringBuilder buffer, int depth) {
