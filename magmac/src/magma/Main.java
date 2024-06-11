@@ -25,13 +25,18 @@ public class Main {
 
         var outputTokens = new ArrayList<String>();
         for (var inputToken : inputTokens) {
-            var strippedInputToken = inputToken.strip();
-            if (!strippedInputToken.isEmpty() && !strippedInputToken.startsWith("package ")) {
-                outputTokens.add(strippedInputToken);
-            }
+            outputTokens.add(compileRootStatement(inputToken.strip()));
         }
 
         return String.join("", outputTokens);
+    }
+
+    private static String compileRootStatement(String strippedInputToken) {
+        if (strippedInputToken.isEmpty() || strippedInputToken.startsWith("package ")) {
+            return "";
+        } else {
+            return strippedInputToken;
+        }
     }
 
     private static List<String> split(String input) {
@@ -41,8 +46,7 @@ public class Main {
             current = processChar(current.append(c), c);
         }
 
-        var inputTokens = current.advance().tokens;
-        return inputTokens;
+        return current.advance().tokens;
     }
 
     private static State processChar(State state, char c) {
