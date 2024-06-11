@@ -1,11 +1,9 @@
 package magma;
 
+import java.util.Optional;
+
 public interface Node {
-    Node withModifiers(String modifiers);
+    Node with(String key, String value);
 
-    String modifiers();
-
-    String name();
-
-    String content();
+    Optional<String> apply(String key);
 }

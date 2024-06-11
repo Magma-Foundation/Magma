@@ -62,19 +62,22 @@ public class Main {
 
                 return wrapIndex(afterContentStart.lastIndexOf('}')).map(contentEnd -> {
                     var content = afterContentStart.substring(0, contentEnd);
-                    return new ClassNode(inputModifiers, name, content);
+                    return new MapNode()
+                            .with("modifiers", inputModifiers)
+                            .with("name", name)
+                            .with("content", content);
                 });
             });
         });
     }
 
     private static String parseAndRender(Node node) {
-        var outputModifiers = node.modifiers().equals("public") ? "export " : "";
-        return renderClass(node.withModifiers(outputModifiers));
+        var outputModifiers = node.apply("modifiers").orElseThrow().equals("public") ? "export " : "";
+        return renderClass(node.with("modifiers", outputModifiers));
     }
 
     private static String renderClass(Node node) {
-        return node.modifiers() + CLASS_KEYWORD_WITH_SPACE + "def " + node.name() + "() => {\n\t" + node.content() + "}";
+        return node.apply("modifiers").orElseThrow() + CLASS_KEYWORD_WITH_SPACE + "def " + node.apply("name").orElseThrow() + "() => {\n\t" + node.apply("content").orElseThrow() + "}";
     }
 
     private static Optional<Tuple> splitAtSlice(String input, String slice) {
