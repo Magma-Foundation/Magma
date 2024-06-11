@@ -1,4 +1,10 @@
-import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths;import java.util.ArrayList;import java.util.Collections;import java.util.List;public class Main {
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+public class Main {
     public static void main(String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -16,13 +22,22 @@ import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths
 
         var outputTokens = new ArrayList<String>();
         for (var inputToken : inputTokens) {
-            var strippedInputToken = inputToken.strip();
-            if (!strippedInputToken.isEmpty() && !strippedInputToken.startsWith("package ")) {
-                outputTokens.add(strippedInputToken);
-            }
+            outputTokens.add(compileRootStatement(inputToken.strip()));
         }
 
         return String.join("", outputTokens);
+    }
+
+    private static String compileRootStatement(String strippedInputToken) {
+        if (strippedInputToken.isEmpty() || strippedInputToken.startsWith("package ")) {
+            return "";
+        }
+
+        if(strippedInputToken.startsWith("import ")) {
+            return strippedInputToken + "\n";
+        }
+
+        return strippedInputToken;
     }
 
     private static List<String> split(String input) {
@@ -32,8 +47,7 @@ import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths
             current = processChar(current.append(c), c);
         }
 
-        var inputTokens = current.advance().tokens;
-        return inputTokens;
+        return current.advance().tokens;
     }
 
     private static State processChar(State state, char c) {

@@ -34,9 +34,13 @@ public class Main {
     private static String compileRootStatement(String strippedInputToken) {
         if (strippedInputToken.isEmpty() || strippedInputToken.startsWith("package ")) {
             return "";
-        } else {
-            return strippedInputToken;
         }
+
+        if(strippedInputToken.startsWith("import ")) {
+            return strippedInputToken + "\n";
+        }
+
+        return strippedInputToken;
     }
 
     private static List<String> split(String input) {
