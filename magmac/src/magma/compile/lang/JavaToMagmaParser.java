@@ -1,14 +1,14 @@
 package magma.compile.lang;
 
-import magma.compile.Node;
+import magma.compile.Attributes;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
 
 import java.util.ArrayList;
 
 public class JavaToMagmaParser {
-    public static Node parse(Node node) {
-        var oldModifiers = node.apply("modifiers")
+    public static Attributes parse(Attributes attributes) {
+        var oldModifiers = attributes.apply("modifiers")
                 .flatMap(Attribute::asStringList)
                 .orElseThrow();
 
@@ -22,6 +22,6 @@ public class JavaToMagmaParser {
         newModifiers.add("class");
         newModifiers.add("def");
 
-        return node.with("modifiers", new StringListAttribute(newModifiers));
+        return attributes.with("modifiers", new StringListAttribute(newModifiers));
     }
 }

@@ -1,12 +1,12 @@
 package magma.compile.rule;
 
-import magma.compile.Node;
+import magma.compile.Attributes;
 
 import java.util.Optional;
 
 public record SplitAtSliceRule(Rule leftRule, String slice, Rule rightRule) implements Rule {
     @Override
-    public Optional<Node> toNode(String input) {
+    public Optional<Attributes> toNode(String input) {
         return Rules.splitAtSlice(input, slice()).flatMap(contentStart -> {
             var left = contentStart.left();
             var right = contentStart.right();
@@ -16,7 +16,7 @@ public record SplitAtSliceRule(Rule leftRule, String slice, Rule rightRule) impl
     }
 
     @Override
-    public Optional<String> fromNode(Node node) {
-        return leftRule.fromNode(node).flatMap(left -> rightRule.fromNode(node).map(right -> left + slice + right));
+    public Optional<String> fromNode(Attributes attributes) {
+        return leftRule.fromNode(attributes).flatMap(left -> rightRule.fromNode(attributes).map(right -> left + slice + right));
     }
 }

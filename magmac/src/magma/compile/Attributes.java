@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * adding attributes, applying attributes, merging nodes, and
  * streaming entries.
  */
-public interface Node {
+public interface Attributes {
 
     /**
      * Adds an attribute to the node.
@@ -21,7 +21,7 @@ public interface Node {
      * @param value the attribute to add
      * @return a new Node instance with the added attribute
      */
-    Node with(String key, Attribute value);
+    Attributes with(String key, Attribute value);
 
     /**
      * Retrieves an attribute associated with the given key.
@@ -37,7 +37,7 @@ public interface Node {
      * @param other the node to merge with
      * @return a new Node instance representing the merged result
      */
-    Node merge(Node other);
+    Attributes merge(Attributes other);
 
     /**
      * Streams the entries of the node as tuples of key and attribute.

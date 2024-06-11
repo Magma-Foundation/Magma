@@ -10,16 +10,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record MapNode(Map<String, Attribute> values) implements Node {
-    public MapNode() {
+public record MapAttributes(Map<String, Attribute> values) implements Attributes {
+    public MapAttributes() {
         this(Collections.emptyMap());
     }
 
     @Override
-    public Node with(String key, Attribute value) {
+    public Attributes with(String key, Attribute value) {
         var copy = new HashMap<>(values);
         copy.put(key, value);
-        return new MapNode(copy);
+        return new MapAttributes(copy);
     }
 
     @Override
@@ -30,10 +30,10 @@ public record MapNode(Map<String, Attribute> values) implements Node {
     }
 
     @Override
-    public Node merge(Node other) {
+    public Attributes merge(Attributes other) {
         var entries = other.streamEntries().collect(Collectors.toSet());
 
-        Node current = this;
+        Attributes current = this;
         for (var entry : entries) {
             current = current.with(entry.left(), entry.right());
         }
