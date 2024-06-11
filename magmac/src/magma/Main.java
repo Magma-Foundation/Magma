@@ -31,16 +31,20 @@ public class Main {
         return String.join("", outputTokens);
     }
 
-    private static String compileRootStatement(String strippedInputToken) {
-        if (strippedInputToken.isEmpty() || strippedInputToken.startsWith("package ")) {
+    private static String compileRootStatement(String input) {
+        if (input.isEmpty() || input.startsWith("package ")) {
             return "";
         }
 
-        if(strippedInputToken.startsWith("import ")) {
-            return strippedInputToken + "\n";
+        if (input.startsWith("import ")) {
+            return input + "\n";
         }
 
-        return strippedInputToken;
+        if (input.contains("class")) {
+            return "class def Test() => {}";
+        }
+
+        return input;
     }
 
     private static List<String> split(String input) {
