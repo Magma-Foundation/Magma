@@ -1,5 +1,7 @@
 package magma.compile.rule;
 
+import magma.compile.rule.result.RuleResult;
+
 import java.util.Optional;
 
 /**

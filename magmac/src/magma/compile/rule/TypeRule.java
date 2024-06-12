@@ -1,5 +1,9 @@
 package magma.compile.rule;
 
+import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.TypedRuleResult;
+
 import java.util.Optional;
 
 public record TypeRule(String type, Rule child) implements Rule {

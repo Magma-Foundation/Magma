@@ -1,9 +1,9 @@
 package magma.compile.lang;
 
-import magma.compile.rule.ExtractStringListRule;
-import magma.compile.rule.ExtractStringRule;
-import magma.compile.rule.RightRule;
-import magma.compile.rule.SplitAtSliceRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.result.SplitAtSliceRule;
 
 public class MagmaLang {
     public static SplitAtSliceRule createFunctionRule() {

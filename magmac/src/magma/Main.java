@@ -3,11 +3,9 @@ package magma;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
-import magma.compile.rule.EmptyRuleResult;
-import magma.compile.rule.Node;
-import magma.compile.rule.RightRule;
-import magma.compile.rule.Rule;
-import magma.compile.rule.RuleResult;
+import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.result.RuleResult;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,6 +1,10 @@
-package magma.compile.rule;
+package magma.compile.rule.text;
 
 import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.AdaptiveRuleResult;
+import magma.compile.rule.result.RuleResult;
 
 import java.util.Optional;
 

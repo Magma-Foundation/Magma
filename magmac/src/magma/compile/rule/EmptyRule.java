@@ -2,6 +2,9 @@ package magma.compile.rule;
 
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
+import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
 
 import java.util.Optional;
 

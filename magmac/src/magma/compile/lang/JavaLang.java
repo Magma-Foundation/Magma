@@ -2,13 +2,13 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.ExtractStringListRule;
-import magma.compile.rule.ExtractStringRule;
-import magma.compile.rule.LeftRule;
-import magma.compile.rule.RightRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
 import magma.compile.rule.Rule;
-import magma.compile.rule.SplitAtSliceRule;
-import magma.compile.rule.StripRule;
+import magma.compile.rule.result.SplitAtSliceRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.TypeRule;
 
 public class JavaLang {

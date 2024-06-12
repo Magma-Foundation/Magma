@@ -9,7 +9,7 @@ public class Rules {
         return index == -1 ? Optional.empty() : Optional.of(index);
     }
 
-    static Optional<Tuple<String, String>> splitAtSlice(String input, String slice) {
+    public static Optional<Tuple<String, String>> splitAtSlice(String input, String slice) {
         return wrapIndex(input.indexOf(slice)).map(keywordIndex -> {
             var left = input.substring(0, keywordIndex);
             var right = input.substring(keywordIndex + slice.length());

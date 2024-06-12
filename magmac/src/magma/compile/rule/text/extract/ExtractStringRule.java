@@ -1,4 +1,4 @@
-package magma.compile.rule;
+package magma.compile.rule.text.extract;
 
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;

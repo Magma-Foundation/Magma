@@ -1,6 +1,7 @@
-package magma.compile.rule;
+package magma.compile.rule.result;
 
 import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
 
 import java.util.Optional;
 

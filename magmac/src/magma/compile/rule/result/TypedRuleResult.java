@@ -1,13 +1,14 @@
-package magma.compile.rule;
+package magma.compile.rule.result;
 
 import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
 
 import java.util.Optional;
 
-public record UntypedRuleResult(Attributes attributes) implements RuleResult {
+public record TypedRuleResult(String name, Attributes attributes) implements RuleResult{
     @Override
     public Optional<String> findName() {
-        return Optional.empty();
+        return Optional.of(name);
     }
 
     @Override
@@ -17,6 +18,6 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
 
     @Override
     public Optional<Node> create() {
-        return Optional.empty();
+        return Optional.of(new Node(name, attributes));
     }
 }
