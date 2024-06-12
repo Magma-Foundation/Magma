@@ -1,5 +1,9 @@
 package magma.compile.rule;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.RuleResult;
 
@@ -18,11 +22,17 @@ public record OrRule(List<Rule> rules) implements Rule {
         return new EmptyRuleResult();
     }
 
-    @Override
-    public Optional<String> fromNode(Node node) {
+    private Optional<String> fromNode0(Node node) {
         return rules.stream()
-                .map(rule -> rule.fromNode(node))
+                .map(rule -> rule.fromNode(node).findValue())
                 .flatMap(Optional::stream)
                 .findFirst();
+    }
+
+    @Override
+    public Result<String, CompileException> fromNode(Node node) {
+        return fromNode0(node)
+                .<Result<String, CompileException>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
     }
 }

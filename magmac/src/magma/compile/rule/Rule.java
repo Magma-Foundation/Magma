@@ -1,8 +1,8 @@
 package magma.compile.rule;
 
+import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.rule.result.RuleResult;
-
-import java.util.Optional;
 
 /**
  * The Rule interface provides methods for converting between strings
@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface Rule {
     RuleResult toNode(String input);
 
-    Optional<String> fromNode(Node node);
+    Result<String, CompileException> fromNode(Node node);
 }

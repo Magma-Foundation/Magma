@@ -1,5 +1,9 @@
 package magma.compile.rule;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.TypedRuleResult;
@@ -15,10 +19,14 @@ public record TypeRule(String type, Rule child) implements Rule {
                 .orElse(new EmptyRuleResult());
     }
 
+    private Optional<String> fromNode0(Node node) {
+        return node.type().equals(type) ? child.fromNode(node).findValue() : Optional.empty();
+    }
+
     @Override
-    public Optional<String> fromNode(Node node) {
-        return node.type().equals(type)
-                ? child.fromNode(node)
-                : Optional.empty();
+    public Result<String, CompileException> fromNode(Node node) {
+        return fromNode0(node)
+                .<Result<String, CompileException>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
     }
 }

@@ -1,5 +1,9 @@
 package magma.compile.rule;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
@@ -30,8 +34,7 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
         }
     }
 
-    @Override
-    public Optional<String> fromNode(Node node) {
+    private Optional<String> fromNode0(Node node) {
         return node.attributes()
                 .apply(propertyKey)
                 .flatMap(Attribute::asNodeList)
@@ -40,8 +43,15 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
 
     private String joinNodes(List<Node> list) {
         return list.stream()
-                .map(childRule::fromNode)
+                .map(node -> childRule.fromNode(node).findValue())
                 .flatMap(Optional::stream)
                 .collect(Collectors.joining());
+    }
+
+    @Override
+    public Result<String, CompileException> fromNode(Node node) {
+        return fromNode0(node)
+                .<Result<String, CompileException>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
     }
 }

@@ -1,5 +1,9 @@
 package magma.compile.rule.text;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -16,7 +20,8 @@ public record LeftRule(String slice, Rule child) implements Rule {
     }
 
     private Optional<String> fromNode0(Attributes attributes) {
-        return child.fromNode(new Node("", attributes)).map(inner -> slice + inner);
+        Node node = new Node("", attributes);
+        return child.fromNode(node).findValue().map(inner -> slice + inner);
     }
 
     @Override
@@ -24,8 +29,14 @@ public record LeftRule(String slice, Rule child) implements Rule {
         return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
     }
 
-    @Override
-    public Optional<String> fromNode(Node node) {
+    private Optional<String> fromNode0(Node node) {
         return fromNode0(node.attributes());
+    }
+
+    @Override
+    public Result<String, CompileException> fromNode(Node node) {
+        return fromNode0(node)
+                .<Result<String, CompileException>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
     }
 }

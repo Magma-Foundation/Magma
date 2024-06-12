@@ -3,6 +3,7 @@ package magma;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
+import magma.compile.rule.Rule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +19,8 @@ public class Main {
             var target = source.resolveSibling("Main.mgs");
             var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
             var generated = JavaToMagmaGenerator.generate(root);
-            Files.writeString(target, MagmaLang.createRootRule().fromNode(generated).orElseThrow());
+            Rule rule = MagmaLang.createRootRule();
+            Files.writeString(target, rule.fromNode(generated).findValue().orElseThrow());
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
