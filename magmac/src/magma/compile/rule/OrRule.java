@@ -19,9 +19,9 @@ public record OrRule(List<Rule> rules) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Node attributes) {
+    public Optional<String> fromNode(Node node) {
         return rules.stream()
-                .map(rule -> rule.fromNode(attributes))
+                .map(rule -> rule.fromNode(node))
                 .flatMap(Optional::stream)
                 .findFirst();
     }

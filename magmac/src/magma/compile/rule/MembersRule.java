@@ -31,8 +31,8 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Node attributes) {
-        return attributes.attributes()
+    public Optional<String> fromNode(Node node) {
+        return node.attributes()
                 .apply(propertyKey)
                 .flatMap(Attribute::asNodeList)
                 .map(this::joinNodes);

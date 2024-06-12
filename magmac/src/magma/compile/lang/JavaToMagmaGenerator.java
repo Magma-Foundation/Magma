@@ -41,6 +41,7 @@ public class JavaToMagmaGenerator {
             newModifiers.add("def");
 
             var newAttributes = oldAttributes.with("modifiers", new StringListAttribute(newModifiers));
+
             return root.retype("function").withAttributes(newAttributes);
         }
 

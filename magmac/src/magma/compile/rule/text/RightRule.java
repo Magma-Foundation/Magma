@@ -23,7 +23,7 @@ public record RightRule(Rule child, String slice) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Node attributes) {
-        return child.fromNode(attributes).map(inner -> inner + slice);
+    public Optional<String> fromNode(Node node) {
+        return child.fromNode(node).map(inner -> inner + slice);
     }
 }

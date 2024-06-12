@@ -16,9 +16,9 @@ public record TypeRule(String type, Rule child) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Node attributes) {
-        return attributes.type().equals(type)
-                ? child.fromNode(attributes)
+    public Optional<String> fromNode(Node node) {
+        return node.type().equals(type)
+                ? child.fromNode(node)
                 : Optional.empty();
     }
 }

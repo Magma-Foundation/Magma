@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface Rule {
     RuleResult toNode(String input);
 
-    Optional<String> fromNode(Node attributes);
+    Optional<String> fromNode(Node node);
 }

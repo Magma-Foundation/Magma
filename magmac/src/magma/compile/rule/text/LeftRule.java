@@ -25,7 +25,7 @@ public record LeftRule(String slice, Rule child) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Node attributes) {
-        return fromNode0(attributes.attributes());
+    public Optional<String> fromNode(Node node) {
+        return fromNode0(node.attributes());
     }
 }

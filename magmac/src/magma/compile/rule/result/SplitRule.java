@@ -36,7 +36,7 @@ public abstract class SplitRule {
 
     protected abstract Optional<Integer> computeIndex(String input);
 
-    public Optional<String> fromNode(Node attributes) {
-        return leftRule.fromNode(attributes).flatMap(left -> rightRule.fromNode(attributes).map(right -> left + slice + right));
+    public Optional<String> fromNode(Node node) {
+        return leftRule.fromNode(node).flatMap(left -> rightRule.fromNode(node).map(right -> left + slice + right));
     }
 }
