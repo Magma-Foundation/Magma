@@ -1,5 +1,7 @@
 package magma.compile.attribute;
 
+import magma.compile.rule.Node;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +11,9 @@ import java.util.Optional;
  * the attribute value as a string or a list of strings.
  */
 public interface Attribute {
+    default Optional<List<Node>> asNodeList() {
+        return Optional.empty();
+    }
 
     /**
      * Retrieves the attribute value as a string.

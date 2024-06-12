@@ -9,9 +9,6 @@ import magma.compile.rule.result.RuleResult;
 import java.util.Optional;
 
 public record StripRule(Rule child) implements Rule{
-    private Optional<Attributes> toNode0(String input) {
-        return child.toNode(input.strip()).findAttributes();
-    }
 
     private Optional<String> fromNode0(Attributes attributes) {
         throw new UnsupportedOperationException();
@@ -19,7 +16,7 @@ public record StripRule(Rule child) implements Rule{
 
     @Override
     public RuleResult toNode(String input) {
-        return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
+        return child.toNode(input.strip());
     }
 
     @Override

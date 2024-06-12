@@ -2,6 +2,8 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
+import magma.compile.rule.MembersRule;
+import magma.compile.rule.OrRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.LeftRule;
@@ -10,6 +12,8 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.SplitAtSliceRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.TypeRule;
+
+import java.util.List;
 
 public class JavaLang {
     public static Rule createClassRule() {
@@ -31,5 +35,15 @@ public class JavaLang {
 
     public static Rule createImportRule() {
         return new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value")));
+    }
+
+    public static TypeRule createRootRule() {
+        var childRule = new OrRule(List.of(
+                createWhitespaceRule(),
+                createPackageRule(),
+                createImportRule(),
+                createClassRule()));
+
+        return new TypeRule("root", new MembersRule("children", new StripRule(childRule)));
     }
 }

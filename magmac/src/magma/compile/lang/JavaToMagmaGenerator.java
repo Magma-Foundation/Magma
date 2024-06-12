@@ -1,16 +1,31 @@
 package magma.compile.lang;
 
 import magma.compile.attribute.Attribute;
+import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class JavaToMagmaGenerator {
-    public static Optional<Node> generate(Node node) {
-        if (node.is("class")) {
-            var oldAttributes = node.attributes();
+    public static Node generate(Node node) {
+        var withChildren = node.mapAttributes(attributes -> attributes.mapValues(attribute -> {
+            var list = attribute.asNodeList();
+            if (list.isPresent()) {
+                return new NodeListAttribute(list.get().stream()
+                        .map(JavaToMagmaGenerator::generate)
+                        .toList());
+            } else {
+                return attribute;
+            }
+        }));
+
+        return postVisit(withChildren);
+    }
+
+    private static Node postVisit(Node root) {
+        if (root.is("class")) {
+            var oldAttributes = root.attributes();
             var oldModifiers = oldAttributes.apply("modifiers")
                     .flatMap(Attribute::asStringList)
                     .orElseThrow();
@@ -26,11 +41,10 @@ public class JavaToMagmaGenerator {
             newModifiers.add("def");
 
             var newAttributes = oldAttributes.with("modifiers", new StringListAttribute(newModifiers));
-            return Optional.of(node.withAttributes(newAttributes));
+            return root.retype("function").withAttributes(newAttributes);
         }
 
-        if(node.is("import")) return Optional.of(node);
-
-        return Optional.empty();
+        if (root.is("import")) return root;
+        return root;
     }
 }

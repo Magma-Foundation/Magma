@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,5 +46,15 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
         return values.entrySet()
                 .stream()
                 .map(entry -> new Tuple<>(entry.getKey(), entry.getValue()));
+    }
+
+    @Override
+    public Attributes mapValues(Function<Attribute, Attribute> mapper) {
+        var copy = new HashMap<String, Attribute>();
+        for (Map.Entry<String, Attribute> stringAttributeEntry : values.entrySet()) {
+            copy.put(stringAttributeEntry.getKey(), mapper.apply(stringAttributeEntry.getValue()));
+        }
+
+        return new MapAttributes(copy);
     }
 }

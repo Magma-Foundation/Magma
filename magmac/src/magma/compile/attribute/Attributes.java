@@ -3,6 +3,7 @@ package magma.compile.attribute;
 import magma.api.Tuple;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -44,4 +45,6 @@ public interface Attributes {
      * @return a Stream of tuples containing the keys and attributes
      */
     Stream<Tuple<String, Attribute>> streamEntries();
+
+    Attributes mapValues(Function<Attribute, Attribute> mapper);
 }
