@@ -1,5 +1,7 @@
 package magma;
 
+import magma.api.Results;
+import magma.compile.CompileException;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -20,8 +22,8 @@ public class Main {
             var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
             var generated = JavaToMagmaGenerator.generate(root);
             Rule rule = MagmaLang.createRootRule();
-            Files.writeString(target, rule.fromNode(generated).findValue().orElseThrow());
-        } catch (IOException e) {
+            Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
+        } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }

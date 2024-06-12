@@ -1,12 +1,14 @@
 package magma.compile.rule.result;
 
+import magma.api.Result;
 import magma.api.Tuple;
+import magma.compile.CompileException;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 
 import java.util.Optional;
 
-public abstract class SplitRule {
+public abstract class SplitRule implements Rule {
     protected final Rule leftRule;
     protected final String slice;
     protected final Rule rightRule;
@@ -36,7 +38,8 @@ public abstract class SplitRule {
 
     protected abstract Optional<Integer> computeIndex(String input);
 
-    public Optional<String> fromNode0(Node node) {
-        return leftRule.fromNode(node).findValue().flatMap(left -> rightRule.fromNode(node).findValue().map(right -> left + slice + right));
+    @Override
+    public Result<String, CompileException> fromNode(Node node) {
+        return leftRule.fromNode(node).flatMapValue(left -> rightRule.fromNode(node).mapValue(right -> left + slice + right));
     }
 }

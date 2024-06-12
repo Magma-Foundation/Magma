@@ -1,8 +1,9 @@
 package magma.compile.rule;
 
+import magma.api.Collectors;
 import magma.api.Err;
-import magma.api.Ok;
 import magma.api.Result;
+import magma.api.Streams;
 import magma.compile.CompileException;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
@@ -14,8 +15,6 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record MembersRule(String propertyKey, Rule childRule) implements Rule {
     @Override
@@ -34,24 +33,19 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
         }
     }
 
-    private Optional<String> fromNode0(Node node) {
-        return node.attributes()
-                .apply(propertyKey)
-                .flatMap(Attribute::asNodeList)
-                .map(this::joinNodes);
-    }
-
-    private String joinNodes(List<Node> list) {
-        return list.stream()
-                .map(node -> childRule.fromNode(node).findValue())
-                .flatMap(Optional::stream)
-                .collect(Collectors.joining());
+    private Result<String, CompileException> joinNodes(List<Node> list) {
+        return Streams.fromNativeList(list)
+                .map(childRule::fromNode)
+                .collect(Collectors.exceptionally(Collectors.joining()))
+                .mapValue(inner -> inner.orElse(""));
     }
 
     @Override
     public Result<String, CompileException> fromNode(Node node) {
-        return fromNode0(node)
-                .<Result<String, CompileException>>map(Ok::new)
+        return node.attributes()
+                .apply(propertyKey)
+                .flatMap(Attribute::asNodeList)
+                .map(this::joinNodes)
                 .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
     }
 }
