@@ -1,4 +1,4 @@
-package magma.compile;
+package magma.compile.rule;
 
 import magma.compile.attribute.Attributes;
 
@@ -8,4 +8,6 @@ public interface RuleResult {
     Optional<String> findName();
 
     Optional<Attributes> findAttributes();
+
+    Optional<Node> create();
 }

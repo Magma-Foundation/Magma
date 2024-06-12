@@ -1,7 +1,5 @@
 package magma.compile.rule;
 
-import magma.compile.AdaptiveRuleResult;
-import magma.compile.RuleResult;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.Attribute;
@@ -23,13 +21,17 @@ public abstract class ExtractRule implements Rule {
         return Optional.of(new MapAttributes().with(key, toAttribute(input)));
     }
 
-    @Override
-    public Optional<String> fromNode(Attributes attributes) {
+    private Optional<String> fromNode0(Attributes attributes) {
         return attributes.apply(key).flatMap(this::fromAttribute);
     }
 
     @Override
     public RuleResult toNode(String input) {
         return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
+    }
+
+    @Override
+    public Optional<String> fromNode(Node attributes) {
+        return fromNode0(attributes.attributes());
     }
 }

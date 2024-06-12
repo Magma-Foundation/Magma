@@ -1,7 +1,5 @@
 package magma.compile.rule;
 
-import magma.compile.AdaptiveRuleResult;
-import magma.compile.RuleResult;
 import magma.compile.attribute.Attributes;
 
 import java.util.Optional;
@@ -16,12 +14,12 @@ public record RightRule(Rule child, String slice) implements Rule {
     }
 
     @Override
-    public Optional<String> fromNode(Attributes attributes) {
-        return child.fromNode(attributes).map(inner -> inner + slice);
+    public RuleResult toNode(String input) {
+        return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
     }
 
     @Override
-    public RuleResult toNode(String input) {
-        return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
+    public Optional<String> fromNode(Node attributes) {
+        return child.fromNode(attributes).map(inner -> inner + slice);
     }
 }

@@ -1,11 +1,13 @@
 package magma;
 
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.JavaToMagmaParser;
+import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
-import magma.compile.rule.ExtractStringRule;
-import magma.compile.rule.LeftRule;
+import magma.compile.rule.EmptyRuleResult;
+import magma.compile.rule.Node;
 import magma.compile.rule.RightRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.RuleResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -43,38 +46,30 @@ public class Main {
     }
 
     private static String compileRootStatement(String input) {
-        return compileEmpty(input)
-                .or(() -> compilePackage(input))
-                .or(() -> compileImport(input))
-                .or(() -> compileClass(input))
-                .orElse(input);
+        return parseRootStatement(input).create().flatMap(JavaToMagmaGenerator::generate).flatMap(node -> {
+            var name = node.type();
+            if (name.equals("import")) {
+                var rule = new RightRule(JavaLang.createImportRule(), "\n");
+                return rule.fromNode(node);
+            } else if (name.equals("class")) {
+                var rule = MagmaLang.createFunctionRule();
+                return rule.fromNode(node);
+            } else {
+                return Optional.empty();
+            }
+        }).orElse("");
     }
 
-    private static Optional<String> compileClass(String input) {
-        var sourceRule = JavaLang.createClassRule();
-        var targetRule = MagmaLang.createFunctionRule();
-
-        return sourceRule.toNode(input).findAttributes().map(JavaToMagmaParser::parse).flatMap(targetRule::fromNode);
-    }
-
-    private static Optional<String> compileImport(String input) {
-        var sourceRule = new LeftRule("import ", new ExtractStringRule("value"));
-        var rightRule = new RightRule(sourceRule, "\n");
-        return sourceRule.toNode(input).findAttributes().flatMap(rightRule::fromNode);
-    }
-
-    private static Optional<String> compilePackage(String input) {
-        if (input.startsWith("package ")) {
-            return Optional.of("");
-        }
-        return Optional.empty();
-    }
-
-    private static Optional<String> compileEmpty(String input) {
-        if (input.isEmpty()) {
-            return Optional.of("");
-        }
-        return Optional.empty();
+    private static RuleResult parseRootStatement(String input) {
+        return Stream.of(
+                        JavaLang.createWhitespaceRule(),
+                        JavaLang.createPackageRule(),
+                        JavaLang.createImportRule(),
+                        JavaLang.createClassRule())
+                .map(rule -> rule.toNode(input))
+                .filter(result -> result.findAttributes().isPresent())
+                .findFirst()
+                .orElse(new EmptyRuleResult());
     }
 
     private static List<String> split(String input) {

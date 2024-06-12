@@ -1,8 +1,5 @@
 package magma.compile.rule;
 
-import magma.compile.RuleResult;
-import magma.compile.attribute.Attributes;
-
 import java.util.Optional;
 
 /**
@@ -13,11 +10,5 @@ import java.util.Optional;
 public interface Rule {
     RuleResult toNode(String input);
 
-    /**
-     * Converts a Node to a string representation.
-     *
-     * @param attributes the Node to convert
-     * @return an Optional containing the resulting string if the conversion is successful, otherwise empty
-     */
-    Optional<String> fromNode(Attributes attributes);
+    Optional<String> fromNode(Node attributes);
 }
