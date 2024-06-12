@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 export class def Main() => {
-	public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-
-    public static void main(String[] args) {
-        try {
-            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+CLASS_KEYWORD_WITH_SPACE = "class ";
+source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
             var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
