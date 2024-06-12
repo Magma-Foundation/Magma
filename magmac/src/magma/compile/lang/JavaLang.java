@@ -20,7 +20,7 @@ public class JavaLang {
     public static Rule createClassRule() {
         var modifiers = new ExtractStringListRule("modifiers", " ");
         var name = new StripRule(new ExtractStringRule("name"));
-        var content = new MembersRule("content", new StripRule(createClassMemberRule()));
+        var content = new MembersRule("children", new StripRule(createClassMemberRule()));
 
         var splitAtSliceRule = new FirstRule(new StripRule(modifiers), Main.CLASS_KEYWORD_WITH_SPACE, new StripRule(new FirstRule(name, "{", new StripRule(new RightRule(content, "}")))));
         return new TypeRule("class", splitAtSliceRule);

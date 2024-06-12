@@ -6,6 +6,7 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.RightRule;
@@ -17,7 +18,7 @@ public class MagmaLang {
     public static FirstRule createFunctionRule() {
         var modifiers = new ExtractStringListRule("modifiers", " ");
         var name = new ExtractStringRule("name");
-        var content = new MembersRule("content", createStatementRule());
+        var content = new MembersRule("children", new StripRule(createStatementRule()));
 
         return new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(content, "}")));
     }

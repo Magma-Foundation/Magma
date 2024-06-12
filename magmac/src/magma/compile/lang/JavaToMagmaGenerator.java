@@ -1,7 +1,7 @@
 package magma.compile.lang;
 
-import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeListAttribute;
+import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
@@ -25,27 +25,26 @@ public class JavaToMagmaGenerator {
 
     private static Node postVisit(Node root) {
         if (root.is("class")) {
-            var oldAttributes = root.attributes();
-            var oldModifiers = oldAttributes.apply("modifiers")
-                    .flatMap(Attribute::asStringList)
-                    .orElseThrow();
+            return root.retype("function").mapAttributes(attributes -> {
+                var withNewModifiers = attributes.mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
+                    var newModifiers = new ArrayList<String>();
+                    for (var oldModifier : oldModifiers) {
+                        if (oldModifier.equals("public")) {
+                            newModifiers.add("export");
+                        }
+                    }
 
-            var newModifiers = new ArrayList<String>();
-            for (var oldModifier : oldModifiers) {
-                if (oldModifier.equals("public")) {
-                    newModifiers.add("export");
-                }
-            }
+                    newModifiers.add("class");
+                    newModifiers.add("def");
+                    return newModifiers;
+                });
 
-            newModifiers.add("class");
-            newModifiers.add("def");
-
-            var newAttributes = oldAttributes.with("modifiers", new StringListAttribute(newModifiers));
-
-            return root.retype("function").withAttributes(newAttributes);
+                return withNewModifiers.mapValue("children", NodeListAttribute.Factory, children -> children.stream()
+                        .map(child -> child.mapAttributes(childAttributes -> childAttributes.with("left-indent", new StringAttribute("\t"))))
+                        .toList());
+            });
         }
 
-        if (root.is("import")) return root;
         return root;
     }
 }

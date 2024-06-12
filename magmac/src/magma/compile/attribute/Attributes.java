@@ -13,6 +13,7 @@ import java.util.stream.Stream;
  * streaming entries.
  */
 public interface Attributes {
+    <T> Attributes mapValue(String key, Factory<T> factory, Function<T, T> mapper);
 
     /**
      * Adds an attribute to the node.

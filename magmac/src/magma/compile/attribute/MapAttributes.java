@@ -16,6 +16,15 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     }
 
     @Override
+    public <T> Attributes mapValue(String key, Factory<T> factory, Function<T, T> mapper) {
+        if (!values.containsKey(key)) return this;
+
+        return factory.fromAttribute(values.get(key)).map(mapper).map(factory::toAttribute)
+                .map(inner -> with(key, inner))
+                .orElse(this);
+    }
+
+    @Override
     public Attributes with(String key, Attribute value) {
         var copy = new HashMap<>(values);
         copy.put(key, value);

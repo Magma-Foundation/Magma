@@ -4,6 +4,18 @@ import java.util.List;
 import java.util.Optional;
 
 public record StringListAttribute(List<String> values) implements Attribute {
+    public static final Factory<List<String>> Factory = new Factory<List<String>>() {
+        @Override
+        public Optional<List<String>> fromAttribute(Attribute attribute) {
+            return attribute.asStringList();
+        }
+
+        @Override
+        public Attribute toAttribute(List<String> value) {
+            return new StringListAttribute(value);
+        }
+    };
+
     @Override
     public Optional<List<String>> asStringList() {
         return Optional.of(values);
