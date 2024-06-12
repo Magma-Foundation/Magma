@@ -1,6 +1,5 @@
 package magma.compile.lang;
 
-import magma.compile.rule.EmptyRule;
 import magma.compile.rule.MembersRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -15,14 +14,6 @@ import magma.compile.rule.result.FirstRule;
 import java.util.List;
 
 public class MagmaLang {
-    public static FirstRule createFunctionRule() {
-        var modifiers = new ExtractStringListRule("modifiers", " ");
-        var name = new ExtractStringRule("name");
-        var content = new MembersRule("children", new StripRule(createStatementRule()));
-
-        return new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(content, "}")));
-    }
-
     private static Rule createStatementRule() {
         return new OrRule(List.of(
                 createDeclarationRule(),
@@ -40,7 +31,15 @@ public class MagmaLang {
     public static TypeRule createRootRule() {
         return new TypeRule("root", new MembersRule("children", new OrRule(List.of(
                 new RightRule(new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))), "\n"),
-                new TypeRule("function", createFunctionRule())
+                createFunctionRule()
         ))));
+    }
+
+    private static TypeRule createFunctionRule() {
+        var modifiers = new ExtractStringListRule("modifiers", " ");
+        var name = new ExtractStringRule("name");
+        var content = new MembersRule("children", new StripRule(createStatementRule()));
+
+        return new TypeRule("function", new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(content, "}"))));
     }
 }

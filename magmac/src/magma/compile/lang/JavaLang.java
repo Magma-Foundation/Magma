@@ -28,9 +28,14 @@ public class JavaLang {
 
     private static Rule createClassMemberRule() {
         return new OrRule(List.of(
+                createMethodRule(),
                 createDeclarationRule(),
                 new TypeRule("any", new ExtractStringRule("content"))
         ));
+    }
+
+    private static Rule createMethodRule() {
+        return new TypeRule("method", new FirstRule(new ExtractStringRule("left"), "{", new ExtractStringRule("right")));
     }
 
     private static TypeRule createDeclarationRule() {

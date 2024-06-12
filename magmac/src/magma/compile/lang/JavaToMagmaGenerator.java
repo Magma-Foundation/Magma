@@ -6,6 +6,7 @@ import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class JavaToMagmaGenerator {
     public static Node generate(Node node) {
@@ -43,6 +44,12 @@ public class JavaToMagmaGenerator {
                         .map(child -> child.mapAttributes(childAttributes -> childAttributes.with("left-indent", new StringAttribute("\t"))))
                         .toList());
             });
+        }
+
+        if (root.is("method")) {
+            return root.retype("function").mapAttributes(attributes -> attributes.with("modifiers", new StringListAttribute(Collections.emptyList()))
+                    .with("name", new StringAttribute("test"))
+                    .with("children", new NodeListAttribute(Collections.emptyList())));
         }
 
         return root;
