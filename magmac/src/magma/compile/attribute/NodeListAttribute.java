@@ -4,6 +4,7 @@ import magma.compile.rule.Node;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record NodeListAttribute(List<Node> nodeList) implements Attribute {
     public static final Factory<List<Node>> Factory = new Factory<List<Node>>() {
@@ -21,5 +22,12 @@ public record NodeListAttribute(List<Node> nodeList) implements Attribute {
     @Override
     public Optional<List<Node>> asNodeList() {
         return Optional.of(nodeList);
+    }
+
+    @Override
+    public String format(int depth) {
+        return nodeList.stream()
+                .map(child -> child.format(depth))
+                .collect(Collectors.joining(",\n", "[\n", "]"));
     }
 }

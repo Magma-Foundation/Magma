@@ -66,4 +66,12 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
 
         return new MapAttributes(copy);
     }
+
+    @Override
+    public String format(int depth) {
+        return values.entrySet()
+                .stream()
+                .map(entry -> "\n" + "\t".repeat(depth + 1) + entry.getKey() + " : " + entry.getValue().format(depth + 1))
+                .collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
+    }
 }

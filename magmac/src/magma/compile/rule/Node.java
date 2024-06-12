@@ -5,8 +5,13 @@ import magma.compile.attribute.Attributes;
 import java.util.function.Function;
 
 public record Node(String type, Attributes attributes) {
-    public Node withAttributes(Attributes attributes) {
-        return new Node(type, attributes);
+    public String format(int depth) {
+        return "\t".repeat(depth) + type + " = " + attributes.format(depth);
+    }
+
+    @Override
+    public String toString() {
+        return format(0);
     }
 
     public boolean is(String type) {

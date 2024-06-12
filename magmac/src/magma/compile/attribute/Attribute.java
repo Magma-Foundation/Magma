@@ -32,4 +32,6 @@ public interface Attribute {
     default Optional<List<String>> asStringList() {
         return Optional.empty();
     }
+
+    String format(int depth);
 }

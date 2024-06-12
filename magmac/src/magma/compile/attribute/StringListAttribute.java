@@ -2,6 +2,7 @@ package magma.compile.attribute;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public record StringListAttribute(List<String> values) implements Attribute {
     public static final Factory<List<String>> Factory = new Factory<List<String>>() {
@@ -19,5 +20,12 @@ public record StringListAttribute(List<String> values) implements Attribute {
     @Override
     public Optional<List<String>> asStringList() {
         return Optional.of(values);
+    }
+
+    @Override
+    public String format(int depth) {
+        return values.stream()
+                .map(value -> "\"" + value + "\"")
+                .collect(Collectors.joining(",", "[", "]"));
     }
 }

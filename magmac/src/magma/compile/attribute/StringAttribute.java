@@ -7,4 +7,9 @@ public record StringAttribute(String value) implements Attribute {
     public Optional<String> asString() {
         return Optional.of(value);
     }
+
+    @Override
+    public String format(int depth) {
+        return "\"" + value + "\"";
+    }
 }
