@@ -9,7 +9,7 @@ public class Generator {
         var list = attribute.asNodeList();
         if (list.isPresent()) {
             return new NodeListAttribute(list.get().stream()
-                    .map(new JavaToMagmaGenerator()::generate)
+                    .map(new RootTypeRemover("package")::generate)
                     .toList());
         } else {
             return attribute;
