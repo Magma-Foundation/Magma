@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 export class def Main() => {
-	CLASS_KEYWORD_WITH_SPACE = "class ";
+	public static final let CLASS_KEYWORD_WITH_SPACE = "class ";
 	def test() => {
 	}
 }

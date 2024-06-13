@@ -5,12 +5,13 @@ import magma.compile.rule.MembersRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
+import magma.compile.rule.result.FirstRule;
+import magma.compile.rule.result.LastRule;
 import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
-import magma.compile.rule.text.RightRule;
-import magma.compile.rule.result.FirstRule;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class MagmaLang {
     }
 
     private static TypeRule createDeclarationRule() {
-        var left = new ExtractStringRule("name");
+        var left = new LastRule(new ExtractStringListRule("modifiers", " "), " let ", new ExtractStringRule("name"));
         var value = new ExtractStringRule("value");
 
         return new TypeRule("declaration", new FirstRule(left, " = ", new RightRule(value, "\n")));

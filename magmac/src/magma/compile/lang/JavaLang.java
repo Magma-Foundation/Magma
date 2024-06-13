@@ -39,7 +39,8 @@ public class JavaLang {
     }
 
     private static TypeRule createDeclarationRule() {
-        var left = new LastRule(new ExtractStringRule("discard"), " ", new ExtractStringRule("name"));
+        var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
+        var left = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
         var value = new StripRule(new ExtractStringRule("value"));
 
         return new TypeRule("declaration", new FirstRule(new StripRule(left), "=", value));
