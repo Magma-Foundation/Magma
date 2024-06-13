@@ -58,7 +58,11 @@ public class JavaToMagmaGenerator {
 
         if (root.is("method")) {
             return root.retype("function").mapAttributes(attributes -> attributes
-                    .with("modifiers", new StringListAttribute(Collections.singletonList("def")))
+                    .mapValue("modifiers", StringListAttribute.Factory, modifiers -> {
+                        var copy = new ArrayList<>(modifiers);
+                        copy.add("def");
+                        return copy;
+                    })
                     .with("right-padding", new StringAttribute("\t"))
                     .with("children", new NodeListAttribute(Collections.emptyList())));
         }
@@ -68,8 +72,8 @@ public class JavaToMagmaGenerator {
                 return attributes.mapValue("modifiers", StringListAttribute.Factory, modifiers -> {
                     var newModifiers = new ArrayList<String>();
 
-                    if(modifiers.contains("public")) newModifiers.add("public");
-                    if(modifiers.contains("final")) {
+                    if (modifiers.contains("public")) newModifiers.add("public");
+                    if (modifiers.contains("final")) {
                         newModifiers.add("const");
                     } else newModifiers.add("let");
 
