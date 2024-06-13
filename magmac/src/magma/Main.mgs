@@ -7,7 +7,7 @@ import magma.compile.rule.Rule;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-export class def Main => {
+export class def Main() => {
 	public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
 	public def main(String[] args) : void => {
 	}

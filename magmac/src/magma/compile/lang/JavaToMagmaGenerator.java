@@ -52,7 +52,7 @@ public class JavaToMagmaGenerator {
 
         if (root.is("class")) {
             return root.retype("function").mapAttributes(attributes -> {
-                var withNewModifiers = attributes.mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
+                var withNewModifiers = attributes.with("params", new StringAttribute("")).mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
                     var newModifiers = new ArrayList<String>();
                     for (var oldModifier : oldModifiers) {
                         if (oldModifier.equals("public")) {
