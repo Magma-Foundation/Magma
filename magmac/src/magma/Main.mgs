@@ -9,5 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 export class def Main() => {
 	CLASS_KEYWORD_WITH_SPACE = "class ";
-	 test() => {
-}}k
+	def test() => {
+	}
+}

@@ -45,6 +45,6 @@ public class MagmaLang {
         var name = new ExtractStringRule("name");
         var content = new MembersRule("children", new StripRule(statements));
 
-        return new TypeRule("function", new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(content, "}"))));
+        return new TypeRule("function", new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(new StripRule(content), "}\n"))));
     }
 }

@@ -57,8 +57,10 @@ public class JavaToMagmaGenerator {
         }
 
         if (root.is("method")) {
-            return root.retype("function").mapAttributes(attributes -> attributes.with("modifiers", new StringListAttribute(Collections.emptyList()))
+            return root.retype("function").mapAttributes(attributes -> attributes
+                    .with("modifiers", new StringListAttribute(Collections.singletonList("def")))
                     .with("name", new StringAttribute("test"))
+                    .with("right-padding", new StringAttribute("\t"))
                     .with("children", new NodeListAttribute(Collections.emptyList())));
         }
 
