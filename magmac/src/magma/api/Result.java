@@ -11,4 +11,6 @@ public interface Result<T, E> {
     <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper);
 
     <R> Result<R, E> mapValue(Function<T, R> mapper);
+
+    boolean isOk();
 }

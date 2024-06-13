@@ -26,14 +26,8 @@ public record RightRule(Rule child, String slice) implements Rule {
         return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
     }
 
-    private Optional<String> fromNode0(Node node) {
-        return child.fromNode(node).findValue().map(inner -> inner + slice);
-    }
-
     @Override
     public Result<String, CompileException> fromNode(Node node) {
-        return fromNode0(node)
-                .<Result<String, CompileException>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
+        return child.fromNode(node).mapValue(inner -> inner + slice);
     }
 }

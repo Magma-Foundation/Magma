@@ -17,6 +17,7 @@ public class MagmaLang {
     private static Rule createStatementRule() {
         return new OrRule(List.of(
                 createDeclarationRule(),
+                createFunctionRule(),
                 new TypeRule("any", new ExtractStringRule("content"))
         ));
     }

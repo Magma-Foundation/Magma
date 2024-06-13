@@ -23,4 +23,9 @@ public record Err<T, E>(E value) implements Result<T, E> {
     public <R> Result<R, E> mapValue(Function<T, R> mapper) {
         return new Err<>(value);
     }
+
+    @Override
+    public boolean isOk() {
+        return false;
+    }
 }
