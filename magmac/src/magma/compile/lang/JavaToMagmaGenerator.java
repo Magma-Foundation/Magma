@@ -1,5 +1,8 @@
 package magma.compile.lang;
 
+import magma.api.Streams;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
@@ -8,6 +11,7 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class JavaToMagmaGenerator {
     public static Node generate(Node node) {
@@ -31,6 +35,16 @@ public class JavaToMagmaGenerator {
                 return attributes.mapValue("children", NodeListAttribute.Factory, list -> {
                     return list.stream()
                             .filter(element -> !element.is("package") && !element.is("whitespace"))
+                            .flatMap(element -> {
+                                if(element.is("function")) {
+                                    var name = element.attributes().apply("name").flatMap(Attribute::asString).orElseThrow();
+
+                                    return Stream.of(element, new Node("object", new MapAttributes()
+                                            .with("name", new StringAttribute(name))));
+                                } else {
+                                    return Stream.of(element);
+                                }
+                            })
                             .toList();
                 });
             });

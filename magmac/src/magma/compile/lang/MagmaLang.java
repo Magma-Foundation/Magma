@@ -21,10 +21,15 @@ public class MagmaLang {
         var orRule = new OrRule(List.of(
                 createDeclarationRule(),
                 createFunctionRule(statements),
+                createObjectRule(),
                 new TypeRule("any", new ExtractStringRule("content"))
         ));
         statements.setRule(orRule);
         return orRule;
+    }
+
+    private static Rule createObjectRule() {
+        return new TypeRule("object", new LeftRule("object ", new RightRule(new ExtractStringRule("name"), " {}")));
     }
 
     private static TypeRule createDeclarationRule() {
