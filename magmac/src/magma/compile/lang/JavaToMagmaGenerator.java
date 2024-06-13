@@ -7,6 +7,7 @@ import magma.compile.rule.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class JavaToMagmaGenerator {
     public static Node generate(Node node) {
@@ -58,10 +59,11 @@ public class JavaToMagmaGenerator {
 
         if (root.is("method")) {
             return root.retype("function").mapAttributes(attributes -> attributes
-                    .mapValue("modifiers", StringListAttribute.Factory, modifiers -> {
-                        var copy = new ArrayList<>(modifiers);
-                        copy.add("def");
-                        return copy;
+                    .mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
+                        var newModifiers = new ArrayList<String>();
+                        if(oldModifiers.contains("public")) newModifiers.add("public");
+                        newModifiers.add("def");
+                        return newModifiers;
                     })
                     .with("right-padding", new StringAttribute("\t"))
                     .with("children", new NodeListAttribute(Collections.emptyList())));

@@ -9,6 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 export class def Main => {
 	public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
-	public static def main(String[] args) : void => {
+	public def main(String[] args) : void => {
 	}
 }
