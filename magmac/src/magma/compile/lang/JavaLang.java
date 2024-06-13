@@ -35,7 +35,8 @@ public class JavaLang {
     }
 
     private static Rule createMethodRule() {
-        return new TypeRule("method", new FirstRule(new ExtractStringRule("left"), "{", new ExtractStringRule("right")));
+        var header = new LastRule(createDeclarationRule(), "(", new ExtractStringRule("discard"));
+        return new TypeRule("method", new FirstRule(header, "{", new ExtractStringRule("right")));
     }
 
     private static TypeRule createDeclarationRule() {
