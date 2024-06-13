@@ -28,10 +28,14 @@ public class MagmaLang {
     }
 
     private static TypeRule createDeclarationRule() {
-        var left = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("name"));
+        var definition = createDefinitionRule();
         var value = new ExtractStringRule("value");
 
-        return new TypeRule("declaration", new FirstRule(left, " = ", new RightRule(value, "\n")));
+        return new TypeRule("declaration", new FirstRule(definition, " = ", new RightRule(value, "\n")));
+    }
+
+    private static LastRule createDefinitionRule() {
+        return new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("name"));
     }
 
     public static TypeRule createRootRule() {
@@ -42,10 +46,8 @@ public class MagmaLang {
     }
 
     private static TypeRule createFunctionRule(LazyRule statements) {
-        var modifiers = new ExtractStringListRule("modifiers", " ");
-        var name = new ExtractStringRule("name");
+        var definition = createDefinitionRule();
         var content = new MembersRule("children", new StripRule(statements));
-
-        return new TypeRule("function", new FirstRule(modifiers, " ", new FirstRule(name, "() => {\n", new RightRule(new StripRule(content), "}\n"))));
+        return new TypeRule("function", new FirstRule(definition, " => {\n", new RightRule(new StripRule(content), "}\n")));
     }
 }
