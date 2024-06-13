@@ -10,6 +10,7 @@ import magma.compile.rule.result.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 
@@ -53,7 +54,7 @@ public class MagmaLang {
     }
 
     public static TypeRule createRootRule() {
-        return new TypeRule("root", new MembersRule("children", new OrRule(List.of(
+        return new TypeRule("block", new MembersRule("children", new OrRule(List.of(
                 new RightRule(new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))), "\n"),
                 createStatementRule()
         ))));
@@ -61,7 +62,7 @@ public class MagmaLang {
 
     private static TypeRule createFunctionRule(LazyRule statements) {
         var definition = createDefinitionRule();
-        var content = new MembersRule("children", new StripRule(statements));
+        var content = new ExtractNodeRule("content", new TypeRule("block", new MembersRule("children", new StripRule(statements))));
         return new TypeRule("function", new FirstRule(definition, " => {\n", new RightRule(new StripRule(content), "}\n")));
     }
 }

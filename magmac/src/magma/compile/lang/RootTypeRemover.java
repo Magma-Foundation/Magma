@@ -12,7 +12,7 @@ public class RootTypeRemover extends Modifier {
 
     @Override
     protected Node preVisit(Node node) {
-        if (!node.is("root")) return node;
+        if (!node.is("block")) return node;
         return node.mapAttributes(attributes -> attributes.mapValue("children", NodeListAttribute.Factory, children -> children.stream()
                 .filter(child -> !child.is(type))
                 .toList()));

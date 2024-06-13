@@ -60,6 +60,6 @@ public class JavaLang {
                 new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createClassRule()));
 
-        return new TypeRule("root", new MembersRule("children", new StripRule(childRule)));
+        return new TypeRule("block", new MembersRule("children", new StripRule(childRule)));
     }
 }

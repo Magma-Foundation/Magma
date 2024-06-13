@@ -5,6 +5,7 @@ import magma.compile.CompileException;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
+import magma.compile.lang.Modifier;
 import magma.compile.lang.ObjectSplitter;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
@@ -13,6 +14,8 @@ import magma.compile.rule.Rule;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class Main {
@@ -34,11 +37,17 @@ public class Main {
     }
 
     private static Node generate(Node root) {
-        return Stream.of(
+        var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
                 new ObjectSplitter()
-        ).reduce(root, (node, modifier) -> modifier.generate(node), (node, node2) -> node2);
+        );
+
+        Node acc = root;
+        for (Modifier modifier : list) {
+            acc = modifier.generate(acc);
+        }
+        return acc;
     }
 }

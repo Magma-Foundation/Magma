@@ -1,19 +1,27 @@
 package magma.compile.lang;
 
 import magma.compile.attribute.Attribute;
+import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
+import java.util.Optional;
+
 public class Modifier {
     private Attribute generateAttribute(Attribute attribute) {
-        var list = attribute.asNodeList();
-        if (list.isPresent()) {
-            return new NodeListAttribute(list.get().stream()
+        var nodeList = attribute.asNodeList();
+        if (nodeList.isPresent()) {
+            return new NodeListAttribute(nodeList.get().stream()
                     .map(this::generate)
                     .toList());
-        } else {
-            return attribute;
         }
+
+        var node = attribute.asNode();
+        if(node.isPresent()) {
+            return new NodeAttribute(generate(node.get()));
+        }
+
+        return attribute;
     }
 
     public Node generate(Node node) {
