@@ -28,4 +28,9 @@ public record Ok<T, E>(T value) implements Result<T, E> {
     public boolean isOk() {
         return true;
     }
+
+    @Override
+    public <R> Result<T, R> mapErr(Function<E, R> mapper) {
+        return new Ok<>(value);
+    }
 }

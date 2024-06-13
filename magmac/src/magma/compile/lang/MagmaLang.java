@@ -37,9 +37,12 @@ public class MagmaLang {
     private static LastRule createDefinitionRule() {
         var withoutParams = new ExtractStringRule("name");
         var withParams = new FirstRule(withoutParams, "(", new RightRule(new ExtractStringRule("params"), ")"));
-        var anyParams = new OrRule(List.of(withParams, withoutParams));
 
-        return new LastRule(new ExtractStringListRule("modifiers", " "), " ", anyParams);
+        var withoutType = new OrRule(List.of(withParams, withoutParams));
+        var withType = new LastRule(withoutType, " : ", new ExtractStringRule("type"));
+        var anyType = new OrRule(List.of(withType, withoutType));
+
+        return new LastRule(new ExtractStringListRule("modifiers", " "), " ", anyType);
     }
 
     public static TypeRule createRootRule() {

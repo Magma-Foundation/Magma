@@ -5,6 +5,10 @@ public class CompileException extends Exception {
         super(message);
     }
 
+    public CompileException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public int calculateDepth() {
         var cause = getCause();
         if (cause instanceof CompileException compileException) {

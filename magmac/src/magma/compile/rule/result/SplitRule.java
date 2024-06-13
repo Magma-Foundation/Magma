@@ -42,6 +42,11 @@ public abstract class SplitRule implements Rule {
 
     @Override
     public Result<String, CompileException> fromNode(Node node) {
-        return leftRule.fromNode(node).flatMapValue(left -> rightRule.fromNode(node).mapValue(right -> left + slice + right));
+        var leftResult = leftRule.fromNode(node);
+        var rightValue = rightRule.fromNode(node);
+
+        return leftResult
+                .flatMapValue(left -> rightValue.mapValue(right -> left + slice + right))
+                .mapErr(err -> new CompileException("Cannot merge node: " + node, err));
     }
 }
