@@ -4,7 +4,7 @@ import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
-public class Generator {
+public class Modifier {
     private static Attribute generateAttribute(Attribute attribute) {
         var list = attribute.asNodeList();
         if (list.isPresent()) {
@@ -18,7 +18,7 @@ public class Generator {
 
     public Node generate(Node node) {
         var preVisited = preVisit(node);
-        var withChildren = preVisited.mapAttributes(attributes -> attributes.mapValues(Generator::generateAttribute));
+        var withChildren = preVisited.mapAttributes(attributes -> attributes.mapValues(Modifier::generateAttribute));
         return postVisit(withChildren);
     }
 

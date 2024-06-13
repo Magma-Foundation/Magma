@@ -2,7 +2,7 @@ package magma;
 
 import magma.api.Results;
 import magma.compile.CompileException;
-import magma.compile.lang.Generator;
+import magma.compile.lang.Modifier;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.RootTypeRemover;
@@ -33,9 +33,9 @@ public class Main {
     }
 
     private static Node generate(Node root) {
-        return Stream.<Generator>of(
+        return Stream.<Modifier>of(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace")
-        ).reduce(root, (node, generator) -> generator.generate(node), (node, node2) -> node2);
+        ).reduce(root, (node, modifier) -> modifier.generate(node), (node, node2) -> node2);
     }
 }

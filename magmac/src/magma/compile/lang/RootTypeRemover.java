@@ -3,7 +3,7 @@ package magma.compile.lang;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
-public class RootTypeRemover extends Generator {
+public class RootTypeRemover extends Modifier {
     private final String type;
 
     public RootTypeRemover(String type) {
