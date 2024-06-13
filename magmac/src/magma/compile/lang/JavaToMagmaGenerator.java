@@ -25,6 +25,16 @@ public class JavaToMagmaGenerator {
     }
 
     private static Node postVisit(Node root) {
+        if (root.is("root")) {
+            return root.mapAttributes(attributes -> {
+                return attributes.mapValue("children", NodeListAttribute.Factory, list -> {
+                    return list.stream()
+                            .filter(element -> !element.is("package") && !element.is("whitespace"))
+                            .toList();
+                });
+            });
+        }
+
         if (root.is("class")) {
             return root.retype("function").mapAttributes(attributes -> {
                 var withNewModifiers = attributes.mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
