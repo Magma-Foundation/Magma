@@ -35,7 +35,7 @@ public class JavaLang {
     }
 
     private static Rule createMethodRule() {
-        var header = new LastRule(createDefinitionRule(), "(", new ExtractStringRule("discard"));
+        var header = new StripRule(createDefinitionRule());
         return new TypeRule("method", new FirstRule(header, "{", new ExtractStringRule("right")));
     }
 
@@ -45,10 +45,11 @@ public class JavaLang {
         return new TypeRule("declaration", new FirstRule(new StripRule(left), "=", value));
     }
 
-    private static LastRule createDefinitionRule() {
+    private static Rule createDefinitionRule() {
         var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
-        var left = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
-        return left;
+        var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
+        var withParams = new LastRule(withoutParams, "(", new RightRule(new ExtractStringRule("params"), ")"));
+        return new OrRule(List.of(withParams, withoutParams));
     }
 
     public static TypeRule createRootRule() {

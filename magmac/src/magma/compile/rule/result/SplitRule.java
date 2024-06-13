@@ -30,7 +30,9 @@ public abstract class SplitRule implements Rule {
             var left = contentStart.left();
             var right = contentStart.right();
 
-            return leftRule.toNode(left).findAttributes().flatMap(leftResult -> rightRule.toNode(right).findAttributes().map(inner -> inner.merge(leftResult)));
+            var leftResult = leftRule.toNode(left);
+            var rightResult = rightRule.toNode(right);
+            return leftResult.findAttributes().flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)));
         });
 
         return new AdaptiveRuleResult(Optional.empty(), attributes);
