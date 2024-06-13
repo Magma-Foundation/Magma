@@ -11,6 +11,7 @@ import magma.compile.rule.result.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 
@@ -20,10 +21,10 @@ public class JavaLang {
     public static Rule createClassRule() {
         var modifiers = new ExtractStringListRule("modifiers", " ");
         var name = new StripRule(new ExtractStringRule("name"));
-        var content = new MembersRule("children", new StripRule(createClassMemberRule()));
+        var children = new MembersRule("children", new StripRule(createClassMemberRule()));
+        var content = new ExtractNodeRule("content", new TypeRule("block", children));
 
-        var splitAtSliceRule = new FirstRule(new StripRule(modifiers), Main.CLASS_KEYWORD_WITH_SPACE, new StripRule(new FirstRule(name, "{", new StripRule(new RightRule(content, "}")))));
-        return new TypeRule("class", splitAtSliceRule);
+        return new TypeRule("class", new FirstRule(new StripRule(modifiers), Main.CLASS_KEYWORD_WITH_SPACE, new StripRule(new FirstRule(name, "{", new StripRule(new RightRule(content, "}"))))));
     }
 
     private static Rule createClassMemberRule() {

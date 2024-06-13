@@ -11,6 +11,10 @@ import java.util.Optional;
  * the attribute value as a string or a list of strings.
  */
 public interface Attribute {
+    default Optional<Node> asNode() {
+        return Optional.empty();
+    }
+
     default Optional<List<Node>> asNodeList() {
         return Optional.empty();
     }
