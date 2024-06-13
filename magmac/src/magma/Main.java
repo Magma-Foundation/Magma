@@ -6,7 +6,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
-import magma.compile.lang.ObjectSplitter;
+import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class Main {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -41,7 +39,7 @@ public class Main {
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
-                new ObjectSplitter()
+                new ClassSplitter()
         );
 
         Node acc = root;

@@ -4,6 +4,8 @@ import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
+import magma.compile.attribute.StringAttribute;
+import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ObjectSplitter extends Modifier {
+public class ClassSplitter extends Modifier {
     @Override
     protected Node preVisit(Node node) {
         if (node.is("block")) {
@@ -52,8 +54,22 @@ public class ObjectSplitter extends Modifier {
             var instanceBlock = createBlock(instances);
             var staticBlock = createBlock(statics);
 
-            var asFunction = child.retype("function").mapAttributes(attributes -> attributes.with("content", new NodeAttribute(instanceBlock)));
-            var asObject = child.retype("object").mapAttributes(attributes -> attributes.with("content", new NodeAttribute(staticBlock)));
+            var modified = child.mapAttributes(attributes -> {
+                return attributes.mapValue("modifiers", StringListAttribute.Factory, list -> {
+                    return list.contains("public") ? Collections.singletonList("export") : Collections.emptyList();
+                });
+            });
+
+            var asFunction = modified.retype("function").mapAttributes(attributes -> attributes
+                    .mapValue("modifiers", StringListAttribute.Factory, list -> {
+                        var copy = new ArrayList<>(list);
+                        copy.add("class");
+                        copy.add("def");
+                        return copy;
+                    })
+                    .with("params", new StringAttribute(""))
+                    .with("content", new NodeAttribute(instanceBlock)));
+            var asObject = modified.retype("object").mapAttributes(attributes -> attributes.with("content", new NodeAttribute(staticBlock)));
 
             return Stream.of(asFunction, asObject);
         } else {
