@@ -28,7 +28,7 @@ public class MagmaLang {
     }
 
     private static TypeRule createDeclarationRule() {
-        var left = new LastRule(new ExtractStringListRule("modifiers", " "), " let ", new ExtractStringRule("name"));
+        var left = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("name"));
         var value = new ExtractStringRule("value");
 
         return new TypeRule("declaration", new FirstRule(left, " = ", new RightRule(value, "\n")));

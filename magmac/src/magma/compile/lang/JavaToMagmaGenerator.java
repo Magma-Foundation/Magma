@@ -64,6 +64,21 @@ public class JavaToMagmaGenerator {
                     .with("children", new NodeListAttribute(Collections.emptyList())));
         }
 
+        if (root.is("declaration")) {
+            return root.mapAttributes(attributes -> {
+                return attributes.mapValue("modifiers", StringListAttribute.Factory, modifiers -> {
+                    var newModifiers = new ArrayList<String>();
+
+                    if(modifiers.contains("public")) newModifiers.add("public");
+                    if(modifiers.contains("final")) {
+                        newModifiers.add("const");
+                    } else newModifiers.add("let");
+
+                    return newModifiers;
+                });
+            });
+        }
+
         return root;
     }
 }
