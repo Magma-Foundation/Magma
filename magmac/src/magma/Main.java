@@ -20,7 +20,7 @@ public class Main {
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
             var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
-            var generated = JavaToMagmaGenerator.generate(root);
+            var generated = new JavaToMagmaGenerator().generate(root);
             Rule rule = MagmaLang.createRootRule();
             Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
         } catch (IOException | CompileException e) {
