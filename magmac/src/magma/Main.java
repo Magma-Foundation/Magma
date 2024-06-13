@@ -5,6 +5,7 @@ import magma.compile.CompileException;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
+import magma.compile.lang.ObjectSplitter;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -36,7 +37,8 @@ public class Main {
         return Stream.of(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
-                new MethodRenamer()
+                new MethodRenamer(),
+                new ObjectSplitter()
         ).reduce(root, (node, modifier) -> modifier.generate(node), (node, node2) -> node2);
     }
 }
