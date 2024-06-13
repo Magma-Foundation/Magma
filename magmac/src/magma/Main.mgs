@@ -12,4 +12,4 @@ export class def Main() => {
 	public def main(String[] args) : void => {
 	}
 }
-object Main {}
+export object Main {}

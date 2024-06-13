@@ -1,6 +1,5 @@
 package magma.compile.lang;
 
-import magma.api.Streams;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
@@ -10,7 +9,6 @@ import magma.compile.rule.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class JavaToMagmaGenerator {
@@ -36,11 +34,19 @@ public class JavaToMagmaGenerator {
                     return list.stream()
                             .filter(element -> !element.is("package") && !element.is("whitespace"))
                             .flatMap(element -> {
-                                if(element.is("function")) {
-                                    var name = element.attributes().apply("name").flatMap(Attribute::asString).orElseThrow();
+                                if (element.is("function")) {
+                                    var oldModifiers = element.attributes().apply("modifiers")
+                                            .flatMap(Attribute::asStringList)
+                                            .orElseThrow();
 
-                                    return Stream.of(element, new Node("object", new MapAttributes()
-                                            .with("name", new StringAttribute(name))));
+                                    var newModifiers = new ArrayList<String>();
+                                    if (oldModifiers.contains("export")) newModifiers.add("export");
+
+                                    var object = new Node("object", new MapAttributes()
+                                            .with("name", element.attributes().apply("name").orElseThrow())
+                                            .with("modifiers", new StringListAttribute(newModifiers)));
+
+                                    return Stream.of(element, object);
                                 } else {
                                     return Stream.of(element);
                                 }
@@ -75,7 +81,7 @@ public class JavaToMagmaGenerator {
             return root.retype("function").mapAttributes(attributes -> attributes
                     .mapValue("modifiers", StringListAttribute.Factory, oldModifiers -> {
                         var newModifiers = new ArrayList<String>();
-                        if(oldModifiers.contains("public")) newModifiers.add("public");
+                        if (oldModifiers.contains("public")) newModifiers.add("public");
                         newModifiers.add("def");
                         return newModifiers;
                     })
