@@ -2,9 +2,9 @@ package magma;
 
 import magma.api.Results;
 import magma.compile.CompileException;
-import magma.compile.lang.Modifier;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
+import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -33,9 +33,10 @@ public class Main {
     }
 
     private static Node generate(Node root) {
-        return Stream.<Modifier>of(
+        return Stream.of(
                 new RootTypeRemover("package"),
-                new RootTypeRemover("whitespace")
+                new RootTypeRemover("whitespace"),
+                new MethodRenamer()
         ).reduce(root, (node, modifier) -> modifier.generate(node), (node, node2) -> node2);
     }
 }
