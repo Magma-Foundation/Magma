@@ -9,16 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 export class def Main() => {
 	public const CLASS_KEYWORD_WITH_SPACE = "class ";
-	public let source = Paths.get(".", "magmac", "src", "magma", "Main.java");
-            var input = Files.readString(source);
-            var target = source.resolveSibling("Main.mgs");
-            var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
-            var generated = JavaToMagmaGenerator.generate(root);
-            Rule rule = MagmaLang.createRootRule();
-            Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
-        } catch (IOException | CompileException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }
-    }
+	def main() => {
+	}
 }
