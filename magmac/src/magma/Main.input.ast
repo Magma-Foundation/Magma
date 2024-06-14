@@ -124,8 +124,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "Paths.get(".", "magmac", "src", "magma", "Main.java")"
+												value : invocation = {
+													caller : "Paths.get",
+													arguments : "".", "magmac", "src", "magma", "Main.java""
 												}
 											},
 											declaration = {
@@ -133,8 +134,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "Files.readString(source)"
+												value : invocation = {
+													arguments : "source",
+													caller : "Files.readString"
 												}
 											},
 											declaration = {
@@ -142,8 +144,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "source.resolveSibling("Main.mgs")"
+												value : invocation = {
+													arguments : ""Main.mgs"",
+													caller : "source.resolveSibling"
 												}
 											},
 											declaration = {
@@ -151,8 +154,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "JavaLang.createRootRule().toNode(input)"
+												value : invocation = {
+													arguments : ").toNode(input",
+													caller : "JavaLang.createRootRule"
 												}
 											},
 											declaration = {
@@ -160,8 +164,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "parseResult.findError()"
+												value : invocation = {
+													arguments : "",
+													caller : "parseResult.findError"
 												}
 											},
 											any = {
@@ -172,8 +177,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "parseResult.create().orElseThrow()"
+												value : invocation = {
+													arguments : ").orElseThrow(",
+													caller : "parseResult.create"
 												}
 											},
 											any = {
@@ -184,8 +190,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "generate(root)"
+												value : invocation = {
+													arguments : "root",
+													caller : "generate"
 												}
 											},
 											any = {
@@ -196,8 +203,9 @@ block = {
 												type : symbol = {
 													value : "Rule"
 												},
-												value : any = {
-													value : "MagmaLang.createRootRule()"
+												value : invocation = {
+													arguments : "",
+													caller : "MagmaLang.createRootRule"
 												}
 											},
 											declaration = {
@@ -205,8 +213,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "rule.fromNode(generated)"
+												value : invocation = {
+													arguments : "generated",
+													caller : "rule.fromNode"
 												}
 											},
 											declaration = {
@@ -214,8 +223,9 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : any = {
-													value : "generateResult.findErr()"
+												value : invocation = {
+													arguments : "",
+													caller : "generateResult.findErr"
 												}
 											},
 											any = {
@@ -260,8 +270,9 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "e.findContext().orElse("")"
+									value : invocation = {
+										caller : "e.findContext",
+										arguments : ").orElse("""
 									}
 								},
 								declaration = {
@@ -269,8 +280,9 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "actualContext.indexOf('\n')"
+									value : invocation = {
+										arguments : "'\n'",
+										caller : "actualContext.indexOf"
 									}
 								},
 								declaration = {
@@ -278,8 +290,9 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "index == -1 ? actualContext : actualContext.substring(0, index)"
+									value : invocation = {
+										arguments : "0, index",
+										caller : "index == -1 ? actualContext : actualContext.substring"
 									}
 								},
 								declaration = {
@@ -287,8 +300,9 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "e.findMessage()"
+									value : invocation = {
+										arguments : "",
+										caller : "e.findMessage"
 									}
 								},
 								declaration = {
@@ -306,8 +320,9 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "e.findCauses().orElse(Collections.emptyList())"
+									value : invocation = {
+										caller : "e.findCauses",
+										arguments : ").orElse(Collections.emptyList()"
 									}
 								},
 								any = {
@@ -351,15 +366,16 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : any = {
-										value : "Arrays.asList(
+									value : invocation = {
+										caller : "Arrays.asList",
+										arguments : "
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
-        )"
+        "
 									}
 								},
 								declaration = {

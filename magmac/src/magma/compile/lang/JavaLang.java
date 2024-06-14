@@ -24,6 +24,7 @@ public class JavaLang {
 
         var value = new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                new TypeRule("invocation", new FirstRule(new ExtractStringRule("caller"), "(", new RightRule(new ExtractStringRule("arguments"), ")"))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
 
