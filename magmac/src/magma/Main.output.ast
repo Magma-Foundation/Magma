@@ -162,8 +162,13 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													caller : "Paths.get",
-													arguments : "".", "magmac", "src", "magma", "Main.java""
+													arguments : "".", "magmac", "src", "magma", "Main.java"",
+													caller : access = {
+														child : "get",
+														parent : reference = {
+															value : "Paths"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -175,7 +180,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : "source",
-													caller : "Files.readString"
+													caller : access = {
+														child : "readString",
+														parent : reference = {
+															value : "Files"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -187,7 +197,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : ""Main.mgs"",
-													caller : "source.resolveSibling"
+													caller : access = {
+														child : "resolveSibling",
+														parent : reference = {
+															value : "source"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -199,7 +214,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : ").toNode(input",
-													caller : "JavaLang.createRootRule"
+													caller : access = {
+														child : "createRootRule",
+														parent : reference = {
+															value : "JavaLang"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -211,7 +231,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : "",
-													caller : "parseResult.findError"
+													caller : access = {
+														child : "findError",
+														parent : reference = {
+															value : "parseResult"
+														}
+													}
 												}
 											},
 											any = {
@@ -226,7 +251,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : ").orElseThrow(",
-													caller : "parseResult.create"
+													caller : access = {
+														child : "create",
+														parent : reference = {
+															value : "parseResult"
+														}
+													}
 												}
 											},
 											any = {
@@ -241,7 +271,9 @@ block = {
 												},
 												value : invocation = {
 													arguments : "root",
-													caller : "generate"
+													caller : reference = {
+														value : "generate"
+													}
 												}
 											},
 											any = {
@@ -256,7 +288,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : "",
-													caller : "MagmaLang.createRootRule"
+													caller : access = {
+														child : "createRootRule",
+														parent : reference = {
+															value : "MagmaLang"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -268,7 +305,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : "generated",
-													caller : "rule.fromNode"
+													caller : access = {
+														child : "fromNode",
+														parent : reference = {
+															value : "rule"
+														}
+													}
 												}
 											},
 											declaration = {
@@ -280,7 +322,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : "",
-													caller : "generateResult.findErr"
+													caller : access = {
+														child : "findErr",
+														parent : reference = {
+															value : "generateResult"
+														}
+													}
 												}
 											},
 											any = {
@@ -330,8 +377,13 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										caller : "e.findContext",
-										arguments : ").orElse("""
+										arguments : ").orElse(""",
+										caller : access = {
+											child : "findContext",
+											parent : reference = {
+												value : "e"
+											}
+										}
 									}
 								},
 								declaration = {
@@ -343,7 +395,12 @@ block = {
 									},
 									value : invocation = {
 										arguments : "'\n'",
-										caller : "actualContext.indexOf"
+										caller : access = {
+											child : "indexOf",
+											parent : reference = {
+												value : "actualContext"
+											}
+										}
 									}
 								},
 								declaration = {
@@ -355,7 +412,12 @@ block = {
 									},
 									value : invocation = {
 										arguments : "0, index",
-										caller : "index == -1 ? actualContext : actualContext.substring"
+										caller : access = {
+											child : "substring",
+											parent : reference = {
+												value : "index == -1 ? actualContext : actualContext"
+											}
+										}
 									}
 								},
 								declaration = {
@@ -367,7 +429,12 @@ block = {
 									},
 									value : invocation = {
 										arguments : "",
-										caller : "e.findMessage"
+										caller : access = {
+											child : "findMessage",
+											parent : reference = {
+												value : "e"
+											}
+										}
 									}
 								},
 								declaration = {
@@ -377,7 +444,7 @@ block = {
 									type : symbol = {
 										value : "+"
 									},
-									value : any = {
+									value : reference = {
 										value : "" + s + " " + context))"
 									},
 									modifiers : ["message.ifPresent(s", "->", "System.err.println("\t".repeat(depth)", "+", "depth", "let"]
@@ -390,8 +457,13 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										caller : "e.findCauses",
-										arguments : ").orElse(Collections.emptyList()"
+										arguments : ").orElse(Collections.emptyList()",
+										caller : access = {
+											child : "findCauses",
+											parent : reference = {
+												value : "e"
+											}
+										}
 									}
 								},
 								any = {
@@ -440,7 +512,12 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										caller : "Arrays.asList",
+										caller : access = {
+											child : "asList",
+											parent : reference = {
+												value : "Arrays"
+											}
+										},
 										arguments : "
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
@@ -455,11 +532,11 @@ block = {
 									name : "acc",
 									left-indent : "
 	",
-									value : any = {
-										value : "root"
-									},
 									type : symbol = {
 										value : "Node"
+									},
+									value : reference = {
+										value : "root"
 									}
 								},
 								any = {

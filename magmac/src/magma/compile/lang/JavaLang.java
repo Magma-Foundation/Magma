@@ -22,11 +22,13 @@ public class JavaLang {
         var namespace = new TypeRule("namespace", new SimpleExtractStringListRule("namespace", "\\."));
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
-        var value = new OrRule(List.of(
+        var value = new LazyRule();
+        value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
-                new TypeRule("invocation", new FirstRule(new ExtractStringRule("caller"), "(", new RightRule(new ExtractStringRule("arguments"), ")"))),
-                new TypeRule("any", new ExtractStringRule("value"))
-        ));
+                new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(", new RightRule(new ExtractStringRule("arguments"), ")"))),
+                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
+                new TypeRule("reference", new ExtractStringRule("value"))
+        )));
 
         var type = new LazyRule();
         type.setRule(new OrRule(List.of(
