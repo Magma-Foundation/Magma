@@ -47,6 +47,6 @@ public abstract class SplitRule implements Rule {
 
         return leftResult
                 .flatMapValue(left -> rightValue.mapValue(right -> left + slice + right))
-                .mapErr(err -> new CompileException("Cannot merge node: ", node.toString(), err));
+                .mapErr(err -> new CompileException("Cannot merge node using slice '" + slice + "'.", node.toString(), err));
     }
 }

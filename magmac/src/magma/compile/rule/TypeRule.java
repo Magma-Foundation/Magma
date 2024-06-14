@@ -18,7 +18,9 @@ public record TypeRule(String type, Rule child) implements Rule {
 
     @Override
     public Result<String, CompileException> fromNode(Node node) {
-        if (node.type().equals(type)) return child.fromNode(node);
+        if (node.type().equals(type)) return child.fromNode(node)
+                .mapErr(err -> new CompileException("Cannot generate '"+ type + "' from node.", node.toString(), err));
+
         var format = "Node was not of type '%s': %s";
         var message = format.formatted(type, node);
         return new Err<>(new CompileException(message));

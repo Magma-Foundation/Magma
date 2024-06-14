@@ -21,23 +21,32 @@ public class JavaLang {
     public static Rule createClassRule() {
         var modifiers = new ExtractStringListRule("modifiers", " ");
         var name = new StripRule(new ExtractStringRule("name"));
-        var children = new MembersRule("children", new StripRule(createClassMemberRule()));
-        var content = new ExtractNodeRule("content", new TypeRule("block", children));
+        var block = createBlock(createClassMemberRule());
+        var content = new ExtractNodeRule("content", block);
 
         return new TypeRule("class", new FirstRule(new StripRule(modifiers), Main.CLASS_KEYWORD_WITH_SPACE, new StripRule(new FirstRule(name, "{", new StripRule(new RightRule(content, "}"))))));
+    }
+
+    private static TypeRule createBlock(Rule memberRule) {
+        var children = new MembersRule("children", new StripRule(memberRule));
+        return new TypeRule("block", children);
     }
 
     private static Rule createClassMemberRule() {
         return new OrRule(List.of(
                 createMethodRule(),
                 createDeclarationRule(),
-                new TypeRule("any", new ExtractStringRule("content"))
+                createAnyRule()
         ));
+    }
+
+    private static TypeRule createAnyRule() {
+        return new TypeRule("any", new ExtractStringRule("content"));
     }
 
     private static Rule createMethodRule() {
         var header = new StripRule(createDefinitionRule());
-        return new TypeRule("method", new FirstRule(header, "{", new ExtractStringRule("right")));
+        return new TypeRule("method", new FirstRule(header, "{", new RightRule(new ExtractNodeRule("content", createBlock(createAnyRule())), "}")));
     }
 
     private static TypeRule createDeclarationRule() {

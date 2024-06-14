@@ -30,7 +30,7 @@ public class MagmaLang {
     }
 
     private static Rule createObjectRule(Rule statements) {
-        var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), "{", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
+        var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), " {\n", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
         var child = new LastRule(new ExtractStringListRule("modifiers", " "), " ", name);
         return new TypeRule("object", child);
     }
