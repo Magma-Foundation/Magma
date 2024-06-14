@@ -507,11 +507,26 @@ block = {
 										]
 									}
 								},
-								any = {
-									value : "catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }"
+								catch = {
+									definition : definition = {
+										name : "e",
+										type : symbol = {
+											value : "IOException"
+										}
+									},
+									child : block = {
+										children : [
+											invocation = {
+												caller : access = {
+													child : "printStackTrace",
+													parent : any = {
+														value : "//noinspection CallToPrintStackTrace
+            e"
+													}
+												}
+											}
+										]
+									}
 								}
 							]
 						}

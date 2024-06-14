@@ -67,6 +67,7 @@ public class JavaLang {
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 declaration,
                 new TypeRule("invocation", new RightRule(invocation, ";")),
+                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", definition), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 
