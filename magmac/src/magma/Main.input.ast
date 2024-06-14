@@ -90,15 +90,8 @@ block = {
 			modifiers : ["public"],
 			child : block = {
 				children : [
-					declaration = {
-						name : "CLASS_KEYWORD_WITH_SPACE",
-						modifiers : ["public", "static", "final"],
-						type : symbol = {
-							value : "String"
-						},
-						value : string = {
-							value : "class "
-						}
+					any = {
+						value : "public static final String CLASS_KEYWORD_WITH_SPACE = "class ";"
 					},
 					method = {
 						name : "main",
@@ -593,15 +586,37 @@ block = {
 										}
 									}
 								},
-								declaration = {
-									name : """,
-									type : symbol = {
-										value : "+"
+								invocation = {
+									caller : access = {
+										child : "ifPresent",
+										parent : symbol = {
+											value : "message"
+										}
 									},
-									value : any = {
-										value : "" + s + " " + context))"
-									},
-									modifiers : ["message.ifPresent(s", "->", "System.err.println("\t".repeat(depth)", "+", "depth"]
+									arguments : [
+										lambda = {
+											param-name : "s",
+											value : invocation = {
+												arguments : [
+													access = {
+														child : "repeat(depth) + depth + " = " + s + " " + context",
+														parent : string = {
+															value : "\t"
+														}
+													}
+												],
+												caller : access = {
+													child : "println",
+													parent : access = {
+														child : "err",
+														parent : symbol = {
+															value : "System"
+														}
+													}
+												}
+											}
+										}
+									]
 								},
 								declaration = {
 									name : "causes",

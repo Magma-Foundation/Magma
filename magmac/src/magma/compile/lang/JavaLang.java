@@ -64,7 +64,7 @@ public class JavaLang {
         var withoutModifiers = new ExtractNodeRule("type", type);
         var withModifiers = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
-        var definitionHeader = new LastRule(anyModifiers, " ", new ExtractStringRule("name"));
+        var definitionHeader = new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
         var definition = new TypeRule("definition", definitionHeader);
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
 
