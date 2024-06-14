@@ -22,7 +22,11 @@ try {
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
             var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
+
+            Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
             var generated = generate(root);
+            Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
+
             Rule rule = MagmaLang.createRootRule();
             Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
         } catch (IOException e) {

@@ -35,8 +35,7 @@ public class JavaLang {
     private static Rule createClassMemberRule() {
         return new OrRule(List.of(
                 createMethodRule(),
-                createDeclarationRule(),
-                createAnyRule()
+                createDeclarationRule()
         ));
     }
 
