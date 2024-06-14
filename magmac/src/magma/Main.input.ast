@@ -106,7 +106,15 @@ block = {
 						type : symbol = {
 							value : "void"
 						},
-						right : "String[] args) {
+						params : definition = {
+							name : "args",
+							type : array = {
+								child : symbol = {
+									value : "String"
+								}
+							}
+						},
+						child : " {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
@@ -140,7 +148,14 @@ block = {
 						type : symbol = {
 							value : "void"
 						},
-						right : "Error_ e, int depth) {
+						params : definition = {
+							name : "depth",
+							modifiers : ["Error_", "e,"],
+							type : symbol = {
+								value : "int"
+							}
+						},
+						child : " {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
         var context = index == -1 ? actualContext : actualContext.substring(0, index);
@@ -167,7 +182,13 @@ block = {
 						type : symbol = {
 							value : "Node"
 						},
-						right : "Node root) {
+						params : definition = {
+							name : "root",
+							type : symbol = {
+								value : "Node"
+							}
+						},
+						child : " {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),

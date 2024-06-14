@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -26,14 +27,21 @@ public class JavaLang {
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
 
-        var type = new OrRule(List.of(
+        var type = new LazyRule();
+        type.setRule(new OrRule(List.of(
+                new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
                 new TypeRule("symbol", new ExtractStringRule("value"))
-        ));
+        )));
 
-        var definition = new LastRule(new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", new ExtractNodeRule("type", type)), " ", new ExtractStringRule("name"));
+        var withoutModifiers = new ExtractNodeRule("type", type);
+        var withModifiers = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", withoutModifiers);
+        var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
+        var definitionHeader = new LastRule(anyModifiers, " ", new ExtractStringRule("name"));
+        var definition = new TypeRule("definition", definitionHeader);
+
         var classMember = new OrRule(List.of(
-                new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
-                new TypeRule("method", new FirstRule(definition, "(", new ExtractStringRule("right"))),
+                new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new ExtractNodeRule("params", definition), ")", new ExtractStringRule("child")))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);
