@@ -63,6 +63,7 @@ public class JavaLang {
         statement.setRule(new OrRule(List.of(
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 declaration,
+                new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 

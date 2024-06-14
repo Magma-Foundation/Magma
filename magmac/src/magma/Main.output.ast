@@ -272,8 +272,21 @@ block = {
 													}
 												}
 											},
-											any = {
-												value : "parseError.ifPresent(error -> print(error, 0));"
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "error"
+													},
+													any = {
+														value : "0)"
+													}
+												],
+												caller : access = {
+													child : "ifPresent(error -> print",
+													parent : symbol = {
+														value : "parseError"
+													}
+												}
 											},
 											declaration = {
 												name : "root",
@@ -296,8 +309,30 @@ block = {
 													}
 												}
 											},
-											any = {
-												value : "Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());"
+											invocation = {
+												arguments : [
+													any = {
+														value : ")"
+													}
+												],
+												caller : access = {
+													child : "toString",
+													parent : access = {
+														child : "ast"), root",
+														parent : access = {
+															child : "input",
+															parent : access = {
+																child : "resolveSibling("Main",
+																parent : access = {
+																	child : "writeString(source",
+																	parent : symbol = {
+																		value : "Files"
+																	}
+																}
+															}
+														}
+													}
+												}
 											},
 											declaration = {
 												name : "generated",
@@ -317,8 +352,30 @@ block = {
 													]
 												}
 											},
-											any = {
-												value : "Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());"
+											invocation = {
+												arguments : [
+													any = {
+														value : ")"
+													}
+												],
+												caller : access = {
+													child : "toString",
+													parent : access = {
+														child : "ast"), generated",
+														parent : access = {
+															child : "output",
+															parent : access = {
+																child : "resolveSibling("Main",
+																parent : access = {
+																	child : "writeString(source",
+																	parent : symbol = {
+																		value : "Files"
+																	}
+																}
+															}
+														}
+													}
+												}
 											},
 											declaration = {
 												name : "rule",
@@ -373,11 +430,42 @@ block = {
 													}
 												}
 											},
-											any = {
-												value : "generateError.ifPresent(error -> print(error, 0));"
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "error"
+													},
+													any = {
+														value : "0)"
+													}
+												],
+												caller : access = {
+													child : "ifPresent(error -> print",
+													parent : symbol = {
+														value : "generateError"
+													}
+												}
 											},
-											any = {
-												value : "Files.writeString(target, generateResult.findValue().orElseThrow());"
+											invocation = {
+												arguments : [
+													any = {
+														value : ")"
+													}
+												],
+												caller : access = {
+													child : "orElseThrow",
+													parent : invocation = {
+														caller : access = {
+															child : "findValue",
+															parent : access = {
+																child : "writeString(target, generateResult",
+																parent : symbol = {
+																	value : "Files"
+																}
+															}
+														}
+													}
+												}
 											},
 											any = {
 												value : ""
