@@ -1,7 +1,7 @@
 package magma.compile.rule;
 
-public final class SymbolRule extends FilterRule {
-    public SymbolRule(Rule child) {
+public final class NumberRule extends FilterRule {
+    public NumberRule(Rule child) {
         super(child);
     }
 
@@ -9,7 +9,7 @@ public final class SymbolRule extends FilterRule {
     protected boolean filter(String input) {
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
-            if (!Character.isLetter(c)) {
+            if (!Character.isDigit(c)) {
                 return false;
             }
         }

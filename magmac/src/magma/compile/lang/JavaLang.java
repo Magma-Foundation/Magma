@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.NumberRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -40,9 +41,11 @@ public class JavaLang {
 
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
                 invocation,
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 

@@ -280,18 +280,21 @@ block = {
 													}
 												},
 												arguments : [
-													invocation = {
-														caller : any = {
-															value : "error -> print"
-														},
-														arguments : [
-															symbol = {
-																value : "error"
+													lambda = {
+														param-name : "error",
+														value : invocation = {
+															caller : symbol = {
+																value : "print"
 															},
-															any = {
-																value : "0"
-															}
-														]
+															arguments : [
+																symbol = {
+																	value : "error"
+																},
+																number = {
+																	value : "0"
+																}
+															]
+														}
 													}
 												]
 											},
@@ -457,18 +460,21 @@ block = {
 													}
 												},
 												arguments : [
-													invocation = {
-														caller : any = {
-															value : "error -> print"
-														},
-														arguments : [
-															symbol = {
-																value : "error"
+													lambda = {
+														param-name : "error",
+														value : invocation = {
+															caller : symbol = {
+																value : "print"
 															},
-															any = {
-																value : "0"
-															}
-														]
+															arguments : [
+																symbol = {
+																	value : "error"
+																},
+																number = {
+																	value : "0"
+																}
+															]
+														}
 													}
 												]
 											},
@@ -589,7 +595,7 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											any = {
+											number = {
 												value : "0"
 											},
 											symbol = {
