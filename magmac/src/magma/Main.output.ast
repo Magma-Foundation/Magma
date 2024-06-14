@@ -273,20 +273,20 @@ block = {
 												}
 											},
 											invocation = {
+												caller : access = {
+													child : "ifPresent",
+													parent : symbol = {
+														value : "parseError"
+													}
+												},
 												arguments : [
-													symbol = {
-														value : "error"
+													any = {
+														value : "error -> print(error"
 													},
 													any = {
 														value : "0)"
 													}
-												],
-												caller : access = {
-													child : "ifPresent(error -> print",
-													parent : symbol = {
-														value : "parseError"
-													}
-												}
+												]
 											},
 											declaration = {
 												name : "root",
@@ -310,29 +310,35 @@ block = {
 												}
 											},
 											invocation = {
-												arguments : [
-													any = {
-														value : ")"
-													}
-												],
 												caller : access = {
-													child : "toString",
-													parent : access = {
-														child : "ast"), root",
-														parent : access = {
-															child : "input",
-															parent : access = {
-																child : "resolveSibling("Main",
-																parent : access = {
-																	child : "writeString(source",
-																	parent : symbol = {
-																		value : "Files"
-																	}
-																}
+													child : "writeString",
+													parent : symbol = {
+														value : "Files"
+													}
+												},
+												arguments : [
+													invocation = {
+														arguments : [
+															string = {
+																value : "Main.input.ast"
+															}
+														],
+														caller : access = {
+															child : "resolveSibling",
+															parent : symbol = {
+																value : "source"
+															}
+														}
+													},
+													invocation = {
+														caller : access = {
+															child : "toString",
+															parent : symbol = {
+																value : "root"
 															}
 														}
 													}
-												}
+												]
 											},
 											declaration = {
 												name : "generated",
@@ -353,29 +359,35 @@ block = {
 												}
 											},
 											invocation = {
-												arguments : [
-													any = {
-														value : ")"
-													}
-												],
 												caller : access = {
-													child : "toString",
-													parent : access = {
-														child : "ast"), generated",
-														parent : access = {
-															child : "output",
-															parent : access = {
-																child : "resolveSibling("Main",
-																parent : access = {
-																	child : "writeString(source",
-																	parent : symbol = {
-																		value : "Files"
-																	}
-																}
+													child : "writeString",
+													parent : symbol = {
+														value : "Files"
+													}
+												},
+												arguments : [
+													invocation = {
+														arguments : [
+															string = {
+																value : "Main.output.ast"
+															}
+														],
+														caller : access = {
+															child : "resolveSibling",
+															parent : symbol = {
+																value : "source"
+															}
+														}
+													},
+													invocation = {
+														caller : access = {
+															child : "toString",
+															parent : symbol = {
+																value : "generated"
 															}
 														}
 													}
-												}
+												]
 											},
 											declaration = {
 												name : "rule",
@@ -431,41 +443,46 @@ block = {
 												}
 											},
 											invocation = {
+												caller : access = {
+													child : "ifPresent",
+													parent : symbol = {
+														value : "generateError"
+													}
+												},
 												arguments : [
-													symbol = {
-														value : "error"
+													any = {
+														value : "error -> print(error"
 													},
 													any = {
 														value : "0)"
 													}
-												],
-												caller : access = {
-													child : "ifPresent(error -> print",
-													parent : symbol = {
-														value : "generateError"
-													}
-												}
+												]
 											},
 											invocation = {
-												arguments : [
-													any = {
-														value : ")"
-													}
-												],
 												caller : access = {
-													child : "orElseThrow",
-													parent : invocation = {
+													child : "writeString",
+													parent : symbol = {
+														value : "Files"
+													}
+												},
+												arguments : [
+													symbol = {
+														value : "target"
+													},
+													invocation = {
 														caller : access = {
-															child : "findValue",
-															parent : access = {
-																child : "writeString(target, generateResult",
-																parent : symbol = {
-																	value : "Files"
+															child : "orElseThrow",
+															parent : invocation = {
+																caller : access = {
+																	child : "findValue",
+																	parent : symbol = {
+																		value : "generateResult"
+																	}
 																}
 															}
 														}
 													}
-												}
+												]
 											},
 											any = {
 												value : ""
@@ -610,20 +627,22 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											any = {
-												value : ")"
+											invocation = {
+												caller : access = {
+													child : "emptyList",
+													parent : symbol = {
+														value : "Collections"
+													}
+												}
 											}
 										],
 										caller : access = {
-											child : "emptyList",
-											parent : access = {
-												child : "orElse(Collections",
-												parent : invocation = {
-													caller : access = {
-														child : "findCauses",
-														parent : symbol = {
-															value : "e"
-														}
+											child : "orElse",
+											parent : invocation = {
+												caller : access = {
+													child : "findCauses",
+													parent : symbol = {
+														value : "e"
 													}
 												}
 											}
@@ -677,23 +696,54 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : [
-											any = {
-												value : ")"
-											}
-										],
 										caller : access = {
+											child : "asList",
 											parent : symbol = {
 												value : "Arrays"
+											}
+										},
+										arguments : [
+											invocation = {
+												caller : any = {
+													value : "new RootTypeRemover"
+												},
+												arguments : [
+													string = {
+														value : "package"
+													}
+												]
 											},
-											child : "asList(
-                new RootTypeRemover("package"),
-                new RootTypeRemover("whitespace"),
-                new MethodMigrator(),
-                new ModifierAttacher(),
-                new ClassSplitter(),
-                new MagmaFormatter"
-										}
+											invocation = {
+												caller : any = {
+													value : "new RootTypeRemover"
+												},
+												arguments : [
+													string = {
+														value : "whitespace"
+													}
+												]
+											},
+											invocation = {
+												caller : any = {
+													value : "new MethodMigrator"
+												}
+											},
+											invocation = {
+												caller : any = {
+													value : "new ModifierAttacher"
+												}
+											},
+											invocation = {
+												caller : any = {
+													value : "new ClassSplitter"
+												}
+											},
+											invocation = {
+												caller : any = {
+													value : "new MagmaFormatter"
+												}
+											}
+										]
 									}
 								},
 								declaration = {
