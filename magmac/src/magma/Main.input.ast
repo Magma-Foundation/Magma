@@ -460,12 +460,14 @@ block = {
 									},
 									child : block = {
 										children : [
+											comment = {
+												value : "noinspection CallToPrintStackTrace"
+											},
 											invocation = {
 												caller : access = {
 													child : "printStackTrace",
-													parent : any = {
-														value : "//noinspection CallToPrintStackTrace
-            e"
+													parent : symbol = {
+														value : "e"
 													}
 												}
 											}

@@ -2,23 +2,54 @@ package magma.compile.rule.split;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MembersSplitter implements Splitter {
-    private static State processChar(State state, char c) {
-        if (c == ';' && state.isLevel()) return state.advance();
-        if (c == '}' && state.isShallow()) return state.exit().advance();
-        if (c == '{') return state.enter();
-        if (c == '}') return state.exit();
-        return state;
-    }
 
     @Override
     public List<String> split(String input) {
         var current = new State();
-        for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
-            current = processChar(current.append(c), c);
+        var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+            var state = current.append(c);
+
+            if (c == '/' && state.isLevel() && !queue.isEmpty()) {
+                var after = queue.peek();
+                if (after == '/') {
+                    // We are in a comment.
+
+                    var withAfter = state.append(queue.pop());
+                    while (!queue.isEmpty()) {
+                        var next = queue.pop();
+                        withAfter = withAfter.append(next);
+                        if(next == '\n') {
+                            break;
+                        }
+                    }
+
+                    current = withAfter.advance();
+                    continue;
+                }
+            }
+
+            if (c == ';' && state.isLevel()) {
+                current = state.advance();
+            } else if (c == '}' && state.isShallow()) {
+                current = state.exit().advance();
+            } else if (c == '{') {
+                current = state.enter();
+            } else if (c == '}') {
+                current = state.exit();
+            } else {
+                current = state;
+            }
         }
 
         return current.advance().tokens

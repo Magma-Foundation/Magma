@@ -64,6 +64,7 @@ public class JavaLang {
 
         var statement = new LazyRule();
         statement.setRule(new OrRule(List.of(
+                new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 declaration,
                 new TypeRule("invocation", new RightRule(invocation, ";")),
