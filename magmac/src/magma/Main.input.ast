@@ -102,6 +102,10 @@ block = {
 					},
 					method = {
 						name : "main",
+						modifiers : ["public", "static"],
+						type : symbol = {
+							value : "void"
+						},
 						right : "String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -128,14 +132,14 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }",
-						modifiers : ["public", "static"],
-						type : symbol = {
-							value : "void"
-						}
+    }"
 					},
 					method = {
 						name : "print",
+						modifiers : ["private", "static"],
+						type : symbol = {
+							value : "void"
+						},
 						right : "Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
@@ -155,14 +159,14 @@ block = {
         } else {
             print(causes.get(0), depth + 1);
         }
-    }",
-						modifiers : ["private", "static"],
-						type : symbol = {
-							value : "void"
-						}
+    }"
 					},
 					method = {
 						name : "generate",
+						modifiers : ["private", "static"],
+						type : symbol = {
+							value : "Node"
+						},
 						right : "Node root) {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
@@ -178,11 +182,7 @@ block = {
             acc = modifier.generate(acc);
         }
         return acc;
-    }",
-						type : symbol = {
-							value : "Node"
-						},
-						modifiers : ["private", "static"]
+    }"
 					},
 					any = {
 						value : ""

@@ -122,9 +122,9 @@ block = {
 			child : block = {
 				children : [
 					declaration = {
-						name : "CLASS_KEYWORD_WITH_SPACE",
 						left-indent : "
 	",
+						name : "CLASS_KEYWORD_WITH_SPACE",
 						modifiers : ["public", "static", "const"],
 						type : symbol = {
 							value : "String"
@@ -137,6 +137,10 @@ block = {
 						name : "main",
 						left-indent : "
 	",
+						modifiers : ["public", "static", "def"],
+						type : symbol = {
+							value : "void"
+						},
 						right : "String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -163,16 +167,16 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }",
-						modifiers : ["public", "static", "def"],
-						type : symbol = {
-							value : "void"
-						}
+    }"
 					},
 					function = {
 						name : "print",
 						left-indent : "
 	",
+						modifiers : ["private", "static", "def"],
+						type : symbol = {
+							value : "void"
+						},
 						right : "Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
@@ -192,16 +196,16 @@ block = {
         } else {
             print(causes.get(0), depth + 1);
         }
-    }",
-						modifiers : ["private", "static", "def"],
-						type : symbol = {
-							value : "void"
-						}
+    }"
 					},
 					function = {
 						name : "generate",
 						left-indent : "
 	",
+						modifiers : ["private", "static", "def"],
+						type : symbol = {
+							value : "Node"
+						},
 						right : "Node root) {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
@@ -217,11 +221,7 @@ block = {
             acc = modifier.generate(acc);
         }
         return acc;
-    }",
-						type : symbol = {
-							value : "Node"
-						},
-						modifiers : ["private", "static", "def"]
+    }"
 					},
 					any = {
 						value : ""

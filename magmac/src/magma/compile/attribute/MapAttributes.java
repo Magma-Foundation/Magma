@@ -3,6 +3,7 @@ package magma.compile.attribute;
 import magma.api.Tuple;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +73,7 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
         return values.entrySet()
                 .stream()
                 .map(entry -> "\n" + "\t".repeat(depth + 1) + entry.getKey() + " : " + entry.getValue().format(depth + 1))
+                .sorted(Comparator.comparingInt(String::length))
                 .collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
     }
 }
