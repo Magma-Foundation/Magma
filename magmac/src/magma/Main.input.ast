@@ -88,10 +88,14 @@ block = {
 		class = {
 			name : "Main",
 			modifiers : ["public"],
-			right : "
-    public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-
-    public static void main(String[] args) {
+			child : block = {
+				children : [
+					declaration = {
+						left : "public static final String CLASS_KEYWORD_WITH_SPACE ",
+						right : ""class ""
+					},
+					any = {
+						value : "public static void main(String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
@@ -117,9 +121,10 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }
-
-    private static void print(Error_ e, int depth) {
+    }"
+					},
+					any = {
+						value : "private static void print(Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
         var context = index == -1 ? actualContext : actualContext.substring(0, index);
@@ -138,9 +143,10 @@ block = {
         } else {
             print(causes.get(0), depth + 1);
         }
-    }
-
-    private static Node generate(Node root) {
+    }"
+					},
+					any = {
+						value : "private static Node generate(Node root) {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
@@ -155,8 +161,12 @@ block = {
             acc = modifier.generate(acc);
         }
         return acc;
-    }
-"
+    }"
+					},
+					any = {
+						value : ""
+					}]
+			}
 		},
 		any = {
 			value : ""

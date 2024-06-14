@@ -20,13 +20,23 @@ public class JavaLang {
         var namespace = new TypeRule("namespace", new SimpleExtractStringListRule("namespace", "\\."));
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
+        var classMember = new OrRule(List.of(
+                new TypeRule("declaration", new FirstRule(new ExtractStringRule("left"), "=", new RightRule(new StripRule(new ExtractStringRule("value")), ";"))),
+                new TypeRule("any", new ExtractStringRule("value"))
+        ));
+        var classChild = createBlock(classMember);
+
         var rootMember = new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 new TypeRule("import", new LeftRule("import ", new RightRule(new ExtractNodeRule("external", namespace), ";"))),
-                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractStringRule("child"), "}")))),
+                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}")))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
 
-        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(rootMember)));
+        return createBlock(rootMember);
+    }
+
+    private static TypeRule createBlock(Rule child) {
+        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(child)));
     }
 }
