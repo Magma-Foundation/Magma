@@ -3,6 +3,7 @@ package magma.compile.lang;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
@@ -17,10 +18,12 @@ import java.util.List;
 public class JavaLang {
     public static Rule createRootRule() {
         var namespace = new TypeRule("namespace", new SimpleExtractStringListRule("namespace", "\\."));
+        var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
         var rootMember = new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 new TypeRule("import", new LeftRule("import ", new RightRule(new ExtractNodeRule("external", namespace), ";"))),
+                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractStringRule("child"), "}")))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
 

@@ -85,8 +85,10 @@ block = {
 				namespace : ["java", "util", "Collections"]
 			}
 		},
-		any = {
-			value : "public class Main {
+		class = {
+			name : "Main",
+			modifiers : ["public"],
+			right : "
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
 
     public static void main(String[] args) {
@@ -154,7 +156,7 @@ block = {
         }
         return acc;
     }
-}"
+"
 		},
 		any = {
 			value : ""
