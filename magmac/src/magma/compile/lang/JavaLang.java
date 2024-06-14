@@ -74,7 +74,7 @@ public class JavaLang {
 
         var classMember = new OrRule(List.of(
                 declaration,
-                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", definition), ")", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))))),
+                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);

@@ -552,7 +552,6 @@ block = {
 							},
 							definition = {
 								name : "depth",
-								modifiers : [""],
 								type : symbol = {
 									value : "int"
 								}
