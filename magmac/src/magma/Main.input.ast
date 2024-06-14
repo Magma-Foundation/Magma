@@ -553,8 +553,13 @@ block = {
 										true : symbol = {
 											value : "actualContext"
 										},
-										condition : any = {
-											value : "index == -1"
+										condition : operator = {
+											right : number = {
+												value : "-1"
+											},
+											left : symbol = {
+												value : "index"
+											}
 										},
 										false : invocation = {
 											caller : access = {

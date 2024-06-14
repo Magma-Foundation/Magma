@@ -36,7 +36,6 @@ public class JavaLang {
         );
 
         var caller = new ExtractNodeRule("caller", value);
-
         var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
 
         value.setRule(new OrRule(List.of(
@@ -52,6 +51,7 @@ public class JavaLang {
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
+                new TypeRule("operator", new FirstRule(new StripRule(new ExtractNodeRule("left", value)), "==", new StripRule(new ExtractNodeRule("right", value)))),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 

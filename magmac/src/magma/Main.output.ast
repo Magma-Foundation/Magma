@@ -614,11 +614,16 @@ block = {
 										value : "var"
 									},
 									value : ternary = {
-										condition : any = {
-											value : "index == -1"
-										},
 										true : symbol = {
 											value : "actualContext"
+										},
+										condition : operator = {
+											right : number = {
+												value : "-1"
+											},
+											left : symbol = {
+												value : "index"
+											}
 										},
 										false : invocation = {
 											caller : access = {

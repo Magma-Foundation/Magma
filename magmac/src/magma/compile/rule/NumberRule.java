@@ -5,8 +5,9 @@ public final class NumberRule extends FilterRule {
         super(child);
     }
 
-    @Override
-    protected boolean filter(String input) {
+    private static boolean allDigits(String input) {
+        if(input.isEmpty()) return false;
+
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
             if (!Character.isDigit(c)) {
@@ -15,5 +16,12 @@ public final class NumberRule extends FilterRule {
         }
 
         return true;
+    }
+
+    @Override
+    protected boolean filter(String input) {
+        return input.startsWith("-")
+                ? allDigits(input.substring(1))
+                : allDigits(input);
     }
 }
