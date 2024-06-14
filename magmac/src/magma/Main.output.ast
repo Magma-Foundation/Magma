@@ -122,12 +122,16 @@ block = {
 			child : block = {
 				children : [
 					declaration = {
-						left : "public static final String CLASS_KEYWORD_WITH_SPACE ",
+						name : "CLASS_KEYWORD_WITH_SPACE",
+						left-indent : "
+	",
+						modifiers : ["public", "static", "const"],
+						type : symbol = {
+							value : "String"
+						},
 						value : string = {
 							value : "class "
-						},
-						left-indent : "
-	"
+						}
 					},
 					any = {
 						value : "public static void main(String[] args) {

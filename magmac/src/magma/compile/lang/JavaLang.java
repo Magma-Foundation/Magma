@@ -4,6 +4,7 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
@@ -25,8 +26,13 @@ public class JavaLang {
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
 
+        var type = new OrRule(List.of(
+                new TypeRule("symbol", new ExtractStringRule("value"))
+        ));
+
+        var definition = new LastRule(new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", new ExtractNodeRule("type", type)), " ", new ExtractStringRule("name"));
         var classMember = new OrRule(List.of(
-                new TypeRule("declaration", new FirstRule(new ExtractStringRule("left"), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);
