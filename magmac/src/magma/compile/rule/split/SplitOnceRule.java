@@ -2,10 +2,14 @@ package magma.compile.rule.split;
 
 import magma.api.Result;
 import magma.api.Tuple;
+import magma.compile.CompileParentError;
 import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.AdaptiveRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
 import java.util.Optional;
@@ -28,27 +32,40 @@ public abstract class SplitOnceRule implements Rule {
             return new Tuple<>(left1, right1);
         });
 
-        var attributes = tuple.flatMap(contentStart -> {
+        return tuple.map(contentStart -> {
             var left = contentStart.left();
             var right = contentStart.right();
 
             var leftResult = leftRule.toNode(left);
-            var rightResult = rightRule.toNode(right);
-            return leftResult.findAttributes().flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)));
-        });
+            if (leftResult.findError().isPresent()) return leftResult;
 
-        return new AdaptiveRuleResult(Optional.empty(), attributes);
+            var rightResult = rightRule.toNode(right);
+            if (rightResult.findError().isPresent()) return rightResult;
+
+            var attributes1 = leftResult.findAttributes().flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)));
+            return new AdaptiveRuleResult(Optional.empty(), attributes1);
+        }).orElseGet(() -> {
+            var format = "Slice '%s' not present.";
+            var message = format.formatted(slice);
+            return new ErrorRuleResult(new JavaError(new CompileException(message, input)));
+        });
     }
 
     protected abstract Optional<Integer> computeIndex(String input);
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         var leftResult = leftRule.fromNode(node);
         var rightValue = rightRule.fromNode(node);
 
         return leftResult
                 .flatMapValue(left -> rightValue.mapValue(right -> left + slice + right))
-                .mapErr(err -> new CompileException("Cannot merge node using slice '" + slice + "'.", node.toString(), err));
+                .mapErr(err -> createError(node, err));
+    }
+
+    private CompileParentError createError(Node node, Error_ err) {
+        var format = "Cannot merge node using slice '%s'.";
+        var message = format.formatted(slice);
+        return new CompileParentError(message, node.toString(), err);
     }
 }

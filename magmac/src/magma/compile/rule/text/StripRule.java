@@ -1,7 +1,8 @@
 package magma.compile.rule.text;
 
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -14,7 +15,7 @@ public record StripRule(Rule child) implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         var leftIndent = node.attributes()
                 .apply("left-indent")
                 .flatMap(Attribute::asString)
@@ -27,6 +28,6 @@ public record StripRule(Rule child) implements Rule {
 
         return child.fromNode(node)
                 .mapValue(inner -> leftIndent + inner + rightIndent)
-                .mapErr(err -> new CompileException("Cannot apply indentation: ", node.toString(), err));
+                .mapErr(err -> new CompileParentError("Cannot apply indentation: ", node.toString(), err));
     }
 }

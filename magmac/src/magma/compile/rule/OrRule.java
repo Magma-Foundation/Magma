@@ -2,28 +2,38 @@ package magma.compile.rule;
 
 import magma.api.Err;
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.MultipleError;
 import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public record OrRule(List<Rule> rules) implements Rule {
     @Override
     public RuleResult toNode(String input) {
+        var errors = new ArrayList<Error_>();
         for (Rule rule : rules()) {
-            RuleResult result = rule.toNode(input);
+            var result = rule.toNode(input);
             if (result.findAttributes().isPresent()) {
                 return result;
             }
+
+            result.findError().ifPresent(errors::add);
         }
-        return new EmptyRuleResult();
+
+        if (errors.isEmpty()) {
+            return new EmptyRuleResult();
+        } else {
+            return new ErrorRuleResult(new MultipleError(errors));
+        }
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         var results = rules.stream()
                 .map(rule -> rule.fromNode(node))
                 .toList();
@@ -32,15 +42,14 @@ public record OrRule(List<Rule> rules) implements Rule {
                 .filter(Result::isOk)
                 .findFirst();
 
-        if (anyOk.isPresent()) return anyOk.get();
+        return anyOk.orElseGet(() -> toError(results));
 
-        var max = results.stream()
+    }
+
+    private static Err<String, Error_> toError(List<Result<String, Error_>> results) {
+        return new Err<>(new MultipleError(results.stream()
                 .map(Result::findErr)
                 .flatMap(Optional::stream)
-                .max(Comparator.comparingInt(CompileException::calculateDepth));
-
-        return max
-                .<Result<String, CompileException>>map(Err::new)
-                .orElseGet(() -> new Err<>(new CompileException("No errors found.")));
+                .toList()));
     }
 }

@@ -1,14 +1,11 @@
 package magma.compile.rule.text;
 
 import magma.api.Result;
-import magma.compile.CompileException;
-import magma.compile.attribute.Attributes;
+import magma.compile.Error_;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.RuleResult;
-
-import java.util.Optional;
 
 public record RightRule(Rule child, String slice) implements Rule {
 
@@ -24,7 +21,7 @@ public record RightRule(Rule child, String slice) implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return child.fromNode(node).mapValue(inner -> inner + slice);
     }
 }

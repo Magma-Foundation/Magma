@@ -3,6 +3,8 @@ package magma.compile.rule;
 import magma.api.Err;
 import magma.api.Result;
 import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.RuleResult;
 
@@ -27,8 +29,8 @@ public class LazyRule implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return child.map(inner -> inner.fromNode(node))
-                .orElse(new Err<>(new CompileException("No child set.")));
+                .orElse(new Err<>(new JavaError(new CompileException("No child set."))));
     }
 }

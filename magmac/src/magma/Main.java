@@ -1,7 +1,6 @@
 package magma;
 
-import magma.api.Results;
-import magma.compile.CompileException;
+import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaFormatter;
@@ -12,12 +11,13 @@ import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
-import magma.compile.rule.result.RuleResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 public class Main {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -28,39 +28,39 @@ public class Main {
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
 
-            var node = JavaLang.createRootRule().toNode(input);
-            if(node.findError().isPresent()) {
-                throw node.findError().get();
-            }
+            var parseResult = JavaLang.createRootRule().toNode(input);
+            var parseError = parseResult.findError();
+            parseError.ifPresent(error -> print(error, 0));
 
-            var root = node.create().orElseThrow();
+            var root = parseResult.create().orElseThrow();
 
             Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
             var generated = generate(root);
             Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
 
             Rule rule = MagmaLang.createRootRule();
-            Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
+            var generateResult = rule.fromNode(generated);
+            var generateError = generateResult.findErr();
+            generateError.ifPresent(error -> print(error, 0));
+
+            Files.writeString(target, generateResult.findValue().orElseThrow());
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        } catch (CompileException e) {
-            print(e, 0);
         }
     }
 
-    private static void print(CompileException e, int depth) {
-        var message = e.getMessage();
-        System.err.println("\t".repeat(depth) + message);
+    private static void print(Error_ e, int depth) {
+        var message = e.findMessage();
+        message.ifPresent(s -> System.err.println("\t".repeat(depth) + s));
 
-        var cause = e.getCause();
-        if (cause == null) {
-            System.err.println("\n---\n" + e.content + "\n---\n");
+        var causes = e.findCauses().orElse(Collections.emptyList());
+        if (causes.isEmpty()) {
+            var context = e.findContext();
+            context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
         } else {
-            if (cause instanceof CompileException cast) {
-                print(cast, depth + 1);
-            } else {
-                cause.printStackTrace();
+            for (Error_ cause : causes) {
+                print(cause, depth + 1);
             }
         }
     }

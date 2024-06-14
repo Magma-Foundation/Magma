@@ -1,7 +1,7 @@
 package magma.compile.rule.text;
 
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -23,7 +23,7 @@ public record LeftRule(String slice, Rule child) implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return child.fromNode(node).mapValue(inner -> slice + inner);
     }
 }

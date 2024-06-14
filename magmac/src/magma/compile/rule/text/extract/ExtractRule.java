@@ -4,6 +4,8 @@ import magma.api.Err;
 import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
@@ -35,15 +37,15 @@ public abstract class ExtractRule implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return node.attributes()
                 .apply(key)
                 .flatMap(this::fromAttribute)
-                .<Result<String, CompileException>>map(Ok::new)
+                .<Result<String, Error_>>map(Ok::new)
                 .orElseGet(() -> {
                     var format = "Property '%s' does not exist on: %s";
                     var message = format.formatted(key, node);
-                    return new Err<>(new CompileException(message));
+                    return new Err<>(new JavaError(new CompileException(message)));
                 });
     }
 }

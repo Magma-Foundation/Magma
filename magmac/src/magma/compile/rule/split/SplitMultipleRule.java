@@ -4,7 +4,11 @@ import magma.api.Collectors;
 import magma.api.Err;
 import magma.api.Result;
 import magma.api.Streams;
+import magma.compile.CompileError;
+import magma.compile.CompileParentError;
 import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
@@ -41,7 +45,9 @@ public final class SplitMultipleRule implements Rule {
             if (result.findError().isPresent()) return result;
 
             var optional = result.create();
-            if (optional.isEmpty()) return new ErrorRuleResult(new CompileException("No name present."));
+            if (optional.isEmpty()) {
+                return new ErrorRuleResult(new CompileError("No name present.", childString));
+            }
 
             members.add(optional.get());
         }
@@ -53,7 +59,7 @@ public final class SplitMultipleRule implements Rule {
         }
     }
 
-    private Result<String, CompileException> joinNodes(List<Node> list) {
+    private Result<String, Error_> joinNodes(List<Node> list) {
         return Streams.fromNativeList(list)
                 .map(childRule::fromNode)
                 .collect(Collectors.exceptionally(Collectors.joining(delimiter)))
@@ -61,7 +67,7 @@ public final class SplitMultipleRule implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return node.attributes()
                 .apply(propertyKey)
                 .flatMap(Attribute::asNodeList)
@@ -69,9 +75,9 @@ public final class SplitMultipleRule implements Rule {
                 .orElseGet(() -> createErr(node));
     }
 
-    private Err<String, CompileException> createErr(Node node) {
+    private Err<String, Error_> createErr(Node node) {
         var format = "Property '%s' does not exist on node.";
         var message = format.formatted(propertyKey);
-        return new Err<>(new CompileException(message, node.toString()));
+        return new Err<>(new JavaError(new CompileException(message, node.toString())));
     }
 }

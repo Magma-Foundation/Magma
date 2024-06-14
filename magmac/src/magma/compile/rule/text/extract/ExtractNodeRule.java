@@ -3,6 +3,8 @@ package magma.compile.rule.text.extract;
 import magma.api.Err;
 import magma.api.Result;
 import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
@@ -24,7 +26,7 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
     }
 
     @Override
-    public Result<String, CompileException> fromNode(Node node) {
+    public Result<String, Error_> fromNode(Node node) {
         return node.attributes()
                 .apply(propertyKey)
                 .flatMap(Attribute::asNode)
@@ -32,9 +34,9 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
                 .orElseGet(() -> createErr(node));
     }
 
-    private Err<String, CompileException> createErr(Node node) {
+    private Err<String, Error_> createErr(Node node) {
         var format = "Node did not have attribute '%s' as a node.";
         var message = format.formatted(propertyKey);
-        return new Err<>(new CompileException(message, node.toString()));
+        return new Err<>(new JavaError(new CompileException(message, node.toString())));
     }
 }

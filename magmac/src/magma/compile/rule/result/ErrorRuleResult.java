@@ -1,19 +1,19 @@
 package magma.compile.rule.result;
 
-import magma.compile.CompileException;
+import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
 import java.util.Optional;
 
-public record ErrorRuleResult(CompileException e) implements RuleResult {
+public record ErrorRuleResult(Error_ e) implements RuleResult {
     @Override
     public Optional<String> findName() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<CompileException> findError() {
+    public Optional<Error_> findError() {
         return Optional.of(e);
     }
 

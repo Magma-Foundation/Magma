@@ -1,7 +1,7 @@
 package magma.compile.rule;
 
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.Error_;
 import magma.compile.rule.result.RuleResult;
 
 /**
@@ -12,5 +12,5 @@ import magma.compile.rule.result.RuleResult;
 public interface Rule {
     RuleResult toNode(String input);
 
-    Result<String, CompileException> fromNode(Node node);
+    Result<String, Error_> fromNode(Node node);
 }

@@ -1,6 +1,6 @@
 package magma.compile.rule.result;
 
-import magma.compile.CompileException;
+import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
@@ -23,7 +23,7 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
     }
 
     @Override
-    public Optional<CompileException> findError() {
+    public Optional<Error_> findError() {
         return Optional.empty();
     }
 }
