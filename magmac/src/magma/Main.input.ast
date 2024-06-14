@@ -25,6 +25,9 @@ block = {
 			value : "magma.compile.lang.Modifier;"
 		},
 		import = {
+			value : "magma.compile.lang.ModifierAttacher;"
+		},
+		import = {
 			value : "magma.compile.lang.RootTypeRemover;"
 		},
 		import = {
@@ -110,6 +113,7 @@ block = {
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
+                new ModifierAttacher(),
                 new ClassSplitter()
         );"
 								},

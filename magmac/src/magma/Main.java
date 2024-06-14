@@ -7,6 +7,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
+import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -61,6 +62,7 @@ public class Main {
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
+                new ModifierAttacher(),
                 new ClassSplitter()
         );
 

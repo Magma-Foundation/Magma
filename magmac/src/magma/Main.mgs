@@ -5,6 +5,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
+import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 export class def Main() => {
 }
 export object Main {
-public static final CLASS_KEYWORD_WITH_SPACE : String = "class ";
+public static const CLASS_KEYWORD_WITH_SPACE : String = "class ";
 public static main(String[] args) : void => {
 try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
@@ -54,6 +55,7 @@ try {
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
+                new ModifierAttacher(),
                 new ClassSplitter()
         );Node acc = root;for (Modifier modifier : list) {
             acc = modifier.generate(acc);

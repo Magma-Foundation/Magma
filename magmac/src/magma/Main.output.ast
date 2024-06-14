@@ -22,6 +22,9 @@ block = {
 			value : "magma.compile.lang.Modifier;"
 		},
 		import = {
+			value : "magma.compile.lang.ModifierAttacher;"
+		},
+		import = {
 			value : "magma.compile.lang.RootTypeRemover;"
 		},
 		import = {
@@ -59,7 +62,7 @@ block = {
 					declaration = {
 						name : "CLASS_KEYWORD_WITH_SPACE",
 						type : "String",
-						modifiers : ["public","static","final"],
+						modifiers : ["public","static","const"],
 						value : ""class ";"
 					},
 					function = {
@@ -116,6 +119,7 @@ block = {
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
+                new ModifierAttacher(),
                 new ClassSplitter()
         );"
 								},
