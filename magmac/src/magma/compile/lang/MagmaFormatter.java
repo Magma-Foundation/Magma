@@ -9,6 +9,14 @@ public class MagmaFormatter extends Modifier {
             return node.withString("right-indent", "\n");
         }
 
+        if(node.is("declaration")) {
+            return node.withString("left-indent", "\n\t");
+        }
+
+        if(node.is("function")) {
+            return node.withString("left-indent", "\n\t");
+        }
+
         return node;
     }
 }

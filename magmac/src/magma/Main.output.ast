@@ -87,12 +87,16 @@ block = {
 				children : [
 					declaration = {
 						name : "CLASS_KEYWORD_WITH_SPACE",
+						left-indent : "
+	",
 						type : "String",
 						modifiers : ["public","const"],
 						value : ""class ";"
 					},
 					function = {
 						name : "main",
+						left-indent : "
+	",
 						params : "String[] args",
 						type : "void",
 						modifiers : ["public"],
@@ -131,6 +135,8 @@ block = {
 					},
 					function = {
 						name : "print",
+						left-indent : "
+	",
 						params : "CompileException e, int depth",
 						type : "void",
 						modifiers : ["private"],
@@ -166,6 +172,8 @@ block = {
 					},
 					function = {
 						name : "generate",
+						left-indent : "
+	",
 						type : "Node",
 						params : "Node root",
 						modifiers : ["private"],
