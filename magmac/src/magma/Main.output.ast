@@ -245,17 +245,10 @@ block = {
 													],
 													caller : access = {
 														child : "toNode",
-														parent : invocation = {
-															arguments : [
-																symbol = {
-																	value : ""
-																}
-															],
-															caller : access = {
-																child : "createRootRule",
-																parent : symbol = {
-																	value : "JavaLang"
-																}
+														parent : access = {
+															child : "createRootRule()",
+															parent : symbol = {
+																value : "JavaLang"
 															}
 														}
 													}
@@ -268,17 +261,10 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : invocation = {
-													arguments : [
-														symbol = {
-															value : ""
-														}
-													],
-													caller : access = {
-														child : "findError",
-														parent : symbol = {
-															value : "parseResult"
-														}
+												value : access = {
+													child : "findError()",
+													parent : symbol = {
+														value : "parseResult"
 													}
 												}
 											},
@@ -292,26 +278,12 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : invocation = {
-													arguments : [
-														symbol = {
-															value : ""
-														}
-													],
-													caller : access = {
-														child : "orElseThrow",
-														parent : invocation = {
-															arguments : [
-																symbol = {
-																	value : ""
-																}
-															],
-															caller : access = {
-																child : "create",
-																parent : symbol = {
-																	value : "parseResult"
-																}
-															}
+												value : access = {
+													child : "orElseThrow()",
+													parent : access = {
+														child : "create()",
+														parent : symbol = {
+															value : "parseResult"
 														}
 													}
 												}
@@ -347,17 +319,10 @@ block = {
 												type : symbol = {
 													value : "Rule"
 												},
-												value : invocation = {
-													arguments : [
-														symbol = {
-															value : ""
-														}
-													],
-													caller : access = {
-														child : "createRootRule",
-														parent : symbol = {
-															value : "MagmaLang"
-														}
+												value : access = {
+													child : "createRootRule()",
+													parent : symbol = {
+														value : "MagmaLang"
 													}
 												}
 											},
@@ -389,17 +354,10 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : invocation = {
-													arguments : [
-														symbol = {
-															value : ""
-														}
-													],
-													caller : access = {
-														child : "findErr",
-														parent : symbol = {
-															value : "generateResult"
-														}
+												value : access = {
+													child : "findErr()",
+													parent : symbol = {
+														value : "generateResult"
 													}
 												}
 											},
@@ -459,17 +417,10 @@ block = {
 										],
 										caller : access = {
 											child : "orElse",
-											parent : invocation = {
-												arguments : [
-													symbol = {
-														value : ""
-													}
-												],
-												caller : access = {
-													child : "findContext",
-													parent : symbol = {
-														value : "e"
-													}
+											parent : access = {
+												child : "findContext()",
+												parent : symbol = {
+													value : "e"
 												}
 											}
 										}
@@ -527,17 +478,10 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : invocation = {
-										arguments : [
-											symbol = {
-												value : ""
-											}
-										],
-										caller : access = {
-											child : "findMessage",
-											parent : symbol = {
-												value : "e"
-											}
+									value : access = {
+										child : "findMessage()",
+										parent : symbol = {
+											value : "e"
 										}
 									}
 								},
@@ -570,17 +514,10 @@ block = {
 											child : "emptyList",
 											parent : access = {
 												child : "orElse(Collections",
-												parent : invocation = {
-													arguments : [
-														symbol = {
-															value : ""
-														}
-													],
-													caller : access = {
-														child : "findCauses",
-														parent : symbol = {
-															value : "e"
-														}
+												parent : access = {
+													child : "findCauses()",
+													parent : symbol = {
+														value : "e"
 													}
 												}
 											}
