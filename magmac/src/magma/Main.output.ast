@@ -280,11 +280,18 @@ block = {
 													}
 												},
 												arguments : [
-													any = {
-														value : "error -> print(error"
-													},
-													any = {
-														value : "0)"
+													invocation = {
+														caller : any = {
+															value : "error -> print"
+														},
+														arguments : [
+															symbol = {
+																value : "error"
+															},
+															any = {
+																value : "0"
+															}
+														]
 													}
 												]
 											},
@@ -450,11 +457,18 @@ block = {
 													}
 												},
 												arguments : [
-													any = {
-														value : "error -> print(error"
-													},
-													any = {
-														value : "0)"
+													invocation = {
+														caller : any = {
+															value : "error -> print"
+														},
+														arguments : [
+															symbol = {
+																value : "error"
+															},
+															any = {
+																value : "0"
+															}
+														]
 													}
 												]
 											},
