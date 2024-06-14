@@ -16,6 +16,9 @@ block = {
 			value : "magma.compile.lang.JavaLang;"
 		},
 		import = {
+			value : "magma.compile.lang.MagmaFormatter;"
+		},
+		import = {
 			value : "magma.compile.lang.MagmaLang;"
 		},
 		import = {
@@ -145,7 +148,8 @@ block = {
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
                 new ModifierAttacher(),
-                new ClassSplitter()
+                new ClassSplitter(),
+                new MagmaFormatter()
         );"
 								},
 								any = {

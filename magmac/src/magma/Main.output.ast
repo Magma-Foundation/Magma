@@ -1,48 +1,83 @@
 block = {
 	children : [
 		import = {
+			right-indent : "
+",
 			value : "magma.api.Results;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.CompileException;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.ClassSplitter;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.JavaLang;"
 		},
 		import = {
+			right-indent : "
+",
+			value : "magma.compile.lang.MagmaFormatter;"
+		},
+		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.MagmaLang;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.MethodRenamer;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.Modifier;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.ModifierAttacher;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.lang.RootTypeRemover;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.rule.Node;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "magma.compile.rule.Rule;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "java.io.IOException;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "java.nio.file.Files;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "java.nio.file.Paths;"
 		},
 		import = {
+			right-indent : "
+",
 			value : "java.util.Arrays;"
 		},
 		object = {
@@ -142,7 +177,8 @@ block = {
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
                 new ModifierAttacher(),
-                new ClassSplitter()
+                new ClassSplitter(),
+                new MagmaFormatter()
         );"
 								},
 								any = {

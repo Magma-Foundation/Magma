@@ -2,6 +2,7 @@ import magma.api.Results;
 import magma.compile.CompileException;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
@@ -13,10 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-export object Main {
-public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
-public main(String[] args) : void => {
-try {
+export object Main {public const CLASS_KEYWORD_WITH_SPACE : String = "class ";public main(String[] args) : void => {try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
@@ -33,9 +31,7 @@ try {
             e.printStackTrace();
         }catch (CompileException e) {
             print(e, 0);
-        }}
-private print(CompileException e, int depth) : void => {
-var message = e.getMessage();System.err.println("\t".repeat(depth) + message);var cause = e.getCause();if (cause == null) {
+        }}private print(CompileException e, int depth) : void => {var message = e.getMessage();System.err.println("\t".repeat(depth) + message);var cause = e.getCause();if (cause == null) {
             System.err.println("\n---\n" + e.content + "\n---\n");
         }else {
             if (cause instanceof CompileException cast) {
@@ -43,15 +39,13 @@ var message = e.getMessage();System.err.println("\t".repeat(depth) + message);va
             } else {
                 cause.printStackTrace();
             }
-        }}
-private generate(Node root) : Node => {
-var list = Arrays.asList(
+        }}private generate(Node root) : Node => {var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
                 new ModifierAttacher(),
-                new ClassSplitter()
+                new ClassSplitter(),
+                new MagmaFormatter()
         );Node acc = root;for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }return acc;}
-}
+        }return acc;}}

@@ -61,7 +61,7 @@ public class MagmaLang {
     }
 
     private static TypeRule createBlock(Rule values) {
-        return new TypeRule("block", new MembersRule("children", values));
+        return new TypeRule("block", new MembersRule("children", new StripRule(values)));
     }
 
     private static TypeRule createFunctionRule(LazyRule statements) {
