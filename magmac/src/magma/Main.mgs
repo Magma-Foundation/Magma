@@ -30,28 +30,24 @@ try {
 
             Rule rule = MagmaLang.createRootRule();
             Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
-        } catch (IOException e) {
+        }catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        } catch (CompileException e) {
+        }catch (CompileException e) {
             print(e, 0);
-        }
-    }
-
-    private static void print(CompileException e, int depth) {
-        var message = e.getMessage();System.err.println("\t".repeat(depth) + message);var cause = e.getCause();if (cause == null) {
+        }}
+private print(CompileException e, int depth) : void => {
+var message = e.getMessage();System.err.println("\t".repeat(depth) + message);var cause = e.getCause();if (cause == null) {
             System.err.println("\n---\n" + e.content + "\n---\n");
-        } else {
+        }else {
             if (cause instanceof CompileException cast) {
                 print(cast, depth + 1);
             } else {
                 cause.printStackTrace();
             }
-        }
-    }
-
-    private static Node generate(Node root) {
-        var list = Arrays.asList(
+        }}
+private generate(Node root) : Node => {
+var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
@@ -59,6 +55,5 @@ try {
                 new ClassSplitter()
         );Node acc = root;for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }
-        return acc;}
+        }return acc;}
 }

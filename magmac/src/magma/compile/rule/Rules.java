@@ -22,6 +22,7 @@ public class Rules {
 
     private static State processChar(State state, char c) {
         if (c == ';' && state.isLevel()) return state.advance();
+        if (c == '}' && state.isShallow()) return state.exit().advance();
         if (c == '{') return state.enter();
         if (c == '}') return state.exit();
         return state;
@@ -52,6 +53,10 @@ public class Rules {
 
         public State exit() {
             return new State(tokens, buffer, depth - 1);
+        }
+
+        public boolean isShallow() {
+            return depth == 1;
         }
     }
 }

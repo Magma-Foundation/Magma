@@ -85,16 +85,33 @@ block = {
 
             Rule rule = MagmaLang.createRootRule();
             Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
-        } catch (IOException e) {
+        }"
+								},
+								any = {
+									content : "catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        } catch (CompileException e) {
+        }"
+								},
+								any = {
+									content : "catch (CompileException e) {
             print(e, 0);
-        }
-    }
-
-    private static void print(CompileException e, int depth) {
-        var message = e.getMessage();"
+        }"
+								},
+								any = {
+									content : ""
+								}]
+						}
+					},
+					function = {
+						name : "print",
+						params : "CompileException e, int depth",
+						type : "void",
+						modifiers : ["private"],
+						content : block = {
+							children : [
+								any = {
+									content : "var message = e.getMessage();"
 								},
 								any = {
 									content : "System.err.println("\t".repeat(depth) + message);"
@@ -105,17 +122,31 @@ block = {
 								any = {
 									content : "if (cause == null) {
             System.err.println("\n---\n" + e.content + "\n---\n");
-        } else {
+        }"
+								},
+								any = {
+									content : "else {
             if (cause instanceof CompileException cast) {
                 print(cast, depth + 1);
             } else {
                 cause.printStackTrace();
             }
-        }
-    }
-
-    private static Node generate(Node root) {
-        var list = Arrays.asList(
+        }"
+								},
+								any = {
+									content : ""
+								}]
+						}
+					},
+					function = {
+						name : "generate",
+						type : "Node",
+						params : "Node root",
+						modifiers : ["private"],
+						content : block = {
+							children : [
+								any = {
+									content : "var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
@@ -129,8 +160,10 @@ block = {
 								any = {
 									content : "for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }
-        return acc;"
+        }"
+								},
+								any = {
+									content : "return acc;"
 								},
 								any = {
 									content : ""
