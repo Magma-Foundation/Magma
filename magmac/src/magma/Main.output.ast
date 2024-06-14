@@ -162,13 +162,28 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "".", "magmac", "src", "magma", "Main.java"",
 													caller : access = {
 														child : "get",
 														parent : reference = {
 															value : "Paths"
 														}
-													}
+													},
+													arguments : [
+														string = {
+															value : "."
+														},
+														string = {
+															value : "magmac"
+														},
+														string = {
+															value : "src"
+														},
+														string = {
+															value : "magma"
+														},
+														string = {
+															value : "Main.java"
+														}]
 												}
 											},
 											declaration = {
@@ -179,7 +194,10 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "source",
+													arguments : [
+														reference = {
+															value : "source"
+														}],
 													caller : access = {
 														child : "readString",
 														parent : reference = {
@@ -196,7 +214,10 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : ""Main.mgs"",
+													arguments : [
+														string = {
+															value : "Main.mgs"
+														}],
 													caller : access = {
 														child : "resolveSibling",
 														parent : reference = {
@@ -213,13 +234,19 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : ").toNode(input",
 													caller : access = {
 														child : "createRootRule",
 														parent : reference = {
 															value : "JavaLang"
 														}
-													}
+													},
+													arguments : [
+														access = {
+															child : "toNode(input",
+															parent : reference = {
+																value : ")"
+															}
+														}]
 												}
 											},
 											declaration = {
@@ -230,7 +257,10 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "",
+													arguments : [
+														reference = {
+															value : ""
+														}],
 													caller : access = {
 														child : "findError",
 														parent : reference = {
@@ -250,13 +280,19 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : ").orElseThrow(",
 													caller : access = {
 														child : "create",
 														parent : reference = {
 															value : "parseResult"
 														}
-													}
+													},
+													arguments : [
+														access = {
+															child : "orElseThrow(",
+															parent : reference = {
+																value : ")"
+															}
+														}]
 												}
 											},
 											any = {
@@ -270,10 +306,13 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "root",
 													caller : reference = {
 														value : "generate"
-													}
+													},
+													arguments : [
+														reference = {
+															value : "root"
+														}]
 												}
 											},
 											any = {
@@ -287,7 +326,10 @@ block = {
 													value : "Rule"
 												},
 												value : invocation = {
-													arguments : "",
+													arguments : [
+														reference = {
+															value : ""
+														}],
 													caller : access = {
 														child : "createRootRule",
 														parent : reference = {
@@ -304,7 +346,10 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "generated",
+													arguments : [
+														reference = {
+															value : "generated"
+														}],
 													caller : access = {
 														child : "fromNode",
 														parent : reference = {
@@ -321,7 +366,10 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													arguments : "",
+													arguments : [
+														reference = {
+															value : ""
+														}],
 													caller : access = {
 														child : "findErr",
 														parent : reference = {
@@ -377,13 +425,19 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : ").orElse(""",
 										caller : access = {
 											child : "findContext",
 											parent : reference = {
 												value : "e"
 											}
-										}
+										},
+										arguments : [
+											access = {
+												child : "orElse(""",
+												parent : reference = {
+													value : ")"
+												}
+											}]
 									}
 								},
 								declaration = {
@@ -394,7 +448,10 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : "'\n'",
+										arguments : [
+											reference = {
+												value : "'\n'"
+											}],
 										caller : access = {
 											child : "indexOf",
 											parent : reference = {
@@ -411,7 +468,13 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : "0, index",
+										arguments : [
+											reference = {
+												value : "0"
+											},
+											reference = {
+												value : "index"
+											}],
 										caller : access = {
 											child : "substring",
 											parent : reference = {
@@ -428,7 +491,10 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : "",
+										arguments : [
+											reference = {
+												value : ""
+											}],
 										caller : access = {
 											child : "findMessage",
 											parent : reference = {
@@ -457,13 +523,28 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										arguments : ").orElse(Collections.emptyList()",
 										caller : access = {
 											child : "findCauses",
 											parent : reference = {
 												value : "e"
 											}
-										}
+										},
+										arguments : [
+											invocation = {
+												caller : access = {
+													child : "orElse",
+													parent : reference = {
+														value : ")"
+													}
+												},
+												arguments : [
+													access = {
+														child : "emptyList(",
+														parent : reference = {
+															value : "Collections"
+														}
+													}]
+											}]
 									}
 								},
 								any = {
@@ -518,14 +599,61 @@ block = {
 												value : "Arrays"
 											}
 										},
-										arguments : "
-                new RootTypeRemover("package"),
-                new RootTypeRemover("whitespace"),
-                new MethodMigrator(),
-                new ModifierAttacher(),
-                new ClassSplitter(),
-                new MagmaFormatter()
-        "
+										arguments : [
+											invocation = {
+												caller : reference = {
+													value : "new RootTypeRemover"
+												},
+												arguments : [
+													string = {
+														value : "package"
+													}]
+											},
+											invocation = {
+												caller : reference = {
+													value : "new RootTypeRemover"
+												},
+												arguments : [
+													string = {
+														value : "whitespace"
+													}]
+											},
+											invocation = {
+												caller : reference = {
+													value : "new MethodMigrator"
+												},
+												arguments : [
+													reference = {
+														value : ""
+													}]
+											},
+											invocation = {
+												caller : reference = {
+													value : "new ModifierAttacher"
+												},
+												arguments : [
+													reference = {
+														value : ""
+													}]
+											},
+											invocation = {
+												caller : reference = {
+													value : "new ClassSplitter"
+												},
+												arguments : [
+													reference = {
+														value : ""
+													}]
+											},
+											invocation = {
+												caller : reference = {
+													value : "new MagmaFormatter"
+												},
+												arguments : [
+													reference = {
+														value : ""
+													}]
+											}]
 									}
 								},
 								declaration = {

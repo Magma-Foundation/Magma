@@ -7,6 +7,7 @@ import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
+import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
@@ -23,9 +24,10 @@ public class JavaLang {
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
         var value = new LazyRule();
+        var arguments = new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value));
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
-                new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(", new RightRule(new ExtractStringRule("arguments"), ")"))),
+                new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(", new RightRule(arguments, ")"))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
                 new TypeRule("reference", new ExtractStringRule("value"))
         )));
