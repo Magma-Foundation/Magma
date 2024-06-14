@@ -748,8 +748,7 @@ block = {
 								if = {
 									child : block = {
 										children : [
-											any = {
-												value : "return;"
+											return = {
 											}
 										]
 									},
@@ -876,8 +875,10 @@ block = {
             acc = modifier.generate(acc);
         }"
 								},
-								any = {
-									value : "return acc;"
+								return = {
+									child : symbol = {
+										value : "acc"
+									}
 								}
 							]
 						}
