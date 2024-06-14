@@ -53,6 +53,7 @@ public class JavaLang {
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
                 createOperator("equals", "==", value),
                 createOperator("add", "+", value),
+                createOperator("greater-than", ">", value),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 

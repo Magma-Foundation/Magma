@@ -762,9 +762,6 @@ block = {
 									}
 								},
 								if = {
-									condition : any = {
-										value : "causes.size() > 1"
-									},
 									child : block = {
 										children : [
 											any = {
@@ -773,6 +770,19 @@ block = {
             }"
 											}
 										]
+									},
+									condition : greater-than = {
+										right : number = {
+											value : "1"
+										},
+										left : invocation = {
+											caller : access = {
+												child : "size",
+												parent : symbol = {
+													value : "causes"
+												}
+											}
+										}
 									}
 								},
 								any = {
