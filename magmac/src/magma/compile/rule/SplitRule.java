@@ -9,6 +9,7 @@ import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 
@@ -34,8 +35,13 @@ public final class SplitRule implements Rule {
         var split = splitter.split(input);
         var members = new ArrayList<Node>();
         for (String childString : split) {
-            var optional = childRule.toNode(childString).create();
-            optional.ifPresent(members::add);
+            var result = childRule.toNode(childString);
+            if (result.findError().isPresent()) return result;
+
+            var optional = result.create();
+            if (optional.isEmpty()) return new ErrorRuleResult(new CompileException("No name present."));
+
+            members.add(optional.get());
         }
 
         if (members.isEmpty()) {

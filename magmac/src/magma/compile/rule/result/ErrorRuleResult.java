@@ -6,10 +6,15 @@ import magma.compile.rule.Node;
 
 import java.util.Optional;
 
-public class EmptyRuleResult implements RuleResult {
+public record ErrorRuleResult(CompileException e) implements RuleResult {
     @Override
     public Optional<String> findName() {
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<CompileException> findError() {
+        return Optional.of(e);
     }
 
     @Override
@@ -19,11 +24,6 @@ public class EmptyRuleResult implements RuleResult {
 
     @Override
     public Optional<Node> create() {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<CompileException> findError() {
         return Optional.empty();
     }
 }

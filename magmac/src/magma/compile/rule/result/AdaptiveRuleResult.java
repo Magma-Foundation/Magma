@@ -1,5 +1,6 @@
 package magma.compile.rule.result;
 
+import magma.compile.CompileException;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
@@ -19,5 +20,10 @@ public record AdaptiveRuleResult(Optional<String> name, Optional<Attributes> att
     @Override
     public Optional<Node> create() {
         return name.flatMap(innerName -> attributes.map(innerAttributes -> new Node(innerName, innerAttributes)));
+    }
+
+    @Override
+    public Optional<CompileException> findError() {
+        return Optional.empty();
     }
 }

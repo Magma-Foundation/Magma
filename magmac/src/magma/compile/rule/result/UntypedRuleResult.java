@@ -1,5 +1,6 @@
 package magma.compile.rule.result;
 
+import magma.compile.CompileException;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
@@ -18,6 +19,11 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
 
     @Override
     public Optional<Node> create() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<CompileException> findError() {
         return Optional.empty();
     }
 }

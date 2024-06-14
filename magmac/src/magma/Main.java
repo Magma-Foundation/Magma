@@ -12,6 +12,7 @@ import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.compile.rule.result.RuleResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,7 +27,13 @@ public class Main {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
-            var root = JavaLang.createRootRule().toNode(input).create().orElseThrow();
+
+            var node = JavaLang.createRootRule().toNode(input);
+            if(node.findError().isPresent()) {
+                throw node.findError().get();
+            }
+
+            var root = node.create().orElseThrow();
 
             Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
             var generated = generate(root);

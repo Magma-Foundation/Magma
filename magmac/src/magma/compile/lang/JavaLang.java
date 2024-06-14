@@ -2,10 +2,11 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.SplitRule;
 import magma.compile.rule.MembersSplitter;
 import magma.compile.rule.OrRule;
+import magma.compile.rule.ParamSplitter;
 import magma.compile.rule.Rule;
+import magma.compile.rule.SplitRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.result.FirstRule;
 import magma.compile.rule.result.LastRule;
@@ -65,8 +66,7 @@ public class JavaLang {
         var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
         var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
 
-        var params = new ExtractStringRule("params");
-
+        var params = new SplitRule(new ParamSplitter(), ",", "params", new ExtractStringRule("param"));
 
         var withParams = new LastRule(withoutParams, "(", new RightRule(params, ")"));
         return new OrRule(List.of(withParams, withoutParams));
