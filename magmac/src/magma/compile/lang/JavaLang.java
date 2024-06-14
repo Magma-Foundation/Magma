@@ -41,6 +41,7 @@ public class JavaLang {
 
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
                 new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
                 invocation,
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),

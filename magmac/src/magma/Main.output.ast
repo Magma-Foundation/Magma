@@ -594,8 +594,8 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											any = {
-												value : "'\n'"
+											char = {
+												value : "\n"
 											}
 										],
 										caller : access = {
