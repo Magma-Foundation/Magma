@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
 
 public class Main {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -51,15 +50,23 @@ public class Main {
     }
 
     private static void print(Error_ e, int depth) {
+        var actualContext = e.findContext().orElse("");
+        var index = actualContext.indexOf('\n');
+        var context = index == -1 ? actualContext : actualContext.substring(0, index);
+
         var message = e.findMessage();
-        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + ": " + s));
+        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
-        } else {
+            return;
+        }
+        if (causes.size() > 1) {
             for (Error_ cause : causes) {
-                print(cause, depth + 1);
+                print(cause, depth);
             }
+        } else {
+            print(causes.get(0), depth + 1);
         }
     }
 
