@@ -38,15 +38,17 @@ public class JavaLang {
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         var definitionHeader = new LastRule(anyModifiers, " ", new ExtractStringRule("name"));
         var definition = new TypeRule("definition", definitionHeader);
+        var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
 
         var statement = new LazyRule();
         statement.setRule(new OrRule(List.of(
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
+                declaration,
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 
         var classMember = new OrRule(List.of(
-                new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                declaration,
                 new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new ExtractNodeRule("params", definition), ")", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));

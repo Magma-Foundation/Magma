@@ -119,44 +119,104 @@ block = {
 								try = {
 									child : block = {
 										children : [
-											any = {
-												value : "var source = Paths.get(".", "magmac", "src", "magma", "Main.java");"
+											declaration = {
+												name : "source",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "Paths.get(".", "magmac", "src", "magma", "Main.java")"
+												}
 											},
-											any = {
-												value : "var input = Files.readString(source);"
+											declaration = {
+												name : "input",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "Files.readString(source)"
+												}
 											},
-											any = {
-												value : "var target = source.resolveSibling("Main.mgs");"
+											declaration = {
+												name : "target",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "source.resolveSibling("Main.mgs")"
+												}
 											},
-											any = {
-												value : "var parseResult = JavaLang.createRootRule().toNode(input);"
+											declaration = {
+												name : "parseResult",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "JavaLang.createRootRule().toNode(input)"
+												}
 											},
-											any = {
-												value : "var parseError = parseResult.findError();"
+											declaration = {
+												name : "parseError",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "parseResult.findError()"
+												}
 											},
 											any = {
 												value : "parseError.ifPresent(error -> print(error, 0));"
 											},
-											any = {
-												value : "var root = parseResult.create().orElseThrow();"
+											declaration = {
+												name : "root",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "parseResult.create().orElseThrow()"
+												}
 											},
 											any = {
 												value : "Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());"
 											},
-											any = {
-												value : "var generated = generate(root);"
+											declaration = {
+												name : "generated",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "generate(root)"
+												}
 											},
 											any = {
 												value : "Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());"
 											},
-											any = {
-												value : "Rule rule = MagmaLang.createRootRule();"
+											declaration = {
+												name : "rule",
+												type : symbol = {
+													value : "Rule"
+												},
+												value : any = {
+													value : "MagmaLang.createRootRule()"
+												}
 											},
-											any = {
-												value : "var generateResult = rule.fromNode(generated);"
+											declaration = {
+												name : "generateResult",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "rule.fromNode(generated)"
+												}
 											},
-											any = {
-												value : "var generateError = generateResult.findErr();"
+											declaration = {
+												name : "generateError",
+												type : symbol = {
+													value : "var"
+												},
+												value : any = {
+													value : "generateResult.findErr()"
+												}
 											},
 											any = {
 												value : "generateError.ifPresent(error -> print(error, 0));"
@@ -195,23 +255,60 @@ block = {
 						},
 						child : block = {
 							children : [
-								any = {
-									value : "var actualContext = e.findContext().orElse("");"
+								declaration = {
+									name : "actualContext",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "e.findContext().orElse("")"
+									}
 								},
-								any = {
-									value : "var index = actualContext.indexOf('\n');"
+								declaration = {
+									name : "index",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "actualContext.indexOf('\n')"
+									}
 								},
-								any = {
-									value : "var context = index == -1 ? actualContext : actualContext.substring(0, index);"
+								declaration = {
+									name : "context",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "index == -1 ? actualContext : actualContext.substring(0, index)"
+									}
 								},
-								any = {
-									value : "var message = e.findMessage();"
+								declaration = {
+									name : "message",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "e.findMessage()"
+									}
 								},
-								any = {
-									value : "message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));"
+								declaration = {
+									name : """,
+									type : symbol = {
+										value : "+"
+									},
+									value : any = {
+										value : "" + s + " " + context))"
+									},
+									modifiers : ["message.ifPresent(s", "->", "System.err.println("\t".repeat(depth)", "+", "depth"]
 								},
-								any = {
-									value : "var causes = e.findCauses().orElse(Collections.emptyList());"
+								declaration = {
+									name : "causes",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "e.findCauses().orElse(Collections.emptyList())"
+									}
 								},
 								any = {
 									value : "if (causes.isEmpty()) {
@@ -249,18 +346,30 @@ block = {
 						},
 						child : block = {
 							children : [
-								any = {
-									value : "var list = Arrays.asList(
+								declaration = {
+									name : "list",
+									type : symbol = {
+										value : "var"
+									},
+									value : any = {
+										value : "Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
-        );"
+        )"
+									}
 								},
-								any = {
-									value : "Node acc = root;"
+								declaration = {
+									name : "acc",
+									value : any = {
+										value : "root"
+									},
+									type : symbol = {
+										value : "Node"
+									}
 								},
 								any = {
 									value : "for (Modifier modifier : list) {
