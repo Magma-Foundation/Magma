@@ -133,8 +133,11 @@ block = {
 							value : "class "
 						}
 					},
-					any = {
-						value : "public static void main(String[] args) {
+					function = {
+						name : "main",
+						left-indent : "
+	",
+						right : "String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
@@ -160,10 +163,17 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }"
+    }",
+						modifiers : ["public", "static", "def"],
+						type : symbol = {
+							value : "void"
+						}
 					},
-					any = {
-						value : "private static void print(Error_ e, int depth) {
+					function = {
+						name : "print",
+						left-indent : "
+	",
+						right : "Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
         var context = index == -1 ? actualContext : actualContext.substring(0, index);
@@ -182,10 +192,17 @@ block = {
         } else {
             print(causes.get(0), depth + 1);
         }
-    }"
+    }",
+						modifiers : ["private", "static", "def"],
+						type : symbol = {
+							value : "void"
+						}
 					},
-					any = {
-						value : "private static Node generate(Node root) {
+					function = {
+						name : "generate",
+						left-indent : "
+	",
+						right : "Node root) {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
@@ -200,7 +217,11 @@ block = {
             acc = modifier.generate(acc);
         }
         return acc;
-    }"
+    }",
+						type : symbol = {
+							value : "Node"
+						},
+						modifiers : ["private", "static", "def"]
 					},
 					any = {
 						value : ""

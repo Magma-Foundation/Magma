@@ -33,6 +33,7 @@ public class JavaLang {
         var definition = new LastRule(new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", new ExtractNodeRule("type", type)), " ", new ExtractStringRule("name"));
         var classMember = new OrRule(List.of(
                 new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                new TypeRule("method", new FirstRule(definition, "(", new ExtractStringRule("right"))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);
