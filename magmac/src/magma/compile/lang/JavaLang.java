@@ -48,10 +48,11 @@ public class JavaLang {
                                 new StripRule(new ExtractNodeRule("true", value)), ":",
                                 new StripRule(new ExtractNodeRule("false", value))))),
                 invocation,
-                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
+                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child"))))),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
-                new TypeRule("operator", new FirstRule(new StripRule(new ExtractNodeRule("left", value)), "==", new StripRule(new ExtractNodeRule("right", value)))),
+                createOperator("equals", "==", value),
+                createOperator("add", "+", value),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 
@@ -93,6 +94,10 @@ public class JavaLang {
         ));
 
         return createBlock(rootMember);
+    }
+
+    private static TypeRule createOperator(String name, String slice, Rule value) {
+        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
     }
 
     private static TypeRule createBlock(Rule child) {

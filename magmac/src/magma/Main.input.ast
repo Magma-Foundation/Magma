@@ -546,7 +546,7 @@ block = {
 										true : symbol = {
 											value : "actualContext"
 										},
-										condition : operator = {
+										condition : equals = {
 											right : number = {
 												value : "-1"
 											},
@@ -597,14 +597,6 @@ block = {
 										lambda = {
 											param-name : "s",
 											value : invocation = {
-												arguments : [
-													access = {
-														child : "repeat(depth) + depth + " = " + s + " " + context",
-														parent : string = {
-															value : "\t"
-														}
-													}
-												],
 												caller : access = {
 													child : "println",
 													parent : access = {
@@ -613,7 +605,47 @@ block = {
 															value : "System"
 														}
 													}
-												}
+												},
+												arguments : [
+													add = {
+														left : invocation = {
+															arguments : [
+																symbol = {
+																	value : "depth"
+																}
+															],
+															caller : access = {
+																child : "repeat",
+																parent : string = {
+																	value : "\t"
+																}
+															}
+														},
+														right : add = {
+															left : symbol = {
+																value : "depth"
+															},
+															right : add = {
+																left : string = {
+																	value : " = "
+																},
+																right : add = {
+																	left : symbol = {
+																		value : "s"
+																	},
+																	right : add = {
+																		left : string = {
+																			value : " "
+																		},
+																		right : symbol = {
+																			value : "context"
+																		}
+																	}
+																}
+															}
+														}
+													}
+												]
 											}
 										}
 									]
