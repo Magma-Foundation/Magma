@@ -4,75 +4,55 @@ block = {
 			value : "package magma;"
 		},
 		any = {
-			value : "
-
-import magma.compile.Error_;"
+			value : "import magma.compile.Error_;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.ClassSplitter;"
+			value : "import magma.compile.lang.ClassSplitter;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.JavaLang;"
+			value : "import magma.compile.lang.JavaLang;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.MagmaFormatter;"
+			value : "import magma.compile.lang.MagmaFormatter;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.MagmaLang;"
+			value : "import magma.compile.lang.MagmaLang;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.MethodMigrator;"
+			value : "import magma.compile.lang.MethodMigrator;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.Modifier;"
+			value : "import magma.compile.lang.Modifier;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.ModifierAttacher;"
+			value : "import magma.compile.lang.ModifierAttacher;"
 		},
 		any = {
-			value : "
-import magma.compile.lang.RootTypeRemover;"
+			value : "import magma.compile.lang.RootTypeRemover;"
 		},
 		any = {
-			value : "
-import magma.compile.rule.Node;"
+			value : "import magma.compile.rule.Node;"
 		},
 		any = {
-			value : "
-import magma.compile.rule.Rule;"
+			value : "import magma.compile.rule.Rule;"
 		},
 		any = {
-			value : "
-
-import java.io.IOException;"
+			value : "import java.io.IOException;"
 		},
 		any = {
-			value : "
-import java.nio.file.Files;"
+			value : "import java.nio.file.Files;"
 		},
 		any = {
-			value : "
-import java.nio.file.Paths;"
+			value : "import java.nio.file.Paths;"
 		},
 		any = {
-			value : "
-import java.util.Arrays;"
+			value : "import java.util.Arrays;"
 		},
 		any = {
-			value : "
-import java.util.Collections;"
+			value : "import java.util.Collections;"
 		},
 		any = {
-			value : "
-
-public class Main {
+			value : "public class Main {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
 
     public static void main(String[] args) {
@@ -143,7 +123,6 @@ public class Main {
 }"
 		},
 		any = {
-			value : "
-"
+			value : ""
 		}]
 }
