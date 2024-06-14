@@ -45,15 +45,6 @@ block = {
 		import = {
 			value : "java.util.Arrays;"
 		},
-		function = {
-			name : "Main",
-			modifiers : ["export","class","def"],
-			params : "",
-			content : block = {
-				children : [
-]
-			}
-		},
 		object = {
 			name : "Main",
 			modifiers : ["export"],

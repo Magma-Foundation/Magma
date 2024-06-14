@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-export class def Main() => {
-}
 export object Main {
 public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
 public main(String[] args) : void => {
