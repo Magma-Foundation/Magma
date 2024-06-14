@@ -745,17 +745,36 @@ block = {
 										}
 									}
 								},
-								any = {
-									value : "if (causes.isEmpty()) {
-            return;
-        }"
+								if = {
+									child : block = {
+										children : [
+											any = {
+												value : "return;"
+											}
+										]
+									},
+									condition : invocation = {
+										caller : access = {
+											child : "isEmpty",
+											parent : symbol = {
+												value : "causes"
+											}
+										}
+									}
 								},
-								any = {
-									value : "if (causes.size() > 1) {
-            for (Error_ cause : causes) {
+								if = {
+									condition : any = {
+										value : "causes.size() > 1"
+									},
+									child : block = {
+										children : [
+											any = {
+												value : "for (Error_ cause : causes) {
                 print(cause, depth);
-            }
-        }"
+            }"
+											}
+										]
+									}
 								},
 								any = {
 									value : "else {

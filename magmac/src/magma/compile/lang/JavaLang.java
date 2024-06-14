@@ -70,18 +70,21 @@ public class JavaLang {
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
 
         var statement = new LazyRule();
+        var block = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
+
         statement.setRule(new OrRule(List.of(
                 new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
-                new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
+                new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
                 declaration,
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", definition), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
+                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
                 new TypeRule("any", new ExtractStringRule("value"))
         )));
 
         var classMember = new OrRule(List.of(
                 declaration,
-                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))))),
+                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", block))))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);
