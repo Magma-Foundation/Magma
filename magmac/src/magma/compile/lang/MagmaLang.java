@@ -1,13 +1,13 @@
 package magma.compile.lang;
 
 import magma.compile.rule.LazyRule;
-import magma.compile.rule.SplitRule;
-import magma.compile.rule.MembersSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
-import magma.compile.rule.result.FirstRule;
-import magma.compile.rule.result.LastRule;
+import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -62,12 +62,12 @@ public class MagmaLang {
     }
 
     private static TypeRule createBlock(Rule values) {
-        return new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(values)));
+        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(values)));
     }
 
     private static TypeRule createFunctionRule(LazyRule statements) {
         var definition = createDefinitionRule();
-        var content = new ExtractNodeRule("content", new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(statements))));
+        var content = new ExtractNodeRule("content", new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(statements))));
         return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(new StripRule(content), "}")));
     }
 }

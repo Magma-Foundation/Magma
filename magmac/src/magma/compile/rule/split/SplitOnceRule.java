@@ -1,19 +1,21 @@
-package magma.compile.rule.result;
+package magma.compile.rule.split;
 
 import magma.api.Result;
 import magma.api.Tuple;
 import magma.compile.CompileException;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.compile.rule.result.AdaptiveRuleResult;
+import magma.compile.rule.result.RuleResult;
 
 import java.util.Optional;
 
-public abstract class SplitRule implements Rule {
+public abstract class SplitOnceRule implements Rule {
     protected final Rule leftRule;
     protected final String slice;
     protected final Rule rightRule;
 
-    public SplitRule(Rule leftRule, String slice, Rule rightRule) {
+    public SplitOnceRule(Rule leftRule, String slice, Rule rightRule) {
         this.leftRule = leftRule;
         this.slice = slice;
         this.rightRule = rightRule;

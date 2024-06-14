@@ -2,14 +2,14 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.MembersSplitter;
+import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.OrRule;
-import magma.compile.rule.ParamSplitter;
+import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.Rule;
-import magma.compile.rule.SplitRule;
+import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.TypeRule;
-import magma.compile.rule.result.FirstRule;
-import magma.compile.rule.result.LastRule;
+import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -30,7 +30,7 @@ public class JavaLang {
     }
 
     private static TypeRule createBlock(Rule memberRule) {
-        var children = new SplitRule(new MembersSplitter(), "", "children", new StripRule(memberRule));
+        var children = new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(memberRule));
         return new TypeRule("block", children);
     }
 
@@ -66,7 +66,7 @@ public class JavaLang {
         var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
         var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
 
-        var params = new SplitRule(new ParamSplitter(), ",", "params", new ExtractStringRule("param"));
+        var params = new SplitMultipleRule(new ParamSplitter(), ",", "params", new ExtractStringRule("param"));
 
         var withParams = new LastRule(withoutParams, "(", new RightRule(params, ")"));
         return new OrRule(List.of(withParams, withoutParams));
@@ -79,6 +79,6 @@ public class JavaLang {
                 new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createClassRule()));
 
-        return new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(childRule)));
+        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(childRule)));
     }
 }

@@ -1,4 +1,4 @@
-package magma.compile.rule;
+package magma.compile.rule.split;
 
 import magma.api.Collectors;
 import magma.api.Err;
@@ -8,6 +8,8 @@ import magma.compile.CompileException;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
 import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
@@ -17,13 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class SplitRule implements Rule {
+public final class SplitMultipleRule implements Rule {
     private final String propertyKey;
     private final Rule childRule;
     private final Splitter splitter;
     private final String delimiter;
 
-    public SplitRule(Splitter splitter, String delimiter, String propertyKey, Rule childRule) {
+    public SplitMultipleRule(Splitter splitter, String delimiter, String propertyKey, Rule childRule) {
         this.propertyKey = propertyKey;
         this.childRule = childRule;
         this.splitter = splitter;
