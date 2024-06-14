@@ -1,55 +1,89 @@
 block = {
 	children : [
 		package = {
-			namespace : "magma"
+			internal : namespace = {
+				namespace : ["magma"]
+			}
 		},
-		any = {
-			value : "import magma.compile.Error_;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "Error_"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.ClassSplitter;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "ClassSplitter"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.JavaLang;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "JavaLang"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.MagmaFormatter;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.MagmaLang;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MagmaLang"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.MethodMigrator;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MethodMigrator"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.Modifier;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "Modifier"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.ModifierAttacher;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "ModifierAttacher"]
+			}
 		},
-		any = {
-			value : "import magma.compile.lang.RootTypeRemover;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "RootTypeRemover"]
+			}
 		},
-		any = {
-			value : "import magma.compile.rule.Node;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "rule", "Node"]
+			}
 		},
-		any = {
-			value : "import magma.compile.rule.Rule;"
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "rule", "Rule"]
+			}
 		},
-		any = {
-			value : "import java.io.IOException;"
+		import = {
+			external : namespace = {
+				namespace : ["java", "io", "IOException"]
+			}
 		},
-		any = {
-			value : "import java.nio.file.Files;"
+		import = {
+			external : namespace = {
+				namespace : ["java", "nio", "file", "Files"]
+			}
 		},
-		any = {
-			value : "import java.nio.file.Paths;"
+		import = {
+			external : namespace = {
+				namespace : ["java", "nio", "file", "Paths"]
+			}
 		},
-		any = {
-			value : "import java.util.Arrays;"
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Arrays"]
+			}
 		},
-		any = {
-			value : "import java.util.Collections;"
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Collections"]
+			}
 		},
 		any = {
 			value : "public class Main {

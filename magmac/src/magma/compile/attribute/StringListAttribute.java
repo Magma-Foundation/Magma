@@ -26,6 +26,6 @@ public record StringListAttribute(List<String> values) implements Attribute {
     public String format(int depth) {
         return values.stream()
                 .map(value -> "\"" + value + "\"")
-                .collect(Collectors.joining(",", "[", "]"));
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 }
