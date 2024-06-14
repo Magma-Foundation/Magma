@@ -62,14 +62,14 @@ block = {
 					declaration = {
 						name : "CLASS_KEYWORD_WITH_SPACE",
 						type : "String",
-						modifiers : ["public","static","const"],
+						modifiers : ["public","const"],
 						value : ""class ";"
 					},
 					function = {
 						name : "main",
 						params : "String[] args",
 						type : "void",
-						modifiers : ["public","static"],
+						modifiers : ["public"],
 						content : block = {
 							children : [
 								any = {

@@ -45,7 +45,9 @@ public class ClassSplitter extends Modifier {
                         .orElse(Collections.emptyList());
 
                 if (modifiers.contains("static")) {
-                    statics.add(node);
+                    statics.add(node.mapAttributes(attributes -> attributes.mapValue("modifiers", StringListAttribute.Factory, list -> list.stream()
+                            .filter(value -> !value.equals("static"))
+                            .toList())));
                 } else {
                     instances.add(node);
                 }
