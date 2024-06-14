@@ -52,7 +52,7 @@ public class Main {
 
     private static void print(Error_ e, int depth) {
         var message = e.findMessage();
-        message.ifPresent(s -> System.err.println("\t".repeat(depth) + s));
+        message.ifPresent(s -> System.err.println(depth + ": " + s));
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {

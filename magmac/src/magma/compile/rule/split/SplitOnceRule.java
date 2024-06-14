@@ -47,9 +47,9 @@ public abstract class SplitOnceRule implements Rule {
                     .map(UntypedRuleResult::new)
                     .orElseThrow();
         }).orElseGet(() -> {
-            var format = "Slice '%s' not present.";
-            var message = format.formatted(slice);
-            return new ErrorRuleResult(new JavaError(new CompileException(message, input)));
+            var format = "Slice '%s' not present: %s";
+            var message = format.formatted(slice, input);
+            return new ErrorRuleResult(new JavaError(new CompileException(message)));
         });
     }
 
