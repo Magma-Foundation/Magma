@@ -20,8 +20,13 @@ public class JavaLang {
         var namespace = new TypeRule("namespace", new SimpleExtractStringListRule("namespace", "\\."));
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
+        var value = new OrRule(List.of(
+                new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                new TypeRule("any", new ExtractStringRule("value"))
+        ));
+
         var classMember = new OrRule(List.of(
-                new TypeRule("declaration", new FirstRule(new ExtractStringRule("left"), "=", new RightRule(new StripRule(new ExtractStringRule("value")), ";"))),
+                new TypeRule("declaration", new FirstRule(new ExtractStringRule("left"), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("any", new ExtractStringRule("value"))
         ));
         var classChild = createBlock(classMember);

@@ -91,8 +91,10 @@ block = {
 			child : block = {
 				children : [
 					declaration = {
-						left : "public static final String CLASS_KEYWORD_WITH_SPACE ",
-						right : ""class ""
+						value : string = {
+							value : "class "
+						},
+						left : "public static final String CLASS_KEYWORD_WITH_SPACE "
 					},
 					any = {
 						value : "public static void main(String[] args) {

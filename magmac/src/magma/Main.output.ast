@@ -123,9 +123,11 @@ block = {
 				children : [
 					declaration = {
 						left : "public static final String CLASS_KEYWORD_WITH_SPACE ",
+						value : string = {
+							value : "class "
+						},
 						left-indent : "
-	",
-						right : ""class ""
+	"
 					},
 					any = {
 						value : "public static void main(String[] args) {
