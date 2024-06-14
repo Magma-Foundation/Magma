@@ -2,9 +2,10 @@ package magma.compile.rule;
 
 import magma.api.Err;
 import magma.api.Result;
+import magma.compile.CompileException;
 import magma.compile.Error_;
+import magma.compile.JavaError;
 import magma.compile.MultipleError;
-import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
@@ -13,6 +14,13 @@ import java.util.List;
 import java.util.Optional;
 
 public record OrRule(List<Rule> rules) implements Rule {
+    private static Err<String, Error_> toError(List<Result<String, Error_>> results) {
+        return new Err<>(new MultipleError(results.stream()
+                .map(Result::findErr)
+                .flatMap(Optional::stream)
+                .toList()));
+    }
+
     @Override
     public RuleResult toNode(String input) {
         var errors = new ArrayList<Error_>();
@@ -26,7 +34,7 @@ public record OrRule(List<Rule> rules) implements Rule {
         }
 
         if (errors.isEmpty()) {
-            return new EmptyRuleResult();
+            return new ErrorRuleResult(new JavaError(new CompileException("No rules were present.")));
         } else {
             return new ErrorRuleResult(new MultipleError(errors));
         }
@@ -44,12 +52,5 @@ public record OrRule(List<Rule> rules) implements Rule {
 
         return anyOk.orElseGet(() -> toError(results));
 
-    }
-
-    private static Err<String, Error_> toError(List<Result<String, Error_>> results) {
-        return new Err<>(new MultipleError(results.stream()
-                .map(Result::findErr)
-                .flatMap(Optional::stream)
-                .toList()));
     }
 }

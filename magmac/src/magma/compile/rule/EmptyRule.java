@@ -8,7 +8,7 @@ import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
-import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 
@@ -19,7 +19,7 @@ public class EmptyRule implements Rule {
     public RuleResult toNode(String input) {
         return input.isEmpty()
                 ? new UntypedRuleResult(new MapAttributes())
-                : new EmptyRuleResult();
+                : new ErrorRuleResult(new JavaError(new CompileException("Input is not empty: " + input)));
     }
 
     private Optional<String> fromNode0(Attributes attributes) {

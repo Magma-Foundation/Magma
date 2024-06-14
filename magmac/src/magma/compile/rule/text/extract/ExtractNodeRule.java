@@ -10,19 +10,22 @@ import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
-import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 
 public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
     @Override
     public RuleResult toNode(String input) {
-        return child.toNode(input)
+        var node = child.toNode(input);
+        if (node.findError().isPresent()) return node;
+
+        return node
                 .create()
                 .map(NodeAttribute::new)
                 .map(attribute -> new MapAttributes().with(propertyKey, attribute))
                 .<RuleResult>map(UntypedRuleResult::new)
-                .orElse(new EmptyRuleResult());
+                .orElse(new ErrorRuleResult(new JavaError(new CompileException("No name present: " + input))));
     }
 
     @Override

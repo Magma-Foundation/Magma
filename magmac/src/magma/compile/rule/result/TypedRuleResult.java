@@ -26,4 +26,9 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
     public Optional<Error_> findError() {
         return Optional.empty();
     }
+
+    @Override
+    public RuleResult withType(String type) {
+        return this;
+    }
 }

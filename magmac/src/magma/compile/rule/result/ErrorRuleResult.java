@@ -26,4 +26,9 @@ public record ErrorRuleResult(Error_ e) implements RuleResult {
     public Optional<Node> create() {
         return Optional.empty();
     }
+
+    @Override
+    public RuleResult withType(String type) {
+        return this;
+    }
 }

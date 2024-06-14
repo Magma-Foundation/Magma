@@ -14,4 +14,6 @@ public interface RuleResult {
     Optional<Attributes> findAttributes();
 
     Optional<Node> create();
+
+    RuleResult withType(String type);
 }

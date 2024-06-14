@@ -26,4 +26,9 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
     public Optional<Error_> findError() {
         return Optional.empty();
     }
+
+    @Override
+    public RuleResult withType(String type) {
+        return new TypedRuleResult(type, attributes);
+    }
 }

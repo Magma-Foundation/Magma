@@ -4,8 +4,6 @@ import magma.api.Collectors;
 import magma.api.Err;
 import magma.api.Result;
 import magma.api.Streams;
-import magma.compile.CompileError;
-import magma.compile.CompileParentError;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
@@ -14,7 +12,6 @@ import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
-import magma.compile.rule.result.EmptyRuleResult;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
@@ -46,14 +43,14 @@ public final class SplitMultipleRule implements Rule {
 
             var optional = result.create();
             if (optional.isEmpty()) {
-                return new ErrorRuleResult(new CompileError("No name present.", childString));
+                return new ErrorRuleResult(new JavaError(new CompileException("No name present: " + childString)));
             }
 
             members.add(optional.get());
         }
 
         if (members.isEmpty()) {
-            return new EmptyRuleResult();
+            return new ErrorRuleResult(new JavaError(new CompileException("Nothing could be found: " + input)));
         } else {
             return new UntypedRuleResult(new MapAttributes(Map.of(propertyKey, new NodeListAttribute(members))));
         }

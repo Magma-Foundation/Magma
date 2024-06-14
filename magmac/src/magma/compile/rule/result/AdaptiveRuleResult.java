@@ -26,4 +26,9 @@ public record AdaptiveRuleResult(Optional<String> name, Optional<Attributes> att
     public Optional<Error_> findError() {
         return Optional.empty();
     }
+
+    @Override
+    public RuleResult withType(String type) {
+        return this;
+    }
 }

@@ -5,7 +5,7 @@ import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
-import magma.compile.rule.result.EmptyRuleResult;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class LazyRule implements Rule {
     public RuleResult toNode(String input) {
         return child
                 .map(inner -> inner.toNode(input))
-                .orElse(new EmptyRuleResult());
+                .orElse(new ErrorRuleResult(new JavaError(new CompileException("Child was not set."))));
     }
 
     @Override
