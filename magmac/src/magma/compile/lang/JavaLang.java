@@ -10,6 +10,7 @@ import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -18,6 +19,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
+import java.util.Optional;
 
 public class JavaLang {
     public static Rule createRootRule() {
@@ -25,10 +27,15 @@ public class JavaLang {
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
         var value = new LazyRule();
+
         var arguments = new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value));
+        var caller = new ExtractNodeRule("caller", value);
+
+        var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
+
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
-                new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(", new RightRule(arguments, ")"))),
+                invocation,
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
                 new TypeRule("any", new ExtractStringRule("value"))
@@ -73,5 +80,21 @@ public class JavaLang {
 
     private static TypeRule createBlock(Rule child) {
         return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(child)));
+    }
+
+    private static class InvocationStart extends SplitOnceRule {
+        public InvocationStart(ExtractNodeRule caller, SplitMultipleRule arguments) {
+            super(caller, "(", arguments);
+        }
+
+        @Override
+        protected Optional<Integer> computeIndex(String input) {
+            for (int i = input.length() - 1; i >= 0; i--) {
+                var c = input.charAt(i);
+                if(c == '(') return Optional.of(i);
+            }
+
+            return Optional.empty();
+        }
     }
 }

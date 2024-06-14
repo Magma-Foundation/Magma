@@ -117,7 +117,8 @@ block = {
 			modifiers : ["export"],
 			content : block = {
 				children : [
-]
+
+				]
 			},
 			child : block = {
 				children : [
@@ -183,7 +184,8 @@ block = {
 														},
 														string = {
 															value : "Main.java"
-														}]
+														}
+													]
 												}
 											},
 											declaration = {
@@ -197,7 +199,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : "source"
-														}],
+														}
+													],
 													caller : access = {
 														child : "readString",
 														parent : symbol = {
@@ -217,7 +220,8 @@ block = {
 													arguments : [
 														string = {
 															value : "Main.mgs"
-														}],
+														}
+													],
 													caller : access = {
 														child : "resolveSibling",
 														parent : symbol = {
@@ -234,19 +238,27 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													caller : access = {
-														child : "createRootRule",
-														parent : symbol = {
-															value : "JavaLang"
-														}
-													},
 													arguments : [
-														access = {
-															child : "toNode(input",
-															parent : any = {
-																value : ")"
+														symbol = {
+															value : "input"
+														}
+													],
+													caller : access = {
+														child : "toNode",
+														parent : invocation = {
+															arguments : [
+																symbol = {
+																	value : ""
+																}
+															],
+															caller : access = {
+																child : "createRootRule",
+																parent : symbol = {
+																	value : "JavaLang"
+																}
 															}
-														}]
+														}
+													}
 												}
 											},
 											declaration = {
@@ -260,7 +272,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : ""
-														}],
+														}
+													],
 													caller : access = {
 														child : "findError",
 														parent : symbol = {
@@ -280,19 +293,27 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													caller : access = {
-														child : "create",
-														parent : symbol = {
-															value : "parseResult"
-														}
-													},
 													arguments : [
-														access = {
-															child : "orElseThrow(",
-															parent : any = {
-																value : ")"
+														symbol = {
+															value : ""
+														}
+													],
+													caller : access = {
+														child : "orElseThrow",
+														parent : invocation = {
+															arguments : [
+																symbol = {
+																	value : ""
+																}
+															],
+															caller : access = {
+																child : "create",
+																parent : symbol = {
+																	value : "parseResult"
+																}
 															}
-														}]
+														}
+													}
 												}
 											},
 											any = {
@@ -312,7 +333,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : "root"
-														}]
+														}
+													]
 												}
 											},
 											any = {
@@ -329,7 +351,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : ""
-														}],
+														}
+													],
 													caller : access = {
 														child : "createRootRule",
 														parent : symbol = {
@@ -349,7 +372,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : "generated"
-														}],
+														}
+													],
 													caller : access = {
 														child : "fromNode",
 														parent : symbol = {
@@ -369,7 +393,8 @@ block = {
 													arguments : [
 														symbol = {
 															value : ""
-														}],
+														}
+													],
 													caller : access = {
 														child : "findErr",
 														parent : symbol = {
@@ -386,7 +411,8 @@ block = {
 											},
 											any = {
 												value : ""
-											}]
+											}
+										]
 									}
 								},
 								any = {
@@ -397,7 +423,8 @@ block = {
 								},
 								any = {
 									value : ""
-								}]
+								}
+							]
 						}
 					},
 					function = {
@@ -425,19 +452,27 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										caller : access = {
-											child : "findContext",
-											parent : symbol = {
-												value : "e"
-											}
-										},
 										arguments : [
-											access = {
-												child : "orElse(""",
-												parent : any = {
-													value : ")"
+											string = {
+												value : ""
+											}
+										],
+										caller : access = {
+											child : "orElse",
+											parent : invocation = {
+												arguments : [
+													symbol = {
+														value : ""
+													}
+												],
+												caller : access = {
+													child : "findContext",
+													parent : symbol = {
+														value : "e"
+													}
 												}
-											}]
+											}
+										}
 									}
 								},
 								declaration = {
@@ -451,7 +486,8 @@ block = {
 										arguments : [
 											any = {
 												value : "'\n'"
-											}],
+											}
+										],
 										caller : access = {
 											child : "indexOf",
 											parent : symbol = {
@@ -474,7 +510,8 @@ block = {
 											},
 											symbol = {
 												value : "index"
-											}],
+											}
+										],
 										caller : access = {
 											child : "substring",
 											parent : any = {
@@ -494,7 +531,8 @@ block = {
 										arguments : [
 											symbol = {
 												value : ""
-											}],
+											}
+										],
 										caller : access = {
 											child : "findMessage",
 											parent : symbol = {
@@ -523,28 +561,30 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
-										caller : access = {
-											child : "findCauses",
-											parent : symbol = {
-												value : "e"
-											}
-										},
 										arguments : [
-											invocation = {
-												caller : access = {
-													child : "orElse",
-													parent : any = {
-														value : ")"
-													}
-												},
-												arguments : [
-													access = {
-														child : "emptyList(",
-														parent : symbol = {
-															value : "Collections"
+											any = {
+												value : ")"
+											}
+										],
+										caller : access = {
+											child : "emptyList",
+											parent : access = {
+												child : "orElse(Collections",
+												parent : invocation = {
+													arguments : [
+														symbol = {
+															value : ""
 														}
-													}]
-											}]
+													],
+													caller : access = {
+														child : "findCauses",
+														parent : symbol = {
+															value : "e"
+														}
+													}
+												}
+											}
+										}
 									}
 								},
 								any = {
@@ -566,7 +606,8 @@ block = {
 								},
 								any = {
 									value : ""
-								}]
+								}
+							]
 						}
 					},
 					function = {
@@ -593,67 +634,23 @@ block = {
 										value : "var"
 									},
 									value : invocation = {
+										arguments : [
+											any = {
+												value : ")"
+											}
+										],
 										caller : access = {
-											child : "asList",
 											parent : symbol = {
 												value : "Arrays"
-											}
-										},
-										arguments : [
-											invocation = {
-												caller : any = {
-													value : "new RootTypeRemover"
-												},
-												arguments : [
-													string = {
-														value : "package"
-													}]
 											},
-											invocation = {
-												caller : any = {
-													value : "new RootTypeRemover"
-												},
-												arguments : [
-													string = {
-														value : "whitespace"
-													}]
-											},
-											invocation = {
-												caller : any = {
-													value : "new MethodMigrator"
-												},
-												arguments : [
-													symbol = {
-														value : ""
-													}]
-											},
-											invocation = {
-												caller : any = {
-													value : "new ModifierAttacher"
-												},
-												arguments : [
-													symbol = {
-														value : ""
-													}]
-											},
-											invocation = {
-												caller : any = {
-													value : "new ClassSplitter"
-												},
-												arguments : [
-													symbol = {
-														value : ""
-													}]
-											},
-											invocation = {
-												caller : any = {
-													value : "new MagmaFormatter"
-												},
-												arguments : [
-													symbol = {
-														value : ""
-													}]
-											}]
+											child : "asList(
+                new RootTypeRemover("package"),
+                new RootTypeRemover("whitespace"),
+                new MethodMigrator(),
+                new ModifierAttacher(),
+                new ClassSplitter(),
+                new MagmaFormatter"
+										}
 									}
 								},
 								declaration = {
@@ -677,15 +674,18 @@ block = {
 								},
 								any = {
 									value : ""
-								}]
+								}
+							]
 						}
 					},
 					any = {
 						value : ""
-					}]
+					}
+				]
 			}
 		},
 		any = {
 			value : ""
-		}]
+		}
+	]
 }
