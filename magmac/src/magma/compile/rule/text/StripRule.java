@@ -11,7 +11,7 @@ import magma.compile.rule.result.RuleResult;
 public record StripRule(Rule child) implements Rule {
     @Override
     public RuleResult toNode(String input) {
-        return child.toNode(input.strip());
+        return child.toNode(input.strip()).mapErr(error -> new CompileParentError("Cannot strip input.", input, error));
     }
 
     @Override

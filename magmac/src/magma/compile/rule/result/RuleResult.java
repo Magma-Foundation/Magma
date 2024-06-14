@@ -5,6 +5,7 @@ import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface RuleResult {
     Optional<String> findName();
@@ -16,4 +17,6 @@ public interface RuleResult {
     Optional<Node> create();
 
     RuleResult withType(String type);
+
+    RuleResult mapErr(Function<Error_, Error_> mapper);
 }

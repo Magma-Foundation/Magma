@@ -5,6 +5,7 @@ import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public record TypedRuleResult(String name, Attributes attributes) implements RuleResult{
     @Override
@@ -29,6 +30,11 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
 
     @Override
     public RuleResult withType(String type) {
+        return this;
+    }
+
+    @Override
+    public RuleResult mapErr(Function<Error_, Error_> mapper) {
         return this;
     }
 }

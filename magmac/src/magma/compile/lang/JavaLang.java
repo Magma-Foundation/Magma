@@ -36,6 +36,7 @@ public class JavaLang {
 
     private static Rule createClassMemberRule() {
         return new OrRule(List.of(
+                createWhitespaceRule(),
                 createMethodRule(),
                 createDeclarationRule()
         ));
@@ -74,11 +75,15 @@ public class JavaLang {
 
     public static TypeRule createRootRule() {
         var childRule = new OrRule(List.of(
-                new TypeRule("whitespace", new EmptyRule()),
+                createWhitespaceRule(),
                 new TypeRule("package", new LeftRule("package ", new ExtractStringListRule("namespace", "."))),
                 new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createClassRule()));
 
         return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(childRule)));
+    }
+
+    private static TypeRule createWhitespaceRule() {
+        return new TypeRule("whitespace", new EmptyRule());
     }
 }

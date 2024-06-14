@@ -6,14 +6,18 @@ import magma.compile.CompileException;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.JavaError;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
 public record TypeRule(String type, Rule child) implements Rule {
     @Override
     public RuleResult toNode(String input) {
         var result = child.toNode(input);
-        if (result.findError().isPresent()) return result;
-        return result.withType(type);
+        if (result.findError().isEmpty()) return result.withType(type);
+
+        var format = "Cannot attach type '%s'.";
+        var message = format.formatted(type);
+        return new ErrorRuleResult(new CompileParentError(message, input, result.findError().get()));
     }
 
     @Override

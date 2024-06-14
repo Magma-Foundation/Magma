@@ -4,10 +4,7 @@ block = {
 			namespace : []
 		},
 		import = {
-			value : "magma.api.Results;"
-		},
-		import = {
-			value : "magma.compile.CompileException;"
+			value : "magma.compile.Error_;"
 		},
 		import = {
 			value : "magma.compile.lang.ClassSplitter;"
@@ -50,6 +47,133 @@ block = {
 		},
 		import = {
 			value : "java.util.Arrays;"
+		},
+		import = {
+			value : "java.util.Collections;"
+		},
+		import = {
+			value : "java.util.Optional;"
+		},
+		class = {
+			name : "Main",
+			modifiers : ["public"],
+			content : block = {
+				children : [
+					declaration = {
+						name : "CLASS_KEYWORD_WITH_SPACE",
+						type : "String",
+						modifiers : ["public","static","final"],
+						value : ""class ";"
+					},
+					method = {
+						name : "args)",
+						type : "main(String[]",
+						modifiers : ["public","static","void"],
+						content : block = {
+							children : [
+								any = {
+									content : "try {
+            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+            var input = Files.readString(source);
+            var target = source.resolveSibling("Main.mgs");
+
+            var parseResult = JavaLang.createRootRule().toNode(input);
+            var parseError = parseResult.findError();
+            parseError.ifPresent(error -> print(error, 0));
+
+            var root = parseResult.create().orElseThrow();
+
+            Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
+            var generated = generate(root);
+            Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
+
+            Rule rule = MagmaLang.createRootRule();
+            var generateResult = rule.fromNode(generated);
+            var generateError = generateResult.findErr();
+            generateError.ifPresent(error -> print(error, 0));
+
+            Files.writeString(target, generateResult.findValue().orElseThrow());
+        }"
+								},
+								any = {
+									content : "catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }"
+								},
+								any = {
+									content : ""
+								}]
+						}
+					},
+					method = {
+						name : "depth)",
+						type : "int",
+						modifiers : ["private","static","void","print(Error_","e,"],
+						content : block = {
+							children : [
+								any = {
+									content : "var message = e.findMessage();"
+								},
+								any = {
+									content : "message.ifPresent(s -> System.err.println(depth + ": " + s));"
+								},
+								any = {
+									content : "var causes = e.findCauses().orElse(Collections.emptyList());"
+								},
+								any = {
+									content : "if (causes.isEmpty()) {
+            var context = e.findContext();
+            context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
+        }"
+								},
+								any = {
+									content : "else {
+            for (Error_ cause : causes) {
+                print(cause, depth + 1);
+            }
+        }"
+								},
+								any = {
+									content : ""
+								}]
+						}
+					},
+					method = {
+						name : "root)",
+						modifiers : ["private","static","Node"],
+						type : "generate(Node",
+						content : block = {
+							children : [
+								any = {
+									content : "var list = Arrays.asList(
+                new RootTypeRemover("package"),
+                new RootTypeRemover("whitespace"),
+                new MethodMigrator(),
+                new ModifierAttacher(),
+                new ClassSplitter(),
+                new MagmaFormatter()
+        );"
+								},
+								any = {
+									content : "Node acc = root;"
+								},
+								any = {
+									content : "for (Modifier modifier : list) {
+            acc = modifier.generate(acc);
+        }"
+								},
+								any = {
+									content : "return acc;"
+								},
+								any = {
+									content : ""
+								}]
+						}
+					},
+					whitespace = {
+					}]
+			}
 		},
 		whitespace = {
 		}]
