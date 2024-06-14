@@ -46,6 +46,6 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
                 .apply(propertyKey)
                 .flatMap(Attribute::asNodeList)
                 .map(this::joinNodes)
-                .orElseGet(() -> new Err<>(new CompileException("Property '" + propertyKey + "' does not exist on node: " + node)));
+                .orElseGet(() -> new Err<>(new CompileException("Property '" + propertyKey + "' does not exist on node: ", node.toString())));
     }
 }

@@ -33,8 +33,8 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
     }
 
     private Err<String, CompileException> createErr(Node node) {
-        var format = "Node did not have attribute '%s': %s";
-        var message = format.formatted(propertyKey, node);
-        return new Err<>(new CompileException(message));
+        var format = "Node did not have attribute '%s'.";
+        var message = format.formatted(propertyKey);
+        return new Err<>(new CompileException(message, node.toString()));
     }
 }

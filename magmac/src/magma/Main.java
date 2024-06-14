@@ -2,11 +2,11 @@ package magma;
 
 import magma.api.Results;
 import magma.compile.CompileException;
+import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
-import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -28,9 +28,27 @@ public class Main {
             var generated = generate(root);
             Rule rule = MagmaLang.createRootRule();
             Files.writeString(target, Results.unwrap(rule.fromNode(generated)));
-        } catch (IOException | CompileException e) {
+        } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
+        } catch (CompileException e) {
+            print(e, 0);
+        }
+    }
+
+    private static void print(CompileException e, int depth) {
+        var message = e.getMessage();
+        System.err.println("\t".repeat(depth) + message);
+
+        var cause = e.getCause();
+        if (cause == null) {
+            System.err.println("\n---\n" + e.content + "\n---\n");
+        } else {
+            if (cause instanceof CompileException cast) {
+                print(cast, depth + 1);
+            } else {
+                cause.printStackTrace();
+            }
         }
     }
 

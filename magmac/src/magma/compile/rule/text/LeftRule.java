@@ -1,7 +1,5 @@
 package magma.compile.rule.text;
 
-import magma.api.Err;
-import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.attribute.Attributes;
@@ -19,24 +17,13 @@ public record LeftRule(String slice, Rule child) implements Rule {
         return child.toNode(content).findAttributes();
     }
 
-    private Optional<String> fromNode0(Attributes attributes) {
-        Node node = new Node("", attributes);
-        return child.fromNode(node).findValue().map(inner -> slice + inner);
-    }
-
     @Override
     public RuleResult toNode(String input) {
         return new AdaptiveRuleResult(Optional.empty(), toNode0(input));
     }
 
-    private Optional<String> fromNode0(Node node) {
-        return fromNode0(node.attributes());
-    }
-
     @Override
     public Result<String, CompileException> fromNode(Node node) {
-        return fromNode0(node)
-                .<Result<String, CompileException>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
+        return child.fromNode(node).mapValue(inner -> slice + inner);
     }
 }

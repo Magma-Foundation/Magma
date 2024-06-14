@@ -32,6 +32,6 @@ public class EmptyRule implements Rule {
     public Result<String, CompileException> fromNode(Node node) {
         return fromNode0(node)
                 .<Result<String, CompileException>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileException("Cannot render: " + node)));
+                .orElseGet(() -> new Err<>(new CompileException("Cannot render: ", node.toString())));
     }
 }

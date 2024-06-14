@@ -27,6 +27,6 @@ public record StripRule(Rule child) implements Rule {
 
         return child.fromNode(node)
                 .mapValue(inner -> leftIndent + inner + rightIndent)
-                .mapErr(err -> new CompileException("Cannot apply indentation: " + node, err));
+                .mapErr(err -> new CompileException("Cannot apply indentation: ", node.toString(), err));
     }
 }

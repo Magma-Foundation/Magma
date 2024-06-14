@@ -22,15 +22,15 @@ public class MagmaLang {
         var orRule = new OrRule(List.of(
                 createDeclarationRule(),
                 createFunctionRule(statements),
-                createObjectRule(),
+                createObjectRule(statements),
                 new TypeRule("any", new ExtractStringRule("content"))
         ));
         statements.setRule(orRule);
         return orRule;
     }
 
-    private static Rule createObjectRule() {
-        var name = new LeftRule("object ", new RightRule(new ExtractStringRule("name"), " {}"));
+    private static Rule createObjectRule(Rule statements) {
+        var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), "{", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
         var child = new LastRule(new ExtractStringListRule("modifiers", " "), " ", name);
         return new TypeRule("object", child);
     }
@@ -54,10 +54,14 @@ public class MagmaLang {
     }
 
     public static TypeRule createRootRule() {
-        return new TypeRule("block", new MembersRule("children", new OrRule(List.of(
+        return createBlock(new OrRule(List.of(
                 new RightRule(new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))), "\n"),
                 createStatementRule()
-        ))));
+        )));
+    }
+
+    private static TypeRule createBlock(Rule values) {
+        return new TypeRule("block", new MembersRule("children", values));
     }
 
     private static TypeRule createFunctionRule(LazyRule statements) {
