@@ -5,6 +5,7 @@ import magma.compile.rule.ContainsRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
@@ -70,8 +71,7 @@ public class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        var withoutModifiers = new ExtractStringRule("type");
-
+        var withoutModifiers = new SymbolRule(new ExtractStringRule("type"));
         var modifiersFilter = new ContainsRule(new ExtractStringRule(""),
                 "public",
                 "static",

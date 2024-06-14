@@ -17,7 +17,7 @@ public record ContainsRule(Rule child, String... values) implements Rule {
         }
 
         var joinedValues = String.join(" ", values);
-        return new ErrorRuleResult(new JavaError(new CompileException("Options of '" + joinedValues + "' not present:" + input)));
+        return new ErrorRuleResult(new JavaError(new CompileException("Options of '" + joinedValues + "' not present: " + input)));
     }
 
     @Override

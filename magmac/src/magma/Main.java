@@ -52,12 +52,10 @@ public class Main {
 
     private static void print(Error_ e, int depth) {
         var message = e.findMessage();
-        message.ifPresent(s -> System.err.println(depth + ": " + s));
+        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + ": " + s));
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
-            var context = e.findContext();
-            context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
         } else {
             for (Error_ cause : causes) {
                 print(cause, depth + 1);
