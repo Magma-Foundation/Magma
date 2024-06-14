@@ -164,7 +164,7 @@ block = {
 												value : invocation = {
 													caller : access = {
 														child : "get",
-														parent : reference = {
+														parent : symbol = {
 															value : "Paths"
 														}
 													},
@@ -195,12 +195,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : [
-														reference = {
+														symbol = {
 															value : "source"
 														}],
 													caller : access = {
 														child : "readString",
-														parent : reference = {
+														parent : symbol = {
 															value : "Files"
 														}
 													}
@@ -220,7 +220,7 @@ block = {
 														}],
 													caller : access = {
 														child : "resolveSibling",
-														parent : reference = {
+														parent : symbol = {
 															value : "source"
 														}
 													}
@@ -236,14 +236,14 @@ block = {
 												value : invocation = {
 													caller : access = {
 														child : "createRootRule",
-														parent : reference = {
+														parent : symbol = {
 															value : "JavaLang"
 														}
 													},
 													arguments : [
 														access = {
 															child : "toNode(input",
-															parent : reference = {
+															parent : any = {
 																value : ")"
 															}
 														}]
@@ -258,12 +258,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : [
-														reference = {
+														symbol = {
 															value : ""
 														}],
 													caller : access = {
 														child : "findError",
-														parent : reference = {
+														parent : symbol = {
 															value : "parseResult"
 														}
 													}
@@ -282,14 +282,14 @@ block = {
 												value : invocation = {
 													caller : access = {
 														child : "create",
-														parent : reference = {
+														parent : symbol = {
 															value : "parseResult"
 														}
 													},
 													arguments : [
 														access = {
 															child : "orElseThrow(",
-															parent : reference = {
+															parent : any = {
 																value : ")"
 															}
 														}]
@@ -306,11 +306,11 @@ block = {
 													value : "var"
 												},
 												value : invocation = {
-													caller : reference = {
+													caller : symbol = {
 														value : "generate"
 													},
 													arguments : [
-														reference = {
+														symbol = {
 															value : "root"
 														}]
 												}
@@ -327,12 +327,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : [
-														reference = {
+														symbol = {
 															value : ""
 														}],
 													caller : access = {
 														child : "createRootRule",
-														parent : reference = {
+														parent : symbol = {
 															value : "MagmaLang"
 														}
 													}
@@ -347,12 +347,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : [
-														reference = {
+														symbol = {
 															value : "generated"
 														}],
 													caller : access = {
 														child : "fromNode",
-														parent : reference = {
+														parent : symbol = {
 															value : "rule"
 														}
 													}
@@ -367,12 +367,12 @@ block = {
 												},
 												value : invocation = {
 													arguments : [
-														reference = {
+														symbol = {
 															value : ""
 														}],
 													caller : access = {
 														child : "findErr",
-														parent : reference = {
+														parent : symbol = {
 															value : "generateResult"
 														}
 													}
@@ -427,14 +427,14 @@ block = {
 									value : invocation = {
 										caller : access = {
 											child : "findContext",
-											parent : reference = {
+											parent : symbol = {
 												value : "e"
 											}
 										},
 										arguments : [
 											access = {
 												child : "orElse(""",
-												parent : reference = {
+												parent : any = {
 													value : ")"
 												}
 											}]
@@ -449,12 +449,12 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											reference = {
+											any = {
 												value : "'\n'"
 											}],
 										caller : access = {
 											child : "indexOf",
-											parent : reference = {
+											parent : symbol = {
 												value : "actualContext"
 											}
 										}
@@ -469,15 +469,15 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											reference = {
+											any = {
 												value : "0"
 											},
-											reference = {
+											symbol = {
 												value : "index"
 											}],
 										caller : access = {
 											child : "substring",
-											parent : reference = {
+											parent : any = {
 												value : "index == -1 ? actualContext : actualContext"
 											}
 										}
@@ -492,12 +492,12 @@ block = {
 									},
 									value : invocation = {
 										arguments : [
-											reference = {
+											symbol = {
 												value : ""
 											}],
 										caller : access = {
 											child : "findMessage",
-											parent : reference = {
+											parent : symbol = {
 												value : "e"
 											}
 										}
@@ -510,7 +510,7 @@ block = {
 									type : symbol = {
 										value : "+"
 									},
-									value : reference = {
+									value : any = {
 										value : "" + s + " " + context))"
 									},
 									modifiers : ["message.ifPresent(s", "->", "System.err.println("\t".repeat(depth)", "+", "depth", "let"]
@@ -525,7 +525,7 @@ block = {
 									value : invocation = {
 										caller : access = {
 											child : "findCauses",
-											parent : reference = {
+											parent : symbol = {
 												value : "e"
 											}
 										},
@@ -533,14 +533,14 @@ block = {
 											invocation = {
 												caller : access = {
 													child : "orElse",
-													parent : reference = {
+													parent : any = {
 														value : ")"
 													}
 												},
 												arguments : [
 													access = {
 														child : "emptyList(",
-														parent : reference = {
+														parent : symbol = {
 															value : "Collections"
 														}
 													}]
@@ -595,13 +595,13 @@ block = {
 									value : invocation = {
 										caller : access = {
 											child : "asList",
-											parent : reference = {
+											parent : symbol = {
 												value : "Arrays"
 											}
 										},
 										arguments : [
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new RootTypeRemover"
 												},
 												arguments : [
@@ -610,7 +610,7 @@ block = {
 													}]
 											},
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new RootTypeRemover"
 												},
 												arguments : [
@@ -619,38 +619,38 @@ block = {
 													}]
 											},
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new MethodMigrator"
 												},
 												arguments : [
-													reference = {
+													symbol = {
 														value : ""
 													}]
 											},
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new ModifierAttacher"
 												},
 												arguments : [
-													reference = {
+													symbol = {
 														value : ""
 													}]
 											},
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new ClassSplitter"
 												},
 												arguments : [
-													reference = {
+													symbol = {
 														value : ""
 													}]
 											},
 											invocation = {
-												caller : reference = {
+												caller : any = {
 													value : "new MagmaFormatter"
 												},
 												arguments : [
-													reference = {
+													symbol = {
 														value : ""
 													}]
 											}]
@@ -663,7 +663,7 @@ block = {
 									type : symbol = {
 										value : "Node"
 									},
-									value : reference = {
+									value : symbol = {
 										value : "root"
 									}
 								},

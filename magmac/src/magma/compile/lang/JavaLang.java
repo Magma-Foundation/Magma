@@ -3,6 +3,7 @@ package magma.compile.lang;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
@@ -29,7 +30,8 @@ public class JavaLang {
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
                 new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(", new RightRule(arguments, ")"))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
-                new TypeRule("reference", new ExtractStringRule("value"))
+                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                new TypeRule("any", new ExtractStringRule("value"))
         )));
 
         var type = new LazyRule();
