@@ -1,7 +1,7 @@
 block = {
 	children : [
-		any = {
-			value : "package magma;"
+		package = {
+			namespace : "magma"
 		},
 		any = {
 			value : "import magma.compile.Error_;"

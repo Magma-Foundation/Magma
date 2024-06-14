@@ -1,9 +1,6 @@
 block = {
 	children : [
 		any = {
-			value : "package magma;"
-		},
-		any = {
 			value : "import magma.compile.Error_;"
 		},
 		any = {
