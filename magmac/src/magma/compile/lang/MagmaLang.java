@@ -30,7 +30,7 @@ public class MagmaLang {
     }
 
     private static Rule createObjectRule(Rule statements) {
-        var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), " {\n", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
+        var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), " {", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
         var child = new LastRule(new ExtractStringListRule("modifiers", " "), " ", name);
         return new TypeRule("object", child);
     }
@@ -39,7 +39,7 @@ public class MagmaLang {
         var definition = createDefinitionRule();
         var value = new ExtractStringRule("value");
 
-        return new TypeRule("declaration", new FirstRule(definition, " = ", new RightRule(value, "\n")));
+        return new TypeRule("declaration", new FirstRule(definition, " = ", value));
     }
 
     private static LastRule createDefinitionRule() {
@@ -55,7 +55,7 @@ public class MagmaLang {
 
     public static TypeRule createRootRule() {
         return createBlock(new OrRule(List.of(
-                new RightRule(new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))), "\n"),
+                new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createStatementRule()
         )));
     }
@@ -67,6 +67,6 @@ public class MagmaLang {
     private static TypeRule createFunctionRule(LazyRule statements) {
         var definition = createDefinitionRule();
         var content = new ExtractNodeRule("content", new TypeRule("block", new MembersRule("children", new StripRule(statements))));
-        return new TypeRule("function", new FirstRule(definition, " => {\n", new RightRule(new StripRule(content), "}\n")));
+        return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(new StripRule(content), "}")));
     }
 }

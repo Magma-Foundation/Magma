@@ -4,6 +4,7 @@ import magma.api.Results;
 import magma.compile.CompileException;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.MethodRenamer;
 import magma.compile.lang.Modifier;
@@ -63,7 +64,8 @@ public class Main {
                 new RootTypeRemover("whitespace"),
                 new MethodRenamer(),
                 new ModifierAttacher(),
-                new ClassSplitter()
+                new ClassSplitter(),
+                new MagmaFormatter()
         );
 
         Node acc = root;
