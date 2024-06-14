@@ -1,106 +1,30 @@
 block = {
-	children : [
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.Error_;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.ClassSplitter;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.JavaLang;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.MagmaFormatter;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.MagmaLang;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.MethodMigrator;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.Modifier;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.ModifierAttacher;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.lang.RootTypeRemover;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.rule.Node;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "magma.compile.rule.Rule;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.io.IOException;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.nio.file.Files;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.nio.file.Paths;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.util.Arrays;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.util.Collections;"
-		},
-		import = {
-			right-indent : "
-",
-			value : "java.util.Optional;"
-		},
-		function = {
-			name : "Main",
-			left-indent : "
-	",
-			modifiers : ["export","class","def"],
-			params : "",
-			content : block = {
-				children : [
-					declaration = {
-						name : "source",
-						left-indent : "
-	",
-						type : "public static void main(String[] args) {
+	value : "package magma;
+
+import magma.compile.Error_;
+import magma.compile.lang.ClassSplitter;
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.MagmaFormatter;
+import magma.compile.lang.MagmaLang;
+import magma.compile.lang.MethodMigrator;
+import magma.compile.lang.Modifier;
+import magma.compile.lang.ModifierAttacher;
+import magma.compile.lang.RootTypeRemover;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+
+public class Main {
+    public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
+
+    public static void main(String[] args) {
         try {
-            var",
-						value : "Paths.get(".", "magmac", "src", "magma", "Main.java");
+            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
 
@@ -124,35 +48,31 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
-    }"
-					},
-					declaration = {
-						name : "message",
-						left-indent : "
-	",
-						type : "private static void print(Error_ e, int depth) {
-        var",
-						value : "e.findMessage();
-        message.ifPresent(s -> System.err.println(depth + ": " + s));
+    }
+
+    private static void print(Error_ e, int depth) {
+        var actualContext = e.findContext().orElse("");
+        var index = actualContext.indexOf('\n');
+        var context = index == -1 ? actualContext : actualContext.substring(0, index);
+
+        var message = e.findMessage();
+        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
-            var context = e.findContext();
-            context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
-        } else {
-            for (Error_ cause : causes) {
-                print(cause, depth + 1);
-            }
+            return;
         }
-    }"
-					},
-					declaration = {
-						name : "list",
-						left-indent : "
-	",
-						type : "private static Node generate(Node root) {
-        var",
-						value : "Arrays.asList(
+        if (causes.size() > 1) {
+            for (Error_ cause : causes) {
+                print(cause, depth);
+            }
+        } else {
+            print(causes.get(0), depth + 1);
+        }
+    }
+
+    private static Node generate(Node root) {
+        var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
@@ -166,23 +86,7 @@ block = {
             acc = modifier.generate(acc);
         }
         return acc;
-    }"
-					}]
-			}
-		},
-		object = {
-			name : "Main",
-			modifiers : ["export"],
-			content : block = {
-				children : [
-					declaration = {
-						name : "CLASS_KEYWORD_WITH_SPACE",
-						left-indent : "
-	",
-						type : "String",
-						modifiers : ["public","const"],
-						value : ""class ";"
-					}]
-			}
-		}]
+    }
+}
+"
 }
