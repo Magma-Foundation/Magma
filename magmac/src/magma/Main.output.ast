@@ -613,20 +613,28 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : invocation = {
-										arguments : [
-											number = {
-												value : "0"
+									value : ternary = {
+										condition : any = {
+											value : "index == -1"
+										},
+										true : symbol = {
+											value : "actualContext"
+										},
+										false : invocation = {
+											caller : access = {
+												child : "substring",
+												parent : symbol = {
+													value : "actualContext"
+												}
 											},
-											symbol = {
-												value : "index"
-											}
-										],
-										caller : access = {
-											child : "substring",
-											parent : any = {
-												value : "index == -1 ? actualContext : actualContext"
-											}
+											arguments : [
+												number = {
+													value : "0"
+												},
+												symbol = {
+													value : "index"
+												}
+											]
 										}
 									}
 								},
