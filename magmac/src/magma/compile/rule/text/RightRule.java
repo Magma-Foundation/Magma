@@ -13,12 +13,12 @@ public record RightRule(Rule child, String slice) implements Rule {
 
     @Override
     public RuleResult toNode(String input) {
-        if (!input.endsWith(slice)) {
-            return new ErrorRuleResult(new JavaError(new CompileException("Input does not end with '" + slice + "': " + input)));
-        } else {
+        if (input.endsWith(slice)) {
             var contentEnd = input.length() - slice.length();
             var content = input.substring(0, contentEnd);
             return child.toNode(content);
+        } else {
+            return new ErrorRuleResult(new JavaError(new CompileException("Input does not end with '%s': %s".formatted(slice, input))));
         }
     }
 

@@ -2,15 +2,15 @@ package magma.compile.rule.split;
 
 import magma.api.Result;
 import magma.api.Tuple;
-import magma.compile.CompileParentError;
 import magma.compile.CompileException;
+import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
-import magma.compile.rule.result.AdaptiveRuleResult;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
 
 import java.util.Optional;
 
@@ -42,8 +42,10 @@ public abstract class SplitOnceRule implements Rule {
             var rightResult = rightRule.toNode(right);
             if (rightResult.findError().isPresent()) return rightResult;
 
-            var attributes1 = leftResult.findAttributes().flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)));
-            return new AdaptiveRuleResult(Optional.empty(), attributes1);
+            return leftResult.findAttributes()
+                    .flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)))
+                    .map(UntypedRuleResult::new)
+                    .orElseThrow();
         }).orElseGet(() -> {
             var format = "Slice '%s' not present.";
             var message = format.formatted(slice);
