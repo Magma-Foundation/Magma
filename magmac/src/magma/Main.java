@@ -6,7 +6,7 @@ import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.MethodRenamer;
+import magma.compile.lang.MethodMigrator;
 import magma.compile.lang.Modifier;
 import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
@@ -62,7 +62,7 @@ public class Main {
         var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
-                new MethodRenamer(),
+                new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()

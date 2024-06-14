@@ -4,7 +4,7 @@ import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.MethodRenamer;
+import magma.compile.lang.MethodMigrator;
 import magma.compile.lang.Modifier;
 import magma.compile.lang.ModifierAttacher;
 import magma.compile.lang.RootTypeRemover;
@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 export object Main {
 	public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
-	public main(String[] args) : void => {
+	public def main(String[] args) : void => {
 	try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
@@ -35,7 +35,7 @@ export object Main {
         }catch (CompileException e) {
             print(e, 0);
         }}
-	private print(CompileException e, int depth) : void => {
+	private def print(CompileException e, int depth) : void => {
 	var message = e.getMessage();System.err.println("\t".repeat(depth) + message);var cause = e.getCause();if (cause == null) {
             System.err.println("\n---\n" + e.content + "\n---\n");
         }else {
@@ -45,11 +45,11 @@ export object Main {
                 cause.printStackTrace();
             }
         }}
-	private generate(Node root) : Node => {
+	private def generate(Node root) : Node => {
 	var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
-                new MethodRenamer(),
+                new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()

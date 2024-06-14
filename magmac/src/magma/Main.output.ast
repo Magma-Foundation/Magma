@@ -33,7 +33,7 @@ block = {
 		import = {
 			right-indent : "
 ",
-			value : "magma.compile.lang.MethodRenamer;"
+			value : "magma.compile.lang.MethodMigrator;"
 		},
 		import = {
 			right-indent : "
@@ -99,7 +99,7 @@ block = {
 	",
 						params : "String[] args",
 						type : "void",
-						modifiers : ["public"],
+						modifiers : ["public","def"],
 						content : block = {
 							children : [
 								any = {
@@ -139,7 +139,7 @@ block = {
 	",
 						params : "CompileException e, int depth",
 						type : "void",
-						modifiers : ["private"],
+						modifiers : ["private","def"],
 						content : block = {
 							children : [
 								any = {
@@ -176,14 +176,14 @@ block = {
 	",
 						type : "Node",
 						params : "Node root",
-						modifiers : ["private"],
+						modifiers : ["private","def"],
 						content : block = {
 							children : [
 								any = {
 									content : "var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
-                new MethodRenamer(),
+                new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()

@@ -22,7 +22,7 @@ block = {
 			value : "magma.compile.lang.MagmaLang;"
 		},
 		import = {
-			value : "magma.compile.lang.MethodRenamer;"
+			value : "magma.compile.lang.MethodMigrator;"
 		},
 		import = {
 			value : "magma.compile.lang.Modifier;"
@@ -146,7 +146,7 @@ block = {
 									content : "var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
-                new MethodRenamer(),
+                new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
