@@ -4,6 +4,10 @@ import java.util.Optional;
 
 public class Collectors {
     public static Collector<String, Optional<String>> joining() {
+        return joining("");
+    }
+
+    public static Collector<String, Optional<String>> joining(final String delimiter) {
         return new Collector<>() {
             @Override
             public Optional<String> createInitial() {
@@ -14,7 +18,7 @@ public class Collectors {
             public Optional<String> fold(Optional<String> current, String next) {
                 return current.isEmpty()
                         ? Optional.of(next)
-                        : current.map(inner -> inner + next);
+                        : current.map(inner -> inner + delimiter + next);
             }
         };
     }

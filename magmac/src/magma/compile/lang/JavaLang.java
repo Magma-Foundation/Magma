@@ -2,7 +2,8 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.MembersRule;
+import magma.compile.rule.SplitRule;
+import magma.compile.rule.MembersSplitter;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -28,7 +29,7 @@ public class JavaLang {
     }
 
     private static TypeRule createBlock(Rule memberRule) {
-        var children = new MembersRule("children", new StripRule(memberRule));
+        var children = new SplitRule(new MembersSplitter(), "", "children", new StripRule(memberRule));
         return new TypeRule("block", children);
     }
 
@@ -63,7 +64,11 @@ public class JavaLang {
     private static Rule createDefinitionRule() {
         var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
         var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
-        var withParams = new LastRule(withoutParams, "(", new RightRule(new ExtractStringRule("params"), ")"));
+
+        var params = new ExtractStringRule("params");
+
+
+        var withParams = new LastRule(withoutParams, "(", new RightRule(params, ")"));
         return new OrRule(List.of(withParams, withoutParams));
     }
 
@@ -74,6 +79,6 @@ public class JavaLang {
                 new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createClassRule()));
 
-        return new TypeRule("block", new MembersRule("children", new StripRule(childRule)));
+        return new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(childRule)));
     }
 }

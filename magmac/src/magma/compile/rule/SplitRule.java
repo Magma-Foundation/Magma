@@ -16,11 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public record MembersRule(String propertyKey, Rule childRule) implements Rule {
+public final class SplitRule implements Rule {
+    private final String propertyKey;
+    private final Rule childRule;
+    private final Splitter splitter;
+    private final String delimiter;
+
+    public SplitRule(Splitter splitter, String delimiter, String propertyKey, Rule childRule) {
+        this.propertyKey = propertyKey;
+        this.childRule = childRule;
+        this.splitter = splitter;
+        this.delimiter = delimiter;
+    }
+
     @Override
     public RuleResult toNode(String input) {
-        var split = Rules.split(input);
-        List<Node> members = new ArrayList<>();
+        var split = splitter.split(input);
+        var members = new ArrayList<Node>();
         for (String childString : split) {
             var optional = childRule.toNode(childString).create();
             optional.ifPresent(members::add);
@@ -36,7 +48,7 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
     private Result<String, CompileException> joinNodes(List<Node> list) {
         return Streams.fromNativeList(list)
                 .map(childRule::fromNode)
-                .collect(Collectors.exceptionally(Collectors.joining()))
+                .collect(Collectors.exceptionally(Collectors.joining(delimiter)))
                 .mapValue(inner -> inner.orElse(""));
     }
 
@@ -46,6 +58,12 @@ public record MembersRule(String propertyKey, Rule childRule) implements Rule {
                 .apply(propertyKey)
                 .flatMap(Attribute::asNodeList)
                 .map(this::joinNodes)
-                .orElseGet(() -> new Err<>(new CompileException("Property '" + propertyKey + "' does not exist on node: ", node.toString())));
+                .orElseGet(() -> createErr(node));
+    }
+
+    private Err<String, CompileException> createErr(Node node) {
+        var format = "Property '%s' does not exist on node.";
+        var message = format.formatted(propertyKey);
+        return new Err<>(new CompileException(message, node.toString()));
     }
 }

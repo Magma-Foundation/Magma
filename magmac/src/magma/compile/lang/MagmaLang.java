@@ -1,7 +1,8 @@
 package magma.compile.lang;
 
 import magma.compile.rule.LazyRule;
-import magma.compile.rule.MembersRule;
+import magma.compile.rule.SplitRule;
+import magma.compile.rule.MembersSplitter;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -61,12 +62,12 @@ public class MagmaLang {
     }
 
     private static TypeRule createBlock(Rule values) {
-        return new TypeRule("block", new MembersRule("children", new StripRule(values)));
+        return new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(values)));
     }
 
     private static TypeRule createFunctionRule(LazyRule statements) {
         var definition = createDefinitionRule();
-        var content = new ExtractNodeRule("content", new TypeRule("block", new MembersRule("children", new StripRule(statements))));
+        var content = new ExtractNodeRule("content", new TypeRule("block", new SplitRule(new MembersSplitter(), "", "children", new StripRule(statements))));
         return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(new StripRule(content), "}")));
     }
 }
