@@ -33,4 +33,9 @@ public record Ok<T, E>(T value) implements Result<T, E> {
     public <R> Result<T, R> mapErr(Function<E, R> mapper) {
         return new Ok<>(value);
     }
+
+    @Override
+    public <R> R match(Function<T, R> onOk, Function<E, R> onErr) {
+        return onOk.apply(value);
+    }
 }

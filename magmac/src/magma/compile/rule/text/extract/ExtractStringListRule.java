@@ -1,13 +1,17 @@
 package magma.compile.rule.text.extract;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public final class ExtractStringListRule extends ExtractRule {
-    private final String delimiter;
+public abstract class ExtractStringListRule extends ExtractRule {
+    protected final String delimiter;
 
     public ExtractStringListRule(String key, String delimiter) {
         super(key);
@@ -20,7 +24,17 @@ public final class ExtractStringListRule extends ExtractRule {
     }
 
     @Override
-    protected Attribute toAttribute(String content) {
-        return new StringListAttribute(Arrays.asList(content.split(delimiter)));
+    protected Result<Attribute, Error_> toAttribute(String content) {
+        var list = Arrays.asList(content.split(delimiter));
+        for (String format : list) {
+            var qualified = qualify(format);
+            if (qualified.isPresent()) {
+                return new Err<>(qualified.get());
+            }
+        }
+
+        return new Ok<>(new StringListAttribute(list));
     }
+
+    protected abstract Optional<Error_> qualify(String child);
 }

@@ -15,4 +15,6 @@ public interface Result<T, E> {
     boolean isOk();
 
     <R> Result<T, R> mapErr(Function<E, R> mapper);
+
+    <R> R match(Function<T, R> onOk, Function<E, R> onErr);
 }

@@ -66,11 +66,10 @@ block = {
 						value : ""class ";"
 					},
 					declaration = {
+						type : "public static void main(String[] args) {
+        try {
+            var",
 						name : "source",
-						type : "var",
-						modifiers : ["public","static","void","main(String[]","args)","{
-","","","","","","","","try","{
-"],
 						value : "Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
@@ -98,10 +97,9 @@ block = {
     }"
 					},
 					declaration = {
+						type : "private static void print(Error_ e, int depth) {
+        var",
 						name : "message",
-						type : "var",
-						modifiers : ["private","static","void","print(Error_","e,","int","depth)","{
-"],
 						value : "e.findMessage();
         message.ifPresent(s -> System.err.println(depth + ": " + s));
 
@@ -118,9 +116,8 @@ block = {
 					},
 					declaration = {
 						name : "list",
-						type : "var",
-						modifiers : ["private","static","Node","generate(Node","root)","{
-"],
+						type : "private static Node generate(Node root) {
+        var",
 						value : "Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),

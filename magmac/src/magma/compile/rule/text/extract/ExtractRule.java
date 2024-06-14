@@ -10,6 +10,7 @@ import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 
@@ -24,11 +25,13 @@ public abstract class ExtractRule implements Rule {
 
     protected abstract Optional<String> fromAttribute(Attribute attribute);
 
-    protected abstract Attribute toAttribute(String content);
+    protected abstract Result<Attribute, Error_> toAttribute(String content);
 
     @Override
     public RuleResult toNode(String input) {
-        return new UntypedRuleResult(new MapAttributes().with(key, toAttribute(input)));
+        return toAttribute(input).match(
+                attribute -> new UntypedRuleResult(new MapAttributes().with(key, attribute)),
+                ErrorRuleResult::new);
     }
 
     @Override

@@ -12,8 +12,8 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
-import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class MagmaLang {
 
     private static Rule createObjectRule(Rule statements) {
         var name = new LeftRule("object ", new FirstRule(new ExtractStringRule("name"), " {", new RightRule(new ExtractNodeRule("content", createBlock(statements)), "}")));
-        var child = new LastRule(new ExtractStringListRule("modifiers", " "), " ", name);
+        var child = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", name);
         return new TypeRule("object", child);
     }
 
@@ -51,7 +51,7 @@ public class MagmaLang {
         var withType = new LastRule(withoutType, " : ", new ExtractStringRule("type"));
         var anyType = new OrRule(List.of(withType, withoutType));
 
-        return new LastRule(new ExtractStringListRule("modifiers", " "), " ", anyType);
+        return new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", anyType);
     }
 
     public static TypeRule createRootRule() {

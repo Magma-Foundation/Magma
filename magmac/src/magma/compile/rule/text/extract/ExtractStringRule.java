@@ -1,5 +1,8 @@
 package magma.compile.rule.text.extract;
 
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;
 
@@ -16,7 +19,7 @@ public final class ExtractStringRule extends ExtractRule {
     }
 
     @Override
-    protected Attribute toAttribute(String content) {
-        return new StringAttribute(content);
+    protected Result<Attribute, Error_> toAttribute(String content) {
+        return new Ok<>(new StringAttribute(content));
     }
 }

@@ -85,27 +85,21 @@ block = {
 ",
 			value : "java.util.Optional;"
 		},
-		object = {
+		function = {
 			name : "Main",
-			modifiers : ["export"],
+			left-indent : "
+	",
+			modifiers : ["export","class","def"],
+			params : "",
 			content : block = {
 				children : [
-					declaration = {
-						name : "CLASS_KEYWORD_WITH_SPACE",
-						left-indent : "
-	",
-						type : "String",
-						modifiers : ["public","const"],
-						value : ""class ";"
-					},
 					declaration = {
 						name : "source",
 						left-indent : "
 	",
-						type : "var",
-						modifiers : ["public","void","main(String[]","args)","{
-","","","","","","","","try","{
-","let"],
+						type : "public static void main(String[] args) {
+        try {
+            var",
 						value : "Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
@@ -136,9 +130,8 @@ block = {
 						name : "message",
 						left-indent : "
 	",
-						type : "var",
-						modifiers : ["private","void","print(Error_","e,","int","depth)","{
-","let"],
+						type : "private static void print(Error_ e, int depth) {
+        var",
 						value : "e.findMessage();
         message.ifPresent(s -> System.err.println(depth + ": " + s));
 
@@ -157,9 +150,8 @@ block = {
 						name : "list",
 						left-indent : "
 	",
-						type : "var",
-						modifiers : ["private","Node","generate(Node","root)","{
-","let"],
+						type : "private static Node generate(Node root) {
+        var",
 						value : "Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
@@ -175,6 +167,21 @@ block = {
         }
         return acc;
     }"
+					}]
+			}
+		},
+		object = {
+			name : "Main",
+			modifiers : ["export"],
+			content : block = {
+				children : [
+					declaration = {
+						name : "CLASS_KEYWORD_WITH_SPACE",
+						left-indent : "
+	",
+						type : "String",
+						modifiers : ["public","const"],
+						value : ""class ";"
 					}]
 			}
 		}]

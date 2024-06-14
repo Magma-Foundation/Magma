@@ -1,8 +1,8 @@
 package magma.compile.lang;
 
 import magma.Main;
+import magma.compile.rule.ContainsRule;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -15,14 +15,15 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
-import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.QualifiedExtractStringListRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
 
 public class JavaLang {
     public static Rule createClassRule() {
-        var modifiers = new ExtractStringListRule("modifiers", " ");
+        var modifiers = new SimpleExtractStringListRule("modifiers", " ");
         var name = new StripRule(new ExtractStringRule("name"));
         var block = createBlock(createClassMemberRule());
         var content = new ExtractNodeRule("content", block);
@@ -70,7 +71,14 @@ public class JavaLang {
 
     private static Rule createDefinitionRule() {
         var withoutModifiers = new ExtractStringRule("type");
-        var withModifiers = new LastRule(new ExtractStringListRule("modifiers", " "), " ", withoutModifiers);
+
+        var modifiersFilter = new ContainsRule(new ExtractStringRule(""),
+                "public",
+                "static",
+                "final"
+        );
+
+        var withModifiers = new LastRule(new QualifiedExtractStringListRule("modifiers", " ", modifiersFilter), " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
 
         return new LastRule(anyModifiers, " ", new ExtractStringRule("name"));
@@ -79,7 +87,7 @@ public class JavaLang {
     public static TypeRule createRootRule() {
         var childRule = new OrRule(List.of(
                 createWhitespaceRule(),
-                new TypeRule("package", new LeftRule("package ", new ExtractStringListRule("namespace", "."))),
+                new TypeRule("package", new LeftRule("package ", new SimpleExtractStringListRule("namespace", "."))),
                 new TypeRule("import", new LeftRule("import ", new ExtractStringRule("value"))),
                 createClassRule()));
 
