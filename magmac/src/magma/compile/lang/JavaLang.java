@@ -45,7 +45,13 @@ public class JavaLang {
 
     private static Rule createMethodRule() {
         var header = new StripRule(createDefinitionRule());
-        return new TypeRule("method", new FirstRule(header, "{", new RightRule(new ExtractNodeRule("content", createBlock(createAnyRule())), "}")));
+        return new TypeRule("method", new FirstRule(header, "{", new RightRule(new ExtractNodeRule("content", createBlock(createStatementRule())), "}")));
+    }
+
+    private static Rule createStatementRule() {
+        return new OrRule(
+                List.of(createAnyRule())
+        );
     }
 
     private static TypeRule createDeclarationRule() {
