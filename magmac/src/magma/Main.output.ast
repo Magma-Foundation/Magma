@@ -142,14 +142,16 @@ block = {
 						type : symbol = {
 							value : "void"
 						},
-						params : definition = {
-							name : "args",
-							type : array = {
-								child : symbol = {
-									value : "String"
+						params : [
+							definition = {
+								name : "args",
+								type : array = {
+									child : symbol = {
+										value : "String"
+									}
 								}
 							}
-						},
+						],
 						child : block = {
 							children : [
 								try = {
@@ -541,13 +543,21 @@ block = {
 						type : symbol = {
 							value : "void"
 						},
-						params : definition = {
-							name : "depth",
-							modifiers : ["Error_", "e,"],
-							type : symbol = {
-								value : "int"
+						params : [
+							definition = {
+								name : "e",
+								type : symbol = {
+									value : "Error_"
+								}
+							},
+							definition = {
+								name : "depth",
+								modifiers : [""],
+								type : symbol = {
+									value : "int"
+								}
 							}
-						},
+						],
 						child : block = {
 							children : [
 								declaration = {
@@ -708,12 +718,14 @@ block = {
 						type : symbol = {
 							value : "Node"
 						},
-						params : definition = {
-							name : "root",
-							type : symbol = {
-								value : "Node"
+						params : [
+							definition = {
+								name : "root",
+								type : symbol = {
+									value : "Node"
+								}
 							}
-						},
+						],
 						child : block = {
 							children : [
 								declaration = {
