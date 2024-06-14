@@ -149,8 +149,10 @@ block = {
 								}
 							}
 						},
-						child : " {
-        try {
+						child : block = {
+							children : [
+								any = {
+									value : "try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
@@ -171,11 +173,18 @@ block = {
             generateError.ifPresent(error -> print(error, 0));
 
             Files.writeString(target, generateResult.findValue().orElseThrow());
-        } catch (IOException e) {
+        }"
+								},
+								any = {
+									value : "catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        }
-    }"
+        }"
+								},
+								any = {
+									value : ""
+								}]
+						}
 					},
 					function = {
 						name : "print",
@@ -192,26 +201,47 @@ block = {
 								value : "int"
 							}
 						},
-						child : " {
-        var actualContext = e.findContext().orElse("");
-        var index = actualContext.indexOf('\n');
-        var context = index == -1 ? actualContext : actualContext.substring(0, index);
-
-        var message = e.findMessage();
-        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));
-
-        var causes = e.findCauses().orElse(Collections.emptyList());
-        if (causes.isEmpty()) {
+						child : block = {
+							children : [
+								any = {
+									value : "var actualContext = e.findContext().orElse("");"
+								},
+								any = {
+									value : "var index = actualContext.indexOf('\n');"
+								},
+								any = {
+									value : "var context = index == -1 ? actualContext : actualContext.substring(0, index);"
+								},
+								any = {
+									value : "var message = e.findMessage();"
+								},
+								any = {
+									value : "message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));"
+								},
+								any = {
+									value : "var causes = e.findCauses().orElse(Collections.emptyList());"
+								},
+								any = {
+									value : "if (causes.isEmpty()) {
             return;
-        }
-        if (causes.size() > 1) {
+        }"
+								},
+								any = {
+									value : "if (causes.size() > 1) {
             for (Error_ cause : causes) {
                 print(cause, depth);
             }
-        } else {
+        }"
+								},
+								any = {
+									value : "else {
             print(causes.get(0), depth + 1);
-        }
-    }"
+        }"
+								},
+								any = {
+									value : ""
+								}]
+						}
 					},
 					function = {
 						name : "generate",
@@ -227,22 +257,33 @@ block = {
 								value : "Node"
 							}
 						},
-						child : " {
-        var list = Arrays.asList(
+						child : block = {
+							children : [
+								any = {
+									value : "var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
-        );
-
-        Node acc = root;
-        for (Modifier modifier : list) {
+        );"
+								},
+								any = {
+									value : "Node acc = root;"
+								},
+								any = {
+									value : "for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }
-        return acc;
-    }"
+        }"
+								},
+								any = {
+									value : "return acc;"
+								},
+								any = {
+									value : ""
+								}]
+						}
 					},
 					any = {
 						value : ""
