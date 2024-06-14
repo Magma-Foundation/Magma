@@ -21,7 +21,10 @@ public class MembersSplitter implements Splitter {
             current = processChar(current.append(c), c);
         }
 
-        return current.advance().tokens;
+        return current.advance().tokens
+                .stream()
+                .filter(token -> !token.isBlank())
+                .toList();
     }
 
     record State(List<String> tokens, StringBuilder buffer, int depth) {

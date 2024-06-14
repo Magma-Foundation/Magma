@@ -447,9 +447,6 @@ block = {
 														}
 													}
 												]
-											},
-											any = {
-												value : ""
 											}
 										]
 									}
@@ -459,9 +456,6 @@ block = {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }"
-								},
-								any = {
-									value : ""
 								}
 							]
 						}
@@ -615,9 +609,6 @@ block = {
 									value : "else {
             print(causes.get(0), depth + 1);
         }"
-								},
-								any = {
-									value : ""
 								}
 							]
 						}
@@ -708,21 +699,12 @@ block = {
 								},
 								any = {
 									value : "return acc;"
-								},
-								any = {
-									value : ""
 								}
 							]
 						}
-					},
-					any = {
-						value : ""
 					}
 				]
 			}
-		},
-		any = {
-			value : ""
 		}
 	]
 }
