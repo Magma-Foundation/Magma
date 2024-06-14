@@ -99,11 +99,15 @@ block = {
 						value : ""class ";"
 					},
 					function = {
-						name : "args)",
+						name : "main",
 						left-indent : "
 	",
-						type : "main(String[]",
-						modifiers : ["public","void","def"],
+						params : [
+							param = {
+								value : "String[] args"
+							}],
+						type : "void",
+						modifiers : ["public","def"],
 						content : block = {
 							children : [
 								any = {
@@ -142,11 +146,18 @@ block = {
 						}
 					},
 					function = {
-						name : "depth)",
+						name : "print",
 						left-indent : "
 	",
-						type : "int",
-						modifiers : ["private","void","print(Error_","e,","def"],
+						params : [
+							param = {
+								value : "Error_ e"
+							},
+							param = {
+								value : " int depth"
+							}],
+						type : "void",
+						modifiers : ["private","def"],
 						content : block = {
 							children : [
 								any = {
@@ -177,11 +188,15 @@ block = {
 						}
 					},
 					function = {
-						name : "root)",
+						name : "generate",
 						left-indent : "
 	",
-						modifiers : ["private","Node","def"],
-						type : "generate(Node",
+						type : "Node",
+						modifiers : ["private","def"],
+						params : [
+							param = {
+								value : "Node root"
+							}],
 						content : block = {
 							children : [
 								any = {

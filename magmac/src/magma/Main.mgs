@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Optional;
 export object Main {
 	public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
-	public void def args) : main(String[] => {
+	public def main : void => {
 	try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
@@ -43,7 +43,7 @@ export object Main {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }}
-	private void print(Error_ e, def depth) : int => {
+	private def print : void => {
 	var message = e.findMessage();message.ifPresent(s -> System.err.println(depth + ": " + s));var causes = e.findCauses().orElse(Collections.emptyList());if (causes.isEmpty()) {
             var context = e.findContext();
             context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
@@ -52,7 +52,7 @@ export object Main {
                 print(cause, depth + 1);
             }
         }}
-	private Node def root) : generate(Node => {
+	private def generate : Node => {
 	var list = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),

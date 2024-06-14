@@ -66,9 +66,13 @@ block = {
 						value : ""class ";"
 					},
 					method = {
-						name : "args)",
-						type : "main(String[]",
-						modifiers : ["public","static","void"],
+						name : "main",
+						params : [
+							param = {
+								value : "String[] args"
+							}],
+						type : "void",
+						modifiers : ["public","static"],
 						content : block = {
 							children : [
 								any = {
@@ -107,9 +111,16 @@ block = {
 						}
 					},
 					method = {
-						name : "depth)",
-						type : "int",
-						modifiers : ["private","static","void","print(Error_","e,"],
+						name : "print",
+						params : [
+							param = {
+								value : "Error_ e"
+							},
+							param = {
+								value : " int depth"
+							}],
+						type : "void",
+						modifiers : ["private","static"],
 						content : block = {
 							children : [
 								any = {
@@ -140,9 +151,13 @@ block = {
 						}
 					},
 					method = {
-						name : "root)",
-						modifiers : ["private","static","Node"],
-						type : "generate(Node",
+						name : "generate",
+						type : "Node",
+						modifiers : ["private","static"],
+						params : [
+							param = {
+								value : "Node root"
+							}],
 						content : block = {
 							children : [
 								any = {

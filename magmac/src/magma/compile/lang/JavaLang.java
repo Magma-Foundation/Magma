@@ -67,7 +67,7 @@ public class JavaLang {
         var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
         var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
 
-        var params = new SplitMultipleRule(new ParamSplitter(), ",", "params", new ExtractStringRule("param"));
+        var params = new SplitMultipleRule(new ParamSplitter(), ",", "params", new TypeRule("param", new ExtractStringRule("value")));
 
         var withParams = new LastRule(withoutParams, "(", new RightRule(params, ")"));
         return new OrRule(List.of(withParams, withoutParams));
