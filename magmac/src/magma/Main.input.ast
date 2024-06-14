@@ -1,23 +1,76 @@
 block = {
-	value : "package magma;
+	children : [
+		any = {
+			value : "package magma;"
+		},
+		any = {
+			value : "
 
-import magma.compile.Error_;
-import magma.compile.lang.ClassSplitter;
-import magma.compile.lang.JavaLang;
-import magma.compile.lang.MagmaFormatter;
-import magma.compile.lang.MagmaLang;
-import magma.compile.lang.MethodMigrator;
-import magma.compile.lang.Modifier;
-import magma.compile.lang.ModifierAttacher;
-import magma.compile.lang.RootTypeRemover;
-import magma.compile.rule.Node;
-import magma.compile.rule.Rule;
+import magma.compile.Error_;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.ClassSplitter;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.JavaLang;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.MagmaFormatter;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.MagmaLang;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.MethodMigrator;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.Modifier;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.ModifierAttacher;"
+		},
+		any = {
+			value : "
+import magma.compile.lang.RootTypeRemover;"
+		},
+		any = {
+			value : "
+import magma.compile.rule.Node;"
+		},
+		any = {
+			value : "
+import magma.compile.rule.Rule;"
+		},
+		any = {
+			value : "
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.IOException;"
+		},
+		any = {
+			value : "
+import java.nio.file.Files;"
+		},
+		any = {
+			value : "
+import java.nio.file.Paths;"
+		},
+		any = {
+			value : "
+import java.util.Arrays;"
+		},
+		any = {
+			value : "
+import java.util.Collections;"
+		},
+		any = {
+			value : "
 
 public class Main {
     public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
@@ -87,6 +140,10 @@ public class Main {
         }
         return acc;
     }
-}
+}"
+		},
+		any = {
+			value : "
 "
+		}]
 }
