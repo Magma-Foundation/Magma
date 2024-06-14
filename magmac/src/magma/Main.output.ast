@@ -245,10 +245,12 @@ block = {
 													],
 													caller : access = {
 														child : "toNode",
-														parent : access = {
-															child : "createRootRule()",
-															parent : symbol = {
-																value : "JavaLang"
+														parent : invocation = {
+															caller : access = {
+																child : "createRootRule",
+																parent : symbol = {
+																	value : "JavaLang"
+																}
 															}
 														}
 													}
@@ -261,10 +263,12 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : access = {
-													child : "findError()",
-													parent : symbol = {
-														value : "parseResult"
+												value : invocation = {
+													caller : access = {
+														child : "findError",
+														parent : symbol = {
+															value : "parseResult"
+														}
 													}
 												}
 											},
@@ -278,12 +282,16 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : access = {
-													child : "orElseThrow()",
-													parent : access = {
-														child : "create()",
-														parent : symbol = {
-															value : "parseResult"
+												value : invocation = {
+													caller : access = {
+														child : "orElseThrow",
+														parent : invocation = {
+															caller : access = {
+																child : "create",
+																parent : symbol = {
+																	value : "parseResult"
+																}
+															}
 														}
 													}
 												}
@@ -319,10 +327,12 @@ block = {
 												type : symbol = {
 													value : "Rule"
 												},
-												value : access = {
-													child : "createRootRule()",
-													parent : symbol = {
-														value : "MagmaLang"
+												value : invocation = {
+													caller : access = {
+														child : "createRootRule",
+														parent : symbol = {
+															value : "MagmaLang"
+														}
 													}
 												}
 											},
@@ -354,10 +364,12 @@ block = {
 												type : symbol = {
 													value : "var"
 												},
-												value : access = {
-													child : "findErr()",
-													parent : symbol = {
-														value : "generateResult"
+												value : invocation = {
+													caller : access = {
+														child : "findErr",
+														parent : symbol = {
+															value : "generateResult"
+														}
 													}
 												}
 											},
@@ -417,10 +429,12 @@ block = {
 										],
 										caller : access = {
 											child : "orElse",
-											parent : access = {
-												child : "findContext()",
-												parent : symbol = {
-													value : "e"
+											parent : invocation = {
+												caller : access = {
+													child : "findContext",
+													parent : symbol = {
+														value : "e"
+													}
 												}
 											}
 										}
@@ -478,10 +492,12 @@ block = {
 									type : symbol = {
 										value : "var"
 									},
-									value : access = {
-										child : "findMessage()",
-										parent : symbol = {
-											value : "e"
+									value : invocation = {
+										caller : access = {
+											child : "findMessage",
+											parent : symbol = {
+												value : "e"
+											}
 										}
 									}
 								},
@@ -514,10 +530,12 @@ block = {
 											child : "emptyList",
 											parent : access = {
 												child : "orElse(Collections",
-												parent : access = {
-													child : "findCauses()",
-													parent : symbol = {
-														value : "e"
+												parent : invocation = {
+													caller : access = {
+														child : "findCauses",
+														parent : symbol = {
+															value : "e"
+														}
 													}
 												}
 											}

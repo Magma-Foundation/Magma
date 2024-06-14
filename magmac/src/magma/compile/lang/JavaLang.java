@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -28,7 +29,11 @@ public class JavaLang {
 
         var value = new LazyRule();
 
-        var arguments = new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value));
+        var arguments = new OrRule(List.of(
+                new EmptyRule(),
+                new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value)))
+        );
+
         var caller = new ExtractNodeRule("caller", value);
 
         var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
@@ -83,7 +88,7 @@ public class JavaLang {
     }
 
     private static class InvocationStart extends SplitOnceRule {
-        public InvocationStart(ExtractNodeRule caller, SplitMultipleRule arguments) {
+        public InvocationStart(Rule caller, Rule arguments) {
             super(caller, "(", arguments);
         }
 
@@ -91,7 +96,7 @@ public class JavaLang {
         protected Optional<Integer> computeIndex(String input) {
             for (int i = input.length() - 1; i >= 0; i--) {
                 var c = input.charAt(i);
-                if(c == '(') return Optional.of(i);
+                if (c == '(') return Optional.of(i);
             }
 
             return Optional.empty();
