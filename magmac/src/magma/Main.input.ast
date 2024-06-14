@@ -65,19 +65,13 @@ block = {
 						modifiers : ["public","static","final"],
 						value : ""class ";"
 					},
-					method = {
-						name : "main",
-						params : [
-							param = {
-								value : "String[] args"
-							}],
-						type : "void",
-						modifiers : ["public","static"],
-						content : block = {
-							children : [
-								any = {
-									content : "try {
-            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+					declaration = {
+						name : "source",
+						type : "var",
+						modifiers : ["public","static","void","main(String[]","args)","{
+","","","","","","","","try","{
+"],
+						value : "Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
 
@@ -97,94 +91,51 @@ block = {
             generateError.ifPresent(error -> print(error, 0));
 
             Files.writeString(target, generateResult.findValue().orElseThrow());
-        }"
-								},
-								any = {
-									content : "catch (IOException e) {
+        } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        }"
-								},
-								any = {
-									content : ""
-								}]
-						}
+        }
+    }"
 					},
-					method = {
-						name : "print",
-						params : [
-							param = {
-								value : "Error_ e"
-							},
-							param = {
-								value : " int depth"
-							}],
-						type : "void",
-						modifiers : ["private","static"],
-						content : block = {
-							children : [
-								any = {
-									content : "var message = e.findMessage();"
-								},
-								any = {
-									content : "message.ifPresent(s -> System.err.println(depth + ": " + s));"
-								},
-								any = {
-									content : "var causes = e.findCauses().orElse(Collections.emptyList());"
-								},
-								any = {
-									content : "if (causes.isEmpty()) {
+					declaration = {
+						name : "message",
+						type : "var",
+						modifiers : ["private","static","void","print(Error_","e,","int","depth)","{
+"],
+						value : "e.findMessage();
+        message.ifPresent(s -> System.err.println(depth + ": " + s));
+
+        var causes = e.findCauses().orElse(Collections.emptyList());
+        if (causes.isEmpty()) {
             var context = e.findContext();
             context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
-        }"
-								},
-								any = {
-									content : "else {
+        } else {
             for (Error_ cause : causes) {
                 print(cause, depth + 1);
             }
-        }"
-								},
-								any = {
-									content : ""
-								}]
-						}
+        }
+    }"
 					},
-					method = {
-						name : "generate",
-						type : "Node",
-						modifiers : ["private","static"],
-						params : [
-							param = {
-								value : "Node root"
-							}],
-						content : block = {
-							children : [
-								any = {
-									content : "var list = Arrays.asList(
+					declaration = {
+						name : "list",
+						type : "var",
+						modifiers : ["private","static","Node","generate(Node","root)","{
+"],
+						value : "Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
-        );"
-								},
-								any = {
-									content : "Node acc = root;"
-								},
-								any = {
-									content : "for (Modifier modifier : list) {
+        );
+
+        Node acc = root;
+        for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }"
-								},
-								any = {
-									content : "return acc;"
-								},
-								any = {
-									content : ""
-								}]
-						}
+        }
+        return acc;
+    }"
 					},
 					whitespace = {
 					}]

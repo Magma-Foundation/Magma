@@ -17,9 +17,9 @@ import java.util.Collections;
 import java.util.Optional;
 export object Main {
 	public const CLASS_KEYWORD_WITH_SPACE : String = "class ";
-	public def main : void => {
-	try {
-            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+	public void main(String[] args) {
+        try {
+ let source : var = Paths.get(".", "magmac", "src", "magma", "Main.java");
             var input = Files.readString(source);
             var target = source.resolveSibling("Main.mgs");
 
@@ -39,27 +39,38 @@ export object Main {
             generateError.ifPresent(error -> print(error, 0));
 
             Files.writeString(target, generateResult.findValue().orElseThrow());
-        }catch (IOException e) {
+        } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
-        }}
-	private def print : void => {
-	var message = e.findMessage();message.ifPresent(s -> System.err.println(depth + ": " + s));var causes = e.findCauses().orElse(Collections.emptyList());if (causes.isEmpty()) {
+        }
+    }
+	private void print(Error_ e, int depth) {
+ let message : var = e.findMessage();
+        message.ifPresent(s -> System.err.println(depth + ": " + s));
+
+        var causes = e.findCauses().orElse(Collections.emptyList());
+        if (causes.isEmpty()) {
             var context = e.findContext();
             context.ifPresent(s -> System.err.println("\n---\n" + s + "\n---\n"));
-        }else {
+        } else {
             for (Error_ cause : causes) {
                 print(cause, depth + 1);
             }
-        }}
-	private def generate : Node => {
-	var list = Arrays.asList(
+        }
+    }
+	private Node generate(Node root) {
+ let list : var = Arrays.asList(
                 new RootTypeRemover("package"),
                 new RootTypeRemover("whitespace"),
                 new MethodMigrator(),
                 new ModifierAttacher(),
                 new ClassSplitter(),
                 new MagmaFormatter()
-        );Node acc = root;for (Modifier modifier : list) {
+        );
+
+        Node acc = root;
+        for (Modifier modifier : list) {
             acc = modifier.generate(acc);
-        }return acc;}}
+        }
+        return acc;
+    }}

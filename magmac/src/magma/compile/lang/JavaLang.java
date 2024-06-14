@@ -2,14 +2,15 @@ package magma.compile.lang;
 
 import magma.Main;
 import magma.compile.rule.EmptyRule;
-import magma.compile.rule.split.MembersSplitter;
+import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
-import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.Rule;
-import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.MembersSplitter;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -47,7 +48,11 @@ public class JavaLang {
     }
 
     private static Rule createMethodRule() {
-        var header = new StripRule(createDefinitionRule());
+        var definition = createDefinitionRule();
+        var params = new SplitMultipleRule(new ParamSplitter(), ",", "params", new TypeRule("param", definition));
+
+        var header = new LastRule(definition, "(", new RightRule(params, ")"));
+
         return new TypeRule("method", new FirstRule(header, "{", new RightRule(new ExtractNodeRule("content", createBlock(createStatementRule())), "}")));
     }
 
@@ -64,13 +69,11 @@ public class JavaLang {
     }
 
     private static Rule createDefinitionRule() {
-        var modifiersAndType = new LastRule(new ExtractStringListRule("modifiers", " "), " ", new ExtractStringRule("type"));
-        var withoutParams = new LastRule(modifiersAndType, " ", new ExtractStringRule("name"));
+        var withoutModifiers = new ExtractStringRule("type");
+        var withModifiers = new LastRule(new ExtractStringListRule("modifiers", " "), " ", withoutModifiers);
+        var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
 
-        var params = new SplitMultipleRule(new ParamSplitter(), ",", "params", new TypeRule("param", new ExtractStringRule("value")));
-
-        var withParams = new LastRule(withoutParams, "(", new RightRule(params, ")"));
-        return new OrRule(List.of(withParams, withoutParams));
+        return new LastRule(anyModifiers, " ", new ExtractStringRule("name"));
     }
 
     public static TypeRule createRootRule() {
