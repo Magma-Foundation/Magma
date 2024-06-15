@@ -15,7 +15,7 @@ public record TypeRule(String type, Rule child) implements Rule {
         var result = child.toNode(input);
         if (result.findError().isEmpty()) return result.withType(type);
 
-        var format = "Cannot attach type '%s'.";
+        var format = "Cannot attach type '%s' because of child failure.";
         var message = format.formatted(type);
         return new ErrorRuleResult(new CompileParentError(message, input, result.findError().get()));
     }
