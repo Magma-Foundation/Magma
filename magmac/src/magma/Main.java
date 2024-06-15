@@ -2,13 +2,12 @@ package magma;
 
 import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
+import magma.compile.lang.Generator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaNormalizer;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaGenerator;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.Generator;
-import magma.compile.lang.MethodNormalizer;
 import magma.compile.lang.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -73,7 +72,6 @@ public class Main {
         var list = Arrays.asList(
                 new PackageRemover(),
                 new ClassSplitter(),
-                new MethodNormalizer(),
                 new JavaNormalizer(),
                 new MagmaGenerator(),
                 new MagmaFormatter()

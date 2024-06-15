@@ -28,6 +28,10 @@ public class JavaNormalizer extends Generator {
             }), depth);
         }
 
+        if (node.is("method")) {
+            return new Tuple<>(node.retype("function"), depth);
+        }
+
         return new Tuple<>(node, depth);
     }
 }
