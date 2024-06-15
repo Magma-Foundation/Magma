@@ -31,10 +31,13 @@ export def Main() => {
 			generateResult = ?(?);
 			generateError = ?(?);
 			?(?);
-			?(?);}
+			?(?);
+		}
 		catch (?){
 			//
-			?(?);}}
+			?(?);
+		}
+	}
 	def print() => {
 		actualContext = ?(?);
 		index = ?(?);
@@ -43,15 +46,23 @@ export def Main() => {
 		?(?);
 		causes = ?(?);
 		if (?){
-			return }
+			return 
+		}
 		if (?){
 			for (?){
-				?(?);}}
+				?(?);
+			}
+		}
 		else {
-			?(?);}}
+			?(?);
+		}
+	}
 	def generate() => {
 		list = ?(?);
 		acc = ?;
 		for (?){
-			? = ?}
-		return }}
+			? = ?
+		}
+		return 
+	}
+}

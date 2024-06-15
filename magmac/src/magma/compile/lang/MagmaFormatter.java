@@ -10,13 +10,13 @@ import java.util.List;
 public class MagmaFormatter extends Generator {
     @Override
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
-        if(node.is("block")) return new Tuple<>(node, depth + 1);
+        if (node.is("block")) return new Tuple<>(node, depth + 1);
         return new Tuple<>(node, depth);
     }
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        if(node.is("block")) {
+        if (node.is("block")) {
             var children = node.mapAttributes(attributes -> attributes.mapValue("children", NodeListAttribute.Factory, list -> {
                 List<Node> result = new ArrayList<>();
 
@@ -26,8 +26,14 @@ public class MagmaFormatter extends Generator {
                     if (i == 0 && depth == 0) {
                         withString = child;
                     } else {
-                        withString = child.withString("left-indent", "\n" + "\t".repeat(depth));
+                        var withString1 = child.withString("left-indent", "\n" + "\t".repeat(depth));
+                        if (i == list.size() - 1 && depth != 0) {
+                            withString = withString1.withString("right-indent", "\n" + "\t".repeat(depth - 1));
+                        } else {
+                            withString = withString1;
+                        }
                     }
+
                     result.add(withString);
                 }
 
