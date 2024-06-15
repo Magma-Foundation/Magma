@@ -57,7 +57,7 @@ public class JavaLang {
                 new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 Lang.createCatchRule(definition, statement),
-                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))),
+                Lang.createIfRule(value, statement),
                 new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
                 new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definition), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))),
                 new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))))
