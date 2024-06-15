@@ -5,7 +5,7 @@ import magma.compile.rule.Node;
 
 public class ClassSplitter extends Generator {
     @Override
-    protected Node postVisit(Node node) {
+    protected Node postVisit(Node node, int depth) {
         if(!node.is("block")) return node;
 
         return node.mapAttributes(attributes -> attributes.mapValue("children", NodeListAttribute.Factory, children -> {

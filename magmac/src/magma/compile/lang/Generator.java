@@ -6,33 +6,39 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
 public class Generator {
-    private Attribute generateAttribute(Attribute attribute) {
+    private Attribute generateAttribute(Attribute attribute, int depth) {
         var nodeList = attribute.asNodeList();
         if (nodeList.isPresent()) {
             return new NodeListAttribute(nodeList.get().stream()
-                    .map(this::generate)
+                    .map(node -> generateWithDepth(node, depth))
                     .toList());
         }
 
         var node = attribute.asNode();
         if(node.isPresent()) {
-            return new NodeAttribute(generate(node.get()));
+            return new NodeAttribute(generateWithDepth(node.get(), depth));
         }
 
         return attribute;
     }
 
     public Node generate(Node node) {
-        var preVisited = preVisit(node);
-        var withChildren = preVisited.mapAttributes(attributes -> attributes.mapValues(this::generateAttribute));
-        return postVisit(withChildren);
+        return generateWithDepth(node, 0);
     }
 
-    protected Node preVisit(Node node) {
+    private Node generateWithDepth(Node node, int depth) {
+        var preVisited = preVisit(node, depth);
+        var withChildren = preVisited.mapAttributes(attributes -> {
+            return attributes.mapValues(attribute -> generateAttribute(attribute, depth + 1));
+        });
+        return postVisit(withChildren, depth);
+    }
+
+    protected Node preVisit(Node node, int depth) {
         return node;
     }
 
-    protected Node postVisit(Node node) {
+    protected Node postVisit(Node node, int depth) {
         return node;
     }
 }

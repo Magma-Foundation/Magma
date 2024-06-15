@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class MagmaGenerator extends Generator {
     @Override
-    protected Node postVisit(Node node) {
+    protected Node postVisit(Node node, int depth) {
         if (!node.is("function")) return node;
 
         return node.mapAttributes(attributes -> attributes.mapValue("modifiers", StringListAttribute.Factory, list -> {
