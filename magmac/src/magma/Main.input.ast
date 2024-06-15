@@ -114,9 +114,11 @@ block = {
 									child : block = {
 										children : [
 											declaration = {
-												name : "source",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "source",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -145,9 +147,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "input",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "input",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													arguments : [
@@ -164,9 +168,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "target",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "target",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													arguments : [
@@ -183,9 +189,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "parseResult",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "parseResult",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													arguments : [
@@ -207,9 +215,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "parseError",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "parseError",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -247,9 +257,11 @@ block = {
 												]
 											},
 											declaration = {
-												name : "root",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "root",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -297,9 +309,11 @@ block = {
 												]
 											},
 											declaration = {
-												name : "generated",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "generated",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													caller : symbol = {
@@ -344,9 +358,11 @@ block = {
 												]
 											},
 											declaration = {
-												name : "rule",
-												type : symbol = {
-													value : "Rule"
+												definition : definition = {
+													name : "rule",
+													type : symbol = {
+														value : "Rule"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -358,9 +374,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "generateResult",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "generateResult",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													arguments : [
@@ -377,9 +395,11 @@ block = {
 												}
 											},
 											declaration = {
-												name : "generateError",
-												type : symbol = {
-													value : "var"
+												definition : definition = {
+													name : "generateError",
+													type : symbol = {
+														value : "var"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -496,9 +516,11 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
-									name : "actualContext",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "actualContext",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : invocation = {
 										arguments : [
@@ -520,9 +542,11 @@ block = {
 									}
 								},
 								declaration = {
-									name : "index",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "index",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : invocation = {
 										arguments : [
@@ -539,9 +563,11 @@ block = {
 									}
 								},
 								declaration = {
-									name : "context",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "context",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : ternary = {
 										true : symbol = {
@@ -574,9 +600,11 @@ block = {
 									}
 								},
 								declaration = {
-									name : "message",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "message",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : invocation = {
 										caller : access = {
@@ -652,9 +680,11 @@ block = {
 									]
 								},
 								declaration = {
-									name : "causes",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "causes",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : invocation = {
 										arguments : [
@@ -797,9 +827,11 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
-									name : "list",
-									type : symbol = {
-										value : "var"
+									definition : definition = {
+										name : "list",
+										type : symbol = {
+											value : "var"
+										}
 									},
 									value : invocation = {
 										caller : access = {
@@ -838,12 +870,14 @@ block = {
 									}
 								},
 								declaration = {
-									name : "acc",
-									type : symbol = {
-										value : "Node"
-									},
 									value : symbol = {
 										value : "root"
+									},
+									definition : definition = {
+										name : "acc",
+										type : symbol = {
+											value : "Node"
+										}
 									}
 								},
 								for = {

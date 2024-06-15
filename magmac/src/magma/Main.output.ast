@@ -135,9 +135,14 @@ block = {
 									child : block = {
 										children : [
 											declaration = {
-												name : "source",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "source",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													caller : access = {
 														child : "get",
@@ -165,9 +170,14 @@ block = {
 												}
 											},
 											declaration = {
-												name : "input",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "input",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -183,9 +193,14 @@ block = {
 												}
 											},
 											declaration = {
-												name : "target",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "target",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													arguments : [
 														string = {
@@ -202,8 +217,13 @@ block = {
 											},
 											declaration = {
 												modifiers : ["let"],
-												name : "parseResult",
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "parseResult",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -224,9 +244,14 @@ block = {
 												}
 											},
 											declaration = {
-												name : "parseError",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "parseError",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													caller : access = {
 														child : "findError",
@@ -264,9 +289,14 @@ block = {
 												]
 											},
 											declaration = {
-												name : "root",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "root",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													caller : access = {
 														child : "orElseThrow",
@@ -314,9 +344,14 @@ block = {
 												]
 											},
 											declaration = {
-												name : "generated",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "generated",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													caller : symbol = {
 														value : "generate"
@@ -361,11 +396,13 @@ block = {
 												]
 											},
 											declaration = {
-												name : "rule",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "Rule"
+												definition : definition = {
+													name : "rule",
+													type : symbol = {
+														value : "Rule"
+													}
 												},
 												value : invocation = {
 													caller : access = {
@@ -378,8 +415,13 @@ block = {
 											},
 											declaration = {
 												modifiers : ["let"],
-												name : "generateResult",
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "generateResult",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -396,8 +438,13 @@ block = {
 											},
 											declaration = {
 												modifiers : ["let"],
-												name : "generateError",
 												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "generateError",
+													type : symbol = {
+														value : "var"
+													}
+												},
 												value : invocation = {
 													caller : access = {
 														child : "findErr",
@@ -521,8 +568,13 @@ block = {
 							children : [
 								declaration = {
 									modifiers : ["let"],
-									name : "actualContext",
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "actualContext",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : invocation = {
 										arguments : [
 											string = {
@@ -543,9 +595,14 @@ block = {
 									}
 								},
 								declaration = {
-									name : "index",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "index",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : invocation = {
 										arguments : [
 											char = {
@@ -561,9 +618,14 @@ block = {
 									}
 								},
 								declaration = {
-									name : "context",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "context",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : ternary = {
 										true : symbol = {
 											value : "actualContext"
@@ -595,9 +657,14 @@ block = {
 									}
 								},
 								declaration = {
-									name : "message",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "message",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : invocation = {
 										caller : access = {
 											child : "findMessage",
@@ -673,9 +740,14 @@ block = {
 									]
 								},
 								declaration = {
-									name : "causes",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "causes",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : invocation = {
 										arguments : [
 											invocation = {
@@ -825,9 +897,14 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
-									name : "list",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "list",
+										type : symbol = {
+											value : "var"
+										}
+									},
 									value : invocation = {
 										caller : access = {
 											child : "asList",
@@ -865,14 +942,16 @@ block = {
 									}
 								},
 								declaration = {
-									name : "acc",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "Node"
-									},
 									value : symbol = {
 										value : "root"
+									},
+									definition : definition = {
+										name : "acc",
+										type : symbol = {
+											value : "Node"
+										}
 									}
 								},
 								for = {

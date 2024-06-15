@@ -19,61 +19,31 @@ export class def Main() => {
 	public def main(args : String[]) : void => {
 		try 
 		{
-			
-			
-			let source=Paths.get();
-			
-			
-			let input=Files.readString();
-			
-			
-			let target=source.resolveSibling();
-			
-			
-			let parseResult=JavaLang.createRootRule().toNode();
-			
-			
-			let parseError=parseResult.findError();
+			source : var=Paths.get();
+			input : var=Files.readString();
+			target : var=source.resolveSibling();
+			parseResult : var=JavaLang.createRootRule().toNode();
+			parseError : var=parseResult.findError();
 			parseError.ifPresent()
-			
-			
-			let root=parseResult.create().orElseThrow();
+			root : var=parseResult.create().orElseThrow();
 			Files.writeString()
-			
-			
-			let generated=generate();
+			generated : var=generate();
 			Files.writeString()
-			
-			
-			let rule : Rule=MagmaLang.createRootRule();
-			
-			
-			let generateResult=rule.fromNode();
-			
-			
-			let generateError=generateResult.findErr();
+			rule : Rule=MagmaLang.createRootRule();
+			generateResult : var=rule.fromNode();
+			generateError : var=generateResult.findErr();
 			generateError.ifPresent()
 			Files.writeString()}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace()}}
 	def print(e : Error_, depth : int) : void => {
-		
-		
-		let actualContext=e.findContext().orElse();
-		
-		
-		let index=actualContext.indexOf();
-		
-		
-		let context=index==-1?actualContext:actualContext.substring();
-		
-		
-		let message=e.findMessage();
+		actualContext : var=e.findContext().orElse();
+		index : var=actualContext.indexOf();
+		context : var=index==-1?actualContext:actualContext.substring();
+		message : var=e.findMessage();
 		message.ifPresent()
-		
-		
-		let causes=e.findCauses().orElse();
+		causes : var=e.findCauses().orElse();
 		if
 		(causes.isEmpty()){
 			return
@@ -89,12 +59,8 @@ export class def Main() => {
 		{
 			print()}}
 	def generate(root : Node) : Node => {
-		
-		
-		let list=Arrays.asList();
-		
-		
-		let acc : Node=root;
+		list : var=Arrays.asList();
+		acc : Node=root;
 		for
 		(
 		generator : Generator in 

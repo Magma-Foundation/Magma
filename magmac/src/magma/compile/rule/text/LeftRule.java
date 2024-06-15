@@ -16,7 +16,7 @@ public record LeftRule(String slice, Rule child) implements Rule {
             var content = input.substring(slice.length());
             return child.toNode(content);
         } else {
-            return new ErrorRuleResult(new CompileError("Input does not start with '%s'.", input));
+            return new ErrorRuleResult(new CompileError(String.format("Input does not start with '%s'.", slice), input));
         }
     }
 
