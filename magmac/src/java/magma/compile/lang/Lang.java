@@ -72,11 +72,11 @@ public class Lang {
         return new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value")));
     }
 
-    static TypeRule createIfRule(Rule value, Rule statement) {
+    static TypeRule createIfRule(String type, Rule value, Rule statement) {
         var condition = new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"));
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
         var conditionOuter = new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(condition)));
-        return new TypeRule("if", new LeftRule("if", new FirstRule(conditionOuter, "{", child)));
+        return new TypeRule(type, new LeftRule(type, new FirstRule(conditionOuter, "{", child)));
     }
 
     static Rule createReturnRule(Rule value) {

@@ -38,7 +38,7 @@ public class MagmaLang {
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
-                Lang.createIfRule(value, statement),
+                Lang.createIfRule("if", value, statement),
                 Lang.createElseRule(statement),
                 Lang.createReturnRule(value),
                 Lang.createAssignmentRule(value),

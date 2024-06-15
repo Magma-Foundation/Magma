@@ -105,14 +105,14 @@ public class Main {
         var index = actualContext.indexOf('\n');
         String context;
         if (e.findCauses().isEmpty())
-            context = "\n" + "\t".repeat(depth + 1) + "---\n" + "\t".repeat(depth + 1) + actualContext.replace("\n", "\n" + "\t".repeat(depth - 1)) + "\n" + "\t".repeat(depth + 1) + "---\n";
+            context = "\n" + "|\t".repeat(depth + 1) + "---\n" + "|\t".repeat(depth + 1) + actualContext.replace("\n", "\n" + "|\t".repeat(depth - 1)) + "\n" + "|\t".repeat(depth + 1) + "---\n";
         else {
             if (index == -1) context = actualContext;
             else context = actualContext.substring(0, index);
         }
 
         var message = e.findMessage();
-        message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));
+        message.ifPresent(s -> System.err.println("|\t".repeat(depth) + depth + " = " + s + " " + context));
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
