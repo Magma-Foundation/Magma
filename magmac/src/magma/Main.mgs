@@ -44,12 +44,10 @@ export class def Main() => {
 		let message=e.findMessage();
 		message.ifPresent( (s) => {System.err.println("\t".repeat(depth)+depth+" = "+s+" "+context);});
 		let causes=e.findCauses().orElse(Collections.emptyList());
-		if
-		(causes.isEmpty()){
+		if(causes.isEmpty()){
 			return
 			;}
-		if
-		(causes.size()>1){
+		if(causes.size()>1){
 			for
 			(
 			cause : Error_ in 

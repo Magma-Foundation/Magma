@@ -762,31 +762,35 @@ block = {
 											}
 										]
 									},
-									condition : invocation = {
-										arguments : [
+									condition-outer : condition-outer = {
+										condition : invocation = {
+											arguments : [
 
-										],
-										caller : access = {
-											child : "isEmpty",
-											parent : symbol = {
-												value : "causes"
+											],
+											caller : access = {
+												child : "isEmpty",
+												parent : symbol = {
+													value : "causes"
+												}
 											}
 										}
 									}
 								},
 								if = {
-									condition : greater-than = {
-										right : number = {
-											value : "1"
-										},
-										left : invocation = {
-											arguments : [
+									condition-outer : condition-outer = {
+										condition : greater-than = {
+											right : number = {
+												value : "1"
+											},
+											left : invocation = {
+												arguments : [
 
-											],
-											caller : access = {
-												child : "size",
-												parent : symbol = {
-													value : "causes"
+												],
+												caller : access = {
+													child : "size",
+													parent : symbol = {
+														value : "causes"
+													}
 												}
 											}
 										}
