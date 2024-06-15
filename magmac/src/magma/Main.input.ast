@@ -91,10 +91,12 @@ block = {
 			child : block = {
 				children : [
 					method = {
-						name : "main",
-						modifiers : ["public", "static"],
-						type : symbol = {
-							value : "void"
+						definition : definition = {
+							name : "main",
+							modifiers : ["public", "static"],
+							type : symbol = {
+								value : "void"
+							}
 						},
 						params : [
 							definition = {
@@ -470,10 +472,12 @@ block = {
 						}
 					},
 					method = {
-						name : "print",
-						modifiers : ["private", "static"],
-						type : symbol = {
-							value : "void"
+						definition : definition = {
+							name : "print",
+							modifiers : ["private", "static"],
+							type : symbol = {
+								value : "void"
+							}
 						},
 						params : [
 							definition = {
@@ -775,11 +779,6 @@ block = {
 						}
 					},
 					method = {
-						name : "generate",
-						modifiers : ["private", "static"],
-						type : symbol = {
-							value : "Node"
-						},
 						params : [
 							definition = {
 								name : "root",
@@ -788,6 +787,13 @@ block = {
 								}
 							}
 						],
+						definition : definition = {
+							name : "generate",
+							modifiers : ["private", "static"],
+							type : symbol = {
+								value : "Node"
+							}
+						},
 						child : block = {
 							children : [
 								declaration = {

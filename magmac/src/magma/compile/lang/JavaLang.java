@@ -61,7 +61,9 @@ public class JavaLang {
         var params = Lang.createParamsRule(definition);
         var content = new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")));
         var paramsAndValue = new FirstRule(params, ")", content);
-        var methodRule = new TypeRule("method", new FirstRule(definition, "(", paramsAndValue));
+
+        var leftRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
+        var methodRule = new TypeRule("method", new FirstRule(leftRule, "(", paramsAndValue));
 
         var classMember = new OrRule(List.of(
                 declaration,

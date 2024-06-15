@@ -1,8 +1,14 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ClassSplitter extends Generator {
     @Override
@@ -13,7 +19,30 @@ public class ClassSplitter extends Generator {
             return children.stream()
                     .map(child -> {
                         if(child.is("class")) {
-                            return child.retype("function");
+                            var oldAttributes = child.attributes();
+                            var modifiers = oldAttributes.apply("modifiers")
+                                    .flatMap(Attribute::asStringList)
+                                    .orElse(Collections.emptyList());
+
+                            var newModifiers = new ArrayList<String>();
+                            if(modifiers.contains("public")) {
+                                newModifiers.add("export");
+                            }
+
+                            newModifiers.add("class");
+                            newModifiers.add("def");
+
+                            var name = oldAttributes.apply("name")
+                                    .flatMap(Attribute::asString)
+                                    .orElseThrow();
+
+                            var definition = new Node("definition")
+                                    .withString("name", name)
+                                    .withStringList("modifiers", newModifiers)
+                                    .withNodeList("params", Collections.emptyList());
+
+                            return child.retype("function")
+                                    .withNode("definition", definition);
                         } else {
                             return child;
                         }

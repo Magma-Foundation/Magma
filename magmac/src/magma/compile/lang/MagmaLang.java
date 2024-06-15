@@ -74,6 +74,7 @@ public class MagmaLang {
 
     private static TypeRule createFunctionRule(Rule statement) {
         var child = new ExtractNodeRule("child", Lang.createBlock(statement));
-        return new TypeRule("function", new FirstRule(createDefinitionRule(), " => {", new RightRule(child, "}")));
+        var definition = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
+        return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(child, "}")));
     }
 }
