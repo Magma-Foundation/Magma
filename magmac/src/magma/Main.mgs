@@ -16,20 +16,42 @@ import java.util.Arrays;
 import java.util.Collections;
 export def Main() => {
 	export def main() => {
-		try {}
-		catch (){}}
+		try {
+			source = 
+			input = 
+			target = 
+			parseResult = 
+			parseError = 
+			?(?);
+			root = 
+			?(?);
+			generated = 
+			?(?);
+			rule = 
+			generateResult = 
+			generateError = 
+			?(?);
+			?(?);}
+		catch (?){
+			//
+			?(?);}}
 	def print() => {
 		actualContext = 
 		index = 
 		context = 
 		message = 
-		();
+		?(?);
 		causes = 
-		if (){}
-		if (){}
-		else {}}
+		if (?){
+			return }
+		if (?){
+			for (?){
+				?(?);}}
+		else {
+			?(?);}}
 	def generate() => {
 		list = 
 		acc = 
-		for (){}
+		for (?){
+			? = ?}
 		return }}

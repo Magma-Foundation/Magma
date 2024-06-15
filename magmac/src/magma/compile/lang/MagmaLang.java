@@ -33,15 +33,18 @@ public class MagmaLang {
         var child = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", name);
         var declaration = new TypeRule("declaration", new FirstRule(new OrRule(List.of(child, name)), " = ", new ExtractNodeRule("value", value)));
 
+        var child1 = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
         statement.setRule(new OrRule(List.of(
                 declaration,
-                new TypeRule("try", new LeftRule("try {}", new EmptyRule())),
-                new TypeRule("catch", new LeftRule("catch (){}", new EmptyRule())),
-                new TypeRule("invocation", new LeftRule("();", new EmptyRule())),
-                new TypeRule("if", new LeftRule("if (){}", new EmptyRule())),
-                new TypeRule("else", new LeftRule("else {}", new EmptyRule())),
-                new TypeRule("for", new LeftRule("for (){}", new EmptyRule())),
+                new TypeRule("try", new LeftRule("try {", child1)),
+                new TypeRule("catch", new LeftRule("catch (?){", child1)),
+                new TypeRule("invocation", new LeftRule("?(?);", new EmptyRule())),
+                new TypeRule("if", new LeftRule("if (?){", child1)),
+                new TypeRule("else", new LeftRule("else {", child1)),
+                new TypeRule("for", new LeftRule("for (?){", child1)),
                 new TypeRule("return", new LeftRule("return ", new EmptyRule())),
+                new TypeRule("comment", new LeftRule("//", new EmptyRule())),
+                new TypeRule("assignment", new RightRule(new EmptyRule(), "? = ?")),
                 function
         )));
 
