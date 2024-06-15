@@ -79,11 +79,7 @@ public class JavaLang {
                 Lang.createStringRule(),
                 new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
                 new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
-                new TypeRule("ternary", new FirstRule(
-                        new StripRule(new ExtractNodeRule("condition", value)), "?",
-                        new FirstRule(
-                                new StripRule(new ExtractNodeRule("true", value)), ":",
-                                new StripRule(new ExtractNodeRule("false", value))))),
+                Lang.createTernaryRule(value),
                 createConstructorRule(value),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),

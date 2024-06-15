@@ -126,4 +126,12 @@ public class Lang {
     static TypeRule createSymbolRule() {
         return new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value")));
     }
+
+    static TypeRule createTernaryRule(LazyRule value) {
+        return new TypeRule("ternary", new FirstRule(
+                new StripRule(new ExtractNodeRule("condition", value)), "?",
+                new FirstRule(
+                        new StripRule(new ExtractNodeRule("true", value)), ":",
+                        new StripRule(new ExtractNodeRule("false", value)))));
+    }
 }
