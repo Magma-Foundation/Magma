@@ -16,7 +16,6 @@ import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
-import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,21 +83,17 @@ public class JavaLang {
                 methodRule
         ));
 
-        var modifiers = createModifiersRule();
+        var modifiers = Lang.createModifiersRule();
         return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
     }
 
-    private static StripRule createModifiersRule() {
-        return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
-    }
-
-    private static LastRule createDefinitionHeaderRule() {
+    private static Rule createDefinitionHeaderRule() {
         var type = Lang.createTypeRule();
         return createDefinitionHeaderRule(type);
     }
 
-    private static LastRule createDefinitionHeaderRule(LazyRule type) {
-        var modifiers = createModifiersRule();
+    private static Rule createDefinitionHeaderRule(Rule type) {
+        var modifiers = Lang.createModifiersRule();
         var withoutModifiers = new ExtractNodeRule("type", type);
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));

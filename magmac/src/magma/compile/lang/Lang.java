@@ -49,4 +49,8 @@ public class Lang {
     static TypeRule createTryRule(Rule statement) {
         return new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))));
     }
+
+    static StripRule createModifiersRule() {
+        return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
+    }
 }
