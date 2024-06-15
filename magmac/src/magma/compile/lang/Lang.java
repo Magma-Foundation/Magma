@@ -94,4 +94,9 @@ public class Lang {
         var after = new FirstRule(new StripRule(new LeftRule("(", condition)), "{", content);
         return new TypeRule("for", new LeftRule("for", after));
     }
+
+    static Rule createElseRule(Rule statement) {
+        var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
+        return new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", child))));
+    }
 }

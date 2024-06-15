@@ -59,7 +59,7 @@ public class JavaLang {
                 Lang.createIfRule(value, statement),
                 Lang.createReturnRule(value),
                 Lang.createForRule(definition, value, statement, ":"),
-                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))))
+                Lang.createElseRule(statement)
         );
 
         var copy = new ArrayList<>(rules);
