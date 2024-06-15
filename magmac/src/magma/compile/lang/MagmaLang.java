@@ -9,6 +9,7 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
@@ -26,9 +27,14 @@ public class MagmaLang {
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new ExtractStringRule("value")),
                 new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(?)", new EmptyRule())),
-                new TypeRule("ternary", new LeftRule("? ? ? : ?", new EmptyRule())),
+                new TypeRule("ternary", new FirstRule(
+                        new StripRule(new ExtractNodeRule("condition", value)), "?",
+                        new FirstRule(
+                                new StripRule(new ExtractNodeRule("true", value)), ":",
+                                new StripRule(new ExtractNodeRule("false", value))))),
                 new TypeRule("symbol", new LeftRule("?", new EmptyRule())),
-                new TypeRule("access", new LeftRule("?", new EmptyRule()))
+                new TypeRule("access", new LeftRule("?", new EmptyRule())),
+                new TypeRule("equals", new LeftRule("? == ?", new EmptyRule()))
         )));
 
         var name = new ExtractStringRule("name");
