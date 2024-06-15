@@ -1,132 +1,73 @@
 block = {
 	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma"]
+			}
+		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "Error_"]
 			}
 		},
 		import = {
-			right-indent : "
-",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "ClassSplitter"]
-			}
-		},
-		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaLang"]
 			}
 		},
 		import = {
-			right-indent : "
-",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
-			}
-		},
-		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
 			}
 		},
 		import = {
-			right-indent : "
-",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "MethodMigrator"]
-			}
-		},
-		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "Modifier"]
 			}
 		},
 		import = {
-			right-indent : "
-",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "ModifierAttacher"]
-			}
-		},
-		import = {
-			right-indent : "
-",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "RootTypeRemover"]
-			}
-		},
-		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Node"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Rule"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["java", "io", "IOException"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Files"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Paths"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["java", "util", "Arrays"]
 			}
 		},
 		import = {
-			right-indent : "
-",
 			external : namespace = {
 				namespace : ["java", "util", "Collections"]
 			}
 		},
-		object = {
+		class = {
 			name : "Main",
-			modifiers : ["export"],
-			content : block = {
-				children : [
-
-				]
-			},
+			modifiers : ["public"],
 			child : block = {
 				children : [
 					declaration = {
-						left-indent : "
-	",
 						name : "CLASS_KEYWORD_WITH_SPACE",
-						modifiers : ["public", "static", "const"],
+						modifiers : ["public", "static", "final"],
 						type : symbol = {
 							value : "String"
 						},
@@ -134,11 +75,9 @@ block = {
 							value : "class "
 						}
 					},
-					function = {
+					method = {
 						name : "main",
-						left-indent : "
-	",
-						modifiers : ["public", "static", "def"],
+						modifiers : ["public", "static"],
 						type : symbol = {
 							value : "void"
 						},
@@ -159,8 +98,6 @@ block = {
 										children : [
 											declaration = {
 												name : "source",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "var"
 												},
@@ -192,8 +129,6 @@ block = {
 											},
 											declaration = {
 												name : "input",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "var"
 												},
@@ -213,8 +148,6 @@ block = {
 											},
 											declaration = {
 												name : "target",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "var"
 												},
@@ -233,8 +166,6 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "
-	",
 												name : "parseResult",
 												type : symbol = {
 													value : "var"
@@ -259,8 +190,6 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "
-	",
 												name : "parseError",
 												type : symbol = {
 													value : "var"
@@ -302,8 +231,6 @@ block = {
 											},
 											declaration = {
 												name : "root",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "var"
 												},
@@ -354,8 +281,6 @@ block = {
 											},
 											declaration = {
 												name : "generated",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "var"
 												},
@@ -403,8 +328,6 @@ block = {
 											},
 											declaration = {
 												name : "rule",
-												left-indent : "
-	",
 												type : symbol = {
 													value : "Rule"
 												},
@@ -418,8 +341,6 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "
-	",
 												name : "generateResult",
 												type : symbol = {
 													value : "var"
@@ -439,8 +360,6 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "
-	",
 												name : "generateError",
 												type : symbol = {
 													value : "var"
@@ -535,11 +454,9 @@ block = {
 							]
 						}
 					},
-					function = {
+					method = {
 						name : "print",
-						left-indent : "
-	",
-						modifiers : ["private", "static", "def"],
+						modifiers : ["private", "static"],
 						type : symbol = {
 							value : "void"
 						},
@@ -560,8 +477,6 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
-									left-indent : "
-	",
 									name : "actualContext",
 									type : symbol = {
 										value : "var"
@@ -587,8 +502,6 @@ block = {
 								},
 								declaration = {
 									name : "index",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "var"
 									},
@@ -608,8 +521,6 @@ block = {
 								},
 								declaration = {
 									name : "context",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "var"
 									},
@@ -645,8 +556,6 @@ block = {
 								},
 								declaration = {
 									name : "message",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "var"
 									},
@@ -725,8 +634,6 @@ block = {
 								},
 								declaration = {
 									name : "causes",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "var"
 									},
@@ -852,11 +759,9 @@ block = {
 							]
 						}
 					},
-					function = {
+					method = {
 						name : "generate",
-						left-indent : "
-	",
-						modifiers : ["private", "static", "def"],
+						modifiers : ["private", "static"],
 						type : symbol = {
 							value : "Node"
 						},
@@ -872,8 +777,6 @@ block = {
 							children : [
 								declaration = {
 									name : "list",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "var"
 									},
@@ -887,42 +790,7 @@ block = {
 										arguments : [
 											constructor = {
 												caller : symbol = {
-													value : "RootTypeRemover"
-												},
-												arguments : [
-													string = {
-														value : "package"
-													}
-												]
-											},
-											constructor = {
-												caller : symbol = {
-													value : "RootTypeRemover"
-												},
-												arguments : [
-													string = {
-														value : "whitespace"
-													}
-												]
-											},
-											constructor = {
-												caller : symbol = {
-													value : "MethodMigrator"
-												}
-											},
-											constructor = {
-												caller : symbol = {
-													value : "ModifierAttacher"
-												}
-											},
-											constructor = {
-												caller : symbol = {
-													value : "ClassSplitter"
-												}
-											},
-											constructor = {
-												caller : symbol = {
-													value : "MagmaFormatter"
+													value : "Modifier"
 												}
 											}
 										]
@@ -930,8 +798,6 @@ block = {
 								},
 								declaration = {
 									name : "acc",
-									left-indent : "
-	",
 									type : symbol = {
 										value : "Node"
 									},

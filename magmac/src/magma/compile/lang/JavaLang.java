@@ -9,7 +9,6 @@ import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
-import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.split.SplitOnceRule;
@@ -72,7 +71,7 @@ public class JavaLang {
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
 
         var statement = new LazyRule();
-        var block = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
+        var block = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
 
         statement.setRule(new OrRule(List.of(
                 new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
@@ -81,7 +80,7 @@ public class JavaLang {
                 new TypeRule("constructor", new RightRule(constructor, ";")),
                 new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
-                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", new TypeRule("definition", definitionHeader)), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
+                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", new TypeRule("definition", definitionHeader)), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))))),
                 new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
                 new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
                 new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definitionHeader), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
@@ -92,7 +91,7 @@ public class JavaLang {
                 declaration,
                 new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", block)))))
         ));
-        var classChild = createBlock(classMember);
+        var classChild = Lang.createBlock(classMember);
 
         var rootMember = new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
@@ -100,15 +99,11 @@ public class JavaLang {
                 new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}"))))
         ));
 
-        return createBlock(rootMember);
+        return Lang.createBlock(rootMember);
     }
 
     private static TypeRule createOperator(String name, String slice, Rule value) {
         return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
-    }
-
-    private static TypeRule createBlock(Rule child) {
-        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(child)));
     }
 
     private static class InvocationStart extends SplitOnceRule {
