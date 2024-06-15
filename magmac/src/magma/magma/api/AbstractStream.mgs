@@ -1,0 +1,25 @@
+import java.util.Optional;
+import java.util.function.Function;
+export class def AbstractStream() => {
+	public def map(mapper : Function<T, R>) : Stream<R> => {
+		return AbstractStream();
+		
+		
+	;
+	}
+	public def collect(collector : Collector<T, C>) : C => {
+		let current=collector.createInitial();
+		while(true){
+			let finalCurrent : C=current;
+			let tuple=Options.toTuple(head().map( (head) => {collector.fold(finalCurrent, head);}), current);
+			if(tuple.left()){
+				current=tuple.right();
+			}
+			else
+			{
+				return current;
+			}
+		
+		}
+	}
+}

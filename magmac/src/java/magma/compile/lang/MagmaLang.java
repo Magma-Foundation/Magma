@@ -39,13 +39,15 @@ public class MagmaLang {
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
                 Lang.createIfRule("if", value, statement),
+                Lang.createIfRule("while", value, statement),
                 Lang.createElseRule(statement),
                 Lang.createReturnRule(value),
                 Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
                 createFunctionRule(statement),
                 Lang.createDeclarationRule(definition, value),
-                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";"))
+                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
+                Lang.createEmptyStatementRule()
         )));
 
         return Lang.createBlock(new OrRule(List.of(

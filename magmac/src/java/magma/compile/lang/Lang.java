@@ -152,4 +152,8 @@ public class Lang {
     static TypeRule createCharRule() {
         return new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'")));
     }
+
+    static TypeRule createEmptyStatementRule() {
+        return new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"));
+    }
 }

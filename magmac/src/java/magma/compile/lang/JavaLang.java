@@ -1,6 +1,5 @@
 package magma.compile.lang;
 
-import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -55,7 +54,7 @@ public class JavaLang {
                 Lang.createReturnRule(value),
                 Lang.createForRule(definition, value, statement, ":"),
                 Lang.createElseRule(statement),
-                new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"))
+                Lang.createEmptyStatementRule()
         );
 
         var copy = new ArrayList<>(rules);
