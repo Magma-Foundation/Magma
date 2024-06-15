@@ -1,10 +1,11 @@
 package magma.compile.lang;
 
 import magma.compile.rule.EmptyRule;
+import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 
 public class MagmaLang {
-    public static TypeRule createRootRule() {
-        return new TypeRule("block", new EmptyRule());
+    public static Rule createRootRule() {
+        return Lang.createBlock(new TypeRule("empty", new EmptyRule()));
     }
 }
