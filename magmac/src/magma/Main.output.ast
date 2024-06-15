@@ -1,7 +1,6 @@
 block = {
 	children : [
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "Error_"]
 			}
@@ -99,6 +98,7 @@ block = {
 		function = {
 			name : "Main",
 			left-indent : "\n",
+			right-indent : "\n",
 			modifiers : ["public"],
 			definition : definition = {
 				name : "Main",
@@ -505,6 +505,7 @@ block = {
 												]
 											},
 											invocation = {
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
@@ -541,6 +542,7 @@ block = {
 									}
 								},
 								catch = {
+									right-indent : "\n\t",
 									left-indent : "\n\t\t",
 									condition : declaration = {
 										name : "e",
@@ -556,6 +558,7 @@ block = {
 												value : "noinspection CallToPrintStackTrace"
 											},
 											invocation = {
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
 												arguments : [
 
@@ -819,6 +822,7 @@ block = {
 									child : block = {
 										children : [
 											return = {
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t"
 											}
 										]
@@ -860,6 +864,7 @@ block = {
 									child : block = {
 										children : [
 											for = {
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
 												condition-parent : condition-parent = {
 													name : "cause",
@@ -873,6 +878,7 @@ block = {
 												child : block = {
 													children : [
 														invocation = {
+															right-indent : "\n\t\t\t",
 															left-indent : "\n\t\t\t\t",
 															caller : symbol = {
 																value : "print"
@@ -893,10 +899,12 @@ block = {
 									}
 								},
 								else = {
+									right-indent : "\n\t",
 									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											invocation = {
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
 												caller : symbol = {
 													value : "print"
@@ -932,6 +940,7 @@ block = {
 						}
 					},
 					function = {
+						right-indent : "\n",
 						left-indent : "\n\t",
 						definition : definition = {
 							name : "generate",
@@ -1037,6 +1046,7 @@ block = {
 										children : [
 											assignment = {
 												reference : "acc",
+												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
@@ -1059,6 +1069,7 @@ block = {
 									}
 								},
 								return = {
+									right-indent : "\n\t",
 									left-indent : "\n\t\t",
 									child : symbol = {
 										value : "acc"

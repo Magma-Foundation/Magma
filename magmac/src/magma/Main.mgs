@@ -1,4 +1,3 @@
-
 import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.Generator;
@@ -33,10 +32,13 @@ export class def Main() => {
 			let generateResult=rule.fromNode(generated);
 			let generateError=generateResult.findErr();
 			generateError.ifPresent( (error) => {print(error, 0);});
-			Files.writeString(target, generateResult.findValue().orElseThrow());}
+			Files.writeString(target, generateResult.findValue().orElseThrow());
+		}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
-			e.printStackTrace();}}
+			e.printStackTrace();
+		}
+	}
 	def print(e : Error_, depth : int) : void => {
 		let actualContext=e.findContext().orElse("");
 		let index=actualContext.indexOf('\n');
@@ -45,18 +47,29 @@ export class def Main() => {
 		message.ifPresent( (s) => {System.err.println("\t".repeat(depth)+depth+" = "+s+" "+context);});
 		let causes=e.findCauses().orElse(Collections.emptyList());
 		if(causes.isEmpty()){
-			return;}
+			return;
+		}
 		if(causes.size()>1){
 			for(cause : Error_ in causes){
-				print(cause, depth);}}
+				print(cause, depth);
+			}
+		}
 		else
 		{
-			print(causes.get(0), depth+1);}}
+			print(causes.get(0), depth+1);
+		}
+	
+	}
 	def generate(root : Node) : Node => {
 		let list=Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
 		let acc : Node=root;
 		for(generator : Generator in list){
 			
-			acc=
-			generator.generate(acc, -1);}
-		return;}}
+			acc
+		=
+			generator.generate(acc, -1)
+		;
+		}
+		return;
+	}
+}
