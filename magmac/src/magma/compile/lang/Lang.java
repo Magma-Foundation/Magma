@@ -69,4 +69,8 @@ public class Lang {
     static TypeRule createInvocationRule(Rule value) {
         return new TypeRule("invocation", new RightRule(createSplitter(value), ")"));
     }
+
+    static TypeRule createCommentRule() {
+        return new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value")));
+    }
 }

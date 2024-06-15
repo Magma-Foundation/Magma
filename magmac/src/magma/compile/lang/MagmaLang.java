@@ -20,6 +20,7 @@ public class MagmaLang {
         var definition = new ExtractStringRule("name");
 
         statement.setRule(new OrRule(List.of(
+                Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
                 new TypeRule("function", new ExtractNodeRule("child", Lang.createBlock(statement))),

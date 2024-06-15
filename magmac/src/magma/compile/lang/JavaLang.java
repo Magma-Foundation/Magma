@@ -51,7 +51,7 @@ public class JavaLang {
         var statement = new LazyRule();
 
         var rules = List.<Rule>of(
-                new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
+                Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 declaration,
                 new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
