@@ -6,104 +6,87 @@ block = {
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "ClassSplitter"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "Generator"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaLang"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaNormalizer"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaGenerator"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "PackageRemover"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Node"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Rule"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "io", "IOException"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Files"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Paths"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "util", "Arrays"]
 			}
 		},
 		import = {
-			left-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "util", "Collections"]
 			}
 		},
 		function = {
 			name : "Main",
-			left-indent : "\n",
 			modifiers : ["export", "def"],
 			child : block = {
 				children : [
 					function = {
 						name : "main",
-						left-indent : "\n\t",
 						modifiers : ["export", "def"],
 						type : symbol = {
 							value : "void"
@@ -121,13 +104,11 @@ block = {
 						child : block = {
 							children : [
 								try = {
-									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											declaration = {
 												name : "source",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "get",
@@ -157,7 +138,6 @@ block = {
 											declaration = {
 												name : "input",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -175,7 +155,6 @@ block = {
 											declaration = {
 												name : "target",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														string = {
@@ -193,7 +172,6 @@ block = {
 											declaration = {
 												modifiers : ["let"],
 												name : "parseResult",
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -216,7 +194,6 @@ block = {
 											declaration = {
 												name : "parseError",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "findError",
@@ -227,7 +204,6 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "ifPresent",
 													parent : symbol = {
@@ -256,7 +232,6 @@ block = {
 											declaration = {
 												name : "root",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "orElseThrow",
@@ -272,7 +247,6 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -306,7 +280,6 @@ block = {
 											declaration = {
 												name : "generated",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : symbol = {
 														value : "generate"
@@ -319,7 +292,6 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -353,7 +325,6 @@ block = {
 											declaration = {
 												name : "rule",
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "Rule"
 												},
@@ -369,7 +340,6 @@ block = {
 											declaration = {
 												modifiers : ["let"],
 												name : "generateResult",
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -387,7 +357,6 @@ block = {
 											declaration = {
 												modifiers : ["let"],
 												name : "generateError",
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "findErr",
@@ -398,7 +367,6 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "ifPresent",
 													parent : symbol = {
@@ -425,8 +393,6 @@ block = {
 												]
 											},
 											invocation = {
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -456,8 +422,6 @@ block = {
 									}
 								},
 								catch = {
-									right-indent : "\n\t",
-									left-indent : "\n\t\t",
 									condition : declaration = {
 										name : "e",
 										modifiers : ["let"],
@@ -468,12 +432,9 @@ block = {
 									child : block = {
 										children : [
 											comment = {
-												left-indent : "\n\t\t\t",
 												value : "noinspection CallToPrintStackTrace"
 											},
 											invocation = {
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "printStackTrace",
 													parent : symbol = {
@@ -490,7 +451,6 @@ block = {
 					function = {
 						name : "print",
 						modifiers : ["def"],
-						left-indent : "\n\t",
 						type : symbol = {
 							value : "void"
 						},
@@ -513,7 +473,6 @@ block = {
 								declaration = {
 									modifiers : ["let"],
 									name : "actualContext",
-									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											string = {
@@ -536,7 +495,6 @@ block = {
 								declaration = {
 									name : "index",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											char = {
@@ -554,7 +512,6 @@ block = {
 								declaration = {
 									name : "context",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									value : ternary = {
 										true : symbol = {
 											value : "actualContext"
@@ -588,7 +545,6 @@ block = {
 								declaration = {
 									name : "message",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									value : invocation = {
 										caller : access = {
 											child : "findMessage",
@@ -599,7 +555,6 @@ block = {
 									}
 								},
 								invocation = {
-									left-indent : "\n\t\t",
 									caller : access = {
 										child : "ifPresent",
 										parent : symbol = {
@@ -666,7 +621,6 @@ block = {
 								declaration = {
 									name : "causes",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											invocation = {
@@ -692,12 +646,9 @@ block = {
 									}
 								},
 								if = {
-									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											return = {
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t"
 											}
 										]
 									},
@@ -711,7 +662,6 @@ block = {
 									}
 								},
 								if = {
-									left-indent : "\n\t\t",
 									condition : greater-than = {
 										right : number = {
 											value : "1"
@@ -729,8 +679,6 @@ block = {
 										children : [
 											for = {
 												name : "cause",
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "Error_"
 												},
@@ -740,8 +688,6 @@ block = {
 												child : block = {
 													children : [
 														invocation = {
-															right-indent : "\n\t\t\t",
-															left-indent : "\n\t\t\t\t",
 															caller : symbol = {
 																value : "print"
 															},
@@ -761,13 +707,9 @@ block = {
 									}
 								},
 								else = {
-									right-indent : "\n\t",
-									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											invocation = {
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
 												caller : symbol = {
 													value : "print"
 												},
@@ -803,9 +745,7 @@ block = {
 					},
 					function = {
 						name : "generate",
-						right-indent : "\n",
 						modifiers : ["def"],
-						left-indent : "\n\t",
 						type : symbol = {
 							value : "Node"
 						},
@@ -822,7 +762,6 @@ block = {
 								declaration = {
 									name : "list",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									value : invocation = {
 										caller : access = {
 											child : "asList",
@@ -862,7 +801,6 @@ block = {
 								declaration = {
 									name : "acc",
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "Node"
 									},
@@ -872,7 +810,6 @@ block = {
 								},
 								for = {
 									name : "generator",
-									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "Generator"
 									},
@@ -883,8 +820,6 @@ block = {
 										children : [
 											assignment = {
 												reference : "acc",
-												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "generate",
@@ -906,8 +841,6 @@ block = {
 									}
 								},
 								return = {
-									right-indent : "\n\t",
-									left-indent : "\n\t\t",
 									child : symbol = {
 										value : "acc"
 									}
