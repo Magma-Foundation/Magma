@@ -446,28 +446,11 @@ block = {
 										]
 									}
 								},
-								catch = {
-									definition : definition = {
-										name : "e",
-										type : symbol = {
-											value : "IOException"
-										}
-									},
-									child : block = {
-										children : [
-											comment = {
-												value : "noinspection CallToPrintStackTrace"
-											},
-											invocation = {
-												caller : access = {
-													child : "printStackTrace",
-													parent : symbol = {
-														value : "e"
-													}
-												}
-											}
-										]
-									}
+								any = {
+									value : "catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        }"
 								}
 							]
 						}
@@ -712,7 +695,13 @@ block = {
 									child : block = {
 										children : [
 											for = {
-												condition : "Error_ cause : causes",
+												name : "cause",
+												type : symbol = {
+													value : "Error_"
+												},
+												collection : symbol = {
+													value : "causes"
+												},
 												child : block = {
 													children : [
 														invocation = {
@@ -824,7 +813,13 @@ block = {
 									}
 								},
 								for = {
-									condition : "Modifier modifier : list",
+									name : "modifier",
+									type : symbol = {
+										value : "Modifier"
+									},
+									collection : symbol = {
+										value : "list"
+									},
 									child : block = {
 										children : [
 											invocation = {
