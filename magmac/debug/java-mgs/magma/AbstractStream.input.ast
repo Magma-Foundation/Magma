@@ -34,8 +34,7 @@ Optional[block = {
 					method = {
 						definition : definition = {
 							name : "map",
-							modifiers : ["@Override
-", "", "", "", "public", "<R>"],
+							modifiers : ["@Override", "public", "<R>"],
 							type : generic = {
 								parent : symbol = {
 									value : "Stream"
@@ -87,11 +86,10 @@ Optional[block = {
 					method = {
 						definition : definition = {
 							name : "collect",
+							modifiers : ["@Override", "public", "<C>"],
 							type : symbol = {
 								value : "C"
-							},
-							modifiers : ["@Override
-", "", "", "", "public", "<C>"]
+							}
 						},
 						params : [
 							definition = {

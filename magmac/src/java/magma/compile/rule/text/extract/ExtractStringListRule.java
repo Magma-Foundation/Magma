@@ -48,8 +48,10 @@ public abstract class ExtractStringListRule extends ExtractRule {
         }
 
         result.add(content.substring(start));
-
-        return result;
+        return result.stream()
+                .map(String::strip)
+                .filter(value -> !value.isEmpty())
+                .toList();
     }
 
 
