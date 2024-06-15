@@ -99,7 +99,7 @@ block = {
 		function = {
 			name : "Main",
 			left-indent : "\n",
-			modifiers : ["export", "def"],
+			modifiers : ["public"],
 			definition : definition = {
 				name : "Main",
 				params : [
@@ -113,7 +113,7 @@ block = {
 						left-indent : "\n\t",
 						definition : definition = {
 							name : "main",
-							modifiers : ["public", "static"],
+							modifiers : ["public", "def"],
 							type : symbol = {
 								value : "void"
 							},
@@ -498,7 +498,7 @@ block = {
 						left-indent : "\n\t",
 						definition : definition = {
 							name : "print",
-							modifiers : ["private", "static"],
+							modifiers : ["def"],
 							type : symbol = {
 								value : "void"
 							},
@@ -809,7 +809,7 @@ block = {
 						left-indent : "\n\t",
 						definition : definition = {
 							name : "generate",
-							modifiers : ["private", "static"],
+							modifiers : ["def"],
 							type : symbol = {
 								value : "Node"
 							},
