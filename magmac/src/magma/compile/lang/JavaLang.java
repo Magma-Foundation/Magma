@@ -18,17 +18,30 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class JavaLang {
     public static Rule createRootRule() {
+        return Lang.createBlock(createRootMemberRule());
+    }
+
+    private static OrRule createRootMemberRule() {
+        var classRule = createClassRule();
         var namespace = Lang.createNamespaceRule();
         var importRule = Lang.createImportRule(namespace);
 
-        var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
+        return new OrRule(List.of(
+                new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
+                importRule,
+                classRule
+        ));
+    }
+
+    private static TypeRule createClassRule() {
+        var definition = createDefinitionHeaderRule();
 
         var value = new LazyRule();
-
         var arguments = new OrRule(List.of(
                 new EmptyRule(),
                 new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value)))
@@ -37,7 +50,73 @@ public class JavaLang {
         var caller = new ExtractNodeRule("caller", value);
         var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
         var constructor = new TypeRule("constructor", new LeftRule("new ", new RightRule(new InvocationStart(caller, arguments), ")")));
+        initValues(value, constructor, invocation);
 
+        var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
+
+        var statement = new LazyRule();
+        var block = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
+
+        var rules = List.<Rule>of(
+                new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
+                new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
+                declaration,
+                new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                new TypeRule("invocation", new RightRule(invocation, ";")),
+                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", new TypeRule("definition", definition)), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))))),
+                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
+                new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
+                new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definition), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
+                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", block))))
+        );
+
+        var copy = new ArrayList<>(rules);
+        copy.add(new TypeRule("constructor", new RightRule(constructor, ";")));
+
+        statement.setRule(new OrRule(copy));
+
+        var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition));
+        var content = new StripRule(new LeftRule("{", block));
+        var paramsAndValue = new FirstRule(params, ")", content);
+        var methodRule = new TypeRule("method", new FirstRule(definition, "(", paramsAndValue));
+
+        var classMember = new OrRule(List.of(
+                declaration,
+                methodRule
+        ));
+
+        var modifiers = createModifiersRule();
+        return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
+    }
+
+    private static StripRule createModifiersRule() {
+        return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
+    }
+
+    private static LastRule createDefinitionHeaderRule() {
+        var type = createTypeRule();
+        return createDefinitionHeaderRule(type);
+    }
+
+    private static LastRule createDefinitionHeaderRule(LazyRule type) {
+        var modifiers = createModifiersRule();
+        var withoutModifiers = new ExtractNodeRule("type", type);
+        var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
+        var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
+        var definitionHeader = new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
+        return definitionHeader;
+    }
+
+    private static LazyRule createTypeRule() {
+        var type = new LazyRule();
+        type.setRule(new OrRule(List.of(
+                new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
+                new TypeRule("symbol", new ExtractStringRule("value"))
+        )));
+        return type;
+    }
+
+    private static void initValues(LazyRule value, TypeRule constructor, TypeRule invocation) {
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
                 new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
@@ -56,50 +135,6 @@ public class JavaLang {
                 createOperator("add", "+", value),
                 createOperator("greater-than", ">", value)
         )));
-
-        var type = new LazyRule();
-        type.setRule(new OrRule(List.of(
-                new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
-                new TypeRule("symbol", new ExtractStringRule("value"))
-        )));
-
-        var withoutModifiers = new ExtractNodeRule("type", type);
-        var withModifiers = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", withoutModifiers);
-        var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
-        var definitionHeader = new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
-        var definition = new TypeRule("definition", definitionHeader);
-        var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definitionHeader), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
-
-        var statement = new LazyRule();
-        var block = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
-
-        statement.setRule(new OrRule(List.of(
-                new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
-                new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
-                declaration,
-                new TypeRule("constructor", new RightRule(constructor, ";")),
-                new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
-                new TypeRule("invocation", new RightRule(invocation, ";")),
-                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", new TypeRule("definition", definitionHeader)), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))))),
-                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
-                new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
-                new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definitionHeader), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
-                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", block))))
-        )));
-
-        var classMember = new OrRule(List.of(
-                declaration,
-                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", block)))))
-        ));
-        var classChild = Lang.createBlock(classMember);
-
-        var rootMember = new OrRule(List.of(
-                new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
-                importRule,
-                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}"))))
-        ));
-
-        return Lang.createBlock(rootMember);
     }
 
     private static TypeRule createOperator(String name, String slice, Rule value) {
