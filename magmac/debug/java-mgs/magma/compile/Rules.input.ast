@@ -1,0 +1,79 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "compile", "rule"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		class = {
+			name : "Rules",
+			modifiers : ["public"],
+			child : block = {
+				children : [
+					method = {
+						params : [
+							definition = {
+								name : "index",
+								type : symbol = {
+									value : "int"
+								}
+							}
+						],
+						definition : definition = {
+							name : "wrapIndex",
+							modifiers : ["public", "static"],
+							type : symbol = {
+								value : "Optional<Integer>"
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : ternary = {
+										condition : equals = {
+											right : number = {
+												value : "-1"
+											},
+											left : symbol = {
+												value : "index"
+											}
+										},
+										true : invocation = {
+											arguments : [
+
+											],
+											caller : access = {
+												child : "empty",
+												parent : symbol = {
+													value : "Optional"
+												}
+											}
+										},
+										false : invocation = {
+											arguments : [
+												symbol = {
+													value : "index"
+												}
+											],
+											caller : access = {
+												child : "of",
+												parent : symbol = {
+													value : "Optional"
+												}
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}]

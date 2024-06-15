@@ -1,0 +1,139 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "rule", "Rule"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
+				namespace : ["magma", "compile", "rule", "Rules"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		function = {
+			left-indent : "\n",
+			right-indent : "\n",
+			modifiers : ["public", "final"],
+			name : "LastRule extends SplitOnceRule implements Rule",
+			definition : definition = {
+				params : [
+
+				],
+				modifiers : ["export", "class", "def"],
+				name : "LastRule extends SplitOnceRule implements Rule"
+			},
+			child : block = {
+				children : [
+					function = {
+						left-indent : "\n\t",
+						child : block = {
+							children : [
+								invocation = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									caller : symbol = {
+										value : "super"
+									},
+									arguments : [
+										symbol = {
+											value : "leftRule"
+										},
+										symbol = {
+											value : "slice"
+										},
+										symbol = {
+											value : "rightRule"
+										}
+									]
+								}
+							]
+						},
+						definition : definition = {
+							name : "LastRule",
+							type : symbol = {
+								value : "public"
+							},
+							params : [
+								definition = {
+									name : "leftRule",
+									type : symbol = {
+										value : "Rule"
+									}
+								},
+								definition = {
+									name : "slice",
+									type : symbol = {
+										value : "String"
+									}
+								},
+								definition = {
+									name : "rightRule",
+									type : symbol = {
+										value : "Rule"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						right-indent : "\n",
+						left-indent : "\n\t",
+						definition : definition = {
+							modifiers : ["def"],
+							name : "computeIndex",
+							type : symbol = {
+								value : "Optional<Integer>"
+							},
+							params : [
+								definition = {
+									name : "input",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									child : invocation = {
+										caller : access = {
+											child : "wrapIndex",
+											parent : symbol = {
+												value : "Rules"
+											}
+										},
+										arguments : [
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "slice"
+													}
+												],
+												caller : access = {
+													child : "lastIndexOf",
+													parent : symbol = {
+														value : "input"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

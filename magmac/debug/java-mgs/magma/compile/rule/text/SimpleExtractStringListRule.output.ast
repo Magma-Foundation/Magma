@@ -1,0 +1,112 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "Error_"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		function = {
+			left-indent : "\n",
+			right-indent : "\n",
+			modifiers : ["public", "final"],
+			name : "SimpleExtractStringListRule extends ExtractStringListRule",
+			definition : definition = {
+				params : [
+
+				],
+				modifiers : ["export", "class", "def"],
+				name : "SimpleExtractStringListRule extends ExtractStringListRule"
+			},
+			child : block = {
+				children : [
+					function = {
+						left-indent : "\n\t",
+						child : block = {
+							children : [
+								invocation = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									caller : symbol = {
+										value : "super"
+									},
+									arguments : [
+										symbol = {
+											value : "key"
+										},
+										symbol = {
+											value : "delimiter"
+										}
+									]
+								}
+							]
+						},
+						definition : definition = {
+							name : "SimpleExtractStringListRule",
+							type : symbol = {
+								value : "public"
+							},
+							params : [
+								definition = {
+									name : "key",
+									type : symbol = {
+										value : "String"
+									}
+								},
+								definition = {
+									name : "delimiter",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						right-indent : "\n",
+						left-indent : "\n\t",
+						definition : definition = {
+							name : "qualify",
+							modifiers : ["def"],
+							type : symbol = {
+								value : "Optional<Error_>"
+							},
+							params : [
+								definition = {
+									name : "child",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									child : invocation = {
+										arguments : [
+
+										],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,101 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "compile", "rule", "text", "extract"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "Error_"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		class = {
+			modifiers : ["public", "final"],
+			name : "SimpleExtractStringListRule extends ExtractStringListRule",
+			child : block = {
+				children : [
+					method = {
+						definition : definition = {
+							name : "SimpleExtractStringListRule",
+							type : symbol = {
+								value : "public"
+							}
+						},
+						params : [
+							definition = {
+								name : "key",
+								type : symbol = {
+									value : "String"
+								}
+							},
+							definition = {
+								name : "delimiter",
+								type : symbol = {
+									value : "String"
+								}
+							}
+						],
+						child : block = {
+							children : [
+								invocation = {
+									caller : symbol = {
+										value : "super"
+									},
+									arguments : [
+										symbol = {
+											value : "key"
+										},
+										symbol = {
+											value : "delimiter"
+										}
+									]
+								}
+							]
+						}
+					},
+					method = {
+						params : [
+							definition = {
+								name : "child",
+								type : symbol = {
+									value : "String"
+								}
+							}
+						],
+						definition : definition = {
+							name : "qualify",
+							modifiers : ["@Override
+", "", "", "", "protected"],
+							type : symbol = {
+								value : "Optional<Error_>"
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : invocation = {
+										arguments : [
+
+										],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}]

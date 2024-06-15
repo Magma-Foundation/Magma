@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
 
 public class Main {
 
@@ -35,45 +34,45 @@ public class Main {
             for (var source : sources) {
                 compileSource(source);
             }
-        } catch (IOException e) {
+        } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
 
-    private static void compileSource(Path source) {
-        try {
-            var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
-            var targetParent = TARGET_DIRECTORY.resolve(relativized);
-            var fileName = source.getFileName().toString();
-            var name = fileName.substring(0, fileName.indexOf('.'));
-            var target = targetParent.resolve(name + ".mgs");
-            var input = readImpl(source);
+    private static void compileSource(Path source) throws CompileException {
+        var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
+        var targetParent = TARGET_DIRECTORY.resolve(relativized);
+        var fileName = source.getFileName().toString();
+        var name = fileName.substring(0, fileName.indexOf('.'));
+        var target = targetParent.resolve(name + ".mgs");
+        var input = readImpl(source);
 
-            var parseResult = JavaLang.createRootRule().toNode(input);
-            var parseError = parseResult.findError();
+        var parseResult = JavaLang.createRootRule().toNode(input);
+        var parseError = parseResult.findError();
 
-            parseError.ifPresent(error -> print(error, 0));
-            var root = parseResult.create();
-            if(root.isPresent()) {
-                if (!Files.exists(targetParent)) createDirectory(targetParent);
+        if (parseError.isPresent()) {
+            print(parseError.get(), 0);
+            throw new CompileException();
+        }
 
-                var relativizedDebug = Paths.get(".", "magmac", "debug", "java-mgs").resolve(relativized);
-                if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
+        var root = parseResult.create();
+        if (root.isPresent()) {
+            if (!Files.exists(targetParent)) createDirectory(targetParent);
 
-                writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
-                var generated = generate(root.get());
-                writeImpl(relativizedDebug.resolveSibling(name + ".output.ast"), generated.toString());
+            var relativizedDebug = Paths.get(".", "magmac", "debug", "java-mgs").resolve(relativized);
+            if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
 
-                Rule rule = MagmaLang.createRootRule();
-                var generateResult = rule.fromNode(generated);
-                var generateError = generateResult.findErr();
-                generateError.ifPresent(error -> print(error, 0));
+            writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
+            var generated = generate(root.get());
+            writeImpl(relativizedDebug.resolveSibling(name + ".output.ast"), generated.toString());
 
-                writeImpl(target, generateResult.findValue().orElseThrow());
-            }
-        } catch (CompileException e) {
-            e.printStackTrace();
+            Rule rule = MagmaLang.createRootRule();
+            var generateResult = rule.fromNode(generated);
+            var generateError = generateResult.findErr();
+            generateError.ifPresent(error -> print(error, 0));
+
+            writeImpl(target, generateResult.findValue().orElseThrow());
         }
     }
 

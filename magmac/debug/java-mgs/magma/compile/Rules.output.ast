@@ -1,0 +1,87 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		function = {
+			name : "Rules",
+			left-indent : "\n",
+			right-indent : "\n",
+			modifiers : ["public"],
+			definition : definition = {
+				name : "Rules",
+				params : [
+
+				],
+				modifiers : ["export", "class", "def"]
+			},
+			child : block = {
+				children : [
+					function = {
+						right-indent : "\n",
+						left-indent : "\n\t",
+						definition : definition = {
+							name : "wrapIndex",
+							modifiers : ["public", "def"],
+							type : symbol = {
+								value : "Optional<Integer>"
+							},
+							params : [
+								definition = {
+									name : "index",
+									type : symbol = {
+										value : "int"
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									child : ternary = {
+										condition : equals = {
+											right : number = {
+												value : "-1"
+											},
+											left : symbol = {
+												value : "index"
+											}
+										},
+										true : invocation = {
+											arguments : [
+
+											],
+											caller : access = {
+												child : "empty",
+												parent : symbol = {
+													value : "Optional"
+												}
+											}
+										},
+										false : invocation = {
+											arguments : [
+												symbol = {
+													value : "index"
+												}
+											],
+											caller : access = {
+												child : "of",
+												parent : symbol = {
+													value : "Optional"
+												}
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}
