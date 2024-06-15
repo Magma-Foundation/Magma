@@ -45,4 +45,8 @@ public class Lang {
         )));
         return type;
     }
+
+    static TypeRule createTryRule(Rule statement) {
+        return new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))));
+    }
 }

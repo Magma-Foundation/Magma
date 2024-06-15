@@ -55,19 +55,18 @@ public class JavaLang {
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
 
         var statement = new LazyRule();
-        var block = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
 
         var rules = List.<Rule>of(
                 new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
-                new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
+                Lang.createTryRule(statement),
                 declaration,
                 new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 Lang.createCatchRule(definition, statement),
-                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
+                new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))),
                 new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
-                new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definition), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
-                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", block))))
+                new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definition), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))),
+                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))))
         );
 
         var copy = new ArrayList<>(rules);
@@ -76,7 +75,7 @@ public class JavaLang {
         statement.setRule(new OrRule(copy));
 
         var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(new TypeRule("definition", definition)));
-        var content = new StripRule(new LeftRule("{", block));
+        var content = new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")));
         var paramsAndValue = new FirstRule(params, ")", content);
         var methodRule = new TypeRule("method", new FirstRule(definition, "(", paramsAndValue));
 
