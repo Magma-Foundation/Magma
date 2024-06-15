@@ -144,4 +144,8 @@ public class Lang {
     static TypeRule createNumberRule() {
         return new TypeRule("number", new NumberRule(new ExtractStringRule("value")));
     }
+
+    static TypeRule createCharRule() {
+        return new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'")));
+    }
 }

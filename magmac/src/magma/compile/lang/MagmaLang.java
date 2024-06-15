@@ -22,6 +22,7 @@ public class MagmaLang {
         var definition = createDefinitionRule();
         value.setRule(new OrRule(List.of(
                 createFunctionRule(statement),
+                Lang.createCharRule(),
                 Lang.createStringRule(),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),

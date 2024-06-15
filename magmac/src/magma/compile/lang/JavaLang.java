@@ -78,7 +78,7 @@ public class JavaLang {
         var value = new LazyRule();
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
-                new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
+                Lang.createCharRule(),
                 createLambdaRule(value),
                 Lang.createTernaryRule(value),
                 createConstructorRule(value),
