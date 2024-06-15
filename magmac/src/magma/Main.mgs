@@ -22,20 +22,20 @@ export def Main() => {
 			let target = source.resolveSibling("Main.mgs");
 			let parseResult = JavaLang.createRootRule().toNode(input);
 			let parseError = parseResult.findError();
-			?(?);
+			parseError.ifPresent();
 			let root = parseResult.create().orElseThrow();
-			?(?);
+			Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
 			let generated = generate(root);
-			?(?);
+			Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
 			let rule = MagmaLang.createRootRule();
 			let generateResult = rule.fromNode(generated);
 			let generateError = generateResult.findErr();
-			?(?);
-			?(?);
+			generateError.ifPresent();
+			Files.writeString(target, generateResult.findValue().orElseThrow());
 		}
 		catch (?){
 			//
-			?(?);
+			e.printStackTrace();
 		}
 	}
 	def print() => {
@@ -43,18 +43,18 @@ export def Main() => {
 		let index = actualContext.indexOf();
 		let context = ? == ??actualContext:actualContext.substring();
 		let message = e.findMessage();
-		?(?);
+		message.ifPresent();
 		let causes = e.findCauses().orElse(Collections.emptyList());
 		if (?){
 			return 
 		}
 		if (?){
 			for (?){
-				?(?);
+				print(cause, depth);
 			}
 		}
 		else {
-			?(?);
+			print();
 		}
 	}
 	def generate() => {

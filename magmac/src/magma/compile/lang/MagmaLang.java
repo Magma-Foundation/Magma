@@ -58,7 +58,7 @@ public class MagmaLang {
                 declaration,
                 new TypeRule("try", new LeftRule("try {", child1)),
                 new TypeRule("catch", new LeftRule("catch (?){", child1)),
-                new TypeRule("invocation", new LeftRule("?(?);", new EmptyRule())),
+                new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("if", new LeftRule("if (?){", child1)),
                 new TypeRule("else", new LeftRule("else {", child1)),
                 new TypeRule("for", new LeftRule("for (?){", child1)),
