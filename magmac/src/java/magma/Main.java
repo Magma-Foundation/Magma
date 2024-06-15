@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 public class Main {
 
@@ -42,7 +43,7 @@ public class Main {
 
     private static void compileSource(Path source) {
         try {
-            var relativized = Main.SOURCE_DIRECTORY.relativize(source.getParent());
+            var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
             var targetParent = TARGET_DIRECTORY.resolve(relativized);
             var fileName = source.getFileName().toString();
             var name = fileName.substring(0, fileName.indexOf('.'));
@@ -51,22 +52,26 @@ public class Main {
 
             var parseResult = JavaLang.createRootRule().toNode(input);
             var parseError = parseResult.findError();
+
             parseError.ifPresent(error -> print(error, 0));
+            var root = parseResult.create();
+            if(root.isPresent()) {
+                if (!Files.exists(targetParent)) createDirectory(targetParent);
 
-            var root = parseResult.create().orElseThrow(() -> new CompileException("Cannot parse: " + input));
+                var relativizedDebug = Paths.get(".", "magmac", "debug", "java-mgs").resolve(relativized);
+                if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
 
-            if (!Files.exists(targetParent)) createDirectory(targetParent);
+                writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
+                var generated = generate(root.get());
+                writeImpl(relativizedDebug.resolveSibling(name + ".output.ast"), generated.toString());
 
-            writeImpl(targetParent.resolveSibling("Main.input.ast"), root.toString());
-            var generated = generate(root);
-            writeImpl(targetParent.resolveSibling("Main.output.ast"), generated.toString());
+                Rule rule = MagmaLang.createRootRule();
+                var generateResult = rule.fromNode(generated);
+                var generateError = generateResult.findErr();
+                generateError.ifPresent(error -> print(error, 0));
 
-            Rule rule = MagmaLang.createRootRule();
-            var generateResult = rule.fromNode(generated);
-            var generateError = generateResult.findErr();
-            generateError.ifPresent(error -> print(error, 0));
-
-            writeImpl(target, generateResult.findValue().orElseThrow());
+                writeImpl(target, generateResult.findValue().orElseThrow());
+            }
         } catch (CompileException e) {
             e.printStackTrace();
         }
