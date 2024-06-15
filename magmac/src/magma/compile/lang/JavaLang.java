@@ -24,7 +24,9 @@ import java.util.Optional;
 
 public class JavaLang {
     public static Rule createRootRule() {
-        var namespace = new TypeRule("namespace", new SimpleExtractStringListRule("namespace", "\\."));
+        var namespace = Lang.createNamespaceRule();
+        var importRule = Lang.createImportRule(namespace);
+
         var modifiers = new StripRule(new SimpleExtractStringListRule("modifiers", " "));
 
         var value = new LazyRule();
@@ -95,7 +97,7 @@ public class JavaLang {
 
         var rootMember = new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
-                new TypeRule("import", new LeftRule("import ", new RightRule(new ExtractNodeRule("external", namespace), ";"))),
+                importRule,
                 new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}"))))
         ));
 

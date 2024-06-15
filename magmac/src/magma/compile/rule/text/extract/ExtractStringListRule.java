@@ -7,7 +7,8 @@ import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class ExtractStringListRule extends ExtractRule {
@@ -25,7 +26,7 @@ public abstract class ExtractStringListRule extends ExtractRule {
 
     @Override
     protected Result<Attribute, Error_> toAttribute(String content) {
-        var list = Arrays.asList(content.split(delimiter));
+        var list = split(content);
         for (String format : list) {
             var qualified = qualify(format);
             if (qualified.isPresent()) {
@@ -35,6 +36,22 @@ public abstract class ExtractStringListRule extends ExtractRule {
 
         return new Ok<>(new StringListAttribute(list));
     }
+
+    private List<String> split(String content) {
+        List<String> result = new ArrayList<>();
+        int start = 0;
+        int end;
+
+        while ((end = content.indexOf(delimiter, start)) != -1) {
+            result.add(content.substring(start, end));
+            start = end + delimiter.length();
+        }
+
+        result.add(content.substring(start));
+
+        return result;
+    }
+
 
     protected abstract Optional<Error_> qualify(String child);
 }
