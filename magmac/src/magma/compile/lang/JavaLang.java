@@ -55,8 +55,7 @@ public class JavaLang {
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
                 createOperator("equals", "==", value),
                 createOperator("add", "+", value),
-                createOperator("greater-than", ">", value),
-                new TypeRule("any", new ExtractStringRule("value"))
+                createOperator("greater-than", ">", value)
         )));
 
         var type = new LazyRule();
@@ -86,22 +85,19 @@ public class JavaLang {
                 new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
                 new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
                 new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definitionHeader), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
-                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", block)))),
-                new TypeRule("any", new ExtractStringRule("value"))
+                new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", block))))
         )));
 
         var classMember = new OrRule(List.of(
                 declaration,
-                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", block))))),
-                new TypeRule("any", new ExtractStringRule("value"))
+                new TypeRule("method", new FirstRule(definitionHeader, "(", new FirstRule(new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition)), ")", new StripRule(new LeftRule("{", block)))))
         ));
         var classChild = createBlock(classMember);
 
         var rootMember = new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 new TypeRule("import", new LeftRule("import ", new RightRule(new ExtractNodeRule("external", namespace), ";"))),
-                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}")))),
-                new TypeRule("any", new ExtractStringRule("value"))
+                new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", classChild), "}"))))
         ));
 
         return createBlock(rootMember);
