@@ -106,4 +106,8 @@ public class Lang {
         var right = new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";");
         return new TypeRule("assignment", new FirstRule(left, "=", right));
     }
+
+    static TypeRule createDeclarationRule(Rule definition, Rule value) {
+        return new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
+    }
 }

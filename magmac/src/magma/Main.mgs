@@ -22,28 +22,48 @@ export def Main => {
 		try 
 		{
 			
-			let source;
 			
-			let input;
+			let source=
+			?;
 			
-			let target;
 			
-			let parseResult;
+			let input=
+			?;
 			
-			let parseError;
+			
+			let target=
+			?;
+			
+			
+			let parseResult=
+			?;
+			
+			
+			let parseError=
+			?;
 			?()
 			
-			let root;
+			
+			let root=
+			?;
 			?()
 			
-			let generated;
+			
+			let generated=
+			?;
 			?()
 			
-			let rule : Rule;
 			
-			let generateResult;
+			let rule : Rule=
+			?;
 			
-			let generateError;
+			
+			let generateResult=
+			?;
+			
+			
+			let generateError=
+			?;
 			?()
 			?()}
 		catch (let e : IOException){
@@ -52,16 +72,26 @@ export def Main => {
 	
 	def print : void => {
 		
-		let actualContext;
 		
-		let index;
+		let actualContext=
+		?;
 		
-		let context;
 		
-		let message;
+		let index=
+		?;
+		
+		
+		let context=
+		?;
+		
+		
+		let message=
+		?;
 		?()
 		
-		let causes;
+		
+		let causes=
+		?;
 		if
 		(?){
 			return
@@ -79,9 +109,13 @@ export def Main => {
 	
 	def generate : Node => {
 		
-		let list;
 		
-		let acc : Node;
+		let list=
+		?;
+		
+		
+		let acc : Node=
+		?;
 		for
 		(
 		generator : Generator in 

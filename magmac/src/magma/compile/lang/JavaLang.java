@@ -40,7 +40,7 @@ public class JavaLang {
         var definition = createDefinitionHeaderRule();
         var value = createValueRule();
 
-        var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
+        var declaration = Lang.createDeclarationRule(definition, value);
         var statement = new LazyRule();
 
         var rules = List.of(
