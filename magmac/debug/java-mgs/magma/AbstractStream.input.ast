@@ -32,23 +32,39 @@ Optional[block = {
 			child : block = {
 				children : [
 					method = {
+						definition : definition = {
+							name : "map",
+							modifiers : ["@Override
+", "", "", "", "public", "<R>"],
+							type : generic = {
+								parent : symbol = {
+									value : "Stream"
+								},
+								children : [
+									symbol = {
+										value : "R"
+									}
+								]
+							}
+						},
 						params : [
 							definition = {
 								name : "mapper",
-								modifiers : ["Function<T,"],
-								type : symbol = {
-									value : "R>"
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "R"
+										}
+									]
 								}
 							}
 						],
-						definition : definition = {
-							name : "map",
-							type : symbol = {
-								value : "Stream<R>"
-							},
-							modifiers : ["@Override
-", "", "", "", "public", "<R>"]
-						},
 						child : block = {
 							children : [
 								return = {
@@ -69,15 +85,6 @@ Optional[block = {
 						}
 					},
 					method = {
-						params : [
-							definition = {
-								name : "collector",
-								modifiers : ["Collector<T,"],
-								type : symbol = {
-									value : "C>"
-								}
-							}
-						],
 						definition : definition = {
 							name : "collect",
 							type : symbol = {
@@ -86,6 +93,24 @@ Optional[block = {
 							modifiers : ["@Override
 ", "", "", "", "public", "<C>"]
 						},
+						params : [
+							definition = {
+								name : "collector",
+								type : generic = {
+									parent : symbol = {
+										value : "Collector"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "C"
+										}
+									]
+								}
+							}
+						],
 						child : block = {
 							children : [
 								declaration = {

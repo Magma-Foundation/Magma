@@ -44,10 +44,15 @@ public class Lang {
 
     static LazyRule createTypeRule() {
         var type = new LazyRule();
+        var children = new SplitMultipleRule(new ParamSplitter(), ", ", "children", new StripRule(type));
+        var generic = new TypeRule("generic", new FirstRule(new ExtractNodeRule("parent", type), "<", new RightRule(children, ">")));
+
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
+                generic,
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value")))
         )));
+
         return type;
     }
 
