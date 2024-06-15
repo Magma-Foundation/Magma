@@ -16,10 +16,11 @@ public class MagmaLang {
 
     public static Rule createRootRule() {
         var statement = new LazyRule();
+        var value = new LazyRule();
 
         var definition = createDefinitionRule();
-        var value = new LazyRule();
         value.setRule(new OrRule(List.of(
+                createFunctionRule(statement),
                 Lang.createStringRule(),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),
@@ -42,7 +43,7 @@ public class MagmaLang {
                 Lang.createForRule(definition, value, statement, " in "),
                 createFunctionRule(statement),
                 Lang.createDeclarationRule(definition, value),
-                Lang.createInvocationRule(value)
+                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";"))
         )));
 
         return Lang.createBlock(new OrRule(List.of(
