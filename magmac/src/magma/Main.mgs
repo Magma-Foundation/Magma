@@ -17,31 +17,31 @@ import java.util.Collections;
 export def Main() => {
 	export def main() => {
 		try {
-			source = 
-			input = 
-			target = 
-			parseResult = 
-			parseError = 
+			source = ?(?);
+			input = ?(?);
+			target = ?(?);
+			parseResult = ?(?);
+			parseError = ?(?);
 			?(?);
-			root = 
+			root = ?(?);
 			?(?);
-			generated = 
+			generated = ?(?);
 			?(?);
-			rule = 
-			generateResult = 
-			generateError = 
+			rule = ?(?);
+			generateResult = ?(?);
+			generateError = ?(?);
 			?(?);
 			?(?);}
 		catch (?){
 			//
 			?(?);}}
 	def print() => {
-		actualContext = 
-		index = 
-		context = 
-		message = 
+		actualContext = ?(?);
+		index = ?(?);
+		context = ? ? ? : ?;
+		message = ?(?);
 		?(?);
-		causes = 
+		causes = ?(?);
 		if (?){
 			return }
 		if (?){
@@ -50,8 +50,8 @@ export def Main() => {
 		else {
 			?(?);}}
 	def generate() => {
-		list = 
-		acc = 
+		list = ?(?);
+		acc = ?;
 		for (?){
 			? = ?}
 		return }}
