@@ -23,47 +23,37 @@ export def Main => {
 		{
 			
 			
-			let source=
-			Paths.get();
+			let source=Paths.get();
 			
 			
-			let input=
-			Files.readString();
+			let input=Files.readString();
 			
 			
-			let target=
-			source.resolveSibling();
+			let target=source.resolveSibling();
 			
 			
-			let parseResult=
-			JavaLang.createRootRule().toNode();
+			let parseResult=JavaLang.createRootRule().toNode();
 			
 			
-			let parseError=
-			parseResult.findError();
+			let parseError=parseResult.findError();
 			parseError.ifPresent()
 			
 			
-			let root=
-			parseResult.create().orElseThrow();
+			let root=parseResult.create().orElseThrow();
 			Files.writeString()
 			
 			
-			let generated=
-			generate();
+			let generated=generate();
 			Files.writeString()
 			
 			
-			let rule : Rule=
-			MagmaLang.createRootRule();
+			let rule : Rule=MagmaLang.createRootRule();
 			
 			
-			let generateResult=
-			rule.fromNode();
+			let generateResult=rule.fromNode();
 			
 			
-			let generateError=
-			generateResult.findErr();
+			let generateError=generateResult.findErr();
 			generateError.ifPresent()
 			Files.writeString()}
 		catch (let e : IOException){
@@ -73,25 +63,20 @@ export def Main => {
 	def print(e : Error_, depth : int) : void => {
 		
 		
-		let actualContext=
-		e.findContext().orElse();
+		let actualContext=e.findContext().orElse();
 		
 		
-		let index=
-		actualContext.indexOf();
+		let index=actualContext.indexOf();
 		
 		
-		let context=
-		index==-1?actualContext:actualContext.substring();
+		let context=index==-1?actualContext:actualContext.substring();
 		
 		
-		let message=
-		e.findMessage();
+		let message=e.findMessage();
 		message.ifPresent()
 		
 		
-		let causes=
-		e.findCauses().orElse();
+		let causes=e.findCauses().orElse();
 		if
 		(causes.isEmpty()){
 			return
@@ -110,12 +95,10 @@ export def Main => {
 	def generate(root : Node) : Node => {
 		
 		
-		let list=
-		Arrays.asList();
+		let list=Arrays.asList();
 		
 		
-		let acc : Node=
-		root;
+		let acc : Node=root;
 		for
 		(
 		generator : Generator in 
