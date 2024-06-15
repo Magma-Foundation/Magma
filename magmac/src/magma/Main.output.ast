@@ -235,7 +235,7 @@ block = {
 													}
 												},
 												arguments : [
-													lambda = {
+													function = {
 														param-name : "error",
 														value : invocation = {
 															caller : symbol = {
@@ -406,7 +406,7 @@ block = {
 													}
 												},
 												arguments : [
-													lambda = {
+													function = {
 														param-name : "error",
 														value : invocation = {
 															caller : symbol = {
@@ -607,7 +607,7 @@ block = {
 										}
 									},
 									arguments : [
-										lambda = {
+										function = {
 											param-name : "s",
 											value : invocation = {
 												caller : access = {
