@@ -2,7 +2,7 @@ package magma.compile.rule;
 
 import magma.api.Err;
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.GeneratingException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.MultipleError;
@@ -34,7 +34,7 @@ public record OrRule(List<Rule> rules) implements Rule {
         }
 
         if (errors.isEmpty()) {
-            return new ErrorRuleResult(new JavaError(new CompileException("No rules were present.")));
+            return new ErrorRuleResult(new JavaError(new GeneratingException("No rules were present.")));
         } else {
             return new ErrorRuleResult(new MultipleError(errors));
         }

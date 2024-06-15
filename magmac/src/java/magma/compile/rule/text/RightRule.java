@@ -1,7 +1,7 @@
 package magma.compile.rule.text;
 
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.GeneratingException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.rule.Node;
@@ -18,7 +18,7 @@ public record RightRule(Rule child, String slice) implements Rule {
             var content = input.substring(0, contentEnd);
             return child.toNode(content);
         } else {
-            return new ErrorRuleResult(new JavaError(new CompileException("Input does not end with '%s': %s".formatted(slice, input))));
+            return new ErrorRuleResult(new JavaError(new GeneratingException("Input does not end with '%s': %s".formatted(slice, input))));
         }
     }
 

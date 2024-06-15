@@ -5,7 +5,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
 
-public record JavaError(CompileException e) implements Error_ {
+public record JavaError(GeneratingException e) implements Error_ {
     @Override
     public Optional<String> findMessage() {
         return Optional.of(e.getMessage());

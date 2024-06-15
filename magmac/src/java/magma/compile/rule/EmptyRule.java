@@ -4,7 +4,7 @@ import magma.api.Err;
 import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileError;
-import magma.compile.CompileException;
+import magma.compile.GeneratingException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.attribute.Attributes;
@@ -35,6 +35,6 @@ public class EmptyRule implements Rule {
     public Result<String, Error_> fromNode(Node node) {
         return fromNode0(node)
                 .<Result<String, Error_>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new JavaError(new CompileException("Cannot render: ", node.toString()))));
+                .orElseGet(() -> new Err<>(new JavaError(new GeneratingException("Cannot render: ", node.toString()))));
     }
 }

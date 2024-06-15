@@ -1,5 +1,6 @@
 package magma;
 
+import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.Generator;
@@ -22,44 +23,76 @@ import java.util.Collections;
 public class Main {
 
     public static final Path TARGET_DIRECTORY = Paths.get(".", "magmac", "src", "magma");
+    public static final Path SOURCE_DIRECTORY = Paths.get(".", "magmac", "src", "java");
 
     public static void main(String[] args) {
         try {
-            var sourceDirectory = Paths.get(".", "magmac", "src");
-            var sources = Files.walk(sourceDirectory)
+            var sources = Files.walk(SOURCE_DIRECTORY)
                     .filter(value -> value.toString().endsWith(".java"))
                     .toList();
 
             for (var source : sources) {
-                var relativized = sourceDirectory.relativize(source.getParent());
-                var targetParent = TARGET_DIRECTORY.resolve(relativized);
-                var fileName = source.getFileName().toString();
-                var name = fileName.substring(0, fileName.indexOf('.'));
-                var target = targetParent.resolve(name + ".mgs");
-                var input = Files.readString(source);
-
-                var parseResult = JavaLang.createRootRule().toNode(input);
-                var parseError = parseResult.findError();
-                parseError.ifPresent(error -> print(error, 0));
-
-                var root = parseResult.create().orElseThrow();
-
-                if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
-
-                Files.writeString(targetParent.resolveSibling("Main.input.ast"), root.toString());
-                var generated = generate(root);
-                Files.writeString(targetParent.resolveSibling("Main.output.ast"), generated.toString());
-
-                Rule rule = MagmaLang.createRootRule();
-                var generateResult = rule.fromNode(generated);
-                var generateError = generateResult.findErr();
-                generateError.ifPresent(error -> print(error, 0));
-
-                Files.writeString(target, generateResult.findValue().orElseThrow());
+                compileSource(source);
             }
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
+        }
+    }
+
+    private static void compileSource(Path source) {
+        try {
+            var relativized = Main.SOURCE_DIRECTORY.relativize(source.getParent());
+            var targetParent = TARGET_DIRECTORY.resolve(relativized);
+            var fileName = source.getFileName().toString();
+            var name = fileName.substring(0, fileName.indexOf('.'));
+            var target = targetParent.resolve(name + ".mgs");
+            var input = readImpl(source);
+
+            var parseResult = JavaLang.createRootRule().toNode(input);
+            var parseError = parseResult.findError();
+            parseError.ifPresent(error -> print(error, 0));
+
+            var root = parseResult.create().orElseThrow(() -> new CompileException("Cannot parse: " + input));
+
+            if (!Files.exists(targetParent)) createDirectory(targetParent);
+
+            writeImpl(targetParent.resolveSibling("Main.input.ast"), root.toString());
+            var generated = generate(root);
+            writeImpl(targetParent.resolveSibling("Main.output.ast"), generated.toString());
+
+            Rule rule = MagmaLang.createRootRule();
+            var generateResult = rule.fromNode(generated);
+            var generateError = generateResult.findErr();
+            generateError.ifPresent(error -> print(error, 0));
+
+            writeImpl(target, generateResult.findValue().orElseThrow());
+        } catch (CompileException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String readImpl(Path source) throws CompileException {
+        try {
+            return Files.readString(source);
+        } catch (IOException e) {
+            throw new CompileException("Failed to read input: " + source, e);
+        }
+    }
+
+    private static Path createDirectory(Path targetParent) throws CompileException {
+        try {
+            return Files.createDirectories(targetParent);
+        } catch (IOException e) {
+            throw new CompileException("Failed to make parent.", e);
+        }
+    }
+
+    private static void writeImpl(Path target, String csq) throws CompileException {
+        try {
+            Files.writeString(target, csq);
+        } catch (IOException e) {
+            throw new CompileException("Cannot write.", e);
         }
     }
 

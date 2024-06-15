@@ -3,10 +3,8 @@ package magma.compile.rule;
 import magma.api.Err;
 import magma.api.Result;
 import magma.compile.CompileError;
-import magma.compile.CompileException;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
-import magma.compile.JavaError;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 

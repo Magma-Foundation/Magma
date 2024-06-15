@@ -4,7 +4,7 @@ import magma.api.Collectors;
 import magma.api.Err;
 import magma.api.Result;
 import magma.api.Streams;
-import magma.compile.CompileException;
+import magma.compile.GeneratingException;
 import magma.compile.Error_;
 import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
@@ -43,7 +43,7 @@ public final class SplitMultipleRule implements Rule {
 
             var optional = result.create();
             if (optional.isEmpty()) {
-                return new ErrorRuleResult(new JavaError(new CompileException("No name present: " + childString)));
+                return new ErrorRuleResult(new JavaError(new GeneratingException("No name present: " + childString)));
             }
 
             members.add(optional.get());
@@ -71,6 +71,6 @@ public final class SplitMultipleRule implements Rule {
     private Err<String, Error_> createErr(Node node) {
         var format = "Property '%s' does not exist on node.";
         var message = format.formatted(propertyKey);
-        return new Err<>(new JavaError(new CompileException(message, node.toString())));
+        return new Err<>(new JavaError(new GeneratingException(message, node.toString())));
     }
 }
