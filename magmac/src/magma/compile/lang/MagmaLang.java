@@ -5,6 +5,6 @@ import magma.compile.rule.TypeRule;
 
 public class MagmaLang {
     public static TypeRule createRootRule() {
-        return new TypeRule("empty", new EmptyRule());
+        return new TypeRule("block", new EmptyRule());
     }
 }
