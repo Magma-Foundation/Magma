@@ -86,7 +86,7 @@ public class JavaLang {
                                 new StripRule(new ExtractNodeRule("false", value))))),
                 createConstructorRule(value),
                 Lang.createInvocationRule(value),
-                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child"))))),
+                Lang.createAccessRule(value),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
                 createOperator("equals", "==", value),

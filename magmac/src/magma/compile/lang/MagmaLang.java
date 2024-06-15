@@ -21,7 +21,8 @@ public class MagmaLang {
         var value = new LazyRule();
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
-                Lang.createInvocationRule(value)
+                Lang.createInvocationRule(value),
+                Lang.createAccessRule(value)
         )));
 
         statement.setRule(new OrRule(List.of(
