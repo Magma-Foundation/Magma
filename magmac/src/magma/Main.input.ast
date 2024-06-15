@@ -851,16 +851,19 @@ block = {
 									},
 									child : block = {
 										children : [
-											invocation = {
-												arguments : [
-													symbol = {
-														value : "acc"
-													}
-												],
-												caller : access = {
-													child : "generate",
-													parent : any = {
-														value : "acc = modifier"
+											assignment = {
+												reference : "acc",
+												value : invocation = {
+													arguments : [
+														symbol = {
+															value : "acc"
+														}
+													],
+													caller : access = {
+														child : "generate",
+														parent : symbol = {
+															value : "modifier"
+														}
 													}
 												}
 											}

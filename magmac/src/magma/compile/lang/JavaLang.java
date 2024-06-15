@@ -80,6 +80,7 @@ public class JavaLang {
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
                 declaration,
                 new TypeRule("constructor", new RightRule(constructor, ";")),
+                new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", definitionHeader), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
