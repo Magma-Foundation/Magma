@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.api.Tuple;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
@@ -7,10 +8,10 @@ import java.util.ArrayList;
 
 public class MagmaGenerator extends Generator {
     @Override
-    protected Node postVisit(Node node, int depth) {
-        if (!node.is("function")) return node;
+    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if (!node.is("function")) return new Tuple<>(node, depth);
 
-        return node.mapAttributes(attributes -> attributes.mapValue("modifiers", StringListAttribute.Factory, list -> {
+        return new Tuple<>(node.mapAttributes(attributes -> attributes.mapValue("modifiers", StringListAttribute.Factory, list -> {
             var copy = new ArrayList<String>();
             if (list.contains("public")) {
                 copy.add("export");
@@ -18,6 +19,6 @@ public class MagmaGenerator extends Generator {
 
             copy.add("def");
             return copy;
-        }));
+        })), depth);
     }
 }

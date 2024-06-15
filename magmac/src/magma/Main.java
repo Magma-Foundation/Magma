@@ -81,7 +81,7 @@ public class Main {
 
         Node acc = root;
         for (Generator generator : list) {
-            acc = generator.generate(acc);
+            acc = generator.generate(acc, -1);
         }
         return acc;
     }

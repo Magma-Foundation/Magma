@@ -863,17 +863,20 @@ block = {
 											assignment = {
 												reference : "acc",
 												value : invocation = {
-													arguments : [
-														symbol = {
-															value : "acc"
-														}
-													],
 													caller : access = {
 														child : "generate",
 														parent : symbol = {
 															value : "generator"
 														}
-													}
+													},
+													arguments : [
+														symbol = {
+															value : "acc"
+														},
+														number = {
+															value : "-1"
+														}
+													]
 												}
 											}
 										]

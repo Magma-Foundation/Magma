@@ -34,4 +34,8 @@ public record Node(String type, Attributes attributes) {
     public Node retype(String type) {
         return new Node(type, attributes);
     }
+
+    public Node withAttributes(Attributes attributes) {
+        return new Node(type, attributes);
+    }
 }

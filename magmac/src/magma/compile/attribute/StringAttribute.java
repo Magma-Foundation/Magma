@@ -14,6 +14,8 @@ public record StringAttribute(String value) implements Attribute {
     }
 
     private String escape() {
-        return value.replace("\n", "\\n");
+        return value
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
     }
 }

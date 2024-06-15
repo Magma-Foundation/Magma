@@ -1,14 +1,15 @@
 package magma.compile.lang;
 
+import magma.api.Tuple;
 import magma.compile.rule.Node;
 
 public class MethodNormalizer extends Generator {
     @Override
-    protected Node postVisit(Node node, int depth) {
+    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
         if(!node.is("method")) {
-            return node;
+            return new Tuple<>(node, depth);
         }
 
-        return node.retype("function");
+        return new Tuple<>(node.retype("function"), depth);
     }
 }
