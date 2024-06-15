@@ -76,4 +76,11 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
                 .sorted(Comparator.comparingInt(String::length))
                 .collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
     }
+
+    @Override
+    public Attributes remove(String key) {
+        var copy = new HashMap<>(values);
+        copy.remove(key);
+        return new MapAttributes(copy);
+    }
 }

@@ -128,9 +128,6 @@ block = {
 												name : "source",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													caller : access = {
 														child : "get",
@@ -161,9 +158,6 @@ block = {
 												name : "input",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -182,9 +176,6 @@ block = {
 												name : "target",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													arguments : [
 														string = {
@@ -203,9 +194,6 @@ block = {
 												modifiers : ["let"],
 												name : "parseResult",
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -229,9 +217,6 @@ block = {
 												name : "parseError",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													caller : access = {
 														child : "findError",
@@ -272,9 +257,6 @@ block = {
 												name : "root",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													caller : access = {
 														child : "orElseThrow",
@@ -325,9 +307,6 @@ block = {
 												name : "generated",
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													caller : symbol = {
 														value : "generate"
@@ -391,9 +370,6 @@ block = {
 												modifiers : ["let"],
 												name : "generateResult",
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -412,9 +388,6 @@ block = {
 												modifiers : ["let"],
 												name : "generateError",
 												left-indent : "\n\t\t\t",
-												type : symbol = {
-													value : "var"
-												},
 												value : invocation = {
 													caller : access = {
 														child : "findErr",
@@ -541,9 +514,6 @@ block = {
 									modifiers : ["let"],
 									name : "actualContext",
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : invocation = {
 										arguments : [
 											string = {
@@ -567,9 +537,6 @@ block = {
 									name : "index",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : invocation = {
 										arguments : [
 											char = {
@@ -588,9 +555,6 @@ block = {
 									name : "context",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : ternary = {
 										true : symbol = {
 											value : "actualContext"
@@ -625,9 +589,6 @@ block = {
 									name : "message",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : invocation = {
 										caller : access = {
 											child : "findMessage",
@@ -706,9 +667,6 @@ block = {
 									name : "causes",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : invocation = {
 										arguments : [
 											invocation = {
@@ -865,9 +823,6 @@ block = {
 									name : "list",
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
-									type : symbol = {
-										value : "var"
-									},
 									value : invocation = {
 										caller : access = {
 											child : "asList",

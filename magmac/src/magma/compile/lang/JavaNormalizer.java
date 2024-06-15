@@ -12,7 +12,7 @@ public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
         if (node.is("declaration")) {
-            return new Tuple<>(node.mapAttributes(attributes -> {
+            var withModifiers = node.mapAttributes(attributes -> {
                 var list = attributes.apply("modifiers")
                         .flatMap(Attribute::asStringList)
                         .orElse(Collections.emptyList());
@@ -25,7 +25,27 @@ public class JavaNormalizer extends Generator {
                 }
 
                 return attributes.with("modifiers", new StringListAttribute(copy));
-            }), depth);
+            }).mapAttributes(attributes -> {
+                var type = attributes.apply("type").flatMap(Attribute::asNode);
+                if (type.isEmpty()) return attributes;
+
+                var inner = type.get();
+                if (inner.is("symbol")) {
+                    var value = inner.attributes().apply("value")
+                            .flatMap(Attribute::asString)
+                            .orElseThrow();
+
+                    if(value.equals("var")) {
+                        return attributes.remove("type");
+                    } else {
+                        return attributes;
+                    }
+                } else {
+                    return attributes;
+                }
+            });
+
+            return new Tuple<>(withModifiers, depth);
         }
 
         if (node.is("method")) {

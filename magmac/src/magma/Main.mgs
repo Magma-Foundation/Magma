@@ -17,19 +17,19 @@ import java.util.Collections;
 export def Main() => {
 	export def main() => {
 		try {
-			let source : var = Paths.get(".", "magmac", "src", "magma", "Main.java");
-			let input : var = Files.readString(source);
-			let target : var = source.resolveSibling("Main.mgs");
-			let parseResult : var = JavaLang.createRootRule().toNode(input);
-			let parseError : var = parseResult.findError();
+			let source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+			let input = Files.readString(source);
+			let target = source.resolveSibling("Main.mgs");
+			let parseResult = JavaLang.createRootRule().toNode(input);
+			let parseError = parseResult.findError();
 			parseError.ifPresent();
-			let root : var = parseResult.create().orElseThrow();
+			let root = parseResult.create().orElseThrow();
 			Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
-			let generated : var = generate(root);
+			let generated = generate(root);
 			Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
 			let rule : Rule = MagmaLang.createRootRule();
-			let generateResult : var = rule.fromNode(generated);
-			let generateError : var = generateResult.findErr();
+			let generateResult = rule.fromNode(generated);
+			let generateError = generateResult.findErr();
 			generateError.ifPresent();
 			Files.writeString(target, generateResult.findValue().orElseThrow());
 		}
@@ -39,12 +39,12 @@ export def Main() => {
 		}
 	}
 	def print() => {
-		let actualContext : var = e.findContext().orElse("");
-		let index : var = actualContext.indexOf();
-		let context : var = ? == ??actualContext:actualContext.substring();
-		let message : var = e.findMessage();
+		let actualContext = e.findContext().orElse("");
+		let index = actualContext.indexOf();
+		let context = ? == ??actualContext:actualContext.substring();
+		let message = e.findMessage();
 		message.ifPresent();
-		let causes : var = e.findCauses().orElse(Collections.emptyList());
+		let causes = e.findCauses().orElse(Collections.emptyList());
 		if (?){
 			return 
 		}
@@ -58,7 +58,7 @@ export def Main() => {
 		}
 	}
 	def generate() => {
-		let list : var = Arrays.asList();
+		let list = Arrays.asList();
 		let acc : Node = root;
 		for (?){
 			? = ?

@@ -50,4 +50,6 @@ public interface Attributes {
     Attributes mapValues(Function<Attribute, Attribute> mapper);
 
     String format(int depth);
+
+    Attributes remove(String key);
 }
