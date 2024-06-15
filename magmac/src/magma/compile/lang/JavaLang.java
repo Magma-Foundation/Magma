@@ -85,9 +85,9 @@ public class JavaLang {
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
-                createOperator("equals", "==", value),
-                createOperator("add", "+", value),
-                createOperator("greater-than", ">", value)
+                Lang.createOperator("equals", "==", value),
+                Lang.createOperator("add", "+", value),
+                Lang.createOperator("greater-than", ">", value)
         )));
         return value;
     }
@@ -107,10 +107,6 @@ public class JavaLang {
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
-    }
-
-    private static TypeRule createOperator(String name, String slice, Rule value) {
-        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
     }
 
 }

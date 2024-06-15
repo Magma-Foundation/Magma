@@ -134,4 +134,8 @@ public class Lang {
                         new StripRule(new ExtractNodeRule("true", value)), ":",
                         new StripRule(new ExtractNodeRule("false", value)))));
     }
+
+    static TypeRule createOperator(String name, String slice, Rule value) {
+        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
+    }
 }
