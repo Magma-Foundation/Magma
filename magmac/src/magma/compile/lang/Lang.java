@@ -6,6 +6,7 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
@@ -84,5 +85,13 @@ public class Lang {
         var maybeChild = new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)));
         var after = new RightRule(new StripRule(maybeChild), ";");
         return new TypeRule("return", new LeftRule("return", after));
+    }
+
+    static Rule createForRule(Rule definition, Rule value, Rule statement, String delimiter) {
+        var collection = new StripRule(new ExtractNodeRule("collection", value));
+        var condition = new RightRule(new LastRule(new StripRule(definition), delimiter, collection), ")");
+        var content = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
+        var after = new FirstRule(new StripRule(new LeftRule("(", condition)), "{", content);
+        return new TypeRule("for", new LeftRule("for", after));
     }
 }

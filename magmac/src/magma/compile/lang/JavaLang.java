@@ -49,7 +49,7 @@ public class JavaLang {
 
         var statement = new LazyRule();
 
-        var rules = List.<Rule>of(
+        var rules = List.of(
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 declaration,
@@ -58,7 +58,7 @@ public class JavaLang {
                 Lang.createCatchRule(definition, statement),
                 Lang.createIfRule(value, statement),
                 Lang.createReturnRule(value),
-                new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definition), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))),
+                Lang.createForRule(definition, value, statement, ":"),
                 new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")))))
         );
 
