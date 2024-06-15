@@ -27,6 +27,11 @@ block = {
 		},
 		import = {
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "PackageRemover"]
+			}
+		},
+		import = {
+			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Node"]
 			}
 		},
@@ -790,7 +795,7 @@ block = {
 										arguments : [
 											constructor = {
 												caller : symbol = {
-													value : "Modifier"
+													value : "PackageRemover"
 												}
 											}
 										]

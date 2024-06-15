@@ -1,10 +1,5 @@
 block = {
 	children : [
-		package = {
-			internal : namespace = {
-				namespace : ["magma"]
-			}
-		},
 		import = {
 			external : namespace = {
 				namespace : ["magma", "compile", "Error_"]
@@ -23,6 +18,11 @@ block = {
 		import = {
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "Modifier"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "lang", "PackageRemover"]
 			}
 		},
 		import = {
@@ -790,7 +790,7 @@ block = {
 										arguments : [
 											constructor = {
 												caller : symbol = {
-													value : "Modifier"
+													value : "PackageRemover"
 												}
 											}
 										]

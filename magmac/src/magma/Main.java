@@ -4,6 +4,7 @@ import magma.compile.Error_;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.Modifier;
+import magma.compile.lang.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 
@@ -67,7 +68,7 @@ public class Main {
 
     private static Node generate(Node root) {
         var list = Arrays.asList(
-                new Modifier()
+                new PackageRemover()
         );
 
         Node acc = root;
