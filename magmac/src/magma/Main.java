@@ -4,8 +4,9 @@ import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaFormatter;
+import magma.compile.lang.MagmaGenerator;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.Modifier;
+import magma.compile.lang.Generator;
 import magma.compile.lang.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -72,12 +73,13 @@ public class Main {
         var list = Arrays.asList(
                 new PackageRemover(),
                 new ClassSplitter(),
+                new MagmaGenerator(),
                 new MagmaFormatter()
         );
 
         Node acc = root;
-        for (Modifier modifier : list) {
-            acc = modifier.generate(acc);
+        for (Generator generator : list) {
+            acc = generator.generate(acc);
         }
         return acc;
     }

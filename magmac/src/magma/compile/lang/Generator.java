@@ -5,9 +5,7 @@ import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
-import java.util.Optional;
-
-public class Modifier {
+public class Generator {
     private Attribute generateAttribute(Attribute attribute) {
         var nodeList = attribute.asNodeList();
         if (nodeList.isPresent()) {

@@ -27,13 +27,19 @@ block = {
 		import = {
 			right-indent : "\n",
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MagmaGenerator"]
+			}
+		},
+		import = {
+			right-indent : "\n",
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
 			}
 		},
 		import = {
 			right-indent : "\n",
 			external : namespace = {
-				namespace : ["magma", "compile", "lang", "Modifier"]
+				namespace : ["magma", "compile", "lang", "Generator"]
 			}
 		},
 		import = {
@@ -86,7 +92,7 @@ block = {
 		},
 		function = {
 			name : "Main",
-			modifiers : ["public"],
+			modifiers : ["public", "def"],
 			child : block = {
 				children : [
 					declaration = {
@@ -824,6 +830,11 @@ block = {
 											},
 											constructor = {
 												caller : symbol = {
+													value : "MagmaGenerator"
+												}
+											},
+											constructor = {
+												caller : symbol = {
 													value : "MagmaFormatter"
 												}
 											}
@@ -840,9 +851,9 @@ block = {
 									}
 								},
 								for = {
-									name : "modifier",
+									name : "generator",
 									type : symbol = {
-										value : "Modifier"
+										value : "Generator"
 									},
 									collection : symbol = {
 										value : "list"
@@ -860,7 +871,7 @@ block = {
 													caller : access = {
 														child : "generate",
 														parent : symbol = {
-															value : "modifier"
+															value : "generator"
 														}
 													}
 												}

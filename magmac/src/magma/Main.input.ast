@@ -27,12 +27,17 @@ block = {
 		},
 		import = {
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MagmaGenerator"]
+			}
+		},
+		import = {
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
 			}
 		},
 		import = {
 			external : namespace = {
-				namespace : ["magma", "compile", "lang", "Modifier"]
+				namespace : ["magma", "compile", "lang", "Generator"]
 			}
 		},
 		import = {
@@ -815,6 +820,11 @@ block = {
 											},
 											constructor = {
 												caller : symbol = {
+													value : "MagmaGenerator"
+												}
+											},
+											constructor = {
+												caller : symbol = {
 													value : "MagmaFormatter"
 												}
 											}
@@ -831,9 +841,9 @@ block = {
 									}
 								},
 								for = {
-									name : "modifier",
+									name : "generator",
 									type : symbol = {
-										value : "Modifier"
+										value : "Generator"
 									},
 									collection : symbol = {
 										value : "list"
@@ -851,7 +861,7 @@ block = {
 													caller : access = {
 														child : "generate",
 														parent : symbol = {
-															value : "modifier"
+															value : "generator"
 														}
 													}
 												}

@@ -2,7 +2,7 @@ package magma.compile.lang;
 
 import magma.compile.rule.Node;
 
-public class MagmaFormatter extends Modifier {
+public class MagmaFormatter extends Generator {
     @Override
     protected Node postVisit(Node node) {
         if(node.is("import")) {
