@@ -1,7 +1,6 @@
 package magma.compile.lang;
 
 import magma.compile.rule.LazyRule;
-import magma.compile.rule.NumberRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -84,7 +83,7 @@ public class JavaLang {
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
-                new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
+                Lang.createNumberRule(),
                 Lang.createOperator("equals", "==", value),
                 Lang.createOperator("add", "+", value),
                 Lang.createOperator("greater-than", ">", value)

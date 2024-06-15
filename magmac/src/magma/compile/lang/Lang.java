@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.NumberRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -137,5 +138,9 @@ public class Lang {
 
     static TypeRule createOperator(String name, String slice, Rule value) {
         return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
+    }
+
+    static TypeRule createNumberRule() {
+        return new TypeRule("number", new NumberRule(new ExtractStringRule("value")));
     }
 }

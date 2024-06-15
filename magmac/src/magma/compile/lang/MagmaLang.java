@@ -25,6 +25,7 @@ public class MagmaLang {
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
                 Lang.createTernaryRule(value),
+                Lang.createNumberRule(),
                 Lang.createOperator("equals", "==", value),
                 Lang.createOperator("add", "+", value),
                 Lang.createOperator("greater-than", ">", value)

@@ -24,104 +24,104 @@ export def Main => {
 			
 			
 			let source=
-			?;
+			Paths.get();
 			
 			
 			let input=
-			?;
+			Files.readString();
 			
 			
 			let target=
-			?;
+			source.resolveSibling();
 			
 			
 			let parseResult=
-			?;
+			JavaLang.createRootRule().toNode();
 			
 			
 			let parseError=
-			?;
-			?()
+			parseResult.findError();
+			parseError.ifPresent()
 			
 			
 			let root=
-			?;
-			?()
+			parseResult.create().orElseThrow();
+			Files.writeString()
 			
 			
 			let generated=
-			?;
-			?()
+			generate();
+			Files.writeString()
 			
 			
 			let rule : Rule=
-			?;
+			MagmaLang.createRootRule();
 			
 			
 			let generateResult=
-			?;
+			rule.fromNode();
 			
 			
 			let generateError=
-			?;
-			?()
-			?()}
+			generateResult.findErr();
+			generateError.ifPresent()
+			Files.writeString()}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
-			?()}}
+			e.printStackTrace()}}
 	
 	def print(e : Error_, depth : int) : void => {
 		
 		
 		let actualContext=
-		?;
+		e.findContext().orElse();
 		
 		
 		let index=
-		?;
+		actualContext.indexOf();
 		
 		
 		let context=
-		?;
+		index==-1?actualContext:actualContext.substring();
 		
 		
 		let message=
-		?;
-		?()
+		e.findMessage();
+		message.ifPresent()
 		
 		
 		let causes=
-		?;
+		e.findCauses().orElse();
 		if
-		(?){
+		(causes.isEmpty()){
 			return
 			;}
 		if
-		(?){
+		(causes.size()>1){
 			for
 			(
 			cause : Error_ in 
-			?){
-				?()}}
+			causes){
+				print()}}
 		else
 		{
-			?()}}
+			print()}}
 	
 	def generate(root : Node) : Node => {
 		
 		
 		let list=
-		?;
+		Arrays.asList();
 		
 		
 		let acc : Node=
-		?;
+		root;
 		for
 		(
 		generator : Generator in 
-		?){
+		list){
 			
 			acc=
-			?;}
+			generator.generate();}
 		return
 		;}}
