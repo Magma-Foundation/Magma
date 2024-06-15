@@ -38,15 +38,9 @@ public class JavaLang {
 
     private static TypeRule createClassRule() {
         var definition = createDefinitionHeaderRule();
-
-        var value = new LazyRule();
-        var constructor = createConstructorRule(value);
-        var invocation = Lang.createInvocationRule(value);
-
-        initValues(value, constructor, invocation);
+        var value = createValueRule();
 
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
-
         var statement = new LazyRule();
 
         var rules = List.of(
@@ -54,7 +48,7 @@ public class JavaLang {
                 Lang.createTryRule(statement),
                 declaration,
                 Lang.createAssignmentRule(value),
-                new TypeRule("invocation", new RightRule(invocation, ";")),
+                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
                 Lang.createCatchRule(definition, statement),
                 Lang.createIfRule(value, statement),
                 Lang.createReturnRule(value),
@@ -63,7 +57,7 @@ public class JavaLang {
         );
 
         var copy = new ArrayList<>(rules);
-        copy.add(new TypeRule("constructor", new RightRule(constructor, ";")));
+        copy.add(new TypeRule("constructor", new RightRule(createConstructorRule(value), ";")));
 
         statement.setRule(new OrRule(copy));
 
@@ -81,6 +75,29 @@ public class JavaLang {
         return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
     }
 
+    private static LazyRule createValueRule() {
+        var value = new LazyRule();
+        value.setRule(new OrRule(List.of(
+                new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
+                new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
+                new TypeRule("ternary", new FirstRule(
+                        new StripRule(new ExtractNodeRule("condition", value)), "?",
+                        new FirstRule(
+                                new StripRule(new ExtractNodeRule("true", value)), ":",
+                                new StripRule(new ExtractNodeRule("false", value))))),
+                createConstructorRule(value),
+                Lang.createInvocationRule(value),
+                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child"))))),
+                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
+                createOperator("equals", "==", value),
+                createOperator("add", "+", value),
+                createOperator("greater-than", ">", value)
+        )));
+        return value;
+    }
+
     private static TypeRule createConstructorRule(LazyRule value) {
         return new TypeRule("constructor", new LeftRule("new ", new RightRule(Lang.createSplitter(value), ")")));
     }
@@ -96,27 +113,6 @@ public class JavaLang {
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
-    }
-
-    private static void initValues(LazyRule value, TypeRule constructor, TypeRule invocation) {
-        value.setRule(new OrRule(List.of(
-                new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
-                new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
-                new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
-                new TypeRule("ternary", new FirstRule(
-                        new StripRule(new ExtractNodeRule("condition", value)), "?",
-                        new FirstRule(
-                                new StripRule(new ExtractNodeRule("true", value)), ":",
-                                new StripRule(new ExtractNodeRule("false", value))))),
-                constructor,
-                invocation,
-                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child"))))),
-                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
-                new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
-                createOperator("equals", "==", value),
-                createOperator("add", "+", value),
-                createOperator("greater-than", ">", value)
-        )));
     }
 
     private static TypeRule createOperator(String name, String slice, Rule value) {
