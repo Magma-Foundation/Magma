@@ -269,7 +269,12 @@ block = {
 													function = {
 														param-name : "error",
 														definition : definition = {
-															modifiers : ["def"]
+															modifiers : [],
+															params : [
+																definition = {
+																	name : "error"
+																}
+															]
 														},
 														child : invocation = {
 															caller : symbol = {
@@ -476,7 +481,12 @@ block = {
 													function = {
 														param-name : "error",
 														definition : definition = {
-															modifiers : ["def"]
+															modifiers : [],
+															params : [
+																definition = {
+																	name : "error"
+																}
+															]
 														},
 														child : invocation = {
 															caller : symbol = {
@@ -706,7 +716,12 @@ block = {
 										function = {
 											param-name : "s",
 											definition : definition = {
-												modifiers : ["def"]
+												modifiers : [],
+												params : [
+													definition = {
+														name : "s"
+													}
+												]
 											},
 											child : invocation = {
 												caller : access = {

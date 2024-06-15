@@ -24,7 +24,7 @@ export class def Main() => {
 			let target=source.resolveSibling("Main.mgs");
 			let parseResult=JavaLang.createRootRule().toNode(input);
 			let parseError=parseResult.findError();
-			parseError.ifPresent(def  => {print(error, 0);});
+			parseError.ifPresent( (error) => {print(error, 0);});
 			let root=parseResult.create().orElseThrow();
 			Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
 			let generated=generate(root);
@@ -32,7 +32,7 @@ export class def Main() => {
 			let rule : Rule=MagmaLang.createRootRule();
 			let generateResult=rule.fromNode(generated);
 			let generateError=generateResult.findErr();
-			generateError.ifPresent(def  => {print(error, 0);});
+			generateError.ifPresent( (error) => {print(error, 0);});
 			Files.writeString(target, generateResult.findValue().orElseThrow());}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
@@ -42,7 +42,7 @@ export class def Main() => {
 		let index=actualContext.indexOf('\n');
 		let context=index==-1?actualContext:actualContext.substring(0, index);
 		let message=e.findMessage();
-		message.ifPresent(def  => {System.err.println("\t".repeat(depth)+depth+" = "+s+" "+context);});
+		message.ifPresent( (s) => {System.err.println("\t".repeat(depth)+depth+" = "+s+" "+context);});
 		let causes=e.findCauses().orElse(Collections.emptyList());
 		if
 		(causes.isEmpty()){

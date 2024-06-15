@@ -7,16 +7,26 @@ import magma.compile.rule.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        if(node.is("constructor")) {
+        if (node.is("constructor")) {
             return new Tuple<>(node.retype("invocation"), depth);
         }
 
         if (node.is("lambda")) {
+            var paramName = node.attributes()
+                    .apply("param-name")
+                    .flatMap(Attribute::asString)
+                    .orElseThrow();
+
+            var param = new Node("definition")
+                    .withString("name", paramName);
+
             var definition = new Node("definition")
+                    .withNodeList("params", List.of(param))
                     .withStringList("modifiers", Collections.emptyList());
 
             var function = node.retype("function").withNode("definition", definition);

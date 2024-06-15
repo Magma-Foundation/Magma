@@ -83,4 +83,9 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
         copy.remove(key);
         return new MapAttributes(copy);
     }
+
+    @Override
+    public boolean has(String name) {
+        return this.values.containsKey(name);
+    }
 }

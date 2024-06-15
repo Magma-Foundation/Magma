@@ -52,4 +52,6 @@ public interface Attributes {
     String format(int depth);
 
     Attributes remove(String key);
+
+    boolean has(String name);
 }
