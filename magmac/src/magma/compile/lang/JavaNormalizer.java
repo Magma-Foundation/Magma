@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import magma.api.Tuple;
 import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
@@ -11,7 +12,7 @@ import java.util.Collections;
 public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        if(node.is("lambda")) {
+        if (node.is("lambda")) {
             return new Tuple<>(node.retype("function"), depth);
         }
 
@@ -39,7 +40,7 @@ public class JavaNormalizer extends Generator {
                             .flatMap(Attribute::asString)
                             .orElseThrow();
 
-                    if(value.equals("var")) {
+                    if (value.equals("var")) {
                         return attributes.remove("type");
                     } else {
                         return attributes;
@@ -53,7 +54,22 @@ public class JavaNormalizer extends Generator {
         }
 
         if (node.is("method")) {
-            return new Tuple<>(node.retype("function"), depth);
+            var attributes = node.attributes();
+            var definition = attributes.apply("definition")
+                    .flatMap(Attribute::asNode)
+                    .orElseThrow();
+
+            var params = attributes
+                    .apply("params")
+                    .flatMap(Attribute::asNodeList)
+                    .orElse(Collections.emptyList());
+
+            var withParams = definition.withNodeList("params", params);
+            var function = node.retype("function")
+                    .remove("params")
+                    .withNode("definition", withParams);
+
+            return new Tuple<>(function, depth);
         }
 
         return new Tuple<>(node, depth);

@@ -116,18 +116,18 @@ block = {
 							modifiers : ["public", "static"],
 							type : symbol = {
 								value : "void"
-							}
-						},
-						params : [
-							definition = {
-								name : "args",
-								type : array = {
-									child : symbol = {
-										value : "String"
+							},
+							params : [
+								definition = {
+									name : "args",
+									type : array = {
+										child : symbol = {
+											value : "String"
+										}
 									}
 								}
-							}
-						],
+							]
+						},
 						child : block = {
 							children : [
 								try = {
@@ -501,22 +501,22 @@ block = {
 							modifiers : ["private", "static"],
 							type : symbol = {
 								value : "void"
-							}
-						},
-						params : [
-							definition = {
-								name : "e",
-								type : symbol = {
-									value : "Error_"
-								}
 							},
-							definition = {
-								name : "depth",
-								type : symbol = {
-									value : "int"
+							params : [
+								definition = {
+									name : "e",
+									type : symbol = {
+										value : "Error_"
+									}
+								},
+								definition = {
+									name : "depth",
+									type : symbol = {
+										value : "int"
+									}
 								}
-							}
-						],
+							]
+						},
 						child : block = {
 							children : [
 								declaration = {
@@ -807,20 +807,20 @@ block = {
 					},
 					function = {
 						left-indent : "\n\t",
-						params : [
-							definition = {
-								name : "root",
-								type : symbol = {
-									value : "Node"
-								}
-							}
-						],
 						definition : definition = {
 							name : "generate",
 							modifiers : ["private", "static"],
 							type : symbol = {
 								value : "Node"
-							}
+							},
+							params : [
+								definition = {
+									name : "root",
+									type : symbol = {
+										value : "Node"
+									}
+								}
+							]
 						},
 						child : block = {
 							children : [

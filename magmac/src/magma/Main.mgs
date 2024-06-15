@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 export class def Main() => {
-	public static main : void => {
+	public static main(args : String[]) : void => {
 		try 
 		{
 			
@@ -57,7 +57,7 @@ export class def Main() => {
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace()}}
-	private static print : void => {
+	private static print(e : Error_, depth : int) : void => {
 		
 		
 		let actualContext=e.findContext().orElse();
@@ -88,7 +88,7 @@ export class def Main() => {
 		else
 		{
 			print()}}
-	private static generate : Node => {
+	private static generate(root : Node) : Node => {
 		
 		
 		let list=Arrays.asList();
