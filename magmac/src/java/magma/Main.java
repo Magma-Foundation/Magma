@@ -34,7 +34,11 @@ public class Main {
                     .toList();
 
             for (var source : sources) {
-                compileSource(source);
+                try {
+                    compileSource(source);
+                } catch (CompileException e) {
+                    throw new CompileException(source.toAbsolutePath().toString(), e);
+                }
             }
         } catch (IOException | CompileException e) {
             //noinspection CallToPrintStackTrace
@@ -74,7 +78,7 @@ public class Main {
             var generateError = generateResult.findErr();
             generateError.ifPresent(error -> print(error, 0));
 
-            writeImpl(target, generateResult.findValue().orElseThrow());
+            writeImpl(target, generateResult.findValue().orElseThrow(() -> new CompileException("Nothing was generated.")));
         }
     }
 
