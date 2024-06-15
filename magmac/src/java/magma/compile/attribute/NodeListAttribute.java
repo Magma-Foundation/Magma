@@ -26,6 +26,8 @@ public record NodeListAttribute(List<Node> nodeList) implements Attribute {
 
     @Override
     public String format(int depth) {
+        if (nodeList.isEmpty()) return "[]";
+
         return nodeList.stream()
                 .map(child -> child.formatWithDepth(depth + 1))
                 .collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));

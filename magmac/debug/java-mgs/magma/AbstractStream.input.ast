@@ -69,9 +69,7 @@ Optional[block = {
 								return = {
 									child : constructor = {
 										temp : "R>",
-										arguments : [
-
-										],
+										arguments : [],
 										caller : symbol = {
 											value : "AbstractStream"
 										},
@@ -119,9 +117,7 @@ Optional[block = {
 										}
 									},
 									value : invocation = {
-										arguments : [
-
-										],
+										arguments : [],
 										caller : access = {
 											child : "createInitial",
 											parent : symbol = {
@@ -168,9 +164,7 @@ Optional[block = {
 															caller : access = {
 																child : "map",
 																parent : invocation = {
-																	arguments : [
-
-																	],
+																	arguments : [],
 																	caller : symbol = {
 																		value : "head"
 																	}
@@ -207,9 +201,7 @@ Optional[block = {
 											if = {
 												condition-parent : condition-parent = {
 													condition : invocation = {
-														arguments : [
-
-														],
+														arguments : [],
 														caller : access = {
 															child : "left",
 															parent : symbol = {
@@ -225,9 +217,7 @@ Optional[block = {
 																reference : "current"
 															},
 															value : invocation = {
-																arguments : [
-
-																],
+																arguments : [],
 																caller : access = {
 																	child : "right",
 																	parent : symbol = {
