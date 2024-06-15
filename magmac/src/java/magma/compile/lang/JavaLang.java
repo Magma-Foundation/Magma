@@ -100,7 +100,12 @@ public class JavaLang {
     }
 
     private static TypeRule createConstructorRule(LazyRule value) {
-        return new TypeRule("constructor", new LeftRule("new ", new RightRule(Lang.createSplitter(value), ")")));
+        var before = new RightRule(Lang.createSplitter(value), ")");
+        var child = new OrRule(List.of(
+                new FirstRule(before, "{", new ExtractStringRule("after")),
+                before
+        ));
+        return new TypeRule("constructor", new LeftRule("new ", child));
     }
 
     private static Rule createDefinitionHeaderRule() {
