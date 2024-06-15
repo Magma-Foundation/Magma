@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class Main {
-    public static final String CLASS_KEYWORD_WITH_SPACE = "class ";
-
     public static void main(String[] args) {
         try {
             var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
