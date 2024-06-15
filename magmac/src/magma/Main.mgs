@@ -18,20 +18,20 @@ export def Main() => {
 	
 	public static final CLASS_KEYWORD_WITH_SPACE = 
 	export def main() => {
-		
-		}
+		try {}
+		catch (){}}
 	def print() => {
 		actualContext = 
 		index = 
 		context = 
 		message = 
-		
+		();
 		causes = 
-		
-		
-		}
+		if (){}
+		if (){}
+		else {}}
 	def generate() => {
 		list = 
 		acc = 
-		
-		}}
+		for (){}
+		return }}
