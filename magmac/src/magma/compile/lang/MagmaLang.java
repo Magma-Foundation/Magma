@@ -63,7 +63,7 @@ public class MagmaLang {
                 new TypeRule("else", new LeftRule("else {", child1)),
                 new TypeRule("for", new LeftRule("for (?){", child1)),
                 new TypeRule("return", new LeftRule("return ", new EmptyRule())),
-                new TypeRule("comment", new LeftRule("//", new EmptyRule())),
+                new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
                 new TypeRule("assignment", new RightRule(new EmptyRule(), "? = ?")),
                 function
         )));

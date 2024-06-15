@@ -34,7 +34,7 @@ export def Main() => {
 			Files.writeString(target, generateResult.findValue().orElseThrow());
 		}
 		catch (?){
-			//
+			//noinspection CallToPrintStackTrace
 			e.printStackTrace();
 		}
 	}
