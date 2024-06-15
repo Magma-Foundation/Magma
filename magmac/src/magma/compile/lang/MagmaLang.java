@@ -8,6 +8,7 @@ import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
@@ -21,8 +22,12 @@ public class MagmaLang {
         var function = new TypeRule("function", new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ",
                 new FirstRule(new ExtractStringRule("name"), "() => {", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))));
 
+        var name = new ExtractStringRule("name");
+        var child = new StripRule(new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", name));
+        var declaration = new TypeRule("declaration", new RightRule(new OrRule(List.of(child, name)), " = "));
+
         statement.setRule(new OrRule(List.of(
-                new TypeRule("declaration", new EmptyRule()),
+                declaration,
                 new TypeRule("try", new EmptyRule()),
                 new TypeRule("catch", new EmptyRule()),
                 new TypeRule("invocation", new EmptyRule()),

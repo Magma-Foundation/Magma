@@ -2,6 +2,7 @@ package magma.compile.rule;
 
 import magma.api.Err;
 import magma.api.Result;
+import magma.compile.CompileError;
 import magma.compile.CompileException;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
@@ -28,8 +29,6 @@ public record TypeRule(String type, Rule child) implements Rule {
             return new CompileParentError(message, node.toString(), err);
         });
 
-        var format = "Node was not of type '%s': %s";
-        var message = format.formatted(type, node);
-        return new Err<>(new JavaError(new CompileException(message)));
+        return new Err<>(new CompileError("Node was not of type '%s'.", node.toString()));
     }
 }

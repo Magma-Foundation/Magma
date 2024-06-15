@@ -3,9 +3,8 @@ package magma.compile.rule.text.extract;
 import magma.api.Err;
 import magma.api.Ok;
 import magma.api.Result;
-import magma.compile.CompileException;
+import magma.compile.CompileError;
 import magma.compile.Error_;
-import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.rule.Node;
@@ -40,10 +39,6 @@ public abstract class ExtractRule implements Rule {
                 .apply(key)
                 .flatMap(this::fromAttribute)
                 .<Result<String, Error_>>map(Ok::new)
-                .orElseGet(() -> {
-                    var format = "Property '%s' does not exist on: %s";
-                    var message = format.formatted(key, node);
-                    return new Err<>(new JavaError(new CompileException(message)));
-                });
+                .orElseGet(() -> new Err<>(new CompileError("Property '" + key + "' does not exist.", node.toString())));
     }
 }
