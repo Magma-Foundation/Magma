@@ -101,17 +101,6 @@ block = {
 			modifiers : ["export", "def"],
 			child : block = {
 				children : [
-					declaration = {
-						left-indent : "\n\t",
-						name : "CLASS_KEYWORD_WITH_SPACE",
-						modifiers : ["public", "static", "final"],
-						type : symbol = {
-							value : "String"
-						},
-						value : string = {
-							value : "class "
-						}
-					},
 					function = {
 						name : "main",
 						left-indent : "\n\t",

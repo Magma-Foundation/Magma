@@ -23,7 +23,10 @@ public class MagmaLang {
                 new FirstRule(new ExtractStringRule("name"), "() => {", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))));
 
         var value = new OrRule(List.of(
-                new TypeRule("string", new ExtractStringRule("value"))
+                new TypeRule("string", new ExtractStringRule("value")),
+                new TypeRule("invocation", new EmptyRule()),
+                new TypeRule("ternary", new EmptyRule()),
+                new TypeRule("symbol", new EmptyRule())
         ));
 
         var name = new ExtractStringRule("name");

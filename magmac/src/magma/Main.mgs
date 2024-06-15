@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 export def Main() => {
-	public static final CLASS_KEYWORD_WITH_SPACE = 
 	export def main() => {
 		try {}
 		catch (){}}

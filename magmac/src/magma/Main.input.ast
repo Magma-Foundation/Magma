@@ -90,16 +90,6 @@ block = {
 			modifiers : ["public"],
 			child : block = {
 				children : [
-					declaration = {
-						name : "CLASS_KEYWORD_WITH_SPACE",
-						modifiers : ["public", "static", "final"],
-						type : symbol = {
-							value : "String"
-						},
-						value : string = {
-							value : "class "
-						}
-					},
 					method = {
 						name : "main",
 						modifiers : ["public", "static"],
