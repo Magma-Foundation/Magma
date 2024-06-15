@@ -8,8 +8,6 @@ import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
-import magma.compile.rule.split.ParamSplitter;
-import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -61,7 +59,7 @@ public class JavaLang {
 
         statement.setRule(new OrRule(copy));
 
-        var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(new TypeRule("definition", definition)));
+        var params = Lang.createParamsRule(definition);
         var content = new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")));
         var paramsAndValue = new FirstRule(params, ")", content);
         var methodRule = new TypeRule("method", new FirstRule(definition, "(", paramsAndValue));

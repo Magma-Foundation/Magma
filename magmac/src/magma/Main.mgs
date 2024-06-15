@@ -18,7 +18,7 @@ import java.util.Collections;
 
 export def Main => {
 	
-	export def main : void => {
+	export def main : void(args : String[]) => {
 		try 
 		{
 			
@@ -70,7 +70,7 @@ export def Main => {
 			//noinspection CallToPrintStackTrace
 			?()}}
 	
-	def print : void => {
+	def print : void(e : Error_, depth : int) => {
 		
 		
 		let actualContext=
@@ -107,7 +107,7 @@ export def Main => {
 		{
 			?()}}
 	
-	def generate : Node => {
+	def generate : Node(root : Node) => {
 		
 		
 		let list=

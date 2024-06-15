@@ -110,4 +110,8 @@ public class Lang {
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
         return new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
     }
+
+    static Rule createParamsRule(Rule definition) {
+        return new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(new TypeRule("definition", definition)));
+    }
 }

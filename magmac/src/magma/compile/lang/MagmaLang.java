@@ -52,11 +52,15 @@ public class MagmaLang {
         ));
 
         var type = Lang.createTypeRule();
-        var withoutType = maybeModifiers;
-        var withType = new LastRule(maybeModifiers, " : " , new ExtractNodeRule("type", type));
-        var maybeType = new OrRule(List.of(withType, withoutType));
+        var withType = new LastRule(maybeModifiers, " : ", new ExtractNodeRule("type", type));
 
-        return maybeType;
+        var maybeType = new OrRule(List.of(withType, maybeModifiers));
+
+        var definition = new LazyRule();
+        var params = new FirstRule(maybeType, "(", new RightRule(Lang.createParamsRule(definition), ")"));
+        definition.setRule(new OrRule(List.of(params, maybeType)));
+
+        return definition;
     }
 
     private static TypeRule createFunctionRule(Rule statement) {
