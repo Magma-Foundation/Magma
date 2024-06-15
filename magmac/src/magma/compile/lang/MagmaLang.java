@@ -27,6 +27,7 @@ public class MagmaLang {
                 Lang.createIfRule(value, statement),
                 Lang.createElseRule(statement),
                 Lang.createReturnRule(value),
+                Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
                 new TypeRule("function", new ExtractNodeRule("child", Lang.createBlock(statement))),
                 new TypeRule("declaration", new RightRule(definition, ";")),

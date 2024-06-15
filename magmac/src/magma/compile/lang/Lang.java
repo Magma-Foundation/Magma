@@ -4,6 +4,7 @@ import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
@@ -98,5 +99,11 @@ public class Lang {
     static Rule createElseRule(Rule statement) {
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
         return new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", child))));
+    }
+
+    static Rule createAssignmentRule(Rule value) {
+        var left = new StripRule(new SymbolRule(new ExtractStringRule("reference")));
+        var right = new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";");
+        return new TypeRule("assignment", new FirstRule(left, "=", right));
     }
 }

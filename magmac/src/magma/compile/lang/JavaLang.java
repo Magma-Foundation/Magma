@@ -53,7 +53,7 @@ public class JavaLang {
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 declaration,
-                new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
+                Lang.createAssignmentRule(value),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 Lang.createCatchRule(definition, statement),
                 Lang.createIfRule(value, statement),
