@@ -14,6 +14,12 @@ block = {
 		import = {
 			left-indent : "\n",
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "Generator"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaLang"]
 			}
 		},
@@ -39,18 +45,6 @@ block = {
 			left-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
-			}
-		},
-		import = {
-			left-indent : "\n",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "Generator"]
-			}
-		},
-		import = {
-			left-indent : "\n",
-			external : namespace = {
-				namespace : ["magma", "compile", "lang", "MethodNormalizer"]
 			}
 		},
 		import = {
@@ -889,11 +883,6 @@ block = {
 											constructor = {
 												caller : symbol = {
 													value : "ClassSplitter"
-												}
-											},
-											constructor = {
-												caller : symbol = {
-													value : "MethodNormalizer"
 												}
 											},
 											constructor = {
