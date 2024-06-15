@@ -17,19 +17,19 @@ import java.util.Collections;
 export def Main() => {
 	export def main() => {
 		try {
-			let source = Paths.get(?);
-			let input = Files.readString(?);
-			let target = source.resolveSibling(?);
-			let parseResult = JavaLang.createRootRule(?).toNode(?);
-			let parseError = parseResult.findError(?);
+			let source = Paths.get(".", "magmac", "src", "magma", "Main.java");
+			let input = Files.readString(source);
+			let target = source.resolveSibling("Main.mgs");
+			let parseResult = JavaLang.createRootRule().toNode(input);
+			let parseError = parseResult.findError();
 			?(?);
-			let root = parseResult.create(?).orElseThrow(?);
+			let root = parseResult.create().orElseThrow();
 			?(?);
-			let generated = generate(?);
+			let generated = generate(root);
 			?(?);
-			let rule = MagmaLang.createRootRule(?);
-			let generateResult = rule.fromNode(?);
-			let generateError = generateResult.findErr(?);
+			let rule = MagmaLang.createRootRule();
+			let generateResult = rule.fromNode(generated);
+			let generateError = generateResult.findErr();
 			?(?);
 			?(?);
 		}
@@ -39,12 +39,12 @@ export def Main() => {
 		}
 	}
 	def print() => {
-		let actualContext = e.findContext(?).orElse(?);
-		let index = actualContext.indexOf(?);
-		let context = ? == ??actualContext:actualContext.substring(?);
-		let message = e.findMessage(?);
+		let actualContext = e.findContext().orElse("");
+		let index = actualContext.indexOf();
+		let context = ? == ??actualContext:actualContext.substring();
+		let message = e.findMessage();
 		?(?);
-		let causes = e.findCauses(?).orElse(?);
+		let causes = e.findCauses().orElse(Collections.emptyList());
 		if (?){
 			return 
 		}
@@ -58,7 +58,7 @@ export def Main() => {
 		}
 	}
 	def generate() => {
-		let list = Arrays.asList(?);
+		let list = Arrays.asList();
 		let acc = root;
 		for (?){
 			? = ?

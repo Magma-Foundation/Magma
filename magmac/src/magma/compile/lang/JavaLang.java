@@ -11,7 +11,6 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
-import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -20,7 +19,6 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
-import java.util.Optional;
 
 public class JavaLang {
     public static Rule createRootRule() {
@@ -108,23 +106,4 @@ public class JavaLang {
         return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
     }
 
-    private static class InvocationStart extends SplitOnceRule {
-        public InvocationStart(Rule caller, Rule arguments) {
-            super(caller, "(", arguments);
-        }
-
-        @Override
-        protected Optional<Integer> computeIndex(String input) {
-            var depth = 0;
-
-            for (int i = input.length() - 1; i >= 0; i--) {
-                var c = input.charAt(i);
-                if (c == '(' && depth == 0) return Optional.of(i);
-                else if (c == ')') depth++;
-                else if (c == '(') depth--;
-            }
-
-            return Optional.empty();
-        }
-    }
 }

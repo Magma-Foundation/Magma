@@ -7,6 +7,8 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -23,10 +25,19 @@ public class MagmaLang {
         var function = new TypeRule("function", new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ",
                 new FirstRule(new ExtractStringRule("name"), "() => {", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))));
 
+
         var value = new LazyRule();
+
+        var arguments = new OrRule(List.of(
+                new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value)),
+                new EmptyRule()
+        ));
+
+        var caller = new ExtractNodeRule("caller", value);
+        var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
         value.setRule(new OrRule(List.of(
-                new TypeRule("string", new ExtractStringRule("value")),
-                new TypeRule("invocation", new FirstRule(new ExtractNodeRule("caller", value), "(?)", new EmptyRule())),
+                new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                invocation,
                 new TypeRule("ternary", new FirstRule(
                         new StripRule(new ExtractNodeRule("condition", value)), "?",
                         new FirstRule(
