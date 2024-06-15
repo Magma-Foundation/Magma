@@ -69,7 +69,53 @@ Optional[block = {
 										caller : symbol = {
 											value : "AbstractStream"
 										},
-										after : "\n            @Override\n            public Optional<R> head() {\n                return AbstractStream.this.head().map(mapper);\n            }\n        }"
+										children : [
+											method = {
+												params : [],
+												definition : definition = {
+													name : "head",
+													modifiers : ["@Override", "public"],
+													type : generic = {
+														parent : symbol = {
+															value : "Optional"
+														},
+														children : [
+															symbol = {
+																value : "R"
+															}
+														]
+													}
+												},
+												child : block = {
+													children : [
+														return = {
+															child : invocation = {
+																arguments : [
+																	symbol = {
+																		value : "mapper"
+																	}
+																],
+																caller : access = {
+																	child : "map",
+																	parent : invocation = {
+																		arguments : [],
+																		caller : access = {
+																			child : "head",
+																			parent : access = {
+																				child : "this",
+																				parent : symbol = {
+																					value : "AbstractStream"
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													]
+												}
+											}
+										]
 									}
 								},
 								empty = {

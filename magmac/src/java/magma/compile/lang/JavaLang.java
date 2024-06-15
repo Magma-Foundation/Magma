@@ -37,10 +37,11 @@ public class JavaLang {
 
     private static TypeRule createClassRule() {
         var definition = createDefinitionHeaderRule();
-        var value = createValueRule();
+        var statement = new LazyRule();
+        var classMember = new LazyRule();
+        var value = createValueRule(classMember);
 
         var declaration = Lang.createDeclarationRule(definition, value);
-        var statement = new LazyRule();
 
         var rules = List.of(
                 Lang.createCommentRule(),
@@ -58,7 +59,7 @@ public class JavaLang {
         );
 
         var copy = new ArrayList<>(rules);
-        copy.add(new TypeRule("constructor", new RightRule(createConstructorRule(value), ";")));
+        copy.add(new TypeRule("constructor", new RightRule(createConstructorRule(value, classMember), ";")));
 
         statement.setRule(new OrRule(copy));
 
@@ -69,10 +70,10 @@ public class JavaLang {
         var leftRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
         var methodRule = new TypeRule("method", new FirstRule(leftRule, "(", paramsAndValue));
 
-        var classMember = new OrRule(List.of(
+        classMember.setRule(new OrRule(List.of(
                 declaration,
                 methodRule
-        ));
+        )));
 
         var modifiers = Lang.createModifiersRule();
 
@@ -91,14 +92,14 @@ public class JavaLang {
         return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(beforeContent), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
     }
 
-    private static LazyRule createValueRule() {
+    private static LazyRule createValueRule(LazyRule classMember) {
         var value = new LazyRule();
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 Lang.createCharRule(),
                 createLambdaRule(value),
                 Lang.createTernaryRule(value),
-                createConstructorRule(value),
+                createConstructorRule(value, classMember),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
@@ -116,7 +117,7 @@ public class JavaLang {
         return new TypeRule("lambda", new FirstRule(left, "->", right));
     }
 
-    private static TypeRule createConstructorRule(LazyRule value) {
+    private static TypeRule createConstructorRule(LazyRule value, LazyRule classMember) {
         var arguments = new OrRule(List.of(
                 new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
         ));
@@ -128,7 +129,7 @@ public class JavaLang {
         ));
         var before = new RightRule(new InvocationStart(withGenerics, arguments), ")");
         var child = new OrRule(List.of(
-                new FirstRule(new StripRule(before), "{", new ExtractStringRule("after")),
+                new FirstRule(new StripRule(before), "{", new RightRule(Lang.createBlock(classMember), "}")),
                 before
         ));
         return new TypeRule("constructor", new LeftRule("new ", child));

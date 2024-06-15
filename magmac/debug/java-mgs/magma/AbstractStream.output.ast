@@ -32,25 +32,6 @@ block = {
 				children : [
 					function = {
 						left-indent : "\n\t",
-						child : block = {
-							children : [
-								return = {
-									left-indent : "\n\t\t",
-									child : invocation = {
-										temp : "R>",
-										arguments : [],
-										caller : symbol = {
-											value : "AbstractStream"
-										},
-										after : "\n            @Override\n            public Optional<R> head() {\n                return AbstractStream.this.head().map(mapper);\n            }\n        }"
-									}
-								},
-								empty = {
-									right-indent : "\n\t",
-									left-indent : "\n\t\t"
-								}
-							]
-						},
 						definition : definition = {
 							name : "map",
 							modifiers : ["public", "def"],
@@ -80,6 +61,73 @@ block = {
 											}
 										]
 									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									left-indent : "\n\t\t",
+									child : invocation = {
+										temp : "R>",
+										arguments : [],
+										caller : symbol = {
+											value : "AbstractStream"
+										},
+										children : [
+											function = {
+												definition : definition = {
+													params : [],
+													name : "head",
+													modifiers : ["public", "def"],
+													type : generic = {
+														parent : symbol = {
+															value : "Optional"
+														},
+														children : [
+															symbol = {
+																value : "R"
+															}
+														]
+													}
+												},
+												child : block = {
+													children : [
+														return = {
+															right-indent : "\n\t\t",
+															left-indent : "\n\t\t\t",
+															child : invocation = {
+																arguments : [
+																	symbol = {
+																		value : "mapper"
+																	}
+																],
+																caller : access = {
+																	child : "map",
+																	parent : invocation = {
+																		arguments : [],
+																		caller : access = {
+																			child : "head",
+																			parent : access = {
+																				child : "this",
+																				parent : symbol = {
+																					value : "AbstractStream"
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								empty = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t"
 								}
 							]
 						}
