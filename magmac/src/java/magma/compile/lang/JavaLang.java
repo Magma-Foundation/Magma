@@ -30,12 +30,12 @@ public class JavaLang {
         return new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 importRule,
-                createContentMemberRule("class", createClassMemberRule()),
-                createContentMemberRule("interface", createClassMemberRule())
+                createContentRule("class", createContentMember()),
+                createContentRule("interface", createContentMember())
         ));
     }
 
-    private static LazyRule createClassMemberRule() {
+    private static LazyRule createContentMember() {
         var definition = createDefinitionHeaderRule();
         var statement = new LazyRule();
         var classMember = new LazyRule();
@@ -63,29 +63,31 @@ public class JavaLang {
 
         statement.setRule(new OrRule(copy));
 
-        var params = Lang.createParamsRule(definition);
-        var content = new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}")));
-        var paramsAndValue = new FirstRule(params, ")", content);
+        var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
+        var methodHeader = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
+        var withValue = new FirstRule(methodHeader, "{", content);
+        var withoutValue = new RightRule(methodHeader, ";");
+        var maybeValue = new OrRule(List.of(withValue, withoutValue));
 
         var leftRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
-        var methodRule = new TypeRule("method", new FirstRule(leftRule, "(", paramsAndValue));
+        var methodRule = new TypeRule("method", new FirstRule(leftRule, "(", maybeValue));
 
         classMember.setRule(new OrRule(List.of(
-                declaration,
-                methodRule
+                methodRule,
+                declaration
         )));
         return classMember;
     }
 
-    private static TypeRule createContentMemberRule(String keyword, LazyRule classMember) {
+    private static TypeRule createContentRule(String keyword, LazyRule classMember) {
         var modifiers = Lang.createModifiersRule();
         var block = new ExtractNodeRule("child", Lang.createBlock(classMember));
-        var name = createMemberNameRule();
+        var name = createContentMemberRule();
         var withoutModifiers = new FirstRule(new StripRule(name), "{", new RightRule(block, "}"));
         return new TypeRule(keyword, new FirstRule(modifiers, keyword + " ", withoutModifiers));
     }
 
-    private static OrRule createMemberNameRule() {
+    private static OrRule createContentMemberRule() {
         var name = new TypeRule("symbol", new StripRule(new ExtractStringRule("value")));
         var prototype = new OrRule(List.of(
                 new TypeRule("generic", new FirstRule(new StripRule(new ExtractStringRule("value")), "<", new RightRule(new ExtractStringRule("child"), ">"))),
