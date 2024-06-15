@@ -25,7 +25,7 @@ export def Main() => {
 			?(?);
 			let root = ?(?);
 			?(?);
-			let generated = ?(?);
+			let generated = generate(?);
 			?(?);
 			let rule = ?(?);
 			let generateResult = ?(?);
@@ -41,7 +41,7 @@ export def Main() => {
 	def print() => {
 		let actualContext = ?(?);
 		let index = ?(?);
-		let context = ? == ???:?(?);
+		let context = ? == ??actualContext:?(?);
 		let message = ?(?);
 		?(?);
 		let causes = ?(?);
@@ -59,7 +59,7 @@ export def Main() => {
 	}
 	def generate() => {
 		let list = ?(?);
-		let acc = ?;
+		let acc = root;
 		for (?){
 			? = ?
 		}
