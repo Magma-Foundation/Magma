@@ -14,33 +14,49 @@ import magma.compile.rule.Rule;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 
 public class Main {
+
+    public static final Path TARGET_DIRECTORY = Paths.get(".", "magmac", "src-magma");
+
     public static void main(String[] args) {
         try {
-            var source = Paths.get(".", "magmac", "src", "magma", "Main.java");
-            var input = Files.readString(source);
-            var target = source.resolveSibling("Main.mgs");
+            var sourceDirectory = Paths.get(".", "magmac", "src");
+            var sources = Files.walk(sourceDirectory)
+                    .filter(value -> value.toString().endsWith(".java"))
+                    .toList();
 
-            var parseResult = JavaLang.createRootRule().toNode(input);
-            var parseError = parseResult.findError();
-            parseError.ifPresent(error -> print(error, 0));
+            for (var source : sources) {
+                var relativized = sourceDirectory.relativize(source.getParent());
+                var targetParent = TARGET_DIRECTORY.resolve(relativized);
+                var fileName = source.getFileName().toString();
+                var name = fileName.substring(0, fileName.indexOf('.'));
+                var target = targetParent.resolve(name + ".mgs");
+                var input = Files.readString(source);
 
-            var root = parseResult.create().orElseThrow();
+                var parseResult = JavaLang.createRootRule().toNode(input);
+                var parseError = parseResult.findError();
+                parseError.ifPresent(error -> print(error, 0));
 
-            Files.writeString(source.resolveSibling("Main.input.ast"), root.toString());
-            var generated = generate(root);
-            Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString());
+                var root = parseResult.create().orElseThrow();
 
-            Rule rule = MagmaLang.createRootRule();
-            var generateResult = rule.fromNode(generated);
-            var generateError = generateResult.findErr();
-            generateError.ifPresent(error -> print(error, 0));
+                if (!Files.exists(targetParent)) Files.createDirectories(targetParent);
 
-            Files.writeString(target, generateResult.findValue().orElseThrow());
+                Files.writeString(targetParent.resolveSibling("Main.input.ast"), root.toString());
+                var generated = generate(root);
+                Files.writeString(targetParent.resolveSibling("Main.output.ast"), generated.toString());
+
+                Rule rule = MagmaLang.createRootRule();
+                var generateResult = rule.fromNode(generated);
+                var generateError = generateResult.findErr();
+                generateError.ifPresent(error -> print(error, 0));
+
+                Files.writeString(target, generateResult.findValue().orElseThrow());
+            }
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
