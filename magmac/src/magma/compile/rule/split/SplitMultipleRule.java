@@ -49,11 +49,7 @@ public final class SplitMultipleRule implements Rule {
             members.add(optional.get());
         }
 
-        if (members.isEmpty()) {
-            return new ErrorRuleResult(new JavaError(new CompileException("Nothing could be found: " + input)));
-        } else {
-            return new UntypedRuleResult(new MapAttributes(Map.of(propertyKey, new NodeListAttribute(members))));
-        }
+        return new UntypedRuleResult(new MapAttributes(Map.of(propertyKey, new NodeListAttribute(members))));
     }
 
     private Result<String, Error_> joinNodes(List<Node> list) {

@@ -61,8 +61,7 @@ public class Lang {
 
     static Rule createSplitter(Rule value) {
         var arguments = new OrRule(List.of(
-                new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value)),
-                new EmptyRule()
+                new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
         ));
 
         var caller = new ExtractNodeRule("caller", value);

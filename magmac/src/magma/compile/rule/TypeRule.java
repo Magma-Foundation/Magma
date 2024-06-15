@@ -23,11 +23,13 @@ public record TypeRule(String type, Rule child) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        if (node.type().equals(type)) return child.fromNode(node).mapErr(err -> {
-            var format = "Cannot generate '%s' from node.";
-            var message = format.formatted(type);
-            return new CompileParentError(message, node.toString(), err);
-        });
+        if (node.type().equals(type)) {
+            return child.fromNode(node).mapErr(err -> {
+                var format = "Cannot generate '%s' from node.";
+                var message = format.formatted(type);
+                return new CompileParentError(message, node.toString(), err);
+            });
+        }
 
         return new Err<>(new CompileError(String.format("Node was not of type '%s'.", type), node.toString()));
     }

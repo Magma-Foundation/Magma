@@ -225,6 +225,9 @@ block = {
 													caller : access = {
 														child : "toNode",
 														parent : invocation = {
+															arguments : [
+
+															],
 															caller : access = {
 																child : "createRootRule",
 																parent : symbol = {
@@ -243,6 +246,9 @@ block = {
 													modifiers : ["let"]
 												},
 												value : invocation = {
+													arguments : [
+
+													],
 													caller : access = {
 														child : "findError",
 														parent : symbol = {
@@ -260,7 +266,7 @@ block = {
 													}
 												},
 												arguments : [
-													function = {
+													lambda = {
 														param-name : "error",
 														value : invocation = {
 															caller : symbol = {
@@ -286,9 +292,15 @@ block = {
 													modifiers : ["let"]
 												},
 												value : invocation = {
+													arguments : [
+
+													],
 													caller : access = {
 														child : "orElseThrow",
 														parent : invocation = {
+															arguments : [
+
+															],
 															caller : access = {
 																child : "create",
 																parent : symbol = {
@@ -322,6 +334,9 @@ block = {
 														}
 													},
 													invocation = {
+														arguments : [
+
+														],
 														caller : access = {
 															child : "toString",
 															parent : symbol = {
@@ -372,6 +387,9 @@ block = {
 														}
 													},
 													invocation = {
+														arguments : [
+
+														],
 														caller : access = {
 															child : "toString",
 															parent : symbol = {
@@ -392,6 +410,9 @@ block = {
 													}
 												},
 												value : invocation = {
+													arguments : [
+
+													],
 													caller : access = {
 														child : "createRootRule",
 														parent : symbol = {
@@ -429,6 +450,9 @@ block = {
 													name : "generateError"
 												},
 												value : invocation = {
+													arguments : [
+
+													],
 													caller : access = {
 														child : "findErr",
 														parent : symbol = {
@@ -446,7 +470,7 @@ block = {
 													}
 												},
 												arguments : [
-													function = {
+													lambda = {
 														param-name : "error",
 														value : invocation = {
 															caller : symbol = {
@@ -477,9 +501,15 @@ block = {
 														value : "target"
 													},
 													invocation = {
+														arguments : [
+
+														],
 														caller : access = {
 															child : "orElseThrow",
 															parent : invocation = {
+																arguments : [
+
+																],
 																caller : access = {
 																	child : "findValue",
 																	parent : symbol = {
@@ -511,6 +541,9 @@ block = {
 											},
 											invocation = {
 												left-indent : "\n\t\t\t",
+												arguments : [
+
+												],
 												caller : access = {
 													child : "printStackTrace",
 													parent : symbol = {
@@ -565,6 +598,9 @@ block = {
 										caller : access = {
 											child : "orElse",
 											parent : invocation = {
+												arguments : [
+
+												],
 												caller : access = {
 													child : "findContext",
 													parent : symbol = {
@@ -641,6 +677,9 @@ block = {
 										modifiers : ["let"]
 									},
 									value : invocation = {
+										arguments : [
+
+										],
 										caller : access = {
 											child : "findMessage",
 											parent : symbol = {
@@ -658,7 +697,7 @@ block = {
 										}
 									},
 									arguments : [
-										function = {
+										lambda = {
 											param-name : "s",
 											value : invocation = {
 												caller : access = {
@@ -724,6 +763,9 @@ block = {
 									value : invocation = {
 										arguments : [
 											invocation = {
+												arguments : [
+
+												],
 												caller : access = {
 													child : "emptyList",
 													parent : symbol = {
@@ -735,6 +777,9 @@ block = {
 										caller : access = {
 											child : "orElse",
 											parent : invocation = {
+												arguments : [
+
+												],
 												caller : access = {
 													child : "findCauses",
 													parent : symbol = {
@@ -755,6 +800,9 @@ block = {
 										]
 									},
 									condition : invocation = {
+										arguments : [
+
+										],
 										caller : access = {
 											child : "isEmpty",
 											parent : symbol = {
@@ -770,6 +818,9 @@ block = {
 											value : "1"
 										},
 										left : invocation = {
+											arguments : [
+
+											],
 											caller : access = {
 												child : "size",
 												parent : symbol = {
@@ -885,26 +936,41 @@ block = {
 										},
 										arguments : [
 											constructor = {
+												arguments : [
+
+												],
 												caller : symbol = {
 													value : "PackageRemover"
 												}
 											},
 											constructor = {
+												arguments : [
+
+												],
 												caller : symbol = {
 													value : "ClassSplitter"
 												}
 											},
 											constructor = {
+												arguments : [
+
+												],
 												caller : symbol = {
 													value : "JavaNormalizer"
 												}
 											},
 											constructor = {
+												arguments : [
+
+												],
 												caller : symbol = {
 													value : "MagmaGenerator"
 												}
 											},
 											constructor = {
+												arguments : [
+
+												],
 												caller : symbol = {
 													value : "MagmaFormatter"
 												}
