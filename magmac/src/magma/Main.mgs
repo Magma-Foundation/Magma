@@ -66,6 +66,6 @@ export class def Main() => {
 		for(generator : Generator in list){
 			acc=generator.generate(acc, -1);
 		}
-		return;
+		return acc;
 	}
 }
