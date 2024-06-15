@@ -79,7 +79,7 @@ public class Lang {
     static TypeRule createIfRule(Rule value, Rule statement) {
         var condition = new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"));
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
-        var conditionOuter = new ExtractNodeRule("condition-outer", new TypeRule("condition-outer", new StripRule(condition)));
+        var conditionOuter = new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(condition)));
         return new TypeRule("if", new LeftRule("if", new FirstRule(conditionOuter, "{", child)));
     }
 
@@ -93,7 +93,9 @@ public class Lang {
         var collection = new StripRule(new ExtractNodeRule("collection", value));
         var condition = new RightRule(new LastRule(new StripRule(definition), delimiter, collection), ")");
         var content = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
-        var after = new FirstRule(new StripRule(new LeftRule("(", condition)), "{", content);
+        var child = new StripRule(new LeftRule("(", condition));
+        var leftRule = new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", child));
+        var after = new FirstRule(leftRule, "{", content);
         return new TypeRule("for", new LeftRule("for", after));
     }
 

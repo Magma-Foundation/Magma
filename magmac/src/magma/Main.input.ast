@@ -762,7 +762,7 @@ block = {
 											}
 										]
 									},
-									condition-outer : condition-outer = {
+									condition-parent : condition-parent = {
 										condition : invocation = {
 											arguments : [
 
@@ -777,7 +777,7 @@ block = {
 									}
 								},
 								if = {
-									condition-outer : condition-outer = {
+									condition-parent : condition-parent = {
 										condition : greater-than = {
 											right : number = {
 												value : "1"
@@ -798,12 +798,14 @@ block = {
 									child : block = {
 										children : [
 											for = {
-												name : "cause",
-												type : symbol = {
-													value : "Error_"
-												},
-												collection : symbol = {
-													value : "causes"
+												condition-parent : condition-parent = {
+													name : "cause",
+													type : symbol = {
+														value : "Error_"
+													},
+													collection : symbol = {
+														value : "causes"
+													}
 												},
 												child : block = {
 													children : [
@@ -951,12 +953,14 @@ block = {
 									}
 								},
 								for = {
-									name : "generator",
-									type : symbol = {
-										value : "Generator"
-									},
-									collection : symbol = {
-										value : "list"
+									condition-parent : condition-parent = {
+										name : "generator",
+										type : symbol = {
+											value : "Generator"
+										},
+										collection : symbol = {
+											value : "list"
+										}
 									},
 									child : block = {
 										children : [

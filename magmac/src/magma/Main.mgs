@@ -47,10 +47,7 @@ export class def Main() => {
 		if(causes.isEmpty()){
 			return;}
 		if(causes.size()>1){
-			for
-			(
-			cause : Error_ in 
-			causes){
+			for(cause : Error_ in causes){
 				print(cause, depth);}}
 		else
 		{
@@ -58,10 +55,7 @@ export class def Main() => {
 	def generate(root : Node) : Node => {
 		let list=Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
 		let acc : Node=root;
-		for
-		(
-		generator : Generator in 
-		list){
+		for(generator : Generator in list){
 			
 			acc=
 			generator.generate(acc, -1);}
