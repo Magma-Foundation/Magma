@@ -17,7 +17,18 @@ Optional[block = {
 		},
 		class = {
 			modifiers : ["public", "abstract"],
-			name : "AbstractStream<T> implements Stream<T>",
+			interface : generic = {
+				value : "T",
+				parent : symbol = {
+					name : "Stream"
+				}
+			},
+			name : generic = {
+				value : "T",
+				parent : symbol = {
+					name : "AbstractStream"
+				}
+			},
 			child : block = {
 				children : [
 					method = {

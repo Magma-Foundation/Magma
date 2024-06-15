@@ -14,14 +14,15 @@ block = {
 		function = {
 			left-indent : "\n",
 			right-indent : "\n",
+			name : "AbstractStream",
+			interface : " Stream<T>",
 			modifiers : ["public", "abstract"],
-			name : "AbstractStream<T> implements Stream<T>",
 			definition : definition = {
 				params : [
 
 				],
-				modifiers : ["export", "class", "def"],
-				name : "AbstractStream<T> implements Stream<T>"
+				name : "AbstractStream",
+				modifiers : ["export", "class", "def"]
 			},
 			child : block = {
 				children : [

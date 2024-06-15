@@ -76,7 +76,20 @@ public class JavaLang {
         ));
 
         var modifiers = Lang.createModifiersRule();
-        return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
+
+        var name =  new TypeRule("symbol", new StripRule(new ExtractStringRule("name")));
+        var prototype = new OrRule(List.of(
+                new TypeRule("generic", new FirstRule(new ExtractNodeRule("parent", name), "<", new RightRule(new ExtractStringRule("value"), ">"))),
+                name
+        ));
+
+        var leftRule1 = new ExtractNodeRule("name", prototype);
+        var beforeContent = new OrRule(List.of(
+                new FirstRule(leftRule1, " implements", new ExtractNodeRule("interface", prototype)),
+                leftRule1
+        ));
+
+        return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(beforeContent), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
     }
 
     private static LazyRule createValueRule() {
@@ -111,7 +124,7 @@ public class JavaLang {
 
         var caller = new ExtractNodeRule("caller", value);
         var withGenerics = new OrRule(List.of(
-                new LastRule(caller, "<" , new ExtractStringRule("temp")),
+                new LastRule(caller, "<", new ExtractStringRule("temp")),
                 caller
         ));
         var before = new RightRule(new InvocationStart(withGenerics, arguments), ")");
