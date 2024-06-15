@@ -7,6 +7,7 @@ import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaGenerator;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.Generator;
+import magma.compile.lang.MethodNormalizer;
 import magma.compile.lang.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -73,6 +74,7 @@ public class Main {
         var list = Arrays.asList(
                 new PackageRemover(),
                 new ClassSplitter(),
+                new MethodNormalizer(),
                 new MagmaGenerator(),
                 new MagmaFormatter()
         );

@@ -42,6 +42,11 @@ block = {
 		},
 		import = {
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MethodNormalizer"]
+			}
+		},
+		import = {
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "PackageRemover"]
 			}
 		},
@@ -816,6 +821,11 @@ block = {
 											constructor = {
 												caller : symbol = {
 													value : "ClassSplitter"
+												}
+											},
+											constructor = {
+												caller : symbol = {
+													value : "MethodNormalizer"
 												}
 											},
 											constructor = {

@@ -45,6 +45,12 @@ block = {
 		import = {
 			right-indent : "\n",
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "MethodNormalizer"]
+			}
+		},
+		import = {
+			right-indent : "\n",
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "PackageRemover"]
 			}
 		},
@@ -105,9 +111,9 @@ block = {
 							value : "class "
 						}
 					},
-					method = {
+					function = {
 						name : "main",
-						modifiers : ["public", "static"],
+						modifiers : ["export", "def"],
 						type : symbol = {
 							value : "void"
 						},
@@ -484,9 +490,9 @@ block = {
 							]
 						}
 					},
-					method = {
+					function = {
 						name : "print",
-						modifiers : ["private", "static"],
+						modifiers : ["def"],
 						type : symbol = {
 							value : "void"
 						},
@@ -789,9 +795,9 @@ block = {
 							]
 						}
 					},
-					method = {
+					function = {
 						name : "generate",
-						modifiers : ["private", "static"],
+						modifiers : ["def"],
 						type : symbol = {
 							value : "Node"
 						},
@@ -826,6 +832,11 @@ block = {
 											constructor = {
 												caller : symbol = {
 													value : "ClassSplitter"
+												}
+											},
+											constructor = {
+												caller : symbol = {
+													value : "MethodNormalizer"
 												}
 											},
 											constructor = {
