@@ -944,7 +944,7 @@ block = {
 											}
 										},
 										arguments : [
-											constructor = {
+											invocation = {
 												arguments : [
 
 												],
@@ -952,7 +952,7 @@ block = {
 													value : "PackageRemover"
 												}
 											},
-											constructor = {
+											invocation = {
 												arguments : [
 
 												],
@@ -960,7 +960,7 @@ block = {
 													value : "ClassSplitter"
 												}
 											},
-											constructor = {
+											invocation = {
 												arguments : [
 
 												],
@@ -968,7 +968,7 @@ block = {
 													value : "JavaNormalizer"
 												}
 											},
-											constructor = {
+											invocation = {
 												arguments : [
 
 												],
@@ -976,7 +976,7 @@ block = {
 													value : "MagmaGenerator"
 												}
 											},
-											constructor = {
+											invocation = {
 												arguments : [
 
 												],

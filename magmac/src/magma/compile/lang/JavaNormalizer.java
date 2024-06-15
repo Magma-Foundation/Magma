@@ -11,6 +11,10 @@ import java.util.Collections;
 public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if(node.is("constructor")) {
+            return new Tuple<>(node.retype("invocation"), depth);
+        }
+
         if (node.is("lambda")) {
             var definition = new Node("definition")
                     .withStringList("modifiers", Collections.emptyList());
