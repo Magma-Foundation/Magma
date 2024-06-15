@@ -19,31 +19,31 @@ export class def Main() => {
 	public def main(args : String[]) : void => {
 		try 
 		{
-			let source=Paths.get();
-			let input=Files.readString();
-			let target=source.resolveSibling();
-			let parseResult=JavaLang.createRootRule().toNode();
+			let source=Paths.get(".", "magmac", "src", "magma", "Main.java");
+			let input=Files.readString(source);
+			let target=source.resolveSibling("Main.mgs");
+			let parseResult=JavaLang.createRootRule().toNode(input);
 			let parseError=parseResult.findError();
 			parseError.ifPresent()
 			let root=parseResult.create().orElseThrow();
-			Files.writeString()
-			let generated=generate();
-			Files.writeString()
+			Files.writeString(source.resolveSibling("Main.input.ast"), root.toString())
+			let generated=generate(root);
+			Files.writeString(source.resolveSibling("Main.output.ast"), generated.toString())
 			let rule : Rule=MagmaLang.createRootRule();
-			let generateResult=rule.fromNode();
+			let generateResult=rule.fromNode(generated);
 			let generateError=generateResult.findErr();
 			generateError.ifPresent()
-			Files.writeString()}
+			Files.writeString(target, generateResult.findValue().orElseThrow())}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace()}}
 	def print(e : Error_, depth : int) : void => {
-		let actualContext=e.findContext().orElse();
+		let actualContext=e.findContext().orElse("");
 		let index=actualContext.indexOf();
-		let context=index==-1?actualContext:actualContext.substring();
+		let context=index==-1?actualContext:actualContext.substring(0, index);
 		let message=e.findMessage();
 		message.ifPresent()
-		let causes=e.findCauses().orElse();
+		let causes=e.findCauses().orElse(Collections.emptyList());
 		if
 		(causes.isEmpty()){
 			return
@@ -54,10 +54,10 @@ export class def Main() => {
 			(
 			cause : Error_ in 
 			causes){
-				print()}}
+				print(cause, depth)}}
 		else
 		{
-			print()}}
+			print(causes.get(0), depth+1)}}
 	def generate(root : Node) : Node => {
 		let list=Arrays.asList();
 		let acc : Node=root;
@@ -67,6 +67,6 @@ export class def Main() => {
 		list){
 			
 			acc=
-			generator.generate();}
+			generator.generate(acc, -1);}
 		return
 		;}}
