@@ -1,11 +1,13 @@
 package magma.compile.lang;
 
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.MembersSplitter;
+import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
@@ -52,5 +54,19 @@ public class Lang {
 
     static StripRule createModifiersRule() {
         return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
+    }
+
+    static Rule createSplitter(Rule value) {
+        var arguments = new OrRule(List.of(
+                new EmptyRule(),
+                new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value)))
+        );
+
+        var caller = new ExtractNodeRule("caller", value);
+        return new InvocationStart(caller, arguments);
+    }
+
+    static TypeRule createInvocationRule(Rule value) {
+        return new TypeRule("invocation", new RightRule(createSplitter(value), ")"));
     }
 }

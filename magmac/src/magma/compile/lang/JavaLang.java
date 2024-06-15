@@ -41,14 +41,9 @@ public class JavaLang {
         var definition = createDefinitionHeaderRule();
 
         var value = new LazyRule();
-        var arguments = new OrRule(List.of(
-                new EmptyRule(),
-                new SplitMultipleRule(new ParamSplitter(), "", "arguments", new StripRule(value)))
-        );
+        var constructor = createConstructorRule(value);
+        var invocation = Lang.createInvocationRule(value);
 
-        var caller = new ExtractNodeRule("caller", value);
-        var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
-        var constructor = new TypeRule("constructor", new LeftRule("new ", new RightRule(new InvocationStart(caller, arguments), ")")));
         initValues(value, constructor, invocation);
 
         var declaration = new TypeRule("declaration", new FirstRule(new StripRule(definition), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";")));
@@ -85,6 +80,10 @@ public class JavaLang {
 
         var modifiers = Lang.createModifiersRule();
         return new TypeRule("class", new FirstRule(modifiers, "class ", new FirstRule(new StripRule(new ExtractStringRule("name")), "{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(classMember)), "}"))));
+    }
+
+    private static TypeRule createConstructorRule(LazyRule value) {
+        return new TypeRule("constructor", new LeftRule("new ", new RightRule(Lang.createSplitter(value), ")")));
     }
 
     private static Rule createDefinitionHeaderRule() {
