@@ -485,8 +485,9 @@ block = {
 								catch = {
 									right-indent : "\n\t",
 									left-indent : "\n\t\t",
-									definition : definition = {
+									condition : declaration = {
 										name : "e",
+										modifiers : ["let"],
 										type : symbol = {
 											value : "IOException"
 										}

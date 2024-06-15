@@ -50,14 +50,15 @@ public class MagmaLang {
 
         var name = new ExtractStringRule("name");
         var child = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", name);
-        var declaration = new TypeRule("declaration", new FirstRule(new OrRule(List.of(child, name)), " = ", new RightRule(new ExtractNodeRule("value", value), ";")));
+        var definition = new OrRule(List.of(child, name));
+        var declaration = new TypeRule("declaration", new FirstRule(definition, " = ", new RightRule(new ExtractNodeRule("value", value), ";")));
 
         var child1 = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
 
         statement.setRule(new OrRule(List.of(
                 declaration,
                 new TypeRule("try", new LeftRule("try {", child1)),
-                new TypeRule("catch", new LeftRule("catch (?){", child1)),
+                Lang.createCatchRule(definition, statement),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("if", new LeftRule("if (?){", child1)),
                 new TypeRule("else", new LeftRule("else {", child1)),

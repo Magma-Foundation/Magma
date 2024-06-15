@@ -444,7 +444,7 @@ block = {
 									}
 								},
 								catch = {
-									definition : definition = {
+									condition : declaration = {
 										name : "e",
 										type : symbol = {
 											value : "IOException"

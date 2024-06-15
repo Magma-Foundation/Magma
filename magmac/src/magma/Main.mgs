@@ -33,7 +33,7 @@ export def Main() => {
 			generateError.ifPresent();
 			Files.writeString(target, generateResult.findValue().orElseThrow());
 		}
-		catch (?){
+		catch (let e){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace();
 		}
