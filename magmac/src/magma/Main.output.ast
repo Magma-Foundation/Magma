@@ -789,10 +789,39 @@ block = {
 										]
 									}
 								},
-								any = {
-									value : "else {
-            print(causes.get(0), depth + 1);
-        }"
+								else = {
+									child : block = {
+										children : [
+											invocation = {
+												caller : symbol = {
+													value : "print"
+												},
+												arguments : [
+													invocation = {
+														arguments : [
+															number = {
+																value : "0"
+															}
+														],
+														caller : access = {
+															child : "get",
+															parent : symbol = {
+																value : "causes"
+															}
+														}
+													},
+													add = {
+														right : number = {
+															value : "1"
+														},
+														left : symbol = {
+															value : "depth"
+														}
+													}
+												]
+											}
+										]
+									}
 								}
 							]
 						}
