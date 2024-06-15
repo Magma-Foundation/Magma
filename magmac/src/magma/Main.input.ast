@@ -90,8 +90,15 @@ block = {
 			modifiers : ["public"],
 			child : block = {
 				children : [
-					any = {
-						value : "public static final String CLASS_KEYWORD_WITH_SPACE = "class ";"
+					declaration = {
+						name : "CLASS_KEYWORD_WITH_SPACE",
+						modifiers : ["public", "static", "final"],
+						type : symbol = {
+							value : "String"
+						},
+						value : string = {
+							value : "class "
+						}
 					},
 					method = {
 						name : "main",
@@ -446,11 +453,28 @@ block = {
 										]
 									}
 								},
-								any = {
-									value : "catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        }"
+								catch = {
+									definition : definition = {
+										name : "e",
+										type : symbol = {
+											value : "IOException"
+										}
+									},
+									child : block = {
+										children : [
+											comment = {
+												value : "noinspection CallToPrintStackTrace"
+											},
+											invocation = {
+												caller : access = {
+													child : "printStackTrace",
+													parent : symbol = {
+														value : "e"
+													}
+												}
+											}
+										]
+									}
 								}
 							]
 						}

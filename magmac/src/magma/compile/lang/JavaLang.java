@@ -81,7 +81,7 @@ public class JavaLang {
                 new TypeRule("constructor", new RightRule(constructor, ";")),
                 new TypeRule("assignment", new FirstRule(new StripRule(new SymbolRule(new ExtractStringRule("reference"))), "=", new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";"))),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
-                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", definitionHeader), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
+                new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", new TypeRule("definition", definitionHeader)), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),
                 new TypeRule("return", new LeftRule("return", new RightRule(new StripRule(new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)))), ";"))),
                 new TypeRule("for", new LeftRule("for", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new LastRule(new StripRule(definitionHeader), ":", new StripRule(new ExtractNodeRule("collection", value))), ")"))), "{", block))),
