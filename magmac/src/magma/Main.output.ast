@@ -92,7 +92,7 @@ block = {
 		},
 		function = {
 			name : "Main",
-			modifiers : ["public", "def"],
+			modifiers : ["export", "def"],
 			child : block = {
 				children : [
 					declaration = {

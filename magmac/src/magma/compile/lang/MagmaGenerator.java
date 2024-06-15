@@ -11,7 +11,11 @@ public class MagmaGenerator extends Generator {
         if (!node.is("function")) return node;
 
         return node.mapAttributes(attributes -> attributes.mapValue("modifiers", StringListAttribute.Factory, list -> {
-            var copy = new ArrayList<>(list);
+            var copy = new ArrayList<String>();
+            if (list.contains("public")) {
+                copy.add("export");
+            }
+
             copy.add("def");
             return copy;
         }));
