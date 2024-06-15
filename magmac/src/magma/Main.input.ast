@@ -12,6 +12,11 @@ block = {
 		},
 		import = {
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "ClassSplitter"]
+			}
+		},
+		import = {
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaLang"]
 			}
 		},
@@ -796,6 +801,11 @@ block = {
 											constructor = {
 												caller : symbol = {
 													value : "PackageRemover"
+												}
+											},
+											constructor = {
+												caller : symbol = {
+													value : "ClassSplitter"
 												}
 											}
 										]
