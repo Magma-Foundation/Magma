@@ -17,77 +17,77 @@ import java.util.Arrays;
 import java.util.Collections;
 
 export def Main => {
-
-export def main : void => {
-try 
-{
-
-let source;
-
-let input;
-
-let target;
-
-let parseResult;
-
-let parseError;
-?()
-
-let root;
-?()
-
-let generated;
-?()
-
-let rule : Rule;
-
-let generateResult;
-
-let generateError;
-?()
-?()}
-catch (let e : IOException){
-//noinspection CallToPrintStackTrace
-?()}}
-
-def print : void => {
-
-let actualContext;
-
-let index;
-
-let context;
-
-let message;
-?()
-
-let causes;
-if
-(?){
-return
-;}
-if
-(?){
-for
-(
-cause : Error_ in 
-?){
-?()}}
-else
-{
-?()}}
-
-def generate : Node => {
-
-let list;
-
-let acc : Node;
-for
-(
-generator : Generator in 
-?){
-
-acc=
-?;}
-return
-;}}
+	
+	export def main : void => {
+		try 
+		{
+			
+			let source;
+			
+			let input;
+			
+			let target;
+			
+			let parseResult;
+			
+			let parseError;
+			?()
+			
+			let root;
+			?()
+			
+			let generated;
+			?()
+			
+			let rule : Rule;
+			
+			let generateResult;
+			
+			let generateError;
+			?()
+			?()}
+		catch (let e : IOException){
+			//noinspection CallToPrintStackTrace
+			?()}}
+	
+	def print : void => {
+		
+		let actualContext;
+		
+		let index;
+		
+		let context;
+		
+		let message;
+		?()
+		
+		let causes;
+		if
+		(?){
+			return
+			;}
+		if
+		(?){
+			for
+			(
+			cause : Error_ in 
+			?){
+				?()}}
+		else
+		{
+			?()}}
+	
+	def generate : Node => {
+		
+		let list;
+		
+		let acc : Node;
+		for
+		(
+		generator : Generator in 
+		?){
+			
+			acc=
+			?;}
+		return
+		;}}

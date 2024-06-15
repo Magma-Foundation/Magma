@@ -104,7 +104,7 @@ block = {
 				children : [
 					function = {
 						name : "main",
-						left-indent : "\n",
+						left-indent : "\n\t",
 						modifiers : ["export", "def"],
 						type : symbol = {
 							value : "void"
@@ -122,13 +122,13 @@ block = {
 						child : block = {
 							children : [
 								try = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											declaration = {
 												name : "source",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "get",
@@ -157,8 +157,8 @@ block = {
 											},
 											declaration = {
 												name : "input",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -175,8 +175,8 @@ block = {
 											},
 											declaration = {
 												name : "target",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														string = {
@@ -192,9 +192,9 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "\n",
 												modifiers : ["let"],
 												name : "parseResult",
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -215,9 +215,9 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "\n",
 												name : "parseError",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "findError",
@@ -228,7 +228,7 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "ifPresent",
 													parent : symbol = {
@@ -256,8 +256,8 @@ block = {
 											},
 											declaration = {
 												name : "root",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "orElseThrow",
@@ -273,7 +273,7 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -306,8 +306,8 @@ block = {
 											},
 											declaration = {
 												name : "generated",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : symbol = {
 														value : "generate"
@@ -320,7 +320,7 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -353,8 +353,8 @@ block = {
 											},
 											declaration = {
 												name : "rule",
-												left-indent : "\n",
 												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "Rule"
 												},
@@ -368,9 +368,9 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "\n",
 												modifiers : ["let"],
 												name : "generateResult",
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													arguments : [
 														symbol = {
@@ -386,9 +386,9 @@ block = {
 												}
 											},
 											declaration = {
-												left-indent : "\n",
 												modifiers : ["let"],
 												name : "generateError",
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "findErr",
@@ -399,7 +399,7 @@ block = {
 												}
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "ifPresent",
 													parent : symbol = {
@@ -426,7 +426,7 @@ block = {
 												]
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "writeString",
 													parent : symbol = {
@@ -456,7 +456,7 @@ block = {
 									}
 								},
 								catch = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									condition : declaration = {
 										name : "e",
 										modifiers : ["let"],
@@ -467,11 +467,11 @@ block = {
 									child : block = {
 										children : [
 											comment = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												value : "noinspection CallToPrintStackTrace"
 											},
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : access = {
 													child : "printStackTrace",
 													parent : symbol = {
@@ -487,8 +487,8 @@ block = {
 					},
 					function = {
 						name : "print",
-						left-indent : "\n",
 						modifiers : ["def"],
+						left-indent : "\n\t",
 						type : symbol = {
 							value : "void"
 						},
@@ -509,9 +509,9 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
-									left-indent : "\n",
 									modifiers : ["let"],
 									name : "actualContext",
+									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											string = {
@@ -533,8 +533,8 @@ block = {
 								},
 								declaration = {
 									name : "index",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											char = {
@@ -551,8 +551,8 @@ block = {
 								},
 								declaration = {
 									name : "context",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									value : ternary = {
 										true : symbol = {
 											value : "actualContext"
@@ -585,8 +585,8 @@ block = {
 								},
 								declaration = {
 									name : "message",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									value : invocation = {
 										caller : access = {
 											child : "findMessage",
@@ -597,7 +597,7 @@ block = {
 									}
 								},
 								invocation = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									caller : access = {
 										child : "ifPresent",
 										parent : symbol = {
@@ -663,8 +663,8 @@ block = {
 								},
 								declaration = {
 									name : "causes",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									value : invocation = {
 										arguments : [
 											invocation = {
@@ -690,11 +690,11 @@ block = {
 									}
 								},
 								if = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											return = {
-												left-indent : "\n"
+												left-indent : "\n\t\t\t"
 											}
 										]
 									},
@@ -708,7 +708,7 @@ block = {
 									}
 								},
 								if = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									condition : greater-than = {
 										right : number = {
 											value : "1"
@@ -726,7 +726,7 @@ block = {
 										children : [
 											for = {
 												name : "cause",
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "Error_"
 												},
@@ -736,7 +736,7 @@ block = {
 												child : block = {
 													children : [
 														invocation = {
-															left-indent : "\n",
+															left-indent : "\n\t\t\t\t",
 															caller : symbol = {
 																value : "print"
 															},
@@ -756,11 +756,11 @@ block = {
 									}
 								},
 								else = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									child : block = {
 										children : [
 											invocation = {
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												caller : symbol = {
 													value : "print"
 												},
@@ -796,8 +796,8 @@ block = {
 					},
 					function = {
 						name : "generate",
-						left-indent : "\n",
 						modifiers : ["def"],
+						left-indent : "\n\t",
 						type : symbol = {
 							value : "Node"
 						},
@@ -813,8 +813,8 @@ block = {
 							children : [
 								declaration = {
 									name : "list",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									value : invocation = {
 										caller : access = {
 											child : "asList",
@@ -853,8 +853,8 @@ block = {
 								},
 								declaration = {
 									name : "acc",
-									left-indent : "\n",
 									modifiers : ["let"],
+									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "Node"
 									},
@@ -864,7 +864,7 @@ block = {
 								},
 								for = {
 									name : "generator",
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "Generator"
 									},
@@ -875,7 +875,7 @@ block = {
 										children : [
 											assignment = {
 												reference : "acc",
-												left-indent : "\n",
+												left-indent : "\n\t\t\t",
 												value : invocation = {
 													caller : access = {
 														child : "generate",
@@ -897,7 +897,7 @@ block = {
 									}
 								},
 								return = {
-									left-indent : "\n",
+									left-indent : "\n\t\t",
 									child : symbol = {
 										value : "acc"
 									}
