@@ -114,4 +114,8 @@ public class Lang {
     static Rule createParamsRule(Rule definition) {
         return new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(new TypeRule("definition", definition)));
     }
+
+    static TypeRule createStringRule() {
+        return new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\"")));
+    }
 }

@@ -1,13 +1,11 @@
 package magma.compile.lang;
 
-import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
-import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
@@ -20,8 +18,12 @@ public class MagmaLang {
         var statement = new LazyRule();
 
         var definition = createDefinitionRule();
+        var value = new LazyRule();
+        value.setRule(new OrRule(List.of(
+                Lang.createStringRule(),
+                Lang.createInvocationRule(value)
+        )));
 
-        var value = new LeftRule("?", new EmptyRule());
         statement.setRule(new OrRule(List.of(
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),

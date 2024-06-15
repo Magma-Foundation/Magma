@@ -76,7 +76,7 @@ public class JavaLang {
     private static LazyRule createValueRule() {
         var value = new LazyRule();
         value.setRule(new OrRule(List.of(
-                new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
+                Lang.createStringRule(),
                 new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
                 new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
                 new TypeRule("ternary", new FirstRule(
