@@ -87,7 +87,7 @@ public class JavaLang {
                 createConstructorRule(value),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),
-                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                Lang.createSymbolRule(),
                 new TypeRule("number", new NumberRule(new ExtractStringRule("value"))),
                 createOperator("equals", "==", value),
                 createOperator("add", "+", value),

@@ -122,4 +122,8 @@ public class Lang {
     static TypeRule createAccessRule(LazyRule value) {
         return new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child")))));
     }
+
+    static TypeRule createSymbolRule() {
+        return new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value")));
+    }
 }

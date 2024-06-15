@@ -22,7 +22,8 @@ public class MagmaLang {
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 Lang.createInvocationRule(value),
-                Lang.createAccessRule(value)
+                Lang.createAccessRule(value),
+                Lang.createSymbolRule()
         )));
 
         statement.setRule(new OrRule(List.of(
