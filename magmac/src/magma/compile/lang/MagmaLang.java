@@ -33,7 +33,7 @@ public class MagmaLang {
                                 new StripRule(new ExtractNodeRule("true", value)), ":",
                                 new StripRule(new ExtractNodeRule("false", value))))),
                 new TypeRule("symbol", new ExtractStringRule("value")),
-                new TypeRule("access", new LeftRule("?", new EmptyRule())),
+                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new ExtractStringRule("child"))),
                 new TypeRule("equals", new LeftRule("? == ?", new EmptyRule()))
         )));
 

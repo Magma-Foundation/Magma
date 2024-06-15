@@ -17,19 +17,19 @@ import java.util.Collections;
 export def Main() => {
 	export def main() => {
 		try {
-			let source = ?(?);
-			let input = ?(?);
-			let target = ?(?);
-			let parseResult = ?(?);
-			let parseError = ?(?);
+			let source = Paths.get(?);
+			let input = Files.readString(?);
+			let target = source.resolveSibling(?);
+			let parseResult = JavaLang.createRootRule(?).toNode(?);
+			let parseError = parseResult.findError(?);
 			?(?);
-			let root = ?(?);
+			let root = parseResult.create(?).orElseThrow(?);
 			?(?);
 			let generated = generate(?);
 			?(?);
-			let rule = ?(?);
-			let generateResult = ?(?);
-			let generateError = ?(?);
+			let rule = MagmaLang.createRootRule(?);
+			let generateResult = rule.fromNode(?);
+			let generateError = generateResult.findErr(?);
 			?(?);
 			?(?);
 		}
@@ -39,12 +39,12 @@ export def Main() => {
 		}
 	}
 	def print() => {
-		let actualContext = ?(?);
-		let index = ?(?);
-		let context = ? == ??actualContext:?(?);
-		let message = ?(?);
+		let actualContext = e.findContext(?).orElse(?);
+		let index = actualContext.indexOf(?);
+		let context = ? == ??actualContext:actualContext.substring(?);
+		let message = e.findMessage(?);
 		?(?);
-		let causes = ?(?);
+		let causes = e.findCauses(?).orElse(?);
 		if (?){
 			return 
 		}
@@ -58,7 +58,7 @@ export def Main() => {
 		}
 	}
 	def generate() => {
-		let list = ?(?);
+		let list = Arrays.asList(?);
 		let acc = root;
 		for (?){
 			? = ?
