@@ -1,0 +1,28 @@
+import java.util.Optional;
+import java.util.function.Function;
+
+export class def AbstractStream<T>(__impl__ : {
+    head : () => Optional<R>;
+}) {
+    public def map<R>(mapper : T => R): Stream<R> => AbstractStream({
+        def head() : Optional<R> {
+            return AbstractStream.this.head().map(mapper);
+        }
+    });
+
+    public def collect<C>(collector : Collector<T, C>) : C {
+        let current = collector.createInitial();
+
+        while (true) {
+            let finalCurrent = current;
+            let tuple = Options.toTuple(head().map(head -> collector.fold(finalCurrent, head)), current);
+            if (tuple.left()) {
+                current = tuple.right();
+            } else {
+                return current;
+            }
+        }
+    }
+
+    implements Stream<T>;
+}
