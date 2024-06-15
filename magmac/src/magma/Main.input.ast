@@ -246,7 +246,7 @@ block = {
 												arguments : [
 													lambda = {
 														param-name : "error",
-														value : invocation = {
+														child : invocation = {
 															caller : symbol = {
 																value : "print"
 															},
@@ -444,7 +444,7 @@ block = {
 												arguments : [
 													lambda = {
 														param-name : "error",
-														value : invocation = {
+														child : invocation = {
 															caller : symbol = {
 																value : "print"
 															},
@@ -664,7 +664,7 @@ block = {
 									arguments : [
 										lambda = {
 											param-name : "s",
-											value : invocation = {
+											child : invocation = {
 												caller : access = {
 													child : "println",
 													parent : access = {

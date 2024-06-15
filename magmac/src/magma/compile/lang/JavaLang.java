@@ -79,7 +79,7 @@ public class JavaLang {
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 new TypeRule("char", new LeftRule("'", new RightRule(new ExtractStringRule("value"), "'"))),
-                new TypeRule("lambda", new FirstRule(new StripRule(new ExtractStringRule("param-name")), "->", new StripRule(new ExtractNodeRule("value", value)))),
+                createLambdaRule(value),
                 Lang.createTernaryRule(value),
                 createConstructorRule(value),
                 Lang.createInvocationRule(value),
@@ -91,6 +91,12 @@ public class JavaLang {
                 Lang.createOperator("greater-than", ">", value)
         )));
         return value;
+    }
+
+    private static TypeRule createLambdaRule(LazyRule value) {
+        var left = new StripRule(new ExtractStringRule("param-name"));
+        var right = new StripRule(new ExtractNodeRule("child", value));
+        return new TypeRule("lambda", new FirstRule(left, "->", right));
     }
 
     private static TypeRule createConstructorRule(LazyRule value) {

@@ -2,7 +2,6 @@ package magma.compile.lang;
 
 import magma.api.Tuple;
 import magma.compile.attribute.Attribute;
-import magma.compile.attribute.Attributes;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
@@ -12,9 +11,13 @@ import java.util.Collections;
 public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-  /*      if (node.is("lambda")) {
-            return new Tuple<>(node.retype("function"), depth);
-        }*/
+        if (node.is("lambda")) {
+            var definition = new Node("definition")
+                    .withStringList("modifiers", Collections.emptyList());
+
+            var function = node.retype("function").withNode("definition", definition);
+            return new Tuple<>(function, depth);
+        }
 
         if (node.is("declaration")) {
             var withModifiers = node.mapAttributes(attributes -> {

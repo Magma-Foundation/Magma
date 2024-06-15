@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -53,7 +54,7 @@ public class MagmaLang {
 
     private static Rule createDefinitionRule() {
         var modifiers = Lang.createModifiersRule();
-        var withoutModifiers = new ExtractStringRule("name");
+        var withoutModifiers = new OrRule(List.of(new ExtractStringRule("name"), new EmptyRule()));
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
 
         var maybeModifiers = new OrRule(List.of(
@@ -74,7 +75,7 @@ public class MagmaLang {
     }
 
     private static TypeRule createFunctionRule(Rule statement) {
-        var child = new ExtractNodeRule("child", Lang.createBlock(statement));
+        var child = new ExtractNodeRule("child", new OrRule(List.of(Lang.createBlock(statement), statement)));
         var definition = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
         return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(child, "}")));
     }

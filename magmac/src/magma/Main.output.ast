@@ -266,9 +266,12 @@ block = {
 													}
 												},
 												arguments : [
-													lambda = {
+													function = {
 														param-name : "error",
-														value : invocation = {
+														definition : definition = {
+															modifiers : ["def"]
+														},
+														child : invocation = {
 															caller : symbol = {
 																value : "print"
 															},
@@ -470,9 +473,12 @@ block = {
 													}
 												},
 												arguments : [
-													lambda = {
+													function = {
 														param-name : "error",
-														value : invocation = {
+														definition : definition = {
+															modifiers : ["def"]
+														},
+														child : invocation = {
 															caller : symbol = {
 																value : "print"
 															},
@@ -697,9 +703,12 @@ block = {
 										}
 									},
 									arguments : [
-										lambda = {
+										function = {
 											param-name : "s",
-											value : invocation = {
+											definition : definition = {
+												modifiers : ["def"]
+											},
+											child : invocation = {
 												caller : access = {
 													child : "println",
 													parent : access = {
