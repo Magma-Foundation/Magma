@@ -762,15 +762,6 @@ block = {
 									}
 								},
 								if = {
-									child : block = {
-										children : [
-											any = {
-												value : "for (Error_ cause : causes) {
-                print(cause, depth);
-            }"
-											}
-										]
-									},
 									condition : greater-than = {
 										right : number = {
 											value : "1"
@@ -783,6 +774,30 @@ block = {
 												}
 											}
 										}
+									},
+									child : block = {
+										children : [
+											for = {
+												condition : "Error_ cause : causes",
+												child : block = {
+													children : [
+														invocation = {
+															caller : symbol = {
+																value : "print"
+															},
+															arguments : [
+																symbol = {
+																	value : "cause"
+																},
+																symbol = {
+																	value : "depth"
+																}
+															]
+														}
+													]
+												}
+											}
+										]
 									}
 								},
 								any = {
@@ -880,10 +895,25 @@ block = {
 										value : "root"
 									}
 								},
-								any = {
-									value : "for (Modifier modifier : list) {
-            acc = modifier.generate(acc);
-        }"
+								for = {
+									condition : "Modifier modifier : list",
+									child : block = {
+										children : [
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "acc"
+													}
+												],
+												caller : access = {
+													child : "generate",
+													parent : any = {
+														value : "acc = modifier"
+													}
+												}
+											}
+										]
+									}
 								},
 								return = {
 									child : symbol = {
