@@ -2,6 +2,7 @@ package magma.compile.rule.split;
 
 import magma.api.Result;
 import magma.api.Tuple;
+import magma.compile.CompileError;
 import magma.compile.GeneratingException;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
@@ -47,9 +48,9 @@ public abstract class SplitOnceRule implements Rule {
                     .map(UntypedRuleResult::new)
                     .orElseThrow();
         }).orElseGet(() -> {
-            var format = "Slice '%s' not present: %s";
-            var message = format.formatted(slice, input);
-            return new ErrorRuleResult(new JavaError(new GeneratingException(message)));
+            var format = "Slice '%s' not present.";
+            var message = format.formatted(slice);
+            return new ErrorRuleResult(new CompileError(message, input));
         });
     }
 
