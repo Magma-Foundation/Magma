@@ -37,6 +37,7 @@ public class JavaLang {
 
         var caller = new ExtractNodeRule("caller", value);
         var invocation = new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
+        var constructor = new TypeRule("constructor", new LeftRule("new ", new RightRule(new InvocationStart(caller, arguments), ")")));
 
         value.setRule(new OrRule(List.of(
                 new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\""))),
@@ -47,6 +48,7 @@ public class JavaLang {
                         new FirstRule(
                                 new StripRule(new ExtractNodeRule("true", value)), ":",
                                 new StripRule(new ExtractNodeRule("false", value))))),
+                constructor,
                 invocation,
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child"))))),
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
@@ -77,6 +79,7 @@ public class JavaLang {
                 new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value"))),
                 new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", block)))),
                 declaration,
+                new TypeRule("constructor", new RightRule(constructor, ";")),
                 new TypeRule("invocation", new RightRule(invocation, ";")),
                 new TypeRule("catch", new LeftRule("catch ", new StripRule(new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("definition", definitionHeader), ")"))), "{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}"))))),
                 new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"))), "{", block))),

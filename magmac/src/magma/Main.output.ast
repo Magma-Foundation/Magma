@@ -859,9 +859,9 @@ block = {
 											}
 										},
 										arguments : [
-											invocation = {
-												caller : any = {
-													value : "new RootTypeRemover"
+											constructor = {
+												caller : symbol = {
+													value : "RootTypeRemover"
 												},
 												arguments : [
 													string = {
@@ -869,9 +869,9 @@ block = {
 													}
 												]
 											},
-											invocation = {
-												caller : any = {
-													value : "new RootTypeRemover"
+											constructor = {
+												caller : symbol = {
+													value : "RootTypeRemover"
 												},
 												arguments : [
 													string = {
@@ -879,24 +879,24 @@ block = {
 													}
 												]
 											},
-											invocation = {
-												caller : any = {
-													value : "new MethodMigrator"
+											constructor = {
+												caller : symbol = {
+													value : "MethodMigrator"
 												}
 											},
-											invocation = {
-												caller : any = {
-													value : "new ModifierAttacher"
+											constructor = {
+												caller : symbol = {
+													value : "ModifierAttacher"
 												}
 											},
-											invocation = {
-												caller : any = {
-													value : "new ClassSplitter"
+											constructor = {
+												caller : symbol = {
+													value : "ClassSplitter"
 												}
 											},
-											invocation = {
-												caller : any = {
-													value : "new MagmaFormatter"
+											constructor = {
+												caller : symbol = {
+													value : "MagmaFormatter"
 												}
 											}
 										]
