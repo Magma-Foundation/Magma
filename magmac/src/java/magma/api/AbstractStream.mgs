@@ -4,7 +4,7 @@ import java.util.function.Function;
 export class def AbstractStream<T>(__impl__ : {
     head : () => Optional<R>;
 }) {
-    public def map<R>(mapper : T => R): Stream<R> => AbstractStream({
+    public def map<R>(mapper : T => R): Stream<R> => AbstractStream<R>({
         def head() : Optional<R> {
             return AbstractStream.this.head().map(mapper);
         }
