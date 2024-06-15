@@ -75,7 +75,7 @@ public class JavaLang {
 
         statement.setRule(new OrRule(copy));
 
-        var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(definition));
+        var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", new StripRule(new TypeRule("definition", definition)));
         var content = new StripRule(new LeftRule("{", block));
         var paramsAndValue = new FirstRule(params, ")", content);
         var methodRule = new TypeRule("method", new FirstRule(definition, "(", paramsAndValue));
