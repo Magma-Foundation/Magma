@@ -46,7 +46,7 @@ public class Lang {
         var type = new LazyRule();
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
-                new TypeRule("symbol", new ExtractStringRule("value"))
+                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value")))
         )));
         return type;
     }

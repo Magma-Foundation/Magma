@@ -137,10 +137,6 @@ public class JavaLang {
 
     private static Rule createDefinitionHeaderRule() {
         var type = Lang.createTypeRule();
-        return createDefinitionHeaderRule(type);
-    }
-
-    private static Rule createDefinitionHeaderRule(Rule type) {
         var modifiers = Lang.createModifiersRule();
         var withoutModifiers = new ExtractNodeRule("type", type);
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
