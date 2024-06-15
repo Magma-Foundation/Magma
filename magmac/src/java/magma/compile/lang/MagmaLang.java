@@ -47,7 +47,8 @@ public class MagmaLang {
                 createFunctionRule(statement),
                 Lang.createDeclarationRule(definition, value),
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
-                Lang.createEmptyStatementRule()
+                Lang.createEmptyStatementRule(),
+                new TypeRule("trait", new EmptyRule())
         )));
 
         return Lang.createBlock(new OrRule(List.of(

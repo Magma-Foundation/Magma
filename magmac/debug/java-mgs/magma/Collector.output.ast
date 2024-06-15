@@ -1,6 +1,6 @@
 block = {
 	children : [
-		interface = {
+		trait = {
 			right-indent : "\n",
 			modifiers : ["public"],
 			name : generic = {
