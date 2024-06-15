@@ -139,9 +139,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "source",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													caller : access = {
@@ -174,9 +172,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "input",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													arguments : [
@@ -197,9 +193,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "target",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													arguments : [
@@ -219,10 +213,8 @@ block = {
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												definition : definition = {
-													name : "parseResult",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"],
+													name : "parseResult"
 												},
 												value : invocation = {
 													arguments : [
@@ -248,9 +240,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "parseError",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													caller : access = {
@@ -293,9 +283,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "root",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													caller : access = {
@@ -348,9 +336,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "generated",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"]
 												},
 												value : invocation = {
 													caller : symbol = {
@@ -400,6 +386,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "rule",
+													modifiers : ["let"],
 													type : symbol = {
 														value : "Rule"
 													}
@@ -417,10 +404,8 @@ block = {
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												definition : definition = {
-													name : "generateResult",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"],
+													name : "generateResult"
 												},
 												value : invocation = {
 													arguments : [
@@ -440,10 +425,8 @@ block = {
 												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												definition : definition = {
-													name : "generateError",
-													type : symbol = {
-														value : "var"
-													}
+													modifiers : ["let"],
+													name : "generateError"
 												},
 												value : invocation = {
 													caller : access = {
@@ -570,10 +553,8 @@ block = {
 									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									definition : definition = {
-										name : "actualContext",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"],
+										name : "actualContext"
 									},
 									value : invocation = {
 										arguments : [
@@ -599,9 +580,7 @@ block = {
 									left-indent : "\n\t\t",
 									definition : definition = {
 										name : "index",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"]
 									},
 									value : invocation = {
 										arguments : [
@@ -622,9 +601,7 @@ block = {
 									left-indent : "\n\t\t",
 									definition : definition = {
 										name : "context",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"]
 									},
 									value : ternary = {
 										true : symbol = {
@@ -661,9 +638,7 @@ block = {
 									left-indent : "\n\t\t",
 									definition : definition = {
 										name : "message",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"]
 									},
 									value : invocation = {
 										caller : access = {
@@ -744,9 +719,7 @@ block = {
 									left-indent : "\n\t\t",
 									definition : definition = {
 										name : "causes",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"]
 									},
 									value : invocation = {
 										arguments : [
@@ -901,9 +874,7 @@ block = {
 									left-indent : "\n\t\t",
 									definition : definition = {
 										name : "list",
-										type : symbol = {
-											value : "var"
-										}
+										modifiers : ["let"]
 									},
 									value : invocation = {
 										caller : access = {
@@ -949,6 +920,7 @@ block = {
 									},
 									definition : definition = {
 										name : "acc",
+										modifiers : ["let"],
 										type : symbol = {
 											value : "Node"
 										}

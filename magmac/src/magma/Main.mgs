@@ -19,31 +19,31 @@ export class def Main() => {
 	public def main(args : String[]) : void => {
 		try 
 		{
-			source : var=Paths.get();
-			input : var=Files.readString();
-			target : var=source.resolveSibling();
-			parseResult : var=JavaLang.createRootRule().toNode();
-			parseError : var=parseResult.findError();
+			let source=Paths.get();
+			let input=Files.readString();
+			let target=source.resolveSibling();
+			let parseResult=JavaLang.createRootRule().toNode();
+			let parseError=parseResult.findError();
 			parseError.ifPresent()
-			root : var=parseResult.create().orElseThrow();
+			let root=parseResult.create().orElseThrow();
 			Files.writeString()
-			generated : var=generate();
+			let generated=generate();
 			Files.writeString()
-			rule : Rule=MagmaLang.createRootRule();
-			generateResult : var=rule.fromNode();
-			generateError : var=generateResult.findErr();
+			let rule : Rule=MagmaLang.createRootRule();
+			let generateResult=rule.fromNode();
+			let generateError=generateResult.findErr();
 			generateError.ifPresent()
 			Files.writeString()}
 		catch (let e : IOException){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace()}}
 	def print(e : Error_, depth : int) : void => {
-		actualContext : var=e.findContext().orElse();
-		index : var=actualContext.indexOf();
-		context : var=index==-1?actualContext:actualContext.substring();
-		message : var=e.findMessage();
+		let actualContext=e.findContext().orElse();
+		let index=actualContext.indexOf();
+		let context=index==-1?actualContext:actualContext.substring();
+		let message=e.findMessage();
 		message.ifPresent()
-		causes : var=e.findCauses().orElse();
+		let causes=e.findCauses().orElse();
 		if
 		(causes.isEmpty()){
 			return
@@ -59,8 +59,8 @@ export class def Main() => {
 		{
 			print()}}
 	def generate(root : Node) : Node => {
-		list : var=Arrays.asList();
-		acc : Node=root;
+		let list=Arrays.asList();
+		let acc : Node=root;
 		for
 		(
 		generator : Generator in 
