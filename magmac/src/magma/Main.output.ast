@@ -1,99 +1,85 @@
 block = {
 	children : [
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "Error_"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "ClassSplitter"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "JavaLang"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaLang"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "Modifier"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "lang", "PackageRemover"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Node"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["magma", "compile", "rule", "Rule"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "io", "IOException"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Files"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "nio", "file", "Paths"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "util", "Arrays"]
 			}
 		},
 		import = {
-			right-indent : "
-",
+			right-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "util", "Collections"]
 			}

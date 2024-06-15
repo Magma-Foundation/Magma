@@ -10,6 +10,10 @@ public record StringAttribute(String value) implements Attribute {
 
     @Override
     public String format(int depth) {
-        return "\"" + value + "\"";
+        return "\"" + escape() + "\"";
+    }
+
+    private String escape() {
+        return value.replace("\n", "\\n");
     }
 }
