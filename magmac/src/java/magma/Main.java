@@ -103,7 +103,7 @@ public class Main {
     private static void print(Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
-        var context = index == -1 ? actualContext : actualContext.substring(0, index);
+        var context = index == -1 ? actualContext : actualContext.substring(0, Math.max(actualContext.length(), Math.max(20, index)));
 
         var message = e.findMessage();
         message.ifPresent(s -> System.err.println("\t".repeat(depth) + depth + " = " + s + " " + context));
