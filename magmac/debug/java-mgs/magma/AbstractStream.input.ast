@@ -1,0 +1,229 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "api"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		class = {
+			modifiers : ["public", "abstract"],
+			name : "AbstractStream<T> implements Stream<T>",
+			child : block = {
+				children : [
+					method = {
+						params : [
+							definition = {
+								name : "mapper",
+								modifiers : ["Function<T,"],
+								type : symbol = {
+									value : "R>"
+								}
+							}
+						],
+						definition : definition = {
+							name : "map",
+							type : symbol = {
+								value : "Stream<R>"
+							},
+							modifiers : ["@Override
+", "", "", "", "public", "<R>"]
+						},
+						child : block = {
+							children : [
+								return = {
+									child : constructor = {
+										temp : "R>",
+										arguments : [
+
+										],
+										caller : symbol = {
+											value : "AbstractStream"
+										},
+										after : "\n            @Override\n            public Optional<R> head() {\n                return AbstractStream.this.head().map(mapper);\n            }\n        }"
+									}
+								},
+								empty = {
+								}
+							]
+						}
+					},
+					method = {
+						params : [
+							definition = {
+								name : "collector",
+								modifiers : ["Collector<T,"],
+								type : symbol = {
+									value : "C>"
+								}
+							}
+						],
+						definition : definition = {
+							name : "collect",
+							type : symbol = {
+								value : "C"
+							},
+							modifiers : ["@Override
+", "", "", "", "public", "<C>"]
+						},
+						child : block = {
+							children : [
+								declaration = {
+									definition : definition = {
+										name : "current",
+										type : symbol = {
+											value : "var"
+										}
+									},
+									value : invocation = {
+										arguments : [
+
+										],
+										caller : access = {
+											child : "createInitial",
+											parent : symbol = {
+												value : "collector"
+											}
+										}
+									}
+								},
+								while = {
+									condition-parent : condition-parent = {
+										condition : symbol = {
+											value : "true"
+										}
+									},
+									child : block = {
+										children : [
+											declaration = {
+												value : symbol = {
+													value : "current"
+												},
+												definition : definition = {
+													name : "finalCurrent",
+													type : symbol = {
+														value : "C"
+													}
+												}
+											},
+											declaration = {
+												definition : definition = {
+													name : "tuple",
+													type : symbol = {
+														value : "var"
+													}
+												},
+												value : invocation = {
+													caller : access = {
+														child : "toTuple",
+														parent : symbol = {
+															value : "Options"
+														}
+													},
+													arguments : [
+														invocation = {
+															caller : access = {
+																child : "map",
+																parent : invocation = {
+																	arguments : [
+
+																	],
+																	caller : symbol = {
+																		value : "head"
+																	}
+																}
+															},
+															arguments : [
+																lambda = {
+																	param-name : "head",
+																	child : invocation = {
+																		caller : access = {
+																			child : "fold",
+																			parent : symbol = {
+																				value : "collector"
+																			}
+																		},
+																		arguments : [
+																			symbol = {
+																				value : "finalCurrent"
+																			},
+																			symbol = {
+																				value : "head"
+																			}
+																		]
+																	}
+																}
+															]
+														},
+														symbol = {
+															value : "current"
+														}
+													]
+												}
+											},
+											if = {
+												condition-parent : condition-parent = {
+													condition : invocation = {
+														arguments : [
+
+														],
+														caller : access = {
+															child : "left",
+															parent : symbol = {
+																value : "tuple"
+															}
+														}
+													}
+												},
+												child : block = {
+													children : [
+														assignment = {
+															assignable : assignable-parent = {
+																reference : "current"
+															},
+															value : invocation = {
+																arguments : [
+
+																],
+																caller : access = {
+																	child : "right",
+																	parent : symbol = {
+																		value : "tuple"
+																	}
+																}
+															}
+														}
+													]
+												}
+											},
+											else = {
+												child : block = {
+													children : [
+														return = {
+															child : symbol = {
+																value : "current"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}]

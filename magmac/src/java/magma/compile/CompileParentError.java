@@ -19,4 +19,9 @@ public record CompileParentError(String message, String context, Error_ parent) 
     public Optional<String> findContext() {
         return Optional.of(context);
     }
+
+    @Override
+    public int calculateDepth() {
+        return 1 + parent.calculateDepth();
+    }
 }

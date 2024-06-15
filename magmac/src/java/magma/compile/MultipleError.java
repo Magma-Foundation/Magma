@@ -24,4 +24,12 @@ public class MultipleError implements Error_ {
     public Optional<String> findContext() {
         return Optional.empty();
     }
+
+    @Override
+    public int calculateDepth() {
+        return 1 + errors.stream()
+                .mapToInt(Error_::calculateDepth)
+                .max()
+                .orElse(0);
+    }
 }

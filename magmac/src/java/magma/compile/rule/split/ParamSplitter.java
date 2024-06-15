@@ -2,7 +2,10 @@ package magma.compile.rule.split;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ParamSplitter implements Splitter {
     @Override
@@ -11,8 +14,23 @@ public class ParamSplitter implements Splitter {
         var buffer = new StringBuilder();
         var depth = 0;
 
-        for (int i = 0; i < input.length(); i++) {
-            var c = input.charAt(i);
+        var queue = IntStream.range(0, input.length())
+                .mapToObj(input::charAt)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        while (!queue.isEmpty()) {
+            var c = queue.pop();
+
+            if(c == '-') {
+                buffer.append(c);
+                if (!queue.isEmpty()) {
+                    var next = queue.peek();
+                    if(next == '>') {
+                        buffer.append(queue.pop());
+                        continue;
+                    }
+                }
+            }
 
             if (c == ',' && depth == 0) {
                 segments.add(buffer.toString());

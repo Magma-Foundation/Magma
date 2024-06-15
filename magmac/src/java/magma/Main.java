@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class Main {
 
@@ -119,7 +121,11 @@ public class Main {
             return;
         }
         if (causes.size() > 1) {
-            for (Error_ cause : causes) {
+            var list = causes.stream()
+                    .sorted(Comparator.comparingInt(Error_::calculateDepth))
+                    .toList();
+
+            for (Error_ cause : list) {
                 print(cause, depth);
             }
         } else {

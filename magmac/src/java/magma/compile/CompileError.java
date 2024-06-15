@@ -19,4 +19,9 @@ public record CompileError(String message, String context) implements Error_ {
     public Optional<String> findContext() {
         return Optional.of(context);
     }
+
+    @Override
+    public int calculateDepth() {
+        return 1;
+    }
 }

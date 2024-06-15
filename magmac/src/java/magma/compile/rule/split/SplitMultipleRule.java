@@ -4,8 +4,10 @@ import magma.api.Collectors;
 import magma.api.Err;
 import magma.api.Result;
 import magma.api.Streams;
-import magma.compile.GeneratingException;
+import magma.compile.CompileError;
+import magma.compile.CompileParentError;
 import magma.compile.Error_;
+import magma.compile.GeneratingException;
 import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
@@ -39,7 +41,8 @@ public final class SplitMultipleRule implements Rule {
         var members = new ArrayList<Node>();
         for (String childString : split) {
             var result = childRule.toNode(childString);
-            if (result.findError().isPresent()) return result;
+            if (result.findError().isPresent())
+                return result.mapErr(err -> new CompileParentError("Cannot process child.", childString, err));
 
             var optional = result.create();
             if (optional.isEmpty()) {

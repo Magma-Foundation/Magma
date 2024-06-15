@@ -22,4 +22,9 @@ public record JavaError(GeneratingException e) implements Error_ {
         e.printStackTrace(new PrintWriter(writer));
         return Optional.of(writer.toString());
     }
+
+    @Override
+    public int calculateDepth() {
+        return 1;
+    }
 }

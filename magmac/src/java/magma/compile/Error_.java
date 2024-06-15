@@ -9,4 +9,6 @@ public interface Error_ {
     Optional<List<Error_>> findCauses();
 
     Optional<String> findContext();
+
+    int calculateDepth();
 }

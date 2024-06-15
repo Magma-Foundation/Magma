@@ -1,0 +1,258 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		function = {
+			left-indent : "\n",
+			right-indent : "\n",
+			modifiers : ["public", "abstract"],
+			name : "AbstractStream<T> implements Stream<T>",
+			definition : definition = {
+				params : [
+
+				],
+				modifiers : ["export", "class", "def"],
+				name : "AbstractStream<T> implements Stream<T>"
+			},
+			child : block = {
+				children : [
+					function = {
+						left-indent : "\n\t",
+						definition : definition = {
+							name : "map",
+							modifiers : ["public", "def"],
+							type : symbol = {
+								value : "Stream<R>"
+							},
+							params : [
+								definition = {
+									name : "mapper",
+									modifiers : ["Function<T,"],
+									type : symbol = {
+										value : "R>"
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									left-indent : "\n\t\t",
+									child : invocation = {
+										temp : "R>",
+										arguments : [
+
+										],
+										caller : symbol = {
+											value : "AbstractStream"
+										},
+										after : "\n            @Override\n            public Optional<R> head() {\n                return AbstractStream.this.head().map(mapper);\n            }\n        }"
+									}
+								},
+								empty = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t"
+								}
+							]
+						}
+					},
+					function = {
+						right-indent : "\n",
+						left-indent : "\n\t",
+						definition : definition = {
+							name : "collect",
+							modifiers : ["public", "def"],
+							type : symbol = {
+								value : "C"
+							},
+							params : [
+								definition = {
+									name : "collector",
+									modifiers : ["Collector<T,"],
+									type : symbol = {
+										value : "C>"
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								declaration = {
+									modifiers : ["let"],
+									left-indent : "\n\t\t",
+									definition : definition = {
+										name : "current",
+										modifiers : ["let"]
+									},
+									value : invocation = {
+										arguments : [
+
+										],
+										caller : access = {
+											child : "createInitial",
+											parent : symbol = {
+												value : "collector"
+											}
+										}
+									}
+								},
+								while = {
+									right-indent : "\n\t",
+									left-indent : "\n\t\t",
+									condition-parent : condition-parent = {
+										condition : symbol = {
+											value : "true"
+										}
+									},
+									child : block = {
+										children : [
+											declaration = {
+												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
+												value : symbol = {
+													value : "current"
+												},
+												definition : definition = {
+													modifiers : ["let"],
+													name : "finalCurrent",
+													type : symbol = {
+														value : "C"
+													}
+												}
+											},
+											declaration = {
+												modifiers : ["let"],
+												left-indent : "\n\t\t\t",
+												definition : definition = {
+													name : "tuple",
+													modifiers : ["let"]
+												},
+												value : invocation = {
+													caller : access = {
+														child : "toTuple",
+														parent : symbol = {
+															value : "Options"
+														}
+													},
+													arguments : [
+														invocation = {
+															caller : access = {
+																child : "map",
+																parent : invocation = {
+																	arguments : [
+
+																	],
+																	caller : symbol = {
+																		value : "head"
+																	}
+																}
+															},
+															arguments : [
+																function = {
+																	param-name : "head",
+																	definition : definition = {
+																		modifiers : [],
+																		params : [
+																			definition = {
+																				name : "head"
+																			}
+																		]
+																	},
+																	child : invocation = {
+																		caller : access = {
+																			child : "fold",
+																			parent : symbol = {
+																				value : "collector"
+																			}
+																		},
+																		arguments : [
+																			symbol = {
+																				value : "finalCurrent"
+																			},
+																			symbol = {
+																				value : "head"
+																			}
+																		]
+																	}
+																}
+															]
+														},
+														symbol = {
+															value : "current"
+														}
+													]
+												}
+											},
+											if = {
+												left-indent : "\n\t\t\t",
+												condition-parent : condition-parent = {
+													condition : invocation = {
+														arguments : [
+
+														],
+														caller : access = {
+															child : "left",
+															parent : symbol = {
+																value : "tuple"
+															}
+														}
+													}
+												},
+												child : block = {
+													children : [
+														assignment = {
+															right-indent : "\n\t\t\t",
+															left-indent : "\n\t\t\t\t",
+															assignable : assignable-parent = {
+																reference : "current"
+															},
+															value : invocation = {
+																arguments : [
+
+																],
+																caller : access = {
+																	child : "right",
+																	parent : symbol = {
+																		value : "tuple"
+																	}
+																}
+															}
+														}
+													]
+												}
+											},
+											else = {
+												right-indent : "\n\t\t",
+												left-indent : "\n\t\t\t",
+												child : block = {
+													children : [
+														return = {
+															right-indent : "\n\t\t\t",
+															left-indent : "\n\t\t\t\t",
+															child : symbol = {
+																value : "current"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}
