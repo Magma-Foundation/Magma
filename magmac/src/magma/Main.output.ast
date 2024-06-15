@@ -1045,9 +1045,11 @@ block = {
 									child : block = {
 										children : [
 											assignment = {
-												reference : "acc",
 												right-indent : "\n\t\t",
 												left-indent : "\n\t\t\t",
+												assignable : assignable-parent = {
+													reference : "acc"
+												},
 												value : invocation = {
 													caller : access = {
 														child : "generate",

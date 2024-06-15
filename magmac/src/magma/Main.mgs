@@ -64,11 +64,7 @@ export class def Main() => {
 		let list=Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
 		let acc : Node=root;
 		for(generator : Generator in list){
-			
-			acc
-		=
-			generator.generate(acc, -1)
-		;
+			acc=generator.generate(acc, -1);
 		}
 		return;
 	}

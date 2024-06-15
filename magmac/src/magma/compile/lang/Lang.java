@@ -105,8 +105,8 @@ public class Lang {
     }
 
     static Rule createAssignmentRule(Rule value) {
-        var left = new StripRule(new SymbolRule(new ExtractStringRule("reference")));
-        var right = new RightRule(new StripRule(new ExtractNodeRule("value", value)), ";");
+        var left = new ExtractNodeRule("assignable", new TypeRule("assignable-parent", new StripRule(new SymbolRule(new ExtractStringRule("reference")))));
+        var right = new RightRule(new ExtractNodeRule("value", new StripRule(value)), ";");
         return new TypeRule("assignment", new FirstRule(left, "=", right));
     }
 

@@ -965,7 +965,9 @@ block = {
 									child : block = {
 										children : [
 											assignment = {
-												reference : "acc",
+												assignable : assignable-parent = {
+													reference : "acc"
+												},
 												value : invocation = {
 													caller : access = {
 														child : "generate",
