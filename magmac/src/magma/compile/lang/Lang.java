@@ -79,4 +79,10 @@ public class Lang {
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
         return new TypeRule("if", new LeftRule("if", new FirstRule(new StripRule(condition), "{", child)));
     }
+
+    static Rule createReturnRule(Rule value) {
+        var maybeChild = new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)));
+        var after = new RightRule(new StripRule(maybeChild), ";");
+        return new TypeRule("return", new LeftRule("return", after));
+    }
 }
