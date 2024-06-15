@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -7,6 +8,8 @@ import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -50,7 +53,8 @@ public class JavaLang {
                 Lang.createIfRule(value, statement),
                 Lang.createReturnRule(value),
                 Lang.createForRule(definition, value, statement, ":"),
-                Lang.createElseRule(statement)
+                Lang.createElseRule(statement),
+                new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"))
         );
 
         var copy = new ArrayList<>(rules);
@@ -100,9 +104,18 @@ public class JavaLang {
     }
 
     private static TypeRule createConstructorRule(LazyRule value) {
-        var before = new RightRule(Lang.createSplitter(value), ")");
+        var arguments = new OrRule(List.of(
+                new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
+        ));
+
+        var caller = new ExtractNodeRule("caller", value);
+        var withGenerics = new OrRule(List.of(
+                new LastRule(caller, "<" , new ExtractStringRule("temp")),
+                caller
+        ));
+        var before = new RightRule(new InvocationStart(withGenerics, arguments), ")");
         var child = new OrRule(List.of(
-                new FirstRule(before, "{", new ExtractStringRule("after")),
+                new FirstRule(new StripRule(before), "{", new ExtractStringRule("after")),
                 before
         ));
         return new TypeRule("constructor", new LeftRule("new ", child));

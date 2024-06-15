@@ -59,17 +59,13 @@ public class Lang {
         return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
     }
 
-    static Rule createSplitter(Rule value) {
+    static TypeRule createInvocationRule(Rule value) {
         var arguments = new OrRule(List.of(
                 new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
         ));
 
         var caller = new ExtractNodeRule("caller", value);
-        return new InvocationStart(caller, arguments);
-    }
-
-    static TypeRule createInvocationRule(Rule value) {
-        return new TypeRule("invocation", new RightRule(createSplitter(value), ")"));
+        return new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
     }
 
     static TypeRule createCommentRule() {
