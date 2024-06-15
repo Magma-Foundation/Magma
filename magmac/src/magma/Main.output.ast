@@ -20,6 +20,12 @@ block = {
 		import = {
 			left-indent : "\n",
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "JavaNormalizer"]
+			}
+		},
+		import = {
+			left-indent : "\n",
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
 			}
 		},
@@ -126,6 +132,7 @@ block = {
 										children : [
 											declaration = {
 												name : "source",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -158,6 +165,7 @@ block = {
 											},
 											declaration = {
 												name : "input",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -178,6 +186,7 @@ block = {
 											},
 											declaration = {
 												name : "target",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -197,6 +206,7 @@ block = {
 												}
 											},
 											declaration = {
+												modifiers : ["let"],
 												name : "parseResult",
 												left-indent : "\n\t\t\t",
 												type : symbol = {
@@ -223,6 +233,7 @@ block = {
 											},
 											declaration = {
 												name : "parseError",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -265,6 +276,7 @@ block = {
 											},
 											declaration = {
 												name : "root",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -317,6 +329,7 @@ block = {
 											},
 											declaration = {
 												name : "generated",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "var"
@@ -366,6 +379,7 @@ block = {
 											},
 											declaration = {
 												name : "rule",
+												modifiers : ["let"],
 												left-indent : "\n\t\t\t",
 												type : symbol = {
 													value : "Rule"
@@ -380,6 +394,7 @@ block = {
 												}
 											},
 											declaration = {
+												modifiers : ["let"],
 												name : "generateResult",
 												left-indent : "\n\t\t\t",
 												type : symbol = {
@@ -400,6 +415,7 @@ block = {
 												}
 											},
 											declaration = {
+												modifiers : ["let"],
 												name : "generateError",
 												left-indent : "\n\t\t\t",
 												type : symbol = {
@@ -527,6 +543,7 @@ block = {
 						child : block = {
 							children : [
 								declaration = {
+									modifiers : ["let"],
 									name : "actualContext",
 									left-indent : "\n\t\t",
 									type : symbol = {
@@ -553,6 +570,7 @@ block = {
 								},
 								declaration = {
 									name : "index",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "var"
@@ -573,6 +591,7 @@ block = {
 								},
 								declaration = {
 									name : "context",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "var"
@@ -609,6 +628,7 @@ block = {
 								},
 								declaration = {
 									name : "message",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "var"
@@ -689,6 +709,7 @@ block = {
 								},
 								declaration = {
 									name : "causes",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "var"
@@ -847,6 +868,7 @@ block = {
 							children : [
 								declaration = {
 									name : "list",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "var"
@@ -876,6 +898,11 @@ block = {
 											},
 											constructor = {
 												caller : symbol = {
+													value : "JavaNormalizer"
+												}
+											},
+											constructor = {
+												caller : symbol = {
 													value : "MagmaGenerator"
 												}
 											},
@@ -889,6 +916,7 @@ block = {
 								},
 								declaration = {
 									name : "acc",
+									modifiers : ["let"],
 									left-indent : "\n\t\t",
 									type : symbol = {
 										value : "Node"

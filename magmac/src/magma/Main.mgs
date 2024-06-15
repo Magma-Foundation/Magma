@@ -1,6 +1,7 @@
 import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaNormalizer;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -17,19 +18,19 @@ import java.util.Collections;
 export def Main() => {
 	export def main() => {
 		try {
-			source = ?(?);
-			input = ?(?);
-			target = ?(?);
-			parseResult = ?(?);
-			parseError = ?(?);
+			let source = ?(?);
+			let input = ?(?);
+			let target = ?(?);
+			let parseResult = ?(?);
+			let parseError = ?(?);
 			?(?);
-			root = ?(?);
+			let root = ?(?);
 			?(?);
-			generated = ?(?);
+			let generated = ?(?);
 			?(?);
-			rule = ?(?);
-			generateResult = ?(?);
-			generateError = ?(?);
+			let rule = ?(?);
+			let generateResult = ?(?);
+			let generateError = ?(?);
 			?(?);
 			?(?);
 		}
@@ -39,12 +40,12 @@ export def Main() => {
 		}
 	}
 	def print() => {
-		actualContext = ?(?);
-		index = ?(?);
-		context = ? ? ? : ?;
-		message = ?(?);
+		let actualContext = ?(?);
+		let index = ?(?);
+		let context = ? ? ? : ?;
+		let message = ?(?);
 		?(?);
-		causes = ?(?);
+		let causes = ?(?);
 		if (?){
 			return 
 		}
@@ -58,8 +59,8 @@ export def Main() => {
 		}
 	}
 	def generate() => {
-		list = ?(?);
-		acc = ?;
+		let list = ?(?);
+		let acc = ?;
 		for (?){
 			? = ?
 		}

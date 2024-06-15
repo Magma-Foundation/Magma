@@ -3,6 +3,7 @@ package magma;
 import magma.compile.Error_;
 import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaNormalizer;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -73,6 +74,7 @@ public class Main {
                 new PackageRemover(),
                 new ClassSplitter(),
                 new MethodNormalizer(),
+                new JavaNormalizer(),
                 new MagmaGenerator(),
                 new MagmaFormatter()
         );

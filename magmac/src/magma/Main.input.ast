@@ -22,6 +22,11 @@ block = {
 		},
 		import = {
 			external : namespace = {
+				namespace : ["magma", "compile", "lang", "JavaNormalizer"]
+			}
+		},
+		import = {
+			external : namespace = {
 				namespace : ["magma", "compile", "lang", "MagmaFormatter"]
 			}
 		},
@@ -816,6 +821,11 @@ block = {
 											constructor = {
 												caller : symbol = {
 													value : "MethodNormalizer"
+												}
+											},
+											constructor = {
+												caller : symbol = {
+													value : "JavaNormalizer"
 												}
 											},
 											constructor = {
