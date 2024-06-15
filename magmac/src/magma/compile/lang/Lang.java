@@ -84,8 +84,8 @@ public class Lang {
     }
 
     static Rule createReturnRule(Rule value) {
-        var maybeChild = new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", value)));
-        var after = new RightRule(new StripRule(maybeChild), ";");
+        var maybeChild = new OrRule(List.of(new EmptyRule(), new ExtractNodeRule("child", new StripRule(value))));
+        var after = new RightRule(maybeChild, ";");
         return new TypeRule("return", new LeftRule("return", after));
     }
 
