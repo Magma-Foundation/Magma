@@ -1,14 +1,9 @@
 package magma;
 
 import magma.compile.Error_;
-import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.MethodMigrator;
 import magma.compile.lang.Modifier;
-import magma.compile.lang.ModifierAttacher;
-import magma.compile.lang.RootTypeRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 
@@ -72,12 +67,7 @@ public class Main {
 
     private static Node generate(Node root) {
         var list = Arrays.asList(
-                new RootTypeRemover("package"),
-                new RootTypeRemover("whitespace"),
-                new MethodMigrator(),
-                new ModifierAttacher(),
-                new ClassSplitter(),
-                new MagmaFormatter()
+                new Modifier()
         );
 
         Node acc = root;
