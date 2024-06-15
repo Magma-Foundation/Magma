@@ -77,9 +77,9 @@ public class JavaLang {
 
         var modifiers = Lang.createModifiersRule();
 
-        var name =  new TypeRule("symbol", new StripRule(new ExtractStringRule("name")));
+        var name =  new TypeRule("symbol", new StripRule(new ExtractStringRule("value")));
         var prototype = new OrRule(List.of(
-                new TypeRule("generic", new FirstRule(new ExtractNodeRule("parent", name), "<", new RightRule(new ExtractStringRule("value"), ">"))),
+                new TypeRule("generic", new FirstRule(new StripRule(new ExtractStringRule("value")), "<", new RightRule(new ExtractStringRule("child"), ">"))),
                 name
         ));
 

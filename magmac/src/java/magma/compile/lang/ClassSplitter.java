@@ -33,6 +33,8 @@ public class ClassSplitter extends Generator {
                             newModifiers.add("def");
 
                             var name = oldAttributes.apply("name")
+                                    .flatMap(Attribute::asNode)
+                                    .flatMap(className -> className.attributes().apply("value"))
                                     .flatMap(Attribute::asString)
                                     .orElseThrow();
 

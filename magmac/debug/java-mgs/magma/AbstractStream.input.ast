@@ -18,16 +18,12 @@ Optional[block = {
 		class = {
 			modifiers : ["public", "abstract"],
 			interface : generic = {
-				value : "T",
-				parent : symbol = {
-					name : "Stream"
-				}
+				child : "T",
+				value : "Stream"
 			},
 			name : generic = {
-				value : "T",
-				parent : symbol = {
-					name : "AbstractStream"
-				}
+				child : "T",
+				value : "AbstractStream"
 			},
 			child : block = {
 				children : [

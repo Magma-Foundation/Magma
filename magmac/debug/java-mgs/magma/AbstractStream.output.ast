@@ -14,13 +14,17 @@ block = {
 		function = {
 			left-indent : "\n",
 			right-indent : "\n",
-			name : "AbstractStream",
-			interface : " Stream<T>",
 			modifiers : ["public", "abstract"],
+			interface : generic = {
+				child : "T",
+				value : "Stream"
+			},
+			name : generic = {
+				child : "T",
+				value : "AbstractStream"
+			},
 			definition : definition = {
-				params : [
-
-				],
+				params : [],
 				name : "AbstractStream",
 				modifiers : ["export", "class", "def"]
 			},
@@ -28,31 +32,13 @@ block = {
 				children : [
 					function = {
 						left-indent : "\n\t",
-						definition : definition = {
-							name : "map",
-							modifiers : ["public", "def"],
-							type : symbol = {
-								value : "Stream<R>"
-							},
-							params : [
-								definition = {
-									name : "mapper",
-									modifiers : ["Function<T,"],
-									type : symbol = {
-										value : "R>"
-									}
-								}
-							]
-						},
 						child : block = {
 							children : [
 								return = {
 									left-indent : "\n\t\t",
 									child : invocation = {
 										temp : "R>",
-										arguments : [
-
-										],
+										arguments : [],
 										caller : symbol = {
 											value : "AbstractStream"
 										},
@@ -62,6 +48,38 @@ block = {
 								empty = {
 									right-indent : "\n\t",
 									left-indent : "\n\t\t"
+								}
+							]
+						},
+						definition : definition = {
+							name : "map",
+							modifiers : ["public", "def"],
+							type : generic = {
+								parent : symbol = {
+									value : "Stream"
+								},
+								children : [
+									symbol = {
+										value : "R"
+									}
+								]
+							},
+							params : [
+								definition = {
+									name : "mapper",
+									type : generic = {
+										parent : symbol = {
+											value : "Function"
+										},
+										children : [
+											symbol = {
+												value : "T"
+											},
+											symbol = {
+												value : "R"
+											}
+										]
+									}
 								}
 							]
 						}
@@ -78,9 +96,18 @@ block = {
 							params : [
 								definition = {
 									name : "collector",
-									modifiers : ["Collector<T,"],
-									type : symbol = {
-										value : "C>"
+									type : generic = {
+										parent : symbol = {
+											value : "Collector"
+										},
+										children : [
+											symbol = {
+												value : "T"
+											},
+											symbol = {
+												value : "C"
+											}
+										]
 									}
 								}
 							]
@@ -95,9 +122,7 @@ block = {
 										modifiers : ["let"]
 									},
 									value : invocation = {
-										arguments : [
-
-										],
+										arguments : [],
 										caller : access = {
 											child : "createInitial",
 											parent : symbol = {
@@ -149,9 +174,7 @@ block = {
 															caller : access = {
 																child : "map",
 																parent : invocation = {
-																	arguments : [
-
-																	],
+																	arguments : [],
 																	caller : symbol = {
 																		value : "head"
 																	}
@@ -197,9 +220,7 @@ block = {
 												left-indent : "\n\t\t\t",
 												condition-parent : condition-parent = {
 													condition : invocation = {
-														arguments : [
-
-														],
+														arguments : [],
 														caller : access = {
 															child : "left",
 															parent : symbol = {
@@ -217,9 +238,7 @@ block = {
 																reference : "current"
 															},
 															value : invocation = {
-																arguments : [
-
-																],
+																arguments : [],
 																caller : access = {
 																	child : "right",
 																	parent : symbol = {
