@@ -48,11 +48,14 @@ public class MagmaLang {
                 new TypeRule("equals", new LeftRule("? == ?", new EmptyRule()))
         )));
 
-        var name = new ExtractStringRule("name");
-        var child = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", name);
-        var definition = new OrRule(List.of(child, name));
-        var declaration = new TypeRule("declaration", new FirstRule(definition, " = ", new RightRule(new ExtractNodeRule("value", value), ";")));
+        var withoutType = new ExtractStringRule("name");
+        var withType = new LastRule(withoutType, " : ", new ExtractNodeRule("type", Lang.createTypeRule()));
+        var anyType = new OrRule(List.of(withType, withoutType));
 
+        var child = new LastRule(new SimpleExtractStringListRule("modifiers", " "), " ", anyType);
+        var definition = new OrRule(List.of(child, anyType));
+
+        var declaration = new TypeRule("declaration", new FirstRule(definition, " = ", new RightRule(new ExtractNodeRule("value", value), ";")));
         var child1 = new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}");
 
         statement.setRule(new OrRule(List.of(

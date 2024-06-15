@@ -1,5 +1,7 @@
 package magma.compile.lang;
 
+import magma.compile.rule.LazyRule;
+import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
@@ -9,7 +11,10 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
+
+import java.util.List;
 
 public class Lang {
     static Rule createBlock(Rule child) {
@@ -30,5 +35,14 @@ public class Lang {
 
         var afterKeyword = new FirstRule(new ExtractNodeRule("condition", new TypeRule("declaration", declaration)), "{", new RightRule(value, "}"));
         return new TypeRule("catch", new LeftRule("catch ", afterKeyword));
+    }
+
+    static LazyRule createTypeRule() {
+        var type = new LazyRule();
+        type.setRule(new OrRule(List.of(
+                new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
+                new TypeRule("symbol", new ExtractStringRule("value"))
+        )));
+        return type;
     }
 }

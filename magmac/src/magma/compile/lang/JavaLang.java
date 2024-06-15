@@ -94,7 +94,7 @@ public class JavaLang {
     }
 
     private static LastRule createDefinitionHeaderRule() {
-        var type = createTypeRule();
+        var type = Lang.createTypeRule();
         return createDefinitionHeaderRule(type);
     }
 
@@ -104,15 +104,6 @@ public class JavaLang {
         var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
-    }
-
-    private static LazyRule createTypeRule() {
-        var type = new LazyRule();
-        type.setRule(new OrRule(List.of(
-                new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
-                new TypeRule("symbol", new ExtractStringRule("value"))
-        )));
-        return type;
     }
 
     private static void initValues(LazyRule value, TypeRule constructor, TypeRule invocation) {
