@@ -31,6 +31,7 @@ public class Main {
         try {
             var sources = Files.walk(SOURCE_DIRECTORY)
                     .filter(value -> value.toString().endsWith(".java"))
+                    .filter(Files::isRegularFile)
                     .toList();
 
             for (var source : sources) {
@@ -48,6 +49,8 @@ public class Main {
 
     private static void compileSource(Path source) throws CompileException {
         var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
+        System.out.println("Compiling source: " + SOURCE_DIRECTORY.relativize(source));
+
         var targetParent = TARGET_DIRECTORY.resolve(relativized);
         var fileName = source.getFileName().toString();
         var name = fileName.substring(0, fileName.indexOf('.'));
