@@ -29,7 +29,7 @@ public class MembersSplitter implements Splitter {
                     while (!queue.isEmpty()) {
                         var next = queue.pop();
                         withAfter = withAfter.append(next);
-                        if(next == '\n') {
+                        if (next == '\n') {
                             break;
                         }
                     }
@@ -37,6 +37,25 @@ public class MembersSplitter implements Splitter {
                     current = withAfter.advance();
                     continue;
                 }
+            }
+
+            if (c == '\"') {
+                var withString = current;
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    withString = withString.append(next);
+
+                    if (next == '\\') {
+                        withString.append(queue.pop());
+                        continue;
+                    }
+
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+                current = withString;
+                continue;
             }
 
             if (c == ';' && state.isLevel()) {
