@@ -6,6 +6,11 @@ public final class SymbolRule extends FilterRule {
     }
 
     @Override
+    protected String computeMessage() {
+        return "Not a symbol.";
+    }
+
+    @Override
     protected boolean filter(String input) {
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);

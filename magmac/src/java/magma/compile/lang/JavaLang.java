@@ -130,7 +130,7 @@ public class JavaLang {
     }
 
     private static TypeRule createLambdaRule(LazyRule value) {
-        var left = new StripRule(new ExtractStringRule("param-name"));
+        var left = new StripRule(new SymbolRule(new ExtractStringRule("param-name")));
         var right = new StripRule(new ExtractNodeRule("child", value));
         return new TypeRule("lambda", new FirstRule(left, "->", right));
     }

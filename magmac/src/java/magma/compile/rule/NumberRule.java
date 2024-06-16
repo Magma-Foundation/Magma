@@ -6,7 +6,7 @@ public final class NumberRule extends FilterRule {
     }
 
     private static boolean allDigits(String input) {
-        if(input.isEmpty()) return false;
+        if (input.isEmpty()) return false;
 
         for (int i = 0; i < input.length(); i++) {
             var c = input.charAt(i);
@@ -16,6 +16,11 @@ public final class NumberRule extends FilterRule {
         }
 
         return true;
+    }
+
+    @Override
+    protected String computeMessage() {
+        return "Not a number.";
     }
 
     @Override

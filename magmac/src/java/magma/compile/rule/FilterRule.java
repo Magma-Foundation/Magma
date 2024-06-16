@@ -16,8 +16,10 @@ public abstract class FilterRule implements Rule {
     @Override
     public RuleResult toNode(String input) {
         if (filter(input)) return child.toNode(input);
-        return new ErrorRuleResult(new CompileError("Invalid filter.", input));
+        return new ErrorRuleResult(new CompileError("Invalid filter: " + computeMessage(), input));
     }
+
+    protected abstract String computeMessage();
 
     protected abstract boolean filter(String input);
 

@@ -137,9 +137,7 @@ public class Main {
         }
         var s3 = context1.isEmpty() ? "" : " context=\"" + context1 + "\"";
         if (causes.size() > 1) {
-            var list = causes.stream()
-                    .sorted(Comparator.comparingInt(Error_::calculateDepth))
-                    .toList();
+            var list = causes.stream().toList();
 
             var builder = new StringBuilder();
             for (Error_ cause : list) {

@@ -69,7 +69,7 @@ public class Lang {
                 new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
         ));
 
-        var caller = new ExtractNodeRule("caller", value);
+        var caller = new ExtractNodeRule("caller", new StripRule(value));
         return new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
     }
 
@@ -140,7 +140,8 @@ public class Lang {
     }
 
     static TypeRule createAccessRule(LazyRule value) {
-        return new TypeRule("access", new LastRule(new ExtractNodeRule("parent", value), ".", new StripRule(new SymbolRule(new ExtractStringRule("child")))));
+        var parent = new ExtractNodeRule("parent", new StripRule(value));
+        return new TypeRule("access", new LastRule(parent, ".", new StripRule(new SymbolRule(new ExtractStringRule("child")))));
     }
 
     static TypeRule createSymbolRule() {
