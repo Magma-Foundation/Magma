@@ -112,28 +112,30 @@ public class Main {
         var index = actualContext.indexOf('\n');
         String context;
         if (e.findCauses().isEmpty())
-            context = "\n" + "|\t".repeat(depth + 1) + "---\n" + "|\t".repeat(depth + 1) + actualContext.replace("\n", "\n" + "|\t".repeat(depth - 1)) + "\n" + "|\t".repeat(depth + 1) + "---";
+            context = "\n" + " ".repeat(depth + 1) + "---\n" + " ".repeat(depth + 1) + actualContext.replace("\n", "\n" + " ".repeat(depth - 1)) + "\n" + " ".repeat(depth + 1) + "---";
         else {
             if (index == -1) context = actualContext;
             else context = actualContext.substring(0, index);
         }
 
         var message = e.findMessage();
-        message.ifPresent(s -> System.err.println("|\t".repeat(depth) + depth + " = " + s + " " + context));
+        message.ifPresent(s -> System.err.println(" ".repeat(depth) + depth + " = " + s + " " + context));
 
         var s = e.findMessage().orElse("");
         var s1 = s.isEmpty() ? "" : " message=\"" + s.replace("\"", "&quot;") + "\"";
         var causes = e.findCauses().orElse(Collections.emptyList());
-        if (causes.isEmpty()) {
-            var context1 = e.findContext().orElse("")
-                    .replace("&", "&amp;")
-                    .replace("\"", "&quot;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                    .replace("'", "&apos;");
 
-            return "\n" + "\t".repeat(depth) + "<child" + s1 + ">\n" + context1 + "</child>";
+        var context1 = e.findContext().orElse("")
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;");
+        var s2 = "\n" + context1;
+        if (causes.isEmpty()) {
+            return "\n" + "\t".repeat(depth) + "<child" + s1 + ">" + s2 + "</child>";
         }
+        var s3 = context1.isEmpty() ? "" : " context=\"" + context1 + "\"";
         if (causes.size() > 1) {
             var list = causes.stream()
                     .sorted(Comparator.comparingInt(Error_::calculateDepth))
@@ -144,9 +146,10 @@ public class Main {
                 var result = print(cause, depth + 1);
                 builder.append(result);
             }
-            return "\n" + "\t".repeat(depth) + "<collection" + s1 + ">" + builder + "</collection>";
+
+            return "\n" + "\t".repeat(depth) + "<collection" + s1 + s3 + ">" + builder + "</collection>";
         } else {
-            return "\n" + "\t".repeat(depth) + "<parent" + s1 + ">" + print(causes.get(0), depth + 1) + "</parent>";
+            return "\n" + "\t".repeat(depth) + "<parent" + s1 + s3 + ">" + print(causes.get(0), depth + 1) + "</parent>";
         }
     }
 
