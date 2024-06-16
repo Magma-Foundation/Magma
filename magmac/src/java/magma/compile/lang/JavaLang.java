@@ -120,11 +120,11 @@ public class JavaLang {
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
                 Lang.createNumberRule(),
-                Lang.createOperator("equals", "==", value),
-                Lang.createOperator("add", "+", value),
-                Lang.createOperator("greater-than", ">=", value),
-                Lang.createOperator("greater-than", ">", value),
-                new TypeRule("not", new LeftRule("!", new ExtractNodeRule("child", value))),
+                Lang.createOperatorRule("equals", "==", value),
+                Lang.createOperatorRule("add", "+", value),
+                Lang.createOperatorRule("greater-than", ">=", value),
+                Lang.createOperatorRule("greater-than", ">", value),
+                Lang.createNotRule(value),
                 new TypeRule("method-reference", new LastRule(new ExtractNodeRule("object", new StripRule(value)), "::", new ExtractStringRule("member")))
         )));
         return value;

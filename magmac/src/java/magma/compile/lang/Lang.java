@@ -159,7 +159,7 @@ public class Lang {
                         new StripRule(new ExtractNodeRule("false", value)))));
     }
 
-    static TypeRule createOperator(String name, String slice, Rule value) {
+    static TypeRule createOperatorRule(String name, String slice, Rule value) {
         return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
             @Override
             protected Optional<Integer> computeIndex(String input) {
@@ -199,5 +199,9 @@ public class Lang {
     static Rule createThrowRule(Rule value) {
         var after = new RightRule(createScope("value", new ExtractNodeRule("value", value)), ";");
         return new TypeRule("throw", new LeftRule("throw ", after));
+    }
+
+    static TypeRule createNotRule(LazyRule value) {
+        return new TypeRule("not", new LeftRule("!", new ExtractNodeRule("child", value)));
     }
 }
