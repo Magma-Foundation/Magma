@@ -211,4 +211,8 @@ public class Lang {
     static TypeRule createNotRule(LazyRule value) {
         return new TypeRule("not", new LeftRule("!", new ExtractNodeRule("child", value)));
     }
+
+    static TypeRule createDefinitionRule(Rule definition) {
+        return new TypeRule("definition", new RightRule(definition, ";"));
+    }
 }
