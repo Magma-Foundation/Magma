@@ -12,6 +12,7 @@ import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -20,6 +21,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Lang {
     static Rule createBlock(Rule child) {
@@ -78,14 +80,40 @@ public class Lang {
     }
 
     static TypeRule createIfRule(String type, Rule value, Rule statement) {
-        var condition = new LeftRule("(", new ExtractNodeRule("condition", value));
-        var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
-        var withBlock = new OrRule(List.of(
-                new FirstRule(new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(new RightRule(condition, ")")))), "{", child),
-                new FirstRule(new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(condition))), ")", new ExtractNodeRule("child", statement))
-        ));
+        var child = new ExtractNodeRule("condition", value);
+        var conditionParent = createScope("condition", new StripRule(new LeftRule("(", child)));
 
-        return new TypeRule(type, new LeftRule(type, withBlock));
+        var valueWithBlock = new LeftRule("{", new RightRule(new ExtractNodeRule("value", createBlock(statement)), "}"));
+        var valueWithoutBlock = new ExtractNodeRule("value", statement);
+
+        var valueParent = createScope("value", new StripRule(new OrRule(List.of(
+                valueWithBlock,
+                valueWithoutBlock
+        ))));
+
+        return new TypeRule(type, new LeftRule(type, new SplitOnceRule(conditionParent, ")", valueParent) {
+            @Override
+            protected Optional<Integer> computeIndex(String input) {
+                var depth = 0;
+                for (int i = 0; i < input.length(); i++) {
+                    var c = input.charAt(i);
+                    if (c == ')' && depth == 1) {
+                        return Optional.of(i);
+                    } else {
+                        if (c == '(') depth++;
+                        if (c == ')') depth--;
+                    }
+                }
+
+                return Optional.empty();
+            }
+        }));
+    }
+
+    private static Rule createScope(String name, Rule rule) {
+        var withScope = name + ":scope";
+        var type = new TypeRule(withScope, rule);
+        return new ExtractNodeRule(withScope, type);
     }
 
     static Rule createReturnRule(Rule value) {

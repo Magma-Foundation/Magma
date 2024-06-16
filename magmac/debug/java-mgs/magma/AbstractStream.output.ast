@@ -182,138 +182,142 @@ block = {
 								while = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
-									condition-parent : condition-parent = {
+									condition:scope : condition:scope = {
 										condition : symbol = {
 											value : "true"
 										}
 									},
-									child : block = {
-										children : [
-											declaration = {
-												modifiers : ["let"],
-												leftRule-indent : "\n\t\t\t",
-												value : symbol = {
-													value : "current"
-												},
-												definition : definition = {
+									value:scope : value:scope = {
+										value : block = {
+											children : [
+												declaration = {
 													modifiers : ["let"],
-													name : "finalCurrent",
-													type : symbol = {
-														value : "C"
+													leftRule-indent : "\n\t\t\t",
+													value : symbol = {
+														value : "current"
+													},
+													definition : definition = {
+														modifiers : ["let"],
+														name : "finalCurrent",
+														type : symbol = {
+															value : "C"
+														}
 													}
-												}
-											},
-											declaration = {
-												modifiers : ["let"],
-												leftRule-indent : "\n\t\t\t",
-												definition : definition = {
-													name : "tuple",
-													modifiers : ["let"]
 												},
-												value : invocation = {
-													caller : access = {
-														child : "toTuple",
-														parent : symbol = {
-															value : "Options"
+												declaration = {
+													modifiers : ["let"],
+													leftRule-indent : "\n\t\t\t",
+													definition : definition = {
+														name : "tuple",
+														modifiers : ["let"]
+													},
+													value : invocation = {
+														caller : access = {
+															child : "toTuple",
+															parent : symbol = {
+																value : "Options"
+															}
+														},
+														arguments : [
+															invocation = {
+																caller : access = {
+																	child : "map",
+																	parent : invocation = {
+																		arguments : [],
+																		caller : symbol = {
+																			value : "head"
+																		}
+																	}
+																},
+																arguments : [
+																	function = {
+																		param-name : "head",
+																		definition : definition = {
+																			modifiers : [],
+																			params : [
+																				definition = {
+																					name : "head"
+																				}
+																			]
+																		},
+																		child : invocation = {
+																			caller : access = {
+																				child : "fold",
+																				parent : symbol = {
+																					value : "collector"
+																				}
+																			},
+																			arguments : [
+																				symbol = {
+																					value : "finalCurrent"
+																				},
+																				symbol = {
+																					value : "head"
+																				}
+																			]
+																		}
+																	}
+																]
+															},
+															symbol = {
+																value : "current"
+															}
+														]
+													}
+												},
+												if = {
+													leftRule-indent : "\n\t\t\t",
+													condition:scope : condition:scope = {
+														condition : invocation = {
+															arguments : [],
+															caller : access = {
+																child : "left",
+																parent : symbol = {
+																	value : "tuple"
+																}
+															}
 														}
 													},
-													arguments : [
-														invocation = {
-															caller : access = {
-																child : "map",
-																parent : invocation = {
-																	arguments : [],
-																	caller : symbol = {
-																		value : "head"
-																	}
-																}
-															},
-															arguments : [
-																function = {
-																	param-name : "head",
-																	definition : definition = {
-																		modifiers : [],
-																		params : [
-																			definition = {
-																				name : "head"
-																			}
-																		]
+													value:scope : value:scope = {
+														value : block = {
+															children : [
+																assignment = {
+																	right-indent : "\n\t\t\t",
+																	leftRule-indent : "\n\t\t\t\t",
+																	assignable : assignable-parent = {
+																		reference : "current"
 																	},
-																	child : invocation = {
+																	value : invocation = {
+																		arguments : [],
 																		caller : access = {
-																			child : "fold",
+																			child : "right",
 																			parent : symbol = {
-																				value : "collector"
+																				value : "tuple"
 																			}
-																		},
-																		arguments : [
-																			symbol = {
-																				value : "finalCurrent"
-																			},
-																			symbol = {
-																				value : "head"
-																			}
-																		]
+																		}
 																	}
 																}
 															]
-														},
-														symbol = {
-															value : "current"
-														}
-													]
-												}
-											},
-											if = {
-												leftRule-indent : "\n\t\t\t",
-												condition-parent : condition-parent = {
-													condition : invocation = {
-														arguments : [],
-														caller : access = {
-															child : "left",
-															parent : symbol = {
-																value : "tuple"
-															}
 														}
 													}
 												},
-												child : block = {
-													children : [
-														assignment = {
-															right-indent : "\n\t\t\t",
-															leftRule-indent : "\n\t\t\t\t",
-															assignable : assignable-parent = {
-																reference : "current"
-															},
-															value : invocation = {
-																arguments : [],
-																caller : access = {
-																	child : "right",
-																	parent : symbol = {
-																		value : "tuple"
-																	}
+												else = {
+													right-indent : "\n\t\t",
+													leftRule-indent : "\n\t\t\t",
+													child : block = {
+														children : [
+															return = {
+																right-indent : "\n\t\t\t",
+																leftRule-indent : "\n\t\t\t\t",
+																child : symbol = {
+																	value : "current"
 																}
 															}
-														}
-													]
+														]
+													}
 												}
-											},
-											else = {
-												right-indent : "\n\t\t",
-												leftRule-indent : "\n\t\t\t",
-												child : block = {
-													children : [
-														return = {
-															right-indent : "\n\t\t\t",
-															leftRule-indent : "\n\t\t\t\t",
-															child : symbol = {
-																value : "current"
-															}
-														}
-													]
-												}
-											}
-										]
+											]
+										}
 									}
 								}
 							]

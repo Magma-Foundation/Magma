@@ -169,120 +169,124 @@ Optional[block = {
 									}
 								},
 								while = {
-									condition-parent : condition-parent = {
+									condition:scope : condition:scope = {
 										condition : symbol = {
 											value : "true"
 										}
 									},
-									child : block = {
-										children : [
-											declaration = {
-												value : symbol = {
-													value : "current"
-												},
-												definition : definition = {
-													name : "finalCurrent",
-													type : symbol = {
-														value : "C"
-													}
-												}
-											},
-											declaration = {
-												definition : definition = {
-													name : "tuple",
-													type : symbol = {
-														value : "var"
+									value:scope : value:scope = {
+										value : block = {
+											children : [
+												declaration = {
+													value : symbol = {
+														value : "current"
+													},
+													definition : definition = {
+														name : "finalCurrent",
+														type : symbol = {
+															value : "C"
+														}
 													}
 												},
-												value : invocation = {
-													caller : access = {
-														child : "toTuple",
-														parent : symbol = {
-															value : "Options"
+												declaration = {
+													definition : definition = {
+														name : "tuple",
+														type : symbol = {
+															value : "var"
 														}
 													},
-													arguments : [
-														invocation = {
-															caller : access = {
-																child : "map",
-																parent : invocation = {
-																	arguments : [],
-																	caller : symbol = {
-																		value : "head"
+													value : invocation = {
+														caller : access = {
+															child : "toTuple",
+															parent : symbol = {
+																value : "Options"
+															}
+														},
+														arguments : [
+															invocation = {
+																caller : access = {
+																	child : "map",
+																	parent : invocation = {
+																		arguments : [],
+																		caller : symbol = {
+																			value : "head"
+																		}
 																	}
-																}
-															},
-															arguments : [
-																lambda = {
-																	param-name : "head",
-																	child : invocation = {
-																		caller : access = {
-																			child : "fold",
-																			parent : symbol = {
-																				value : "collector"
-																			}
-																		},
-																		arguments : [
-																			symbol = {
-																				value : "finalCurrent"
+																},
+																arguments : [
+																	lambda = {
+																		param-name : "head",
+																		child : invocation = {
+																			caller : access = {
+																				child : "fold",
+																				parent : symbol = {
+																					value : "collector"
+																				}
 																			},
-																			symbol = {
-																				value : "head"
+																			arguments : [
+																				symbol = {
+																					value : "finalCurrent"
+																				},
+																				symbol = {
+																					value : "head"
+																				}
+																			]
+																		}
+																	}
+																]
+															},
+															symbol = {
+																value : "current"
+															}
+														]
+													}
+												},
+												if = {
+													condition:scope : condition:scope = {
+														condition : invocation = {
+															arguments : [],
+															caller : access = {
+																child : "left",
+																parent : symbol = {
+																	value : "tuple"
+																}
+															}
+														}
+													},
+													value:scope : value:scope = {
+														value : block = {
+															children : [
+																assignment = {
+																	assignable : assignable-parent = {
+																		reference : "current"
+																	},
+																	value : invocation = {
+																		arguments : [],
+																		caller : access = {
+																			child : "right",
+																			parent : symbol = {
+																				value : "tuple"
 																			}
-																		]
+																		}
 																	}
 																}
 															]
-														},
-														symbol = {
-															value : "current"
-														}
-													]
-												}
-											},
-											if = {
-												condition-parent : condition-parent = {
-													condition : invocation = {
-														arguments : [],
-														caller : access = {
-															child : "left",
-															parent : symbol = {
-																value : "tuple"
-															}
 														}
 													}
 												},
-												child : block = {
-													children : [
-														assignment = {
-															assignable : assignable-parent = {
-																reference : "current"
-															},
-															value : invocation = {
-																arguments : [],
-																caller : access = {
-																	child : "right",
-																	parent : symbol = {
-																		value : "tuple"
-																	}
+												else = {
+													child : block = {
+														children : [
+															return = {
+																child : symbol = {
+																	value : "current"
 																}
 															}
-														}
-													]
+														]
+													}
 												}
-											},
-											else = {
-												child : block = {
-													children : [
-														return = {
-															child : symbol = {
-																value : "current"
-															}
-														}
-													]
-												}
-											}
-										]
+											]
+										}
 									}
 								}
 							]
