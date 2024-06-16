@@ -92,7 +92,7 @@ public class Lang {
         return new TypeRule(type, new LeftRule(type, new ConditionEndRule(conditionParent, valueParent)));
     }
 
-    private static Rule createScope(String name, Rule rule) {
+    public static Rule createScope(String name, Rule rule) {
         var withScope = name + ":scope";
         var type = new TypeRule(withScope, rule);
         return new ExtractNodeRule(withScope, type);

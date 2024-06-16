@@ -1,0 +1,151 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "api"]
+			}
+		},
+		class = {
+			modifiers : ["public"],
+			name : symbol = {
+				value : "Results"
+			},
+			child : block = {
+				children : [
+					method = {
+						thrown : symbol = {
+							value : "E"
+						},
+						definition : definition = {
+							name : "unwrap",
+							type : symbol = {
+								value : "T"
+							},
+							modifiers : ["public", "static", "<T,", "E", "extends", "Throwable>"]
+						},
+						params : [
+							definition = {
+								name : "result",
+								type : generic = {
+									parent : symbol = {
+										value : "Result"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "E"
+										}
+									]
+								}
+							}
+						],
+						child : block = {
+							children : [
+								declaration = {
+									definition : definition = {
+										name : "value",
+										type : symbol = {
+											value : "var"
+										}
+									},
+									value : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "findValue",
+											parent : symbol = {
+												value : "result"
+											}
+										}
+									}
+								},
+								if = {
+									condition:scope : condition:scope = {
+										condition : invocation = {
+											arguments : [],
+											caller : access = {
+												child : "isPresent",
+												parent : symbol = {
+													value : "value"
+												}
+											}
+										}
+									},
+									value:scope : value:scope = {
+										value : return = {
+											child : invocation = {
+												arguments : [],
+												caller : access = {
+													child : "get",
+													parent : symbol = {
+														value : "value"
+													}
+												}
+											}
+										}
+									}
+								},
+								declaration = {
+									definition : definition = {
+										name : "err",
+										type : symbol = {
+											value : "var"
+										}
+									},
+									value : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "findErr",
+											parent : symbol = {
+												value : "result"
+											}
+										}
+									}
+								},
+								if = {
+									condition:scope : condition:scope = {
+										condition : invocation = {
+											arguments : [],
+											caller : access = {
+												child : "isPresent",
+												parent : symbol = {
+													value : "err"
+												}
+											}
+										}
+									},
+									value:scope : value:scope = {
+										value : throw = {
+											value:scope : invocation = {
+												arguments : [],
+												caller : access = {
+													child : "get",
+													parent : symbol = {
+														value : "err"
+													}
+												}
+											}
+										}
+									}
+								},
+								throw = {
+									value:scope : constructor = {
+										caller : symbol = {
+											value : "RuntimeException"
+										},
+										arguments : [
+											string = {
+												value : "No value or err present?"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}]
