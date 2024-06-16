@@ -171,4 +171,8 @@ public class Lang {
         return new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"));
     }
 
+    static Rule createThrowRule(Rule value) {
+        var after = new RightRule(createScope("value", value), ";");
+        return new TypeRule("throw", new LeftRule("throw ", after));
+    }
 }

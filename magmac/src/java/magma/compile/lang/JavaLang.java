@@ -58,7 +58,7 @@ public class JavaLang {
                 Lang.createForRule(definition, value, statement, ":"),
                 Lang.createElseRule(statement),
                 Lang.createEmptyStatementRule(),
-                createThrowRule(value)
+                Lang.createThrowRule(value)
         );
 
         var copy = new ArrayList<>(rules);
@@ -83,11 +83,6 @@ public class JavaLang {
                 declaration
         )));
         return classMember;
-    }
-
-    private static Rule createThrowRule(Rule value) {
-        var after = new RightRule(Lang.createScope("value", value), ";");
-        return new TypeRule("throw", new LeftRule("throw ", after));
     }
 
     private static TypeRule createContentRule(String keyword, LazyRule classMember) {
