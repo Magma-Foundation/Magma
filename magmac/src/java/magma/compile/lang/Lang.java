@@ -12,7 +12,6 @@ import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
-import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -21,7 +20,6 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
-import java.util.Optional;
 
 public class Lang {
     static Rule createBlock(Rule child) {
@@ -91,23 +89,7 @@ public class Lang {
                 valueWithoutBlock
         ))));
 
-        return new TypeRule(type, new LeftRule(type, new SplitOnceRule(conditionParent, ")", valueParent) {
-            @Override
-            protected Optional<Integer> computeIndex(String input) {
-                var depth = 0;
-                for (int i = 0; i < input.length(); i++) {
-                    var c = input.charAt(i);
-                    if (c == ')' && depth == 1) {
-                        return Optional.of(i);
-                    } else {
-                        if (c == '(') depth++;
-                        if (c == ')') depth--;
-                    }
-                }
-
-                return Optional.empty();
-            }
-        }));
+        return new TypeRule(type, new LeftRule(type, new ConditionEndRule(conditionParent, valueParent)));
     }
 
     private static Rule createScope(String name, Rule rule) {
@@ -188,4 +170,5 @@ public class Lang {
     static TypeRule createEmptyStatementRule() {
         return new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"));
     }
+
 }
