@@ -58,7 +58,8 @@ public class JavaLang {
                 Lang.createForRule(definition, value, statement, ":"),
                 Lang.createElseRule(statement),
                 Lang.createEmptyStatementRule(),
-                Lang.createThrowRule(value)
+                Lang.createThrowRule(value),
+                new TypeRule("post-increment", new RightRule(new ExtractNodeRule("value", value), "++;"))
         );
 
         var copy = new ArrayList<>(rules);
@@ -121,6 +122,7 @@ public class JavaLang {
                 Lang.createNumberRule(),
                 Lang.createOperator("equals", "==", value),
                 Lang.createOperator("add", "+", value),
+                Lang.createOperator("greater-than", ">=", value),
                 Lang.createOperator("greater-than", ">", value)
         )));
         return value;
