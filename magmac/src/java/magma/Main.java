@@ -121,10 +121,18 @@ public class Main {
         var message = e.findMessage();
         message.ifPresent(s -> System.err.println("|\t".repeat(depth) + depth + " = " + s + " " + context));
 
+        var s = e.findMessage().orElse("");
+        var s1 = s.isEmpty() ? "" : " message=\"" + s.replace("\"", "&quot;") + "\"";
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
-            var s = e.findMessage().orElse("");
-            return "<child message=\"" + s.replace("\"", "&quot;") + "\"/>";
+            var context1 = e.findContext().orElse("")
+                    .replace("&", "&amp;")
+                    .replace("\"", "&quot;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("'", "&apos;");
+
+            return "\n" + "\t".repeat(depth) + "<child" + s1 + ">\n" + context1 + "</child>";
         }
         if (causes.size() > 1) {
             var list = causes.stream()
@@ -133,12 +141,12 @@ public class Main {
 
             var builder = new StringBuilder();
             for (Error_ cause : list) {
-                var result = print(cause, depth);
+                var result = print(cause, depth + 1);
                 builder.append(result);
             }
-            return "<parent>" + builder + "</parent>";
+            return "\n" + "\t".repeat(depth) + "<collection" + s1 + ">" + builder + "</collection>";
         } else {
-            return print(causes.get(0), depth + 1);
+            return "\n" + "\t".repeat(depth) + "<parent" + s1 + ">" + print(causes.get(0), depth + 1) + "</parent>";
         }
     }
 
