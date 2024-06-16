@@ -21,6 +21,27 @@ public class ParamSplitter implements Splitter {
         while (!queue.isEmpty()) {
             var c = queue.pop();
 
+            if (c == '\"') {
+                buffer.append(c);
+
+                while (!queue.isEmpty()) {
+                    var next = queue.pop();
+                    buffer.append(next);
+
+                    if (next == '\\') {
+                        buffer.append(queue.pop());
+                        continue;
+                    }
+
+                    if (next == '\"') {
+                        break;
+                    }
+                }
+
+                continue;
+            }
+
+
             if(c == '-') {
                 buffer.append(c);
                 if (!queue.isEmpty()) {
