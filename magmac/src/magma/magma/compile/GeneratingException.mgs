@@ -1,0 +1,16 @@
+export class def GeneratingException extends Exception() => {
+	
+	public final content : String;
+	GeneratingException(message : String) : public => {
+		super(message);
+		this="";
+	}
+	GeneratingException(message : String, content : String) : public => {
+		super(message);
+		this=content;
+	}
+	GeneratingException(message : String, content : String, cause : Throwable) : public => {
+		super(message, cause);
+		this=content;
+	}
+}
