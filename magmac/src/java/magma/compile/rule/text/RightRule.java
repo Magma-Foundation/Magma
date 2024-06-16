@@ -2,9 +2,7 @@ package magma.compile.rule.text;
 
 import magma.api.Result;
 import magma.compile.CompileError;
-import magma.compile.GeneratingException;
 import magma.compile.Error_;
-import magma.compile.JavaError;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;

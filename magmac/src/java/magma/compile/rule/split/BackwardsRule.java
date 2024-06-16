@@ -1,9 +1,8 @@
 package magma.compile.rule.split;
 
 import magma.api.Result;
+import magma.compile.CompileError;
 import magma.compile.Error_;
-import magma.compile.GeneratingException;
-import magma.compile.JavaError;
 import magma.compile.MultipleError;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -41,13 +40,13 @@ public record BackwardsRule(Rule leftRule, String slice, Rule rightRule) impleme
                     .flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)))
                     .map(UntypedRuleResult::new);
 
-            if(optional.isPresent()) {
+            if (optional.isPresent()) {
                 return optional.get();
             }
         }
 
         if (errors.isEmpty()) {
-            return new ErrorRuleResult(new JavaError(new GeneratingException("No rules were present.")));
+            return new ErrorRuleResult(new CompileError("No rules were present.", input));
         } else {
             return new ErrorRuleResult(new MultipleError(errors));
         }

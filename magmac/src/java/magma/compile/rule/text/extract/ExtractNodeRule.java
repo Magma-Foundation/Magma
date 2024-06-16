@@ -2,9 +2,8 @@ package magma.compile.rule.text.extract;
 
 import magma.api.Err;
 import magma.api.Result;
-import magma.compile.GeneratingException;
+import magma.compile.CompileError;
 import magma.compile.Error_;
-import magma.compile.JavaError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
@@ -25,7 +24,7 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
                 .map(NodeAttribute::new)
                 .map(attribute -> new MapAttributes().with(propertyKey, attribute))
                 .<RuleResult>map(UntypedRuleResult::new)
-                .orElse(new ErrorRuleResult(new JavaError(new GeneratingException("No name present: " + input))));
+                .orElse(new ErrorRuleResult(new CompileError("No name present: ", input)));
     }
 
     @Override
@@ -40,6 +39,6 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
     private Err<String, Error_> createErr(Node node) {
         var format = "Node did not have attribute '%s' as a node.";
         var message = format.formatted(propertyKey);
-        return new Err<>(new JavaError(new GeneratingException(message, node.toString())));
+        return new Err<>(new CompileError(message, node.toString()));
     }
 }
