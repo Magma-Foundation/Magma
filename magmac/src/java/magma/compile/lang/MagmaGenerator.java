@@ -52,6 +52,14 @@ public class MagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if (node.is("constructor")) {
+            return new Tuple<>(node.retype("invocation"), depth);
+        }
+
+        if(node.is("record")) {
+            return new Tuple<>(node.retype("function"), depth);
+        }
+
         if(node.is("interface")) {
             return new Tuple<>(node.retype("trait"), depth);
         }

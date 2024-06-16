@@ -18,7 +18,7 @@ public class ClassSplitter extends Generator {
         return new Tuple<>(node.mapAttributes(attributes -> attributes.mapValue("children", NodeListAttribute.Factory, children -> {
             return children.stream()
                     .map(child -> {
-                        if(child.is("class")) {
+                        if(child.is("class") || child.is("record")) {
                             var oldAttributes = child.attributes();
                             var modifiers = oldAttributes.apply("modifiers")
                                     .flatMap(Attribute::asStringList)

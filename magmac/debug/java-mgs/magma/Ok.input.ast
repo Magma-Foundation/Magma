@@ -1,0 +1,366 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "api"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		record = {
+			modifiers : ["public"],
+			name : symbol = {
+				value : "Ok<T, E>(T value)"
+			},
+			interface : generic = {
+				child : "T, E",
+				value : "Result"
+			},
+			child : block = {
+				children : [
+					method = {
+						params : [],
+						definition : definition = {
+							name : "findValue",
+							modifiers : ["@Override", "public"],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "T"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : invocation = {
+										arguments : [
+											symbol = {
+												value : "value"
+											}
+										],
+										caller : access = {
+											child : "of",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					method = {
+						params : [],
+						definition : definition = {
+							name : "findErr",
+							modifiers : ["@Override", "public"],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "E"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					method = {
+						definition : definition = {
+							name : "flatMapValue",
+							modifiers : ["@Override", "public", "<R>"],
+							type : generic = {
+								parent : symbol = {
+									value : "Result"
+								},
+								children : [
+									symbol = {
+										value : "R"
+									},
+									symbol = {
+										value : "E"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : invocation = {
+										arguments : [
+											symbol = {
+												value : "value"
+											}
+										],
+										caller : access = {
+											child : "apply",
+											parent : symbol = {
+												value : "mapper"
+											}
+										}
+									}
+								}
+							]
+						},
+						params : [
+							definition = {
+								name : "mapper",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										generic = {
+											parent : symbol = {
+												value : "Result"
+											},
+											children : [
+												symbol = {
+													value : "R"
+												},
+												symbol = {
+													value : "E"
+												}
+											]
+										}
+									]
+								}
+							}
+						]
+					},
+					method = {
+						params : [
+							definition = {
+								name : "mapper",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "R"
+										}
+									]
+								}
+							}
+						],
+						definition : definition = {
+							name : "mapValue",
+							modifiers : ["@Override", "public", "<R>"],
+							type : generic = {
+								parent : symbol = {
+									value : "Result"
+								},
+								children : [
+									symbol = {
+										value : "R"
+									},
+									symbol = {
+										value : "E"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : constructor = {
+										temp : ">",
+										caller : symbol = {
+											value : "Ok"
+										},
+										arguments : [
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "value"
+													}
+												],
+												caller : access = {
+													child : "apply",
+													parent : symbol = {
+														value : "mapper"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					method = {
+						params : [],
+						child : block = {
+							children : [
+								return = {
+									child : symbol = {
+										value : "true"
+									}
+								}
+							]
+						},
+						definition : definition = {
+							name : "isOk",
+							modifiers : ["@Override", "public"],
+							type : symbol = {
+								value : "boolean"
+							}
+						}
+					},
+					method = {
+						child : block = {
+							children : [
+								return = {
+									child : constructor = {
+										temp : ">",
+										caller : symbol = {
+											value : "Ok"
+										},
+										arguments : [
+											symbol = {
+												value : "value"
+											}
+										]
+									}
+								}
+							]
+						},
+						params : [
+							definition = {
+								name : "mapper",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "E"
+										},
+										symbol = {
+											value : "R"
+										}
+									]
+								}
+							}
+						],
+						definition : definition = {
+							name : "mapErr",
+							modifiers : ["@Override", "public", "<R>"],
+							type : generic = {
+								parent : symbol = {
+									value : "Result"
+								},
+								children : [
+									symbol = {
+										value : "T"
+									},
+									symbol = {
+										value : "R"
+									}
+								]
+							}
+						}
+					},
+					method = {
+						definition : definition = {
+							name : "match",
+							modifiers : ["@Override", "public", "<R>"],
+							type : symbol = {
+								value : "R"
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									child : invocation = {
+										arguments : [
+											symbol = {
+												value : "value"
+											}
+										],
+										caller : access = {
+											child : "apply",
+											parent : symbol = {
+												value : "onOk"
+											}
+										}
+									}
+								}
+							]
+						},
+						params : [
+							definition = {
+								name : "onOk",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "R"
+										}
+									]
+								}
+							},
+							definition = {
+								name : "onErr",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "E"
+										},
+										symbol = {
+											value : "R"
+										}
+									]
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}]

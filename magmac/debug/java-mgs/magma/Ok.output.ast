@@ -16,7 +16,7 @@ block = {
 			leftRule-indent : "\n",
 			modifiers : ["public"],
 			name : symbol = {
-				value : "Err<T, E>(E value)"
+				value : "Ok<T, E>(T value)"
 			},
 			interface : generic = {
 				child : "T, E",
@@ -24,7 +24,7 @@ block = {
 			},
 			definition : definition = {
 				params : [],
-				name : "Err<T, E>(E value)",
+				name : "Ok<T, E>(T value)",
 				modifiers : ["export", "class", "def"]
 			},
 			child : block = {
@@ -52,9 +52,13 @@ block = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
 									child : invocation = {
-										arguments : [],
+										arguments : [
+											symbol = {
+												value : "value"
+											}
+										],
 										caller : access = {
-											child : "empty",
+											child : "of",
 											parent : symbol = {
 												value : "Optional"
 											}
@@ -87,13 +91,9 @@ block = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
 									child : invocation = {
-										arguments : [
-											symbol = {
-												value : "value"
-											}
-										],
+										arguments : [],
 										caller : access = {
-											child : "of",
+											child : "empty",
 											parent : symbol = {
 												value : "Optional"
 											}
@@ -111,15 +111,17 @@ block = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
 									child : invocation = {
-										temp : ">",
-										caller : symbol = {
-											value : "Err"
-										},
 										arguments : [
 											symbol = {
 												value : "value"
 											}
-										]
+										],
+										caller : access = {
+											child : "apply",
+											parent : symbol = {
+												value : "mapper"
+											}
+										}
 									}
 								}
 							]
@@ -180,11 +182,21 @@ block = {
 									child : invocation = {
 										temp : ">",
 										caller : symbol = {
-											value : "Err"
+											value : "Ok"
 										},
 										arguments : [
-											symbol = {
-												value : "value"
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "value"
+													}
+												],
+												caller : access = {
+													child : "apply",
+													parent : symbol = {
+														value : "mapper"
+													}
+												}
 											}
 										]
 									}
@@ -243,7 +255,7 @@ block = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
 									child : symbol = {
-										value : "false"
+										value : "true"
 									}
 								}
 							]
@@ -259,21 +271,11 @@ block = {
 									child : invocation = {
 										temp : ">",
 										caller : symbol = {
-											value : "Err"
+											value : "Ok"
 										},
 										arguments : [
-											invocation = {
-												arguments : [
-													symbol = {
-														value : "value"
-													}
-												],
-												caller : access = {
-													child : "apply",
-													parent : symbol = {
-														value : "mapper"
-													}
-												}
+											symbol = {
+												value : "value"
 											}
 										]
 									}
@@ -333,7 +335,7 @@ block = {
 										caller : access = {
 											child : "apply",
 											parent : symbol = {
-												value : "onErr"
+												value : "onOk"
 											}
 										}
 									}
