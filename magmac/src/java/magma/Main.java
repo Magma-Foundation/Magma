@@ -20,12 +20,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class Main {
 
     public static final Path TARGET_DIRECTORY = Paths.get(".", "magmac", "src", "magma");
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "magmac", "src", "java");
+    public static final Path DEBUG_DIRECTORY = Paths.get(".", "magmac", "debug", "java-mgs");
 
     public static void main(String[] args) {
         try {
@@ -58,7 +58,8 @@ public class Main {
         var parseError = parseResult.findError();
 
         if (parseError.isPresent()) {
-            print(parseError.get(), 0);
+            var result = print(parseError.get(), 0);
+            writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
             throw new CompileException();
         }
 
@@ -66,7 +67,7 @@ public class Main {
         if (root.isPresent()) {
             if (!Files.exists(targetParent)) createDirectory(targetParent);
 
-            var relativizedDebug = Paths.get(".", "magmac", "debug", "java-mgs").resolve(relativized);
+            var relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
             if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
 
             writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
@@ -106,7 +107,7 @@ public class Main {
         }
     }
 
-    private static void print(Error_ e, int depth) {
+    private static String print(Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
         var index = actualContext.indexOf('\n');
         String context;
@@ -122,19 +123,27 @@ public class Main {
 
         var causes = e.findCauses().orElse(Collections.emptyList());
         if (causes.isEmpty()) {
-            return;
+            var s = e.findMessage().orElse("");
+            return "<child message=\"" + s.replace("\"", "&quot;") + "\"/>";
         }
         if (causes.size() > 1) {
             var list = causes.stream()
                     .sorted(Comparator.comparingInt(Error_::calculateDepth))
                     .toList();
 
+            var builder = new StringBuilder();
             for (Error_ cause : list) {
-                print(cause, depth);
+                var result = print(cause, depth);
+                builder.append(result);
             }
+            return "<parent>" + builder + "</parent>";
         } else {
-            print(causes.get(0), depth + 1);
+            return print(causes.get(0), depth + 1);
         }
+    }
+
+    private static String escape(String s) {
+        return s;
     }
 
     private static Node generate(Node root) {
