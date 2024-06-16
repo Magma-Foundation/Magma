@@ -12,6 +12,7 @@ import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -20,6 +21,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Lang {
     static Rule createBlock(Rule child) {
@@ -158,7 +160,16 @@ public class Lang {
     }
 
     static TypeRule createOperator(String name, String slice, Rule value) {
-        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
+        return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
+            @Override
+            protected Optional<Integer> computeIndex(String input) {
+                /*
+                TODO: find the operator
+                 */
+
+                return Optional.empty();
+            }
+        });
     }
 
     static TypeRule createNumberRule() {
