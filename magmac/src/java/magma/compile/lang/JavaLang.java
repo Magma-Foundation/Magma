@@ -123,7 +123,8 @@ public class JavaLang {
                 Lang.createOperator("equals", "==", value),
                 Lang.createOperator("add", "+", value),
                 Lang.createOperator("greater-than", ">=", value),
-                Lang.createOperator("greater-than", ">", value)
+                Lang.createOperator("greater-than", ">", value),
+                new TypeRule("not", new LeftRule("!", new ExtractNodeRule("child", value)))
         )));
         return value;
     }

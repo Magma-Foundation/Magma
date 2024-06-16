@@ -1,0 +1,6 @@
+import java.util.function.Function;
+export class def Tuple<L, R>(L left, R right)() => {
+	public def mapLeft(mapper : Function<L, T>) : Tuple<T, R> => {
+		return Tuple(mapper.apply(left), right);
+	}
+}

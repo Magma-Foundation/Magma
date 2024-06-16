@@ -1,0 +1,250 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "compile", "attribute"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["magma", "api", "Tuple"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "stream", "Stream"]
+			}
+		},
+		interface = {
+			modifiers : ["/**", "*", "The", "Node"],
+			name : symbol = {
+				value : "provides methods to manipulate key-value pairs\n * where keys are strings and values are attributes. It supports\n * adding attributes, applying attributes, merging nodes, and\n * streaming entries.\n */\npublic interface Attributes"
+			},
+			child : block = {
+				children : [
+					method = {
+						definition : definition = {
+							name : "mapValue",
+							modifiers : ["<T>"],
+							type : symbol = {
+								value : "Attributes"
+							}
+						},
+						params : [
+							definition = {
+								name : "key",
+								type : symbol = {
+									value : "String"
+								}
+							},
+							definition = {
+								name : "factory",
+								type : generic = {
+									parent : symbol = {
+										value : "Factory"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										}
+									]
+								}
+							},
+							definition = {
+								name : "mapper",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "T"
+										},
+										symbol = {
+											value : "T"
+										}
+									]
+								}
+							}
+						]
+					},
+					method = {
+						params : [
+							definition = {
+								name : "key",
+								type : symbol = {
+									value : "String"
+								}
+							},
+							definition = {
+								name : "value",
+								type : symbol = {
+									value : "Attribute"
+								}
+							}
+						],
+						definition : definition = {
+							name : "with",
+							type : symbol = {
+								value : "Attributes"
+							},
+							modifiers : ["/**", "*", "Adds", "an", "attribute", "to", "the", "node.", "*", "*", "@param", "key", "the", "key", "to", "associate", "with", "the", "attribute", "*", "@param", "value", "the", "attribute", "to", "add", "*", "@return", "a", "new", "Node", "instance", "with", "the", "added", "attribute", "*/"]
+						}
+					},
+					method = {
+						params : [
+							definition = {
+								name : "key",
+								type : symbol = {
+									value : "String"
+								}
+							}
+						],
+						definition : definition = {
+							name : "apply",
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "Attribute"
+									}
+								]
+							},
+							modifiers : ["/**", "*", "Retrieves", "an", "attribute", "associated", "with", "the", "given", "key.", "*", "*", "@param", "key", "the", "key", "to", "lookup", "*", "@return", "an", "Optional", "containing", "the", "attribute", "if", "present,", "otherwise", "empty", "*/"]
+						}
+					},
+					method = {
+						params : [
+							definition = {
+								name : "other",
+								type : symbol = {
+									value : "Attributes"
+								}
+							}
+						],
+						definition : definition = {
+							name : "merge",
+							type : symbol = {
+								value : "Attributes"
+							},
+							modifiers : ["/**", "*", "Merges", "the", "current", "node", "with", "another", "node.", "*", "*", "@param", "other", "the", "node", "to", "merge", "with", "*", "@return", "a", "new", "Node", "instance", "representing", "the", "merged", "result", "*/"]
+						}
+					},
+					method = {
+						params : [],
+						definition : definition = {
+							name : "streamEntries",
+							modifiers : ["/**", "*", "Streams", "the", "entries", "of", "the", "node", "as", "tuples", "of", "key", "and", "attribute.", "*", "*", "@return", "a", "Stream", "of", "tuples", "containing", "the", "keys", "and", "attributes", "*/"],
+							type : generic = {
+								parent : symbol = {
+									value : "Stream"
+								},
+								children : [
+									generic = {
+										parent : symbol = {
+											value : "Tuple"
+										},
+										children : [
+											symbol = {
+												value : "String"
+											},
+											symbol = {
+												value : "Attribute"
+											}
+										]
+									}
+								]
+							}
+						}
+					},
+					method = {
+						definition : definition = {
+							name : "mapValues",
+							type : symbol = {
+								value : "Attributes"
+							}
+						},
+						params : [
+							definition = {
+								name : "mapper",
+								type : generic = {
+									parent : symbol = {
+										value : "Function"
+									},
+									children : [
+										symbol = {
+											value : "Attribute"
+										},
+										symbol = {
+											value : "Attribute"
+										}
+									]
+								}
+							}
+						]
+					},
+					method = {
+						definition : definition = {
+							name : "format",
+							type : symbol = {
+								value : "String"
+							}
+						},
+						params : [
+							definition = {
+								name : "depth",
+								type : symbol = {
+									value : "int"
+								}
+							}
+						]
+					},
+					method = {
+						definition : definition = {
+							name : "remove",
+							type : symbol = {
+								value : "Attributes"
+							}
+						},
+						params : [
+							definition = {
+								name : "key",
+								type : symbol = {
+									value : "String"
+								}
+							}
+						]
+					},
+					method = {
+						definition : definition = {
+							name : "has",
+							type : symbol = {
+								value : "boolean"
+							}
+						},
+						params : [
+							definition = {
+								name : "name",
+								type : symbol = {
+									value : "String"
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}]

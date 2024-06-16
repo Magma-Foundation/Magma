@@ -1,0 +1,97 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		function = {
+			right-indent : "\n",
+			leftRule-indent : "\n",
+			modifiers : ["public"],
+			name : symbol = {
+				value : "Tuple<L, R>(L left, R right)"
+			},
+			definition : definition = {
+				params : [],
+				name : "Tuple<L, R>(L left, R right)",
+				modifiers : ["export", "class", "def"]
+			},
+			child : block = {
+				children : [
+					function = {
+						right-indent : "\n",
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "mapLeft",
+							modifiers : ["public", "def"],
+							type : generic = {
+								parent : symbol = {
+									value : "Tuple"
+								},
+								children : [
+									symbol = {
+										value : "T"
+									},
+									symbol = {
+										value : "R"
+									}
+								]
+							},
+							params : [
+								definition = {
+									name : "mapper",
+									type : generic = {
+										parent : symbol = {
+											value : "Function"
+										},
+										children : [
+											symbol = {
+												value : "L"
+											},
+											symbol = {
+												value : "T"
+											}
+										]
+									}
+								}
+							]
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									leftRule-indent : "\n\t\t",
+									child : invocation = {
+										temp : ">",
+										caller : symbol = {
+											value : "Tuple"
+										},
+										arguments : [
+											invocation = {
+												arguments : [
+													symbol = {
+														value : "left"
+													}
+												],
+												caller : access = {
+													child : "apply",
+													parent : symbol = {
+														value : "mapper"
+													}
+												}
+											},
+											symbol = {
+												value : "right"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

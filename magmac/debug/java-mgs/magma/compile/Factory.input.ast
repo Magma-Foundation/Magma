@@ -1,0 +1,64 @@
+Optional[block = {
+	children : [
+		package = {
+			internal : namespace = {
+				namespace : ["magma", "compile", "attribute"]
+			}
+		},
+		import = {
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		interface = {
+			modifiers : ["public"],
+			name : generic = {
+				child : "T",
+				value : "Factory"
+			},
+			child : block = {
+				children : [
+					method = {
+						params : [
+							definition = {
+								name : "attribute",
+								type : symbol = {
+									value : "Attribute"
+								}
+							}
+						],
+						definition : definition = {
+							name : "fromAttribute",
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "T"
+									}
+								]
+							}
+						}
+					},
+					method = {
+						definition : definition = {
+							name : "toAttribute",
+							type : symbol = {
+								value : "Attribute"
+							}
+						},
+						params : [
+							definition = {
+								name : "value",
+								type : symbol = {
+									value : "T"
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}]

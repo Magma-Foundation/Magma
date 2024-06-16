@@ -1,0 +1,260 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["magma", "api", "Tuple"]
+			}
+		},
+		import = {
+			leftRule-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		import = {
+			leftRule-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "function", "Function"]
+			}
+		},
+		import = {
+			leftRule-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "stream", "Stream"]
+			}
+		},
+		trait = {
+			right-indent : "\n",
+			leftRule-indent : "\n",
+			modifiers : ["/**", "*", "The", "Node"],
+			name : symbol = {
+				value : "provides methods to manipulate key-value pairs\n * where keys are strings and values are attributes. It supports\n * adding attributes, applying attributes, merging nodes, and\n * streaming entries.\n */\npublic interface Attributes"
+			},
+			child : block = {
+				children : [
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "mapValue",
+							modifiers : ["def"],
+							type : symbol = {
+								value : "Attributes"
+							},
+							params : [
+								definition = {
+									name : "key",
+									type : symbol = {
+										value : "String"
+									}
+								},
+								definition = {
+									name : "factory",
+									type : generic = {
+										parent : symbol = {
+											value : "Factory"
+										},
+										children : [
+											symbol = {
+												value : "T"
+											}
+										]
+									}
+								},
+								definition = {
+									name : "mapper",
+									type : generic = {
+										parent : symbol = {
+											value : "Function"
+										},
+										children : [
+											symbol = {
+												value : "T"
+											},
+											symbol = {
+												value : "T"
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "with",
+							modifiers : ["def"],
+							type : symbol = {
+								value : "Attributes"
+							},
+							params : [
+								definition = {
+									name : "key",
+									type : symbol = {
+										value : "String"
+									}
+								},
+								definition = {
+									name : "value",
+									type : symbol = {
+										value : "Attribute"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "apply",
+							modifiers : ["def"],
+							params : [
+								definition = {
+									name : "key",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "Attribute"
+									}
+								]
+							}
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "merge",
+							modifiers : ["def"],
+							type : symbol = {
+								value : "Attributes"
+							},
+							params : [
+								definition = {
+									name : "other",
+									type : symbol = {
+										value : "Attributes"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							params : [],
+							modifiers : ["def"],
+							name : "streamEntries",
+							type : generic = {
+								parent : symbol = {
+									value : "Stream"
+								},
+								children : [
+									generic = {
+										parent : symbol = {
+											value : "Tuple"
+										},
+										children : [
+											symbol = {
+												value : "String"
+											},
+											symbol = {
+												value : "Attribute"
+											}
+										]
+									}
+								]
+							}
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "mapValues",
+							type : symbol = {
+								value : "Attributes"
+							},
+							params : [
+								definition = {
+									name : "mapper",
+									type : generic = {
+										parent : symbol = {
+											value : "Function"
+										},
+										children : [
+											symbol = {
+												value : "Attribute"
+											},
+											symbol = {
+												value : "Attribute"
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "format",
+							type : symbol = {
+								value : "String"
+							},
+							params : [
+								definition = {
+									name : "depth",
+									type : symbol = {
+										value : "int"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "remove",
+							type : symbol = {
+								value : "Attributes"
+							},
+							params : [
+								definition = {
+									name : "key",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							]
+						}
+					},
+					function = {
+						right-indent : "\n",
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "has",
+							type : symbol = {
+								value : "boolean"
+							},
+							params : [
+								definition = {
+									name : "name",
+									type : symbol = {
+										value : "String"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}

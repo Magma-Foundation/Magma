@@ -1,0 +1,205 @@
+block = {
+	children : [
+		import = {
+			external : namespace = {
+				namespace : ["magma", "compile", "rule", "Node"]
+			}
+		},
+		import = {
+			leftRule-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "List"]
+			}
+		},
+		import = {
+			leftRule-indent : "\n",
+			external : namespace = {
+				namespace : ["java", "util", "Optional"]
+			}
+		},
+		trait = {
+			right-indent : "\n",
+			leftRule-indent : "\n",
+			modifiers : ["/**", "*", "The", "Attribute"],
+			name : symbol = {
+				value : "provides methods to retrieve attribute values\n * as different types. This interface includes default methods to get\n * the attribute value as a string or a list of strings.\n */\npublic interface Attribute"
+			},
+			child : block = {
+				children : [
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							params : [],
+							name : "asNode",
+							modifiers : ["def"],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "Node"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									leftRule-indent : "\n\t\t",
+									child : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									leftRule-indent : "\n\t\t",
+									child : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						},
+						definition : definition = {
+							params : [],
+							name : "asNodeList",
+							modifiers : ["def"],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									generic = {
+										parent : symbol = {
+											value : "List"
+										},
+										children : [
+											symbol = {
+												value : "Node"
+											}
+										]
+									}
+								]
+							}
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							params : [],
+							name : "asString",
+							modifiers : ["def"],
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									symbol = {
+										value : "String"
+									}
+								]
+							}
+						},
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									leftRule-indent : "\n\t\t",
+									child : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					function = {
+						leftRule-indent : "\n\t",
+						child : block = {
+							children : [
+								return = {
+									right-indent : "\n\t",
+									leftRule-indent : "\n\t\t",
+									child : invocation = {
+										arguments : [],
+										caller : access = {
+											child : "empty",
+											parent : symbol = {
+												value : "Optional"
+											}
+										}
+									}
+								}
+							]
+						},
+						definition : definition = {
+							params : [],
+							modifiers : ["def"],
+							name : "asStringList",
+							type : generic = {
+								parent : symbol = {
+									value : "Optional"
+								},
+								children : [
+									generic = {
+										parent : symbol = {
+											value : "List"
+										},
+										children : [
+											symbol = {
+												value : "String"
+											}
+										]
+									}
+								]
+							}
+						}
+					},
+					function = {
+						right-indent : "\n",
+						leftRule-indent : "\n\t",
+						definition : definition = {
+							name : "format",
+							type : symbol = {
+								value : "String"
+							},
+							params : [
+								definition = {
+									name : "depth",
+									type : symbol = {
+										value : "int"
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	]
+}
