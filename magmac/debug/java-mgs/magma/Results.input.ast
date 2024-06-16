@@ -117,12 +117,14 @@ Optional[block = {
 									},
 									value:scope : value:scope = {
 										value : throw = {
-											value:scope : invocation = {
-												arguments : [],
-												caller : access = {
-													child : "get",
-													parent : symbol = {
-														value : "err"
+											value:scope : value:scope = {
+												value : invocation = {
+													arguments : [],
+													caller : access = {
+														child : "get",
+														parent : symbol = {
+															value : "err"
+														}
 													}
 												}
 											}
@@ -130,15 +132,17 @@ Optional[block = {
 									}
 								},
 								throw = {
-									value:scope : constructor = {
-										caller : symbol = {
-											value : "RuntimeException"
-										},
-										arguments : [
-											string = {
-												value : "No value or err present?"
-											}
-										]
+									value:scope : value:scope = {
+										value : constructor = {
+											caller : symbol = {
+												value : "RuntimeException"
+											},
+											arguments : [
+												string = {
+													value : "No value or err present?"
+												}
+											]
+										}
 									}
 								}
 							]

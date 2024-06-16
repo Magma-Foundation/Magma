@@ -122,12 +122,14 @@ block = {
 									},
 									value:scope : value:scope = {
 										value : throw = {
-											value:scope : invocation = {
-												arguments : [],
-												caller : access = {
-													child : "get",
-													parent : symbol = {
-														value : "err"
+											value:scope : value:scope = {
+												value : invocation = {
+													arguments : [],
+													caller : access = {
+														child : "get",
+														parent : symbol = {
+															value : "err"
+														}
 													}
 												}
 											}
@@ -137,15 +139,17 @@ block = {
 								throw = {
 									right-indent : "\n\t",
 									leftRule-indent : "\n\t\t",
-									value:scope : invocation = {
-										caller : symbol = {
-											value : "RuntimeException"
-										},
-										arguments : [
-											string = {
-												value : "No value or err present?"
-											}
-										]
+									value:scope : value:scope = {
+										value : invocation = {
+											caller : symbol = {
+												value : "RuntimeException"
+											},
+											arguments : [
+												string = {
+													value : "No value or err present?"
+												}
+											]
+										}
 									}
 								}
 							]

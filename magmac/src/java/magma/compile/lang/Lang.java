@@ -172,7 +172,7 @@ public class Lang {
     }
 
     static Rule createThrowRule(Rule value) {
-        var after = new RightRule(createScope("value", value), ";");
+        var after = new RightRule(createScope("value", new ExtractNodeRule("value", value)), ";");
         return new TypeRule("throw", new LeftRule("throw ", after));
     }
 }

@@ -1,0 +1,9 @@
+export class def Results() => {
+	public def unwrap(result : Result<T, E>) : T => {
+		let value=result.findValue();
+		if(value.isPresent())return value.get();
+		let err=result.findErr();
+		if(err.isPresent())throw err.get();
+		throw RuntimeException("No value or err present?");
+	}
+}

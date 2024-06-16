@@ -29,6 +29,6 @@ public record TypeRule(String type, Rule child) implements Rule {
             });
         }
 
-        return new Err<>(new CompileError(String.format("Node was not of type '%s'.", type), node.toString()));
+        return new Err<>(new CompileError(String.format("Node was not of type '%s', but rather '%s'.", type, node.type()), node.toString()));
     }
 }
