@@ -50,7 +50,8 @@ public class Lang {
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
                 generic,
-                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value")))
+                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                new TypeRule("access", new LastRule(new ExtractNodeRule("parent", type), ".", new ExtractStringRule("member")))
         )));
 
         return type;
