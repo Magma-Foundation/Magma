@@ -123,7 +123,13 @@ public class Lang {
     }
 
     static Rule createAssignmentRule(Rule value) {
-        var left = new ExtractNodeRule("assignable", new TypeRule("assignable-parent", new StripRule(new SymbolRule(new ExtractStringRule("reference")))));
+        var reference = new SymbolRule(new ExtractStringRule("reference"));
+        var assignable = new OrRule(List.of(
+                new StripRule(reference),
+                new LastRule(reference, ".", new ExtractStringRule("member"))
+        ));
+
+        var left = new ExtractNodeRule("assignable", new TypeRule("assignable-parent", assignable));
         var right = new RightRule(new ExtractNodeRule("value", new StripRule(value)), ";");
         return new TypeRule("assignment", new FirstRule(left, "=", right));
     }
