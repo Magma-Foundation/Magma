@@ -43,12 +43,10 @@ public class JavaLang {
         var classMember = new LazyRule();
         var value = createValueRule(classMember);
 
-        var declaration = Lang.createDeclarationRule(definition, value);
-
         var rules = List.of(
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
-                declaration,
+                Lang.createDeclarationRule(definition, value),
                 Lang.createAssignmentRule(value),
                 Lang.createIfRule("if", value, statement),
                 Lang.createIfRule("while", value, statement),
@@ -81,7 +79,7 @@ public class JavaLang {
 
         classMember.setRule(new OrRule(List.of(
                 methodRule,
-                declaration
+                Lang.createDeclarationRule(definition, value)
         )));
         return classMember;
     }
@@ -162,5 +160,4 @@ public class JavaLang {
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
     }
-
 }
