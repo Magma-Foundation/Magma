@@ -78,10 +78,14 @@ public class Lang {
     }
 
     static TypeRule createIfRule(String type, Rule value, Rule statement) {
-        var condition = new LeftRule("(", new RightRule(new ExtractNodeRule("condition", value), ")"));
+        var condition = new LeftRule("(", new ExtractNodeRule("condition", value));
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
-        var conditionOuter = new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(condition)));
-        return new TypeRule(type, new LeftRule(type, new FirstRule(conditionOuter, "{", child)));
+        var withBlock = new OrRule(List.of(
+                new FirstRule(new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(new RightRule(condition, ")")))), "{", child),
+                new FirstRule(new ExtractNodeRule("condition-parent", new TypeRule("condition-parent", new StripRule(condition))), ")", new ExtractNodeRule("child", statement))
+        ));
+
+        return new TypeRule(type, new LeftRule(type, withBlock));
     }
 
     static Rule createReturnRule(Rule value) {

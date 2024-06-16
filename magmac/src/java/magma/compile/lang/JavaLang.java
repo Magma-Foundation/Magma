@@ -50,10 +50,10 @@ public class JavaLang {
                 Lang.createTryRule(statement),
                 declaration,
                 Lang.createAssignmentRule(value),
-                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
-                Lang.createCatchRule(definition, statement),
                 Lang.createIfRule("if", value, statement),
                 Lang.createIfRule("while", value, statement),
+                new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
+                Lang.createCatchRule(definition, statement),
                 Lang.createReturnRule(value),
                 Lang.createForRule(definition, value, statement, ":"),
                 Lang.createElseRule(statement),
@@ -66,13 +66,16 @@ public class JavaLang {
         statement.setRule(new OrRule(copy));
 
         var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
-        var methodHeader = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
-        var withValue = new FirstRule(methodHeader, "{", content);
-        var withoutValue = new RightRule(methodHeader, ";");
+        var withoutThrows = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
+        var withThrows = new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule())));
+        var maybeThrows = new OrRule(List.of(withThrows, withoutThrows));
+
+        var withValue = new FirstRule(maybeThrows, "{", content);
+        var withoutValue = new RightRule(maybeThrows, ";");
         var maybeValue = new OrRule(List.of(withValue, withoutValue));
 
-        var leftRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
-        var methodRule = new TypeRule("method", new FirstRule(leftRule, "(", maybeValue));
+        var definitionNode = new ExtractNodeRule("definition", new TypeRule("definition", definition));
+        var methodRule = new TypeRule("method", new FirstRule(definitionNode, "(", maybeValue));
 
         classMember.setRule(new OrRule(List.of(
                 methodRule,
