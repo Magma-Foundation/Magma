@@ -142,7 +142,7 @@ public class Lang {
     }
 
     static TypeRule createOperator(String name, String slice, Rule value) {
-        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("left", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
+        return new TypeRule(name, new FirstRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))));
     }
 
     static TypeRule createNumberRule() {

@@ -6,14 +6,14 @@ block = {
 			}
 		},
 		import = {
-			left-indent : "\n",
+			leftRule-indent : "\n",
 			external : namespace = {
 				namespace : ["java", "util", "function", "Function"]
 			}
 		},
 		function = {
-			left-indent : "\n",
 			right-indent : "\n",
+			leftRule-indent : "\n",
 			modifiers : ["public", "abstract"],
 			interface : generic = {
 				child : "T",
@@ -31,7 +31,7 @@ block = {
 			child : block = {
 				children : [
 					function = {
-						left-indent : "\n\t",
+						leftRule-indent : "\n\t",
 						definition : definition = {
 							name : "map",
 							modifiers : ["public", "def"],
@@ -67,7 +67,7 @@ block = {
 						child : block = {
 							children : [
 								return = {
-									left-indent : "\n\t\t",
+									leftRule-indent : "\n\t\t",
 									child : invocation = {
 										temp : "R>",
 										arguments : [],
@@ -95,7 +95,7 @@ block = {
 													children : [
 														return = {
 															right-indent : "\n\t\t",
-															left-indent : "\n\t\t\t",
+															leftRule-indent : "\n\t\t\t",
 															child : invocation = {
 																arguments : [
 																	symbol = {
@@ -127,14 +127,14 @@ block = {
 								},
 								empty = {
 									right-indent : "\n\t",
-									left-indent : "\n\t\t"
+									leftRule-indent : "\n\t\t"
 								}
 							]
 						}
 					},
 					function = {
 						right-indent : "\n",
-						left-indent : "\n\t",
+						leftRule-indent : "\n\t",
 						definition : definition = {
 							name : "collect",
 							modifiers : ["public", "def"],
@@ -164,7 +164,7 @@ block = {
 							children : [
 								declaration = {
 									modifiers : ["let"],
-									left-indent : "\n\t\t",
+									leftRule-indent : "\n\t\t",
 									definition : definition = {
 										name : "current",
 										modifiers : ["let"]
@@ -181,7 +181,7 @@ block = {
 								},
 								while = {
 									right-indent : "\n\t",
-									left-indent : "\n\t\t",
+									leftRule-indent : "\n\t\t",
 									condition-parent : condition-parent = {
 										condition : symbol = {
 											value : "true"
@@ -191,7 +191,7 @@ block = {
 										children : [
 											declaration = {
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
+												leftRule-indent : "\n\t\t\t",
 												value : symbol = {
 													value : "current"
 												},
@@ -205,7 +205,7 @@ block = {
 											},
 											declaration = {
 												modifiers : ["let"],
-												left-indent : "\n\t\t\t",
+												leftRule-indent : "\n\t\t\t",
 												definition : definition = {
 													name : "tuple",
 													modifiers : ["let"]
@@ -265,7 +265,7 @@ block = {
 												}
 											},
 											if = {
-												left-indent : "\n\t\t\t",
+												leftRule-indent : "\n\t\t\t",
 												condition-parent : condition-parent = {
 													condition : invocation = {
 														arguments : [],
@@ -281,7 +281,7 @@ block = {
 													children : [
 														assignment = {
 															right-indent : "\n\t\t\t",
-															left-indent : "\n\t\t\t\t",
+															leftRule-indent : "\n\t\t\t\t",
 															assignable : assignable-parent = {
 																reference : "current"
 															},
@@ -300,12 +300,12 @@ block = {
 											},
 											else = {
 												right-indent : "\n\t\t",
-												left-indent : "\n\t\t\t",
+												leftRule-indent : "\n\t\t\t",
 												child : block = {
 													children : [
 														return = {
 															right-indent : "\n\t\t\t",
-															left-indent : "\n\t\t\t\t",
+															leftRule-indent : "\n\t\t\t\t",
 															child : symbol = {
 																value : "current"
 															}

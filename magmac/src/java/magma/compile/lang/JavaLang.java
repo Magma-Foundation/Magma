@@ -5,6 +5,7 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.BackwardsRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
@@ -107,8 +108,8 @@ public class JavaLang {
                 Lang.createStringRule(),
                 Lang.createCharRule(),
                 createLambdaRule(value),
-                Lang.createTernaryRule(value),
                 createConstructorRule(value, classMember),
+                Lang.createTernaryRule(value),
                 Lang.createInvocationRule(value),
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
@@ -133,7 +134,7 @@ public class JavaLang {
 
         var caller = new ExtractNodeRule("caller", value);
         var withGenerics = new OrRule(List.of(
-                new LastRule(caller, "<", new ExtractStringRule("temp")),
+                new FirstRule(caller, "<", new ExtractStringRule("temp")),
                 caller
         ));
         var before = new RightRule(new InvocationStart(withGenerics, arguments), ")");
@@ -148,7 +149,7 @@ public class JavaLang {
         var type = Lang.createTypeRule();
         var modifiers = Lang.createModifiersRule();
         var withoutModifiers = new ExtractNodeRule("type", type);
-        var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
+        var withModifiers = new BackwardsRule(modifiers, " ", withoutModifiers);
         var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
         return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
     }

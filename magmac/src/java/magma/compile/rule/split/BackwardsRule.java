@@ -1,0 +1,71 @@
+package magma.compile.rule.split;
+
+import magma.api.Result;
+import magma.compile.Error_;
+import magma.compile.GeneratingException;
+import magma.compile.JavaError;
+import magma.compile.MultipleError;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public record BackwardsRule(Rule leftRule, String slice, Rule rightRule) implements Rule {
+    @Override
+    public RuleResult toNode(String input) {
+        var allIndexes = findAllIndexesReverse(input);
+        var errors = new ArrayList<Error_>();
+
+        for (Integer index : allIndexes) {
+            var leftSlice = input.substring(0, index);
+            var rightSlice = input.substring(index + slice.length());
+
+            var leftResult = leftRule.toNode(leftSlice);
+            if (leftResult.findError().isPresent()) {
+                errors.add(leftResult.findError().get());
+                continue;
+            }
+
+            var rightResult = rightRule.toNode(rightSlice);
+            if (rightResult.findError().isPresent()) {
+                errors.add(rightResult.findError().get());
+                continue;
+            }
+
+            var optional = leftResult.findAttributes()
+                    .flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)))
+                    .map(UntypedRuleResult::new);
+
+            if(optional.isPresent()) {
+                return optional.get();
+            }
+        }
+
+        if (errors.isEmpty()) {
+            return new ErrorRuleResult(new JavaError(new GeneratingException("No rules were present.")));
+        } else {
+            return new ErrorRuleResult(new MultipleError(errors));
+        }
+    }
+
+    private List<Integer> findAllIndexesReverse(String input) {
+        List<Integer> indexes = new ArrayList<>();
+        int index = input.indexOf(slice);
+        while (index >= 0) {
+            indexes.add(index);
+            index = input.indexOf(slice, index + 1);
+        }
+        Collections.reverse(indexes);
+        return indexes;
+    }
+
+    @Override
+    public Result<String, Error_> fromNode(Node node) {
+        return leftRule.fromNode(node).flatMapValue(leftResult -> rightRule.fromNode(node).mapValue(rightResult -> leftResult + slice + rightResult));
+    }
+}

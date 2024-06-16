@@ -23,7 +23,7 @@ public class MagmaFormatter extends Generator {
                     Node child = list.get(i);
                     Node withLeft;
                     if (depth != 0 || i != 0) {
-                        withLeft = child.withString("left-indent", "\n" + "\t".repeat(depth));
+                        withLeft = child.withString("leftRule-indent", "\n" + "\t".repeat(depth));
                     } else {
                         withLeft = child;
                     }

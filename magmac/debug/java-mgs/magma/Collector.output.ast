@@ -10,7 +10,7 @@ block = {
 			child : block = {
 				children : [
 					function = {
-						left-indent : "\n\t",
+						leftRule-indent : "\n\t",
 						definition : definition = {
 							params : [],
 							name : "createInitial",
@@ -21,7 +21,7 @@ block = {
 					},
 					function = {
 						right-indent : "\n",
-						left-indent : "\n\t",
+						leftRule-indent : "\n\t",
 						definition : definition = {
 							name : "fold",
 							type : symbol = {
