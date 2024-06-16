@@ -163,6 +163,18 @@ public class Lang {
         return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
             @Override
             protected Optional<Integer> computeIndex(String input) {
+                var depth = 0;
+                for (int i = 0; i < input.length(); i++) {
+                    var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
+                    if (maybeSlice.equals(slice) && depth == 0) {
+                        return Optional.of(i);
+                    } else {
+                        var c = input.charAt(i);
+                        if (c == '(') depth++;
+                        if (c == ')') depth--;
+                    }
+                }
+
                 /*
                 TODO: find the operator
                  */
