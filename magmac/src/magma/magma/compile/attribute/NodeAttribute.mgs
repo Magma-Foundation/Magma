@@ -1,0 +1,13 @@
+import magma.compile.rule.Node;
+import java.util.Optional;
+export class def NodeAttribute(Node value)() => {
+	const Factory : Factory<Node>=Factory();
+	
+	;
+	public def asNode() : Optional<Node> => {
+		return Optional.of(value);
+	}
+	public def format(depth : int) : String => {
+		return value.format(depth);
+	}
+}

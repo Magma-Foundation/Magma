@@ -79,7 +79,8 @@ public class JavaLang {
 
         classMember.setRule(new OrRule(List.of(
                 methodRule,
-                Lang.createDeclarationRule(definition, value)
+                Lang.createDeclarationRule(definition, value),
+                Lang.createEmptyStatementRule()
         )));
         return classMember;
     }
