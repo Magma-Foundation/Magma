@@ -170,6 +170,8 @@ public class Lang {
         return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
             @Override
             protected Optional<Integer> computeIndex(String input) {
+                if(!input.contains(slice)) return Optional.empty();
+
                 var depth = 0;
                 for (int i = 0; i < input.length(); i++) {
                     var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
