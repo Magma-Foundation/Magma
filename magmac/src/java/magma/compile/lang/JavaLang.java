@@ -32,7 +32,8 @@ public class JavaLang {
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 importRule,
                 createContentRule("class", createContentMember()),
-                createContentRule("interface", createContentMember())
+                createContentRule("interface", createContentMember()),
+                createContentRule("record", createContentMember())
         ));
     }
 
