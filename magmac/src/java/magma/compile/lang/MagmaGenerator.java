@@ -30,7 +30,7 @@ public class MagmaGenerator extends Generator {
                 .apply("type")
                 .flatMap(Attribute::asNode);
 
-        if(typeOptional.isEmpty()) return definition;
+        if (typeOptional.isEmpty()) return definition;
         var type = typeOptional.get();
 
         if (type.is("symbol")) {
@@ -92,17 +92,25 @@ public class MagmaGenerator extends Generator {
             }
         }
 
+        if (node.is("declaration")) {
+            var definition = node.mapNode("definition:scope", scope -> {
+                return scope.mapNode("definition", MagmaGenerator::attachModifiers);
+            });
+
+            return new Tuple<>(definition, depth);
+        }
+
         if (node.is("definition")) {
             var removed = removeImplicitType(node);
 
-            var modifiers = node.attributes()
+            var modifiers = removed.attributes()
                     .apply("modifiers")
                     .flatMap(Attribute::asStringList);
 
             if (modifiers.isEmpty() || modifiers.get().isEmpty()) {
-                return new Tuple<>(node.remove("modifiers"), depth);
+                return new Tuple<>(removed.remove("modifiers"), depth);
             } else {
-                return new Tuple<>(node, depth);
+                return new Tuple<>(removed, depth);
             }
         }
 

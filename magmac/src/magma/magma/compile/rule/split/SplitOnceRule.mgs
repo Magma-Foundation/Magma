@@ -22,35 +22,35 @@ export class def SplitOnceRule() => {
 		this=rightRule;
 	}
 	public def toNode(input : String) : RuleResult => {
-		tuple : var = computeIndex(input).map((keywordIndex) => {
-			left1 : var = input.substring(0, keywordIndex);
-			right1 : var = input.substring(keywordIndex+slice.length());
+		let tuple = computeIndex(input).map((keywordIndex) => {
+			let left1 = input.substring(0, keywordIndex);
+			let right1 = input.substring(keywordIndex+slice.length());
 			return Tuple(left1, right1);
 		});
 		return tuple.map((contentStart) => {
-			left : var = contentStart.left();
-			right : var = contentStart.right();
-			leftResult : var = leftRule.toNode(left);
+			let left = contentStart.left();
+			let right = contentStart.right();
+			let leftResult = leftRule.toNode(left);
 			if(leftResult.findError().isPresent())return leftResult;
-			rightResult : var = rightRule.toNode(right);
+			let rightResult = rightRule.toNode(right);
 			if(rightResult.findError().isPresent())return rightResult;
 			return leftResult.findAttributes().flatMap((leftAttributes) => rightResult.findAttributes().map((rightAttributes) => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();
 		}).orElseGet(() => {
-			format : var = "Slice '%s' not present.";
-			message : var = format.formatted(slice);
+			let format = "Slice '%s' not present.";
+			let message = format.formatted(slice);
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
 	
 	protected abstract computeIndex(input : String) : Optional<Integer>;
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		leftResult : var = leftRule.fromNode(node);
-		rightValue : var = rightRule.fromNode(node);
+		let leftResult = leftRule.fromNode(node);
+		let rightValue = rightRule.fromNode(node);
 		return leftResult.flatMapValue((left) => rightValue.mapValue((right) => left+slice+right)).mapErr((err) => createError(node, err));
 	}
 	def createError(node : Node, err : Error_) : CompileParentError => {
-		format : var = "Cannot merge node using slice '%s'.";
-		message : var = format.formatted(slice);
+		let format = "Cannot merge node using slice '%s'.";
+		let message = format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);
 	}
 }

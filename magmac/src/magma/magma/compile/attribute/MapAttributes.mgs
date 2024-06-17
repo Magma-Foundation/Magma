@@ -16,7 +16,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map((inner) => with(key, inner)).orElse(this);
 	}
 	public def with(key : String, value : Attribute) : Attributes => {
-		copy : var = HashMap(values);
+		let copy = HashMap(values);
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
@@ -24,8 +24,8 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
 	}
 	public def merge(other : Attributes) : Attributes => {
-		entries : var = other.streamEntries().collect(Collectors.toSet());
-		current : Attributes = this;
+		let entries = other.streamEntries().collect(Collectors.toSet());
+		let current : Attributes = this;
 		for(entry : var in entries){
 			current=current.with(entry.left(), entry.right());
 		}
@@ -35,7 +35,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return values.entrySet().stream().map((entry) => Tuple(entry.getKey(), entry.getValue()));
 	}
 	public def mapValues(mapper : Attribute => Attribute) : Attributes => {
-		copy : var = HashMap();
+		let copy = HashMap();
 		for(stringAttributeEntry : Map.Entry<String, Attribute> in values.entrySet()){
 			copy.put(stringAttributeEntry.getKey(), mapper.apply(stringAttributeEntry.getValue()));
 		}
@@ -45,7 +45,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return values.entrySet().stream().map((entry) => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
 	}
 	public def remove(key : String) : Attributes => {
-		copy : var = HashMap(values);
+		let copy = HashMap(values);
 		copy.remove(key);
 		return MapAttributes(copy);
 	}

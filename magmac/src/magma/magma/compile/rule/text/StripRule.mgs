@@ -10,8 +10,8 @@ export class def StripRule(Rule child)() => {
 		return child.toNode(input.strip()).mapErr((error) => CompileParentError("Cannot strip input.", input, error));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		leftIndent : var = node.attributes().apply("left-indent").flatMap(Attribute.asString).orElse("");
-		rightIndent : var = node.attributes().apply("right-indent").flatMap(Attribute.asString).orElse("");
+		let leftIndent = node.attributes().apply("left-indent").flatMap(Attribute.asString).orElse("");
+		let rightIndent = node.attributes().apply("right-indent").flatMap(Attribute.asString).orElse("");
 		return child.fromNode(node).mapValue((inner) => leftIndent+inner+rightIndent).mapErr((err) => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
 }

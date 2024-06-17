@@ -31,8 +31,8 @@ export class def ExtractRule() => {
 		return Ok(value);
 	}
 	def createErr(node : Node) : Err<String, Error_> => {
-		format : var = "Property '%s' does not exist.";
-		message : var = format.formatted(key);
+		let format = "Property '%s' does not exist.";
+		let message = format.formatted(key);
 		return Err(CompileError(message, node.toString()));
 	}
 }
