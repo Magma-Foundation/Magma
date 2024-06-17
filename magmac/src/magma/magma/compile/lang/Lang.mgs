@@ -53,7 +53,7 @@ export class def Lang() => {
 		return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
 	}
 	def createModifiersRule() : StripRule => {
-		return createModifiersRule(List.of("public", "abstract", "static", "private"));
+		return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
 	}
 	def createModifiersRule(final modifiers : List<String>) : StripRule => {
 		return StripRule(ExtractStringListRule("modifiers", " "));

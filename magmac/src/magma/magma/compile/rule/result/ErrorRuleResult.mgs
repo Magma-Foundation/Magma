@@ -1,0 +1,25 @@
+import magma.compile.Error_;
+import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
+import java.util.Optional;
+import java.util.function.Function;
+export class def ErrorRuleResult(Error_ e)() => {
+	public def findName() : Optional<String> => {
+		return Optional.empty();
+	}
+	public def findError() : Optional<Error_> => {
+		return Optional.of(e);
+	}
+	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
+		return ErrorRuleResult(mapper.apply(e));
+	}
+	public def findAttributes() : Optional<Attributes> => {
+		return Optional.empty();
+	}
+	public def create() : Optional<Node> => {
+		return Optional.empty();
+	}
+	public def withType(type : String) : RuleResult => {
+		return this;
+	}
+}

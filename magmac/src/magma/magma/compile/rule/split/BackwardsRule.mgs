@@ -1,0 +1,52 @@
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.MultipleError;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() => {
+	public def toNode(input : String) : RuleResult => {
+		let allIndexes=findAllIndexesReverse(input);
+		let errors=ArrayList();
+		for(index : Integer in allIndexes){
+			let leftSlice=input.substring(0, index);
+			let rightSlice=input.substring(index+slice.length());
+			let leftResult=leftRule.toNode(leftSlice);
+			if(leftResult.findError().isPresent()){
+				errors.add(leftResult.findError().get());
+				continue
+				
+			;
+			}
+			let rightResult=rightRule.toNode(rightSlice);
+			if(rightResult.findError().isPresent()){
+				errors.add(rightResult.findError().get());
+				continue
+				
+			;
+			}
+			let optional=leftResult.findAttributes().flatMap( (leftAttributes) => {rightResult.findAttributes().map( (rightAttributes) => {rightAttributes.merge(leftAttributes);});}).map(UntypedRuleResult.new);
+			if(optional.isPresent()){
+				return optional.get();
+			}
+		}
+		if(errors.isEmpty()){
+			return ErrorRuleResult(CompileError("No rules were present.", input));
+		}
+		else
+		{
+			return ErrorRuleResult(MultipleError(errors));
+		}
+	
+	}
+	def findAllIndexesReverse(input : String) : List<Integer>
+	public def fromNode(node : Node) : Result<String, Error_> => {
+		return leftRule.fromNode(node).flatMapValue( (leftResult) => {rightRule.fromNode(node).mapValue( (rightResult) => leftResult+slice+rightResult);});
+	}
+}

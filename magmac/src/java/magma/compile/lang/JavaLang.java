@@ -28,25 +28,28 @@ public class JavaLang {
         var namespace = Lang.createNamespaceRule();
         var importRule = Lang.createImportRule(namespace);
 
-        var classRule = new LazyRule();
-        var classMember = new LazyRule();
+        var member = new LazyRule();
         var statement = new LazyRule();
-        var valueRule = createValueRule(classMember, statement);
 
+        var valueRule = createValueRule(member, statement);
         var rule = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
-        classRule.setRule(createContentRule("class", createContentMember(classRule, rule, statement, classMember, createValueRule(classMember, statement))));
+
+        var contents = new LazyRule();
+        contents.setRule(new OrRule(List.of(
+                createContentRule("class", createContentMember(contents, rule, statement, member, valueRule)),
+                createContentRule("record", createContentMember(contents, rule, statement, member, valueRule)),
+                createContentRule("interface", createContentMember(contents, rule, statement, member, valueRule))
+        )));
 
         return new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 importRule,
-                classRule,
-                createContentRule("interface", createContentMember(classRule, rule, statement, classMember, valueRule)),
-                createContentRule("record", createContentMember(classRule, rule, statement, classMember, valueRule)),
+                contents,
                 Lang.createBlockCommentRule()
         ));
     }
 
-    private static LazyRule createContentMember(LazyRule classRule, Rule definition, LazyRule statement, LazyRule classMember, LazyRule value) {
+    private static LazyRule createContentMember(Rule contents, Rule definition, LazyRule statement, LazyRule classMember, LazyRule value) {
         var rules = List.of(
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
@@ -91,7 +94,7 @@ public class JavaLang {
                 Lang.createDefinitionRule(definition),
                 Lang.createEmptyStatementRule(),
                 Lang.createBlockCommentRule(),
-                classRule
+                contents
         )));
         return classMember;
     }

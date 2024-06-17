@@ -1,0 +1,22 @@
+export class def SymbolRule extends FilterRule() => {
+	SymbolRule(child : Rule) : public => {
+		super(child);
+	}
+	def computeMessage() : String => {
+		return "Not a symbol.";
+	}
+	def filter(input : String) : boolean => {
+		let i : int=0;
+		while(i<input.length()){
+			let c=input.charAt(i);
+			if(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c))){
+				i++;
+				continue
+				
+			;
+			}
+			return false;
+		}
+		return true;
+	}
+}

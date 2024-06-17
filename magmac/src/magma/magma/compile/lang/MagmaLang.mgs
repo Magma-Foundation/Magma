@@ -38,6 +38,7 @@ export class def MagmaLang() => {
 		let definition=ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
 		let rightRule=LeftRule("{", RightRule(child, "}"));
 		let child1=ExtractNodeRule("child", value);
-		return TypeRule("function", FirstRule(definition, " => ", OrRule(List.of(rightRule, child1))));
+		let child2=FirstRule(definition, " => ", OrRule(List.of(rightRule, child1)));
+		return TypeRule("function", OrRule(List.of(child2, definition)));
 	}
 }

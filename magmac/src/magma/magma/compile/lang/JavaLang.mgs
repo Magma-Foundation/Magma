@@ -22,15 +22,15 @@ export class def JavaLang() => {
 	def createRootMemberRule() : OrRule => {
 		let namespace=Lang.createNamespaceRule();
 		let importRule=Lang.createImportRule(namespace);
-		let classRule=LazyRule();
-		let classMember=LazyRule();
+		let member=LazyRule();
 		let statement=LazyRule();
-		let valueRule=createValueRule(classMember, statement);
+		let valueRule=createValueRule(member, statement);
 		let rule=JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
-		classRule.setRule(createContentRule("class", createContentMember(classRule, rule, statement, classMember, createValueRule(classMember, statement))));
-		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, classRule, createContentRule("interface", createContentMember(classRule, rule, statement, classMember, valueRule)), createContentRule("record", createContentMember(classRule, rule, statement, classMember, valueRule)), Lang.createBlockCommentRule()));
+		let contents=LazyRule();
+		contents.setRule(OrRule(List.of(createContentRule("class", createContentMember(contents, rule, statement, member, valueRule)), createContentRule("record", createContentMember(contents, rule, statement, member, valueRule)), createContentRule("interface", createContentMember(contents, rule, statement, member, valueRule)))));
+		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));
 	}
-	def createContentMember(classRule : LazyRule, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : LazyRule => {
+	def createContentMember(contents : Rule, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : LazyRule => {
 		let rules=List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createCatchRule(definition, statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, ":"), Lang.createElseRule(statement), Lang.createEmptyStatementRule(), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"));
 		let copy=ArrayList(rules);
 		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
@@ -44,7 +44,7 @@ export class def JavaLang() => {
 		let maybeValue=OrRule(List.of(withValue, withoutValue));
 		let definitionNode=ExtractNodeRule("definition", TypeRule("definition", definition));
 		let methodRule=TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
-		classMember.setRule(OrRule(List.of(methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), classRule)));
+		classMember.setRule(OrRule(List.of(methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), contents)));
 		return classMember;
 	}
 	def createContentRule(keyword : String, classMember : LazyRule) : TypeRule => {

@@ -1,0 +1,23 @@
+export class def NumberRule extends FilterRule() => {
+	NumberRule(child : Rule) : public => {
+		super(child);
+	}
+	def allDigits(input : String) : boolean => {
+		if(input.isEmpty())return false;
+		let i : int=0;
+		while(i<input.length()){
+			let c=input.charAt(i);
+			if(!Character.isDigit(c)){
+				return false;
+			}
+			i++;
+		}
+		return true;
+	}
+	def computeMessage() : String => {
+		return "Not a number.";
+	}
+	def filter(input : String) : boolean => {
+		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	}
+}

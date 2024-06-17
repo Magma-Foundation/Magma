@@ -1,0 +1,38 @@
+import magma.api.Err;
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.MultipleError;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+export class def OrRule(List<Rule> rules)() => {
+	def toError(results : List<Result<String, Error_>>) : Err<String, Error_> => {
+		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
+	}
+	public def toNode(input : String) : RuleResult => {
+		let errors=ArrayList();
+		for(rule : Rule in rules()){
+			let result=rule.toNode(input);
+			if(result.findAttributes().isPresent()){
+				return result;
+			}
+			result.findError().ifPresent(errors.add);
+		}
+		if(errors.isEmpty()){
+			return ErrorRuleResult(CompileError("No rules were present.", input));
+		}
+		else
+		{
+			return ErrorRuleResult(MultipleError(errors));
+		}
+	
+	}
+	public def fromNode(node : Node) : Result<String, Error_> => {
+		let results=rules.stream().map( (rule) => {rule.fromNode(node);}).toList();
+		let anyOk=results.stream().filter(Result.isOk).findFirst();
+		return;
+	}
+}
