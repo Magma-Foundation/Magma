@@ -116,11 +116,7 @@ public class Main {
         if (e.findCauses().isEmpty())
             context = "\n" + " ".repeat(depth + 1) + "---\n" + " ".repeat(depth + 1) + actualContext.replace("\n", "\n" + " ".repeat(depth - 1)) + "\n" + " ".repeat(depth + 1) + "---";
         else {
-            context = actualContext
-                    .replace("\\n", "\\\\n")
-                    .replace("\n", "\\n")
-                    .replace("\\r", "\\\\r")
-                    .replace("\r", "\\r");
+            context = actualContext;
         }
 
         var message = e.findMessage();
@@ -136,6 +132,7 @@ public class Main {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("'", "&apos;");
+
         var s2 = "\n" + context1;
         if (causes.isEmpty()) {
             return "\n" + "\t".repeat(depth) + "<child" + s1 + ">" + s2 + "</child>";

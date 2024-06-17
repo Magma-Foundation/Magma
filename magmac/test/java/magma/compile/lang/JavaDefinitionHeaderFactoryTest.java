@@ -54,6 +54,14 @@ class JavaDefinitionHeaderFactoryTest {
     }
 
     @Test
+    void spaceInType() {
+        assertParse("public <L, R> First<L, R> test", "type", new NodeAttribute(Lang.createTypeRule()
+                .toNode("First<L, R>")
+                .create()
+                .orElseThrow()));
+    }
+
+    @Test
     void modifiersAndGenerics() {
         assertTrue(parseImpl("public <T> var test").isPresent());
     }

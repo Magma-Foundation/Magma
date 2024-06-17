@@ -25,7 +25,7 @@ public class JavaDefinitionHeaderFactory {
         var name = new ExtractStringRule("name");
 
         var generics = new LeftRule("<", new RightRule(new SimpleExtractStringListRule("type-params", ","), ">"));
-        var withGenerics = new LastRule(generics, " ", type);
+        var withGenerics = new BackwardsRule(generics, " ", type);
         var maybeGenerics = new OrRule(List.of(withGenerics, type));
 
         var modifiers = new ModifiersRule();
@@ -44,7 +44,8 @@ public class JavaDefinitionHeaderFactory {
         public static final List<String> MODIFIERS = List.of(
                 "public",
                 "static",
-                "final"
+                "final",
+                "private"
         );
 
         public ModifiersRule() {
