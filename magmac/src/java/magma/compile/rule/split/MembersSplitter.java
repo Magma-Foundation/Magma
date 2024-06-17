@@ -77,9 +77,9 @@ public class MembersSplitter implements Splitter {
                 current = state.advance();
             } else if (c == '}' && state.isShallow()) {
                 current = state.exit().advance();
-            } else if (c == '{') {
+            } else if (c == '{' || c == '(') {
                 current = state.enter();
-            } else if (c == '}') {
+            } else if (c == '}' || c == ')') {
                 current = state.exit();
             } else {
                 current = state;

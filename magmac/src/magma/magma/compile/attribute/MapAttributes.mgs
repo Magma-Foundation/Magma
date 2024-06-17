@@ -13,7 +13,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 	}
 	public def mapValue(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
 		if(!values.containsKey(key))return this;
-		return;
+		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map( (inner) => {with(key, inner);}).orElse(this);
 	}
 	public def with(key : String, value : Attribute) : Attributes => {
 		let copy=HashMap(values);
@@ -42,7 +42,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return MapAttributes(copy);
 	}
 	public def format(depth : int) : String => {
-		return;
+		return values.entrySet().stream().map( (entry) => {"\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1);}).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
 	}
 	public def remove(key : String) : Attributes => {
 		let copy=HashMap(values);

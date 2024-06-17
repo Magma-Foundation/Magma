@@ -12,6 +12,10 @@ import java.util.List;
 public class JavaNormalizer extends Generator {
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if(node.is("method-reference")) {
+            return new Tuple<>(node.retype("access"), depth);
+        }
+
         if (node.is("lambda")) {
             var paramName = node.attributes()
                     .apply("param-name")

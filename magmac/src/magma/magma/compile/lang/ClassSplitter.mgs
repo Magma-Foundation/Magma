@@ -1,0 +1,36 @@
+import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
+import magma.compile.attribute.NodeListAttribute;
+import magma.compile.rule.Node;
+import java.util.ArrayList;
+import java.util.Collections;
+export class def ClassSplitter extends Generator() => {
+	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(!node.is("block"))return Tuple(node, depth);
+		return Tuple(node.mapAttributes(ClassSplitter.mapBlockChildren), depth);
+	}
+	def mapBlockChildren(attributes : Attributes) : Attributes => {
+		return attributes.mapValue("children", NodeListAttribute.Factory,  (children) => {children.stream().map(ClassSplitter.mapBlockChild).toList();});
+	}
+	def mapBlockChild(child : Node) : Node => {
+		if(child.is("class")||child.is("record")){
+			let oldAttributes=child.attributes();
+			let modifiers=oldAttributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
+			let newModifiers=ArrayList();
+			if(modifiers.contains("public")){
+				newModifiers.add("export");
+			}
+			newModifiers.add("class");
+			newModifiers.add("def");
+			let name=oldAttributes.apply("name").flatMap(Attribute.asNode).flatMap( (className) => {className.attributes().apply("value");}).flatMap(Attribute.asString).orElseThrow();
+			let definition=Node("definition").withString("name", name).withStringList("modifiers", newModifiers).withNodeList("params", Collections.emptyList());
+			return child.retype("function").withNode("definition", definition);
+		}
+		else
+		{
+			return child;
+		}
+	
+	}
+}

@@ -22,8 +22,7 @@ public class MagmaGenerator extends Generator {
             copy.add("let");
         }
 
-        var withModifiers = definition.withStringList("modifiers", copy);
-        return withModifiers;
+        return definition.withStringList("modifiers", copy);
     }
 
     private static Node removeImplicitType(Node definition) {

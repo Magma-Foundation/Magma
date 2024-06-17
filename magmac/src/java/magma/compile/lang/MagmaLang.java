@@ -32,6 +32,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("equals", "==", value),
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("greater-than", ">", value),
+                Lang.createOperatorRule("or", "||", value),
                 Lang.createNotRule(value)
         )));
 

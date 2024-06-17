@@ -41,7 +41,7 @@ public class JavaLang {
         var definition = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
         var statement = new LazyRule();
         var classMember = new LazyRule();
-        var value = createValueRule(classMember);
+        var value = createValueRule(classMember, statement);
 
         var rules = List.of(
                 Lang.createCommentRule(),
@@ -109,12 +109,12 @@ public class JavaLang {
         ));
     }
 
-    private static LazyRule createValueRule(LazyRule classMember) {
+    private static LazyRule createValueRule(LazyRule classMember, Rule statement) {
         var value = new LazyRule();
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 Lang.createCharRule(),
-                createLambdaRule(value),
+                createLambdaRule(value, statement),
                 createConstructorRule(value, classMember),
                 Lang.createTernaryRule(value),
                 Lang.createInvocationRule(value),
@@ -125,15 +125,21 @@ public class JavaLang {
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("greater-than", ">=", value),
                 Lang.createOperatorRule("greater-than", ">", value),
+                Lang.createOperatorRule("or", "||", value),
                 Lang.createNotRule(value),
-                new TypeRule("method-reference", new LastRule(new ExtractNodeRule("object", new StripRule(value)), "::", new ExtractStringRule("member")))
+                new TypeRule("method-reference", new LastRule(new ExtractNodeRule("parent", new StripRule(value)), "::", new ExtractStringRule("child")))
         )));
         return value;
     }
 
-    private static TypeRule createLambdaRule(LazyRule value) {
+    private static Rule createLambdaRule(Rule value, Rule statement) {
         var left = new StripRule(new SymbolRule(new ExtractStringRule("param-name")));
-        var right = new StripRule(new ExtractNodeRule("child", value));
+        var maybeValue = new OrRule(List.of(
+                new StripRule(new LeftRule("{", new RightRule(Lang.createBlock(statement), "}"))),
+                value
+        ));
+
+        var right = new StripRule(new ExtractNodeRule("child", maybeValue));
         return new TypeRule("lambda", new FirstRule(left, "->", right));
     }
 
