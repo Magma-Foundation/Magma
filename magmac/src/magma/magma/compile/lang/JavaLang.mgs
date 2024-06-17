@@ -1,0 +1,83 @@
+import magma.compile.rule.EmptyRule;
+import magma.compile.rule.LazyRule;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import java.util.ArrayList;
+import java.util.List;
+export class def JavaLang() => {
+	public def createRootRule() : Rule => {
+		return Lang.createBlock(createRootMemberRule());
+	}
+	def createRootMemberRule() : OrRule => {
+		let namespace=Lang.createNamespaceRule();
+		let importRule=Lang.createImportRule(namespace);
+		let classRule=LazyRule();
+		let classMember=LazyRule();
+		let statement=LazyRule();
+		let valueRule=createValueRule(classMember, statement);
+		let rule=JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+		classRule.setRule(createContentRule("class", createContentMember(classRule, rule, statement, classMember, createValueRule(classMember, statement))));
+		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, classRule, createContentRule("interface", createContentMember(classRule, rule, statement, classMember, valueRule)), createContentRule("record", createContentMember(classRule, rule, statement, classMember, valueRule)), Lang.createBlockCommentRule()));
+	}
+	def createContentMember(classRule : LazyRule, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : LazyRule => {
+		let rules=List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createCatchRule(definition, statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, ":"), Lang.createElseRule(statement), Lang.createEmptyStatementRule(), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createBreakRule());
+		let copy=ArrayList(rules);
+		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
+		statement.setRule(OrRule(copy));
+		let content=StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
+		let withoutThrows=StripRule(RightRule(Lang.createParamsRule(definition), ")"));
+		let withThrows=LastRule(withoutThrows, "throws ", ExtractNodeRule("thrown", StripRule(Lang.createTypeRule())));
+		let maybeThrows=OrRule(List.of(withThrows, withoutThrows));
+		let withValue=FirstRule(maybeThrows, "{", content);
+		let withoutValue=RightRule(maybeThrows, ";");
+		let maybeValue=OrRule(List.of(withValue, withoutValue));
+		let definitionNode=ExtractNodeRule("definition", TypeRule("definition", definition));
+		let methodRule=TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
+		classMember.setRule(OrRule(List.of(methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), classRule)));
+		return classMember;
+	}
+	def createContentRule(keyword : String, classMember : LazyRule) : TypeRule => {
+		let modifiers=Lang.createModifiersRule();
+		let block=ExtractNodeRule("child", Lang.createBlock(classMember));
+		let name=createContentMemberRule();
+		let withoutModifiers=FirstRule(StripRule(name), "{", RightRule(block, "}"));
+		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
+	}
+	def createContentMemberRule() : OrRule => {
+		let name=TypeRule("symbol", StripRule(ExtractStringRule("value")));
+		let prototype=OrRule(List.of(TypeRule("generic", FirstRule(StripRule(ExtractStringRule("value")), "<", RightRule(ExtractStringRule("child"), ">"))), name));
+		let leftRule1=ExtractNodeRule("name", prototype);
+		return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("interface", prototype)), leftRule1));
+	}
+	def createValueRule(classMember : LazyRule, statement : Rule) : LazyRule => {
+		let value=LazyRule();
+		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule(value), Lang.createSymbolRule(), Lang.createNumberRule(), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value), TypeRule("method-reference", LastRule(ExtractNodeRule("parent", StripRule(value)), "::", ExtractStringRule("child"))))));
+		return value;
+	}
+	def createLambdaRule(value : Rule, statement : Rule) : Rule => {
+		let child=SymbolRule(ExtractStringRule("param-name"));
+		let left=StripRule(OrRule(List.of(LeftRule("()", EmptyRule()), child)));
+		let maybeValue=OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
+		let right=StripRule(ExtractNodeRule("child", maybeValue));
+		return TypeRule("lambda", FirstRule(left, "->", right));
+	}
+	def createConstructorRule(value : LazyRule, classMember : LazyRule) : TypeRule => {
+		let arguments=OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		let caller=ExtractNodeRule("caller", value);
+		let withGenerics=OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
+		let before=RightRule(InvocationStart(withGenerics, arguments), ")");
+		let child=OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
+		return TypeRule("constructor", LeftRule("new ", child));
+	}
+}

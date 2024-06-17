@@ -71,7 +71,7 @@ public class Lang {
     }
 
     static StripRule createModifiersRule() {
-        return createModifiersRule(List.of("public", "abstract"));
+        return createModifiersRule(List.of("public", "abstract", "static", "private"));
     }
 
     static StripRule createModifiersRule(final List<String> modifiers) {

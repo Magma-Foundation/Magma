@@ -28,22 +28,25 @@ public class JavaLang {
         var namespace = Lang.createNamespaceRule();
         var importRule = Lang.createImportRule(namespace);
 
+        var classRule = new LazyRule();
+        var classMember = new LazyRule();
+        var statement = new LazyRule();
+        var valueRule = createValueRule(classMember, statement);
+
+        var rule = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+        classRule.setRule(createContentRule("class", createContentMember(classRule, rule, statement, classMember, createValueRule(classMember, statement))));
+
         return new OrRule(List.of(
                 new TypeRule("package", new LeftRule("package ", new RightRule(new ExtractNodeRule("internal", namespace), ";"))),
                 importRule,
-                createContentRule("class", createContentMember()),
-                createContentRule("interface", createContentMember()),
-                createContentRule("record", createContentMember()),
+                classRule,
+                createContentRule("interface", createContentMember(classRule, rule, statement, classMember, valueRule)),
+                createContentRule("record", createContentMember(classRule, rule, statement, classMember, valueRule)),
                 Lang.createBlockCommentRule()
         ));
     }
 
-    private static LazyRule createContentMember() {
-        var definition = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
-        var statement = new LazyRule();
-        var classMember = new LazyRule();
-        var value = createValueRule(classMember, statement);
-
+    private static LazyRule createContentMember(LazyRule classRule, Rule definition, LazyRule statement, LazyRule classMember, LazyRule value) {
         var rules = List.of(
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
@@ -86,7 +89,8 @@ public class JavaLang {
                 Lang.createDeclarationRule(definition, value),
                 Lang.createDefinitionRule(definition),
                 Lang.createEmptyStatementRule(),
-                Lang.createBlockCommentRule()
+                Lang.createBlockCommentRule(),
+                classRule
         )));
         return classMember;
     }

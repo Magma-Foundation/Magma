@@ -1,0 +1,55 @@
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.BackwardsRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
+import java.util.List;
+import java.util.Optional;
+export class def JavaDefinitionHeaderFactory() => {
+	def createDefinitionHeaderRule() : Rule => {
+		let type=ExtractNodeRule("type", Lang.createTypeRule());
+		let name=ExtractStringRule("name");
+		let generics=LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
+		let withGenerics=BackwardsRule(generics, " ", type);
+		let maybeGenerics=OrRule(List.of(withGenerics, type));
+		let modifiers=ModifiersRule();
+		let withModifiers=BackwardsRule(modifiers, " ", maybeGenerics);
+		let maybeModifiers=OrRule(List.of(withModifiers, maybeGenerics));
+		let annotation=TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		let annotations=SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		let withAnnotations=LastRule(annotations, "\n", maybeModifiers);
+		let maybeAnnotations=OrRule(List.of(withAnnotations, maybeModifiers));
+		return TypeRule("definition", LastRule(maybeAnnotations, " ", name));
+	}
+	class def ModifiersRule extends ExtractStringListRule() => {
+		const MODIFIERS : List<String>=List.of("public", "static", "final", "private", "default", "protected");
+		ModifiersRule() : public => {
+			super("modifiers", " ");
+		}
+		def qualify(child : String) : Optional<Error_> => {
+			if(MODIFIERS.contains(child)){
+				return Optional.empty();
+			}
+			else
+			{
+				return Optional.of(CompileError("Invalid modifier.", child));
+			}
+		
+		}
+	}
+	class def SimpleSplitter() => {
+		public def split(input : String) : List<String> => {
+			return List.of(input.split("\n"));
+		}
+	}
+}
