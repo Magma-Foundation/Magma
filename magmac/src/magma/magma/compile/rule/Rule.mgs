@@ -7,7 +7,7 @@ import magma.compile.rule.result.RuleResult;
  * and nodes. It includes methods to transform an input string into a node
  * and to transform a node back into a string.
  */
-public struct Rule {
+export struct Rule {
 	toNode(input : String) : RuleResult;
 	fromNode(node : Node) : Result<String, Error_>;
 }

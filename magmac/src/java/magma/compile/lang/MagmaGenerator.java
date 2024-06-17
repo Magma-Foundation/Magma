@@ -81,7 +81,17 @@ public class MagmaGenerator extends Generator {
         }
 
         if (node.is("interface")) {
-            return new Tuple<>(node.retype("struct"), depth);
+            var struct = node.retype("struct").mapAttributes(attribute -> {
+                return attribute.mapValue("modifiers", StringListAttribute.Factory, list -> {
+                    var newList = new ArrayList<String>();
+                    if (list.contains("public")) {
+                        newList.add("export");
+                    }
+                    return newList;
+                });
+            });
+
+            return new Tuple<>(struct, depth);
         }
 
         if (node.is("function")) {

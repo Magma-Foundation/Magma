@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.Optional;
-public struct Error_ {
+export struct Error_ {
 	findMessage() : Optional<String>;
 	findCauses() : Optional<List<Error_>>;
 	findContext() : Optional<String>;

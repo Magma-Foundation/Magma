@@ -61,7 +61,16 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node.retype("function"), depth);
 		}
 		if(node.is("interface")){
-			return Tuple(node.retype("struct"), depth);
+			let struct = node.retype("struct").mapAttributes((attribute) => {
+				return attribute.mapValue("modifiers", StringListAttribute.Factory, (list) => {
+					let newList = ArrayList();
+					if(list.contains("public")){
+						newList.add("export");
+					}
+					return newList;
+				});
+			});
+			return Tuple(struct, depth);
 		}
 		if(node.is("function")){
 			let node1 = node.mapAttributes((attributes) => {
