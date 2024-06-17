@@ -169,9 +169,9 @@ public class Lang {
         return new TypeRule("string", new LeftRule("\"", new RightRule(new ExtractStringRule("value"), "\"")));
     }
 
-    static TypeRule createAccessRule(LazyRule value) {
+    static TypeRule createAccessRule(String type, String separator, Rule value) {
         var parent = new ExtractNodeRule("parent", new StripRule(value));
-        return new TypeRule("access", new LastRule(parent, ".", new StripRule(new SymbolRule(new ExtractStringRule("child")))));
+        return new TypeRule(type, new LastRule(parent, separator, new StripRule(new SymbolRule(new ExtractStringRule("child")))));
     }
 
     static TypeRule createSymbolRule() {

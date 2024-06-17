@@ -119,9 +119,9 @@ export class def Lang() => {
 	def createStringRule() : TypeRule => {
 		return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
 	}
-	def createAccessRule(value : LazyRule) : TypeRule => {
+	def createAccessRule(type : String, separator : String, value : Rule) : TypeRule => {
 		let parent=ExtractNodeRule("parent", StripRule(value));
-		return TypeRule("access", LastRule(parent, ".", StripRule(SymbolRule(ExtractStringRule("child")))));
+		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
 	def createSymbolRule() : TypeRule => {
 		return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));

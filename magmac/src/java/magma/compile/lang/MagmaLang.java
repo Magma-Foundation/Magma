@@ -26,7 +26,7 @@ public class MagmaLang {
                 Lang.createCharRule(),
                 Lang.createStringRule(),
                 Lang.createInvocationRule(value),
-                Lang.createAccessRule(value),
+                Lang.createAccessRule("access", ".", value),
                 Lang.createSymbolRule(),
                 Lang.createTernaryRule(value),
                 Lang.createNumberRule(),

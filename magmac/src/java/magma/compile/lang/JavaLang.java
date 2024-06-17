@@ -76,11 +76,11 @@ public class JavaLang {
         var methodRule = new TypeRule("method", new FirstRule(definitionNode, "(", maybeValue));
 
         contentMember.setRule(new OrRule(List.of(
+                Lang.createEmptyStatementRule(),
+                Lang.createBlockCommentRule(),
                 methodRule,
                 Lang.createDeclarationRule(definition, value),
                 Lang.createDefinitionRule(definition),
-                Lang.createEmptyStatementRule(),
-                Lang.createBlockCommentRule(),
                 contents
         )));
     }
@@ -89,22 +89,27 @@ public class JavaLang {
         var rules = List.of(
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
+
+                Lang.createKeywordRule("break"),
+                Lang.createKeywordRule("continue"),
+                Lang.createReturnRule(value),
+
+                Lang.createIfRule("if", value, statement),
+                Lang.createElseRule(statement),
+
+                Lang.createIfRule("while", value, statement),
+                Lang.createForRule(definition, value, statement, ":"),
+
                 Lang.createTryRule(statement),
+                Lang.createCatchRule(definition, statement),
+                Lang.createThrowRule(value),
+
                 Lang.createDeclarationRule(definition, value),
                 Lang.createAssignmentRule(value),
-                Lang.createIfRule("if", value, statement),
-                Lang.createIfRule("while", value, statement),
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
-                Lang.createCatchRule(definition, statement),
-                Lang.createReturnRule(value),
-                Lang.createForRule(definition, value, statement, ":"),
-                Lang.createElseRule(statement),
                 Lang.createEmptyStatementRule(),
-                Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
-                Lang.createPostDecrementRule(value),
-                Lang.createKeywordRule("break"),
-                Lang.createKeywordRule("continue")
+                Lang.createPostDecrementRule(value)
         );
 
         var copy = new ArrayList<>(rules);
@@ -139,13 +144,16 @@ public class JavaLang {
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 Lang.createCharRule(),
+                Lang.createSymbolRule(),
+                Lang.createNumberRule(),
+
                 createLambdaRule(value, statement),
                 createConstructorRule(value, classMember),
                 Lang.createTernaryRule(value),
                 Lang.createInvocationRule(value),
-                Lang.createAccessRule(value),
-                Lang.createSymbolRule(),
-                Lang.createNumberRule(),
+                Lang.createAccessRule("access", ".", value),
+                Lang.createAccessRule("method-reference", "::", value),
+
                 Lang.createOperatorRule("and", "&&", value),
                 Lang.createOperatorRule("equals", "==", value),
                 Lang.createOperatorRule("not-equals", "!=", value),
@@ -155,8 +163,7 @@ public class JavaLang {
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("less-than", "<", value),
-                Lang.createNotRule(value),
-                new TypeRule("method-reference", new LastRule(new ExtractNodeRule("parent", new StripRule(value)), "::", new ExtractStringRule("child")))
+                Lang.createNotRule(value)
         )));
         return value;
     }
