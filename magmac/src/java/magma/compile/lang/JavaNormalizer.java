@@ -8,6 +8,7 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class JavaNormalizer extends Generator {
     @Override
@@ -17,20 +18,28 @@ public class JavaNormalizer extends Generator {
         }
 
         if (node.is("lambda")) {
-            var paramName = node.attributes()
-                    .apply("param-name")
-                    .flatMap(Attribute::asString)
-                    .orElseThrow();
+            var withType = node.retype("function");
 
-            var param = new Node("definition")
-                    .withString("name", paramName);
+            var name = node.attributes().apply("param-name");
+            Node withDefinition;
+            if (name.isPresent()) {
+                var paramName = name
+                        .flatMap(Attribute::asString)
+                        .orElseThrow();
 
-            var definition = new Node("definition")
-                    .withNodeList("params", List.of(param))
-                    .withStringList("modifiers", Collections.emptyList());
+                var param = new Node("definition")
+                        .withString("name", paramName);
 
-            var function = node.retype("function").withNode("definition", definition);
-            return new Tuple<>(function, depth);
+                var definition = new Node("definition")
+                        .withNodeList("params", List.of(param))
+                        .withStringList("modifiers", Collections.emptyList());
+
+                withDefinition = withType.withNode("definition", definition);
+            } else {
+                withDefinition = withType;
+            }
+
+            return new Tuple<>(withDefinition, depth);
         }
 
         if (node.is("declaration")) {

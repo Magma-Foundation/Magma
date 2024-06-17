@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
@@ -137,7 +138,8 @@ public class JavaLang {
     }
 
     private static Rule createLambdaRule(Rule value, Rule statement) {
-        var left = new StripRule(new SymbolRule(new ExtractStringRule("param-name")));
+        var child = new SymbolRule(new ExtractStringRule("param-name"));
+        var left = new StripRule(new OrRule(List.of(new LeftRule("()", new EmptyRule()), child)));
         var maybeValue = new OrRule(List.of(
                 new StripRule(new LeftRule("{", new RightRule(Lang.createBlock(statement), "}"))),
                 value
