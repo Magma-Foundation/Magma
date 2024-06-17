@@ -31,14 +31,17 @@ public class JavaLang {
         var member = new LazyRule();
         var statement = new LazyRule();
 
-        var valueRule = createValueRule(member, statement);
-        var rule = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+        var definitionHeader = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+        var value = createValueRule(member, statement);
+        initStatements(definitionHeader, statement, member, value);
 
         var contents = new LazyRule();
+        initContentMember(member, contents, definitionHeader, statement, value);
+
         contents.setRule(new OrRule(List.of(
-                createContentRule("class", createContentMember(contents, rule, statement, member, valueRule)),
-                createContentRule("record", createContentMember(contents, rule, statement, member, valueRule)),
-                createContentRule("interface", createContentMember(contents, rule, statement, member, valueRule))
+                createContentRule("class", member),
+                createContentRule("record", member),
+                createContentRule("interface", member)
         )));
 
         return new OrRule(List.of(
@@ -49,7 +52,35 @@ public class JavaLang {
         ));
     }
 
-    private static LazyRule createContentMember(Rule contents, Rule definition, LazyRule statement, LazyRule classMember, LazyRule value) {
+    private static void initContentMember(
+            LazyRule contentMember,
+            Rule contents,
+            Rule definition,
+            Rule statement,
+            Rule value) {
+        var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
+        var withoutThrows = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
+        var withThrows = new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule())));
+        var maybeThrows = new OrRule(List.of(withThrows, withoutThrows));
+
+        var withValue = new FirstRule(maybeThrows, "{", content);
+        var withoutValue = new RightRule(maybeThrows, ";");
+        var maybeValue = new OrRule(List.of(withValue, withoutValue));
+
+        var definitionNode = new ExtractNodeRule("definition", new TypeRule("definition", definition));
+        var methodRule = new TypeRule("method", new FirstRule(definitionNode, "(", maybeValue));
+
+        contentMember.setRule(new OrRule(List.of(
+                methodRule,
+                Lang.createDeclarationRule(definition, value),
+                Lang.createDefinitionRule(definition),
+                Lang.createEmptyStatementRule(),
+                Lang.createBlockCommentRule(),
+                contents
+        )));
+    }
+
+    private static void initStatements(Rule definition, LazyRule statement, LazyRule classMember, LazyRule value) {
         var rules = List.of(
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
@@ -73,30 +104,7 @@ public class JavaLang {
 
         var copy = new ArrayList<>(rules);
         copy.add(new TypeRule("constructor", new RightRule(createConstructorRule(value, classMember), ";")));
-
         statement.setRule(new OrRule(copy));
-
-        var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
-        var withoutThrows = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
-        var withThrows = new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule())));
-        var maybeThrows = new OrRule(List.of(withThrows, withoutThrows));
-
-        var withValue = new FirstRule(maybeThrows, "{", content);
-        var withoutValue = new RightRule(maybeThrows, ";");
-        var maybeValue = new OrRule(List.of(withValue, withoutValue));
-
-        var definitionNode = new ExtractNodeRule("definition", new TypeRule("definition", definition));
-        var methodRule = new TypeRule("method", new FirstRule(definitionNode, "(", maybeValue));
-
-        classMember.setRule(new OrRule(List.of(
-                methodRule,
-                Lang.createDeclarationRule(definition, value),
-                Lang.createDefinitionRule(definition),
-                Lang.createEmptyStatementRule(),
-                Lang.createBlockCommentRule(),
-                contents
-        )));
-        return classMember;
     }
 
     private static TypeRule createContentRule(String keyword, LazyRule classMember) {
