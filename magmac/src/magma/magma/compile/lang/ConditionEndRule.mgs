@@ -14,14 +14,14 @@ class def ConditionEndRule extends SplitOnceRule() => {
 		/*
         TODO: reduce nesting
          */
-		queue : var = IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
-		depth : var = 0;
+		let queue = IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
+		let depth = 0;
 		while(!queue.isEmpty()){
-			pop : var = queue.pop();
-			i : var = pop.left();
-			c : var = pop.right();
+			let pop = queue.pop();
+			let i = pop.left();
+			let c = pop.right();
 			if(c=='\''){
-				next : var = queue.pop();
+				let next = queue.pop();
 				if(next.right()=='\\'){
 					queue.pop();
 				}

@@ -11,6 +11,9 @@ export class def Node(String type, Attributes attributes)() => {
 	Node(type : String) : public => {
 		this(type, MapAttributes());
 	}
+	public def mapNode(key : String, nodeNodeFunction : Function<Node, Node>) : Node => {
+		return mapAttributes( (attributes) => {attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction);});
+	}
 	public def withString(key : String, value : String) : Node => {
 		return with(key, StringAttribute(value));
 	}

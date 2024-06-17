@@ -88,14 +88,11 @@ public class MagmaGenerator extends Generator {
         }
 
         if (node.is("declaration")) {
-            var node1 = node.mapAttributes(attributes -> {
-                return attributes.mapValue("definition", NodeAttribute.Factory, definition -> {
-                    var withModifiers = attachModifiers(definition);
-                    return removeImplicitType(withModifiers);
-                });
-            });
+            var withModifiers = node.mapNode("definition:scope",
+                    scope -> scope.mapNode("definition",
+                            definition -> removeImplicitType(attachModifiers(definition))));
 
-            return new Tuple<>(node1, depth);
+            return new Tuple<>(withModifiers, depth);
         }
 
         return new Tuple<>(node, depth);

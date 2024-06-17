@@ -9,9 +9,9 @@ import java.util.Optional;
 export class def JavaNormalizer extends Generator() => {
 	def getNode(name : Optional<Attribute>, withType : Node) : Node => {
 		if(name.isEmpty())return withType;
-		paramName : var = name.flatMap(Attribute.asString).orElseThrow();
-		param : var = Node("definition").withString("name", paramName);
-		definition : var = Node("definition").withNodeList("params", List.of(param)).withStringList("modifiers", Collections.emptyList());
+		let paramName = name.flatMap(Attribute.asString).orElseThrow();
+		let param = Node("definition").withString("name", paramName);
+		let definition = Node("definition").withNodeList("params", List.of(param)).withStringList("modifiers", Collections.emptyList());
 		return withType.withNode("definition", definition);
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
@@ -19,15 +19,15 @@ export class def JavaNormalizer extends Generator() => {
 			return Tuple(node.retype("access"), depth);
 		}
 		if(node.is("lambda")){
-			withType : var = node.retype("function");
-			name : var = node.attributes().apply("param-name");
-			withDefinition : var = getNode(name, withType);
+			let withType = node.retype("function");
+			let name = node.attributes().apply("param-name");
+			let withDefinition = getNode(name, withType);
 			return Tuple(withDefinition, depth);
 		}
 		if(node.is("declaration")){
-			withModifiers : var = node.mapAttributes( (attributes) => {
-				list : var = attributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
-				copy : var = ArrayList();
+			let withModifiers = node.mapAttributes( (attributes) => {
+				let list = attributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
+				let copy = ArrayList();
 				if(list.contains("final")){
 					copy.add("const");
 				}
@@ -37,11 +37,11 @@ export class def JavaNormalizer extends Generator() => {
 				}
 				return attributes.with("modifiers", StringListAttribute(copy));
 			}).mapAttributes( (attributes) => {
-				type : var = attributes.apply("type").flatMap(Attribute.asNode);
+				let type = attributes.apply("type").flatMap(Attribute.asNode);
 				if(type.isEmpty())return attributes;
-				inner : var = type.get();
+				let inner = type.get();
 				if(inner.is("symbol")){
-					value : var = inner.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+					let value = inner.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
 					if(value.equals("var")){
 						return attributes.remove("type");
 					}
@@ -60,11 +60,11 @@ export class def JavaNormalizer extends Generator() => {
 			return Tuple(withModifiers, depth);
 		}
 		if(node.is("method")){
-			attributes : var = node.attributes();
-			definition : var = attributes.apply("definition").flatMap(Attribute.asNode).orElseThrow();
-			params : var = attributes.apply("params").flatMap(Attribute.asNodeList).orElse(Collections.emptyList());
-			withParams : var = definition.withNodeList("params", params);
-			function : var = node.retype("function").remove("params").withNode("definition", withParams);
+			let attributes = node.attributes();
+			let definition = attributes.apply("definition").flatMap(Attribute.asNode).orElseThrow();
+			let params = attributes.apply("params").flatMap(Attribute.asNodeList).orElse(Collections.emptyList());
+			let withParams = definition.withNodeList("params", params);
+			let function = node.retype("function").remove("params").withNode("definition", withParams);
 			return Tuple(function, depth);
 		}
 		return Tuple(node, depth);

@@ -16,6 +16,10 @@ public record Node(String type, Attributes attributes) {
         this(type, new MapAttributes());
     }
 
+    public Node mapNode(String key, Function<Node, Node> nodeNodeFunction) {
+        return mapAttributes(attributes -> attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));
+    }
+
     public Node withString(String key, String value) {
         return with(key, new StringAttribute(value));
     }

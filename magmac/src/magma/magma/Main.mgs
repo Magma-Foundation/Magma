@@ -19,28 +19,28 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 export class def Main() => {
-	public static final TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
-	public static final SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
-	public static final DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
+	const TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
+	const SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
+	const DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
 	public def main(args : String[]) : void
 	def run() : void => {
-		sources : var = Files.walk(SOURCE_DIRECTORY).filter( (value) => {value.toString().endsWith(".java");}).filter(Files.isRegularFile).toList();
+		let sources = Files.walk(SOURCE_DIRECTORY).filter( (value) => {value.toString().endsWith(".java");}).filter(Files.isRegularFile).toList();
 		for(source : var in sources){
-			error : var = compileSource(source);
+			let error = compileSource(source);
 			if(error.isPresent()){
 				throw error.get();
 			}
 		}
 	}
 	def compileSource(source : Path) : Optional<CompileException> => {
-		relativized : var = SOURCE_DIRECTORY.relativize(source.getParent());
+		let relativized = SOURCE_DIRECTORY.relativize(source.getParent());
 		System.out.println("Compiling source: "+SOURCE_DIRECTORY.relativize(source));
-		targetParent : var = TARGET_DIRECTORY.resolve(relativized);
-		fileName : var = source.getFileName().toString();
-		name : var = fileName.substring(0, fileName.indexOf('.'));
-		target : var = targetParent.resolve(name+".mgs");
-		input : var = readImpl(source);
-		parseResult : var = JavaLang.createRootRule().toNode(input);
+		let targetParent = TARGET_DIRECTORY.resolve(relativized);
+		let fileName = source.getFileName().toString();
+		let name = fileName.substring(0, fileName.indexOf('.'));
+		let target = targetParent.resolve(name+".mgs");
+		let input = readImpl(source);
+		let parseResult = JavaLang.createRootRule().toNode(input);
 		return parseResult.create().match( (root) => {handle(root, targetParent, relativized, name, target);}, Main.getCompileException);
 	}
 	def getCompileException(err : Error_) : Optional<CompileException>
@@ -49,39 +49,39 @@ export class def Main() => {
 	def createDirectory(targetParent : Path) : Path
 	def writeImpl(target : Path, csq : String) : void
 	def print(error : Error_, depth : int) : String => {
-		context : var = formatContext(error, depth);
-		anyMessage : var = error.findMessage();
+		let context = formatContext(error, depth);
+		let anyMessage = error.findMessage();
 		anyMessage.ifPresent( (s) => {System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context);});
-		message : var = error.findMessage().orElse("");
-		messageAttribute : var = message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";
-		causes : var = error.findCauses().orElse(Collections.emptyList());
-		escapedContext : var = error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
-		formattedContext : var = "\n"+escapedContext;
+		let message = error.findMessage().orElse("");
+		let messageAttribute = message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";
+		let causes = error.findCauses().orElse(Collections.emptyList());
+		let escapedContext = error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
+		let formattedContext = "\n"+escapedContext;
 		if(causes.isEmpty()){
 			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
 		}
-		contextAttribute : var = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
+		let contextAttribute = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
 		if(causes.size()==1){
 			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
 		}
-		list : var = causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
-		builder : var = StringBuilder();
+		let list = causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
+		let builder = StringBuilder();
 		for(cause : var in list){
-			result : var = print(cause, depth+1);
+			let result = print(cause, depth+1);
 			builder.append(result);
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
 	def formatContext(e : Error_, depth : int) : String => {
-		actualContext : var = e.findContext().orElse("");
+		let actualContext = e.findContext().orElse("");
 		if(e.findCauses().isPresent())return actualContext;
-		spacing : var = " ".repeat(depth+1);
-		formatted : var = actualContext.replace("\n", "\n" + " ".repeat(depth-1));
+		let spacing = " ".repeat(depth+1);
+		let formatted = actualContext.replace("\n", "\n" + " ".repeat(depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
 	def generate(root : Node) : Node => {
-		list : var = Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
-		acc : Node = root;
+		let list = Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
+		let acc : Node = root;
 		for(generator : Generator in list){
 			acc=generator.generate(acc, -1);
 		}

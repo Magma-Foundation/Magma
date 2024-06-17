@@ -15,16 +15,16 @@ export class def ClassSplitter extends Generator() => {
 	}
 	def mapBlockChild(child : Node) : Node => {
 		if(child.is("class")||child.is("record")){
-			oldAttributes : var = child.attributes();
-			modifiers : var = oldAttributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
-			newModifiers : var = ArrayList();
+			let oldAttributes = child.attributes();
+			let modifiers = oldAttributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
+			let newModifiers = ArrayList();
 			if(modifiers.contains("public")){
 				newModifiers.add("export");
 			}
 			newModifiers.add("class");
 			newModifiers.add("def");
-			name : var = oldAttributes.apply("name").flatMap(Attribute.asNode).flatMap( (className) => {className.attributes().apply("value");}).flatMap(Attribute.asString).orElseThrow();
-			definition : var = Node("definition").withString("name", name).withStringList("modifiers", newModifiers).withNodeList("params", Collections.emptyList());
+			let name = oldAttributes.apply("name").flatMap(Attribute.asNode).flatMap( (className) => {className.attributes().apply("value");}).flatMap(Attribute.asString).orElseThrow();
+			let definition = Node("definition").withString("name", name).withStringList("modifiers", newModifiers).withNodeList("params", Collections.emptyList());
 			return child.retype("function").withNode("definition", definition);
 		}
 		else

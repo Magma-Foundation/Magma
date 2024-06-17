@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 export class def MagmaFormatter extends Generator() => {
 	def getNodes(depth : int, list : List<Node>) : List<Node> => {
-		result : List<Node> = ArrayList();
-		i : int = 0;
+		let result : List<Node> = ArrayList();
+		let i : int = 0;
 		while(i<list.size()){
-			child : Node = list.get(i);
-			withLeft : var = attachLeft(depth, i, child);
-			withRight : var = attachRight(depth, list, i, withLeft);
+			let child : Node = list.get(i);
+			let withLeft = attachLeft(depth, i, child);
+			let withRight = attachRight(depth, list, i, withLeft);
 			result.add(withRight);
 			i++;
 		}
@@ -19,7 +19,7 @@ export class def MagmaFormatter extends Generator() => {
 	}
 	def attachRight(depth : int, list : List<Node>, i : int, withLeft : Node) : Node => {
 		if(i==list.size()-1){
-			count : var = depth==0?depth:depth-1;
+			let count = depth==0?depth:depth-1;
 			return withLeft.withString("right-indent", "\n" + "\t".repeat(count));
 		}
 		else
@@ -40,10 +40,10 @@ export class def MagmaFormatter extends Generator() => {
 	}
 	def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("declaration")){
-			attributes : var = node.attributes();
-			oldDefinition : var = attributes.apply("definition:scope").flatMap(Attribute.asNode).orElseThrow();
-			oldValue : var = attributes.apply("value:scope").flatMap(Attribute.asNode).orElseThrow();
-			newNode : var = node.withNode("definition:scope", oldDefinition.withString("right-indent", " ")).withNode("value:scope", oldValue.withString("left-indent", " "));
+			let attributes = node.attributes();
+			let oldDefinition = attributes.apply("definition:scope").flatMap(Attribute.asNode).orElseThrow();
+			let oldValue = attributes.apply("value:scope").flatMap(Attribute.asNode).orElseThrow();
+			let newNode = node.withNode("definition:scope", oldDefinition.withString("right-indent", " ")).withNode("value:scope", oldValue.withString("left-indent", " "));
 			return Tuple(newNode, depth);
 		}
 		if(node.is("block"))return Tuple(node, depth+1);
@@ -51,7 +51,7 @@ export class def MagmaFormatter extends Generator() => {
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(!node.is("block"))return Tuple(node, depth);
-		indented : var = node.mapAttributes( (attributes) => {attributes.mapValue("children", NodeListAttribute.Factory,  (list) => {getNodes(depth, list);});});
+		let indented = node.mapAttributes( (attributes) => {attributes.mapValue("children", NodeListAttribute.Factory,  (list) => {getNodes(depth, list);});});
 		return Tuple(indented, depth-1);
 	}
 }
