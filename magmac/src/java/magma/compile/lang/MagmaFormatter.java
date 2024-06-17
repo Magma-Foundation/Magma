@@ -19,7 +19,8 @@ public class MagmaFormatter extends Generator {
         if (node.is("block")) {
             var indented = node.mapAttributes(attributes -> attributes.mapValue("children", NodeListAttribute.Factory, list -> {
                 List<Node> result = new ArrayList<>();
-                for (int i = 0; i < list.size(); i++) {
+                int i = 0;
+                while (i < list.size()) {
                     Node child = list.get(i);
                     Node withLeft;
                     if (depth != 0 || i != 0) {
@@ -35,6 +36,7 @@ public class MagmaFormatter extends Generator {
                         withRight = withLeft;
                     }
                     result.add(withRight);
+                    i++;
                 }
                 return result;
             }));

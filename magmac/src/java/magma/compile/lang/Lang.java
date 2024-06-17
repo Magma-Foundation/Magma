@@ -186,7 +186,8 @@ public class Lang {
                 if (!input.contains(slice)) return Optional.empty();
 
                 var depth = 0;
-                for (int i = 0; i < input.length(); i++) {
+                int i = 0;
+                while (i < input.length()) {
                     var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
                     if (maybeSlice.equals(slice) && depth == 0) {
                         return Optional.of(i);
@@ -195,6 +196,7 @@ public class Lang {
                         if (c == '(') depth++;
                         if (c == ')') depth--;
                     }
+                    i++;
                 }
 
                 /*

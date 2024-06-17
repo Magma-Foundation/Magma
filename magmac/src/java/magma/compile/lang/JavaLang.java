@@ -44,6 +44,7 @@ public class JavaLang {
         var value = createValueRule(classMember, statement);
 
         var rules = List.of(
+                Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createDeclarationRule(definition, value),
@@ -123,9 +124,11 @@ public class JavaLang {
                 Lang.createNumberRule(),
                 Lang.createOperatorRule("equals", "==", value),
                 Lang.createOperatorRule("add", "+", value),
-                Lang.createOperatorRule("greater-than", ">=", value),
+                Lang.createOperatorRule("greater-than-or-equals", ">=", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
+                Lang.createOperatorRule("less-than", "<", value),
+                Lang.createOperatorRule("and", "&&", value),
                 Lang.createNotRule(value),
                 new TypeRule("method-reference", new LastRule(new ExtractNodeRule("parent", new StripRule(value)), "::", new ExtractStringRule("child")))
         )));

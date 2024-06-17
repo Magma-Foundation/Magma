@@ -8,11 +8,13 @@ public final class NumberRule extends FilterRule {
     private static boolean allDigits(String input) {
         if (input.isEmpty()) return false;
 
-        for (int i = 0; i < input.length(); i++) {
+        int i = 0;
+        while (i < input.length()) {
             var c = input.charAt(i);
             if (!Character.isDigit(c)) {
                 return false;
             }
+            i++;
         }
 
         return true;
