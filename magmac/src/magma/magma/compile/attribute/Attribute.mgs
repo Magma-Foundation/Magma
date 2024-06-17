@@ -7,7 +7,7 @@ import java.util.Optional;
  * as different types. This interface includes default methods to get
  * the attribute value as a string or a list of strings.
  */
-struct Attribute {
+public struct Attribute {
 	;
 	;
 	;

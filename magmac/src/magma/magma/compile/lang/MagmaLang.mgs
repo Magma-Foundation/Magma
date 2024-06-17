@@ -9,6 +9,7 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 export class def MagmaLang() => {
 	public def createRootRule() : Rule => {
@@ -20,9 +21,10 @@ export class def MagmaLang() => {
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
 	def createStructRule(definition : Rule) : TypeRule => {
+		let modifiers = SimpleExtractStringListRule("modifiers", " ");
 		let children = ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
 		let child = FirstRule(ExtractNodeRule("name", Lang.createNamePrototypeRule()), " {", RightRule(children, "}"));
-		return TypeRule("struct", LeftRule("struct ", child));
+		return TypeRule("struct", OrRule(List.of(FirstRule(modifiers, " struct ", child), LeftRule("struct ", child))));
 	}
 	def createDefinitionRule() : Rule => {
 		let modifiers = Lang.createModifiersRule();

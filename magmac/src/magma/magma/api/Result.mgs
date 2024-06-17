@@ -1,6 +1,6 @@
 import java.util.Optional;
 import java.util.function.Function;
-struct Result<T, E> {
+public struct Result<T, E> {
 	findValue() : Optional<T>;
 	findErr() : Optional<E>;
 	flatMapValue(mapper : Function<T, Result<R, E>>) : Result<R, E>;
