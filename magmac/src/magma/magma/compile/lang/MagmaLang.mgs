@@ -12,33 +12,33 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import java.util.List;
 export class def MagmaLang() => {
 	public def createRootRule() : Rule => {
-		let statement=LazyRule();
-		let value=LazyRule();
-		let definition=createDefinitionRule();
+		statement : var =LazyRule();
+		value : var =LazyRule();
+		definition : var =createDefinitionRule();
 		value.setRule(OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
 		statement.setRule(OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), TypeRule("trait", EmptyRule()), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
 	def createDefinitionRule() : Rule => {
-		let modifiers=Lang.createModifiersRule();
-		let withoutModifiers=OrRule(List.of(ExtractStringRule("name"), EmptyRule()));
-		let withModifiers=LastRule(modifiers, " ", withoutModifiers);
-		let maybeModifiers=OrRule(List.of(withModifiers, withoutModifiers));
-		let definition=LazyRule();
-		let params=FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
-		let maybeParams=OrRule(List.of(params, maybeModifiers));
-		let type=Lang.createTypeRule();
-		let withType=LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
-		let maybeType=OrRule(List.of(withType, maybeParams));
+		modifiers : var =Lang.createModifiersRule();
+		withoutModifiers : var =OrRule(List.of(ExtractStringRule("name"), EmptyRule()));
+		withModifiers : var =LastRule(modifiers, " ", withoutModifiers);
+		maybeModifiers : var =OrRule(List.of(withModifiers, withoutModifiers));
+		definition : var =LazyRule();
+		params : var =FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
+		maybeParams : var =OrRule(List.of(params, maybeModifiers));
+		type : var =Lang.createTypeRule();
+		withType : var =LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
+		maybeType : var =OrRule(List.of(withType, maybeParams));
 		definition.setRule(maybeType);
 		return definition;
 	}
 	def createFunctionRule(statement : Rule, value : Rule) : TypeRule => {
-		let child=ExtractNodeRule("child", OrRule(List.of(Lang.createBlock(statement), statement)));
-		let definition=ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
-		let rightRule=LeftRule("{", RightRule(child, "}"));
-		let child1=ExtractNodeRule("child", value);
-		let child2=FirstRule(definition, " => ", OrRule(List.of(rightRule, child1)));
+		child : var =ExtractNodeRule("child", OrRule(List.of(Lang.createBlock(statement), statement)));
+		definition : var =ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
+		rightRule : var =LeftRule("{", RightRule(child, "}"));
+		child1 : var =ExtractNodeRule("child", value);
+		child2 : var =FirstRule(definition, " => ", OrRule(List.of(rightRule, child1)));
 		return TypeRule("function", OrRule(List.of(child2, definition)));
 	}
 }

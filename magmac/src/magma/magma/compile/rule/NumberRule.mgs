@@ -4,9 +4,9 @@ export class def NumberRule extends FilterRule() => {
 	}
 	def allDigits(input : String) : boolean => {
 		if(input.isEmpty())return false;
-		let i : int=0;
+		i : int =0;
 		while(i<input.length()){
-			let c=input.charAt(i);
+			c : var =input.charAt(i);
 			if(!Character.isDigit(c)){
 				return false;
 			}

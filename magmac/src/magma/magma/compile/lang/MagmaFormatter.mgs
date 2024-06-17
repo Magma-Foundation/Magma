@@ -1,16 +1,17 @@
 import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
 export class def MagmaFormatter extends Generator() => {
 	def getNodes(depth : int, list : List<Node>) : List<Node> => {
-		let result : List<Node>=ArrayList();
-		let i : int=0;
+		result : List<Node> =ArrayList();
+		i : int =0;
 		while(i<list.size()){
-			let child : Node=list.get(i);
-			let withLeft=attachLeft(depth, i, child);
-			let withRight=attachRight(depth, list, i, withLeft);
+			child : Node =list.get(i);
+			withLeft : var =attachLeft(depth, i, child);
+			withRight : var =attachRight(depth, list, i, withLeft);
 			result.add(withRight);
 			i++;
 		}
@@ -18,7 +19,7 @@ export class def MagmaFormatter extends Generator() => {
 	}
 	def attachRight(depth : int, list : List<Node>, i : int, withLeft : Node) : Node => {
 		if(i==list.size()-1){
-			let count=depth==0?depth:depth-1;
+			count : var =depth==0?depth:depth-1;
 			return withLeft.withString("right-indent", "\n" + "\t".repeat(count));
 		}
 		else
@@ -38,12 +39,19 @@ export class def MagmaFormatter extends Generator() => {
 	
 	}
 	def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("declaration")){
+			attributes : var =node.attributes();
+			definition : var =attributes.apply("definition:scope").flatMap(Attribute.asNode).orElseThrow();
+			oldValue : var =attributes.apply("value").flatMap(Attribute.asNode).orElseThrow();
+			newNode : var =node.withNode("definition:scope", definition.withString("right-indent", " ")).withNode("value", oldValue.withString("left-indent", " "));
+			return Tuple(newNode, depth);
+		}
 		if(node.is("block"))return Tuple(node, depth+1);
 		return Tuple(node, depth);
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(!node.is("block"))return Tuple(node, depth);
-		let indented=node.mapAttributes( (attributes) => {attributes.mapValue("children", NodeListAttribute.Factory,  (list) => {getNodes(depth, list);});});
+		indented : var =node.mapAttributes( (attributes) => {attributes.mapValue("children", NodeListAttribute.Factory,  (list) => {getNodes(depth, list);});});
 		return Tuple(indented, depth-1);
 	}
 }

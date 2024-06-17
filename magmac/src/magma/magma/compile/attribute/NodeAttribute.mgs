@@ -1,7 +1,7 @@
 import magma.compile.rule.Node;
 import java.util.Optional;
 export class def NodeAttribute(Node value)() => {
-	const Factory : Factory<Node>=Factory();
+	public static final Factory : Factory<Node> =Factory();
 	
 	;
 	public def asNode() : Optional<Node> => {

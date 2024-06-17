@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
@@ -41,6 +42,26 @@ public class MagmaFormatter extends Generator {
 
     @Override
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
+        if (node.is("declaration")) {
+            var attributes = node.attributes();
+
+            var definition = attributes
+                    .apply("definition:scope")
+                    .flatMap(Attribute::asNode)
+                    .orElseThrow();
+
+            var oldValue = attributes
+                    .apply("value")
+                    .flatMap(Attribute::asNode)
+                    .orElseThrow();
+
+            var newNode = node
+                    .withNode("definition:scope", definition.withString("right-indent", " "))
+                    .withNode("value", oldValue.withString("left-indent", " "));
+
+            return new Tuple<>(newNode, depth);
+        }
+
         if (node.is("block")) return new Tuple<>(node, depth + 1);
         return new Tuple<>(node, depth);
     }

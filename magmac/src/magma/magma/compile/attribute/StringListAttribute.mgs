@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 export class def StringListAttribute(List<String> values)() => {
-	const Factory : Factory<List<String>>=Factory();
+	public static final Factory : Factory<List<String>> =Factory();
 	
 	;
 	public def asStringList() : Optional<List<String>> => {

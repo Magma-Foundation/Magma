@@ -32,12 +32,12 @@ export class def SplitMultipleRule() => {
 		this=delimiter;
 	}
 	public def toNode(input : String) : RuleResult => {
-		let split=splitter.split(input);
-		let members=ArrayList();
+		split : var =splitter.split(input);
+		members : var =ArrayList();
 		for(childString : String in split){
-			let result=childRule.toNode(childString);
+			result : var =childRule.toNode(childString);
 			if(result.findError().isPresent())return result.mapErr( (err) => {CompileParentError("Cannot process child.", childString, err);});
-			let optional=result.tryCreate();
+			optional : var =result.tryCreate();
 			if(optional.isEmpty()){
 				return ErrorRuleResult(CompileError("No name present for.", childString));
 			}
@@ -52,8 +52,8 @@ export class def SplitMultipleRule() => {
 		return;
 	}
 	def createErr(node : Node) : Err<String, Error_> => {
-		let format="Property '%s' does not exist on node.";
-		let message=format.formatted(propertyKey);
+		format : var ="Property '%s' does not exist on node.";
+		message : var =format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
 }

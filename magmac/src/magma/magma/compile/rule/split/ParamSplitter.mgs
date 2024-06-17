@@ -6,16 +6,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ParamSplitter() => {
 	public def split(input : String) : List<String> => {
-		let segments=ArrayList();
-		let buffer=StringBuilder();
-		let depth=0;
-		let queue=IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		segments : var =ArrayList();
+		buffer : var =StringBuilder();
+		depth : var =0;
+		queue : var =IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty()){
-			let c=queue.pop();
+			c : var =queue.pop();
 			if(c=='\"'){
 				buffer.append(c);
 				while(!queue.isEmpty()){
-					let next=queue.pop();
+					next : var =queue.pop();
 					buffer.append(next);
 					if(next=='\\'){
 						buffer.append(queue.pop());
@@ -36,7 +36,7 @@ export class def ParamSplitter() => {
 			if(c=='-'){
 				buffer.append(c);
 				if(!queue.isEmpty()){
-					let next=queue.peek();
+					next : var =queue.peek();
 					if(next=='>'){
 						buffer.append(queue.pop());
 						continue

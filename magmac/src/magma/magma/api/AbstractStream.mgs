@@ -8,10 +8,10 @@ export class def AbstractStream() => {
 	;
 	}
 	public def collect(collector : Collector<T, C>) : C => {
-		let current=collector.createInitial();
+		current : var =collector.createInitial();
 		while(true){
-			let finalCurrent : C=current;
-			let tuple=Options.toTuple(head().map( (head) => {collector.fold(finalCurrent, head);}), current);
+			finalCurrent : C =current;
+			tuple : var =Options.toTuple(head().map( (head) => {collector.fold(finalCurrent, head);}), current);
 			if(tuple.left()){
 				current=tuple.right();
 			}
