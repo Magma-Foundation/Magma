@@ -64,7 +64,8 @@ public class JavaLang {
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
-                Lang.createBreakRule()
+                Lang.createKeywordRule("break"),
+                Lang.createKeywordRule("continue")
         );
 
         var copy = new ArrayList<>(rules);

@@ -227,8 +227,8 @@ public class Lang {
         return new TypeRule("post-increment", new RightRule(new ExtractNodeRule("value", value), "++;"));
     }
 
-    static TypeRule createBreakRule() {
-        return new TypeRule("break", new LeftRule("break", new RightRule(new StripRule(new EmptyRule()), ";")));
+    static TypeRule createKeywordRule(String keyword) {
+        return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule()), ";")));
     }
 
     private static class OperatorFinderRule extends SplitOnceRule {

@@ -59,7 +59,8 @@ public class MagmaLang {
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
-                Lang.createBreakRule()
+                Lang.createKeywordRule("break"),
+                Lang.createKeywordRule("continue")
         )));
 
         return Lang.createBlock(new OrRule(List.of(
