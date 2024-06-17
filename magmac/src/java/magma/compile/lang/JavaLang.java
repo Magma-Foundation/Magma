@@ -132,6 +132,7 @@ public class JavaLang {
                 Lang.createNumberRule(),
                 Lang.createOperatorRule("and", "&&", value),
                 Lang.createOperatorRule("equals", "==", value),
+                Lang.createOperatorRule("not-equals", "!=", value),
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),

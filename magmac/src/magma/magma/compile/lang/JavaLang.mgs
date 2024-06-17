@@ -31,7 +31,7 @@ export class def JavaLang() => {
 		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, classRule, createContentRule("interface", createContentMember(classRule, rule, statement, classMember, valueRule)), createContentRule("record", createContentMember(classRule, rule, statement, classMember, valueRule)), Lang.createBlockCommentRule()));
 	}
 	def createContentMember(classRule : LazyRule, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : LazyRule => {
-		let rules=List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createCatchRule(definition, statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, ":"), Lang.createElseRule(statement), Lang.createEmptyStatementRule(), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createBreakRule());
+		let rules=List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createCatchRule(definition, statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, ":"), Lang.createElseRule(statement), Lang.createEmptyStatementRule(), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"));
 		let copy=ArrayList(rules);
 		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
 		statement.setRule(OrRule(copy));
@@ -62,7 +62,7 @@ export class def JavaLang() => {
 	}
 	def createValueRule(classMember : LazyRule, statement : Rule) : LazyRule => {
 		let value=LazyRule();
-		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule(value), Lang.createSymbolRule(), Lang.createNumberRule(), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value), TypeRule("method-reference", LastRule(ExtractNodeRule("parent", StripRule(value)), "::", ExtractStringRule("child"))))));
+		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule(value), Lang.createSymbolRule(), Lang.createNumberRule(), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value), TypeRule("method-reference", LastRule(ExtractNodeRule("parent", StripRule(value)), "::", ExtractStringRule("child"))))));
 		return value;
 	}
 	def createLambdaRule(value : Rule, statement : Rule) : Rule => {
@@ -76,7 +76,7 @@ export class def JavaLang() => {
 		let arguments=OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
 		let caller=ExtractNodeRule("caller", value);
 		let withGenerics=OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
-		let before=RightRule(InvocationStart(withGenerics, arguments), ")");
+		let before=RightRule(InvocationStartRule(withGenerics, arguments), ")");
 		let child=OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", LeftRule("new ", child));
 	}

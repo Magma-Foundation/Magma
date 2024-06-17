@@ -31,11 +31,13 @@ public class MagmaLang {
                 Lang.createTernaryRule(value),
                 Lang.createNumberRule(),
                 Lang.createOperatorRule("equals", "==", value),
+                Lang.createOperatorRule("not-equals", "!=", value),
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("and", "&&", value),
                 Lang.createOperatorRule("subtract", "-", value),
+                Lang.createOperatorRule("less-than", "<", value),
                 Lang.createNotRule(value)
         )));
 
