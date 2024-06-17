@@ -7,6 +7,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
+import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
@@ -21,7 +22,7 @@ public class MagmaLang {
 
         var definition = createDefinitionRule();
         value.setRule(new OrRule(List.of(
-                createFunctionRule(statement),
+                createFunctionRule(statement, value),
                 Lang.createCharRule(),
                 Lang.createStringRule(),
                 Lang.createInvocationRule(value),
@@ -34,6 +35,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("and", "&&", value),
+                Lang.createOperatorRule("subtract", "-", value),
                 Lang.createNotRule(value)
         )));
 
@@ -48,7 +50,7 @@ public class MagmaLang {
                 Lang.createReturnRule(value),
                 Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
-                createFunctionRule(statement),
+                createFunctionRule(statement, value),
                 Lang.createDefinitionRule(definition),
                 Lang.createDeclarationRule(definition, value),
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
@@ -56,7 +58,8 @@ public class MagmaLang {
                 new TypeRule("trait", new EmptyRule()),
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
-                Lang.createPostDecrementRule(value)
+                Lang.createPostDecrementRule(value),
+                Lang.createBreakRule()
         )));
 
         return Lang.createBlock(new OrRule(List.of(
@@ -86,9 +89,11 @@ public class MagmaLang {
         return definition;
     }
 
-    private static TypeRule createFunctionRule(Rule statement) {
+    private static TypeRule createFunctionRule(Rule statement, Rule value) {
         var child = new ExtractNodeRule("child", new OrRule(List.of(Lang.createBlock(statement), statement)));
         var definition = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
-        return new TypeRule("function", new FirstRule(definition, " => {", new RightRule(child, "}")));
+        var rightRule = new LeftRule("{", new RightRule(child, "}"));
+        var child1 = new ExtractNodeRule("child", value);
+        return new TypeRule("function", new FirstRule(definition, " => ", new OrRule(List.of(rightRule, child1))));
     }
 }

@@ -136,7 +136,10 @@ public class Lang {
 
     static Rule createElseRule(Rule statement) {
         var child = new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}");
-        return new TypeRule("else", new LeftRule("else", new StripRule(new LeftRule("{", child))));
+        var child1 = new LeftRule("{", child);
+        var anElse = new LeftRule("else", new StripRule(child1));
+        var anElse1 = new LeftRule("else ", new ExtractNodeRule("child", statement));
+        return new TypeRule("else", new OrRule(List.of(anElse, anElse1)));
     }
 
     static Rule createAssignmentRule(Rule value) {
@@ -224,6 +227,10 @@ public class Lang {
         return new TypeRule("post-increment", new RightRule(new ExtractNodeRule("value", value), "++;"));
     }
 
+    static TypeRule createBreakRule() {
+        return new TypeRule("break", new LeftRule("break", new RightRule(new StripRule(new EmptyRule()), ";")));
+    }
+
     private static class OperatorFinderRule extends SplitOnceRule {
         public OperatorFinderRule(Rule value, String slice) {
             super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));
@@ -247,9 +254,9 @@ public class Lang {
                     return Optional.of(i);
                 } else {
                     var c = maybeSlice.charAt(0);
-                    if(c == '\'') {
+                    if (c == '\'') {
                         var pop = queue.pop();
-                        if(pop.right() == '\\') queue.pop();
+                        if (pop.right() == '\\') queue.pop();
                         queue.pop();
                         continue;
                     }
