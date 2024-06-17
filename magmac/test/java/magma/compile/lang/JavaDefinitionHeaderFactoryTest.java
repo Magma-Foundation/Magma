@@ -82,6 +82,11 @@ class JavaDefinitionHeaderFactoryTest {
     }
 
     @Test
+    void all() {
+        assertTrue(parseImpl("@Test\npublic <T> var test").isPresent());
+    }
+
+    @Test
     void oneModifier() {
         assertParseModifiers("public var test", "modifiers", List.of("public"));
     }
