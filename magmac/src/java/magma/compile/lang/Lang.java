@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.api.Tuple;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.EmptyRule;
@@ -23,8 +24,11 @@ import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Lang {
     static Rule createBlock(Rule child) {
@@ -180,32 +184,7 @@ public class Lang {
     }
 
     static TypeRule createOperatorRule(String name, String slice, Rule value) {
-        return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
-            @Override
-            protected Optional<Integer> computeIndex(String input) {
-                if (!input.contains(slice)) return Optional.empty();
-
-                var depth = 0;
-                int i = 0;
-                while (i < input.length()) {
-                    var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
-                    if (maybeSlice.equals(slice) && depth == 0) {
-                        return Optional.of(i);
-                    } else {
-                        var c = input.charAt(i);
-                        if (c == '(') depth++;
-                        if (c == ')') depth--;
-                    }
-                    i++;
-                }
-
-                /*
-                TODO: find the operator
-                 */
-
-                return Optional.empty();
-            }
-        });
+        return new TypeRule(name, new OperatorFinderRule(value, slice));
     }
 
     static TypeRule createNumberRule() {
@@ -235,5 +214,56 @@ public class Lang {
 
     static TypeRule createBlockCommentRule() {
         return new TypeRule("block-comment", new StripRule(new LeftRule("/*", new RightRule(new ExtractStringRule("value"), "*/"))));
+    }
+
+    static TypeRule createPostDecrementRule(LazyRule value) {
+        return new TypeRule("post-decrement", new RightRule(new ExtractNodeRule("value", value), "--;"));
+    }
+
+    static TypeRule createPostIncrementRule(LazyRule value) {
+        return new TypeRule("post-increment", new RightRule(new ExtractNodeRule("value", value), "++;"));
+    }
+
+    private static class OperatorFinderRule extends SplitOnceRule {
+        public OperatorFinderRule(Rule value, String slice) {
+            super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));
+        }
+
+        @Override
+        protected Optional<Integer> computeIndex(String input) {
+            if (!input.contains(slice)) return Optional.empty();
+
+            var queue = IntStream.range(0, input.length())
+                    .mapToObj(i -> new Tuple<>(i, input.charAt(i)))
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            var depth = 0;
+            while (!queue.isEmpty()) {
+                var tuple = queue.pop();
+                var i = tuple.left();
+
+                var maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
+                if (maybeSlice.equals(slice) && depth == 0) {
+                    return Optional.of(i);
+                } else {
+                    var c = maybeSlice.charAt(0);
+                    if(c == '\'') {
+                        var pop = queue.pop();
+                        if(pop.right() == '\\') queue.pop();
+                        queue.pop();
+                        continue;
+                    }
+
+                    if (c == '(') depth++;
+                    if (c == ')') depth--;
+                }
+            }
+
+            /*
+            TODO: find the operator
+             */
+
+            return Optional.empty();
+        }
     }
 }

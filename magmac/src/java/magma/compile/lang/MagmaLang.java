@@ -33,6 +33,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
+                Lang.createOperatorRule("and", "&&", value),
                 Lang.createNotRule(value)
         )));
 
@@ -53,7 +54,9 @@ public class MagmaLang {
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
                 Lang.createEmptyStatementRule(),
                 new TypeRule("trait", new EmptyRule()),
-                Lang.createThrowRule(value)
+                Lang.createThrowRule(value),
+                Lang.createPostIncrementRule(value),
+                Lang.createPostDecrementRule(value)
         )));
 
         return Lang.createBlock(new OrRule(List.of(

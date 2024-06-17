@@ -26,9 +26,13 @@ public class Generator {
         }
 
         return attribute.asNode()
-                .<Tuple<Attribute, Integer>>map(value -> generateWithDepth(value, depth).mapLeft(NodeAttribute::new))
+                .map(value -> getAttributeIntegerTuple(depth, value))
                 .orElseGet(() -> new Tuple<>(attribute, depth));
 
+    }
+
+    private Tuple<Attribute, Integer> getAttributeIntegerTuple(int depth, Node value) {
+        return generateWithDepth(value, depth).mapLeft(NodeAttribute::new);
     }
 
     public Node generate(Node node, int state) {

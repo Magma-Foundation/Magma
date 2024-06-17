@@ -58,7 +58,8 @@ public class JavaLang {
                 Lang.createElseRule(statement),
                 Lang.createEmptyStatementRule(),
                 Lang.createThrowRule(value),
-                new TypeRule("post-increment", new RightRule(new ExtractNodeRule("value", value), "++;"))
+                Lang.createPostIncrementRule(value),
+                Lang.createPostDecrementRule(value)
         );
 
         var copy = new ArrayList<>(rules);
