@@ -10,7 +10,7 @@ export class def TypedRuleResult(String name, Attributes attributes)() => {
 	public def findAttributes() : Optional<Attributes> => {
 		return Optional.of(attributes);
 	}
-	public def create() : Optional<Node> => {
+	public def tryCreate() : Optional<Node> => {
 		return Optional.of(Node(name, attributes));
 	}
 	public def findError() : Optional<Error_> => {

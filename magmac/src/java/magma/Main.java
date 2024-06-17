@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Optional;
 
 public class Main {
 
@@ -29,18 +30,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            var sources = Files.walk(SOURCE_DIRECTORY)
-                    .filter(value -> value.toString().endsWith(".java"))
-                    .filter(Files::isRegularFile)
-                    .toList();
-
-            for (var source : sources) {
-                try {
-                    compileSource(source);
-                } catch (CompileException e) {
-                    throw new CompileException(source.toAbsolutePath().toString(), e);
-                }
-            }
+            run();
         } catch (IOException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
@@ -50,7 +40,21 @@ public class Main {
         }
     }
 
-    private static void compileSource(Path source) throws CompileException {
+    private static void run() throws IOException, CompileException {
+        var sources = Files.walk(SOURCE_DIRECTORY)
+                .filter(value -> value.toString().endsWith(".java"))
+                .filter(Files::isRegularFile)
+                .toList();
+
+        for (var source : sources) {
+            var error = compileSource(source);
+            if (error.isPresent()) {
+                throw error.get();
+            }
+        }
+    }
+
+    private static Optional<CompileException> compileSource(Path source) throws CompileException {
         var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
         System.out.println("Compiling source: " + SOURCE_DIRECTORY.relativize(source));
 
@@ -61,23 +65,30 @@ public class Main {
         var input = readImpl(source);
 
         var parseResult = JavaLang.createRootRule().toNode(input);
-        var parseError = parseResult.findError();
+        return parseResult.create().match(
+                root -> handle(root, targetParent, relativized, name, target),
+                Main::getCompileException);
+    }
 
-        if (parseError.isPresent()) {
-            var result = print(parseError.get(), 0);
+    private static Optional<CompileException> getCompileException(Error_ err) {
+        try {
+            var result = print(err, 0);
             writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-            throw new CompileException();
+            return Optional.of(new CompileException());
+        } catch (CompileException e) {
+            return Optional.of(e);
         }
+    }
 
-        var root = parseResult.create();
-        if (root.isPresent()) {
+    private static Optional<CompileException> handle(Node root, Path targetParent, Path relativized, String name, Path target) {
+        try {
             if (!Files.exists(targetParent)) createDirectory(targetParent);
 
             var relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
             if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
 
             writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
-            var generated = generate(root.get());
+            var generated = generate(root);
             writeImpl(relativizedDebug.resolveSibling(name + ".output.ast"), generated.toString());
 
             Rule rule = MagmaLang.createRootRule();
@@ -86,6 +97,9 @@ public class Main {
             generateError.ifPresent(error -> print(error, 0));
 
             writeImpl(target, generateResult.findValue().orElseThrow(() -> new CompileException("Nothing was generated.")));
+            return Optional.empty();
+        } catch (CompileException e) {
+            return Optional.of(e);
         }
     }
 
@@ -113,59 +127,53 @@ public class Main {
         }
     }
 
-    private static String print(Error_ e, int depth) {
-        var actualContext = e.findContext().orElse("");
-        var context = computeContext(e, depth, actualContext);
+    private static String print(Error_ error, int depth) {
+        var context = formatContext(error, depth);
 
-        var message = e.findMessage();
-        message.ifPresent(s -> System.err.println(" ".repeat(depth) + depth + " = " + s + " " + context));
+        var anyMessage = error.findMessage();
+        anyMessage.ifPresent(s -> System.err.println(" ".repeat(depth) + depth + " = " + s + " " + context));
 
-        var s = e.findMessage().orElse("");
-        var s1 = s.isEmpty() ? "" : " message=\"" + s.replace("\"", "&quot;") + "\"";
-        var causes = e.findCauses().orElse(Collections.emptyList());
+        var message = error.findMessage().orElse("");
+        var messageAttribute = message.isEmpty() ? "" : " message=\"" + message.replace("\"", "&quot;") + "\"";
+        var causes = error.findCauses().orElse(Collections.emptyList());
 
-        var context1 = e.findContext().orElse("")
+        var escapedContext = error.findContext().orElse("")
                 .replace("&", "&amp;")
                 .replace("\"", "&quot;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("'", "&apos;");
 
-        var s2 = "\n" + context1;
+        var formattedContext = "\n" + escapedContext;
         if (causes.isEmpty()) {
-            return "\n" + "\t".repeat(depth) + "<child" + s1 + ">" + s2 + "</child>";
+            return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
         }
 
-        var s3 = context1.isEmpty() ? "" : " context=\"" + context1 + "\"";
-        if (causes.size() > 1) {
-            var list = causes.stream()
-                    .sorted(Comparator.comparingInt(Error_::calculateDepth))
-                    .toList();
-
-            var builder = new StringBuilder();
-            for (Error_ cause : list) {
-                var result = print(cause, depth + 1);
-                builder.append(result);
-            }
-
-            return "\n" + "\t".repeat(depth) + "<collection" + s1 + s3 + ">" + builder + "</collection>";
-        } else {
-            return "\n" + "\t".repeat(depth) + "<parent" + s1 + s3 + ">" + print(causes.get(0), depth + 1) + "</parent>";
+        var contextAttribute = escapedContext.isEmpty() ? "" : " context=\"" + escapedContext + "\"";
+        if (causes.size() == 1) {
+            return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
         }
+
+        var list = causes.stream()
+                .sorted(Comparator.comparingInt(Error_::calculateDepth))
+                .toList();
+
+        var builder = new StringBuilder();
+        for (var cause : list) {
+            var result = print(cause, depth + 1);
+            builder.append(result);
+        }
+
+        return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
     }
 
-    private static String computeContext(Error_ e, int depth, String actualContext) {
-        if (e.findCauses().isEmpty()) {
-            var repeat = " ".repeat(depth + 1);
-            var replaced = actualContext.replace("\n", "\n" + " ".repeat(depth - 1));
-            return "\n" + repeat + "---\n" + repeat + replaced + "\n" + repeat + "---";
-        } else {
-            return actualContext;
-        }
-    }
+    private static String formatContext(Error_ e, int depth) {
+        var actualContext = e.findContext().orElse("");
+        if (e.findCauses().isPresent()) return actualContext;
 
-    private static String escape(String s) {
-        return s;
+        var spacing = " ".repeat(depth + 1);
+        var formatted = actualContext.replace("\n", "\n" + " ".repeat(depth - 1));
+        return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
     }
 
     private static Node generate(Node root) {

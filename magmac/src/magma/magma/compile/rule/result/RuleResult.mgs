@@ -1,3 +1,7 @@
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;

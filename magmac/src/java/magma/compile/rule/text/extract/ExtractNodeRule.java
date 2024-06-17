@@ -20,7 +20,7 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
         if (node.findError().isPresent()) return node;
 
         return node
-                .create()
+                .tryCreate()
                 .map(NodeAttribute::new)
                 .map(attribute -> new MapAttributes().with(propertyKey, attribute))
                 .<RuleResult>map(UntypedRuleResult::new)

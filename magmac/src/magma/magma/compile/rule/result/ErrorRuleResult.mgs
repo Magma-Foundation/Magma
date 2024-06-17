@@ -16,7 +16,7 @@ export class def ErrorRuleResult(Error_ e)() => {
 	public def findAttributes() : Optional<Attributes> => {
 		return Optional.empty();
 	}
-	public def create() : Optional<Node> => {
+	public def tryCreate() : Optional<Node> => {
 		return Optional.empty();
 	}
 	public def withType(type : String) : RuleResult => {

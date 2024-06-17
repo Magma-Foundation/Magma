@@ -29,7 +29,7 @@ public record ErrorRuleResult(Error_ e) implements RuleResult {
     }
 
     @Override
-    public Optional<Node> create() {
+    public Optional<Node> tryCreate() {
         return Optional.empty();
     }
 

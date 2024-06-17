@@ -34,7 +34,7 @@ class JavaDefinitionHeaderFactoryTest {
             fail(toException(error));
         }
 
-        return result.create();
+        return result.tryCreate();
     }
 
     private static RuntimeException toException(Error_ error) {
@@ -57,7 +57,7 @@ class JavaDefinitionHeaderFactoryTest {
     void spaceInType() {
         assertParse("public <L, R> First<L, R> test", "type", new NodeAttribute(Lang.createTypeRule()
                 .toNode("First<L, R>")
-                .create()
+                .tryCreate()
                 .orElseThrow()));
     }
 
@@ -112,6 +112,6 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void type() {
-        assertParse("var test", "type", new NodeAttribute(Lang.createTypeRule().toNode("var").create().orElseThrow()));
+        assertParse("var test", "type", new NodeAttribute(Lang.createTypeRule().toNode("var").tryCreate().orElseThrow()));
     }
 }

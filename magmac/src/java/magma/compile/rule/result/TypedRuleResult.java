@@ -19,7 +19,7 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
     }
 
     @Override
-    public Optional<Node> create() {
+    public Optional<Node> tryCreate() {
         return Optional.of(new Node(name, attributes));
     }
 

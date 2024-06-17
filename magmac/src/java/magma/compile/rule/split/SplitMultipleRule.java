@@ -42,7 +42,7 @@ public final class SplitMultipleRule implements Rule {
             if (result.findError().isPresent())
                 return result.mapErr(err -> new CompileParentError("Cannot process child.", childString, err));
 
-            var optional = result.create();
+            var optional = result.tryCreate();
             if (optional.isEmpty()) {
                 return new ErrorRuleResult(new CompileError("No name present for.", childString));
             }

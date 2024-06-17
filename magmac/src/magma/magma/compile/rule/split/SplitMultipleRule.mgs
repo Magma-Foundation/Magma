@@ -37,7 +37,7 @@ export class def SplitMultipleRule() => {
 		for(childString : String in split){
 			let result=childRule.toNode(childString);
 			if(result.findError().isPresent())return result.mapErr( (err) => {CompileParentError("Cannot process child.", childString, err);});
-			let optional=result.create();
+			let optional=result.tryCreate();
 			if(optional.isEmpty()){
 				return ErrorRuleResult(CompileError("No name present for.", childString));
 			}

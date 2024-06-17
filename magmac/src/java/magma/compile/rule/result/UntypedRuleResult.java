@@ -19,7 +19,7 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
     }
 
     @Override
-    public Optional<Node> create() {
+    public Optional<Node> tryCreate() {
         return Optional.empty();
     }
 
