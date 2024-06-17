@@ -17,22 +17,22 @@ import java.util.List;
 import java.util.Optional;
 export class def JavaDefinitionHeaderFactory() => {
 	def createDefinitionHeaderRule() : Rule => {
-		type : var =ExtractNodeRule("type", Lang.createTypeRule());
-		name : var =ExtractStringRule("name");
-		generics : var =LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
-		withGenerics : var =BackwardsRule(generics, " ", type);
-		maybeGenerics : var =OrRule(List.of(withGenerics, type));
-		modifiers : var =ModifiersRule();
-		withModifiers : var =BackwardsRule(modifiers, " ", maybeGenerics);
-		maybeModifiers : var =OrRule(List.of(withModifiers, maybeGenerics));
-		annotation : var =TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
-		annotations : var =SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
-		withAnnotations : var =LastRule(annotations, "\n", maybeModifiers);
-		maybeAnnotations : var =OrRule(List.of(withAnnotations, maybeModifiers));
+		type : var = ExtractNodeRule("type", Lang.createTypeRule());
+		name : var = ExtractStringRule("name");
+		generics : var = LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
+		withGenerics : var = BackwardsRule(generics, " ", type);
+		maybeGenerics : var = OrRule(List.of(withGenerics, type));
+		modifiers : var = ModifiersRule();
+		withModifiers : var = BackwardsRule(modifiers, " ", maybeGenerics);
+		maybeModifiers : var = OrRule(List.of(withModifiers, maybeGenerics));
+		annotation : var = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		annotations : var = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		withAnnotations : var = LastRule(annotations, "\n", maybeModifiers);
+		maybeAnnotations : var = OrRule(List.of(withAnnotations, maybeModifiers));
 		return TypeRule("definition", LastRule(maybeAnnotations, " ", name));
 	}
 	class def ModifiersRule extends ExtractStringListRule() => {
-		public static final MODIFIERS : List<String> =List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		public static final MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
 		ModifiersRule() : public => {
 			super("modifiers", " ");
 		}

@@ -9,6 +9,9 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 
 public record TypeRule(String type, Rule child) implements Rule {
+
+    public static final String FORMAT = "Node was not of type '%s', but rather '%s'.";
+
     @Override
     public RuleResult toNode(String input) {
         var result = child.toNode(input);
@@ -21,14 +24,15 @@ public record TypeRule(String type, Rule child) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        if (node.type().equals(type)) {
-            return child.fromNode(node).mapErr(err -> {
-                var format = "Cannot generate '%s' from node.";
-                var message = format.formatted(type);
-                return new CompileParentError(message, node.toString(), err);
-            });
+        if (!node.type().equals(type)) {
+            var message = String.format(FORMAT, type, node.type());
+            return new Err<>(new CompileError(message, node.toString()));
         }
 
-        return new Err<>(new CompileError(String.format("Node was not of type '%s', but rather '%s'.", type, node.type()), node.toString()));
+        return child.fromNode(node).mapErr(err -> {
+            var format = "Cannot generate '%s' from node.";
+            var message = format.formatted(type);
+            return new CompileParentError(message, node.toString(), err);
+        });
     }
 }

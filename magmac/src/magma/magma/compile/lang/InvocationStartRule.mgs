@@ -10,18 +10,18 @@ class def InvocationStartRule extends SplitOnceRule() => {
 		super(caller, "(", arguments);
 	}
 	def computeIndex(input : String) : Optional<Integer> => {
-		depth : var =0;
-		queue : var =IntStream.range(0, input.length()).map( (i) => input.length()-i-1).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
+		depth : var = 0;
+		queue : var = IntStream.range(0, input.length()).map( (i) => input.length()-i-1).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty()){
-			pop : var =queue.pop();
-			i : var =pop.left();
-			c : var =pop.right();
+			pop : var = queue.pop();
+			i : var = pop.left();
+			c : var = pop.right();
 			if(c=='\"'){
 				while(!queue.isEmpty()){
-					next : var =queue.pop().right();
+					next : var = queue.pop().right();
 					if(next=='\"'){
 						if(!queue.isEmpty()){
-							after : var =queue.peek().right();
+							after : var = queue.peek().right();
 							if(after=='\\'){
 								continue
 								

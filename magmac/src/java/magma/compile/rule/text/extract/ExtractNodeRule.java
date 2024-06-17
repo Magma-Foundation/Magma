@@ -29,11 +29,15 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return node.attributes()
-                .apply(propertyKey)
-                .flatMap(Attribute::asNode)
-                .map(child::fromNode)
-                .orElseGet(() -> createErr(node));
+        var attributes = node.attributes();
+
+        var propertyValue = attributes.apply(propertyKey);
+        if (propertyValue.isEmpty()) return createErr(node);
+
+        var asNode = propertyValue.get().asNode();
+        if (asNode.isEmpty()) return createErr(node);
+
+        return child.fromNode(asNode.get());
     }
 
     private Err<String, Error_> createErr(Node node) {

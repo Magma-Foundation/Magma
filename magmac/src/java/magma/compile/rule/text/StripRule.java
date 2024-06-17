@@ -17,7 +17,7 @@ public record StripRule(Rule child) implements Rule {
     @Override
     public Result<String, Error_> fromNode(Node node) {
         var leftIndent = node.attributes()
-                .apply("leftRule-indent")
+                .apply("left-indent")
                 .flatMap(Attribute::asString)
                 .orElse("");
 

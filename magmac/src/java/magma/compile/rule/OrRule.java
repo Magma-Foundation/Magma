@@ -41,13 +41,20 @@ public record OrRule(List<Rule> rules) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        var results = rules.stream()
-                .map(rule -> rule.fromNode(node))
-                .toList();
+        var results = new ArrayList<Result<String, Error_>>();
 
-        var anyOk = results.stream()
-                .filter(Result::isOk)
-                .findFirst();
+        for (var rule : rules) {
+            var result = rule.fromNode(node);
+            results.add(result);
+        }
+
+        Optional<Result<String, Error_>> anyOk = Optional.empty();
+        for (Result<String, Error_> result : results) {
+            if (result.isOk()) {
+                anyOk = Optional.of(result);
+                break;
+            }
+        }
 
         return anyOk.orElseGet(() -> toError(results));
 

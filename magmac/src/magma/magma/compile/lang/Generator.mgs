@@ -8,12 +8,12 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 export class def Generator() => {
 	def generateAttribute(attribute : Attribute, depth : int) : Tuple<Attribute, Integer> => {
-		nodeList : var =attribute.asNodeList();
+		nodeList : var = attribute.asNodeList();
 		if(nodeList.isPresent()){
-			list : var =ArrayList();
-			current : var =depth;
+			list : var = ArrayList();
+			current : var = depth;
 			for(node : var in nodeList.get()){
-				nodeIntegerTuple : Tuple<Node, Integer> =generateWithDepth(node, current);
+				nodeIntegerTuple : Tuple<Node, Integer> = generateWithDepth(node, current);
 				list.add(nodeIntegerTuple.left());
 				current=nodeIntegerTuple.right();
 			}
@@ -28,14 +28,14 @@ export class def Generator() => {
 		return generateWithDepth(node, state).left();
 	}
 	def generateWithDepth(node : Node, depth : int) : Tuple<Node, Integer> => {
-		preVisited : var =preVisit(node, depth);
-		oldAttributes : var =preVisited.left().attributes();
-		newAttributes : Attributes =MapAttributes();
-		current : var =preVisited.right();
+		preVisited : var = preVisit(node, depth);
+		oldAttributes : var = preVisited.left().attributes();
+		newAttributes : Attributes = MapAttributes();
+		current : var = preVisited.right();
 		for(oldTUple : Tuple<String, Attribute> in oldAttributes.streamEntries().toList()){
-			key : var =oldTUple.left();
-			value : var =oldTUple.right();
-			newTuple : var =generateAttribute(value, current);
+			key : var = oldTUple.left();
+			value : var = oldTUple.right();
+			newTuple : var = generateAttribute(value, current);
 			newAttributes=newAttributes.with(key, newTuple.left());
 			current=newTuple.right();
 		}

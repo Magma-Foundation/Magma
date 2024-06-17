@@ -34,7 +34,7 @@ public class MagmaFormatter extends Generator {
 
     private static Node attachLeft(int depth, int i, Node child) {
         if (depth != 0 || i != 0) {
-            return child.withString("leftRule-indent", "\n" + "\t".repeat(depth));
+            return child.withString("left-indent", "\n" + "\t".repeat(depth));
         } else {
             return child;
         }
@@ -45,19 +45,19 @@ public class MagmaFormatter extends Generator {
         if (node.is("declaration")) {
             var attributes = node.attributes();
 
-            var definition = attributes
+            var oldDefinition = attributes
                     .apply("definition:scope")
                     .flatMap(Attribute::asNode)
                     .orElseThrow();
 
             var oldValue = attributes
-                    .apply("value")
+                    .apply("value:scope")
                     .flatMap(Attribute::asNode)
                     .orElseThrow();
 
             var newNode = node
-                    .withNode("definition:scope", definition.withString("right-indent", " "))
-                    .withNode("value", oldValue.withString("left-indent", " "));
+                    .withNode("definition:scope", oldDefinition.withString("right-indent", " "))
+                    .withNode("value:scope", oldValue.withString("left-indent", " "));
 
             return new Tuple<>(newNode, depth);
         }

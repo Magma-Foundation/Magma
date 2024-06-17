@@ -37,15 +37,15 @@ export class def Lang() => {
 		return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
 	}
 	def createCatchRule(definition : Rule, statement : Rule) : TypeRule => {
-		declaration : var =StripRule(LeftRule("(", RightRule(definition, ")")));
-		value : var =ExtractNodeRule("child", createBlock(statement));
-		afterKeyword : var =FirstRule(ExtractNodeRule("condition", TypeRule("declaration", declaration)), "{", RightRule(value, "}"));
+		declaration : var = StripRule(LeftRule("(", RightRule(definition, ")")));
+		value : var = ExtractNodeRule("child", createBlock(statement));
+		afterKeyword : var = FirstRule(ExtractNodeRule("condition", TypeRule("declaration", declaration)), "{", RightRule(value, "}"));
 		return TypeRule("catch", LeftRule("catch ", afterKeyword));
 	}
 	def createTypeRule() : LazyRule => {
-		type : var =LazyRule();
-		children : var =SplitMultipleRule(ParamSplitter(), ", ", "children", StripRule(type));
-		generic : var =TypeRule("generic", FirstRule(ExtractNodeRule("parent", type), "<", RightRule(children, ">")));
+		type : var = LazyRule();
+		children : var = SplitMultipleRule(ParamSplitter(), ", ", "children", StripRule(type));
+		generic : var = TypeRule("generic", FirstRule(ExtractNodeRule("parent", type), "<", RightRule(children, ">")));
 		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("symbol", SymbolRule(ExtractStringRule("value"))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))))));
 		return type;
 	}
@@ -59,60 +59,60 @@ export class def Lang() => {
 		return StripRule(ExtractStringListRule("modifiers", " "));
 	}
 	def createInvocationRule(value : Rule) : TypeRule => {
-		arguments : var =OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
-		caller : var =ExtractNodeRule("caller", StripRule(value));
+		arguments : var = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		caller : var = ExtractNodeRule("caller", StripRule(value));
 		return TypeRule("invocation", RightRule(InvocationStartRule(caller, arguments), ")"));
 	}
 	def createCommentRule() : TypeRule => {
 		return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
 	}
 	def createIfRule(type : String, value : Rule, statement : Rule) : TypeRule => {
-		child : var =ExtractNodeRule("condition", value);
-		conditionParent : var =createScope("condition", StripRule(LeftRule("(", child)));
-		valueWithBlock : var =LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));
-		valueWithoutBlock : var =ExtractNodeRule("value", statement);
-		valueParent : var =createScope("value", StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock))));
+		child : var = ExtractNodeRule("condition", value);
+		conditionParent : var = createScope("condition", StripRule(LeftRule("(", child)));
+		valueWithBlock : var = LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));
+		valueWithoutBlock : var = ExtractNodeRule("value", statement);
+		valueParent : var = createScope("value", StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock))));
 		return TypeRule(type, LeftRule(type, ConditionEndRule(conditionParent, valueParent)));
 	}
 	public def createScope(name : String, rule : Rule) : Rule => {
-		withScope : var =name+":scope";
-		type : var =TypeRule(withScope, rule);
+		withScope : var = name+":scope";
+		type : var = TypeRule(withScope, rule);
 		return ExtractNodeRule(withScope, type);
 	}
 	def createReturnRule(value : Rule) : Rule => {
-		maybeChild : var =OrRule(List.of(LeftRule(" ", ExtractNodeRule("child", StripRule(value))), EmptyRule()));
-		after : var =OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
+		maybeChild : var = OrRule(List.of(LeftRule(" ", ExtractNodeRule("child", StripRule(value))), EmptyRule()));
+		after : var = OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
 		return TypeRule("return", LeftRule("return", after));
 	}
 	def createForRule(definition : Rule, value : Rule, statement : Rule, delimiter : String) : Rule => {
-		collection : var =StripRule(ExtractNodeRule("collection", value));
-		condition : var =RightRule(LastRule(StripRule(definition), delimiter, collection), ")");
-		content : var =RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
-		child : var =StripRule(LeftRule("(", condition));
-		leftRule : var =ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));
-		after : var =FirstRule(leftRule, "{", content);
+		collection : var = StripRule(ExtractNodeRule("collection", value));
+		condition : var = RightRule(LastRule(StripRule(definition), delimiter, collection), ")");
+		content : var = RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		child : var = StripRule(LeftRule("(", condition));
+		leftRule : var = ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));
+		after : var = FirstRule(leftRule, "{", content);
 		return TypeRule("for", LeftRule("for", after));
 	}
 	def createElseRule(statement : Rule) : Rule => {
-		child : var =RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
-		child1 : var =LeftRule("{", child);
-		anElse : var =LeftRule("else", StripRule(child1));
-		anElse1 : var =LeftRule("else ", ExtractNodeRule("child", statement));
+		child : var = RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		child1 : var = LeftRule("{", child);
+		anElse : var = LeftRule("else", StripRule(child1));
+		anElse1 : var = LeftRule("else ", ExtractNodeRule("child", statement));
 		return TypeRule("else", OrRule(List.of(anElse, anElse1)));
 	}
 	def createAssignmentRule(value : Rule) : Rule => {
-		reference : var =SymbolRule(ExtractStringRule("reference"));
-		assignable : var =OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
-		left : var =ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
-		right : var =RightRule(ExtractNodeRule("value", StripRule(value)), ";");
+		reference : var = SymbolRule(ExtractStringRule("reference"));
+		assignable : var = OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
+		left : var = ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
+		right : var = RightRule(ExtractNodeRule("value", StripRule(value)), ";");
 		return TypeRule("assignment", FirstRule(left, "=", right));
 	}
 	def createDeclarationRule(definition : Rule, value : Rule) : TypeRule => {
-		extractNodeRule : var =ExtractNodeRule("definition", TypeRule("definition", definition));
-		left : var =createScope("definition", StripRule(extractNodeRule));
-		withoutTerminator : var =ExtractNodeRule("value", StripRule(value));
-		maybeTerminating : var =OrRule(List.of(RightRule(withoutTerminator, ";"), withoutTerminator));
-		return TypeRule("declaration", FirstRule(left, "=", maybeTerminating));
+		extractNodeRule : var = ExtractNodeRule("definition", TypeRule("definition", definition));
+		left : var = createScope("definition", StripRule(extractNodeRule));
+		withoutTerminator : var = ExtractNodeRule("value", value);
+		maybeTerminating : var = OrRule(List.of(RightRule(withoutTerminator, ";"), withoutTerminator));
+		return TypeRule("declaration", FirstRule(left, "=", createScope("value", StripRule(maybeTerminating))));
 	}
 	def createParamsRule(definition : Rule) : Rule => {
 		return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
@@ -121,7 +121,7 @@ export class def Lang() => {
 		return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
 	}
 	def createAccessRule(type : String, separator : String, value : Rule) : TypeRule => {
-		parent : var =ExtractNodeRule("parent", StripRule(value));
+		parent : var = ExtractNodeRule("parent", StripRule(value));
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
 	def createSymbolRule() : TypeRule => {
@@ -143,7 +143,7 @@ export class def Lang() => {
 		return TypeRule("empty", RightRule(StripRule(EmptyRule()), ";"));
 	}
 	def createThrowRule(value : Rule) : Rule => {
-		after : var =RightRule(createScope("value", ExtractNodeRule("value", value)), ";");
+		after : var = RightRule(createScope("value", ExtractNodeRule("value", value)), ";");
 		return TypeRule("throw", LeftRule("throw ", after));
 	}
 	def createNotRule(value : LazyRule) : TypeRule => {
@@ -170,20 +170,20 @@ export class def Lang() => {
 		}
 		def computeIndex(input : String) : Optional<Integer> => {
 			if(!input.contains(slice))return Optional.empty();
-			queue : var =IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
-			depth : var =0;
+			queue : var = IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
+			depth : var = 0;
 			while(!queue.isEmpty()){
-				tuple : var =queue.pop();
-				i : var =tuple.left();
-				maybeSlice : var =input.substring(i, Math.min(i+slice.length(), input.length()));
+				tuple : var = queue.pop();
+				i : var = tuple.left();
+				maybeSlice : var = input.substring(i, Math.min(i+slice.length(), input.length()));
 				if(maybeSlice.equals(slice)&&depth==0){
 					return Optional.of(i);
 				}
 				else
 				{
-					c : var =maybeSlice.charAt(0);
+					c : var = maybeSlice.charAt(0);
 					if(c=='\''){
-						pop : var =queue.pop();
+						pop : var = queue.pop();
 						if(pop.right()=='\\')queue.pop();
 						queue.pop();
 						continue

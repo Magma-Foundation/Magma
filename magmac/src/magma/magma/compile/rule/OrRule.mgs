@@ -13,9 +13,9 @@ export class def OrRule(List<Rule> rules)() => {
 		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
 	}
 	public def toNode(input : String) : RuleResult => {
-		errors : var =ArrayList();
+		errors : var = ArrayList();
 		for(rule : Rule in rules()){
-			result : var =rule.toNode(input);
+			result : var = rule.toNode(input);
 			if(result.findAttributes().isPresent()){
 				return result;
 			}
@@ -31,8 +31,20 @@ export class def OrRule(List<Rule> rules)() => {
 	
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		results : var =rules.stream().map( (rule) => {rule.fromNode(node);}).toList();
-		anyOk : var =results.stream().filter(Result.isOk).findFirst();
+		results : var = ArrayList();
+		for(rule : var in rules){
+			result : var = rule.fromNode(node);
+			results.add(result);
+		}
+		anyOk : Optional<Result<String, Error_>> = Optional.empty();
+		for(result : Result<String, Error_> in results){
+			if(result.isOk()){
+				anyOk=Optional.of(result);
+				break
+				
+			;
+			}
+		}
 		return;
 	}
 }
