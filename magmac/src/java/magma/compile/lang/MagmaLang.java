@@ -98,7 +98,7 @@ public class MagmaLang {
         var asValue = new ExtractNodeRule("child", value);
 
         var withoutValue = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
-        var withValue = new FirstRule(withoutValue, " => ", new OrRule(List.of(asBlock, asValue)));
+        var withValue = new FirstRule(withoutValue, " => ", new OrRule(List.of(asValue, asBlock)));
         return new TypeRule("function", new OrRule(List.of(withValue, withoutValue)));
     }
 }

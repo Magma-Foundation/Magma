@@ -24,7 +24,7 @@ export class def Main() => {
 	const DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
 	public def main(args : String[]) : void
 	def run() : void => {
-		let sources = Files.walk(SOURCE_DIRECTORY).filter( (value) => value.toString().endsWith(".java");).filter(Files.isRegularFile).toList();
+		let sources = Files.walk(SOURCE_DIRECTORY).filter( (value) => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
 		for(source : var in sources){
 			let error = compileSource(source);
 			if(error.isPresent()){
@@ -41,7 +41,7 @@ export class def Main() => {
 		let target = targetParent.resolve(name+".mgs");
 		let input = readImpl(source);
 		let parseResult = JavaLang.createRootRule().toNode(input);
-		return parseResult.create().match( (root) => handle(root, targetParent, relativized, name, target);, Main.getCompileException);
+		return parseResult.create().match( (root) => handle(root, targetParent, relativized, name, target), Main.getCompileException);
 	}
 	def getCompileException(err : Error_) : Optional<CompileException>
 	def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException>
@@ -51,7 +51,7 @@ export class def Main() => {
 	def print(error : Error_, depth : int) : String => {
 		let context = formatContext(error, depth);
 		let anyMessage = error.findMessage();
-		anyMessage.ifPresent( (s) => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context););
+		anyMessage.ifPresent( (s) => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
 		let message = error.findMessage().orElse("");
 		let messageAttribute = message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";
 		let causes = error.findCauses().orElse(Collections.emptyList());

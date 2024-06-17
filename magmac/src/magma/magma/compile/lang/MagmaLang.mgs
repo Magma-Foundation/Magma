@@ -38,7 +38,7 @@ export class def MagmaLang() => {
 		let asBlock = ExtractNodeRule("child", OrRule(List.of(block, statement)));
 		let asValue = ExtractNodeRule("child", value);
 		let withoutValue = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
-		let withValue = FirstRule(withoutValue, " => ", OrRule(List.of(asBlock, asValue)));
+		let withValue = FirstRule(withoutValue, " => ", OrRule(List.of(asValue, asBlock)));
 		return TypeRule("function", OrRule(List.of(withValue, withoutValue)));
 	}
 }

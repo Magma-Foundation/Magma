@@ -13,7 +13,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 	}
 	public def mapValue(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
 		if(!values.containsKey(key))return this;
-		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map( (inner) => with(key, inner);).orElse(this);
+		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map( (inner) => with(key, inner)).orElse(this);
 	}
 	public def with(key : String, value : Attribute) : Attributes => {
 		let copy = HashMap(values);
@@ -32,7 +32,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return current;
 	}
 	public def streamEntries() : Stream<Tuple<String, Attribute>> => {
-		return values.entrySet().stream().map( (entry) => Tuple(entry.getKey(), entry.getValue()););
+		return values.entrySet().stream().map( (entry) => Tuple(entry.getKey(), entry.getValue()));
 	}
 	public def mapValues(mapper : Function<Attribute, Attribute>) : Attributes => {
 		let copy = HashMap();
@@ -42,7 +42,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 		return MapAttributes(copy);
 	}
 	public def format(depth : int) : String => {
-		return values.entrySet().stream().map( (entry) => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1);).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
+		return values.entrySet().stream().map( (entry) => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
 	}
 	public def remove(key : String) : Attributes => {
 		let copy = HashMap(values);

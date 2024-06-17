@@ -51,7 +51,7 @@ export class def MagmaFormatter extends Generator() => {
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(!node.is("block"))return Tuple(node, depth);
-		let indented = node.mapAttributes( (attributes) => attributes.mapValue("children", NodeListAttribute.Factory,  (list) => getNodes(depth, list);););
+		let indented = node.mapAttributes( (attributes) => attributes.mapValue("children", NodeListAttribute.Factory,  (list) => getNodes(depth, list)));
 		return Tuple(indented, depth-1);
 	}
 }

@@ -68,7 +68,7 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node1, depth);
 		}
 		if(node.is("declaration")){
-			let withModifiers = node.mapNode("definition:scope",  (scope) => scope.mapNode("definition",  (definition) => removeImplicitType(attachModifiers(definition));););
+			let withModifiers = node.mapNode("definition:scope",  (scope) => scope.mapNode("definition",  (definition) => removeImplicitType(attachModifiers(definition))));
 			return Tuple(withModifiers, depth);
 		}
 		return Tuple(node, depth);

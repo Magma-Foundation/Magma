@@ -61,6 +61,6 @@ export class def ParamSplitter() => {
 		
 		}
 		segments.add(buffer.toString());
-		return segments.stream().filter( (value) => !value.isBlank();).toList();
+		return segments.stream().filter( (value) => !value.isBlank()).toList();
 	}
 }

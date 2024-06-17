@@ -33,7 +33,7 @@ export class def SplitOnceRule() => {
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		let leftResult = leftRule.fromNode(node);
 		let rightValue = rightRule.fromNode(node);
-		return leftResult.flatMapValue( (left) => rightValue.mapValue( (right) => left+slice+right);).mapErr( (err) => createError(node, err););
+		return leftResult.flatMapValue( (left) => rightValue.mapValue( (right) => left+slice+right)).mapErr( (err) => createError(node, err));
 	}
 	def createError(node : Node, err : Error_) : CompileParentError => {
 		let format = "Cannot merge node using slice '%s'.";
