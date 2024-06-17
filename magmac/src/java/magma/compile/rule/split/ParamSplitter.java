@@ -51,6 +51,7 @@ public class ParamSplitter implements Splitter {
                         continue;
                     }
                 }
+                continue;
             }
 
             if (c == ',' && depth == 0) {
