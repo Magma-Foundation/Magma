@@ -22,7 +22,20 @@ export class def Main() => {
 	const TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
 	const SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
 	const DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
-	public def main(args : String[]) : void
+	public def main(args : String[]) : void => {
+		try 
+		{
+			run();
+		}
+		catch (e : IOException){
+			//noinspection CallToPrintStackTrace
+			e.printStackTrace();
+		}
+		catch (e : CompileException){
+			//noinspection CallToPrintStackTrace
+			e.printStackTrace();
+		}
+	}
 	def run() : void => {
 		let sources = Files.walk(SOURCE_DIRECTORY).filter((value) => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
 		for(source : var in sources){
@@ -43,11 +56,64 @@ export class def Main() => {
 		let parseResult = JavaLang.createRootRule().toNode(input);
 		return parseResult.create().match((root) => handle(root, targetParent, relativized, name, target), Main.getCompileException);
 	}
-	def getCompileException(err : Error_) : Optional<CompileException>
-	def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException>
-	def readImpl(source : Path) : String
-	def createDirectory(targetParent : Path) : Path
-	def writeImpl(target : Path, csq : String) : void
+	def getCompileException(err : Error_) : Optional<CompileException> => {
+		try 
+		{
+			let result = print(err, 0);
+			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
+			return Optional.of(CompileException());
+		}
+		catch (e : CompileException){
+			return Optional.of(e);
+		}
+	}
+	def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException> => {
+		try 
+		{
+			if(!Files.exists(targetParent))createDirectory(targetParent);
+			let relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
+			if(!Files.exists(relativizedDebug))createDirectory(relativizedDebug);
+			writeImpl(relativizedDebug.resolveSibling(name+".input.ast"), root.toString());
+			let generated = generate(root);
+			writeImpl(relativizedDebug.resolveSibling(name+".output.ast"), generated.toString());
+			let rule : Rule = MagmaLang.createRootRule();
+			let generateResult = rule.fromNode(generated);
+			let generateError = generateResult.findErr();
+			generateError.ifPresent((error) => print(error, 0));
+			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
+			return Optional.empty();
+		}
+		catch (e : CompileException){
+			return Optional.of(e);
+		}
+	}
+	def readImpl(source : Path) : String => {
+		try 
+		{
+			return Files.readString(source);
+		}
+		catch (e : IOException){
+			throw CompileException("Failed to read input: "+source, e);
+		}
+	}
+	def createDirectory(targetParent : Path) : Path => {
+		try 
+		{
+			return Files.createDirectories(targetParent);
+		}
+		catch (e : IOException){
+			throw CompileException("Failed to make parent.", e);
+		}
+	}
+	def writeImpl(target : Path, csq : String) : void => {
+		try 
+		{
+			Files.writeString(target, csq);
+		}
+		catch (e : IOException){
+			throw CompileException("Cannot write.", e);
+		}
+	}
 	def print(error : Error_, depth : int) : String => {
 		let context = formatContext(error, depth);
 		let anyMessage = error.findMessage();

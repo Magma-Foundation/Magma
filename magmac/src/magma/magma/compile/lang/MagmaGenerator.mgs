@@ -4,8 +4,6 @@ import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
 		let oldModifiers = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
@@ -39,6 +37,12 @@ export class def MagmaGenerator extends Generator() => {
 	
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("function")){
+			if(!node.has("child")){
+				let definition = node.attributes().apply("definition").flatMap(Attribute.asNode).orElseThrow();
+				return Tuple(definition, depth);
+			}
+		}
 		if(node.is("definition")){
 			let modifiers = node.attributes().apply("modifiers").flatMap(Attribute.asStringList);
 			if(modifiers.isEmpty()||modifiers.get().isEmpty()){

@@ -39,5 +39,7 @@ export class def ExtractStringListRule extends ExtractRule() => {
 		result.add(content.substring(start));
 		return result.stream().map(String.strip).filter((value) => !value.isEmpty()).toList();
 	}
-	def qualify(child : String) : Optional<Error_>
+	
+	protected abstract
+ qualify(child : String) : Optional<Error_>;
 }

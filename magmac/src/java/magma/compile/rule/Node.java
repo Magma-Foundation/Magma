@@ -72,4 +72,8 @@ public record Node(String type, Attributes attributes) {
     public Node remove(String key) {
         return new Node(type, attributes.remove(key));
     }
+
+    public boolean has(String child) {
+        return attributes.has(child);
+    }
 }

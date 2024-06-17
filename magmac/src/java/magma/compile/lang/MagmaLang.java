@@ -38,6 +38,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("and", "&&", value),
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("less-than", "<", value),
+                Lang.createOperatorRule("greater-than-or-equals", ">=", value),
                 Lang.createNotRule(value)
         )));
 
@@ -53,8 +54,10 @@ public class MagmaLang {
                 Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
                 createFunctionRule(statement, value),
+
                 Lang.createDefinitionRule(definition),
                 Lang.createDeclarationRule(definition, value),
+
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
                 Lang.createEmptyStatementRule(),
                 new TypeRule("trait", new EmptyRule()),
@@ -97,8 +100,12 @@ public class MagmaLang {
         var asBlock = new ExtractNodeRule("child", new OrRule(List.of(block, statement)));
         var asValue = new ExtractNodeRule("child", value);
 
-        var withoutValue = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
-        var withValue = new FirstRule(withoutValue, " => ", new OrRule(List.of(asValue, asBlock)));
-        return new TypeRule("function", new OrRule(List.of(withValue, withoutValue)));
+        var definition = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
+        var content = new OrRule(List.of(asValue, asBlock));
+
+        var withDefinition = new FirstRule(definition, " => ", content);
+        var withoutDefinition = new LeftRule("() => " , content);
+
+        return new TypeRule("function", new OrRule(List.of(withDefinition, withoutDefinition)));
     }
 }

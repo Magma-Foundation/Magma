@@ -19,7 +19,7 @@ export class def Generator() => {
 			}
 			return Tuple(NodeListAttribute(list), current);
 		}
-		return;
+		return attribute.asNode().map((value) => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));
 	}
 	def getAttributeIntegerTuple(depth : int, value : Node) : Tuple<Attribute, Integer> => {
 		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);

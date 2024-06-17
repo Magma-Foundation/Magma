@@ -17,13 +17,15 @@ export class def ExtractRule() => {
 	ExtractRule(key : String) : public => {
 		this=key;
 	}
-	def fromAttribute(attribute : Attribute) : Optional<String>
-	def toAttribute(content : String) : Result<Attribute, Error_>
+	
+	protected abstract fromAttribute(attribute : Attribute) : Optional<String>;
+	
+	protected abstract toAttribute(content : String) : Result<Attribute, Error_>;
 	public def toNode(input : String) : RuleResult => {
 		return toAttribute(input).match((attribute) => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return;
+		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
 	}
 	def getStringErrorOk(value : String) : Result<String, Error_> => {
 		return Ok(value);

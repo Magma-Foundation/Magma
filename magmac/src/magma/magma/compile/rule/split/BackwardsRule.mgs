@@ -45,7 +45,16 @@ export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() =>
 		}
 	
 	}
-	def findAllIndexesReverse(input : String) : List<Integer>
+	def findAllIndexesReverse(input : String) : List<Integer> => {
+		let indexes : List<Integer> = ArrayList();
+		let index : int = input.indexOf(slice);
+		while(index>=0){
+			indexes.add(index);
+			index=input.indexOf(slice, index+1);
+		}
+		Collections.reverse(indexes);
+		return indexes;
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return leftRule.fromNode(node).flatMapValue((leftResult) => rightRule.fromNode(node).mapValue((rightResult) => leftResult+slice+rightResult));
 	}

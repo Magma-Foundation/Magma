@@ -39,7 +39,7 @@ export class def Lang() => {
 	def createCatchRule(definition : Rule, statement : Rule) : TypeRule => {
 		let declaration = StripRule(LeftRule("(", RightRule(definition, ")")));
 		let value = ExtractNodeRule("child", createBlock(statement));
-		let afterKeyword = FirstRule(ExtractNodeRule("condition", TypeRule("declaration", declaration)), "{", RightRule(value, "}"));
+		let afterKeyword = FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));
 		return TypeRule("catch", LeftRule("catch ", afterKeyword));
 	}
 	def createTypeRule() : LazyRule => {

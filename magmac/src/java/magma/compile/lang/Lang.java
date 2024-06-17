@@ -47,7 +47,7 @@ public class Lang {
         var declaration = new StripRule(new LeftRule("(", new RightRule(definition, ")")));
         var value = new ExtractNodeRule("child", createBlock(statement));
 
-        var afterKeyword = new FirstRule(new ExtractNodeRule("condition", new TypeRule("declaration", declaration)), "{", new RightRule(value, "}"));
+        var afterKeyword = new FirstRule(new ExtractNodeRule("condition", new TypeRule("definition", declaration)), "{", new RightRule(value, "}"));
         return new TypeRule("catch", new LeftRule("catch ", afterKeyword));
     }
 

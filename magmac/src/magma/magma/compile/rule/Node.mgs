@@ -53,4 +53,7 @@ export class def Node(String type, Attributes attributes)() => {
 	public def remove(key : String) : Node => {
 		return Node(type, attributes.remove(key));
 	}
+	public def has(child : String) : boolean => {
+		return attributes.has(child);
+	}
 }

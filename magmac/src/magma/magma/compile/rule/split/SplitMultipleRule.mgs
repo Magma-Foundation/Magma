@@ -49,7 +49,7 @@ export class def SplitMultipleRule() => {
 		return Streams.fromNativeList(list).map(childRule.fromNode).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue((inner) => inner.orElse(""));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return;
+		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));
 	}
 	def createErr(node : Node) : Err<String, Error_> => {
 		let format = "Property '%s' does not exist on node.";

@@ -15,7 +15,7 @@ export class def MagmaLang() => {
 		let statement = LazyRule();
 		let value = LazyRule();
 		let definition = createDefinitionRule();
-		value.setRule(OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
+		value.setRule(OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createNotRule(value))));
 		statement.setRule(OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), TypeRule("trait", EmptyRule()), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
@@ -37,8 +37,10 @@ export class def MagmaLang() => {
 		let block = LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
 		let asBlock = ExtractNodeRule("child", OrRule(List.of(block, statement)));
 		let asValue = ExtractNodeRule("child", value);
-		let withoutValue = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
-		let withValue = FirstRule(withoutValue, " => ", OrRule(List.of(asValue, asBlock)));
-		return TypeRule("function", OrRule(List.of(withValue, withoutValue)));
+		let definition = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
+		let content = OrRule(List.of(asValue, asBlock));
+		let withDefinition = FirstRule(definition, " => ", content);
+		let withoutDefinition = LeftRule("() => ", content);
+		return TypeRule("function", OrRule(List.of(withDefinition, withoutDefinition)));
 	}
 }

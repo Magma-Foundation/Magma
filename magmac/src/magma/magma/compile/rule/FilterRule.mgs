@@ -13,8 +13,10 @@ export class def FilterRule() => {
 		if(filter(input))return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
-	def computeMessage() : String
-	def filter(input : String) : boolean
+	
+	protected abstract computeMessage() : String;
+	
+	protected abstract filter(input : String) : boolean;
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);
 	}
