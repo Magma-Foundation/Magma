@@ -60,7 +60,8 @@ public class JavaLang {
                 Lang.createEmptyStatementRule(),
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
-                Lang.createPostDecrementRule(value)
+                Lang.createPostDecrementRule(value),
+                new TypeRule("break", new LeftRule("break", new RightRule(new StripRule(new EmptyRule()), ";")))
         );
 
         var copy = new ArrayList<>(rules);
