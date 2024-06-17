@@ -11,6 +11,7 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
 
@@ -74,9 +75,11 @@ public class MagmaLang {
     }
 
     private static TypeRule createStructRule(Rule definition) {
+        var modifiers = new SimpleExtractStringListRule("modifiers", " ");
+
         var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
         var child = new FirstRule(new ExtractNodeRule("name", Lang.createNamePrototypeRule()), " {", new RightRule(children, "}"));
-        return new TypeRule("struct", new LeftRule("struct ", child));
+        return new TypeRule("struct", new OrRule(List.of(new FirstRule(modifiers, " struct ", child), new LeftRule("struct ", child))));
     }
 
     private static Rule createDefinitionRule() {
