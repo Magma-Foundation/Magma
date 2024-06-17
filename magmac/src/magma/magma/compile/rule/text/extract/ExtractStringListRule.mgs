@@ -18,9 +18,9 @@ export class def ExtractStringListRule extends ExtractRule() => {
 		return attribute.asStringList().map((list) => String.join(delimiter, list));
 	}
 	def toAttribute(content : String) : Result<Attribute, Error_> => {
-		let list = split(content);
+		list : var = split(content);
 		for(format : String in list){
-			let qualified = qualify(format);
+			qualified : var = qualify(format);
 			if(qualified.isPresent()){
 				return Err(qualified.get());
 			}
@@ -28,10 +28,10 @@ export class def ExtractStringListRule extends ExtractRule() => {
 		return Ok(StringListAttribute(list));
 	}
 	def split(content : String) : List<String> => {
-		let result : List<String> = ArrayList();
-		let start : int = 0;
+		result : List<String> = ArrayList();
+		start : int = 0;
 		while(true){
-			let end = content.indexOf(delimiter, start);
+			end : var = content.indexOf(delimiter, start);
 			if(end==-1)break;
 			result.add(content.substring(start, end));
 			start=end+delimiter.length();

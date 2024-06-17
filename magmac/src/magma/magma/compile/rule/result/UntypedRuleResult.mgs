@@ -19,7 +19,7 @@ export class def UntypedRuleResult(Attributes attributes)() => {
 	public def withType(type : String) : RuleResult => {
 		return TypedRuleResult(type, attributes);
 	}
-	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
+	public def mapErr(mapper : Error_ => Error_) : RuleResult => {
 		return this;
 	}
 }

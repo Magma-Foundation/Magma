@@ -15,7 +15,7 @@ export struct RuleResult {
 	findAttributes() : Optional<Attributes>;
 	tryCreate() : Optional<Node>;
 	withType(type : String) : RuleResult;
-	mapErr(mapper : Function<Error_, Error_>) : RuleResult;
+	mapErr(mapper : Error_ => Error_) : RuleResult;
 	;
 	;
 }

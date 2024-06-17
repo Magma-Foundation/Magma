@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 export class def NodeListAttribute(List<Node> nodeList)() => {
-	const Factory : Factory<List<Node>> = Factory();
+	public static final Factory : Factory<List<Node>> = Factory();
 	
 	;
 	public def asNodeList() : Optional<List<Node>> => {

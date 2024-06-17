@@ -12,21 +12,21 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 export class def ExtractNodeRule(String propertyKey, Rule child)() => {
 	public def toNode(input : String) : RuleResult => {
-		let node = child.toNode(input);
+		node : var = child.toNode(input);
 		if(node.findError().isPresent())return node;
 		return node.tryCreate().map(NodeAttribute.new).map((attribute) => MapAttributes().with(propertyKey, attribute)).<RuleResult>map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		let attributes = node.attributes();
-		let propertyValue = attributes.apply(propertyKey);
+		attributes : var = node.attributes();
+		propertyValue : var = attributes.apply(propertyKey);
 		if(propertyValue.isEmpty())return createErr(node);
-		let asNode = propertyValue.get().asNode();
+		asNode : var = propertyValue.get().asNode();
 		if(asNode.isEmpty())return createErr(node);
 		return child.fromNode(asNode.get());
 	}
 	def createErr(node : Node) : Err<String, Error_> => {
-		let format = "Node did not have attribute '%s' as a node.";
-		let message = format.formatted(propertyKey);
+		format : var = "Node did not have attribute '%s' as a node.";
+		message : var = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
 }

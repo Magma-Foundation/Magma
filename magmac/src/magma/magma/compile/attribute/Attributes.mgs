@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  * streaming entries.
  */
 export struct Attributes {
-	mapValue(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes;
+	mapValue(key : String, factory : Factory<T>, mapper : T => T) : Attributes;
 	;
 	with(key : String, value : Attribute) : Attributes;
 	;
@@ -19,7 +19,7 @@ export struct Attributes {
 	merge(other : Attributes) : Attributes;
 	;
 	streamEntries() : Stream<Tuple<String, Attribute>>;
-	mapValues(mapper : Function<Attribute, Attribute>) : Attributes;
+	mapValues(mapper : Attribute => Attribute) : Attributes;
 	format(depth : int) : String;
 	remove(key : String) : Attributes;
 	has(name : String) : boolean;

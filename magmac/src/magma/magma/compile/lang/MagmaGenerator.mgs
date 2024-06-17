@@ -6,8 +6,8 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
-		let oldModifiers = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
-		let copy = ArrayList();
+		oldModifiers : var = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
+		copy : var = ArrayList();
 		if(oldModifiers.contains("final")){
 			copy.add("const");
 		}
@@ -18,9 +18,11 @@ export class def MagmaGenerator extends Generator() => {
 		return definition.withStringList("modifiers", copy);
 	}
 	def removeImplicitType(definition : Node) : Node => {
-		let type = definition.attributes().apply("type").flatMap(Attribute.asNode).orElseThrow();
+		typeOptional : var = definition.attributes().apply("type").flatMap(Attribute.asNode);
+		if(typeOptional.isEmpty())return definition;
+		type : var = typeOptional.get();
 		if(type.is("symbol")){
-			let value = type.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+			value : var = type.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
 			if(value.equals("var")){
 				return definition.remove("type");
 			}
@@ -37,14 +39,28 @@ export class def MagmaGenerator extends Generator() => {
 	
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("generic-type")){
+			parent : var = node.attributes().apply("parent").flatMap(Attribute.asNode).orElseThrow();
+			if(parent.is("symbol")){
+				value : var = parent.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+				if(value.equals("Function")){
+					children : var = node.attributes().apply("children").flatMap(Attribute.asNodeList).orElseThrow();
+					first : var = children.get(0);
+					second : var = children.get(1);
+					newNode : var = Node("function-type").withNode("from", first).withNode("to", second);
+					return Tuple(newNode, depth);
+				}
+			}
+		}
 		if(node.is("function")){
 			if(!node.has("child")){
-				let definition = node.attributes().apply("definition").flatMap(Attribute.asNode).orElseThrow();
+				definition : var = node.attributes().apply("definition").flatMap(Attribute.asNode).orElseThrow();
 				return Tuple(definition, depth);
 			}
 		}
 		if(node.is("definition")){
-			let modifiers = node.attributes().apply("modifiers").flatMap(Attribute.asStringList);
+			removed : var = removeImplicitType(node);
+			modifiers : var = node.attributes().apply("modifiers").flatMap(Attribute.asStringList);
 			if(modifiers.isEmpty()||modifiers.get().isEmpty()){
 				return Tuple(node.remove("modifiers"), depth);
 			}
@@ -61,9 +77,9 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node.retype("function"), depth);
 		}
 		if(node.is("interface")){
-			let struct = node.retype("struct").mapAttributes((attribute) => {
+			struct : var = node.retype("struct").mapAttributes((attribute) => {
 				return attribute.mapValue("modifiers", StringListAttribute.Factory, (list) => {
-					let newList = ArrayList();
+					newList : var = ArrayList();
 					if(list.contains("public")){
 						newList.add("export");
 					}
@@ -73,7 +89,7 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(struct, depth);
 		}
 		if(node.is("function")){
-			let node1 = node.mapAttributes((attributes) => {
+			node1 : var = node.mapAttributes((attributes) => {
 				return attributes.mapValue("definition", NodeAttribute.Factory, (definition) => {
 					if(!definition.attributes().has("name")){
 						return definition;
@@ -81,7 +97,7 @@ export class def MagmaGenerator extends Generator() => {
 					return definition.mapAttributes((attributes1) => {
 						return attributes1.mapValue("modifiers", StringListAttribute.Factory, (list) => {
 							if(list.contains("class"))return list;
-							let copy = ArrayList();
+							copy : var = ArrayList();
 							if(list.contains("public")){
 								copy.add("public");
 							}
@@ -92,10 +108,6 @@ export class def MagmaGenerator extends Generator() => {
 				});
 			});
 			return Tuple(node1, depth);
-		}
-		if(node.is("declaration")){
-			let withModifiers = node.mapNode("definition:scope", (scope) => scope.mapNode("definition", (definition) => removeImplicitType(attachModifiers(definition))));
-			return Tuple(withModifiers, depth);
 		}
 		return Tuple(node, depth);
 	}

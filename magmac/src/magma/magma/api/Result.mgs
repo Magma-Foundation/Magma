@@ -3,9 +3,9 @@ import java.util.function.Function;
 export struct Result<T, E> {
 	findValue() : Optional<T>;
 	findErr() : Optional<E>;
-	flatMapValue(mapper : Function<T, Result<R, E>>) : Result<R, E>;
-	mapValue(mapper : Function<T, R>) : Result<R, E>;
+	flatMapValue(mapper : T => Result<R, E>) : Result<R, E>;
+	mapValue(mapper : T => R) : Result<R, E>;
 	isOk() : boolean;
-	mapErr(mapper : Function<E, R>) : Result<T, R>;
-	match(onOk : Function<T, R>, onErr : Function<E, R>) : R;
+	mapErr(mapper : E => R) : Result<T, R>;
+	match(onOk : T => R, onErr : E => R) : R;
 }

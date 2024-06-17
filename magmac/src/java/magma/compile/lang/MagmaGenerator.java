@@ -26,10 +26,12 @@ public class MagmaGenerator extends Generator {
     }
 
     private static Node removeImplicitType(Node definition) {
-        var type = definition.attributes()
+        var typeOptional = definition.attributes()
                 .apply("type")
-                .flatMap(Attribute::asNode)
-                .orElseThrow();
+                .flatMap(Attribute::asNode);
+
+        if(typeOptional.isEmpty()) return definition;
+        var type = typeOptional.get();
 
         if (type.is("symbol")) {
             var value = type.attributes()
@@ -49,6 +51,36 @@ public class MagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if (node.is("generic-type")) {
+            var parent = node.attributes()
+                    .apply("parent")
+                    .flatMap(Attribute::asNode)
+                    .orElseThrow();
+
+            if (parent.is("symbol")) {
+                var value = parent.attributes()
+                        .apply("value")
+                        .flatMap(Attribute::asString)
+                        .orElseThrow();
+
+                if (value.equals("Function")) {
+                    var children = node.attributes()
+                            .apply("children")
+                            .flatMap(Attribute::asNodeList)
+                            .orElseThrow();
+
+                    var first = children.get(0);
+                    var second = children.get(1);
+
+                    var newNode = new Node("function-type")
+                            .withNode("from", first)
+                            .withNode("to", second);
+
+                    return new Tuple<>(newNode, depth);
+                }
+            }
+        }
+
         if (node.is("function")) {
             if (!node.has("child")) {
                 var definition = node.attributes()
@@ -61,6 +93,8 @@ public class MagmaGenerator extends Generator {
         }
 
         if (node.is("definition")) {
+            var removed = removeImplicitType(node);
+
             var modifiers = node.attributes()
                     .apply("modifiers")
                     .flatMap(Attribute::asStringList);
@@ -118,14 +152,6 @@ public class MagmaGenerator extends Generator {
 
             });
             return new Tuple<>(node1, depth);
-        }
-
-        if (node.is("declaration")) {
-            var withModifiers = node.mapNode("definition:scope",
-                    scope -> scope.mapNode("definition",
-                            definition -> removeImplicitType(attachModifiers(definition))));
-
-            return new Tuple<>(withModifiers, depth);
         }
 
         return new Tuple<>(node, depth);

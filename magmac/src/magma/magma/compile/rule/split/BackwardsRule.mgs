@@ -12,26 +12,26 @@ import java.util.Collections;
 import java.util.List;
 export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() => {
 	public def toNode(input : String) : RuleResult => {
-		let allIndexes = findAllIndexesReverse(input);
-		let errors = ArrayList();
+		allIndexes : var = findAllIndexesReverse(input);
+		errors : var = ArrayList();
 		for(index : Integer in allIndexes){
-			let leftSlice = input.substring(0, index);
-			let rightSlice = input.substring(index+slice.length());
-			let leftResult = leftRule.toNode(leftSlice);
+			leftSlice : var = input.substring(0, index);
+			rightSlice : var = input.substring(index+slice.length());
+			leftResult : var = leftRule.toNode(leftSlice);
 			if(leftResult.findError().isPresent()){
 				errors.add(leftResult.findError().get());
 				continue
 				
 			;
 			}
-			let rightResult = rightRule.toNode(rightSlice);
+			rightResult : var = rightRule.toNode(rightSlice);
 			if(rightResult.findError().isPresent()){
 				errors.add(rightResult.findError().get());
 				continue
 				
 			;
 			}
-			let optional = leftResult.findAttributes().flatMap((leftAttributes) => rightResult.findAttributes().map((rightAttributes) => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			optional : var = leftResult.findAttributes().flatMap((leftAttributes) => rightResult.findAttributes().map((rightAttributes) => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if(optional.isPresent()){
 				return optional.get();
 			}
@@ -46,8 +46,8 @@ export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() =>
 	
 	}
 	def findAllIndexesReverse(input : String) : List<Integer> => {
-		let indexes : List<Integer> = ArrayList();
-		let index : int = input.indexOf(slice);
+		indexes : List<Integer> = ArrayList();
+		index : int = input.indexOf(slice);
 		while(index>=0){
 			indexes.add(index);
 			index=input.indexOf(slice, index+1);
