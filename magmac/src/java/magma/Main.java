@@ -87,9 +87,9 @@ public class Main {
             var relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
             if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
 
-            writeImpl(relativizedDebug.resolveSibling(name + ".input.ast"), root.toString());
+            writeImpl(relativizedDebug.resolve(name + ".input.ast"), root.toString());
             var generated = generate(root);
-            writeImpl(relativizedDebug.resolveSibling(name + ".output.ast"), generated.toString());
+            writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
 
             Rule rule = MagmaLang.createRootRule();
             var generateResult = rule.fromNode(generated);

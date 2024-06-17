@@ -73,9 +73,9 @@ export class def Main() => {
 			if(!Files.exists(targetParent))createDirectory(targetParent);
 			let relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
 			if(!Files.exists(relativizedDebug))createDirectory(relativizedDebug);
-			writeImpl(relativizedDebug.resolveSibling(name+".input.ast"), root.toString());
+			writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());
 			let generated = generate(root);
-			writeImpl(relativizedDebug.resolveSibling(name+".output.ast"), generated.toString());
+			writeImpl(relativizedDebug.resolve(name+".output.ast"), generated.toString());
 			let rule : Rule = MagmaLang.createRootRule();
 			let generateResult = rule.fromNode(generated);
 			let generateError = generateResult.findErr();
