@@ -14,6 +14,7 @@ import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class JavaDefinitionHeaderFactory {
         var type = new ExtractNodeRule("type", Lang.createTypeRule());
         var name = new ExtractStringRule("name");
 
-        var generics = new LeftRule("<", new RightRule(new ExtractStringRule("type-params"), ">"));
+        var generics = new LeftRule("<", new RightRule(new SimpleExtractStringListRule("type-params", ","), ">"));
         var withGenerics = new LastRule(generics, " ", type);
         var maybeGenerics = new OrRule(List.of(withGenerics, type));
 
@@ -63,7 +64,7 @@ public class JavaDefinitionHeaderFactory {
     private static class SimpleSplitter implements Splitter {
         @Override
         public List<String> split(String input) {
-            return List.of(input.split(" "));
+            return List.of(input.split("\n"));
         }
     }
 }

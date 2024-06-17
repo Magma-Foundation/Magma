@@ -53,18 +53,19 @@ class JavaDefinitionHeaderFactoryTest {
         assertParse(input, key, new StringListAttribute(list));
     }
 
-    private static void assertParseToString(String input, String propertyKey, String propertyValue) {
-        assertParse(input, propertyKey, new StringAttribute(propertyValue));
-    }
-
     @Test
     void modifiersAndGenerics() {
         assertTrue(parseImpl("public <T> var test").isPresent());
     }
 
     @Test
-    void typeParams() {
-        assertParseToString("<T> var test", "type-params", "T");
+    void oneTypeParam() {
+        assertParse("<T> var test", "type-params", new StringListAttribute(List.of("T")));
+    }
+
+    @Test
+    void twoTypeParams() {
+        assertParse("<L, R> var test", "type-params", new StringListAttribute(List.of("L", "R")));
     }
 
     @Test
@@ -83,7 +84,7 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void all() {
-        assertTrue(parseImpl("@Test\npublic <T> var test").isPresent());
+        assertTrue(parseImpl("@First\n@Second\npublic static <L, R> var test").isPresent());
     }
 
     @Test
@@ -98,7 +99,7 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void name() {
-        assertParseToString("var test", "name", "test");
+        assertParse("var test", "name", new StringAttribute("test"));
     }
 
     @Test
