@@ -93,12 +93,12 @@ public class MagmaLang {
     }
 
     private static TypeRule createFunctionRule(Rule statement, Rule value) {
-        var child = new ExtractNodeRule("child", new OrRule(List.of(Lang.createBlock(statement), statement)));
-        var definition = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
-        var rightRule = new LeftRule("{", new RightRule(child, "}"));
-        var child1 = new ExtractNodeRule("child", value);
+        var block = new LeftRule("{", new RightRule(Lang.createBlock(statement), "}"));
+        var asBlock = new ExtractNodeRule("child", new OrRule(List.of(block, statement)));
+        var asValue = new ExtractNodeRule("child", value);
 
-        var child2 = new FirstRule(definition, " => ", new OrRule(List.of(rightRule, child1)));
-        return new TypeRule("function", new OrRule(List.of(child2, definition)));
+        var withoutValue = new ExtractNodeRule("definition", new TypeRule("definition", createDefinitionRule()));
+        var withValue = new FirstRule(withoutValue, " => ", new OrRule(List.of(asBlock, asValue)));
+        return new TypeRule("function", new OrRule(List.of(withValue, withoutValue)));
     }
 }

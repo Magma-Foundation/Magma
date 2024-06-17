@@ -15,9 +15,9 @@ export class def LazyRule() => {
 		this=Optional.of(child);
 	}
 	public def toNode(input : String) : RuleResult => {
-		return child.map( (inner) => {inner.toNode(input);}).orElse(ErrorRuleResult(CompileError("Child was not set.", input)));
+		return child.map( (inner) => inner.toNode(input);).orElse(ErrorRuleResult(CompileError("Child was not set.", input)));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return child.map( (inner) => {inner.fromNode(node);}).orElse(Err(CompileError("No child set.", node.toString())));
+		return child.map( (inner) => inner.fromNode(node);).orElse(Err(CompileError("No child set.", node.toString())));
 	}
 }

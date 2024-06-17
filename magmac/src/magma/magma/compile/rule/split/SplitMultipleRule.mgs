@@ -36,7 +36,7 @@ export class def SplitMultipleRule() => {
 		let members = ArrayList();
 		for(childString : String in split){
 			let result = childRule.toNode(childString);
-			if(result.findError().isPresent())return result.mapErr( (err) => {CompileParentError("Cannot process child.", childString, err);});
+			if(result.findError().isPresent())return result.mapErr( (err) => CompileParentError("Cannot process child.", childString, err););
 			let optional = result.tryCreate();
 			if(optional.isEmpty()){
 				return ErrorRuleResult(CompileError("No name present for.", childString));
@@ -46,7 +46,7 @@ export class def SplitMultipleRule() => {
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
 	}
 	def joinNodes(list : List<Node>) : Result<String, Error_> => {
-		return Streams.fromNativeList(list).map(childRule.fromNode).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue( (inner) => {inner.orElse("");});
+		return Streams.fromNativeList(list).map(childRule.fromNode).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue( (inner) => inner.orElse(""););
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return;

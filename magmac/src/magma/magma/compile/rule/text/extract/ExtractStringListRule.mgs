@@ -15,7 +15,7 @@ export class def ExtractStringListRule extends ExtractRule() => {
 		this=delimiter;
 	}
 	def fromAttribute(attribute : Attribute) : Optional<String> => {
-		return attribute.asStringList().map( (list) => {String.join(delimiter, list);});
+		return attribute.asStringList().map( (list) => String.join(delimiter, list););
 	}
 	def toAttribute(content : String) : Result<Attribute, Error_> => {
 		let list = split(content);
@@ -37,7 +37,7 @@ export class def ExtractStringListRule extends ExtractRule() => {
 			start=end+delimiter.length();
 		}
 		result.add(content.substring(start));
-		return result.stream().map(String.strip).filter( (value) => {!value.isEmpty();}).toList();
+		return result.stream().map(String.strip).filter( (value) => !value.isEmpty();).toList();
 	}
 	def qualify(child : String) : Optional<Error_>
 }

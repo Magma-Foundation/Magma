@@ -14,7 +14,7 @@ class def ConditionEndRule extends SplitOnceRule() => {
 		/*
         TODO: reduce nesting
          */
-		let queue = IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
+		let queue = IntStream.range(0, input.length()).mapToObj( (i) => Tuple(i, input.charAt(i));).collect(Collectors.toCollection(LinkedList.new));
 		let depth = 0;
 		while(!queue.isEmpty()){
 			let pop = queue.pop();

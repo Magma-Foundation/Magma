@@ -170,7 +170,7 @@ export class def Lang() => {
 		}
 		def computeIndex(input : String) : Optional<Integer> => {
 			if(!input.contains(slice))return Optional.empty();
-			let queue = IntStream.range(0, input.length()).mapToObj( (i) => {Tuple(i, input.charAt(i));}).collect(Collectors.toCollection(LinkedList.new));
+			let queue = IntStream.range(0, input.length()).mapToObj( (i) => Tuple(i, input.charAt(i));).collect(Collectors.toCollection(LinkedList.new));
 			let depth = 0;
 			while(!queue.isEmpty()){
 				let tuple = queue.pop();

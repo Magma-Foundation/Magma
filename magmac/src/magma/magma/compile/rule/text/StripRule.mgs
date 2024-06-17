@@ -7,11 +7,11 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 export class def StripRule(Rule child)() => {
 	public def toNode(input : String) : RuleResult => {
-		return child.toNode(input.strip()).mapErr( (error) => {CompileParentError("Cannot strip input.", input, error);});
+		return child.toNode(input.strip()).mapErr( (error) => CompileParentError("Cannot strip input.", input, error););
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		let leftIndent = node.attributes().apply("left-indent").flatMap(Attribute.asString).orElse("");
 		let rightIndent = node.attributes().apply("right-indent").flatMap(Attribute.asString).orElse("");
-		return child.fromNode(node).mapValue( (inner) => leftIndent+inner+rightIndent).mapErr( (err) => {CompileParentError("Cannot apply indentation: ", node.toString(), err);});
+		return child.fromNode(node).mapValue( (inner) => leftIndent+inner+rightIndent).mapErr( (err) => CompileParentError("Cannot apply indentation: ", node.toString(), err););
 	}
 }
