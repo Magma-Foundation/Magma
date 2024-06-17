@@ -8,6 +8,7 @@ import magma.compile.rule.Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class MagmaGenerator extends Generator {
@@ -91,9 +92,21 @@ public class MagmaGenerator extends Generator {
                 .flatMap(Optional::stream)
                 .toList();
 
-        return child.remove("params").mapNode("type", returnType -> new Node("function-type")
+        return child.remove("params")
+                .mapOrSetStringList("modifiers", list -> add(list, "const"), () -> Collections.singletonList("const"))
+                .mapNode("type", returnType -> buildFunctionType(returnType, params));
+    }
+
+    private static <T> List<T> add(List<T> list, T element) {
+        var copy = new ArrayList<>(list);
+        copy.add(element);
+        return copy;
+    }
+
+    private static Node buildFunctionType(Node returnType, List<Node> params) {
+        return new Node("function-type")
                 .withNodeList("params", params)
-                .withNode("returns", returnType));
+                .withNode("returns", returnType);
     }
 
     private static Tuple<Node, Integer> getNodeIntegerTuple3(Node node, int depth) {
@@ -174,10 +187,7 @@ public class MagmaGenerator extends Generator {
                     var first = children.get(0);
                     var second = children.get(1);
 
-                    var newNode = new Node("function-type")
-                            .withNodeList("params", Collections.singletonList(first))
-                            .withNode("returns", second);
-
+                    var newNode = buildFunctionType(second, Collections.singletonList(first));
                     return new Tuple<>(newNode, depth);
                 }
             }

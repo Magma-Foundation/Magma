@@ -10,6 +10,7 @@ import magma.compile.attribute.StringListAttribute;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public record Node(String type, Attributes attributes) {
     public Node(String type) {
@@ -79,5 +80,14 @@ public record Node(String type, Attributes attributes) {
 
     public Node mapNodes(String key, Function<List<Node>, List<Node>> mapper) {
         return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, mapper));
+    }
+
+
+    public Node mapOrSetStringList(String key, Function<List<String>, List<String>> onPresent, Supplier<List<String>> onEmpty) {
+        if (has(key)) {
+            return mapAttributes(attributes -> attributes.mapValue(key, StringListAttribute.Factory, onPresent));
+        } else {
+            return with(key, new StringListAttribute(onEmpty.get()));
+        }
     }
 }

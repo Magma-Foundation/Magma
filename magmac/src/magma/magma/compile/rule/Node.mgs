@@ -7,6 +7,7 @@ import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 export class def Node(String type, Attributes attributes)() => {
 	Node(type : String) : public => {
 		this(type, MapAttributes());
@@ -58,5 +59,15 @@ export class def Node(String type, Attributes attributes)() => {
 	}
 	public def mapNodes(key : String, mapper : (List<Node>) => List<Node>) : Node => {
 		return mapAttributes((attributes) => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
+	}
+	public def mapOrSetStringList(key : String, onPresent : (List<String>) => List<String>, onEmpty : Supplier<List<String>>) : Node => {
+		if(has(key)){
+			return mapAttributes((attributes) => attributes.mapValue(key, StringListAttribute.Factory, onPresent));
+		}
+		else
+		{
+			return with(key, StringListAttribute(onEmpty.get()));
+		}
+	
 	}
 }

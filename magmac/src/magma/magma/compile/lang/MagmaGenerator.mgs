@@ -5,6 +5,7 @@ import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
@@ -61,7 +62,15 @@ export class def MagmaGenerator extends Generator() => {
 		let paramsOptional = child.attributes().apply("params").flatMap(Attribute.asNodeList);
 		if(paramsOptional.isEmpty())return child;
 		let params = paramsOptional.get().stream().map(Node.attributes).map((attributes) => attributes.apply("type")).flatMap(Optional.stream).map(Attribute.asNode).flatMap(Optional.stream).toList();
-		return child.remove("params").mapNode("type", (returnType) => Node("function-type").withNodeList("params", params).withNode("returns", returnType));
+		return child.remove("params").mapOrSetStringList("modifiers", (list) => add(list, "const"), () => Collections.singletonList("const")).mapNode("type", (returnType) => buildFunctionType(returnType, params));
+	}
+	def add(list : List<T>, element : T) : List<T> => {
+		let copy = ArrayList(list);
+		copy.add(element);
+		return copy;
+	}
+	def buildFunctionType(returnType : Node, params : List<Node>) : Node => {
+		return Node("function-type").withNodeList("params", params).withNode("returns", returnType);
 	}
 	def getNodeIntegerTuple3(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("record")){
@@ -117,7 +126,7 @@ export class def MagmaGenerator extends Generator() => {
 					let children = node.attributes().apply("children").flatMap(Attribute.asNodeList).orElseThrow();
 					let first = children.get(0);
 					let second = children.get(1);
-					let newNode = Node("function-type").withNodeList("params", Collections.singletonList(first)).withNode("returns", second);
+					let newNode = buildFunctionType(second, Collections.singletonList(first));
 					return Tuple(newNode, depth);
 				}
 			}

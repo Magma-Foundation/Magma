@@ -10,12 +10,12 @@ import java.util.function.Function;
 export struct RuleResult {
 	;
 	;
-	findName : () => Optional<String>;
-	findError : () => Optional<Error_>;
-	findAttributes : () => Optional<Attributes>;
-	tryCreate : () => Optional<Node>;
-	withType : (String) => RuleResult;
-	mapErr : ((Error_) => Error_) => RuleResult;
+	const findName : () => Optional<String>;
+	const findError : () => Optional<Error_>;
+	const findAttributes : () => Optional<Attributes>;
+	const tryCreate : () => Optional<Node>;
+	const withType : (String) => RuleResult;
+	const mapErr : ((Error_) => Error_) => RuleResult;
 	;
 	;
 }

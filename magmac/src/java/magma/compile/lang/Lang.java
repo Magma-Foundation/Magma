@@ -79,18 +79,18 @@ public class Lang {
         return new TypeRule("try", new LeftRule("try ", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", createBlock(statement)), "}")))));
     }
 
-    static StripRule createModifiersRule() {
+    static Rule createModifiersRule() {
         return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
     }
 
-    static StripRule createModifiersRule(final List<String> modifiers) {
-        return new StripRule(new ExtractStringListRule("modifiers", " ") {
+    static Rule createModifiersRule(final List<String> modifiers) {
+        return new ExtractStringListRule("modifiers", " ") {
             @Override
             protected Optional<Error_> qualify(String child) {
                 if (modifiers.contains(child)) return Optional.empty();
                 else return Optional.of(new CompileError("Invalid modifier.", child));
             }
-        });
+        };
     }
 
     static TypeRule createInvocationRule(Rule value) {
