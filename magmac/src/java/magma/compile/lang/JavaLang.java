@@ -122,13 +122,13 @@ public class JavaLang {
                 Lang.createAccessRule(value),
                 Lang.createSymbolRule(),
                 Lang.createNumberRule(),
+                Lang.createOperatorRule("and", "&&", value),
                 Lang.createOperatorRule("equals", "==", value),
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("less-than", "<", value),
-                Lang.createOperatorRule("and", "&&", value),
                 Lang.createNotRule(value),
                 new TypeRule("method-reference", new LastRule(new ExtractNodeRule("parent", new StripRule(value)), "::", new ExtractStringRule("child")))
         )));

@@ -54,6 +54,20 @@ public class MembersSplitter implements Splitter {
                 }
             }
 
+            if(c == '\'') {
+                var next = queue.pop();
+                var withNext = current.append(next);
+                State escaped;
+                if(next == '\\') {
+                    escaped = current.append(queue.pop());
+                } else {
+                    escaped = withNext;
+                }
+
+                current = escaped.append(queue.pop());
+                continue;
+            }
+
             if (c == '\"') {
                 var withString = current;
                 while (!queue.isEmpty()) {
