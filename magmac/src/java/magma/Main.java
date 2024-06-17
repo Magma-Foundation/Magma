@@ -112,13 +112,15 @@ public class Main {
 
     private static String print(Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
-        var index = actualContext.indexOf('\n');
         String context;
         if (e.findCauses().isEmpty())
             context = "\n" + " ".repeat(depth + 1) + "---\n" + " ".repeat(depth + 1) + actualContext.replace("\n", "\n" + " ".repeat(depth - 1)) + "\n" + " ".repeat(depth + 1) + "---";
         else {
-            if (index == -1) context = actualContext;
-            else context = actualContext.substring(0, index);
+            context = actualContext
+                    .replace("\\n", "\\\\n")
+                    .replace("\n", "\\n")
+                    .replace("\\r", "\\\\r")
+                    .replace("\r", "\\r");
         }
 
         var message = e.findMessage();
@@ -140,9 +142,7 @@ public class Main {
         }
         var s3 = context1.isEmpty() ? "" : " context=\"" + context1 + "\"";
         if (causes.size() > 1) {
-            var list = causes.stream()
-                    .sorted(Comparator.comparingInt(Error_::calculateDepth))
-                    .toList();
+            var list = causes.stream().toList();
 
             var builder = new StringBuilder();
             for (Error_ cause : list) {

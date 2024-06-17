@@ -5,7 +5,6 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
-import magma.compile.rule.split.BackwardsRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
@@ -38,7 +37,7 @@ public class JavaLang {
     }
 
     private static LazyRule createContentMember() {
-        var definition = createDefinitionHeaderRule();
+        var definition = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
         var statement = new LazyRule();
         var classMember = new LazyRule();
         var value = createValueRule(classMember);
@@ -152,14 +151,5 @@ public class JavaLang {
                 before
         ));
         return new TypeRule("constructor", new LeftRule("new ", child));
-    }
-
-    private static Rule createDefinitionHeaderRule() {
-        var type = Lang.createTypeRule();
-        var modifiers = Lang.createModifiersRule();
-        var withoutModifiers = new ExtractNodeRule("type", type);
-        var withModifiers = new BackwardsRule(modifiers, " ", withoutModifiers);
-        var anyModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
-        return new LastRule(anyModifiers, " ", new StripRule(new SymbolRule(new ExtractStringRule("name"))));
     }
 }

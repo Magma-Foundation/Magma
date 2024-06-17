@@ -1,5 +1,7 @@
 package magma.compile.lang;
 
+import magma.compile.CompileError;
+import magma.compile.Error_;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.NumberRule;
@@ -17,6 +19,7 @@ import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
@@ -64,7 +67,17 @@ public class Lang {
     }
 
     static StripRule createModifiersRule() {
-        return new StripRule(new SimpleExtractStringListRule("modifiers", " "));
+        return createModifiersRule(List.of("public", "abstract"));
+    }
+
+    static StripRule createModifiersRule(final List<String> modifiers) {
+        return new StripRule(new ExtractStringListRule("modifiers", " ") {
+            @Override
+            protected Optional<Error_> qualify(String child) {
+                if (modifiers.contains(child)) return Optional.empty();
+                else return Optional.of(new CompileError("Invalid modifier.", child));
+            }
+        });
     }
 
     static TypeRule createInvocationRule(Rule value) {
@@ -170,7 +183,7 @@ public class Lang {
         return new TypeRule(name, new SplitOnceRule(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value))) {
             @Override
             protected Optional<Integer> computeIndex(String input) {
-                if(!input.contains(slice)) return Optional.empty();
+                if (!input.contains(slice)) return Optional.empty();
 
                 var depth = 0;
                 for (int i = 0; i < input.length(); i++) {
