@@ -88,4 +88,9 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     public boolean has(String name) {
         return this.values.containsKey(name);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
 }

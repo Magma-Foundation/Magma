@@ -1,5 +1,6 @@
 package magma.compile.rule;
 
+import magma.api.Err;
 import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileError;
@@ -19,6 +20,10 @@ public class EmptyRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return new Ok<>("");
+        if(node.attributes().isEmpty()) {
+            return new Ok<>("");
+        } else {
+            return new Err<>(new CompileError("Node is not empty.", node.toString()));
+        }
     }
 }

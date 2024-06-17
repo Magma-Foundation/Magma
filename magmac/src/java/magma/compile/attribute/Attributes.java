@@ -18,7 +18,7 @@ public interface Attributes {
     /**
      * Adds an attribute to the node.
      *
-     * @param key the key to associate with the attribute
+     * @param key   the key to associate with the attribute
      * @param value the attribute to add
      * @return a new Node instance with the added attribute
      */
@@ -54,4 +54,6 @@ public interface Attributes {
     Attributes remove(String key);
 
     boolean has(String name);
+
+    boolean isEmpty();
 }
