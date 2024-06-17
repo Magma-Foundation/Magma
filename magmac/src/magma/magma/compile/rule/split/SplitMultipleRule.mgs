@@ -21,7 +21,7 @@ export class def SplitMultipleRule() => {
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	SplitMultipleRule(splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
+	 SplitMultipleRule(splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
 		this=propertyKey;
 		this=childRule;
 		this=splitter;
@@ -52,4 +52,5 @@ export class def SplitMultipleRule() => {
 		let message = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

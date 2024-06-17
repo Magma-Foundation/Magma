@@ -25,4 +25,5 @@ export class def TypeRule(String type, Rule child)() => {
 			return CompileParentError(message, node.toString(), err);
 		});
 	}
+	implements Rule;
 }

@@ -247,9 +247,9 @@ public class Lang {
     }
 
     static OrRule createNamePrototypeRule() {
-        var name = new TypeRule("symbol", new StripRule(new ExtractStringRule("value")));
+        var name = new TypeRule("symbol-name", new StripRule(new ExtractStringRule("value")));
         return new OrRule(List.of(
-                new TypeRule("generic", new FirstRule(new StripRule(new ExtractStringRule("value")), "<", new RightRule(new ExtractStringRule("child"), ">"))),
+                new TypeRule("generic-name", new FirstRule(new StripRule(new ExtractStringRule("parent")), "<", new RightRule(new ExtractStringRule("value"), ">"))),
                 name
         ));
     }

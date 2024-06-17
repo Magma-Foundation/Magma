@@ -14,4 +14,5 @@ export class def StripRule(Rule child)() => {
 		let rightIndent = node.attributes().apply("right-indent").flatMap(Attribute.asString).orElse("");
 		return child.fromNode(node).mapValue((inner) => leftIndent+inner+rightIndent).mapErr((err) => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
+	implements Rule;
 }

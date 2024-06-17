@@ -58,4 +58,5 @@ export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() =>
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return leftRule.fromNode(node).flatMapValue((leftResult) => rightRule.fromNode(node).mapValue((rightResult) => leftResult+slice+rightResult));
 	}
+	implements Rule;
 }

@@ -1,5 +1,5 @@
 export class def SymbolRule extends FilterRule() => {
-	SymbolRule(child : Rule) : public => {
+	 SymbolRule(child : Rule) : public => {
 		super(child);
 	}
 	def computeMessage() : String => {

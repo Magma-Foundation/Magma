@@ -22,4 +22,5 @@ export class def UntypedRuleResult(Attributes attributes)() => {
 	public def mapErr(mapper : (Error_) => Error_) : RuleResult => {
 		return this;
 	}
+	implements RuleResult;
 }

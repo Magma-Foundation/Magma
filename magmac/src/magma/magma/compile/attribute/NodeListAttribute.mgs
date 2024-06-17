@@ -11,4 +11,5 @@ export class def NodeListAttribute(List<Node> nodeList)() => {
 		if(nodeList.isEmpty())return "[]";
 		return nodeList.stream().map((child) => child.formatWithDepth(depth+1)).collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));
 	}
+	implements Attribute;
 }

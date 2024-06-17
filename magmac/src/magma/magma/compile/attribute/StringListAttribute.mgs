@@ -9,4 +9,5 @@ export class def StringListAttribute(List<String> values)() => {
 	public def format(depth : int) : String => {
 		return values.stream().map((value) => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
 	}
+	implements Attribute;
 }

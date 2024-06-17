@@ -22,4 +22,5 @@ export class def Err<T, E>(E value)() => {
 	public def match(onOk : (T) => R, onErr : (E) => R) : R => {
 		return onErr.apply(value);
 	}
+	implements Result<T, E>;
 }

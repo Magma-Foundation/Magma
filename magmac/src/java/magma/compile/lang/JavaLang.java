@@ -130,7 +130,7 @@ public class JavaLang {
 
         var leftRule1 = new ExtractNodeRule("name", prototype);
         return new OrRule(List.of(
-                new FirstRule(leftRule1, " implements", new ExtractNodeRule("interface", prototype)),
+                new FirstRule(leftRule1, " implements", new ExtractNodeRule("implements", prototype)),
                 leftRule1
         ));
     }

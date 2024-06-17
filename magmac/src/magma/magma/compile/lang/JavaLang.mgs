@@ -64,7 +64,7 @@ export class def JavaLang() => {
 	def createContentMemberRule() : OrRule => {
 		let prototype = Lang.createNamePrototypeRule();
 		let leftRule1 = ExtractNodeRule("name", prototype);
-		return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("interface", prototype)), leftRule1));
+		return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("implements", prototype)), leftRule1));
 	}
 	def createValueRule(classMember : LazyRule, statement : Rule) : LazyRule => {
 		let value = LazyRule();
@@ -90,5 +90,6 @@ export class def JavaLang() => {
 		public def split(input : String) : List<String> => {
 			return Arrays.asList(input.split(","));
 		}
+		implements Splitter;
 	}
 }

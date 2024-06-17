@@ -8,4 +8,5 @@ export class def NodeAttribute(Node value)() => {
 	public def format(depth : int) : String => {
 		return value.format(depth);
 	}
+	implements Attribute;
 }

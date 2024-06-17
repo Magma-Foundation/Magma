@@ -1,9 +1,9 @@
 export class def CompileException  extends Exception() => {
-	CompileException(message : String, cause : Throwable) : public => {
+	 CompileException(message : String, cause : Throwable) : public => {
 		super(message, cause);
 	}
-	CompileException(message : String) : public => {
+	 CompileException(message : String) : public => {
 		super(message);
 	}
-	CompileException() : public => {}
+	 CompileException() : public => {}
 }

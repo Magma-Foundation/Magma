@@ -47,4 +47,5 @@ export class def OrRule(List<Rule> rules)() => {
 		}
 		return anyOk.orElseGet(() => toError(results));
 	}
+	implements Rule;
 }

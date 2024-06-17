@@ -1,5 +1,5 @@
 export class def NumberRule extends FilterRule() => {
-	NumberRule(child : Rule) : public => {
+	 NumberRule(child : Rule) : public => {
 		super(child);
 	}
 	def allDigits(input : String) : boolean => {

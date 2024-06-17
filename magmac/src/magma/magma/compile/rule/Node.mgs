@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 export class def Node(String type, Attributes attributes)() => {
-	Node(type : String) : public => {
+	 Node(type : String) : public => {
 		this(type, MapAttributes());
 	}
 	public def mapNode(key : String, nodeNodeFunction : (Node) => Node) : Node => {

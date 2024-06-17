@@ -202,26 +202,68 @@ public class MagmaGenerator extends Generator {
 
     private static Optional<Tuple<Node, Integer>> generateFromFunction(Node node, int depth) {
         if (!node.is("function")) return Optional.empty();
-
-        var node1 = node.mapAttributes(attributes -> attributes.mapValue("definition", NodeAttribute.Factory, definition -> {
-            if (!definition.attributes().has("name")) {
-                return definition;
-            }
-
-            return definition.mapAttributes(attributes1 -> attributes1.mapValue("modifiers", StringListAttribute.Factory, list -> {
-                if (list.contains("class")) return list;
-
-                var copy = new ArrayList<String>();
-                if (list.contains("public")) {
-                    copy.add("public");
-                }
-
-                copy.add("def");
-                return copy;
-            }));
-        }));
-
+        var withDefinition = node.mapNode("definition", MagmaGenerator::generateFunctionDefinition);
+        var node1 = generateImplements(withDefinition);
         return Optional.of(new Tuple<>(node1, depth));
+    }
+
+    private static Node generateImplements(Node withDefinition) {
+        var maybeInterface = withDefinition.attributes()
+                .apply("implements")
+                .flatMap(Attribute::asNode);
+
+        return maybeInterface.map(interfaceType -> {
+            return withDefinition.mapNode("child", child -> {
+                return child.mapNodes("children", list -> {
+                    var element = new Node("implements").withNode("type", fromNameToInstanceType(interfaceType));
+                    return add(list, element);
+                });
+            });
+        }).orElse(withDefinition);
+    }
+
+    private static Node fromNameToInstanceType(Node interfaceType) {
+        if (interfaceType.is("symbol-name")) {
+            return interfaceType.retype("symbol");
+        }
+
+        if (interfaceType.is("generic-name")) {
+            var parent = interfaceType.attributes()
+                    .apply("parent")
+                    .flatMap(Attribute::asString)
+                    .orElseThrow();
+
+            var child = interfaceType.attributes()
+                    .apply("value")
+                    .flatMap(Attribute::asString)
+                    .orElseThrow();
+
+            return new Node("generic-type")
+                    .withNode("parent", new Node("symbol").withString("value", parent))
+                    .withNodeList("children", List.of(new Node("symbol").withString("value", child)));
+        }
+
+        return interfaceType;
+    }
+
+    private static Node generateFunctionDefinition(Node definition) {
+        if (definition.has("name")) {
+            return definition.mapOrSetStringList("modifiers", MagmaGenerator::generateFunctionModifiers, Collections::emptyList);
+        }
+
+        return definition;
+    }
+
+    private static List<String> generateFunctionModifiers(List<String> list) {
+        if (list.contains("class")) return list;
+
+        var copy = new ArrayList<String>();
+        if (list.contains("public")) {
+            copy.add("public");
+        }
+
+        copy.add("def");
+        return copy;
     }
 
     @Override

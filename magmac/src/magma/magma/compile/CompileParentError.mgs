@@ -14,4 +14,5 @@ export class def CompileParentError(String message, String context, Error_ paren
 	public def calculateDepth() : int => {
 		return 1+parent.calculateDepth();
 	}
+	implements Error_;
 }

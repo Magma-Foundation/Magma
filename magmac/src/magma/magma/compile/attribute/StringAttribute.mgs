@@ -9,4 +9,5 @@ export class def StringAttribute(String value)() => {
 	def escape() : String => {
 		return value.replace("\n", "\\n").replace("\t", "\\t");
 	}
+	implements Attribute;
 }

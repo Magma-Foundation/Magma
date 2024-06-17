@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 export class def MapAttributes(Map<String, Attribute> values)() => {
-	MapAttributes() : public => {
+	 MapAttributes() : public => {
 		this(Collections.emptyMap());
 	}
 	public def mapValue(key : String, factory : Factory<T>, mapper : (T) => T) : Attributes => {
@@ -55,4 +55,5 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 	public def isEmpty() : boolean => {
 		return values.isEmpty();
 	}
+	implements Attributes;
 }

@@ -101,7 +101,7 @@ export class def MembersSplitter() => {
 		return current.advance().tokens.stream().filter((token) => !token.isBlank()).toList();
 	}
 	class def State(List<String> tokens, StringBuilder buffer, int depth)() => {
-		State() : public => {
+		 State() : public => {
 			this(Collections.emptyList(), StringBuilder(), 0);
 		}
 		def advance() : State => {
@@ -125,4 +125,5 @@ export class def MembersSplitter() => {
 			return depth==1;
 		}
 	}
+	implements Splitter;
 }

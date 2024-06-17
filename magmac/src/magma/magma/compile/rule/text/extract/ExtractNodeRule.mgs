@@ -29,4 +29,5 @@ export class def ExtractNodeRule(String propertyKey, Rule child)() => {
 		let message = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

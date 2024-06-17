@@ -14,4 +14,5 @@ export class def CompileError(String message, String context)() => {
 	public def calculateDepth() : int => {
 		return 1;
 	}
+	implements Error_;
 }

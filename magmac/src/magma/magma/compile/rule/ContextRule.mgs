@@ -9,4 +9,5 @@ export class def ContextRule(String message, Rule child)() => {
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);
 	}
+	implements Rule;
 }

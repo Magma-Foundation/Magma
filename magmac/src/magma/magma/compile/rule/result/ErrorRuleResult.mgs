@@ -22,4 +22,5 @@ export class def ErrorRuleResult(Error_ e)() => {
 	public def withType(type : String) : RuleResult => {
 		return this;
 	}
+	implements RuleResult;
 }

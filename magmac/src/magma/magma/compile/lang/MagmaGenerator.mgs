@@ -143,21 +143,46 @@ export class def MagmaGenerator extends Generator() => {
 	}
 	def generateFromFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if(!node.is("function"))return Optional.empty();
-		let node1 = node.mapAttributes((attributes) => attributes.mapValue("definition", NodeAttribute.Factory, (definition) => {
-			if(!definition.attributes().has("name")){
-				return definition;
-			}
-			return definition.mapAttributes((attributes1) => attributes1.mapValue("modifiers", StringListAttribute.Factory, (list) => {
-				if(list.contains("class"))return list;
-				let copy = ArrayList();
-				if(list.contains("public")){
-					copy.add("public");
-				}
-				copy.add("def");
-				return copy;
-			}));
-		}));
+		let withDefinition = node.mapNode("definition", MagmaGenerator.generateFunctionDefinition);
+		let node1 = generateImplements(withDefinition);
 		return Optional.of(Tuple(node1, depth));
+	}
+	def generateImplements(withDefinition : Node) : Node => {
+		let maybeInterface = withDefinition.attributes().apply("implements").flatMap(Attribute.asNode);
+		return maybeInterface.map((interfaceType) => {
+			return withDefinition.mapNode("child", (child) => {
+				return child.mapNodes("children", (list) => {
+					let element = Node("implements").withNode("type", fromNameToInstanceType(interfaceType));
+					return add(list, element);
+				});
+			});
+		}).orElse(withDefinition);
+	}
+	def fromNameToInstanceType(interfaceType : Node) : Node => {
+		if(interfaceType.is("symbol-name")){
+			return interfaceType.retype("symbol");
+		}
+		if(interfaceType.is("generic-name")){
+			let parent = interfaceType.attributes().apply("parent").flatMap(Attribute.asString).orElseThrow();
+			let child = interfaceType.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+			return Node("generic-type").withNode("parent", Node("symbol").withString("value", parent)).withNodeList("children", List.of(Node("symbol").withString("value", child)));
+		}
+		return interfaceType;
+	}
+	def generateFunctionDefinition(definition : Node) : Node => {
+		if(definition.has("name")){
+			return definition.mapOrSetStringList("modifiers", MagmaGenerator.generateFunctionModifiers, Collections.emptyList);
+		}
+		return definition;
+	}
+	def generateFunctionModifiers(list : List<String>) : List<String> => {
+		if(list.contains("class"))return list;
+		let copy = ArrayList();
+		if(list.contains("public")){
+			copy.add("public");
+		}
+		copy.add("def");
+		return copy;
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("block")){

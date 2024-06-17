@@ -7,7 +7,7 @@ export class def OptionalRule() => {
 	private final child : Rule;
 	private final onEmpty : Rule;
 	private final orRule : OrRule;
-	OptionalRule(key : String, child : Rule, onEmpty : Rule) : public => {
+	 OptionalRule(key : String, child : Rule, onEmpty : Rule) : public => {
 		this=key;
 		this=child;
 		this=onEmpty;
@@ -26,4 +26,5 @@ export class def OptionalRule() => {
 		}
 	
 	}
+	implements Rule;
 }

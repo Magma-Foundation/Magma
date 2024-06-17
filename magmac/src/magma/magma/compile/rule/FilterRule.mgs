@@ -5,7 +5,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export class def FilterRule() => {
 	protected final child : Rule;
-	FilterRule(child : Rule) : public => {
+	 FilterRule(child : Rule) : public => {
 		this=child;
 	}
 	public def toNode(input : String) : RuleResult => {
@@ -17,4 +17,5 @@ export class def FilterRule() => {
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);
 	}
+	implements Rule;
 }

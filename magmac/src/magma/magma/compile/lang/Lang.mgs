@@ -174,11 +174,11 @@ export class def Lang() => {
 		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	}
 	def createNamePrototypeRule() : OrRule => {
-		let name = TypeRule("symbol", StripRule(ExtractStringRule("value")));
-		return OrRule(List.of(TypeRule("generic", FirstRule(StripRule(ExtractStringRule("value")), "<", RightRule(ExtractStringRule("child"), ">"))), name));
+		let name = TypeRule("symbol-name", StripRule(ExtractStringRule("value")));
+		return OrRule(List.of(TypeRule("generic-name", FirstRule(StripRule(ExtractStringRule("parent")), "<", RightRule(ExtractStringRule("value"), ">"))), name));
 	}
 	class def OperatorFinderRule extends SplitOnceRule() => {
-		OperatorFinderRule(value : Rule, slice : String) : public => {
+		 OperatorFinderRule(value : Rule, slice : String) : public => {
 			super(StripRule(ExtractNodeRule("leftRule", value)), slice, StripRule(ExtractNodeRule("right", value)));
 		}
 		def computeIndex(input : String) : Optional<Integer> => {

@@ -21,4 +21,5 @@ export class def RightRule(Rule child, String slice)() => {
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node).mapValue((inner) => inner+slice);
 	}
+	implements Rule;
 }

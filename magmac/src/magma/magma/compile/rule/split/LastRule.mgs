@@ -2,10 +2,11 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
 import java.util.Optional;
 export class def LastRule extends SplitOnceRule() => {
-	LastRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
+	 LastRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		super(leftRule, slice, rightRule);
 	}
 	def computeIndex(input : String) : Optional<Integer> => {
 		return Rules.wrapIndex(input.lastIndexOf(slice));
 	}
+	implements Rule;
 }

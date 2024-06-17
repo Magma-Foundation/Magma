@@ -13,7 +13,7 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 export class def ExtractRule() => {
 	protected final key : String;
-	ExtractRule(key : String) : public => {
+	 ExtractRule(key : String) : public => {
 		this=key;
 	}
 	protected abstract fromAttribute(attribute : Attribute) : Optional<String>;
@@ -32,4 +32,5 @@ export class def ExtractRule() => {
 		let message = format.formatted(key);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

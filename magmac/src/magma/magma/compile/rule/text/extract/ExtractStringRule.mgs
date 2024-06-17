@@ -5,7 +5,7 @@ import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;
 import java.util.Optional;
 export class def ExtractStringRule extends ExtractRule() => {
-	ExtractStringRule(key : String) : public => {
+	 ExtractStringRule(key : String) : public => {
 		super(key);
 	}
 	def fromAttribute(attribute : Attribute) : Optional<String> => {

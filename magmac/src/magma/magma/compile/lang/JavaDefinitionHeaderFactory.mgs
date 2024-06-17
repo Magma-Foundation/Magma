@@ -33,7 +33,7 @@ export class def JavaDefinitionHeaderFactory() => {
 	}
 	class def ModifiersRule extends ExtractStringListRule() => {
 		const MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
-		ModifiersRule() : public => {
+		 ModifiersRule() : public => {
 			super("modifiers", " ");
 		}
 		def qualify(child : String) : Optional<Error_> => {
@@ -51,5 +51,6 @@ export class def JavaDefinitionHeaderFactory() => {
 		public def split(input : String) : List<String> => {
 			return List.of(input.split("\n"));
 		}
+		implements Splitter;
 	}
 }

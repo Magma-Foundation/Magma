@@ -21,4 +21,5 @@ export class def EmptyRule(String name)() => {
 		}
 	
 	}
+	implements Rule;
 }
