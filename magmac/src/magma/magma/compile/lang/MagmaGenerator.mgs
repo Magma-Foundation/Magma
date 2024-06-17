@@ -4,6 +4,8 @@ import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
 		let oldModifiers = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
@@ -37,6 +39,17 @@ export class def MagmaGenerator extends Generator() => {
 	
 	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("definition")){
+			let modifiers = node.attributes().apply("modifiers").flatMap(Attribute.asStringList);
+			if(modifiers.isEmpty()||modifiers.get().isEmpty()){
+				return Tuple(node.remove("modifiers"), depth);
+			}
+			else
+			{
+				return Tuple(node, depth);
+			}
+		
+		}
 		if(node.is("constructor")){
 			return Tuple(node.retype("invocation"), depth);
 		}
@@ -47,13 +60,13 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node.retype("trait"), depth);
 		}
 		if(node.is("function")){
-			let node1 = node.mapAttributes( (attributes) => {
-				return attributes.mapValue("definition", NodeAttribute.Factory,  (definition) => {
+			let node1 = node.mapAttributes((attributes) => {
+				return attributes.mapValue("definition", NodeAttribute.Factory, (definition) => {
 					if(!definition.attributes().has("name")){
 						return definition;
 					}
-					return definition.mapAttributes( (attributes1) => {
-						return attributes1.mapValue("modifiers", StringListAttribute.Factory,  (list) => {
+					return definition.mapAttributes((attributes1) => {
+						return attributes1.mapValue("modifiers", StringListAttribute.Factory, (list) => {
 							if(list.contains("class"))return list;
 							let copy = ArrayList();
 							if(list.contains("public")){
@@ -68,7 +81,7 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node1, depth);
 		}
 		if(node.is("declaration")){
-			let withModifiers = node.mapNode("definition:scope",  (scope) => scope.mapNode("definition",  (definition) => removeImplicitType(attachModifiers(definition))));
+			let withModifiers = node.mapNode("definition:scope", (scope) => scope.mapNode("definition", (definition) => removeImplicitType(attachModifiers(definition))));
 			return Tuple(withModifiers, depth);
 		}
 		return Tuple(node, depth);

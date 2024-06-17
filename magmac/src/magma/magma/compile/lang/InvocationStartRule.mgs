@@ -11,7 +11,7 @@ class def InvocationStartRule extends SplitOnceRule() => {
 	}
 	def computeIndex(input : String) : Optional<Integer> => {
 		let depth = 0;
-		let queue = IntStream.range(0, input.length()).map( (i) => input.length()-i-1).mapToObj( (i) => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		let queue = IntStream.range(0, input.length()).map((i) => input.length()-i-1).mapToObj((i) => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty()){
 			let pop = queue.pop();
 			let i = pop.left();

@@ -11,7 +11,7 @@ export class def ClassSplitter extends Generator() => {
 		return Tuple(node.mapAttributes(ClassSplitter.mapBlockChildren), depth);
 	}
 	def mapBlockChildren(attributes : Attributes) : Attributes => {
-		return attributes.mapValue("children", NodeListAttribute.Factory,  (children) => children.stream().map(ClassSplitter.mapBlockChild).toList());
+		return attributes.mapValue("children", NodeListAttribute.Factory, (children) => children.stream().map(ClassSplitter.mapBlockChild).toList());
 	}
 	def mapBlockChild(child : Node) : Node => {
 		if(child.is("class")||child.is("record")){
@@ -23,7 +23,7 @@ export class def ClassSplitter extends Generator() => {
 			}
 			newModifiers.add("class");
 			newModifiers.add("def");
-			let name = oldAttributes.apply("name").flatMap(Attribute.asNode).flatMap( (className) => className.attributes().apply("value")).flatMap(Attribute.asString).orElseThrow();
+			let name = oldAttributes.apply("name").flatMap(Attribute.asNode).flatMap((className) => className.attributes().apply("value")).flatMap(Attribute.asString).orElseThrow();
 			let definition = Node("definition").withString("name", name).withStringList("modifiers", newModifiers).withNodeList("params", Collections.emptyList());
 			return child.retype("function").withNode("definition", definition);
 		}

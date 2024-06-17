@@ -25,7 +25,7 @@ export class def JavaNormalizer extends Generator() => {
 			return Tuple(withDefinition, depth);
 		}
 		if(node.is("declaration")){
-			let withModifiers = node.mapAttributes( (attributes) => {
+			let withModifiers = node.mapAttributes((attributes) => {
 				let list = attributes.apply("modifiers").flatMap(Attribute.asStringList).orElse(Collections.emptyList());
 				let copy = ArrayList();
 				if(list.contains("final")){
@@ -36,7 +36,7 @@ export class def JavaNormalizer extends Generator() => {
 					copy.add("let");
 				}
 				return attributes.with("modifiers", StringListAttribute(copy));
-			}).mapAttributes( (attributes) => {
+			}).mapAttributes((attributes) => {
 				let type = attributes.apply("type").flatMap(Attribute.asNode);
 				if(type.isEmpty())return attributes;
 				let inner = type.get();

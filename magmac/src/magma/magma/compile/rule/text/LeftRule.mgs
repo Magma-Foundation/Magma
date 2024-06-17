@@ -18,6 +18,6 @@ export class def LeftRule(String slice, Rule child)() => {
 	
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return child.fromNode(node).mapValue( (inner) => slice+inner);
+		return child.fromNode(node).mapValue((inner) => slice+inner);
 	}
 }

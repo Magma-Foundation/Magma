@@ -98,7 +98,7 @@ export class def MembersSplitter() => {
 			}
 		
 		}
-		return current.advance().tokens.stream().filter( (token) => !token.isBlank()).toList();
+		return current.advance().tokens.stream().filter((token) => !token.isBlank()).toList();
 	}
 	class def State(List<String> tokens, StringBuilder buffer, int depth)() => {
 		State() : public => {

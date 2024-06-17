@@ -7,6 +7,8 @@ import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class MagmaGenerator extends Generator {
     private static Node attachModifiers(Node definition) {
@@ -49,6 +51,18 @@ public class MagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if(node.is("definition")) {
+            var modifiers = node.attributes()
+                    .apply("modifiers")
+                    .flatMap(Attribute::asStringList);
+
+            if(modifiers.isEmpty() || modifiers.get().isEmpty()) {
+                return new Tuple<>(node.remove("modifiers"), depth);
+            } else {
+                return new Tuple<>(node, depth);
+            }
+        }
+
         if (node.is("constructor")) {
             return new Tuple<>(node.retype("invocation"), depth);
         }

@@ -19,7 +19,7 @@ export class def TypeRule(String type, Rule child)() => {
 			let message = String.format(FORMAT, type, node.type());
 			return Err(CompileError(message, node.toString()));
 		}
-		return child.fromNode(node).mapErr( (err) => {
+		return child.fromNode(node).mapErr((err) => {
 			let format = "Cannot generate '%s' from node.";
 			let message = format.formatted(type);
 			return CompileParentError(message, node.toString(), err);

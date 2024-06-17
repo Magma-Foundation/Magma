@@ -31,7 +31,7 @@ export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() =>
 				
 			;
 			}
-			let optional = leftResult.findAttributes().flatMap( (leftAttributes) => rightResult.findAttributes().map( (rightAttributes) => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			let optional = leftResult.findAttributes().flatMap((leftAttributes) => rightResult.findAttributes().map((rightAttributes) => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if(optional.isPresent()){
 				return optional.get();
 			}
@@ -47,6 +47,6 @@ export class def BackwardsRule(Rule leftRule, String slice, Rule rightRule)() =>
 	}
 	def findAllIndexesReverse(input : String) : List<Integer>
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return leftRule.fromNode(node).flatMapValue( (leftResult) => rightRule.fromNode(node).mapValue( (rightResult) => leftResult+slice+rightResult));
+		return leftRule.fromNode(node).flatMapValue((leftResult) => rightRule.fromNode(node).mapValue((rightResult) => leftResult+slice+rightResult));
 	}
 }
