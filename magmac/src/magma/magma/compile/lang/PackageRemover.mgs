@@ -1,0 +1,11 @@
+import magma.api.Tuple;
+import magma.compile.attribute.NodeListAttribute;
+import magma.compile.rule.Node;
+export class def PackageRemover extends Generator() => {
+	def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(!node.is("block"))return Tuple(node, depth);
+		return Tuple(node.mapAttributes( (attributes) => {attributes.mapValue("children", NodeListAttribute.Factory,  (children) => {
+			return children.stream().filter( (child) => {!child.is("package");}).toList();
+		});}), depth);
+	}
+}

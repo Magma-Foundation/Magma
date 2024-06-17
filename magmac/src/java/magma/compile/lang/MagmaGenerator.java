@@ -26,7 +26,6 @@ public class MagmaGenerator extends Generator {
     }
 
     private static Node removeImplicitType(Node definition) {
-        Node maybeWithType;
         var type = definition.attributes()
                 .apply("type")
                 .flatMap(Attribute::asNode)
@@ -39,14 +38,13 @@ public class MagmaGenerator extends Generator {
                     .orElseThrow();
 
             if (value.equals("var")) {
-                maybeWithType = definition.remove("type");
+                return definition.remove("type");
             } else {
-                maybeWithType = definition;
+                return definition;
             }
         } else {
-            maybeWithType = definition;
+            return definition;
         }
-        return maybeWithType;
     }
 
     @Override
@@ -55,11 +53,11 @@ public class MagmaGenerator extends Generator {
             return new Tuple<>(node.retype("invocation"), depth);
         }
 
-        if(node.is("record")) {
+        if (node.is("record")) {
             return new Tuple<>(node.retype("function"), depth);
         }
 
-        if(node.is("interface")) {
+        if (node.is("interface")) {
             return new Tuple<>(node.retype("trait"), depth);
         }
 

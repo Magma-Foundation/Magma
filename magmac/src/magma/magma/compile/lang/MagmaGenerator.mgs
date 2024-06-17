@@ -1,0 +1,81 @@
+import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.NodeAttribute;
+import magma.compile.attribute.StringListAttribute;
+import magma.compile.rule.Node;
+import java.util.ArrayList;
+export class def MagmaGenerator extends Generator() => {
+	def attachModifiers(definition : Node) : Node => {
+		let oldModifiers=definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
+		let copy=ArrayList();
+		if(oldModifiers.contains("final")){
+			copy.add("const");
+		}
+		else
+		{
+			copy.add("let");
+		}
+		return definition.withStringList("modifiers", copy);
+	}
+	def removeImplicitType(definition : Node) : Node => {
+		let type=definition.attributes().apply("type").flatMap(Attribute.asNode).orElseThrow();
+		if(type.is("symbol")){
+			let value=type.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+			if(value.equals("var")){
+				return definition.remove("type");
+			}
+			else
+			{
+				return definition;
+			}
+		
+		}
+		else
+		{
+			return definition;
+		}
+	
+	}
+	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("constructor")){
+			return Tuple(node.retype("invocation"), depth);
+		}
+		if(node.is("record")){
+			return Tuple(node.retype("function"), depth);
+		}
+		if(node.is("interface")){
+			return Tuple(node.retype("trait"), depth);
+		}
+		if(node.is("function")){
+			let node1=node.mapAttributes( (attributes) => {
+				return attributes.mapValue("definition", NodeAttribute.Factory,  (definition) => {
+					if(!definition.attributes().has("name")){
+						return definition;
+					}
+					return definition.mapAttributes( (attributes1) => {
+						return attributes1.mapValue("modifiers", StringListAttribute.Factory,  (list) => {
+							if(list.contains("class"))return list;
+							let copy=ArrayList();
+							if(list.contains("public")){
+								copy.add("public");
+							}
+							copy.add("def");
+							return copy;
+						});
+					});
+				});
+			});
+			return Tuple(node1, depth);
+		}
+		if(node.is("declaration")){
+			let node1=node.mapAttributes( (attributes) => {
+				return attributes.mapValue("definition", NodeAttribute.Factory,  (definition) => {
+					let withModifiers=attachModifiers(definition);
+					return removeImplicitType(withModifiers);
+				});
+			});
+			return Tuple(node1, depth);
+		}
+		return Tuple(node, depth);
+	}
+}

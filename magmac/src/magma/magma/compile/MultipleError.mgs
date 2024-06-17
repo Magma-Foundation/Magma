@@ -1,0 +1,21 @@
+import java.util.List;
+import java.util.Optional;
+export class def MultipleError() => {
+	
+	private final errors : List<Error_>;
+	MultipleError(errors : List<Error_>) : public => {
+		this=errors;
+	}
+	public def findMessage() : Optional<String> => {
+		return Optional.empty();
+	}
+	public def findCauses() : Optional<List<Error_>> => {
+		return Optional.of(errors);
+	}
+	public def findContext() : Optional<String> => {
+		return Optional.empty();
+	}
+	public def calculateDepth() : int => {
+		return 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
+	}
+}
