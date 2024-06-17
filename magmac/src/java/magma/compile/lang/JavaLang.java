@@ -165,7 +165,7 @@ public class JavaLang {
                 new FirstRule(caller, "<", new ExtractStringRule("temp")),
                 caller
         ));
-        var before = new RightRule(new InvocationStart(withGenerics, arguments), ")");
+        var before = new RightRule(new InvocationStartRule(withGenerics, arguments), ")");
         var child = new OrRule(List.of(
                 new FirstRule(new StripRule(before), "{", new RightRule(Lang.createBlock(classMember), "}")),
                 before

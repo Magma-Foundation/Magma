@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-class InvocationStart extends SplitOnceRule {
-    public InvocationStart(Rule caller, Rule arguments) {
+class InvocationStartRule extends SplitOnceRule {
+    public InvocationStartRule(Rule caller, Rule arguments) {
         super(caller, "(", arguments);
     }
 
@@ -28,11 +28,18 @@ class InvocationStart extends SplitOnceRule {
             var i = pop.left();
             var c = pop.right();
 
-
-
             if (c == '\"') {
                 while (!queue.isEmpty()) {
                     var next = queue.pop().right();
+
+                    if(next == '\"') {
+                        if (!queue.isEmpty()) {
+                            var after = queue.peek().right();
+                            if(after == '\\') {
+                                continue;
+                            }
+                        }
+                    }
 
                     if (next == '\"') {
                         break;

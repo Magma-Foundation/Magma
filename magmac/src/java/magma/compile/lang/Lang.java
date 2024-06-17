@@ -90,7 +90,7 @@ public class Lang {
         ));
 
         var caller = new ExtractNodeRule("caller", new StripRule(value));
-        return new TypeRule("invocation", new RightRule(new InvocationStart(caller, arguments), ")"));
+        return new TypeRule("invocation", new RightRule(new InvocationStartRule(caller, arguments), ")"));
     }
 
     static TypeRule createCommentRule() {

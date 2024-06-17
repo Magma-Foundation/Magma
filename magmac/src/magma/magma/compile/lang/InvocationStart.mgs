@@ -20,6 +20,16 @@ class def InvocationStart extends SplitOnceRule() => {
 				while(!queue.isEmpty()){
 					let next=queue.pop().right();
 					if(next=='\"'){
+						if(!queue.isEmpty()){
+							let after=queue.peek().right();
+							if(after=='\\'){
+								break
+								
+							;
+							}
+						}
+					}
+					if(next=='\"'){
 						break
 						
 					;
