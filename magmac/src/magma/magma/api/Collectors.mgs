@@ -5,14 +5,8 @@ export class def Collectors() => {
 	}
 	public def joining(final delimiter : String) : Collector<String, Optional<String>> => {
 		return Collector();
-		
-		
-	;
 	}
 	public def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
 		return Collector();
-		
-		
-	;
 	}
 }

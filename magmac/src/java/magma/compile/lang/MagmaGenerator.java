@@ -73,6 +73,14 @@ public class MagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if(node.is("block")) {
+            return new Tuple<>(node.mapNodes("children", list -> {
+                return list.stream()
+                        .filter(child -> !child.is("empty"))
+                        .toList();
+            }), depth);
+        }
+
         var newNode = getNodeIntegerTuple(node, depth);
         if (newNode != null) return newNode;
 
