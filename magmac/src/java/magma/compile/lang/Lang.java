@@ -71,13 +71,10 @@ public class Lang {
     private static TypeRule createFunctionType(LazyRule type) {
         var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", type);
         var wrappedParams = new LeftRule("(", new RightRule(params, ")"));
-
-        var param = new ExtractNodeRule("param", type);
-        var maybeParam = new OptionalRule("param", param, new LeftRule("()", new EmptyRule("param")));
-        var anyParams = new OptionalRule("params", wrappedParams, maybeParam);
+        var maybeParams = new OptionalRule("params", wrappedParams, new EmptyRule("params"));
 
         var returns = new ExtractNodeRule("returns", type);
-        return new TypeRule("function-type", new FirstRule(anyParams, " => ", returns));
+        return new TypeRule("function-type", new FirstRule(maybeParams, " => ", returns));
     }
 
     static TypeRule createTryRule(Rule statement) {

@@ -14,5 +14,5 @@ export struct Attribute {
 	;
 	;
 	;
-	const format : int => String;
+	const format : (int) => String;
 }

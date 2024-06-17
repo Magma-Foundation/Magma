@@ -109,8 +109,6 @@ public class MagmaGenerator extends Generator {
 
         if (params.isEmpty()) {
             return returns;
-        } else if (params.size() == 1) {
-            return returns.withNode("param", params.get(0));
         } else {
             return returns.withNodeList("params", params);
         }
