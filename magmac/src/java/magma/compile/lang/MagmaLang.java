@@ -36,6 +36,7 @@ public class MagmaLang {
         )));
 
         statement.setRule(new OrRule(List.of(
+                Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),

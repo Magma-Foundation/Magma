@@ -3,3 +3,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * The Node interface provides methods to manipulate key-value pairs
+ * where keys are strings and values are attributes. It supports
+ * adding attributes, applying attributes, merging nodes, and
+ * streaming entries.
+ */
+

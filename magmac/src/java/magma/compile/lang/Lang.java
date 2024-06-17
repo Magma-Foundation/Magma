@@ -230,4 +230,8 @@ public class Lang {
     static TypeRule createDefinitionRule(Rule definition) {
         return new TypeRule("definition", new RightRule(definition, ";"));
     }
+
+    static TypeRule createBlockCommentRule() {
+        return new TypeRule("block-comment", new StripRule(new LeftRule("/*", new RightRule(new ExtractStringRule("value"), "*/"))));
+    }
 }

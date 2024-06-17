@@ -33,7 +33,7 @@ public class JavaLang {
                 createContentRule("class", createContentMember()),
                 createContentRule("interface", createContentMember()),
                 createContentRule("record", createContentMember()),
-                new TypeRule("block-comment", new StripRule(new LeftRule("/*", new RightRule(new ExtractStringRule("value"), "*/"))))
+                Lang.createBlockCommentRule()
         ));
     }
 
@@ -81,7 +81,8 @@ public class JavaLang {
                 methodRule,
                 Lang.createDeclarationRule(definition, value),
                 Lang.createDefinitionRule(definition),
-                Lang.createEmptyStatementRule()
+                Lang.createEmptyStatementRule(),
+                Lang.createBlockCommentRule()
         )));
         return classMember;
     }
