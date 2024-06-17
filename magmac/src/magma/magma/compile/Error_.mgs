@@ -1,8 +1,8 @@
 import java.util.List;
 import java.util.Optional;
 export struct Error_ {
-	const findMessage :  => Optional<String>;
-	const findCauses :  => Optional<List<Error_>>;
-	const findContext :  => Optional<String>;
-	const calculateDepth :  => int;
+	const findMessage : () => Optional<String>;
+	const findCauses : () => Optional<List<Error_>>;
+	const findContext : () => Optional<String>;
+	const calculateDepth : () => int;
 }

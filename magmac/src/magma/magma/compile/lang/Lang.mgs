@@ -53,7 +53,7 @@ export class def Lang() => {
 	def createFunctionType(type : LazyRule) : TypeRule => {
 		let params = SplitMultipleRule(ParamSplitter(), ", ", "params", type);
 		let wrappedParams = LeftRule("(", RightRule(params, ")"));
-		let maybeParams = OptionalRule("params", wrappedParams, EmptyRule("params"));
+		let maybeParams = OptionalRule("params", wrappedParams, LeftRule("()", EmptyRule("params")));
 		let returns = ExtractNodeRule("returns", type);
 		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
 	}

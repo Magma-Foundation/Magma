@@ -1,4 +1,4 @@
 export struct Collector<T, C> {
-	const createInitial :  => C;
+	const createInitial : () => C;
 	const fold : (C, T) => C;
 }

@@ -18,10 +18,10 @@ export struct Attributes {
 	;
 	const merge : (Attributes) => Attributes;
 	;
-	const streamEntries :  => Stream<Tuple<String, Attribute>>;
+	const streamEntries : () => Stream<Tuple<String, Attribute>>;
 	const mapValues : ((Attribute) => Attribute) => Attributes;
 	const format : (int) => String;
 	const remove : (String) => Attributes;
 	const has : (String) => boolean;
-	const isEmpty :  => boolean;
+	const isEmpty : () => boolean;
 }
