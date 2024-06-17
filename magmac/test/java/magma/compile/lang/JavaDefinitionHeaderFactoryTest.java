@@ -3,7 +3,10 @@ package magma.compile.lang;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.StringAttribute;
+import magma.compile.attribute.StringListAttribute;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,6 +21,22 @@ class JavaDefinitionHeaderFactoryTest {
                 .attributes()
                 .apply(propertyKey)
                 .orElseThrow());
+    }
+
+
+
+    private static void assertParseModifiers(String input, List<String> list) {
+        assertParse(input, "modifiers", new StringListAttribute(list));
+    }
+
+    @Test
+    void oneModifier() {
+        assertParseModifiers("public var test", List.of("public"));
+    }
+
+    @Test
+    void twoModifiers() {
+        assertParseModifiers("public static var test", List.of("public", "static"));
     }
 
     @Test
