@@ -46,7 +46,8 @@ public class JavaDefinitionHeaderFactory {
                 "static",
                 "final",
                 "private",
-                "default"
+                "default",
+                "protected"
         );
 
         public ModifiersRule() {
