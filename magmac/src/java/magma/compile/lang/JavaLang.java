@@ -126,11 +126,7 @@ public class JavaLang {
     }
 
     private static OrRule createContentMemberRule() {
-        var name = new TypeRule("symbol", new StripRule(new ExtractStringRule("value")));
-        var prototype = new OrRule(List.of(
-                new TypeRule("generic", new FirstRule(new StripRule(new ExtractStringRule("value")), "<", new RightRule(new ExtractStringRule("child"), ">"))),
-                name
-        ));
+        var prototype = Lang.createNamePrototypeRule();
 
         var leftRule1 = new ExtractNodeRule("name", prototype);
         return new OrRule(List.of(
@@ -180,7 +176,7 @@ public class JavaLang {
         return new TypeRule("lambda", new FirstRule(left, "->", right));
     }
 
-    private static TypeRule createConstructorRule(LazyRule value, LazyRule classMember) {
+    private static Rule createConstructorRule(Rule value, Rule classMember) {
         var arguments = new OrRule(List.of(
                 new SplitMultipleRule(new ParamSplitter(), ", ", "arguments", new StripRule(value))
         ));
@@ -190,11 +186,13 @@ public class JavaLang {
                 new FirstRule(caller, "<", new ExtractStringRule("temp")),
                 caller
         ));
+
         var before = new RightRule(new InvocationStartRule(withGenerics, arguments), ")");
         var child = new OrRule(List.of(
                 new FirstRule(new StripRule(before), "{", new RightRule(Lang.createBlock(classMember), "}")),
                 before
         ));
+
         return new TypeRule("constructor", new LeftRule("new ", child));
     }
 

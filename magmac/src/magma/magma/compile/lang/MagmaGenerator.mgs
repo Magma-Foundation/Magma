@@ -61,7 +61,7 @@ export class def MagmaGenerator extends Generator() => {
 			return Tuple(node.retype("function"), depth);
 		}
 		if(node.is("interface")){
-			return Tuple(node.retype("trait"), depth);
+			return Tuple(node.retype("struct"), depth);
 		}
 		if(node.is("function")){
 			let node1 = node.mapAttributes((attributes) => {

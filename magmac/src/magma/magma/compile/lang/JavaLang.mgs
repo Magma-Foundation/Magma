@@ -62,8 +62,7 @@ export class def JavaLang() => {
 		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
 	}
 	def createContentMemberRule() : OrRule => {
-		let name = TypeRule("symbol", StripRule(ExtractStringRule("value")));
-		let prototype = OrRule(List.of(TypeRule("generic", FirstRule(StripRule(ExtractStringRule("value")), "<", RightRule(ExtractStringRule("child"), ">"))), name));
+		let prototype = Lang.createNamePrototypeRule();
 		let leftRule1 = ExtractNodeRule("name", prototype);
 		return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("interface", prototype)), leftRule1));
 	}
@@ -79,7 +78,7 @@ export class def JavaLang() => {
 		let right = StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));
 	}
-	def createConstructorRule(value : LazyRule, classMember : LazyRule) : TypeRule => {
+	def createConstructorRule(value : Rule, classMember : Rule) : Rule => {
 		let arguments = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
 		let caller = ExtractNodeRule("caller", value);
 		let withGenerics = OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));

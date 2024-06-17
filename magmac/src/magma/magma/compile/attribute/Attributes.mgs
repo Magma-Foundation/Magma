@@ -9,4 +9,18 @@ import java.util.stream.Stream;
  * adding attributes, applying attributes, merging nodes, and
  * streaming entries.
  */
-
+struct Attributes {
+	mapValue(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes;
+	;
+	with(key : String, value : Attribute) : Attributes;
+	;
+	apply(key : String) : Optional<Attribute>;
+	;
+	merge(other : Attributes) : Attributes;
+	;
+	streamEntries() : Stream<Tuple<String, Attribute>>;
+	mapValues(mapper : Function<Attribute, Attribute>) : Attributes;
+	format(depth : int) : String;
+	remove(key : String) : Attributes;
+	has(name : String) : boolean;
+}

@@ -1,1 +1,4 @@
-
+struct Collector<T, C> {
+	createInitial() : C;
+	fold(current : C, next : T) : C;
+}

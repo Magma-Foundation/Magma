@@ -234,6 +234,14 @@ public class Lang {
         return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule()), ";")));
     }
 
+    static OrRule createNamePrototypeRule() {
+        var name = new TypeRule("symbol", new StripRule(new ExtractStringRule("value")));
+        return new OrRule(List.of(
+                new TypeRule("generic", new FirstRule(new StripRule(new ExtractStringRule("value")), "<", new RightRule(new ExtractStringRule("child"), ">"))),
+                name
+        ));
+    }
+
     private static class OperatorFinderRule extends SplitOnceRule {
         public OperatorFinderRule(Rule value, String slice) {
             super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));

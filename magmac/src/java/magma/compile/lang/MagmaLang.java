@@ -60,7 +60,7 @@ public class MagmaLang {
 
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
                 Lang.createEmptyStatementRule(),
-                new TypeRule("trait", new EmptyRule()),
+                createStructRule(definition),
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
@@ -71,6 +71,12 @@ public class MagmaLang {
         return Lang.createBlock(new OrRule(List.of(
                 Lang.createImportRule(Lang.createNamespaceRule()),
                 statement)));
+    }
+
+    private static TypeRule createStructRule(Rule definition) {
+        var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
+        var child = new FirstRule(new ExtractNodeRule("name", Lang.createNamePrototypeRule()), " {", new RightRule(children, "}"));
+        return new TypeRule("struct", new LeftRule("struct ", child));
     }
 
     private static Rule createDefinitionRule() {
@@ -104,7 +110,7 @@ public class MagmaLang {
         var content = new OrRule(List.of(asValue, asBlock));
 
         var withDefinition = new FirstRule(definition, " => ", content);
-        var withoutDefinition = new LeftRule("() => " , content);
+        var withoutDefinition = new LeftRule("() => ", content);
 
         return new TypeRule("function", new OrRule(List.of(withDefinition, withoutDefinition)));
     }

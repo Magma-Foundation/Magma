@@ -1,2 +1,4 @@
 import java.util.List;
-
+struct Splitter {
+	split(input : String) : List<String>;
+}

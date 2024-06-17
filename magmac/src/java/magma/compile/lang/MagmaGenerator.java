@@ -81,7 +81,7 @@ public class MagmaGenerator extends Generator {
         }
 
         if (node.is("interface")) {
-            return new Tuple<>(node.retype("trait"), depth);
+            return new Tuple<>(node.retype("struct"), depth);
         }
 
         if (node.is("function")) {
