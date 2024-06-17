@@ -10,17 +10,17 @@ import java.util.stream.Stream;
  * streaming entries.
  */
 export struct Attributes {
-	mapValue(key : String, factory : Factory<T>, mapper : T => T) : Attributes;
+	mapValue;
 	;
-	with(key : String, value : Attribute) : Attributes;
+	with;
 	;
-	apply(key : String) : Optional<Attribute>;
+	apply;
 	;
-	merge(other : Attributes) : Attributes;
+	merge;
 	;
-	streamEntries() : Stream<Tuple<String, Attribute>>;
-	mapValues(mapper : Attribute => Attribute) : Attributes;
-	format(depth : int) : String;
-	remove(key : String) : Attributes;
-	has(name : String) : boolean;
+	streamEntries : () => Stream<Tuple<String, Attribute>>;
+	mapValues;
+	format;
+	remove;
+	has;
 }

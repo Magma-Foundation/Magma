@@ -11,7 +11,7 @@ export class def Node(String type, Attributes attributes)() => {
 	Node(type : String) : public => {
 		this(type, MapAttributes());
 	}
-	public def mapNode(key : String, nodeNodeFunction : Node => Node) : Node => {
+	public def mapNode(key : String, nodeNodeFunction : (Node) => Node) : Node => {
 		return mapAttributes((attributes) => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));
 	}
 	public def withString(key : String, value : String) : Node => {
@@ -32,7 +32,7 @@ export class def Node(String type, Attributes attributes)() => {
 	public def is(type : String) : boolean => {
 		return this.type.equals(type);
 	}
-	public def mapAttributes(mapper : Attributes => Attributes) : Node => {
+	public def mapAttributes(mapper : (Attributes) => Attributes) : Node => {
 		return Node(type, mapper.apply(attributes));
 	}
 	public def retype(type : String) : Node => {
@@ -55,5 +55,8 @@ export class def Node(String type, Attributes attributes)() => {
 	}
 	public def has(child : String) : boolean => {
 		return attributes.has(child);
+	}
+	public def mapNodes(key : String, mapper : (List<Node>) => List<Node>) : Node => {
+		return mapAttributes((attributes) => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
 	}
 }

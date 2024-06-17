@@ -76,4 +76,8 @@ public record Node(String type, Attributes attributes) {
     public boolean has(String child) {
         return attributes.has(child);
     }
+
+    public Node mapNodes(String key, Function<List<Node>, List<Node>> mapper) {
+        return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, mapper));
+    }
 }

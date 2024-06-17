@@ -1,7 +1,7 @@
 import java.util.Optional;
 import java.util.function.Function;
 export struct Stream<T> {
-	head() : Optional<T>;
-	map(mapper : T => R) : Stream<R>;
-	collect(collector : Collector<T, C>) : C;
+	head : () => Optional<T>;
+	map;
+	collect;
 }

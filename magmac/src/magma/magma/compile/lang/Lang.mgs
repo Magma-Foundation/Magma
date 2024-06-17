@@ -46,8 +46,14 @@ export class def Lang() => {
 		let type = LazyRule();
 		let children = SplitMultipleRule(ParamSplitter(), ", ", "children", StripRule(type));
 		let generic = TypeRule("generic-type", FirstRule(ExtractNodeRule("parent", type), "<", RightRule(children, ">")));
-		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("symbol", SymbolRule(ExtractStringRule("value"))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), TypeRule("function-type", FirstRule(ExtractNodeRule("from", type), " => ", ExtractNodeRule("to", type))))));
+		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("symbol", SymbolRule(ExtractStringRule("value"))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));
 		return type;
+	}
+	def createFunctionType(type : LazyRule) : TypeRule => {
+		let params = SplitMultipleRule(ParamSplitter(), ", ", "params", type);
+		let wrappedParams = LeftRule("(", RightRule(params, ")"));
+		let returns = ExtractNodeRule("returns", type);
+		return TypeRule("function-type", FirstRule(wrappedParams, " => ", returns));
 	}
 	def createTryRule(statement : Rule) : TypeRule => {
 		return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));

@@ -10,7 +10,7 @@ export class def ErrorRuleResult(Error_ e)() => {
 	public def findError() : Optional<Error_> => {
 		return Optional.of(e);
 	}
-	public def mapErr(mapper : Error_ => Error_) : RuleResult => {
+	public def mapErr(mapper : (Error_) => Error_) : RuleResult => {
 		return ErrorRuleResult(mapper.apply(e));
 	}
 	public def findAttributes() : Optional<Attributes> => {

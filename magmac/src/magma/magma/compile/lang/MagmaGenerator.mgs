@@ -4,6 +4,9 @@ import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Function;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
 		let oldModifiers = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
@@ -38,32 +41,65 @@ export class def MagmaGenerator extends Generator() => {
 		}
 	
 	}
+	def getNodeNodeFunction() : (Node) => Node => {
+		return (child) => {
+			if(!child.is("definition"))return child;
+			let paramsOptional = child.attributes().apply("params").flatMap(Attribute.asNodeList);
+			if(paramsOptional.isEmpty())return child;
+			let params = paramsOptional.get();
+			return child.remove("params").mapNode("type", (returnType) => Node("function-type").withNodeList("params", params).withNode("returns", returnType));
+		};
+		
+		
+	;
+	}
 	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		if(node.is("generic-type")){
-			let parent = node.attributes().apply("parent").flatMap(Attribute.asNode).orElseThrow();
-			if(parent.is("symbol")){
-				let value = parent.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
-				if(value.equals("Function")){
-					let children = node.attributes().apply("children").flatMap(Attribute.asNodeList).orElseThrow();
-					let first = children.get(0);
-					let second = children.get(1);
-					let newNode = Node("function-type").withNode("from", first).withNode("to", second);
-					return Tuple(newNode, depth);
+		let newNode = getNodeIntegerTuple(node, depth);
+		if(newNode!=null)return newNode;
+		let definition = getIntegerTuple(node, depth);
+		if(definition!=null)return definition;
+		let definition1 = getTuple(node, depth);
+		if(definition1!=null)return definition1;
+		let removed = getNodeIntegerTuple1(node, depth);
+		if(removed!=null)return removed;
+		let node2 = getNodeIntegerTuple2(node, depth);
+		if(node2!=null)return node2;
+		let node3 = getNodeIntegerTuple3(node, depth);
+		if(node3!=null)return node3;
+		let struct = generateFromInterface(node, depth);
+		if(struct.isPresent())return struct.get();
+		let node1 = generateFromFunction(node, depth);
+		return node1.orElseGet(() => Tuple(node, depth));
+	}
+	def generateFromInterface(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
+		if(!node.is("interface")){
+			return Optional.empty();
+		}
+		let struct = node.retype("struct").mapAttributes((attribute) => {
+			let withModifiers = attribute.mapValue("modifiers", StringListAttribute.Factory, (list) => {
+				let newList = ArrayList();
+				if(list.contains("public")){
+					newList.add("export");
 				}
-			}
-		}
-		if(node.is("function")){
-			if(!node.has("child")){
-				let definition = node.attributes().apply("definition").flatMap(Attribute.asNode).orElseThrow();
-				return Tuple(definition, depth);
-			}
-		}
-		if(node.is("declaration")){
-			let definition = node.mapNode("definition:scope", (scope) => {
-				return scope.mapNode("definition", MagmaGenerator.attachModifiers);
+				return newList;
 			});
-			return Tuple(definition, depth);
+			return withModifiers.mapValue("child", NodeAttribute.Factory, (interfaceChild) => interfaceChild.mapNodes("children", (children) => children.stream().map(getNodeNodeFunction()).toList()));
+		});
+		return Optional.of(Tuple(struct, depth));
+	}
+	def getNodeIntegerTuple3(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("record")){
+			return Tuple(node.retype("function"), depth);
 		}
+		return null;
+	}
+	def getNodeIntegerTuple2(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("constructor")){
+			return Tuple(node.retype("invocation"), depth);
+		}
+		return null;
+	}
+	def getNodeIntegerTuple1(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("definition")){
 			let removed = removeImplicitType(node);
 			let modifiers = removed.attributes().apply("modifiers").flatMap(Attribute.asStringList);
@@ -76,45 +112,58 @@ export class def MagmaGenerator extends Generator() => {
 			}
 		
 		}
-		if(node.is("constructor")){
-			return Tuple(node.retype("invocation"), depth);
-		}
-		if(node.is("record")){
-			return Tuple(node.retype("function"), depth);
-		}
-		if(node.is("interface")){
-			let struct = node.retype("struct").mapAttributes((attribute) => {
-				return attribute.mapValue("modifiers", StringListAttribute.Factory, (list) => {
-					let newList = ArrayList();
-					if(list.contains("public")){
-						newList.add("export");
-					}
-					return newList;
-				});
+		return null;
+	}
+	def getTuple(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("declaration")){
+			let definition = node.mapNode("definition:scope", (scope) => {
+				return scope.mapNode("definition", MagmaGenerator.attachModifiers);
 			});
-			return Tuple(struct, depth);
+			return Tuple(definition, depth);
 		}
+		return null;
+	}
+	def getIntegerTuple(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("function")){
-			let node1 = node.mapAttributes((attributes) => {
-				return attributes.mapValue("definition", NodeAttribute.Factory, (definition) => {
-					if(!definition.attributes().has("name")){
-						return definition;
-					}
-					return definition.mapAttributes((attributes1) => {
-						return attributes1.mapValue("modifiers", StringListAttribute.Factory, (list) => {
-							if(list.contains("class"))return list;
-							let copy = ArrayList();
-							if(list.contains("public")){
-								copy.add("public");
-							}
-							copy.add("def");
-							return copy;
-						});
-					});
-				});
-			});
-			return Tuple(node1, depth);
+			if(!node.has("child")){
+				let definition = node.attributes().apply("definition").flatMap(Attribute.asNode).orElseThrow();
+				return Tuple(definition, depth);
+			}
 		}
-		return Tuple(node, depth);
+		return null;
+	}
+	def getNodeIntegerTuple(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("generic-type")){
+			let parent = node.attributes().apply("parent").flatMap(Attribute.asNode).orElseThrow();
+			if(parent.is("symbol")){
+				let value = parent.attributes().apply("value").flatMap(Attribute.asString).orElseThrow();
+				if(value.equals("Function")){
+					let children = node.attributes().apply("children").flatMap(Attribute.asNodeList).orElseThrow();
+					let first = children.get(0);
+					let second = children.get(1);
+					let newNode = Node("function-type").withNodeList("params", Collections.singletonList(first)).withNode("returns", second);
+					return Tuple(newNode, depth);
+				}
+			}
+		}
+		return null;
+	}
+	def generateFromFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
+		if(!node.is("function"))return Optional.empty();
+		let node1 = node.mapAttributes((attributes) => attributes.mapValue("definition", NodeAttribute.Factory, (definition) => {
+			if(!definition.attributes().has("name")){
+				return definition;
+			}
+			return definition.mapAttributes((attributes1) => attributes1.mapValue("modifiers", StringListAttribute.Factory, (list) => {
+				if(list.contains("class"))return list;
+				let copy = ArrayList();
+				if(list.contains("public")){
+					copy.add("public");
+				}
+				copy.add("def");
+				return copy;
+			}));
+		}));
+		return Optional.of(Tuple(node1, depth));
 	}
 }

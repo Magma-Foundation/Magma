@@ -55,7 +55,7 @@ public final class SplitMultipleRule implements Rule {
 
     private Result<String, Error_> joinNodes(List<Node> list) {
         return Streams.fromNativeList(list)
-                .map(childRule::fromNode)
+                .map(node -> childRule.fromNode(node))
                 .collect(Collectors.exceptionally(Collectors.joining(delimiter)))
                 .mapValue(inner -> inner.orElse(""));
     }

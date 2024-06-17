@@ -61,10 +61,18 @@ public class Lang {
                 generic,
                 new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", type), ".", new ExtractStringRule("member"))),
-                new TypeRule("function-type", new FirstRule(new ExtractNodeRule("from", type), " => ", new ExtractNodeRule("to", type)))
+                createFunctionType(type)
         )));
 
         return type;
+    }
+
+    private static TypeRule createFunctionType(LazyRule type) {
+        var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", type);
+        var wrappedParams = new LeftRule("(", new RightRule(params, ")"));
+        var returns = new ExtractNodeRule("returns", type);
+
+        return new TypeRule("function-type", new FirstRule(wrappedParams, " => ", returns));
     }
 
     static TypeRule createTryRule(Rule statement) {
