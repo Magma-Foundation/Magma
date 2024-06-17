@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -84,22 +85,21 @@ public class MagmaLang {
 
     private static Rule createDefinitionRule() {
         var modifiers = Lang.createModifiersRule();
-        var withoutModifiers = new OrRule(List.of(new ExtractStringRule("name"), new EmptyRule()));
-        var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
+        var withoutModifiers = new OptionalRule("name",
+                new ExtractStringRule("name"),
+                new EmptyRule("name"));
 
-        var maybeModifiers = new OrRule(List.of(
-                withModifiers,
-                withoutModifiers
-        ));
+        var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
+        var maybeModifiers = new OptionalRule("modifiers", withModifiers, withoutModifiers);
 
         var definition = new LazyRule();
         var params = new FirstRule(maybeModifiers, "(", new RightRule(Lang.createParamsRule(definition), ")"));
-        var maybeParams = new OrRule(List.of(params, maybeModifiers));
+        var maybeParams = new OptionalRule("params", params, maybeModifiers);
 
         var type = Lang.createTypeRule();
         var withType = new LastRule(maybeParams, " : ", new ExtractNodeRule("type", type));
+        var maybeType = new OptionalRule("type", withType, maybeParams);
 
-        var maybeType = new OrRule(List.of(withType, maybeParams));
         definition.setRule(maybeType);
         return definition;
     }

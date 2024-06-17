@@ -1,5 +1,6 @@
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -28,15 +29,15 @@ export class def MagmaLang() => {
 	}
 	def createDefinitionRule() : Rule => {
 		let modifiers = Lang.createModifiersRule();
-		let withoutModifiers = OrRule(List.of(ExtractStringRule("name"), EmptyRule()));
+		let withoutModifiers = OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
 		let withModifiers = LastRule(modifiers, " ", withoutModifiers);
-		let maybeModifiers = OrRule(List.of(withModifiers, withoutModifiers));
+		let maybeModifiers = OptionalRule("modifiers", withModifiers, withoutModifiers);
 		let definition = LazyRule();
 		let params = FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
-		let maybeParams = OrRule(List.of(params, maybeModifiers));
+		let maybeParams = OptionalRule("params", params, maybeModifiers);
 		let type = Lang.createTypeRule();
 		let withType = LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
-		let maybeType = OrRule(List.of(withType, maybeParams));
+		let maybeType = OptionalRule("type", withType, maybeParams);
 		definition.setRule(maybeType);
 		return definition;
 	}

@@ -86,7 +86,8 @@ export class def Lang() => {
 		return ExtractNodeRule(withScope, type);
 	}
 	def createReturnRule(value : Rule) : Rule => {
-		let maybeChild = OrRule(List.of(LeftRule(" ", ExtractNodeRule("child", StripRule(value))), EmptyRule()));
+		let withValue = LeftRule(" ", ExtractNodeRule("child", StripRule(value)));
+		let maybeChild = OrRule(List.of(withValue, EmptyRule("child")));
 		let after = OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
 		return TypeRule("return", LeftRule("return", after));
 	}
@@ -146,7 +147,7 @@ export class def Lang() => {
 		return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
 	}
 	def createEmptyStatementRule() : TypeRule => {
-		return TypeRule("empty", RightRule(StripRule(EmptyRule()), ";"));
+		return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
 	}
 	def createThrowRule(value : Rule) : Rule => {
 		let after = RightRule(createScope("value", ExtractNodeRule("value", value)), ";");
@@ -168,7 +169,7 @@ export class def Lang() => {
 		return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
 	}
 	def createKeywordRule(keyword : String) : TypeRule => {
-		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule()), ";")));
+		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	}
 	def createNamePrototypeRule() : OrRule => {
 		let name = TypeRule("symbol", StripRule(ExtractStringRule("value")));

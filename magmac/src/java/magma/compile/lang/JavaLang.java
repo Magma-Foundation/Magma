@@ -166,7 +166,7 @@ public class JavaLang {
 
     private static Rule createLambdaRule(Rule value, Rule statement) {
         var child = new SymbolRule(new ExtractStringRule("param-name"));
-        var left = new StripRule(new OrRule(List.of(new LeftRule("()", new EmptyRule()), child)));
+        var left = new StripRule(new OrRule(List.of(new LeftRule("()", new EmptyRule("param-name")), child)));
         var maybeValue = new OrRule(List.of(
                 new StripRule(new LeftRule("{", new RightRule(Lang.createBlock(statement), "}"))),
                 value

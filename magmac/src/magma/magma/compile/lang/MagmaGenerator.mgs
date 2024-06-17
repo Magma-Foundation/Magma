@@ -6,7 +6,6 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.Function;
 export class def MagmaGenerator extends Generator() => {
 	def attachModifiers(definition : Node) : Node => {
 		let oldModifiers = definition.attributes().apply("modifiers").flatMap(Attribute.asStringList).orElse(ArrayList());
@@ -41,36 +40,6 @@ export class def MagmaGenerator extends Generator() => {
 		}
 	
 	}
-	def getNodeNodeFunction() : (Node) => Node => {
-		return (child) => {
-			if(!child.is("definition"))return child;
-			let paramsOptional = child.attributes().apply("params").flatMap(Attribute.asNodeList);
-			if(paramsOptional.isEmpty())return child;
-			let params = paramsOptional.get();
-			return child.remove("params").mapNode("type", (returnType) => Node("function-type").withNodeList("params", params).withNode("returns", returnType));
-		};
-		
-		
-	;
-	}
-	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		let newNode = getNodeIntegerTuple(node, depth);
-		if(newNode!=null)return newNode;
-		let definition = getIntegerTuple(node, depth);
-		if(definition!=null)return definition;
-		let definition1 = getTuple(node, depth);
-		if(definition1!=null)return definition1;
-		let removed = getNodeIntegerTuple1(node, depth);
-		if(removed!=null)return removed;
-		let node2 = getNodeIntegerTuple2(node, depth);
-		if(node2!=null)return node2;
-		let node3 = getNodeIntegerTuple3(node, depth);
-		if(node3!=null)return node3;
-		let struct = generateFromInterface(node, depth);
-		if(struct.isPresent())return struct.get();
-		let node1 = generateFromFunction(node, depth);
-		return node1.orElseGet(() => Tuple(node, depth));
-	}
 	def generateFromInterface(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if(!node.is("interface")){
 			return Optional.empty();
@@ -83,9 +52,16 @@ export class def MagmaGenerator extends Generator() => {
 				}
 				return newList;
 			});
-			return withModifiers.mapValue("child", NodeAttribute.Factory, (interfaceChild) => interfaceChild.mapNodes("children", (children) => children.stream().map(getNodeNodeFunction()).toList()));
+			return withModifiers.mapValue("child", NodeAttribute.Factory, (interfaceChild) => interfaceChild.mapNodes("children", (children) => children.stream().map(MagmaGenerator.migrateDefinition).toList()));
 		});
 		return Optional.of(Tuple(struct, depth));
+	}
+	def migrateDefinition(child : Node) : Node => {
+		if(!child.is("definition"))return child;
+		let paramsOptional = child.attributes().apply("params").flatMap(Attribute.asNodeList);
+		if(paramsOptional.isEmpty())return child;
+		let params = paramsOptional.get().stream().map(Node.attributes).map((attributes) => attributes.apply("type")).flatMap(Optional.stream).map(Attribute.asNode).flatMap(Optional.stream).toList();
+		return child.remove("params").mapNode("type", (returnType) => Node("function-type").withNodeList("params", params).withNode("returns", returnType));
 	}
 	def getNodeIntegerTuple3(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("record")){
@@ -165,5 +141,28 @@ export class def MagmaGenerator extends Generator() => {
 			}));
 		}));
 		return Optional.of(Tuple(node1, depth));
+	}
+	def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
+		if(node.is("block")){
+			return Tuple(node.mapNodes("children", (list) => {
+				return list.stream().filter((child) => !child.is("empty")).toList();
+			}), depth);
+		}
+		let newNode = getNodeIntegerTuple(node, depth);
+		if(newNode!=null)return newNode;
+		let definition = getIntegerTuple(node, depth);
+		if(definition!=null)return definition;
+		let definition1 = getTuple(node, depth);
+		if(definition1!=null)return definition1;
+		let removed = getNodeIntegerTuple1(node, depth);
+		if(removed!=null)return removed;
+		let node2 = getNodeIntegerTuple2(node, depth);
+		if(node2!=null)return node2;
+		let node3 = getNodeIntegerTuple3(node, depth);
+		if(node3!=null)return node3;
+		let struct = generateFromInterface(node, depth);
+		if(struct.isPresent())return struct.get();
+		let node1 = generateFromFunction(node, depth);
+		return node1.orElseGet(() => Tuple(node, depth));
 	}
 }

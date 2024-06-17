@@ -10,7 +10,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 
-public class EmptyRule implements Rule {
+public record EmptyRule(String name) implements Rule {
     @Override
     public RuleResult toNode(String input) {
         return input.isEmpty()
@@ -20,10 +20,10 @@ public class EmptyRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        if(node.attributes().isEmpty()) {
-            return new Ok<>("");
+        if (node.has(name)) {
+            return new Err<>(new CompileError("Node has property '" + name + "'.", node.toString()));
         } else {
-            return new Err<>(new CompileError("Node is not empty.", node.toString()));
+            return new Ok<>("");
         }
     }
 }

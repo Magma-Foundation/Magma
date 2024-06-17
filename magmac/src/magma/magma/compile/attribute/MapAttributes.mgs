@@ -52,4 +52,7 @@ export class def MapAttributes(Map<String, Attribute> values)() => {
 	public def has(name : String) : boolean => {
 		return this.values.containsKey(name);
 	}
+	public def isEmpty() : boolean => {
+		return values.isEmpty();
+	}
 }

@@ -73,7 +73,7 @@ export class def JavaLang() => {
 	}
 	def createLambdaRule(value : Rule, statement : Rule) : Rule => {
 		let child = SymbolRule(ExtractStringRule("param-name"));
-		let left = StripRule(OrRule(List.of(LeftRule("()", EmptyRule()), child)));
+		let left = StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
 		let maybeValue = OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
 		let right = StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));

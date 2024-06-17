@@ -1,6 +1,6 @@
 import java.util.Optional;
 export class def Options() => {
 	public def toTuple(optional : Optional<C>, other : C) : Tuple<Boolean, C> => {
-		return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));
+		return optional.map((value) => Tuple(true, value)).orElse(Tuple(false, other));
 	}
 }

@@ -128,7 +128,8 @@ public class Lang {
     }
 
     static Rule createReturnRule(Rule value) {
-        var maybeChild = new OrRule(List.of(new LeftRule(" ", new ExtractNodeRule("child", new StripRule(value))), new EmptyRule()));
+        var withValue = new LeftRule(" ", new ExtractNodeRule("child", new StripRule(value)));
+        var maybeChild = new OrRule(List.of(withValue, new EmptyRule("child")));
         var after = new OrRule(List.of(new RightRule(maybeChild, ";"), maybeChild));
         return new TypeRule("return", new LeftRule("return", after));
     }
@@ -211,7 +212,7 @@ public class Lang {
     }
 
     static TypeRule createEmptyStatementRule() {
-        return new TypeRule("empty", new RightRule(new StripRule(new EmptyRule()), ";"));
+        return new TypeRule("empty", new RightRule(new StripRule(new EmptyRule("value")), ";"));
     }
 
     static Rule createThrowRule(Rule value) {
@@ -240,7 +241,7 @@ public class Lang {
     }
 
     static TypeRule createKeywordRule(String keyword) {
-        return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule()), ";")));
+        return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule("value")), ";")));
     }
 
     static OrRule createNamePrototypeRule() {

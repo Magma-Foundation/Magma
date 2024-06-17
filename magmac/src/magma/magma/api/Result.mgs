@@ -3,9 +3,9 @@ import java.util.function.Function;
 export struct Result<T, E> {
 	findValue : () => Optional<T>;
 	findErr : () => Optional<E>;
-	flatMapValue;
-	mapValue;
+	flatMapValue : ((T) => Result<R, E>) => Result<R, E>;
+	mapValue : ((T) => R) => Result<R, E>;
 	isOk : () => boolean;
-	mapErr;
-	match;
+	mapErr : ((E) => R) => Result<T, R>;
+	match : ((T) => R, (E) => R) => R;
 }

@@ -8,6 +8,6 @@ import magma.compile.rule.result.RuleResult;
  * and to transform a node back into a string.
  */
 export struct Rule {
-	toNode;
-	fromNode;
+	toNode : (String) => RuleResult;
+	fromNode : (Node) => Result<String, Error_>;
 }

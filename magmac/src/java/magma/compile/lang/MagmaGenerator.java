@@ -9,7 +9,6 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class MagmaGenerator extends Generator {
     private static Node attachModifiers(Node definition) {
@@ -52,61 +51,6 @@ public class MagmaGenerator extends Generator {
         }
     }
 
-    private static Function<Node, Node> getNodeNodeFunction() {
-        return child -> {
-            if (!child.is("definition")) return child;
-
-            var paramsOptional = child.attributes()
-                    .apply("params")
-                    .flatMap(Attribute::asNodeList);
-
-            if (paramsOptional.isEmpty()) return child;
-
-            var params = paramsOptional.get();
-            return child
-                    .remove("params")
-                    .mapNode("type", returnType -> new Node("function-type")
-                            .withNodeList("params", params)
-                            .withNode("returns", returnType));
-        };
-    }
-
-    @Override
-    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        if(node.is("block")) {
-            return new Tuple<>(node.mapNodes("children", list -> {
-                return list.stream()
-                        .filter(child -> !child.is("empty"))
-                        .toList();
-            }), depth);
-        }
-
-        var newNode = getNodeIntegerTuple(node, depth);
-        if (newNode != null) return newNode;
-
-        var definition = getIntegerTuple(node, depth);
-        if (definition != null) return definition;
-
-        var definition1 = getTuple(node, depth);
-        if (definition1 != null) return definition1;
-
-        var removed = getNodeIntegerTuple1(node, depth);
-        if (removed != null) return removed;
-
-        var node2 = getNodeIntegerTuple2(node, depth);
-        if (node2 != null) return node2;
-
-        var node3 = getNodeIntegerTuple3(node, depth);
-        if (node3 != null) return node3;
-
-        var struct = generateFromInterface(node, depth);
-        if (struct.isPresent()) return struct.get();
-
-        var node1 = generateFromFunction(node, depth);
-        return node1.orElseGet(() -> new Tuple<>(node, depth));
-
-    }
-
     private static Optional<Tuple<Node, Integer>> generateFromInterface(Node node, int depth) {
         if (!node.is("interface")) {
             return Optional.empty();
@@ -122,11 +66,34 @@ public class MagmaGenerator extends Generator {
             });
 
             return withModifiers.mapValue("child", NodeAttribute.Factory, interfaceChild -> interfaceChild.mapNodes("children", children -> children.stream()
-                    .map(getNodeNodeFunction())
+                    .map(MagmaGenerator::migrateDefinition)
                     .toList()));
         });
 
         return Optional.of(new Tuple<>(struct, depth));
+    }
+
+    private static Node migrateDefinition(Node child) {
+        if (!child.is("definition")) return child;
+
+        var paramsOptional = child.attributes()
+                .apply("params")
+                .flatMap(Attribute::asNodeList);
+
+        if (paramsOptional.isEmpty()) return child;
+
+        var params = paramsOptional.get()
+                .stream()
+                .map(Node::attributes)
+                .map(attributes -> attributes.apply("type"))
+                .flatMap(Optional::stream)
+                .map(Attribute::asNode)
+                .flatMap(Optional::stream)
+                .toList();
+
+        return child.remove("params").mapNode("type", returnType -> new Node("function-type")
+                .withNodeList("params", params)
+                .withNode("returns", returnType));
     }
 
     private static Tuple<Node, Integer> getNodeIntegerTuple3(Node node, int depth) {
@@ -240,5 +207,41 @@ public class MagmaGenerator extends Generator {
         }));
 
         return Optional.of(new Tuple<>(node1, depth));
+    }
+
+    @Override
+    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        if (node.is("block")) {
+            return new Tuple<>(node.mapNodes("children", list -> {
+                return list.stream()
+                        .filter(child -> !child.is("empty"))
+                        .toList();
+            }), depth);
+        }
+
+        var newNode = getNodeIntegerTuple(node, depth);
+        if (newNode != null) return newNode;
+
+        var definition = getIntegerTuple(node, depth);
+        if (definition != null) return definition;
+
+        var definition1 = getTuple(node, depth);
+        if (definition1 != null) return definition1;
+
+        var removed = getNodeIntegerTuple1(node, depth);
+        if (removed != null) return removed;
+
+        var node2 = getNodeIntegerTuple2(node, depth);
+        if (node2 != null) return node2;
+
+        var node3 = getNodeIntegerTuple3(node, depth);
+        if (node3 != null) return node3;
+
+        var struct = generateFromInterface(node, depth);
+        if (struct.isPresent()) return struct.get();
+
+        var node1 = generateFromFunction(node, depth);
+        return node1.orElseGet(() -> new Tuple<>(node, depth));
+
     }
 }
