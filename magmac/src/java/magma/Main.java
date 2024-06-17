@@ -41,7 +41,10 @@ public class Main {
                     throw new CompileException(source.toAbsolutePath().toString(), e);
                 }
             }
-        } catch (IOException | CompileException e) {
+        } catch (IOException e) {
+            //noinspection CallToPrintStackTrace
+            e.printStackTrace();
+        } catch (CompileException e) {
             //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
@@ -112,12 +115,7 @@ public class Main {
 
     private static String print(Error_ e, int depth) {
         var actualContext = e.findContext().orElse("");
-        String context;
-        if (e.findCauses().isEmpty())
-            context = "\n" + " ".repeat(depth + 1) + "---\n" + " ".repeat(depth + 1) + actualContext.replace("\n", "\n" + " ".repeat(depth - 1)) + "\n" + " ".repeat(depth + 1) + "---";
-        else {
-            context = actualContext;
-        }
+        var context = computeContext(e, depth, actualContext);
 
         var message = e.findMessage();
         message.ifPresent(s -> System.err.println(" ".repeat(depth) + depth + " = " + s + " " + context));
@@ -137,6 +135,7 @@ public class Main {
         if (causes.isEmpty()) {
             return "\n" + "\t".repeat(depth) + "<child" + s1 + ">" + s2 + "</child>";
         }
+
         var s3 = context1.isEmpty() ? "" : " context=\"" + context1 + "\"";
         if (causes.size() > 1) {
             var list = causes.stream()
@@ -152,6 +151,16 @@ public class Main {
             return "\n" + "\t".repeat(depth) + "<collection" + s1 + s3 + ">" + builder + "</collection>";
         } else {
             return "\n" + "\t".repeat(depth) + "<parent" + s1 + s3 + ">" + print(causes.get(0), depth + 1) + "</parent>";
+        }
+    }
+
+    private static String computeContext(Error_ e, int depth, String actualContext) {
+        if (e.findCauses().isEmpty()) {
+            var repeat = " ".repeat(depth + 1);
+            var replaced = actualContext.replace("\n", "\n" + " ".repeat(depth - 1));
+            return "\n" + repeat + "---\n" + repeat + replaced + "\n" + repeat + "---";
+        } else {
+            return actualContext;
         }
     }
 

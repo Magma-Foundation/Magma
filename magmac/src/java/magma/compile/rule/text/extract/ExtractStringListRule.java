@@ -40,9 +40,10 @@ public abstract class ExtractStringListRule extends ExtractRule {
     private List<String> split(String content) {
         List<String> result = new ArrayList<>();
         int start = 0;
-        int end;
 
-        while ((end = content.indexOf(delimiter, start)) != -1) {
+        while (true) {
+            var end = content.indexOf(delimiter, start);
+            if (end == -1) break;
             result.add(content.substring(start, end));
             start = end + delimiter.length();
         }

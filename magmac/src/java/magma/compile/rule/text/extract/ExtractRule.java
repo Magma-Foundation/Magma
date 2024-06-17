@@ -38,7 +38,17 @@ public abstract class ExtractRule implements Rule {
         return node.attributes()
                 .apply(key)
                 .flatMap(this::fromAttribute)
-                .<Result<String, Error_>>map(Ok::new)
-                .orElseGet(() -> new Err<>(new CompileError("Property '" + key + "' does not exist.", node.toString())));
+                .map(ExtractRule::getStringErrorOk)
+                .orElseGet(() -> createErr(node));
+    }
+
+    private static Result<String, Error_> getStringErrorOk(String value) {
+        return new Ok<>(value);
+    }
+
+    private Err<String, Error_> createErr(Node node) {
+        var format = "Property '%s' does not exist.";
+        var message = format.formatted(key);
+        return new Err<>(new CompileError(message, node.toString()));
     }
 }
