@@ -155,10 +155,13 @@ public class Lang {
     }
 
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
-        var left = new ExtractNodeRule("definition", new TypeRule("definition", new StripRule(definition)));
-        var withoutTerminator = new ExtractNodeRule("value", new StripRule(value));
-        var maybeTerminating = new OrRule(List.of(new RightRule(withoutTerminator, ";"), withoutTerminator));
-        return new TypeRule("declaration", new FirstRule(left, "=", maybeTerminating));
+        var definitionNode = createScope("definition", new StripRule(definition));
+
+        var withoutTerminator = createScope("value", new StripRule(new ExtractNodeRule("value", value)));
+        var withTerminator = new RightRule(withoutTerminator, ";");
+        var maybeTerminating = new OrRule(List.of(withTerminator, withoutTerminator));
+
+        return new TypeRule("declaration", new FirstRule(definitionNode, "=", maybeTerminating));
     }
 
     static Rule createParamsRule(Rule definition) {
