@@ -11,6 +11,7 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -18,6 +19,7 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JavaLang {
@@ -61,7 +63,9 @@ public class JavaLang {
             Rule value) {
         var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
         var withoutThrows = new ContextRule("No throws statement present.", new StripRule(new RightRule(Lang.createParamsRule(definition), ")")));
-        var withThrows = new ContextRule("Throws statement present.", new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule()))));
+
+        var thrownValues = new SplitMultipleRule(new SplitThrows(), ", ", "thrown", new StripRule(Lang.createTypeRule()));
+        var withThrows = new ContextRule("Throws statement present.", new LastRule(withoutThrows, "throws ", thrownValues));
         var maybeThrows = new OrRule(List.of(withThrows, withoutThrows));
 
         var withValue = new ContextRule("Value present.", new FirstRule(maybeThrows, "{", content));
@@ -185,5 +189,12 @@ public class JavaLang {
                 before
         ));
         return new TypeRule("constructor", new LeftRule("new ", child));
+    }
+
+    private static class SplitThrows implements Splitter {
+        @Override
+        public List<String> split(String input) {
+            return Arrays.asList(input.split(","));
+        }
     }
 }

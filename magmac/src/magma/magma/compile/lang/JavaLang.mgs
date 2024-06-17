@@ -9,12 +9,14 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 export class def JavaLang() => {
 	public def createRootRule() : Rule => {
@@ -36,7 +38,8 @@ export class def JavaLang() => {
 	def initContentMember(contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) : void => {
 		let content=StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
 		let withoutThrows=ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));
-		let withThrows=ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", ExtractNodeRule("thrown", StripRule(Lang.createTypeRule()))));
+		let thrownValues=SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));
+		let withThrows=ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", thrownValues));
 		let maybeThrows=OrRule(List.of(withThrows, withoutThrows));
 		let withValue=ContextRule("Value present.", FirstRule(maybeThrows, "{", content));
 		let withoutValue=ContextRule("No value present.", RightRule(maybeThrows, ";"));
@@ -83,5 +86,10 @@ export class def JavaLang() => {
 		let before=RightRule(InvocationStartRule(withGenerics, arguments), ")");
 		let child=OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", LeftRule("new ", child));
+	}
+	class def SplitThrows() => {
+		public def split(input : String) : List<String> => {
+			return Arrays.asList(input.split(","));
+		}
 	}
 }
