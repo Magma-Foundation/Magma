@@ -1,0 +1,81 @@
+import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.lang.ClassSplitter;
+import magma.compile.lang.Generator;
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaNormalizer;
+import magma.compile.lang.MagmaFormatter;
+import magma.compile.lang.MagmaGenerator;
+import magma.compile.lang.MagmaLang;
+import magma.compile.lang.PackageRemover;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+export class def Main() => {
+	const TARGET_DIRECTORY : Path=Paths.get(".", "magmac", "src", "magma");
+	const SOURCE_DIRECTORY : Path=Paths.get(".", "magmac", "src", "java");
+	const DEBUG_DIRECTORY : Path=Paths.get(".", "magmac", "debug", "java-mgs");
+	public def main(args : String[]) : void
+	def compileSource(source : Path) : void
+	def readImpl(source : Path) : String
+	def createDirectory(targetParent : Path) : Path
+	def writeImpl(target : Path, csq : String) : void
+	def print(e : Error_, depth : int) : String => {
+		let actualContext=e.findContext().orElse("");
+		let context=computeContext(e, depth, actualContext);
+		let message=e.findMessage();
+		message.ifPresent( (s) => {System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context);});
+		let s=e.findMessage().orElse("");
+		let s1=s.isEmpty()?"":" message=\"" + s.replace("\"", "&quot;") + "\"";
+		let causes=e.findCauses().orElse(Collections.emptyList());
+		let context1=e.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
+		let s2="\n"+context1;
+		if(causes.isEmpty()){
+			return "\n" + "\t".repeat(depth) + "<child" + s1 + ">" + s2 + "</child>";
+		}
+		let s3=context1.isEmpty()?"":" context=\"" + context1 + "\"";
+		if(causes.size()>1){
+			let list=causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
+			let builder=StringBuilder();
+			for(cause : Error_ in list){
+				let result=print(cause, depth+1);
+				builder.append(result);
+			}
+			return "\n" + "\t".repeat(depth) + "<collection" + s1 + s3 + ">" + builder + "</collection>";
+		}
+		else
+		{
+			return "\n" + "\t".repeat(depth) + "<parent" + s1 + s3 + ">" + print(causes.get(0), depth + 1) + "</parent>";
+		}
+	
+	}
+	def computeContext(e : Error_, depth : int, actualContext : String) : String => {
+		if(e.findCauses().isEmpty()){
+			let repeat=" ".repeat(depth+1);
+			let replaced=actualContext.replace("\n", "\n" + " ".repeat(depth-1));
+			return "\n" + repeat + "---\n" + repeat + replaced + "\n" + repeat + "---";
+		}
+		else
+		{
+			return actualContext;
+		}
+	
+	}
+	def escape(s : String) : String => {
+		return s;
+	}
+	def generate(root : Node) : Node => {
+		let list=Arrays.asList(PackageRemover(), ClassSplitter(), JavaNormalizer(), MagmaGenerator(), MagmaFormatter());
+		let acc : Node=root;
+		for(generator : Generator in list){
+			acc=generator.generate(acc, -1);
+		}
+		return acc;
+	}
+}

@@ -1,0 +1,17 @@
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.Error_;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringAttribute;
+import java.util.Optional;
+export class def ExtractStringRule extends ExtractRule() => {
+	ExtractStringRule(key : String) : public => {
+		super(key);
+	}
+	def fromAttribute(attribute : Attribute) : Optional<String> => {
+		return attribute.asString();
+	}
+	def toAttribute(content : String) : Result<Attribute, Error_> => {
+		return Ok(StringAttribute(content));
+	}
+}
