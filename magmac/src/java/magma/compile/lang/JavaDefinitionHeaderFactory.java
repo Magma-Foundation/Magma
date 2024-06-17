@@ -40,7 +40,11 @@ public class JavaDefinitionHeaderFactory {
     }
 
     private static class ModifiersRule extends ExtractStringListRule {
-        public static final List<String> MODIFIERS = List.of("public", "static");
+        public static final List<String> MODIFIERS = List.of(
+                "public",
+                "static",
+                "final"
+        );
 
         public ModifiersRule() {
             super("modifiers", " ");
