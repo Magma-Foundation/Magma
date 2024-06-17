@@ -7,6 +7,8 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
 import magma.compile.rule.split.BackwardsRule;
 import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
@@ -29,7 +31,12 @@ public class JavaDefinitionHeaderFactory {
         var withModifiers = new BackwardsRule(modifiers, " ", maybeGenerics);
         var maybeModifiers = new OrRule(List.of(withModifiers, maybeGenerics));
 
-        return new TypeRule("definition", new LastRule(maybeModifiers, " ", name));
+        var annotation = new TypeRule("annotation", new LeftRule("@", new ExtractStringRule("value")));
+        var annotations = new SplitMultipleRule(new SimpleSplitter(), ", ", "annotations", annotation);
+        var withAnnotations = new LastRule(annotations, "\n", maybeModifiers);
+        var maybeAnnotations = new OrRule(List.of(withAnnotations, maybeModifiers));
+
+        return new TypeRule("definition", new LastRule(maybeAnnotations, " ", name));
     }
 
     private static class ModifiersRule extends ExtractStringListRule {
@@ -46,6 +53,13 @@ public class JavaDefinitionHeaderFactory {
             } else {
                 return Optional.of(new CompileError("Invalid modifier.", child));
             }
+        }
+    }
+
+    private static class SimpleSplitter implements Splitter {
+        @Override
+        public List<String> split(String input) {
+            return List.of(input.split(" "));
         }
     }
 }

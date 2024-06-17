@@ -3,6 +3,7 @@ package magma.compile.lang;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.NodeAttribute;
+import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
@@ -41,15 +42,15 @@ class JavaDefinitionHeaderFactoryTest {
         var context = error.findContext().orElse("");
 
         var causes = error.findCauses().orElse(Collections.emptyList());
-        if(causes.isEmpty()) {
+        if (causes.isEmpty()) {
             return new RuntimeException(message + context);
         } else {
             return new RuntimeException(message, toException(causes.get(0)));
         }
     }
 
-    private static void assertParseModifiers(String input, List<String> list) {
-        assertParse(input, "modifiers", new StringListAttribute(list));
+    private static void assertParseModifiers(String input, String key, List<String> list) {
+        assertParse(input, key, new StringListAttribute(list));
     }
 
     private static void assertParseToString(String input, String propertyKey, String propertyValue) {
@@ -62,18 +63,32 @@ class JavaDefinitionHeaderFactoryTest {
     }
 
     @Test
-    void generics() {
+    void typeParams() {
         assertParseToString("<T> var test", "type-params", "T");
     }
 
     @Test
+    void oneAnnotation() {
+        assertParse("@Test\nvar test;", "annotations", new NodeListAttribute(List.of(new Node("annotation")
+                .withString("value", "Test"))));
+    }
+
+    @Test
+    void twoAnnotations() {
+        assertParse("@First\n@Second\nvar test;", "annotations", new NodeListAttribute(List.of(
+                new Node("annotation").withString("value", "First"),
+                new Node("annotation").withString("value", "Second")
+        )));
+    }
+
+    @Test
     void oneModifier() {
-        assertParseModifiers("public var test", List.of("public"));
+        assertParseModifiers("public var test", "modifiers", List.of("public"));
     }
 
     @Test
     void twoModifiers() {
-        assertParseModifiers("public static var test", List.of("public", "static"));
+        assertParseModifiers("public static var test", "modifiers", List.of("public", "static"));
     }
 
     @Test
