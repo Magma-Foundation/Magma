@@ -23,13 +23,28 @@ public class MembersSplitter implements Splitter {
             if (c == '/' && state.isLevel() && !queue.isEmpty()) {
                 var after = queue.peek();
                 if (after == '/') {
-                    // We are in a comment.
+                    // We are in a single-line comment.
 
                     var withAfter = state.append(queue.pop());
                     while (!queue.isEmpty()) {
                         var next = queue.pop();
                         withAfter = withAfter.append(next);
                         if (next == '\n') {
+                            break;
+                        }
+                    }
+
+                    current = withAfter.advance();
+                    continue;
+                } else if (after == '*') {
+                    // We are in a block comment.
+
+                    var withAfter = state.append(queue.pop());
+                    while (!queue.isEmpty()) {
+                        var next = queue.pop();
+                        withAfter = withAfter.append(next);
+                        if (next == '*' && !queue.isEmpty() && queue.peek() == '/') {
+                            withAfter = withAfter.append(queue.pop());
                             break;
                         }
                     }

@@ -32,7 +32,8 @@ public class JavaLang {
                 importRule,
                 createContentRule("class", createContentMember()),
                 createContentRule("interface", createContentMember()),
-                createContentRule("record", createContentMember())
+                createContentRule("record", createContentMember()),
+                new TypeRule("block-comment", new StripRule(new LeftRule("/*", new RightRule(new ExtractStringRule("value"), "*/"))))
         ));
     }
 
