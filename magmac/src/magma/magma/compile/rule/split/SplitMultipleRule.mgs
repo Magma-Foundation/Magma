@@ -17,13 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 export class def SplitMultipleRule() => {
-	
 	private final propertyKey : String;
-	
 	private final childRule : Rule;
-	
 	private final splitter : Splitter;
-	
 	private final delimiter : String;
 	SplitMultipleRule(splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
 		this=propertyKey;

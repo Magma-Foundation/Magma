@@ -14,8 +14,8 @@ export struct RuleResult {
 	const findError : () => Optional<Error_>;
 	const findAttributes : () => Optional<Attributes>;
 	const tryCreate : () => Optional<Node>;
-	const withType : (String) => RuleResult;
-	const mapErr : ((Error_) => Error_) => RuleResult;
+	const withType : String => RuleResult;
+	const mapErr : Error_ => Error_ => RuleResult;
 	;
 	;
 }

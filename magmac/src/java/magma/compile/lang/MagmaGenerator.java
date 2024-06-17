@@ -104,9 +104,16 @@ public class MagmaGenerator extends Generator {
     }
 
     private static Node buildFunctionType(Node returnType, List<Node> params) {
-        return new Node("function-type")
-                .withNodeList("params", params)
+        var returns = new Node("function-type")
                 .withNode("returns", returnType);
+
+        if (params.isEmpty()) {
+            return returns;
+        } else if (params.size() == 1) {
+            return returns.withNode("param", params.get(0));
+        } else {
+            return returns.withNodeList("params", params);
+        }
     }
 
     private static Tuple<Node, Integer> getNodeIntegerTuple3(Node node, int depth) {

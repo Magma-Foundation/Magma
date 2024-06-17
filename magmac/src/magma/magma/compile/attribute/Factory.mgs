@@ -1,5 +1,5 @@
 import java.util.Optional;
 export struct Factory<T> {
-	const fromAttribute : (Attribute) => Optional<T>;
-	const toAttribute : (T) => Attribute;
+	const fromAttribute : Attribute => Optional<T>;
+	const toAttribute : T => Attribute;
 }

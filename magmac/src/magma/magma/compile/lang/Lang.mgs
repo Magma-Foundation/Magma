@@ -4,6 +4,7 @@ import magma.compile.Error_;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.NumberRule;
+import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -52,17 +53,20 @@ export class def Lang() => {
 	def createFunctionType(type : LazyRule) : TypeRule => {
 		let params = SplitMultipleRule(ParamSplitter(), ", ", "params", type);
 		let wrappedParams = LeftRule("(", RightRule(params, ")"));
+		let param = ExtractNodeRule("param", type);
+		let maybeParam = OptionalRule("param", param, LeftRule("()", EmptyRule("param")));
+		let anyParams = OptionalRule("params", wrappedParams, maybeParam);
 		let returns = ExtractNodeRule("returns", type);
-		return TypeRule("function-type", FirstRule(wrappedParams, " => ", returns));
+		return TypeRule("function-type", FirstRule(anyParams, " => ", returns));
 	}
 	def createTryRule(statement : Rule) : TypeRule => {
 		return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
 	}
-	def createModifiersRule() : StripRule => {
+	def createModifiersRule() : Rule => {
 		return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
 	}
-	def createModifiersRule(final modifiers : List<String>) : StripRule => {
-		return StripRule(ExtractStringListRule("modifiers", " "));
+	def createModifiersRule(final modifiers : List<String>) : Rule => {
+		return ExtractStringListRule("modifiers", " ");
 	}
 	def createInvocationRule(value : Rule) : TypeRule => {
 		let arguments = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));

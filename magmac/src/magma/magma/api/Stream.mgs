@@ -2,6 +2,6 @@ import java.util.Optional;
 import java.util.function.Function;
 export struct Stream<T> {
 	const head : () => Optional<T>;
-	const map : ((T) => R) => Stream<R>;
-	const collect : (Collector<T, C>) => C;
+	const map : T => R => Stream<R>;
+	const collect : Collector<T, C> => C;
 }

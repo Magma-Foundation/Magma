@@ -12,14 +12,11 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 export class def ExtractRule() => {
-	
 	protected final key : String;
 	ExtractRule(key : String) : public => {
 		this=key;
 	}
-	
 	protected abstract fromAttribute(attribute : Attribute) : Optional<String>;
-	
 	protected abstract toAttribute(content : String) : Result<Attribute, Error_>;
 	public def toNode(input : String) : RuleResult => {
 		return toAttribute(input).match((attribute) => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);

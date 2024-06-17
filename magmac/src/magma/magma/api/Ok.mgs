@@ -7,19 +7,19 @@ export class def Ok<T, E>(T value)() => {
 	public def findErr() : Optional<E> => {
 		return Optional.empty();
 	}
-	public def flatMapValue(mapper : (T) => Result<R, E>) : Result<R, E> => {
+	public def flatMapValue(mapper : T => Result<R, E>) : Result<R, E> => {
 		return mapper.apply(value);
 	}
-	public def mapValue(mapper : (T) => R) : Result<R, E> => {
+	public def mapValue(mapper : T => R) : Result<R, E> => {
 		return Ok(mapper.apply(value));
 	}
 	public def isOk() : boolean => {
 		return true;
 	}
-	public def mapErr(mapper : (E) => R) : Result<T, R> => {
+	public def mapErr(mapper : E => R) : Result<T, R> => {
 		return Ok(value);
 	}
-	public def match(onOk : (T) => R, onErr : (E) => R) : R => {
+	public def match(onOk : T => R, onErr : E => R) : R => {
 		return onOk.apply(value);
 	}
 }

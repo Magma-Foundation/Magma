@@ -6,6 +6,7 @@ import magma.compile.Error_;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.NumberRule;
+import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -70,9 +71,13 @@ public class Lang {
     private static TypeRule createFunctionType(LazyRule type) {
         var params = new SplitMultipleRule(new ParamSplitter(), ", ", "params", type);
         var wrappedParams = new LeftRule("(", new RightRule(params, ")"));
-        var returns = new ExtractNodeRule("returns", type);
 
-        return new TypeRule("function-type", new FirstRule(wrappedParams, " => ", returns));
+        var param = new ExtractNodeRule("param", type);
+        var maybeParam = new OptionalRule("param", param, new LeftRule("()", new EmptyRule("param")));
+        var anyParams = new OptionalRule("params", wrappedParams, maybeParam);
+
+        var returns = new ExtractNodeRule("returns", type);
+        return new TypeRule("function-type", new FirstRule(anyParams, " => ", returns));
     }
 
     static TypeRule createTryRule(Rule statement) {

@@ -10,11 +10,8 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 export class def SplitOnceRule() => {
-	
 	protected final leftRule : Rule;
-	
 	protected final slice : String;
-	
 	protected final rightRule : Rule;
 	SplitOnceRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		this=leftRule;
@@ -41,7 +38,6 @@ export class def SplitOnceRule() => {
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
-	
 	protected abstract computeIndex(input : String) : Optional<Integer>;
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		let leftResult = leftRule.fromNode(node);

@@ -70,7 +70,18 @@ export class def MagmaGenerator extends Generator() => {
 		return copy;
 	}
 	def buildFunctionType(returnType : Node, params : List<Node>) : Node => {
-		return Node("function-type").withNodeList("params", params).withNode("returns", returnType);
+		let returns = Node("function-type").withNode("returns", returnType);
+		if(params.isEmpty()){
+			return returns;
+		}
+		else if(params.size()==1){
+			return returns.withNode("param", params.get(0));
+		}
+		else
+		{
+			return returns.withNodeList("params", params);
+		}
+	
 	}
 	def getNodeIntegerTuple3(node : Node, depth : int) : Tuple<Node, Integer> => {
 		if(node.is("record")){
