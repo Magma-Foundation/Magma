@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OrRule;
@@ -59,12 +60,12 @@ public class JavaLang {
             Rule statement,
             Rule value) {
         var content = new StripRule(new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
-        var withoutThrows = new StripRule(new RightRule(Lang.createParamsRule(definition), ")"));
-        var withThrows = new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule())));
+        var withoutThrows = new ContextRule("No throws statement present.", new StripRule(new RightRule(Lang.createParamsRule(definition), ")")));
+        var withThrows = new ContextRule("Throws statement present.", new LastRule(withoutThrows, "throws ", new ExtractNodeRule("thrown", new StripRule(Lang.createTypeRule()))));
         var maybeThrows = new OrRule(List.of(withThrows, withoutThrows));
 
-        var withValue = new FirstRule(maybeThrows, "{", content);
-        var withoutValue = new RightRule(maybeThrows, ";");
+        var withValue = new ContextRule("Value present.", new FirstRule(maybeThrows, "{", content));
+        var withoutValue = new ContextRule("No value present.", new RightRule(maybeThrows, ";"));
         var maybeValue = new OrRule(List.of(withValue, withoutValue));
 
         var definitionNode = new ExtractNodeRule("definition", new TypeRule("definition", definition));
