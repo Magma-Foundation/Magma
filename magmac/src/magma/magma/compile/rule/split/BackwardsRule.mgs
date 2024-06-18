@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 () => {
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		
 		allIndexes : var=
 		findAllIndexesReverse(input);
@@ -58,7 +58,7 @@ import java.util.List;
 		else
 		{
 			return ErrorRuleResult(MultipleError(errors));}}
-	private def findAllIndexesReverse() : List<Integer> => {
+	private def findAllIndexesReverse(input : String) : List<Integer> => {
 		
 		indexes : List<Integer>=
 		ArrayList();
@@ -72,5 +72,5 @@ import java.util.List;
 			index=input.indexOf(slice, index+1);}
 		Collections.reverse(indexes);
 		return indexes;}
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));}}

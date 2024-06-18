@@ -14,17 +14,17 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 public abstract class def ExtractRule() => {
 	protected final key : String;
-	def ExtractRule() : public => {
+	def ExtractRule(key : String) : public => {
 		this=key;}
 	protected abstract fromAttribute : Optional<String>;
 	protected abstract toAttribute : Result<Attribute, Error_>;
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}
-	private static def getStringErrorOk() : Result<String, Error_> => {
+	private static def getStringErrorOk(value : String) : Result<String, Error_> => {
 		return Ok(value);}
-	private def createErr() : Err<String, Error_> => {
+	private def createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=
 		"Property '%s' does not exist.";

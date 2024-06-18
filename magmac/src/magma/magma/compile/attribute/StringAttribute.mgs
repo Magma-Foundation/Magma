@@ -3,7 +3,7 @@ import java.util.Optional;
 () => {
 	public def asString() : Optional<String> => {
 		return Optional.of(value);}
-	public def format() : String => {
+	public def format(depth : int) : String => {
 		return "\"" + escape() + "\"";}
 	private def escape() : String => {
 		return value.replace("\n", "\\n").replace("\t", "\\t");}}

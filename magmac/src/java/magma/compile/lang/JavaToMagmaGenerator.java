@@ -48,9 +48,11 @@ public class JavaToMagmaGenerator extends Generator {
             var oldDefinition = node.findNode("definition");
 
             if (oldDefinition.isPresent()) {
+                var params = node.findNodeList("params").orElse(Collections.emptyList());
+
                 if (node.has("child")) {
                     var newDefinition = oldDefinition.get()
-                            .mapOrSetNodeList("params", params -> params, () -> Collections.emptyList())
+                            .withNodeList("params", params)
                             .mapOrSetStringList("modifiers", list -> {
                                 var copy = new ArrayList<>(list);
                                 copy.add("def");

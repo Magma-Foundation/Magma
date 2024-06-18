@@ -2,11 +2,11 @@
 import java.util.Optional;
 import java.util.function.Function;
 public abstract class def AbstractStream() => {
-	public def map() : Stream<R> => {
+	public def map(mapper : Function<T, R>) : Stream<R> => {
 		return AbstractStream();
 		
 		;}
-	public def collect() : C => {
+	public def collect(collector : Collector<T, C>) : C => {
 		
 		current : var=
 		collector.createInitial();

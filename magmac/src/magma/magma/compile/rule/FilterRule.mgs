@@ -6,14 +6,14 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 public abstract class def FilterRule() => {
 	protected final child : Rule;
-	def FilterRule() : public => {
+	def FilterRule(child : Rule) : public => {
 		this=child;}
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		if
 		(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));}
 	protected abstract computeMessage : String;
 	protected abstract filter : boolean;
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);}}

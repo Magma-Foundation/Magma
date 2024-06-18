@@ -14,11 +14,11 @@ public abstract class def SplitOnceRule() => {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
-	def SplitOnceRule() : public => {
+	def SplitOnceRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		this=leftRule;
 		this=slice;
 		this=rightRule;}
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		
 		tuple : var=
 		computeIndex(input).map(() => {
@@ -57,7 +57,7 @@ public abstract class def SplitOnceRule() => {
 			format.formatted(slice);
 			return ErrorRuleResult(CompileError(message, input));});}
 	protected abstract computeIndex : Optional<Integer>;
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		
 		leftResult : var=
 		leftRule.fromNode(node);
@@ -65,7 +65,7 @@ public abstract class def SplitOnceRule() => {
 		rightValue : var=
 		rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));}
-	private def createError() : CompileParentError => {
+	private def createError(node : Node, err : Error_) : CompileParentError => {
 		
 		format : var=
 		"Cannot merge node using slice '%s'.";

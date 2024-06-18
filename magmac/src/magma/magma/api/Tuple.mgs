@@ -1,5 +1,5 @@
 
 import java.util.function.Function;
 () => {
-	public def mapLeft() : Tuple<T, R> => {
+	public def mapLeft(mapper : Function<L, T>) : Tuple<T, R> => {
 		return Tuple(mapper.apply(left), right);}}

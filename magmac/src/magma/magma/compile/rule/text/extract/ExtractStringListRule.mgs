@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 public abstract class def ExtractStringListRule() => {
 	protected final delimiter : String;
-	def ExtractStringListRule() : public => {
+	def ExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key);
 		this=delimiter;}
-	protected def fromAttribute() : Optional<String> => {
+	protected def fromAttribute(attribute : Attribute) : Optional<String> => {
 		return attribute.asStringList().map(() => String.join(delimiter, list));}
-	protected def toAttribute() : Result<Attribute, Error_> => {
+	protected def toAttribute(content : String) : Result<Attribute, Error_> => {
 		
 		list : var=
 		split(content);
@@ -28,7 +28,7 @@ public abstract class def ExtractStringListRule() => {
 			{
 				return Err(qualified.get());}}
 		return Ok(StringListAttribute(list));}
-	private def split() : List<String> => {
+	private def split(content : String) : List<String> => {
 		
 		result : List<String>=
 		ArrayList();

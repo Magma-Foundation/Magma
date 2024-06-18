@@ -1,10 +1,10 @@
 
 public final class def SymbolRule() => {
-	def SymbolRule() : public => {
+	def SymbolRule(child : Rule) : public => {
 		super(child);}
 	protected def computeMessage() : String => {
 		return "Not a symbol.";}
-	protected def filter() : boolean => {
+	protected def filter(input : String) : boolean => {
 		
 		i : int=
 		0;

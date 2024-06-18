@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 () => {
-	private static def toError() : Err<String, Error_> => {
+	private static def toError(results : List<Result<String, Error_>>) : Err<String, Error_> => {
 		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));}
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		
 		errors : var=
 		ArrayList();
@@ -32,7 +32,7 @@ import java.util.Optional;
 		else
 		{
 			return ErrorRuleResult(MultipleError(errors));}}
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		
 		results : var=
 		ArrayList();

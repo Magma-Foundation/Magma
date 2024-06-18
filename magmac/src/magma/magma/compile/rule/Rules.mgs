@@ -1,5 +1,5 @@
 
 import java.util.Optional;
 public class def Rules() => {
-	public static def wrapIndex() : Optional<Integer> => {
+	public static def wrapIndex(index : int) : Optional<Integer> => {
 		return index==-1?Optional.empty():Optional.of(index);}}

@@ -2,7 +2,7 @@
 import java.util.List;
 import java.util.Optional;
 public class def Streams() => {
-	public static def fromNativeList() : Stream<T> => {
+	public static def fromNativeList(list : List<T>) : Stream<T> => {
 		return AbstractStream();
 		
 		;}}

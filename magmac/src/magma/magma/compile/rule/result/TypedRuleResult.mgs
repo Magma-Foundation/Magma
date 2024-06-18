@@ -13,7 +13,7 @@ import java.util.function.Function;
 		return Optional.of(Node(name, attributes));}
 	public def findError() : Optional<Error_> => {
 		return Optional.empty();}
-	public def withType() : RuleResult => {
+	public def withType(type : String) : RuleResult => {
 		return this;}
-	public def mapErr() : RuleResult => {
+	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
 		return this;}}

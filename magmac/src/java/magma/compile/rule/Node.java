@@ -114,4 +114,8 @@ public record Node(String type, Attributes attributes) {
     public Node clear(String type) {
         return new Node(type);
     }
+
+    public Optional<List<Node>> findNodeList(String key) {
+        return attributes.apply(key).flatMap(Attribute::asNodeList);
+    }
 }

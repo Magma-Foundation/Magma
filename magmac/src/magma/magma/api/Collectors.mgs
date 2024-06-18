@@ -3,11 +3,11 @@ import java.util.Optional;
 public class def Collectors() => {
 	public static def joining() : Collector<String, Optional<String>> => {
 		return joining("");}
-	public static def joining() : Collector<String, Optional<String>> => {
+	public static def joining(final delimiter : String) : Collector<String, Optional<String>> => {
 		return Collector();
 		
 		;}
-	public static def exceptionally() : Collector<Result<T, E>, Result<C, E>> => {
+	public static def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
 		return Collector();
 		
 		;}}

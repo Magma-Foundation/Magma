@@ -9,5 +9,5 @@ import java.util.Optional;
 	;
 	public def asNode() : Optional<Node> => {
 		return Optional.of(value);}
-	public def format() : String => {
+	public def format(depth : int) : String => {
 		return value.format(depth);}}

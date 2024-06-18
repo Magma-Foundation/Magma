@@ -9,11 +9,11 @@ import java.util.function.Function;
 		return Optional.empty();}
 	public def findError() : Optional<Error_> => {
 		return Optional.of(e);}
-	public def mapErr() : RuleResult => {
+	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
 		return ErrorRuleResult(mapper.apply(e));}
 	public def findAttributes() : Optional<Attributes> => {
 		return Optional.empty();}
 	public def tryCreate() : Optional<Node> => {
 		return Optional.empty();}
-	public def withType() : RuleResult => {
+	public def withType(type : String) : RuleResult => {
 		return this;}}

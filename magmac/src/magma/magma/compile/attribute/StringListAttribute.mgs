@@ -10,5 +10,5 @@ import java.util.stream.Collectors;
 	;
 	public def asStringList() : Optional<List<String>> => {
 		return Optional.of(values);}
-	public def format() : String => {
+	public def format(depth : int) : String => {
 		return values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));}}

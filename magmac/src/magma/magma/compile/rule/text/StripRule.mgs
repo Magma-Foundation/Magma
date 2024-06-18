@@ -13,11 +13,11 @@ import magma.compile.rule.result.RuleResult;
 	
 	public static final DEFAULT_RIGHT : String=
 	"right";
-	def StripRule() : public => {
+	def StripRule(child : Rule) : public => {
 		this(child, DEFAULT_LEFT, DEFAULT_RIGHT);}
-	public def toNode() : RuleResult => {
+	public def toNode(input : String) : RuleResult => {
 		return child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));}
-	public def fromNode() : Result<String, Error_> => {
+	public def fromNode(node : Node) : Result<String, Error_> => {
 		
 		leftIndent : var=
 		node.attributes().apply(left).flatMap(Attribute.asString).orElse("");
