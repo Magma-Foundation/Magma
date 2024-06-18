@@ -24,10 +24,17 @@ public class JavaToMagmaGenerator extends Generator {
         var newNode = removePackagesFromBlock(node)
                 .or(() -> replaceClassWithFunction(node))
                 .or(() -> replaceMethodWithFunction(node))
+                .or(() -> replaceLambdaWithFunction(node))
                 .or(() -> replaceConstructorsWithInvocation(node))
                 .orElse(node);
 
         return new Tuple<>(newNode, depth);
+    }
+
+    private Optional<Node> replaceLambdaWithFunction(Node node) {
+        if (!node.is("lambda")) return Optional.empty();
+
+        return Optional.of(node.retype("function"));
     }
 
     private Optional<Node> replaceConstructorsWithInvocation(Node node) {
