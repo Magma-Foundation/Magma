@@ -1,1 +1,1 @@
-public struct Collector<T, C> {();(current : C, next : T);}
+public struct Collector<T, C> {createInitial : C;fold : C;}

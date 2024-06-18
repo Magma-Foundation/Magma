@@ -1,1 +1,1 @@
-import java.util.Optional;import java.util.function.Function;public struct Stream<T> {();(mapper : Function<T, R>);(collector : Collector<T, C>);}
+import java.util.Optional;import java.util.function.Function;public struct Stream<T> {head : Optional<T>;map : Stream<R>;collect : C;}

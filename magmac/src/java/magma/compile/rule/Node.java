@@ -9,6 +9,7 @@ import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -89,5 +90,9 @@ public record Node(String type, Attributes attributes) {
         } else {
             return with(key, new StringListAttribute(onEmpty.get()));
         }
+    }
+
+    public Optional<Node> findNode(String key) {
+        return attributes.apply(key).flatMap(Attribute::asNode);
     }
 }

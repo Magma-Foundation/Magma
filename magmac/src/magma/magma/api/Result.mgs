@@ -1,1 +1,1 @@
-import java.util.Optional;import java.util.function.Function;public struct Result<T, E> {();();(mapper : Function<T, Result<R, E>>);(mapper : Function<T, R>);();(mapper : Function<E, R>);(onOk : Function<T, R>, onErr : Function<E, R>);}
+import java.util.Optional;import java.util.function.Function;public struct Result<T, E> {findValue : Optional<T>;findErr : Optional<E>;flatMapValue : Result<R, E>;mapValue : Result<R, E>;isOk : boolean;mapErr : Result<T, R>;match : R;}

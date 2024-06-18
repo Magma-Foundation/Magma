@@ -20,6 +20,26 @@ public class JavaToMagmaGenerator extends Generator {
     }
 
     @Override
+    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+        var newNode = unwrapUnimplementedFunction(node).orElse(node);
+
+        return new Tuple<>(newNode, depth);
+    }
+
+    private Optional<Node> unwrapUnimplementedFunction(Node node) {
+        if (node.is("function")) {
+            if (!node.has("child")) {
+                var definition = node.findNode("definition");
+                if (definition.isPresent()) {
+                    return definition;
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
         var newNode = removePackagesFromBlock(node)
                 .or(() -> replaceClassWithFunction(node))

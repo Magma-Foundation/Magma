@@ -1,12 +1,1 @@
-import magma.compile.rule.Rule;
-import magma.compile.rule.Rules;
-import java.util.Optional;
-export class def FirstRule extends SplitOnceRule() => {
-	 FirstRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
-		super(leftRule, slice, rightRule);
-	}
-	def computeIndex(input : String) : Optional<Integer> => {
-		return Rules.wrapIndex(input.indexOf(slice));
-	}
-	implements Rule;
-}
+import magma.compile.rule.Rule;import magma.compile.rule.Rules;import java.util.Optional;() => {FirstRule : public => {super(leftRule, slice, rightRule);}protected computeIndex : Optional<Integer> => {return Rules.wrapIndex(input.indexOf(slice));}}

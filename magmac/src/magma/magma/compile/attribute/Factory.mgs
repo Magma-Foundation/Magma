@@ -1,1 +1,1 @@
-import java.util.Optional;public struct Factory<T> {(attribute : Attribute);(value : T);}
+import java.util.Optional;public struct Factory<T> {fromAttribute : Optional<T>;toAttribute : Attribute;}
