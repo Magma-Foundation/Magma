@@ -8,15 +8,15 @@ import java.util.List;
 
 public final class OptionalRule implements Rule {
     private final String key;
-    private final Rule child;
+    private final Rule onPresent;
     private final Rule onEmpty;
     private final OrRule orRule;
 
-    public OptionalRule(String key, Rule child, Rule onEmpty) {
+    public OptionalRule(String key, Rule onPresent, Rule onEmpty) {
         this.key = key;
-        this.child = child;
+        this.onPresent = onPresent;
         this.onEmpty = onEmpty;
-        this.orRule = new OrRule(List.of(child, onEmpty));
+        this.orRule = new OrRule(List.of(onPresent, onEmpty));
     }
 
     @Override
@@ -27,7 +27,7 @@ public final class OptionalRule implements Rule {
     @Override
     public Result<String, Error_> fromNode(Node node) {
         if (node.has(key)) {
-            return child.fromNode(node);
+            return onPresent.fromNode(node);
         } else {
             return onEmpty.fromNode(node);
         }

@@ -3,6 +3,7 @@ package magma.compile.lang;
 import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
+import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
@@ -42,9 +43,9 @@ public class JavaLang {
         initContentMember(member, contents, definitionHeader, statement, value);
 
         contents.setRule(new OrRule(List.of(
-                createContentRule("class", member),
-                createContentRule("record", member),
-                createContentRule("interface", member)
+                createContentRule("class", member, Lang.createTypeRule()),
+                createContentRule("record", member, Lang.createTypeRule()),
+                createContentRule("interface", member, Lang.createTypeRule())
         )));
 
         return new OrRule(List.of(
@@ -117,22 +118,22 @@ public class JavaLang {
         statement.setRule(new OrRule(copy));
     }
 
-    private static TypeRule createContentRule(String keyword, LazyRule classMember) {
+    private static TypeRule createContentRule(String keyword, LazyRule classMember, LazyRule type) {
         var modifiers = Lang.createModifiersRule();
         var block = new ExtractNodeRule("child", Lang.createBlock(classMember));
-        var name = createContentMemberRule();
-        var withoutModifiers = new FirstRule(new StripRule(name), "{", new RightRule(block, "}"));
+
+        var name = new StripRule(new SymbolRule(new ExtractStringRule("name")));
+
+        var typeParam = new TypeRule("type-param", new StripRule(new SymbolRule(new ExtractStringRule("value"))));
+        var typeParams = new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
+        var withTypeParams = new StripRule(new FirstRule(name, "<", new RightRule(typeParams, ">")));
+        var maybeTypeParams = new OptionalRule("type-params", withTypeParams, name);
+
+        var withImplements = new FirstRule(new StripRule(maybeTypeParams), " implements ", new ExtractNodeRule("type", type));
+        var maybeImplements = new OptionalRule("implements", withImplements, maybeTypeParams);
+
+        var withoutModifiers = new FirstRule(maybeImplements, "{", new RightRule(block, "}"));
         return new TypeRule(keyword, new FirstRule(modifiers, keyword + " ", withoutModifiers));
-    }
-
-    private static OrRule createContentMemberRule() {
-        var prototype = Lang.createNamePrototypeRule();
-
-        var leftRule1 = new ExtractNodeRule("name", prototype);
-        return new OrRule(List.of(
-                new FirstRule(leftRule1, " implements", new ExtractNodeRule("implements", prototype)),
-                leftRule1
-        ));
     }
 
     private static LazyRule createValueRule(LazyRule classMember, Rule statement) {

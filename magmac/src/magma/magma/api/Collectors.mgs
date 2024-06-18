@@ -1,6 +1,6 @@
 
 import java.util.Optional;
-() => {
+public Collectors => {
 	public static joining : Collector<String, Optional<String>> => {
 		return joining("");}
 	public static joining : Collector<String, Optional<String>> => {

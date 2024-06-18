@@ -1,4 +1,4 @@
 
-public struct Collector<T, C> {
+public struct Collector {
 	createInitial : C;
 	fold : C;}

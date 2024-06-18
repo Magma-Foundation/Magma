@@ -54,18 +54,24 @@ public class Lang {
 
     static LazyRule createTypeRule() {
         var type = new LazyRule();
-        var children = new SplitMultipleRule(new ParamSplitter(), ", ", "children", new StripRule(type));
-        var generic = new TypeRule("generic-type", new FirstRule(new ExtractNodeRule("parent", type), "<", new RightRule(children, ">")));
+        var generic = createGenericTypeRule(type);
 
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
                 generic,
-                new TypeRule("symbol", new SymbolRule(new ExtractStringRule("value"))),
+                new TypeRule("symbol", new StripRule(new SymbolRule(new ExtractStringRule("value")))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", type), ".", new ExtractStringRule("member"))),
                 createFunctionType(type)
         )));
 
         return type;
+    }
+
+    private static TypeRule createGenericTypeRule(LazyRule type) {
+        var children = new SplitMultipleRule(new ParamSplitter(), ", ", "children", type);
+        var parent = new StripRule(new ExtractStringRule("parent"));
+
+        return new TypeRule("generic", new StripRule(new FirstRule(parent, "<", new RightRule(children, ">"))));
     }
 
     private static TypeRule createFunctionType(LazyRule type) {
@@ -240,13 +246,6 @@ public class Lang {
 
     static TypeRule createKeywordRule(String keyword) {
         return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule("value")), ";")));
-    }
-
-    static OrRule createNamePrototypeRule() {
-        return new OrRule(List.of(
-                new TypeRule("generic-name", new FirstRule(new StripRule(new ExtractStringRule("parent")), "<", new RightRule(new ExtractStringRule("value"), ">"))),
-                new TypeRule("symbol-name", new StripRule(new ExtractStringRule("value")))
-        ));
     }
 
     private static class OperatorFinderRule extends SplitOnceRule {

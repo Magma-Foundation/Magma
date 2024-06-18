@@ -10,6 +10,7 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
@@ -80,7 +81,8 @@ public class MagmaLang {
         var modifiers = new SimpleExtractStringListRule("modifiers", " ");
 
         var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
-        var name = new ExtractNodeRule("name", Lang.createNamePrototypeRule());
+        var name = new ExtractStringRule("name");
+
         var child = new FirstRule(name, " {", new RightRule(children, "}"));
 
         return new TypeRule("struct", new OptionalRule("modifiers",
