@@ -1,7 +1,7 @@
 
 import java.util.List;
 import java.util.Optional;
-() => {
+public Streams => {
 	public static fromNativeList : Stream<T> => {
 		return AbstractStream();
 		

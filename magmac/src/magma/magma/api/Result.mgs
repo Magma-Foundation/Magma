@@ -1,7 +1,7 @@
 
 import java.util.Optional;
 import java.util.function.Function;
-public struct Result<T, E> {
+public struct Result {
 	findValue : Optional<T>;
 	findErr : Optional<E>;
 	flatMapValue : Result<R, E>;

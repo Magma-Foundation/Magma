@@ -35,17 +35,17 @@ public class JavaLang {
         var member = new LazyRule();
         var statement = new LazyRule();
 
-        var definitionHeader = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+        var definition = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
         var value = createValueRule(member, statement);
-        initStatements(definitionHeader, statement, member, value);
+        initStatements(definition, statement, member, value);
 
         var contents = new LazyRule();
-        initContentMember(member, contents, definitionHeader, statement, value);
+        initContentMember(member, contents, definition, statement, value);
 
         contents.setRule(new OrRule(List.of(
-                createContentRule("class", member, Lang.createTypeRule()),
-                createContentRule("record", member, Lang.createTypeRule()),
-                createContentRule("interface", member, Lang.createTypeRule())
+                createContentRule("class", member, Lang.createTypeRule(), definition),
+                createContentRule("record", member, Lang.createTypeRule(), definition),
+                createContentRule("interface", member, Lang.createTypeRule(), definition)
         )));
 
         return new OrRule(List.of(
@@ -118,7 +118,7 @@ public class JavaLang {
         statement.setRule(new OrRule(copy));
     }
 
-    private static TypeRule createContentRule(String keyword, LazyRule classMember, LazyRule type) {
+    private static TypeRule createContentRule(String keyword, LazyRule classMember, LazyRule type, Rule definition) {
         var modifiers = Lang.createModifiersRule();
         var block = new ExtractNodeRule("child", Lang.createBlock(classMember));
 
@@ -129,8 +129,12 @@ public class JavaLang {
         var withTypeParams = new StripRule(new FirstRule(name, "<", new RightRule(typeParams, ">")));
         var maybeTypeParams = new OptionalRule("type-params", withTypeParams, name);
 
-        var withImplements = new FirstRule(new StripRule(maybeTypeParams), " implements ", new ExtractNodeRule("type", type));
-        var maybeImplements = new OptionalRule("implements", withImplements, maybeTypeParams);
+        var params = Lang.createParamsRule(definition);
+        var withParams = new FirstRule(maybeTypeParams, "(", new StripRule(new RightRule(params, ")")));
+        var maybeParams = new OptionalRule("params", withParams, maybeTypeParams);
+
+        var withImplements = new FirstRule(new StripRule(maybeParams), " implements ", new ExtractNodeRule("type", type));
+        var maybeImplements = new OptionalRule("implements", withImplements, maybeParams);
 
         var withoutModifiers = new FirstRule(maybeImplements, "{", new RightRule(block, "}"));
         return new TypeRule(keyword, new FirstRule(modifiers, keyword + " ", withoutModifiers));

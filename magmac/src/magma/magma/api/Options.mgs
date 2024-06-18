@@ -1,5 +1,5 @@
 
 import java.util.Optional;
-() => {
+public Options => {
 	public static toTuple : Tuple<Boolean, C> => {
 		return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));}}
