@@ -1,1 +1,69 @@
-import magma.api.Tuple;import magma.compile.attribute.Attribute;import magma.compile.attribute.Attributes;import magma.compile.attribute.MapAttributes;import magma.compile.attribute.NodeAttribute;import magma.compile.attribute.NodeListAttribute;import magma.compile.rule.Node;import java.util.ArrayList;import java.util.List;() => {private generateAttribute : Tuple<Attribute, Integer> => {nodeList : var=attribute.asNodeList();if(nodeList.isPresent()){list : var=ArrayList();current : var=depth;for(node : var in nodeList.get()){nodeIntegerTuple : Tuple<Node, Integer>=generateWithDepth(node, current);list.add(nodeIntegerTuple.left());current=nodeIntegerTuple.right();}return Tuple(NodeListAttribute(list), current);}return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));}private getAttributeIntegerTuple : Tuple<Attribute, Integer> => {return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);}public generate : Node => {return generateWithDepth(node, state).left();}private generateWithDepth : Tuple<Node, Integer> => {preVisitedTuple : var=preVisit(node, depth);preVisited : var=preVisitedTuple.left();preVisitedAttributes : var=preVisited.attributes().streamEntries().toList();newAttributes : Attributes=MapAttributes();current : var=preVisitedTuple.right();for(preVisitedAttribute : Tuple<String, Attribute> in preVisitedAttributes){key : var=preVisitedAttribute.left();value : var=preVisitedAttribute.right();newTuple : var=generateAttribute(value, current);newAttributes=newAttributes.with(key, newTuple.left());current=newTuple.right();}return postVisit(preVisited.withAttributes(newAttributes), current);}protected preVisit : Tuple<Node, Integer> => {return Tuple(node, depth);}protected postVisit : Tuple<Node, Integer> => {return Tuple(node, depth);}}
+
+import magma.api.Tuple;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
+import magma.compile.attribute.MapAttributes;
+import magma.compile.attribute.NodeAttribute;
+import magma.compile.attribute.NodeListAttribute;
+import magma.compile.rule.Node;
+import java.util.ArrayList;
+import java.util.List;
+() => {
+	private generateAttribute : Tuple<Attribute, Integer> => {
+		
+		nodeList : var=
+		attribute.asNodeList();
+		if
+		(nodeList.isPresent())
+		{
+			
+			list : var=
+			ArrayList();
+			
+			current : var=
+			depth;
+			for(node : var in nodeList.get()){
+				
+				nodeIntegerTuple : Tuple<Node, Integer>=
+				generateWithDepth(node, current);
+				list.add(nodeIntegerTuple.left());
+				current=nodeIntegerTuple.right();}
+			return Tuple(NodeListAttribute(list), current);}
+		return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));}
+	private getAttributeIntegerTuple : Tuple<Attribute, Integer> => {
+		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);}
+	public generate : Node => {
+		return generateWithDepth(node, state).left();}
+	private generateWithDepth : Tuple<Node, Integer> => {
+		
+		preVisitedTuple : var=
+		preVisit(node, depth);
+		
+		preVisited : var=
+		preVisitedTuple.left();
+		
+		preVisitedAttributes : var=
+		preVisited.attributes().streamEntries().toList();
+		
+		newAttributes : Attributes=
+		MapAttributes();
+		
+		current : var=
+		preVisitedTuple.right();
+		for(preVisitedAttribute : Tuple<String, Attribute> in preVisitedAttributes){
+			
+			key : var=
+			preVisitedAttribute.left();
+			
+			value : var=
+			preVisitedAttribute.right();
+			
+			newTuple : var=
+			generateAttribute(value, current);
+			newAttributes=newAttributes.with(key, newTuple.left());
+			current=newTuple.right();}
+		return postVisit(preVisited.withAttributes(newAttributes), current);}
+	protected preVisit : Tuple<Node, Integer> => {
+		return Tuple(node, depth);}
+	protected postVisit : Tuple<Node, Integer> => {
+		return Tuple(node, depth);}}

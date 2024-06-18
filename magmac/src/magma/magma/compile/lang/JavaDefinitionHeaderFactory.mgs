@@ -1,1 +1,74 @@
-import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.rule.OrRule;import magma.compile.rule.Rule;import magma.compile.rule.TypeRule;import magma.compile.rule.split.BackwardsRule;import magma.compile.rule.split.LastRule;import magma.compile.rule.split.SplitMultipleRule;import magma.compile.rule.split.Splitter;import magma.compile.rule.text.LeftRule;import magma.compile.rule.text.RightRule;import magma.compile.rule.text.extract.ExtractNodeRule;import magma.compile.rule.text.extract.ExtractStringListRule;import magma.compile.rule.text.extract.ExtractStringRule;import magma.compile.rule.text.extract.SimpleExtractStringListRule;import java.util.List;import java.util.Optional;() => {static createDefinitionHeaderRule : Rule => {type : var=ExtractNodeRule("type", Lang.createTypeRule());name : var=ExtractStringRule("name");generics : var=LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));withGenerics : var=BackwardsRule(generics, " ", type);maybeGenerics : var=OrRule(List.of(withGenerics, type));modifiers : var=ModifiersRule();withModifiers : var=BackwardsRule(modifiers, " ", maybeGenerics);maybeModifiers : var=OrRule(List.of(withModifiers, maybeGenerics));annotation : var=TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));annotations : var=SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);withAnnotations : var=LastRule(annotations, "\n", maybeModifiers);maybeAnnotations : var=OrRule(List.of(withAnnotations, maybeModifiers));return TypeRule("definition", LastRule(maybeAnnotations, " ", name));}() => {public static final MODIFIERS : List<String>=List.of("public", "static", "final", "private", "default", "protected", "abstract");ModifiersRule : public => {super("modifiers", " ");}protected qualify : Optional<Error_> => {if(MODIFIERS.contains(child)){return Optional.empty();}else{return Optional.of(CompileError("Invalid modifier.", child));}}}() => {public split : List<String> => {return List.of(input.split("\n"));}}}
+
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.BackwardsRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
+import java.util.List;
+import java.util.Optional;
+() => {
+	static createDefinitionHeaderRule : Rule => {
+		
+		type : var=
+		ExtractNodeRule("type", Lang.createTypeRule());
+		
+		name : var=
+		ExtractStringRule("name");
+		
+		generics : var=
+		LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
+		
+		withGenerics : var=
+		BackwardsRule(generics, " ", type);
+		
+		maybeGenerics : var=
+		OrRule(List.of(withGenerics, type));
+		
+		modifiers : var=
+		ModifiersRule();
+		
+		withModifiers : var=
+		BackwardsRule(modifiers, " ", maybeGenerics);
+		
+		maybeModifiers : var=
+		OrRule(List.of(withModifiers, maybeGenerics));
+		
+		annotation : var=
+		TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		
+		annotations : var=
+		SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		
+		withAnnotations : var=
+		LastRule(annotations, "\n", maybeModifiers);
+		
+		maybeAnnotations : var=
+		OrRule(List.of(withAnnotations, maybeModifiers));
+		return TypeRule("definition", LastRule(maybeAnnotations, " ", name));}
+	() => {
+		
+		public static final MODIFIERS : List<String>=
+		List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		ModifiersRule : public => {
+			super("modifiers", " ");}
+		protected qualify : Optional<Error_> => {
+			if
+			(MODIFIERS.contains(child))
+			{
+				return Optional.empty();}
+			else
+			{
+				return Optional.of(CompileError("Invalid modifier.", child));}}}
+	() => {
+		public split : List<String> => {
+			return List.of(input.split("\n"));}}}

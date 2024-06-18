@@ -1,1 +1,13 @@
-import magma.compile.rule.Node;import java.util.Optional;() => {public static final Factory : Factory<Node>=Factory();;public asNode : Optional<Node> => {return Optional.of(value);}public format : String => {return value.format(depth);}}
+
+import magma.compile.rule.Node;
+import java.util.Optional;
+() => {
+	
+	public static final Factory : Factory<Node>=
+	Factory();
+	
+	;
+	public asNode : Optional<Node> => {
+		return Optional.of(value);}
+	public format : String => {
+		return value.format(depth);}}

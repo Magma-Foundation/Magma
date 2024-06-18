@@ -1,1 +1,5 @@
-import java.util.Optional;() => {public static toTuple : Tuple<Boolean, C> => {return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));}}
+
+import java.util.Optional;
+() => {
+	public static toTuple : Tuple<Boolean, C> => {
+		return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));}}

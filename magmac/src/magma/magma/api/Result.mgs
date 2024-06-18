@@ -1,1 +1,11 @@
-import java.util.Optional;import java.util.function.Function;public struct Result<T, E> {findValue : Optional<T>;findErr : Optional<E>;flatMapValue : Result<R, E>;mapValue : Result<R, E>;isOk : boolean;mapErr : Result<T, R>;match : R;}
+
+import java.util.Optional;
+import java.util.function.Function;
+public struct Result<T, E> {
+	findValue : Optional<T>;
+	findErr : Optional<E>;
+	flatMapValue : Result<R, E>;
+	mapValue : Result<R, E>;
+	isOk : boolean;
+	mapErr : Result<T, R>;
+	match : R;}

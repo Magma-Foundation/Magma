@@ -1,1 +1,153 @@
-import magma.compile.rule.ContextRule;import magma.compile.rule.EmptyRule;import magma.compile.rule.LazyRule;import magma.compile.rule.OrRule;import magma.compile.rule.Rule;import magma.compile.rule.SymbolRule;import magma.compile.rule.TypeRule;import magma.compile.rule.split.FirstRule;import magma.compile.rule.split.LastRule;import magma.compile.rule.split.ParamSplitter;import magma.compile.rule.split.SplitMultipleRule;import magma.compile.rule.split.Splitter;import magma.compile.rule.text.LeftRule;import magma.compile.rule.text.RightRule;import magma.compile.rule.text.StripRule;import magma.compile.rule.text.extract.ExtractNodeRule;import magma.compile.rule.text.extract.ExtractStringRule;import java.util.ArrayList;import java.util.Arrays;import java.util.List;() => {public static createRootRule : Rule => {return Lang.createBlock(createRootMemberRule());}private static createRootMemberRule : OrRule => {namespace : var=Lang.createNamespaceRule();importRule : var=Lang.createImportRule(namespace);member : var=LazyRule();statement : var=LazyRule();definitionHeader : var=JavaDefinitionHeaderFactory.createDefinitionHeaderRule();value : var=createValueRule(member, statement);initStatements(definitionHeader, statement, member, value);contents : var=LazyRule();initContentMember(member, contents, definitionHeader, statement, value);contents.setRule(OrRule(List.of(createContentRule("class", member), createContentRule("record", member), createContentRule("interface", member))));return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));}private static initContentMember : void => {content : var=StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));withoutThrows : var=ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));thrownValues : var=SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));withThrows : var=ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", thrownValues));maybeThrows : var=OrRule(List.of(withThrows, withoutThrows));withValue : var=ContextRule("Value present.", FirstRule(maybeThrows, "{", content));withoutValue : var=ContextRule("No value present.", RightRule(maybeThrows, ";"));maybeValue : var=OrRule(List.of(withValue, withoutValue));definitionNode : var=ExtractNodeRule("definition", TypeRule("definition", definition));methodRule : var=TypeRule("method", FirstRule(definitionNode, "(", maybeValue));contentMember.setRule(OrRule(List.of(Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), contents)));}private static initStatements : void => {rules : var=List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createReturnRule(value), Lang.createIfRule("if", value, statement), Lang.createElseRule(statement), Lang.createIfRule("while", value, statement), Lang.createForRule(definition, value, statement, ":"), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createThrowRule(value), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value));copy : var=ArrayList(rules);copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));statement.setRule(OrRule(copy));}private static createContentRule : TypeRule => {modifiers : var=Lang.createModifiersRule();block : var=ExtractNodeRule("child", Lang.createBlock(classMember));name : var=createContentMemberRule();withoutModifiers : var=FirstRule(StripRule(name), "{", RightRule(block, "}"));return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));}private static createContentMemberRule : OrRule => {prototype : var=Lang.createNamePrototypeRule();leftRule1 : var=ExtractNodeRule("name", prototype);return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("implements", prototype)), leftRule1));}private static createValueRule : LazyRule => {value : var=LazyRule();value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));return value;}private static createLambdaRule : Rule => {child : var=SymbolRule(ExtractStringRule("param-name"));left : var=StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));maybeValue : var=OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));right : var=StripRule(ExtractNodeRule("child", maybeValue));return TypeRule("lambda", FirstRule(left, "->", right));}private static createConstructorRule : Rule => {arguments : var=OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));caller : var=ExtractNodeRule("caller", value);withGenerics : var=OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));before : var=RightRule(InvocationStartRule(withGenerics, arguments), ")");child : var=OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));return TypeRule("constructor", LeftRule("new ", child));}() => {public split : List<String> => {return Arrays.asList(input.split(","));}}}
+
+import magma.compile.rule.ContextRule;
+import magma.compile.rule.EmptyRule;
+import magma.compile.rule.LazyRule;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+() => {
+	public static createRootRule : Rule => {
+		return Lang.createBlock(createRootMemberRule());}
+	private static createRootMemberRule : OrRule => {
+		
+		namespace : var=
+		Lang.createNamespaceRule();
+		
+		importRule : var=
+		Lang.createImportRule(namespace);
+		
+		member : var=
+		LazyRule();
+		
+		statement : var=
+		LazyRule();
+		
+		definitionHeader : var=
+		JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+		
+		value : var=
+		createValueRule(member, statement);
+		initStatements(definitionHeader, statement, member, value);
+		
+		contents : var=
+		LazyRule();
+		initContentMember(member, contents, definitionHeader, statement, value);
+		contents.setRule(OrRule(List.of(createContentRule("class", member), createContentRule("record", member), createContentRule("interface", member))));
+		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));}
+	private static initContentMember : void => {
+		
+		content : var=
+		StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
+		
+		withoutThrows : var=
+		ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));
+		
+		thrownValues : var=
+		SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));
+		
+		withThrows : var=
+		ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", thrownValues));
+		
+		maybeThrows : var=
+		OrRule(List.of(withThrows, withoutThrows));
+		
+		withValue : var=
+		ContextRule("Value present.", FirstRule(maybeThrows, "{", content));
+		
+		withoutValue : var=
+		ContextRule("No value present.", RightRule(maybeThrows, ";"));
+		
+		maybeValue : var=
+		OrRule(List.of(withValue, withoutValue));
+		
+		definitionNode : var=
+		ExtractNodeRule("definition", TypeRule("definition", definition));
+		
+		methodRule : var=
+		TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
+		contentMember.setRule(OrRule(List.of(Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), contents)));}
+	private static initStatements : void => {
+		
+		rules : var=
+		List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createReturnRule(value), Lang.createIfRule("if", value, statement), Lang.createElseRule(statement), Lang.createIfRule("while", value, statement), Lang.createForRule(definition, value, statement, ":"), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createThrowRule(value), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value));
+		
+		copy : var=
+		ArrayList(rules);
+		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
+		statement.setRule(OrRule(copy));}
+	private static createContentRule : TypeRule => {
+		
+		modifiers : var=
+		Lang.createModifiersRule();
+		
+		block : var=
+		ExtractNodeRule("child", Lang.createBlock(classMember));
+		
+		name : var=
+		createContentMemberRule();
+		
+		withoutModifiers : var=
+		FirstRule(StripRule(name), "{", RightRule(block, "}"));
+		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));}
+	private static createContentMemberRule : OrRule => {
+		
+		prototype : var=
+		Lang.createNamePrototypeRule();
+		
+		leftRule1 : var=
+		ExtractNodeRule("name", prototype);
+		return OrRule(List.of(FirstRule(leftRule1, " implements", ExtractNodeRule("implements", prototype)), leftRule1));}
+	private static createValueRule : LazyRule => {
+		
+		value : var=
+		LazyRule();
+		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
+		return value;}
+	private static createLambdaRule : Rule => {
+		
+		child : var=
+		SymbolRule(ExtractStringRule("param-name"));
+		
+		left : var=
+		StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
+		
+		maybeValue : var=
+		OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
+		
+		right : var=
+		StripRule(ExtractNodeRule("child", maybeValue));
+		return TypeRule("lambda", FirstRule(left, "->", right));}
+	private static createConstructorRule : Rule => {
+		
+		arguments : var=
+		OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		
+		caller : var=
+		ExtractNodeRule("caller", value);
+		
+		withGenerics : var=
+		OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
+		
+		before : var=
+		RightRule(InvocationStartRule(withGenerics, arguments), ")");
+		
+		child : var=
+		OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
+		return TypeRule("constructor", LeftRule("new ", child));}
+	() => {
+		public split : List<String> => {
+			return Arrays.asList(input.split(","));}}}

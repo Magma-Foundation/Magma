@@ -1,1 +1,7 @@
-() => {CompileException : public => {super(message, cause);}CompileException : public => {super(message);}CompileException : public => {}}
+
+() => {
+	CompileException : public => {
+		super(message, cause);}
+	CompileException : public => {
+		super(message);}
+	CompileException : public => {}}

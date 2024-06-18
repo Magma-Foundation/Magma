@@ -1,1 +1,12 @@
-() => {public final content : String;GeneratingException : public => {super(message);this="";}GeneratingException : public => {super(message);this=content;}GeneratingException : public => {super(message, cause);this=content;}}
+
+() => {
+	public final content : String;
+	GeneratingException : public => {
+		super(message);
+		this="";}
+	GeneratingException : public => {
+		super(message);
+		this=content;}
+	GeneratingException : public => {
+		super(message, cause);
+		this=content;}}

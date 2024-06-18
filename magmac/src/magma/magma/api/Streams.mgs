@@ -1,1 +1,8 @@
-import java.util.List;import java.util.Optional;() => {public static fromNativeList : Stream<T> => {return AbstractStream();;}}
+
+import java.util.List;
+import java.util.Optional;
+() => {
+	public static fromNativeList : Stream<T> => {
+		return AbstractStream();
+		
+		;}}

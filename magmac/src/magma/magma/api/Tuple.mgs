@@ -1,1 +1,5 @@
-import java.util.function.Function;() => {public mapLeft : Tuple<T, R> => {return Tuple(mapper.apply(left), right);}}
+
+import java.util.function.Function;
+() => {
+	public mapLeft : Tuple<T, R> => {
+		return Tuple(mapper.apply(left), right);}}

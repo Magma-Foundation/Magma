@@ -2,15 +2,17 @@ package magma.compile.lang;
 
 import magma.api.Tuple;
 import magma.compile.rule.Node;
+import magma.compile.rule.text.StripRule;
 
 import java.util.List;
 import java.util.Optional;
 
 public class JavaToMagmaGenerator extends Generator {
-    private static Optional<Node> removePackagesFromBlock(Node node) {
+    private static Optional<Tuple<Node, Integer>> preVisitBlock(Node node, int depth) {
         if (!node.is("block")) return Optional.empty();
 
-        return Optional.of(node.mapNodes("children", JavaToMagmaGenerator::removePackagesFromList));
+        var newBlock = node.mapNodes("children", JavaToMagmaGenerator::removePackagesFromList);
+        return Optional.of(new Tuple<>(newBlock, depth + 1));
     }
 
     private static List<Node> removePackagesFromList(List<Node> children) {
@@ -21,17 +23,30 @@ public class JavaToMagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        var newNode = unwrapUnimplementedFunction(node).orElse(node);
-
-        return new Tuple<>(newNode, depth);
+        return unwrapUnimplementedFunction(node, depth)
+                .or(() -> postVisitBlock(node, depth))
+                .orElse(new Tuple<>(node, depth));
     }
 
-    private Optional<Node> unwrapUnimplementedFunction(Node node) {
+    private Optional<Tuple<Node, Integer>> postVisitBlock(Node node, int depth) {
+        if (!node.is("block")) return Optional.empty();
+
+        var prefix = "\n" + "\t".repeat(depth);
+        var newBlock = node.mapNodes("children", children -> {
+            return children.stream()
+                    .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
+                    .toList();
+        });
+
+        return Optional.of(new Tuple<>(newBlock, depth - 1));
+    }
+
+    private Optional<Tuple<Node, Integer>> unwrapUnimplementedFunction(Node node, int depth) {
         if (node.is("function")) {
             if (!node.has("child")) {
                 var definition = node.findNode("definition");
                 if (definition.isPresent()) {
-                    return definition;
+                    return Optional.of(new Tuple<>(definition.get(), depth));
                 }
             }
         }
@@ -41,58 +56,56 @@ public class JavaToMagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
-        var newNode = removePackagesFromBlock(node)
-                .or(() -> replaceClassWithFunction(node))
-                .or(() -> replaceMethodWithFunction(node))
-                .or(() -> replaceLambdaWithFunction(node))
-                .or(() -> replaceRecordWithFunction(node))
-                .or(() -> replaceConstructorsWithInvocation(node))
-                .or(() -> replaceInterfaceWithStruct(node))
-                .or(() -> replaceMethodReferenceWithAccess(node))
-                .orElse(node);
-
-        return new Tuple<>(newNode, depth);
+        return preVisitBlock(node, depth)
+                .or(() -> replaceClassWithFunction(node, depth))
+                .or(() -> replaceMethodWithFunction(node, depth))
+                .or(() -> replaceLambdaWithFunction(node, depth))
+                .or(() -> replaceRecordWithFunction(node, depth))
+                .or(() -> replaceConstructorsWithInvocation(node, depth))
+                .or(() -> replaceInterfaceWithStruct(node, depth))
+                .or(() -> replaceMethodReferenceWithAccess(node, depth))
+                .orElse(new Tuple<>(node, depth));
     }
 
-    private Optional<Node> replaceMethodReferenceWithAccess(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceMethodReferenceWithAccess(Node node, int depth) {
         if (!node.is("method-reference")) return Optional.empty();
 
-        return Optional.of(node.retype("access"));
+        return Optional.of(new Tuple<>(node.retype("access"), depth));
     }
 
-    private Optional<Node> replaceRecordWithFunction(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceRecordWithFunction(Node node, int depth) {
         if (!node.is("record")) return Optional.empty();
 
-        return Optional.of(node.retype("function"));
+        return Optional.of(new Tuple<>(node.retype("function"), depth));
     }
 
-    private Optional<Node> replaceInterfaceWithStruct(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceInterfaceWithStruct(Node node, int depth) {
         if (!node.is("interface")) return Optional.empty();
 
-        return Optional.of(node.retype("struct"));
+        return Optional.of(new Tuple<>(node.retype("struct"), depth));
     }
 
-    private Optional<Node> replaceLambdaWithFunction(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceLambdaWithFunction(Node node, int depth) {
         if (!node.is("lambda")) return Optional.empty();
 
-        return Optional.of(node.retype("function"));
+        return Optional.of(new Tuple<>(node.retype("function"), depth));
     }
 
-    private Optional<Node> replaceConstructorsWithInvocation(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceConstructorsWithInvocation(Node node, int depth) {
         if (!node.is("constructor")) return Optional.empty();
 
-        return Optional.of(node.retype("invocation"));
+        return Optional.of(new Tuple<>(node.retype("invocation"), depth));
     }
 
-    private Optional<Node> replaceMethodWithFunction(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceMethodWithFunction(Node node, int depth) {
         if (!node.is("method")) return Optional.empty();
 
-        return Optional.of(node.retype("function"));
+        return Optional.of(new Tuple<>(node.retype("function"), depth));
     }
 
-    private Optional<Node> replaceClassWithFunction(Node node) {
+    private Optional<Tuple<Node, Integer>> replaceClassWithFunction(Node node, int depth) {
         if (!node.is("class")) return Optional.empty();
 
-        return Optional.of(node.retype("function"));
+        return Optional.of(new Tuple<>(node.retype("function"), depth));
     }
 }

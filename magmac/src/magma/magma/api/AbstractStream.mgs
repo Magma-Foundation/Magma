@@ -1,1 +1,28 @@
-import java.util.Optional;import java.util.function.Function;() => {public map : Stream<R> => {return AbstractStream();;}public collect : C => {current : var=collector.createInitial();while(true){finalCurrent : C=current;tuple : var=Options.toTuple(head().map(() => collector.fold(finalCurrent, head)), current);if(tuple.left()){current=tuple.right();}else{return current;}}}}
+
+import java.util.Optional;
+import java.util.function.Function;
+() => {
+	public map : Stream<R> => {
+		return AbstractStream();
+		
+		;}
+	public collect : C => {
+		
+		current : var=
+		collector.createInitial();
+		while
+		(true)
+		{
+			
+			finalCurrent : C=
+			current;
+			
+			tuple : var=
+			Options.toTuple(head().map(() => collector.fold(finalCurrent, head)), current);
+			if
+			(tuple.left())
+			{
+				current=tuple.right();}
+			else
+			{
+				return current;}}}}

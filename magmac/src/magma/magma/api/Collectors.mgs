@@ -1,1 +1,13 @@
-import java.util.Optional;() => {public static joining : Collector<String, Optional<String>> => {return joining("");}public static joining : Collector<String, Optional<String>> => {return Collector();;}public static exceptionally : Collector<Result<T, E>, Result<C, E>> => {return Collector();;}}
+
+import java.util.Optional;
+() => {
+	public static joining : Collector<String, Optional<String>> => {
+		return joining("");}
+	public static joining : Collector<String, Optional<String>> => {
+		return Collector();
+		
+		;}
+	public static exceptionally : Collector<Result<T, E>, Result<C, E>> => {
+		return Collector();
+		
+		;}}
