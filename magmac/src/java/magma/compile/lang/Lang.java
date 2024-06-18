@@ -119,7 +119,7 @@ public class Lang {
         return new TypeRule("comment", new LeftRule("//", new ExtractStringRule("value")));
     }
 
-    static TypeRule createIfRule(String type, Rule value, Rule statement) {
+    static TypeRule createConditionRule(String type, Rule value, Rule statement) {
         var child = new ExtractNodeRule("condition", value);
         var conditionParent = new StripRule(new LeftRule("(", child));
 

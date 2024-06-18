@@ -95,10 +95,10 @@ public class JavaLang {
                 Lang.createKeywordRule("continue"),
                 Lang.createReturnRule(value),
 
-                Lang.createIfRule("if", value, statement),
+                Lang.createConditionRule("if", value, statement),
                 Lang.createElseRule(statement),
 
-                Lang.createIfRule("while", value, statement),
+                Lang.createConditionRule("while", value, statement),
                 Lang.createForRule(definition, value, statement, ":"),
 
                 Lang.createTryRule(statement),
