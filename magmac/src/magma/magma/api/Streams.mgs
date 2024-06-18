@@ -10,7 +10,7 @@ public class def Streams() => {
 					if
 					(counter>=list.size())
 					return Optional.empty();
-					next : var = list.get(counter);
+					next = list.get(counter);
 					counter++;
 					return Optional.of(next);
 				}

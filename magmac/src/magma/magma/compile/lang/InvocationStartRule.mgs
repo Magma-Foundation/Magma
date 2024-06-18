@@ -11,28 +11,28 @@ class def InvocationStartRule() => {
 		super(caller, "(", arguments);
 	}
 	protected def computeIndex(input : String) : Optional<Integer> => {
-		depth : var = 0;
-		queue : var = IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		depth = 0;
+		queue = IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
 		while
 		(!queue.isEmpty())
 		{
-			pop : var = queue.pop();
-			i : var = pop.left();
-			c : var = pop.right();
+			pop = queue.pop();
+			i = pop.left();
+			c = pop.right();
 			if
 			(c=='\"')
 			{
 				while
 				(!queue.isEmpty())
 				{
-					next : var = queue.pop().right();
+					next = queue.pop().right();
 					if
 					(next=='\"')
 					{
 						if
 						(!queue.isEmpty())
 						{
-							after : var = queue.peek().right();
+							after = queue.peek().right();
 							if
 							(after=='\\')
 							{

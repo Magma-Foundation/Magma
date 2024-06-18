@@ -7,26 +7,26 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 public class def MembersSplitter() => {
 	public def split(input : String) : List<String> => {
-		current : var = State();
-		queue : var = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		current = State();
+		queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while
 		(!queue.isEmpty())
 		{
-			c : var = queue.pop();
-			state : var = current.append(c);
+			c = queue.pop();
+			state = current.append(c);
 			if
 			(c=='/'&&state.isLevel()&&!queue.isEmpty())
 			{
-				after : var = queue.peek();
+				after = queue.peek();
 				if
 				(after=='/')
 				{
 					// We are in a single-line comment.
-					withAfter : var = state.append(queue.pop());
+					withAfter = state.append(queue.pop());
 					while
 					(!queue.isEmpty())
 					{
-						next : var = queue.pop();
+						next = queue.pop();
 						withAfter=withAfter.append(next);
 						if
 						(next=='\n')
@@ -41,11 +41,11 @@ public class def MembersSplitter() => {
 				}
 				else if(after=='*'){
 					// We are in a block comment.
-					withAfter : var = state.append(queue.pop());
+					withAfter = state.append(queue.pop());
 					while
 					(!queue.isEmpty())
 					{
-						next : var = queue.pop();
+						next = queue.pop();
 						withAfter=withAfter.append(next);
 						if
 						(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
@@ -63,9 +63,9 @@ public class def MembersSplitter() => {
 			if
 			(c=='\'')
 			{
-				next : var = queue.pop();
-				withNext : var = current.append(next);
-				escaped : var = next=='\\'?current.append(queue.pop()):withNext;
+				next = queue.pop();
+				withNext = current.append(next);
+				escaped = next=='\\'?current.append(queue.pop()):withNext;
 				current=escaped.append(queue.pop());
 				continue
 				;
@@ -73,11 +73,11 @@ public class def MembersSplitter() => {
 			if
 			(c=='\"')
 			{
-				withString : var = current;
+				withString = current;
 				while
 				(!queue.isEmpty())
 				{
-					next : var = queue.pop();
+					next = queue.pop();
 					withString=withString.append(next);
 					if
 					(next=='\\')
@@ -123,7 +123,7 @@ public class def MembersSplitter() => {
 			this(Collections.emptyList(), StringBuilder(), 0);
 		}
 		private def advance() : State => {
-			copy : var = ArrayList(this.tokens);
+			copy = ArrayList(this.tokens);
 			copy.add(this.buffer.toString());
 			return State(copy, StringBuilder(), depth);
 		}

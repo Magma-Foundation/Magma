@@ -23,6 +23,20 @@ public class JavaToMagmaGenerator extends Generator {
                 .toList();
     }
 
+    private static Node removeType(Node node) {
+        var definition = node.findNode("definition").orElseThrow();
+        var typeOptional = definition.findNode("type").orElseThrow();
+
+        var type = typeOptional;
+        if (!type.is("symbol")) return node;
+
+        var value = type.findString("value").orElseThrow();
+        if (value.equals("var")) {
+            return node.withNode("definition", definition.remove("type"));
+        }
+        return node;
+    }
+
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
         return postVisitFunction(node, depth)
@@ -90,7 +104,15 @@ public class JavaToMagmaGenerator extends Generator {
                 .or(() -> replaceInterfaceWithStruct(node, depth))
                 .or(() -> replaceMethodReferenceWithAccess(node, depth))
                 .or(() -> replaceGenericWithFunctionType(node, depth))
+                .or(() -> preVisitDeclaration(node, depth))
                 .orElse(new Tuple<>(node, depth));
+    }
+
+    private Optional<? extends Tuple<Node, Integer>> preVisitDeclaration(Node node, int depth) {
+        if (!node.is("declaration")) return Optional.empty();
+
+        var removed = removeType(node);
+        return Optional.of(new Tuple<>(removed, depth));
     }
 
     private Optional<Tuple<Node, Integer>> replaceGenericWithFunctionType(Node node, int depth) {

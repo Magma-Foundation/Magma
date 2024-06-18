@@ -18,9 +18,9 @@ public abstract class def ExtractStringListRule() => {
 		return attribute.asStringList().map(() => String.join(delimiter, list));
 	}
 	protected def toAttribute(content : String) : Result<Attribute, Error_> => {
-		list : var = split(content);
+		list = split(content);
 		for(format : String in list){
-			qualified : var = qualify(format);
+			qualified = qualify(format);
 			if
 			(qualified.isPresent())
 			{
@@ -35,7 +35,7 @@ public abstract class def ExtractStringListRule() => {
 		while
 		(true)
 		{
-			end : var = content.indexOf(delimiter, start);
+			end = content.indexOf(delimiter, start);
 			if
 			(end==-1)
 			break;

@@ -29,14 +29,14 @@ public final class def SplitMultipleRule() => {
 		this=delimiter;
 	}
 	public def toNode(input : String) : RuleResult => {
-		split : var = splitter.split(input);
-		members : var = ArrayList();
+		split = splitter.split(input);
+		members = ArrayList();
 		for(childString : String in split){
-			result : var = childRule.toNode(childString);
+			result = childRule.toNode(childString);
 			if
 			(result.findError().isPresent())
 			return result.mapErr(() => CompileParentError("Cannot process child.", childString, err));
-			optional : var = result.tryCreate();
+			optional = result.tryCreate();
 			if
 			(optional.isEmpty())
 			{
@@ -53,8 +53,8 @@ public final class def SplitMultipleRule() => {
 		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));
 	}
 	private def createErr(node : Node) : Err<String, Error_> => {
-		format : var = "Property '%s' does not exist on node.";
-		message : var = format.formatted(propertyKey);
+		format = "Property '%s' does not exist on node.";
+		message = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
 }

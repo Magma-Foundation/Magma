@@ -11,11 +11,26 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("block"))
 		return Optional.empty();
-		newBlock : var = node.mapNodes("children", JavaToMagmaGenerator.removePackagesFromList);
+		newBlock = node.mapNodes("children", JavaToMagmaGenerator.removePackagesFromList);
 		return Optional.of(Tuple(newBlock, depth+1));
 	}
 	private static def removePackagesFromList(children : List<Node>) : List<Node> => {
 		return children.stream().filter(() => !child.is("package")).toList();
+	}
+	private static def removeType(node : Node) : Node => {
+		definition = node.findNode("definition").orElseThrow();
+		typeOptional = definition.findNode("type").orElseThrow();
+		type = typeOptional;
+		if
+		(!type.is("symbol"))
+		return node;
+		value = type.findString("value").orElseThrow();
+		if
+		(value.equals("var"))
+		{
+			return node.withNode("definition", definition.remove("type"));
+		}
+		return node;
 	}
 	protected def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		return postVisitFunction(node, depth).or(() => postVisitBlock(node, depth)).or(() => formatDeclaration(node, depth)).orElse(Tuple(node, depth));
@@ -30,8 +45,8 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("block"))
 		return Optional.empty();
-		prefix : var = "\n" + "\t".repeat(depth);
-		newBlock : var = node.mapNodes("children", () => {
+		prefix = "\n" + "\t".repeat(depth);
+		newBlock = node.mapNodes("children", () => {
 			return children.stream().filter(() => !child.is("empty")).map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
 		}).withString("after-content", "\n" + "\t".repeat(depth==0?0:depth-1));
 		return Optional.of(Tuple(newBlock, depth-1));
@@ -40,16 +55,16 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(node.is("function"))
 		{
-			oldDefinition : var = node.findNode("definition");
+			oldDefinition = node.findNode("definition");
 			if
 			(oldDefinition.isPresent())
 			{
-				params : var = node.findNodeList("params").orElse(Collections.emptyList());
+				params = node.findNodeList("params").orElse(Collections.emptyList());
 				if
 				(node.has("child"))
 				{
-					newDefinition : var = oldDefinition.get().withNodeList("params", params).mapOrSetStringList("modifiers", () => {
-						copy : var = ArrayList(list);
+					newDefinition = oldDefinition.get().withNodeList("params", params).mapOrSetStringList("modifiers", () => {
+						copy = ArrayList(list);
 						copy.add("def");
 						return copy;
 					}, () => List.of("def"));
@@ -64,24 +79,31 @@ public class def JavaToMagmaGenerator() => {
 		return Optional.empty();
 	}
 	protected def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).or(() => replaceGenericWithFunctionType(node, depth)).orElse(Tuple(node, depth));
+		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).or(() => replaceGenericWithFunctionType(node, depth)).or(() => preVisitDeclaration(node, depth)).orElse(Tuple(node, depth));
+	}
+	private def preVisitDeclaration(node : Node, depth : int) : Optional<? extends Tuple<Node, Integer>> => {
+		if
+		(!node.is("declaration"))
+		return Optional.empty();
+		removed = removeType(node);
+		return Optional.of(Tuple(removed, depth));
 	}
 	private def replaceGenericWithFunctionType(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("generic"))
 		return Optional.empty();
-		parent : var = node.findString("parent").orElseThrow();
+		parent = node.findString("parent").orElseThrow();
 		if
 		(!parent.equals("Function"))
 		return Optional.of(Tuple(node, depth));
-		children : var = node.findNodeList("children").orElseThrow();
+		children = node.findNodeList("children").orElseThrow();
 		if
 		(children.size()!=2)
 		{
 			return Optional.empty();
 		}
-		from : var = children.get(0);
-		to : var = children.get(1);
+		from = children.get(0);
+		to = children.get(1);
 		return Optional.of(Tuple(node.clear("function-type").withNodeList("params", List.of(from)).withNode("returns", to), depth));
 	}
 	private def replaceMethodReferenceWithAccess(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
@@ -112,14 +134,14 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("constructor"))
 		return Optional.empty();
-		oldChildrenOptional : var = node.findNodeList("children");
+		oldChildrenOptional = node.findNodeList("children");
 		if
 		(oldChildrenOptional.isPresent())
 		{
-			originalArguments : var = node.findNodeList("arguments").orElse(Collections.emptyList());
-			oldChildren : var = oldChildrenOptional.get();
-			nonFunctions : var = ArrayList();
-			functions : var = ArrayList();
+			originalArguments = node.findNodeList("arguments").orElse(Collections.emptyList());
+			oldChildren = oldChildrenOptional.get();
+			nonFunctions = ArrayList();
+			functions = ArrayList();
 			for(oldChild : Node in oldChildren){
 				if
 				(oldChild.is("method"))
@@ -131,13 +153,13 @@ public class def JavaToMagmaGenerator() => {
 					nonFunctions.add(oldChild);
 				}
 			}
-			construction : var = node.clear("construction").withNode("child", node.clear("block").withNodeList("children", functions));
-			newChildren : var = ArrayList(nonFunctions);
+			construction = node.clear("construction").withNode("child", node.clear("block").withNodeList("children", functions));
+			newChildren = ArrayList(nonFunctions);
 			newChildren.add(Node("return").withNode("child", construction));
-			lambdaBody : var = node.clear("block").withNodeList("children", newChildren);
-			lambda : var = node.clear("function").withNode("child", lambdaBody);
-			lambda1 : var = node.clear("invocation").withNode("caller", node.clear("quantity").withNode("value", lambda)).withNodeList("arguments", Collections.emptyList());
-			classCreator : var = node.retype("invocation").remove("children").withNodeList("arguments", Collections.singletonList(lambda1));
+			lambdaBody = node.clear("block").withNodeList("children", newChildren);
+			lambda = node.clear("function").withNode("child", lambdaBody);
+			lambda1 = node.clear("invocation").withNode("caller", node.clear("quantity").withNode("value", lambda)).withNodeList("arguments", Collections.emptyList());
+			classCreator = node.retype("invocation").remove("children").withNodeList("arguments", Collections.singletonList(lambda1));
 			return Optional.of(Tuple(node.clear("invocation").withNode("caller", classCreator).withNodeList("arguments", originalArguments), depth));
 		}
 		else
@@ -155,12 +177,12 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("class"))
 		return Optional.empty();
-		name : var = node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
-		modifiers : var = node.findStringList("modifiers").orElseThrow();
-		newModifiers : var = ArrayList(modifiers);
+		name = node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
+		modifiers = node.findStringList("modifiers").orElseThrow();
+		newModifiers = ArrayList(modifiers);
 		newModifiers.add("class");
-		definition : var = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
-		function : var = node.retype("function").withNode("definition", definition);
+		definition = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
+		function = node.retype("function").withNode("definition", definition);
 		return Optional.of(Tuple(function, depth));
 	}
 }

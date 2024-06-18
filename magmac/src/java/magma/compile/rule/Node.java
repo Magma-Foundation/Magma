@@ -71,6 +71,9 @@ public record Node(String type, Attributes attributes) {
         return with(key, new StringListAttribute(values));
     }
 
+    /*
+    TODO: throw an error if the property requested doesn't exist.
+     */
     public Node remove(String key) {
         return new Node(type, attributes.remove(key));
     }

@@ -20,38 +20,38 @@ public abstract class def SplitOnceRule() => {
 		this=rightRule;
 	}
 	public def toNode(input : String) : RuleResult => {
-		tuple : var = computeIndex(input).map(() => {
-			left1 : var = input.substring(0, keywordIndex);
-			right1 : var = input.substring(keywordIndex+slice.length());
+		tuple = computeIndex(input).map(() => {
+			left1 = input.substring(0, keywordIndex);
+			right1 = input.substring(keywordIndex+slice.length());
 			return Tuple(left1, right1);
 		});
 		return tuple.map(() => {
-			left : var = contentStart.left();
-			right : var = contentStart.right();
-			leftResult : var = leftRule.toNode(left);
+			left = contentStart.left();
+			right = contentStart.right();
+			leftResult = leftRule.toNode(left);
 			if
 			(leftResult.findError().isPresent())
 			return leftResult;
-			rightResult : var = rightRule.toNode(right);
+			rightResult = rightRule.toNode(right);
 			if
 			(rightResult.findError().isPresent())
 			return rightResult;
 			return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();
 		}).orElseGet(() => {
-			format : var = "Slice '%s' not present.";
-			message : var = format.formatted(slice);
+			format = "Slice '%s' not present.";
+			message = format.formatted(slice);
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
 	protected abstract computeIndex : Optional<Integer>;
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		leftResult : var = leftRule.fromNode(node);
-		rightValue : var = rightRule.fromNode(node);
+		leftResult = leftRule.fromNode(node);
+		rightValue = rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
 	}
 	private def createError(node : Node, err : Error_) : CompileParentError => {
-		format : var = "Cannot merge node using slice '%s'.";
-		message : var = format.formatted(slice);
+		format = "Cannot merge node using slice '%s'.";
+		message = format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);
 	}
 }

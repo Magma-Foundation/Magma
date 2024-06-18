@@ -1,11 +1,11 @@
 
 public class def Results() => {
 	public static def unwrap<T, E extends Throwable>(result : Result<T, E>) : T => {
-		value : var = result.findValue();
+		value = result.findValue();
 		if
 		(value.isPresent())
 		return value.get();
-		err : var = result.findErr();
+		err = result.findErr();
 		if
 		(err.isPresent())
 		throw err.get();

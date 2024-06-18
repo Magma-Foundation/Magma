@@ -53,6 +53,10 @@ import java.util.function.Supplier;
 	public def withStringList(key : String, values : List<String>) : Node => {
 		return with(key, StringListAttribute(values));
 	}
+	
+	/*
+    TODO: throw an error if the property requested doesn't exist.
+     */
 	public def remove(key : String) : Node => {
 		return Node(type, attributes.remove(key));
 	}
