@@ -1,6 +1,6 @@
 
-public Results => {
-	public static unwrap : T => {
+public class def Results() => {
+	public static def unwrap() : T => {
 		
 		value : var=
 		result.findValue();

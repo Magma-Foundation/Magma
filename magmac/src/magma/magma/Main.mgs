@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
-public Main => {
+public class def Main() => {
 	
 	public static final TARGET_DIRECTORY : Path=
 	Paths.get(".", "magmac", "src", "magma");
@@ -25,7 +25,7 @@ public Main => {
 	
 	public static final DEBUG_DIRECTORY : Path=
 	Paths.get(".", "magmac", "debug", "java-mgs");
-	public static main : void => {
+	public static def main() : void => {
 		try 
 		{
 			run();}
@@ -35,7 +35,7 @@ public Main => {
 		catch (e : CompileException){
 			//noinspection CallToPrintStackTrace
 			e.printStackTrace();}}
-	private static run : void => {
+	private static def run() : void => {
 		
 		sources : var=
 		Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
@@ -47,7 +47,7 @@ public Main => {
 			(error.isPresent())
 			{
 				throw error.get();}}}
-	private static compileSource : Optional<CompileException> => {
+	private static def compileSource() : Optional<CompileException> => {
 		
 		relativized : var=
 		SOURCE_DIRECTORY.relativize(source.getParent());
@@ -71,7 +71,7 @@ public Main => {
 		parseResult : var=
 		JavaLang.createRootRule().toNode(input);
 		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.getCompileException);}
-	private static getCompileException : Optional<CompileException> => {
+	private static def getCompileException() : Optional<CompileException> => {
 		try 
 		{
 			
@@ -81,7 +81,7 @@ public Main => {
 			return Optional.of(CompileException());}
 		catch (e : CompileException){
 			return Optional.of(e);}}
-	private static handle : Optional<CompileException> => {
+	private static def handle() : Optional<CompileException> => {
 		try 
 		{
 			if
@@ -112,25 +112,25 @@ public Main => {
 			return Optional.empty();}
 		catch (e : CompileException){
 			return Optional.of(e);}}
-	private static readImpl : String => {
+	private static def readImpl() : String => {
 		try 
 		{
 			return Files.readString(source);}
 		catch (e : IOException){
 			throw CompileException("Failed to read input: "+source, e);}}
-	private static createDirectory : Path => {
+	private static def createDirectory() : Path => {
 		try 
 		{
 			return Files.createDirectories(targetParent);}
 		catch (e : IOException){
 			throw CompileException("Failed to make parent.", e);}}
-	private static writeImpl : void => {
+	private static def writeImpl() : void => {
 		try 
 		{
 			Files.writeString(target, csq);}
 		catch (e : IOException){
 			throw CompileException("Cannot write.", e);}}
-	private static print : String => {
+	private static def print() : String => {
 		
 		context : var=
 		formatContext(error, depth);
@@ -176,7 +176,7 @@ public Main => {
 			print(cause, depth+1);
 			builder.append(result);}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";}
-	private static formatContext : String => {
+	private static def formatContext() : String => {
 		
 		actualContext : var=
 		e.findContext().orElse("");
@@ -190,7 +190,7 @@ public Main => {
 		formatted : var=
 		actualContext.replace("\n", "\n" + " ".repeat(depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";}
-	private static generate : Node => {
+	private static def generate() : Node => {
 		
 		list : var=
 		Arrays.asList(JavaToMagmaGenerator());

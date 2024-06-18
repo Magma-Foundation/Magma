@@ -1,15 +1,15 @@
 
 import java.util.List;
 import java.util.Optional;
-public MultipleError => {
+public class def MultipleError() => {
 	private final errors : List<Error_>;
-	MultipleError : public => {
+	def MultipleError() : public => {
 		this=errors;}
-	public findMessage : Optional<String> => {
+	public def findMessage() : Optional<String> => {
 		return Optional.empty();}
-	public findCauses : Optional<List<Error_>> => {
+	public def findCauses() : Optional<List<Error_>> => {
 		return Optional.of(errors);}
-	public findContext : Optional<String> => {
+	public def findContext() : Optional<String> => {
 		return Optional.empty();}
-	public calculateDepth : int => {
+	public def calculateDepth() : int => {
 		return 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);}}

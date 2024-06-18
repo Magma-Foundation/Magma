@@ -1,8 +1,8 @@
 
-public final NumberRule => {
-	NumberRule : public => {
+public final class def NumberRule() => {
+	def NumberRule() : public => {
 		super(child);}
-	private static allDigits : boolean => {
+	private static def allDigits() : boolean => {
 		if
 		(input.isEmpty())
 		return false;
@@ -21,7 +21,7 @@ public final NumberRule => {
 				return false;}
 			i++;}
 		return true;}
-	protected computeMessage : String => {
+	protected def computeMessage() : String => {
 		return "Not a number.";}
-	protected filter : boolean => {
+	protected def filter() : boolean => {
 		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);}}

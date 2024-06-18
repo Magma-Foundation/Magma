@@ -10,15 +10,15 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
-public abstract SplitOnceRule => {
+public abstract class def SplitOnceRule() => {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
-	SplitOnceRule : public => {
+	def SplitOnceRule() : public => {
 		this=leftRule;
 		this=slice;
 		this=rightRule;}
-	public toNode : RuleResult => {
+	public def toNode() : RuleResult => {
 		
 		tuple : var=
 		computeIndex(input).map(() => {
@@ -57,7 +57,7 @@ public abstract SplitOnceRule => {
 			format.formatted(slice);
 			return ErrorRuleResult(CompileError(message, input));});}
 	protected abstract computeIndex : Optional<Integer>;
-	public fromNode : Result<String, Error_> => {
+	public def fromNode() : Result<String, Error_> => {
 		
 		leftResult : var=
 		leftRule.fromNode(node);
@@ -65,7 +65,7 @@ public abstract SplitOnceRule => {
 		rightValue : var=
 		rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));}
-	private createError : CompileParentError => {
+	private def createError() : CompileParentError => {
 		
 		format : var=
 		"Cannot merge node using slice '%s'.";

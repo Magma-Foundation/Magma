@@ -2,10 +2,10 @@
 import magma.compile.Error_;
 import magma.compile.rule.Rule;
 import java.util.Optional;
-public final QualifiedExtractStringListRule => {
+public final class def QualifiedExtractStringListRule() => {
 	private final qualifier : Rule;
-	QualifiedExtractStringListRule : public => {
+	def QualifiedExtractStringListRule() : public => {
 		super(key, delimiter);
 		this=qualifier;}
-	protected qualify : Optional<Error_> => {
+	protected def qualify() : Optional<Error_> => {
 		return qualifier.toNode(child).findError();}}

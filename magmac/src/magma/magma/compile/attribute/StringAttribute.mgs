@@ -1,9 +1,9 @@
 
 import java.util.Optional;
 () => {
-	public asString : Optional<String> => {
+	public def asString() : Optional<String> => {
 		return Optional.of(value);}
-	public format : String => {
+	public def format() : String => {
 		return "\"" + escape() + "\"";}
-	private escape : String => {
+	private def escape() : String => {
 		return value.replace("\n", "\\n").replace("\t", "\\t");}}

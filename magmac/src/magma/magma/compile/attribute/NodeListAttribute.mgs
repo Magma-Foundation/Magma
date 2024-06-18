@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 	Factory();
 	
 	;
-	public asNodeList : Optional<List<Node>> => {
+	public def asNodeList() : Optional<List<Node>> => {
 		return Optional.of(nodeList);}
-	public format : String => {
+	public def format() : String => {
 		if
 		(nodeList.isEmpty())
 		return "[]";

@@ -10,7 +10,7 @@ import magma.compile.rule.result.RuleResult;
 	
 	public static final FORMAT : String=
 	"Node was not of type '%s', but rather '%s'.";
-	public toNode : RuleResult => {
+	public def toNode() : RuleResult => {
 		
 		result : var=
 		child.toNode(input);
@@ -24,7 +24,7 @@ import magma.compile.rule.result.RuleResult;
 		message : var=
 		format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));}
-	public fromNode : Result<String, Error_> => {
+	public def fromNode() : Result<String, Error_> => {
 		if
 		(!node.type().equals(type))
 		{

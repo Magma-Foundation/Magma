@@ -4,6 +4,8 @@ import magma.api.Tuple;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +25,7 @@ public class JavaToMagmaGenerator extends Generator {
 
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
-        return unwrapUnimplementedFunction(node, depth)
+        return postVisitFunction(node, depth)
                 .or(() -> postVisitBlock(node, depth))
                 .orElse(new Tuple<>(node, depth));
     }
@@ -41,12 +43,23 @@ public class JavaToMagmaGenerator extends Generator {
         return Optional.of(new Tuple<>(newBlock, depth - 1));
     }
 
-    private Optional<Tuple<Node, Integer>> unwrapUnimplementedFunction(Node node, int depth) {
+    private Optional<Tuple<Node, Integer>> postVisitFunction(Node node, int depth) {
         if (node.is("function")) {
-            if (!node.has("child")) {
-                var definition = node.findNode("definition");
-                if (definition.isPresent()) {
-                    return Optional.of(new Tuple<>(definition.get(), depth));
+            var oldDefinition = node.findNode("definition");
+
+            if (oldDefinition.isPresent()) {
+                if (node.has("child")) {
+                    var newDefinition = oldDefinition.get()
+                            .mapOrSetNodeList("params", params -> params, () -> Collections.emptyList())
+                            .mapOrSetStringList("modifiers", list -> {
+                                var copy = new ArrayList<>(list);
+                                copy.add("def");
+                                return copy;
+                            }, () -> List.of("def"));
+
+                    return Optional.of(new Tuple<>(node.withNode("definition", newDefinition), depth));
+                } else {
+                    return Optional.of(new Tuple<>(oldDefinition.get(), depth));
                 }
             }
         }
@@ -108,11 +121,15 @@ public class JavaToMagmaGenerator extends Generator {
 
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
 
-        var modifiers = node.findStringList("modifiers").orElseThrow();
+        var modifiers = node.findStringList("modifiers")
+                .orElseThrow();
+
+        var newModifiers = new ArrayList<>(modifiers);
+        newModifiers.add("class");
 
         var definition = node.clear("definition")
                 .withString("name", name)
-                .withStringList("modifiers", modifiers);
+                .withStringList("modifiers", newModifiers);
 
         var function = node.retype("function").withNode("definition", definition);
 

@@ -9,9 +9,9 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 () => {
-	public toNode : RuleResult => {
+	public def toNode() : RuleResult => {
 		return input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));}
-	public fromNode : Result<String, Error_> => {
+	public def fromNode() : Result<String, Error_> => {
 		if
 		(node.has(name))
 		{

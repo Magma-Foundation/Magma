@@ -12,19 +12,19 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
-public abstract ExtractRule => {
+public abstract class def ExtractRule() => {
 	protected final key : String;
-	ExtractRule : public => {
+	def ExtractRule() : public => {
 		this=key;}
 	protected abstract fromAttribute : Optional<String>;
 	protected abstract toAttribute : Result<Attribute, Error_>;
-	public toNode : RuleResult => {
+	public def toNode() : RuleResult => {
 		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}
-	public fromNode : Result<String, Error_> => {
+	public def fromNode() : Result<String, Error_> => {
 		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}
-	private static getStringErrorOk : Result<String, Error_> => {
+	private static def getStringErrorOk() : Result<String, Error_> => {
 		return Ok(value);}
-	private createErr : Err<String, Error_> => {
+	private def createErr() : Err<String, Error_> => {
 		
 		format : var=
 		"Property '%s' does not exist.";

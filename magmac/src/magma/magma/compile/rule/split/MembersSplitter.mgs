@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-public MembersSplitter => {
-	public split : List<String> => {
+public class def MembersSplitter() => {
+	public def split() : List<String> => {
 		
 		current : var=
 		State();
@@ -128,21 +128,21 @@ public MembersSplitter => {
 				current=state;}}
 		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();}
 	() => {
-		State : public => {
+		def State() : public => {
 			this(Collections.emptyList(), StringBuilder(), 0);}
-		private advance : State => {
+		private def advance() : State => {
 			
 			copy : var=
 			ArrayList(this.tokens);
 			copy.add(this.buffer.toString());
 			return State(copy, StringBuilder(), depth);}
-		private append : State => {
+		private def append() : State => {
 			return State(tokens, this.buffer.append(c), depth);}
-		public isLevel : boolean => {
+		public def isLevel() : boolean => {
 			return this.depth==0;}
-		public enter : State => {
+		public def enter() : State => {
 			return State(tokens, buffer, depth+1);}
-		public exit : State => {
+		public def exit() : State => {
 			return State(tokens, buffer, depth-1);}
-		public isShallow : boolean => {
+		public def isShallow() : boolean => {
 			return depth==1;}}}

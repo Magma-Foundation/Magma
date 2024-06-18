@@ -8,14 +8,14 @@ import magma.compile.attribute.StringListAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-public abstract ExtractStringListRule => {
+public abstract class def ExtractStringListRule() => {
 	protected final delimiter : String;
-	ExtractStringListRule : public => {
+	def ExtractStringListRule() : public => {
 		super(key);
 		this=delimiter;}
-	protected fromAttribute : Optional<String> => {
+	protected def fromAttribute() : Optional<String> => {
 		return attribute.asStringList().map(() => String.join(delimiter, list));}
-	protected toAttribute : Result<Attribute, Error_> => {
+	protected def toAttribute() : Result<Attribute, Error_> => {
 		
 		list : var=
 		split(content);
@@ -28,7 +28,7 @@ public abstract ExtractStringListRule => {
 			{
 				return Err(qualified.get());}}
 		return Ok(StringListAttribute(list));}
-	private split : List<String> => {
+	private def split() : List<String> => {
 		
 		result : List<String>=
 		ArrayList();

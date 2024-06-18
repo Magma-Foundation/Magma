@@ -5,10 +5,10 @@ import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;
 import java.util.Optional;
-public final ExtractStringRule => {
-	ExtractStringRule : public => {
+public final class def ExtractStringRule() => {
+	def ExtractStringRule() : public => {
 		super(key);}
-	protected fromAttribute : Optional<String> => {
+	protected def fromAttribute() : Optional<String> => {
 		return attribute.asString();}
-	protected toAttribute : Result<Attribute, Error_> => {
+	protected def toAttribute() : Result<Attribute, Error_> => {
 		return Ok(StringAttribute(content));}}

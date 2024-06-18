@@ -83,6 +83,13 @@ public record Node(String type, Attributes attributes) {
         return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, mapper));
     }
 
+    public Node mapOrSetNodeList(String key, Function<List<Node>, List<Node>> onPresent, Supplier<List<Node>> onEmpty) {
+        if (has(key)) {
+            return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, onPresent));
+        } else {
+            return with(key, new NodeListAttribute(onEmpty.get()));
+        }
+    }
 
     public Node mapOrSetStringList(String key, Function<List<String>, List<String>> onPresent, Supplier<List<String>> onEmpty) {
         if (has(key)) {

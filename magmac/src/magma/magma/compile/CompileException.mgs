@@ -1,7 +1,7 @@
 
-public CompileException => {
-	CompileException : public => {
+public class def CompileException() => {
+	def CompileException() : public => {
 		super(message, cause);}
-	CompileException : public => {
+	def CompileException() : public => {
 		super(message);}
-	CompileException : public => {}}
+	def CompileException() : public => {}}

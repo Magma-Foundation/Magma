@@ -2,17 +2,17 @@
 import java.util.Optional;
 import java.util.function.Function;
 () => {
-	public findValue : Optional<T> => {
+	public def findValue() : Optional<T> => {
 		return Optional.of(value);}
-	public findErr : Optional<E> => {
+	public def findErr() : Optional<E> => {
 		return Optional.empty();}
-	public flatMapValue : Result<R, E> => {
+	public def flatMapValue() : Result<R, E> => {
 		return mapper.apply(value);}
-	public mapValue : Result<R, E> => {
+	public def mapValue() : Result<R, E> => {
 		return Ok(mapper.apply(value));}
-	public isOk : boolean => {
+	public def isOk() : boolean => {
 		return true;}
-	public mapErr : Result<T, R> => {
+	public def mapErr() : Result<T, R> => {
 		return Ok(value);}
-	public match : R => {
+	public def match() : R => {
 		return onOk.apply(value);}}

@@ -8,8 +8,8 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
-public Generator => {
-	private generateAttribute : Tuple<Attribute, Integer> => {
+public class def Generator() => {
+	private def generateAttribute() : Tuple<Attribute, Integer> => {
 		
 		nodeList : var=
 		attribute.asNodeList();
@@ -30,11 +30,11 @@ public Generator => {
 				current=nodeIntegerTuple.right();}
 			return Tuple(NodeListAttribute(list), current);}
 		return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));}
-	private getAttributeIntegerTuple : Tuple<Attribute, Integer> => {
+	private def getAttributeIntegerTuple() : Tuple<Attribute, Integer> => {
 		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);}
-	public generate : Node => {
+	public def generate() : Node => {
 		return generateWithDepth(node, state).left();}
-	private generateWithDepth : Tuple<Node, Integer> => {
+	private def generateWithDepth() : Tuple<Node, Integer> => {
 		
 		preVisitedTuple : var=
 		preVisit(node, depth);
@@ -63,7 +63,7 @@ public Generator => {
 			newAttributes=newAttributes.with(key, newTuple.left());
 			current=newTuple.right();}
 		return postVisit(preVisited.withAttributes(newAttributes), current);}
-	protected preVisit : Tuple<Node, Integer> => {
+	protected def preVisit() : Tuple<Node, Integer> => {
 		return Tuple(node, depth);}
-	protected postVisit : Tuple<Node, Integer> => {
+	protected def postVisit() : Tuple<Node, Integer> => {
 		return Tuple(node, depth);}}

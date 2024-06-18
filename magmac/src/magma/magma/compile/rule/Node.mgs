@@ -11,41 +11,49 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 () => {
-	Node : public => {
+	def Node() : public => {
 		this(type, MapAttributes());}
-	public mapNode : Node => {
+	public def mapNode() : Node => {
 		return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));}
-	public withString : Node => {
+	public def withString() : Node => {
 		return with(key, StringAttribute(value));}
-	private with : Node => {
+	private def with() : Node => {
 		return mapAttributes(() => attributes.with(key, value));}
-	public formatWithDepth : String => {
+	public def formatWithDepth() : String => {
 		return "\t".repeat(depth)+format(depth);}
-	public format : String => {
+	public def format() : String => {
 		return type+" = "+attributes.format(depth);}
-	public toString : String => {
+	public def toString() : String => {
 		return formatWithDepth(0);}
-	public is : boolean => {
+	public def is() : boolean => {
 		return this.type.equals(type);}
-	public mapAttributes : Node => {
+	public def mapAttributes() : Node => {
 		return Node(type, mapper.apply(attributes));}
-	public retype : Node => {
+	public def retype() : Node => {
 		return Node(type, attributes);}
-	public withAttributes : Node => {
+	public def withAttributes() : Node => {
 		return Node(type, attributes);}
-	public withNode : Node => {
+	public def withNode() : Node => {
 		return with(key, NodeAttribute(value));}
-	public withNodeList : Node => {
+	public def withNodeList() : Node => {
 		return with(key, NodeListAttribute(values));}
-	public withStringList : Node => {
+	public def withStringList() : Node => {
 		return with(key, StringListAttribute(values));}
-	public remove : Node => {
+	public def remove() : Node => {
 		return Node(type, attributes.remove(key));}
-	public has : boolean => {
+	public def has() : boolean => {
 		return attributes.has(child);}
-	public mapNodes : Node => {
+	public def mapNodes() : Node => {
 		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));}
-	public mapOrSetStringList : Node => {
+	public def mapOrSetNodeList() : Node => {
+		if
+		(has(key))
+		{
+			return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, onPresent));}
+		else
+		{
+			return with(key, NodeListAttribute(onEmpty.get()));}}
+	public def mapOrSetStringList() : Node => {
 		if
 		(has(key))
 		{
@@ -53,11 +61,11 @@ import java.util.function.Supplier;
 		else
 		{
 			return with(key, StringListAttribute(onEmpty.get()));}}
-	public findNode : Optional<Node> => {
+	public def findNode() : Optional<Node> => {
 		return attributes.apply(key).flatMap(Attribute.asNode);}
-	public findString : Optional<String> => {
+	public def findString() : Optional<String> => {
 		return attributes.apply(key).flatMap(Attribute.asString);}
-	public findStringList : Optional<List<String>> => {
+	public def findStringList() : Optional<List<String>> => {
 		return attributes.apply(key).flatMap(Attribute.asStringList);}
-	public clear : Node => {
+	public def clear() : Node => {
 		return Node(type);}}

@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
- ConditionEndRule => {
-	ConditionEndRule : public => {
+class def ConditionEndRule() => {
+	def ConditionEndRule() : public => {
 		super(conditionParent, ")", valueParent);}
-	protected computeIndex : Optional<Integer> => {
+	protected def computeIndex() : Optional<Integer> => {
 		
 		/*
         TODO: reduce nesting

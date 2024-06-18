@@ -1,12 +1,12 @@
 
 import java.util.Optional;
 import java.util.function.Function;
-public abstract AbstractStream => {
-	public map : Stream<R> => {
+public abstract class def AbstractStream() => {
+	public def map() : Stream<R> => {
 		return AbstractStream();
 		
 		;}
-	public collect : C => {
+	public def collect() : C => {
 		
 		current : var=
 		collector.createInitial();

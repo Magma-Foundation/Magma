@@ -17,17 +17,17 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-public final SplitMultipleRule => {
+public final class def SplitMultipleRule() => {
 	private final propertyKey : String;
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	SplitMultipleRule : public => {
+	def SplitMultipleRule() : public => {
 		this=propertyKey;
 		this=childRule;
 		this=splitter;
 		this=delimiter;}
-	public toNode : RuleResult => {
+	public def toNode() : RuleResult => {
 		
 		split : var=
 		splitter.split(input);
@@ -50,11 +50,11 @@ public final SplitMultipleRule => {
 				return ErrorRuleResult(CompileError("No name present for.", childString));}
 			members.add(optional.get());}
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));}
-	private joinNodes : Result<String, Error_> => {
+	private def joinNodes() : Result<String, Error_> => {
 		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));}
-	public fromNode : Result<String, Error_> => {
+	public def fromNode() : Result<String, Error_> => {
 		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));}
-	private createErr : Err<String, Error_> => {
+	private def createErr() : Err<String, Error_> => {
 		
 		format : var=
 		"Property '%s' does not exist on node.";

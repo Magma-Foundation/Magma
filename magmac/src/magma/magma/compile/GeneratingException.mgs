@@ -1,12 +1,12 @@
 
-public GeneratingException => {
+public class def GeneratingException() => {
 	public final content : String;
-	GeneratingException : public => {
+	def GeneratingException() : public => {
 		super(message);
 		this="";}
-	GeneratingException : public => {
+	def GeneratingException() : public => {
 		super(message);
 		this=content;}
-	GeneratingException : public => {
+	def GeneratingException() : public => {
 		super(message, cause);
 		this=content;}}
