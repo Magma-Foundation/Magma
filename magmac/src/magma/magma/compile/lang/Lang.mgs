@@ -43,27 +43,27 @@ public class def Lang() => {
 		return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
 	}
 	static def createCatchRule(definition : Rule, statement : Rule) : TypeRule => {
-		declaration : var=StripRule(LeftRule("(", RightRule(definition, ")")));
-		value : var=ExtractNodeRule("child", createBlock(statement));
-		afterKeyword : var=FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));
+		declaration : var = StripRule(LeftRule("(", RightRule(definition, ")")));
+		value : var = ExtractNodeRule("child", createBlock(statement));
+		afterKeyword : var = FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));
 		return TypeRule("catch", LeftRule("catch ", afterKeyword));
 	}
 	static def createTypeRule() : LazyRule => {
-		type : var=LazyRule();
-		generic : var=createGenericTypeRule(type);
+		type : var = LazyRule();
+		generic : var = createGenericTypeRule(type);
 		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("symbol", StripRule(SymbolRule(ExtractStringRule("value")))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));
 		return type;
 	}
 	private static def createGenericTypeRule(type : LazyRule) : TypeRule => {
-		children : var=SplitMultipleRule(ParamSplitter(), ", ", "children", type);
-		parent : var=StripRule(ExtractStringRule("parent"));
+		children : var = SplitMultipleRule(ParamSplitter(), ", ", "children", type);
+		parent : var = StripRule(ExtractStringRule("parent"));
 		return TypeRule("generic", StripRule(FirstRule(parent, "<", RightRule(children, ">"))));
 	}
 	private static def createFunctionType(type : LazyRule) : TypeRule => {
-		params : var=SplitMultipleRule(ParamSplitter(), ", ", "params", type);
-		wrappedParams : var=LeftRule("(", RightRule(params, ")"));
-		maybeParams : var=OptionalRule("params", wrappedParams, LeftRule("()", EmptyRule("params")));
-		returns : var=ExtractNodeRule("returns", type);
+		params : var = SplitMultipleRule(ParamSplitter(), ", ", "params", type);
+		wrappedParams : var = LeftRule("(", RightRule(params, ")"));
+		maybeParams : var = OptionalRule("params", wrappedParams, LeftRule("()", EmptyRule("params")));
+		returns : var = ExtractNodeRule("returns", type);
 		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
 	}
 	static def createTryRule(statement : Rule) : TypeRule => {
@@ -85,57 +85,58 @@ public class def Lang() => {
 		})())("modifiers", " ");
 	}
 	static def createInvocationRule(value : Rule) : TypeRule => {
-		arguments : var=OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
-		caller : var=ExtractNodeRule("caller", StripRule(value));
+		arguments : var = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		caller : var = ExtractNodeRule("caller", StripRule(value));
 		return TypeRule("invocation", RightRule(InvocationStartRule(caller, arguments), ")"));
 	}
 	static def createCommentRule() : TypeRule => {
 		return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
 	}
 	static def createIfRule(type : String, value : Rule, statement : Rule) : TypeRule => {
-		child : var=ExtractNodeRule("condition", value);
-		conditionParent : var=StripRule(LeftRule("(", child));
-		valueWithBlock : var=LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));
-		valueWithoutBlock : var=ExtractNodeRule("value", statement);
-		valueParent : var=StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock)));
+		child : var = ExtractNodeRule("condition", value);
+		conditionParent : var = StripRule(LeftRule("(", child));
+		valueWithBlock : var = LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));
+		valueWithoutBlock : var = ExtractNodeRule("value", statement);
+		valueParent : var = StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock)));
 		return TypeRule(type, LeftRule(type, ConditionEndRule(conditionParent, valueParent)));
 	}
 	static def createReturnRule(value : Rule) : Rule => {
-		child : var=ExtractNodeRule("child", StripRule(value));
-		withValue : var=LeftRule(" ", ContextRule("Invalid value.", child));
-		maybeChild : var=OrRule(List.of(withValue, EmptyRule("child")));
-		after : var=OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
+		child : var = ExtractNodeRule("child", StripRule(value));
+		withValue : var = LeftRule(" ", ContextRule("Invalid value.", child));
+		maybeChild : var = OrRule(List.of(withValue, EmptyRule("child")));
+		after : var = OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
 		return TypeRule("return", LeftRule("return", after));
 	}
 	static def createForRule(definition : Rule, value : Rule, statement : Rule, delimiter : String) : Rule => {
-		collection : var=StripRule(ExtractNodeRule("collection", value));
-		condition : var=RightRule(LastRule(StripRule(definition), delimiter, collection), ")");
-		content : var=RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
-		child : var=StripRule(LeftRule("(", condition));
-		leftRule : var=ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));
-		after : var=FirstRule(leftRule, "{", content);
+		collection : var = StripRule(ExtractNodeRule("collection", value));
+		condition : var = RightRule(LastRule(StripRule(definition), delimiter, collection), ")");
+		content : var = RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		child : var = StripRule(LeftRule("(", condition));
+		leftRule : var = ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));
+		after : var = FirstRule(leftRule, "{", content);
 		return TypeRule("for", LeftRule("for", after));
 	}
 	static def createElseRule(statement : Rule) : Rule => {
-		child : var=RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
-		child1 : var=LeftRule("{", child);
-		anElse : var=LeftRule("else", StripRule(child1));
-		anElse1 : var=LeftRule("else ", ExtractNodeRule("child", statement));
+		child : var = RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		child1 : var = LeftRule("{", child);
+		anElse : var = LeftRule("else", StripRule(child1));
+		anElse1 : var = LeftRule("else ", ExtractNodeRule("child", statement));
 		return TypeRule("else", OrRule(List.of(anElse, anElse1)));
 	}
 	static def createAssignmentRule(value : Rule) : Rule => {
-		reference : var=SymbolRule(ExtractStringRule("reference"));
-		assignable : var=OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
-		left : var=ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
-		right : var=RightRule(ExtractNodeRule("value", StripRule(value)), ";");
+		reference : var = SymbolRule(ExtractStringRule("reference"));
+		assignable : var = OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
+		left : var = ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
+		right : var = RightRule(ExtractNodeRule("value", StripRule(value)), ";");
 		return TypeRule("assignment", FirstRule(left, "=", right));
 	}
 	static def createDeclarationRule(definition : Rule, value : Rule) : TypeRule => {
-		definitionWrapped : var=ExtractNodeRule("definition", TypeRule("definition", definition));
-		withoutTerminator : var=ExtractNodeRule("value", value);
-		withTerminator : var=StripRule(RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");
-		maybeTerminating : var=OrRule(List.of(withTerminator, withoutTerminator));
-		return TypeRule("declaration", FirstRule(definitionWrapped, "=", maybeTerminating));
+		wrappedDefinition : var = ExtractNodeRule("definition", TypeRule("definition", definition));
+		formattedDefinition : var = StripRule(wrappedDefinition, "", "after-definition");
+		withoutTerminator : var = ExtractNodeRule("value", value);
+		withTerminator : var = StripRule(RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");
+		maybeTerminating : var = StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
+		return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));
 	}
 	static def createParamsRule(definition : Rule) : Rule => {
 		return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
@@ -144,7 +145,7 @@ public class def Lang() => {
 		return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
 	}
 	static def createAccessRule(type : String, separator : String, value : Rule) : TypeRule => {
-		parent : var=ExtractNodeRule("parent", StripRule(value));
+		parent : var = ExtractNodeRule("parent", StripRule(value));
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
 	static def createSymbolRule() : TypeRule => {
@@ -166,8 +167,8 @@ public class def Lang() => {
 		return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
 	}
 	static def createThrowRule(value : Rule) : Rule => {
-		rule : Rule=ExtractNodeRule("value", value);
-		after : var=RightRule(rule, ";");
+		rule : Rule = ExtractNodeRule("value", value);
+		after : var = RightRule(rule, ";");
 		return TypeRule("throw", LeftRule("throw ", after));
 	}
 	static def createNotRule(value : LazyRule) : TypeRule => {
@@ -196,14 +197,14 @@ public class def Lang() => {
 			if
 			(!input.contains(slice))
 			return Optional.empty();
-			queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-			depth : var=0;
+			queue : var = IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+			depth : var = 0;
 			while
 			(!queue.isEmpty())
 			{
-				tuple : var=queue.pop();
-				i : var=tuple.left();
-				maybeSlice : var=input.substring(i, Math.min(i+slice.length(), input.length()));
+				tuple : var = queue.pop();
+				i : var = tuple.left();
+				maybeSlice : var = input.substring(i, Math.min(i+slice.length(), input.length()));
 				if
 				(maybeSlice.equals(slice)&&depth==0)
 				{
@@ -211,11 +212,11 @@ public class def Lang() => {
 				}
 				else
 				{
-					c : var=maybeSlice.charAt(0);
+					c : var = maybeSlice.charAt(0);
 					if
 					(c=='\'')
 					{
-						pop : var=queue.pop();
+						pop : var = queue.pop();
 						if
 						(pop.right()=='\\')
 						queue.pop();

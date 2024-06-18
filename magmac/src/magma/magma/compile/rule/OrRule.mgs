@@ -14,9 +14,9 @@ import java.util.Optional;
 		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
 	}
 	public def toNode(input : String) : RuleResult => {
-		errors : var=ArrayList();
+		errors : var = ArrayList();
 		for(rule : Rule in rules()){
-			result : var=rule.toNode(input);
+			result : var = rule.toNode(input);
 			if
 			(result.findAttributes().isPresent())
 			{
@@ -35,12 +35,12 @@ import java.util.Optional;
 		}
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		results : var=ArrayList();
+		results : var = ArrayList();
 		for(rule : var in rules){
-			result : var=rule.fromNode(node);
+			result : var = rule.fromNode(node);
 			results.add(result);
 		}
-		anyOk : Optional<Result<String, Error_>>=Optional.empty();
+		anyOk : Optional<Result<String, Error_>> = Optional.empty();
 		for(result : Result<String, Error_> in results){
 			if
 			(result.isOk())

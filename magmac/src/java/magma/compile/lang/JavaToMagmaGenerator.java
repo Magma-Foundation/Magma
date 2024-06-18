@@ -27,7 +27,16 @@ public class JavaToMagmaGenerator extends Generator {
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
         return postVisitFunction(node, depth)
                 .or(() -> postVisitBlock(node, depth))
+                .or(() -> formatDeclaration(node, depth))
                 .orElse(new Tuple<>(node, depth));
+    }
+
+    private Optional<? extends Tuple<Node, Integer>> formatDeclaration(Node node, int depth) {
+        if (!node.is("declaration")) return Optional.empty();
+
+        return Optional.of(new Tuple<>(node
+                .withString("after-definition", " ")
+                .withString("after-value-separator", " "), depth));
     }
 
     private Optional<Tuple<Node, Integer>> postVisitBlock(Node node, int depth) {

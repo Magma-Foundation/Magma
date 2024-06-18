@@ -20,26 +20,26 @@ import java.util.List;
 import java.util.Optional;
 public class def JavaDefinitionHeaderFactory() => {
 	static def createDefinitionHeaderRule() : Rule => {
-		type : var=ExtractNodeRule("type", Lang.createTypeRule());
-		name : var=ExtractStringRule("name");
-		generics : var=LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
-		withGenerics : var=ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
-		withoutGenerics : var=ContextRule("Without generics.", type);
-		maybeGenerics : var=OrRule(List.of(withGenerics, withoutGenerics));
-		modifiers : var=ModifiersRule();
-		withModifiers : var=ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
-		withoutModifiers : var=ContextRule("Without modifiers.", maybeGenerics);
-		maybeModifiers : var=OrRule(List.of(withModifiers, withoutModifiers));
-		annotation : var=TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
-		annotations : var=SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
-		withAnnotations : var=ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
-		withoutAnnotations : var=ContextRule("Without annotations.", maybeModifiers);
-		maybeAnnotations : var=OrRule(List.of(withAnnotations, withoutAnnotations));
-		beforeName : var=ContextRule("Cannot parse before name.", maybeAnnotations);
+		type : var = ExtractNodeRule("type", Lang.createTypeRule());
+		name : var = ExtractStringRule("name");
+		generics : var = LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
+		withGenerics : var = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
+		withoutGenerics : var = ContextRule("Without generics.", type);
+		maybeGenerics : var = OrRule(List.of(withGenerics, withoutGenerics));
+		modifiers : var = ModifiersRule();
+		withModifiers : var = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
+		withoutModifiers : var = ContextRule("Without modifiers.", maybeGenerics);
+		maybeModifiers : var = OrRule(List.of(withModifiers, withoutModifiers));
+		annotation : var = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		annotations : var = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		withAnnotations : var = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
+		withoutAnnotations : var = ContextRule("Without annotations.", maybeModifiers);
+		maybeAnnotations : var = OrRule(List.of(withAnnotations, withoutAnnotations));
+		beforeName : var = ContextRule("Cannot parse before name.", maybeAnnotations);
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
 	private static class def ModifiersRule() => {
-		public static final MODIFIERS : List<String>=List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		public static final MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
 		def ModifiersRule() : public => {
 			super("modifiers", " ");
 		}

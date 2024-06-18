@@ -14,12 +14,12 @@ import java.util.Collections;
 import java.util.List;
 () => {
 	public def toNode(input : String) : RuleResult => {
-		allIndexes : var=findAllIndexesReverse(input);
-		errors : var=ArrayList();
+		allIndexes : var = findAllIndexesReverse(input);
+		errors : var = ArrayList();
 		for(index : Integer in allIndexes){
-			leftSlice : var=input.substring(0, index);
-			rightSlice : var=input.substring(index+slice.length());
-			leftResult : var=leftRule.toNode(leftSlice);
+			leftSlice : var = input.substring(0, index);
+			rightSlice : var = input.substring(index+slice.length());
+			leftResult : var = leftRule.toNode(leftSlice);
 			if
 			(leftResult.findError().isPresent())
 			{
@@ -27,7 +27,7 @@ import java.util.List;
 				continue
 				;
 			}
-			rightResult : var=rightRule.toNode(rightSlice);
+			rightResult : var = rightRule.toNode(rightSlice);
 			if
 			(rightResult.findError().isPresent())
 			{
@@ -35,7 +35,7 @@ import java.util.List;
 				continue
 				;
 			}
-			optional : var=leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			optional : var = leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if
 			(optional.isPresent())
 			{
@@ -56,8 +56,8 @@ import java.util.List;
 		return CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 	}
 	private def findAllIndexesReverse(input : String) : List<Integer> => {
-		indexes : List<Integer>=ArrayList();
-		index : int=input.indexOf(slice);
+		indexes : List<Integer> = ArrayList();
+		index : int = input.indexOf(slice);
 		while
 		(index>=0)
 		{

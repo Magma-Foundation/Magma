@@ -29,8 +29,8 @@ public abstract class def ExtractRule() => {
 		return Ok(value);
 	}
 	private def createErr(node : Node) : Err<String, Error_> => {
-		format : var="Property '%s' does not exist.";
-		message : var=format.formatted(key);
+		format : var = "Property '%s' does not exist.";
+		message : var = format.formatted(key);
 		return Err(CompileError(message, node.toString()));
 	}
 }

@@ -15,18 +15,18 @@ class def ConditionEndRule() => {
 		/*
         TODO: reduce nesting
          */
-		queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-		depth : var=0;
+		queue : var = IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		depth : var = 0;
 		while
 		(!queue.isEmpty())
 		{
-			pop : var=queue.pop();
-			i : var=pop.left();
-			c : var=pop.right();
+			pop : var = queue.pop();
+			i : var = pop.left();
+			c : var = pop.right();
 			if
 			(c=='\'')
 			{
-				next : var=queue.pop();
+				next : var = queue.pop();
 				if
 				(next.right()=='\\')
 				{

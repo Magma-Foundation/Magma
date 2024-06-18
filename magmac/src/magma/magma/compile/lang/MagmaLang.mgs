@@ -17,49 +17,49 @@ import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 public class def MagmaLang() => {
 	public static def createRootRule() : Rule => {
-		statement : var=LazyRule();
-		value : var=LazyRule();
-		definition : var=createDefinitionRule();
+		statement : var = LazyRule();
+		value : var = LazyRule();
+		definition : var = createDefinitionRule();
 		value.setRule(ContextRule("Not a value.", OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createNotRule(value), TypeRule("quantity", StripRule(LeftRule("(", RightRule(ExtractNodeRule("value", value), ")")))), createConstructionRule(statement)))));
 		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createIfRule("if", value, statement), Lang.createIfRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), createStructRule(definition), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";")))))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
 	private static def createConstructionRule(statement : Rule) : TypeRule => {
-		child1 : var=ExtractNodeRule("child", Lang.createBlock(statement));
-		child : var=LeftRule("{", RightRule(child1, "}"));
+		child1 : var = ExtractNodeRule("child", Lang.createBlock(statement));
+		child : var = LeftRule("{", RightRule(child1, "}"));
 		return TypeRule("construction", StripRule(child));
 	}
 	private static def createStructRule(definition : Rule) : TypeRule => {
-		modifiers : var=SimpleExtractStringListRule("modifiers", " ");
-		children : var=ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
-		name : var=ExtractStringRule("name");
-		child : var=FirstRule(name, " {", RightRule(children, "}"));
+		modifiers : var = SimpleExtractStringListRule("modifiers", " ");
+		children : var = ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
+		name : var = ExtractStringRule("name");
+		child : var = FirstRule(name, " {", RightRule(children, "}"));
 		return TypeRule("struct", OptionalRule("modifiers", FirstRule(modifiers, " struct ", child), LeftRule("struct ", child)));
 	}
 	private static def createDefinitionRule() : Rule => {
-		modifiers : var=Lang.createModifiersRule();
-		withoutModifiers : var=OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
-		withTypeParams : var=StripRule(FirstRule(withoutModifiers, "<", RightRule(SimpleExtractStringListRule("type-params", ", "), ">")));
-		maybeTypeParams : var=OptionalRule("type-params", withTypeParams, withoutModifiers);
-		withModifiers : var=LastRule(modifiers, " ", maybeTypeParams);
-		maybeModifiers : var=OptionalRule("modifiers", withModifiers, maybeTypeParams);
-		definition : var=LazyRule();
-		params : var=FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
-		maybeParams : var=OptionalRule("params", params, maybeModifiers);
-		type : var=Lang.createTypeRule();
-		withType : var=LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
-		maybeType : var=OptionalRule("type", withType, maybeParams);
+		modifiers : var = Lang.createModifiersRule();
+		withoutModifiers : var = OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
+		withTypeParams : var = StripRule(FirstRule(withoutModifiers, "<", RightRule(SimpleExtractStringListRule("type-params", ", "), ">")));
+		maybeTypeParams : var = OptionalRule("type-params", withTypeParams, withoutModifiers);
+		withModifiers : var = LastRule(modifiers, " ", maybeTypeParams);
+		maybeModifiers : var = OptionalRule("modifiers", withModifiers, maybeTypeParams);
+		definition : var = LazyRule();
+		params : var = FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
+		maybeParams : var = OptionalRule("params", params, maybeModifiers);
+		type : var = Lang.createTypeRule();
+		withType : var = LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
+		maybeType : var = OptionalRule("type", withType, maybeParams);
 		definition.setRule(maybeType);
 		return definition;
 	}
 	private static def createFunctionRule(statement : Rule, value : Rule) : TypeRule => {
-		block : var=LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
-		asBlock : var=ExtractNodeRule("child", OrRule(List.of(block, statement)));
-		asValue : var=ExtractNodeRule("child", value);
-		definition : var=ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
-		content : var=OrRule(List.of(asValue, asBlock));
-		withDefinition : var=FirstRule(definition, " => ", content);
-		withoutDefinition : var=LeftRule("() => ", content);
+		block : var = LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
+		asBlock : var = ExtractNodeRule("child", OrRule(List.of(block, statement)));
+		asValue : var = ExtractNodeRule("child", value);
+		definition : var = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
+		content : var = OrRule(List.of(asValue, asBlock));
+		withDefinition : var = FirstRule(definition, " => ", content);
+		withoutDefinition : var = LeftRule("() => ", content);
 		return TypeRule("function", OrRule(List.of(withDefinition, withoutDefinition)));
 	}
 }

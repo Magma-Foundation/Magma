@@ -173,13 +173,14 @@ public class Lang {
     }
 
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
-        var definitionWrapped = new ExtractNodeRule("definition", new TypeRule("definition", definition));
+        var wrappedDefinition = new ExtractNodeRule("definition", new TypeRule("definition", definition));
+        var formattedDefinition = new StripRule(wrappedDefinition, "", "after-definition");
 
         var withoutTerminator = new ExtractNodeRule("value", value);
         var withTerminator = new StripRule(new RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");
-        var maybeTerminating = new OrRule(List.of(withTerminator, withoutTerminator));
+        var maybeTerminating = new StripRule(new OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
 
-        return new TypeRule("declaration", new FirstRule(definitionWrapped, "=", maybeTerminating));
+        return new TypeRule("declaration", new FirstRule(formattedDefinition, "=", maybeTerminating));
     }
 
     static Rule createParamsRule(Rule definition) {

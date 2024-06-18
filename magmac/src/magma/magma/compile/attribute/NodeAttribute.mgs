@@ -2,7 +2,7 @@
 import magma.compile.rule.Node;
 import java.util.Optional;
 () => {
-	public static final Factory : Factory<Node>=Factory((() => {
+	public static final Factory : Factory<Node> = Factory((() => {
 		return {
 			public def fromAttribute(attribute : Attribute) : Optional<Node> => {
 				return attribute.asNode();

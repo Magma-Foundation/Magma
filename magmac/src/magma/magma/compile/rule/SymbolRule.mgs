@@ -7,11 +7,11 @@ public final class def SymbolRule() => {
 		return "Not a symbol.";
 	}
 	protected def filter(input : String) : boolean => {
-		i : int=0;
+		i : int = 0;
 		while
 		(i<input.length())
 		{
-			c : var=input.charAt(i);
+			c : var = input.charAt(i);
 			if
 			(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c)))
 			{

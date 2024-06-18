@@ -7,8 +7,8 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 () => {
-	public static final DEFAULT_LEFT : String="left";
-	public static final DEFAULT_RIGHT : String="right";
+	public static final DEFAULT_LEFT : String = "left";
+	public static final DEFAULT_RIGHT : String = "right";
 	def StripRule(child : Rule) : public => {
 		this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
 	}
@@ -16,8 +16,8 @@ import magma.compile.rule.result.RuleResult;
 		return child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		leftIndent : var=node.attributes().apply(left).flatMap(Attribute.asString).orElse("");
-		rightIndent : var=node.attributes().apply(right).flatMap(Attribute.asString).orElse("");
+		leftIndent : var = node.attributes().apply(left).flatMap(Attribute.asString).orElse("");
+		rightIndent : var = node.attributes().apply(right).flatMap(Attribute.asString).orElse("");
 		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
 }

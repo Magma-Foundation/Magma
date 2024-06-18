@@ -11,8 +11,8 @@ import magma.compile.rule.result.RuleResult;
 		if
 		(input.endsWith(slice))
 		{
-			contentEnd : var=input.length()-slice.length();
-			content : var=input.substring(0, contentEnd);
+			contentEnd : var = input.length()-slice.length();
+			content : var = input.substring(0, contentEnd);
 			return child.toNode(content);
 		}
 		else
