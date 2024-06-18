@@ -1,4 +1,1 @@
-export struct Collector<T, C> {
-	const createInitial : () => C;
-	const fold : (C, T) => C;
-}
+public struct Collector<T, C> {();(current : C, next : T);}

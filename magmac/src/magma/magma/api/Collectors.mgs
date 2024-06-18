@@ -1,12 +1,1 @@
-import java.util.Optional;
-export class def Collectors() => {
-	public def joining() : Collector<String, Optional<String>> => {
-		return joining("");
-	}
-	public def joining(final delimiter : String) : Collector<String, Optional<String>> => {
-		return Collector();
-	}
-	public def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
-		return Collector();
-	}
-}
+import java.util.Optional;() => {public static joining : Collector<String, Optional<String>> => {return joining("");}public static joining : Collector<String, Optional<String>> => {return Collector();;}public static exceptionally : Collector<Result<T, E>, Result<C, E>> => {return Collector();;}}
