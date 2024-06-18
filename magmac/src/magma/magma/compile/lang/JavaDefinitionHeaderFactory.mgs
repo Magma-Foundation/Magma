@@ -16,7 +16,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-() => {
+public JavaDefinitionHeaderFactory => {
 	static createDefinitionHeaderRule : Rule => {
 		
 		type : var=
@@ -55,7 +55,7 @@ import java.util.Optional;
 		maybeAnnotations : var=
 		OrRule(List.of(withAnnotations, maybeModifiers));
 		return TypeRule("definition", LastRule(maybeAnnotations, " ", name));}
-	() => {
+	private static ModifiersRule => {
 		
 		public static final MODIFIERS : List<String>=
 		List.of("public", "static", "final", "private", "default", "protected", "abstract");
@@ -69,6 +69,6 @@ import java.util.Optional;
 			else
 			{
 				return Optional.of(CompileError("Invalid modifier.", child));}}}
-	() => {
+	private static SimpleSplitter => {
 		public split : List<String> => {
 			return List.of(input.split("\n"));}}}

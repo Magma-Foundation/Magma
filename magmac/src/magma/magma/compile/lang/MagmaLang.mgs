@@ -9,11 +9,12 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
-() => {
+public MagmaLang => {
 	public static createRootRule : Rule => {
 		
 		statement : var=
@@ -36,7 +37,7 @@ import java.util.List;
 		ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
 		
 		name : var=
-		ExtractNodeRule("name", Lang.createNamePrototypeRule());
+		ExtractStringRule("name");
 		
 		child : var=
 		FirstRule(name, " {", RightRule(children, "}"));

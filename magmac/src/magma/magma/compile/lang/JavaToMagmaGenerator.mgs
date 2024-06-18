@@ -4,7 +4,7 @@ import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 import java.util.List;
 import java.util.Optional;
-() => {
+public JavaToMagmaGenerator => {
 	private static preVisitBlock : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("block"))
@@ -82,13 +82,13 @@ import java.util.Optional;
 		return Optional.empty();
 		
 		name : var=
-		node.findNode("name").orElseThrow(() => RuntimeException("No name present: "+node));
+		node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
 		
 		modifiers : var=
 		node.findStringList("modifiers").orElseThrow();
 		
 		definition : var=
-		node.clear("definition").withNode("name", name).withStringList("modifiers", modifiers);
+		node.clear("definition").withString("name", name).withStringList("modifiers", modifiers);
 		
 		function : var=
 		node.retype("function").withNode("definition", definition);

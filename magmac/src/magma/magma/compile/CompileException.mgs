@@ -1,5 +1,5 @@
 
-() => {
+public CompileException => {
 	CompileException : public => {
 		super(message, cause);}
 	CompileException : public => {

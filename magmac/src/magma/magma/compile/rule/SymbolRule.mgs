@@ -1,5 +1,5 @@
 
-() => {
+public final SymbolRule => {
 	SymbolRule : public => {
 		super(child);}
 	protected computeMessage : String => {

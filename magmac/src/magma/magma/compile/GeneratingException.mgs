@@ -1,5 +1,5 @@
 
-() => {
+public GeneratingException => {
 	public final content : String;
 	GeneratingException : public => {
 		super(message);

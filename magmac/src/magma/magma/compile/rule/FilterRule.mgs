@@ -4,7 +4,7 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-() => {
+public abstract FilterRule => {
 	protected final child : Rule;
 	FilterRule : public => {
 		this=child;}

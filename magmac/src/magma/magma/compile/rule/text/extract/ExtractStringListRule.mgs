@@ -8,7 +8,7 @@ import magma.compile.attribute.StringListAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-() => {
+public abstract ExtractStringListRule => {
 	protected final delimiter : String;
 	ExtractStringListRule : public => {
 		super(key);

@@ -133,8 +133,11 @@ public class JavaLang {
         var withParams = new FirstRule(maybeTypeParams, "(", new StripRule(new RightRule(params, ")")));
         var maybeParams = new OptionalRule("params", withParams, maybeTypeParams);
 
-        var withImplements = new FirstRule(new StripRule(maybeParams), " implements ", new ExtractNodeRule("type", type));
-        var maybeImplements = new OptionalRule("implements", withImplements, maybeParams);
+        var withExtends = new FirstRule(maybeParams, " extends ", new StripRule(new ExtractStringRule("superclass")));
+        var maybeExtends = new OptionalRule("extends", withExtends, maybeParams);
+
+        var withImplements = new FirstRule(maybeExtends, " implements ", new ExtractNodeRule("interface", type));
+        var maybeImplements = new OptionalRule("implements", withImplements, maybeExtends);
 
         var withoutModifiers = new FirstRule(maybeImplements, "{", new RightRule(block, "}"));
         return new TypeRule(keyword, new FirstRule(modifiers, keyword + " ", withoutModifiers));

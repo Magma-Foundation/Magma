@@ -8,7 +8,7 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
-() => {
+public Generator => {
 	private generateAttribute : Tuple<Attribute, Integer> => {
 		
 		nodeList : var=

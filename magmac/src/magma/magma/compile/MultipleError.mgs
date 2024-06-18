@@ -1,7 +1,7 @@
 
 import java.util.List;
 import java.util.Optional;
-() => {
+public MultipleError => {
 	private final errors : List<Error_>;
 	MultipleError : public => {
 		this=errors;}

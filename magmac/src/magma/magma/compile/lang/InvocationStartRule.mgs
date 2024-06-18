@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-() => {
+ InvocationStartRule => {
 	InvocationStartRule : public => {
 		super(caller, "(", arguments);}
 	protected computeIndex : Optional<Integer> => {
