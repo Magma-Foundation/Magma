@@ -48,29 +48,36 @@ public class Main {
                 .filter(Files::isRegularFile)
                 .toList();
 
-        var trees = parseSources(sources);
-
-        for (Map.Entry<List<String>, Node> listNodeEntry : trees.entrySet()) {
-            var location = listNodeEntry.getKey();
+        var sourceTrees = parseSources(sources);
+        var targetTrees = new HashMap<List<String>, Node>();
+        for (Map.Entry<List<String>, Node> entry : sourceTrees.entrySet()) {
+            var location = entry.getKey();
             var namespace = location.subList(0, location.size() - 1);
             var name = location.get(location.size() - 1);
-
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
+
+            var generated = generate(entry.getValue());
+            var relativizedDebug = createDebug(namespace);
+            writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
+            targetTrees.put(location, generated);
+        }
+
+        for (Map.Entry<List<String>, Node> entry : targetTrees.entrySet()) {
+            var location = entry.getKey();
+            var namespace = location.subList(0, location.size() - 1);
+            var name = location.get(location.size() - 1);
+            System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
 
             var targetParent = TARGET_DIRECTORY;
             for (String segment : namespace) {
                 targetParent = targetParent.resolve(segment);
             }
 
-            var target = targetParent.resolve(name + ".mgs");
             if (!Files.exists(targetParent)) createDirectory(targetParent);
-
-            var generated = generate(listNodeEntry.getValue());
-            var relativizedDebug = createDebug(namespace);
-            writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
+            var target = targetParent.resolve(name + ".mgs");
 
             Rule rule = MagmaLang.createRootRule();
-            var generateResult = rule.fromNode(generated);
+            var generateResult = rule.fromNode(entry.getValue());
             var generateErrorOptional = generateResult.findErr();
             if (generateErrorOptional.isPresent()) {
                 var generateError = generateErrorOptional.get();

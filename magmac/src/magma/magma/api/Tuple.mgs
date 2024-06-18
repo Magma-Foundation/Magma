@@ -1,7 +1,0 @@
-
-import java.util.function.Function;
-() => {
-	public def mapLeft<T>(mapper : (L) => T) : Tuple<T, R> => {
-		return Tuple(mapper.apply(left), right);
-	}
-}
