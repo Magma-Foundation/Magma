@@ -110,23 +110,17 @@ public class Lang {
 
     static TypeRule createIfRule(String type, Rule value, Rule statement) {
         var child = new ExtractNodeRule("condition", value);
-        var conditionParent = createScope("condition", new StripRule(new LeftRule("(", child)));
+        var conditionParent = new StripRule(new LeftRule("(", child));
 
         var valueWithBlock = new LeftRule("{", new RightRule(new ExtractNodeRule("value", createBlock(statement)), "}"));
         var valueWithoutBlock = new ExtractNodeRule("value", statement);
 
-        var valueParent = createScope("value", new StripRule(new OrRule(List.of(
+        var valueParent = new StripRule(new OrRule(List.of(
                 valueWithBlock,
                 valueWithoutBlock
-        ))));
+        )));
 
         return new TypeRule(type, new LeftRule(type, new ConditionEndRule(conditionParent, valueParent)));
-    }
-
-    public static Rule createScope(String name, Rule rule) {
-        var withScope = name + ":scope";
-        var type = new TypeRule(withScope, rule);
-        return new ExtractNodeRule(withScope, type);
     }
 
     static Rule createReturnRule(Rule value) {
@@ -168,12 +162,13 @@ public class Lang {
 
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
         var extractNodeRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
-        var left = createScope("definition", new StripRule(extractNodeRule));
+        var left = new StripRule(extractNodeRule);
 
         var withoutTerminator = new ExtractNodeRule("value", value);
         var maybeTerminating = new OrRule(List.of(new RightRule(withoutTerminator, ";"), withoutTerminator));
 
-        return new TypeRule("declaration", new FirstRule(left, "=", createScope("value", new StripRule(maybeTerminating))));
+        Rule rule = new StripRule(maybeTerminating);
+        return new TypeRule("declaration", new FirstRule(left, "=", rule));
     }
 
     static Rule createParamsRule(Rule definition) {
@@ -218,7 +213,8 @@ public class Lang {
     }
 
     static Rule createThrowRule(Rule value) {
-        var after = new RightRule(createScope("value", new ExtractNodeRule("value", value)), ";");
+        Rule rule = new ExtractNodeRule("value", value);
+        var after = new RightRule(rule, ";");
         return new TypeRule("throw", new LeftRule("throw ", after));
     }
 
