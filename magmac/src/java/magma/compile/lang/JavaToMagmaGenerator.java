@@ -3,18 +3,34 @@ package magma.compile.lang;
 import magma.api.Tuple;
 import magma.compile.rule.Node;
 
-public class JavaToMagmaGenerator extends Generator {
-    private static Node removePackagesFromBlock(Node node) {
-        if (!node.is("block")) return node;
+import java.util.List;
+import java.util.Optional;
 
-        return node.mapNodes("children", children -> children.stream()
+public class JavaToMagmaGenerator extends Generator {
+    private static Optional<Node> removePackagesFromBlock(Node node) {
+        if (!node.is("block")) return Optional.empty();
+
+        return Optional.of(node.mapNodes("children", JavaToMagmaGenerator::removePackagesFromList));
+    }
+
+    private static List<Node> removePackagesFromList(List<Node> children) {
+        return children.stream()
                 .filter(child -> !child.is("package"))
-                .toList());
+                .toList();
     }
 
     @Override
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
-        var newNode = removePackagesFromBlock(node);
+        var newNode = removePackagesFromBlock(node)
+                .or(() -> replaceClassWithFunction(node))
+                .orElse(node);
+
         return new Tuple<>(newNode, depth);
+    }
+
+    private Optional<Node> replaceClassWithFunction(Node node) {
+        if (!node.is("class")) return Optional.empty();
+
+        return Optional.of(node.retype("function"));
     }
 }

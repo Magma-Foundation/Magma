@@ -9,6 +9,7 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Generator {
     private Tuple<Attribute, Integer> generateAttribute(Attribute attribute, int depth) {
@@ -40,22 +41,24 @@ public class Generator {
     }
 
     private Tuple<Node, Integer> generateWithDepth(Node node, int depth) {
-        var preVisited = preVisit(node, depth);
+        var preVisitedTuple = preVisit(node, depth);
 
-        var oldAttributes = preVisited.left().attributes();
+        var preVisited = preVisitedTuple.left();
+        var preVisitedAttributes = preVisited.attributes().streamEntries().toList();
+
         Attributes newAttributes = new MapAttributes();
-        var current = preVisited.right();
+        var current = preVisitedTuple.right();
 
-        for (Tuple<String, Attribute> oldTUple : oldAttributes.streamEntries().toList()) {
-            var key = oldTUple.left();
-            var value = oldTUple.right();
+        for (Tuple<String, Attribute> preVisitedAttribute : preVisitedAttributes) {
+            var key = preVisitedAttribute.left();
+            var value = preVisitedAttribute.right();
 
             var newTuple = generateAttribute(value, current);
             newAttributes = newAttributes.with(key, newTuple.left());
             current = newTuple.right();
         }
 
-        return postVisit(node.withAttributes(newAttributes), current);
+        return postVisit(preVisited.withAttributes(newAttributes), current);
     }
 
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
