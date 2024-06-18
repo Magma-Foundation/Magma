@@ -1,4 +1,7 @@
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.lang.Generator;
@@ -11,10 +14,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 public class def Main() => {
 	let TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
 	let SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
@@ -35,46 +41,21 @@ public class def Main() => {
 	}
 	private static def run() : void => {
 		let mut sources = Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
-		for(source : var in sources){
-			let mut error = compileSource(source);
-			if(error.isPresent())
-			{
-				throw error.get();
+		let mut trees = parseSources(sources);
+		for(listNodeEntry : Map.Entry<List<String>, Node> in trees.entrySet()){
+			let mut location = listNodeEntry.getKey();
+			let mut namespace = location.subList(0, location.size()-1);
+			let mut name = location.get(location.size()-1);
+			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
+			let mut targetParent = TARGET_DIRECTORY;
+			for(segment : String in namespace){
+				targetParent=targetParent.resolve(segment);
 			}
-		}
-	}
-	private static def compileSource(source : Path) : Optional<CompileException> => {
-		let mut relativized = SOURCE_DIRECTORY.relativize(source.getParent());
-		System.out.println("Compiling source: "+SOURCE_DIRECTORY.relativize(source));
-		let mut targetParent = TARGET_DIRECTORY.resolve(relativized);
-		let mut fileName = source.getFileName().toString();
-		let mut name = fileName.substring(0, fileName.indexOf('.'));
-		let mut target = targetParent.resolve(name+".mgs");
-		let mut input = readImpl(source);
-		let mut parseResult = JavaLang.createRootRule().toNode(input);
-		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.writeError);
-	}
-	private static def writeError(err : Error_) : Optional<CompileException> => {
-		try 
-		{
-			let mut result = print(err, 0);
-			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-			return Optional.of(CompileException());
-		}
-		catch (e : CompileException){
-			return Optional.of(e);
-		}
-	}
-	private static def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException> => {
-		try 
-		{
+			let mut target = targetParent.resolve(name+".mgs");
 			if(!Files.exists(targetParent))
 			createDirectory(targetParent);
-			let mut relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
-			if(!Files.exists(relativizedDebug))
-			createDirectory(relativizedDebug);
-			writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());
-			let mut generated = generate(root);
+			let mut generated = generate(listNodeEntry.getValue());
+			let mut relativizedDebug = createDebug(namespace);
 			writeImpl(relativizedDebug.resolve(name+".output.ast"), generated.toString());
 			let mut rule : Rule = MagmaLang.createRootRule();
 			let mut generateResult = rule.fromNode(generated);
@@ -86,10 +67,72 @@ public class def Main() => {
 				writeError(generateError);
 			}
 			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
-			return Optional.empty();
+		}
+	}
+	private static def parseSources(sources : List<Path>) : Map<List<String>, Node> => {
+		let mut trees = HashMap();
+		for(source : var in sources){
+			let mut relativized = SOURCE_DIRECTORY.relativize(source.getParent());
+			let mut namespace = computeNamespace(relativized);
+			let mut name = computeName(source);
+			let mut result = parseSource(source, namespace, name);
+			let mut error = result.findErr();
+			if(error.isPresent())
+			{
+				throw error.get();
+			}
+			else
+			{
+				let mut list = ArrayList(namespace);
+				list.add(name);
+				trees.put(list, result.findValue().orElseThrow());
+			}
+		}
+		return trees;
+	}
+	private static def parseSource(source : Path, namespace : List<String>, name : String) : Result<Node, CompileException> => {
+		System.out.println("Parsing source: "+SOURCE_DIRECTORY.relativize(source));
+		let mut input = readImpl(source);
+		let mut parseResult = JavaLang.createRootRule().toNode(input);
+		return parseResult.create().match(() => parse(root, namespace, name), Main.writeError);
+	}
+	private static def computeName(source : Path) : String => {
+		let mut fileName = source.getFileName().toString();
+		let mut name = fileName.substring(0, fileName.indexOf('.'));
+		return name;
+	}
+	private static def parse(root : Node, namespace : List<String>, name : String) : Result<Node, CompileException> => {
+		try 
+		{
+			let mut relativizedDebug = createDebug(namespace);
+			writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());
+			return Ok(root);
 		}
 		catch (e : CompileException){
-			return Optional.of(e);
+			return Err(e);
+		}
+	}
+	private static def computeNamespace(relativized : Path) : List<String> => {
+		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
+	}
+	private static def createDebug(namespace : List<String>) : Path => {
+		let mut relativizedDebug = DEBUG_DIRECTORY;
+		for(s : String in namespace){
+			relativizedDebug=relativizedDebug.resolve(s);
+		}
+		if(!Files.exists(relativizedDebug))
+		createDirectory(relativizedDebug);
+		return relativizedDebug;
+	}
+	private static def writeError(err : Error_) : Err<Node, CompileException> => {
+		try 
+		{
+			let mut result = print(err, 0);
+			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
+			return Err(CompileException());
+		}
+		catch (e : CompileException){
+			return Err(e);
 		}
 	}
 	private static def readImpl(source : Path) : String => {
@@ -154,7 +197,7 @@ public class def Main() => {
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
 	private static def generate(root : Node) : Node => {
-		let mut list = Arrays.asList(JavaToMagmaGenerator());
+		let mut list = List.of(JavaToMagmaGenerator());
 		let mut acc : Node = root;
 		for(generator : Generator in list){
 			acc=generator.generate(acc, -1);

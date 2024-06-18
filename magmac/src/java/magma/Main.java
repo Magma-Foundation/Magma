@@ -1,5 +1,8 @@
 package magma;
 
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.lang.Generator;
@@ -13,10 +16,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 public class Main {
 
@@ -42,64 +48,112 @@ public class Main {
                 .filter(Files::isRegularFile)
                 .toList();
 
-        for (var source : sources) {
-            var error = compileSource(source);
-            if (error.isPresent()) {
-                throw error.get();
+        var trees = parseSources(sources);
+
+        for (Map.Entry<List<String>, Node> listNodeEntry : trees.entrySet()) {
+            var location = listNodeEntry.getKey();
+            var namespace = location.subList(0, location.size() - 1);
+            var name = location.get(location.size() - 1);
+
+            System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
+
+            var targetParent = TARGET_DIRECTORY;
+            for (String segment : namespace) {
+                targetParent = targetParent.resolve(segment);
             }
-        }
-    }
 
-    private static Optional<CompileException> compileSource(Path source) throws CompileException {
-        var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
-        System.out.println("Compiling source: " + SOURCE_DIRECTORY.relativize(source));
-
-        var targetParent = TARGET_DIRECTORY.resolve(relativized);
-        var fileName = source.getFileName().toString();
-        var name = fileName.substring(0, fileName.indexOf('.'));
-        var target = targetParent.resolve(name + ".mgs");
-        var input = readImpl(source);
-
-        var parseResult = JavaLang.createRootRule().toNode(input);
-        return parseResult.create().match(
-                root -> handle(root, targetParent, relativized, name, target),
-                Main::writeError);
-    }
-
-    private static Optional<CompileException> writeError(Error_ err) {
-        try {
-            var result = print(err, 0);
-            writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-            return Optional.of(new CompileException());
-        } catch (CompileException e) {
-            return Optional.of(e);
-        }
-    }
-
-    private static Optional<CompileException> handle(Node root, Path targetParent, Path relativized, String name, Path target) {
-        try {
+            var target = targetParent.resolve(name + ".mgs");
             if (!Files.exists(targetParent)) createDirectory(targetParent);
 
-            var relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
-            if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
-
-            writeImpl(relativizedDebug.resolve(name + ".input.ast"), root.toString());
-            var generated = generate(root);
+            var generated = generate(listNodeEntry.getValue());
+            var relativizedDebug = createDebug(namespace);
             writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
 
             Rule rule = MagmaLang.createRootRule();
             var generateResult = rule.fromNode(generated);
             var generateErrorOptional = generateResult.findErr();
-            if(generateErrorOptional.isPresent()) {
+            if (generateErrorOptional.isPresent()) {
                 var generateError = generateErrorOptional.get();
                 print(generateError, 0);
                 writeError(generateError);
             }
 
             writeImpl(target, generateResult.findValue().orElseThrow(() -> new CompileException("Nothing was generated.")));
-            return Optional.empty();
+        }
+    }
+
+    private static Map<List<String>, Node> parseSources(List<Path> sources) throws CompileException {
+        var trees = new HashMap<List<String>, Node>();
+        for (var source : sources) {
+            var relativized = SOURCE_DIRECTORY.relativize(source.getParent());
+            var namespace = computeNamespace(relativized);
+            var name = computeName(source);
+
+            var result = parseSource(source, namespace, name);
+            var error = result.findErr();
+            if (error.isPresent()) {
+                throw error.get();
+            } else {
+                var list = new ArrayList<>(namespace);
+                list.add(name);
+
+                trees.put(list, result.findValue().orElseThrow());
+            }
+        }
+
+        return trees;
+    }
+
+    private static Result<Node, CompileException> parseSource(Path source, List<String> namespace, String name) throws CompileException {
+        System.out.println("Parsing source: " + SOURCE_DIRECTORY.relativize(source));
+
+        var input = readImpl(source);
+
+        var parseResult = JavaLang.createRootRule().toNode(input);
+        return parseResult.create().match(
+                root -> parse(root, namespace, name),
+                Main::writeError);
+    }
+
+    private static String computeName(Path source) {
+        var fileName = source.getFileName().toString();
+        var name = fileName.substring(0, fileName.indexOf('.'));
+        return name;
+    }
+
+    private static Result<Node, CompileException> parse(Node root, List<String> namespace, String name) {
+        try {
+            var relativizedDebug = createDebug(namespace);
+            writeImpl(relativizedDebug.resolve(name + ".input.ast"), root.toString());
+            return new Ok<>(root);
         } catch (CompileException e) {
-            return Optional.of(e);
+            return new Err<>(e);
+        }
+    }
+
+    private static List<String> computeNamespace(Path relativized) {
+        return IntStream.range(0, relativized.getNameCount())
+                .mapToObj(index -> relativized.getName(index).toString())
+                .toList();
+    }
+
+    private static Path createDebug(List<String> namespace) throws CompileException {
+        var relativizedDebug = DEBUG_DIRECTORY;
+        for (String s : namespace) {
+            relativizedDebug = relativizedDebug.resolve(s);
+        }
+
+        if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
+        return relativizedDebug;
+    }
+
+    private static Err<Node, CompileException> writeError(Error_ err) {
+        try {
+            var result = print(err, 0);
+            writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
+            return new Err<>(new CompileException());
+        } catch (CompileException e) {
+            return new Err<>(e);
         }
     }
 
@@ -177,7 +231,7 @@ public class Main {
     }
 
     private static Node generate(Node root) {
-        var list = Arrays.asList(
+        var list = List.of(
                 new JavaToMagmaGenerator()
         );
 
