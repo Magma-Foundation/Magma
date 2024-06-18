@@ -1,7 +1,1 @@
-import java.util.List;
-import java.util.Optional;
-export class def Streams() => {
-	public def fromNativeList(list : List<T>) : Stream<T> => {
-		return AbstractStream();
-	}
-}
+import java.util.List;import java.util.Optional;() => {public static fromNativeList : Stream<T> => {return AbstractStream();;}}

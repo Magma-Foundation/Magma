@@ -25,6 +25,7 @@ public class JavaToMagmaGenerator extends Generator {
                 .or(() -> replaceClassWithFunction(node))
                 .or(() -> replaceMethodWithFunction(node))
                 .or(() -> replaceLambdaWithFunction(node))
+                .or(() -> replaceRecordWithFunction(node))
                 .or(() -> replaceConstructorsWithInvocation(node))
                 .or(() -> replaceInterfaceWithStruct(node))
                 .orElse(node);
@@ -32,8 +33,14 @@ public class JavaToMagmaGenerator extends Generator {
         return new Tuple<>(newNode, depth);
     }
 
+    private Optional<Node> replaceRecordWithFunction(Node node) {
+        if (!node.is("record")) return Optional.empty();
+
+        return Optional.of(node.retype("function"));
+    }
+
     private Optional<Node> replaceInterfaceWithStruct(Node node) {
-        if(!node.is("interface")) return Optional.empty();
+        if (!node.is("interface")) return Optional.empty();
 
         return Optional.of(node.retype("struct"));
     }

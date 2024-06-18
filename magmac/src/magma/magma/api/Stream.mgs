@@ -1,7 +1,1 @@
-import java.util.Optional;
-import java.util.function.Function;
-export struct Stream<T> {
-	const head : () => Optional<T>;
-	const map : ((T) => R) => Stream<R>;
-	const collect : (Collector<T, C>) => C;
-}
+import java.util.Optional;import java.util.function.Function;public struct Stream<T> {();(mapper : Function<T, R>);(collector : Collector<T, C>);}

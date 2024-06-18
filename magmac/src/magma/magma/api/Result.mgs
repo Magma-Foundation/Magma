@@ -1,11 +1,1 @@
-import java.util.Optional;
-import java.util.function.Function;
-export struct Result<T, E> {
-	const findValue : () => Optional<T>;
-	const findErr : () => Optional<E>;
-	const flatMapValue : ((T) => Result<R, E>) => Result<R, E>;
-	const mapValue : ((T) => R) => Result<R, E>;
-	const isOk : () => boolean;
-	const mapErr : ((E) => R) => Result<T, R>;
-	const match : ((T) => R, (E) => R) => R;
-}
+import java.util.Optional;import java.util.function.Function;public struct Result<T, E> {();();(mapper : Function<T, Result<R, E>>);(mapper : Function<T, R>);();(mapper : Function<E, R>);(onOk : Function<T, R>, onErr : Function<E, R>);}
