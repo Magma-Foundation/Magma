@@ -109,7 +109,8 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Tuple<Node, Integer>> replaceConstructorsWithInvocation(Node node, int depth) {
         if (!node.is("constructor")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("invocation"), depth));
+        var children = node.findNodeList("children").orElse(Collections.emptyList());
+        return Optional.of(new Tuple<>(node.retype("invocation").withNodeList("arguments", children), depth));
     }
 
     private Optional<Tuple<Node, Integer>> replaceMethodWithFunction(Node node, int depth) {

@@ -13,4 +13,4 @@ public class def Results() => {
 		if
 		(err.isPresent())
 		throw err.get();
-		throw RuntimeException("No value or err present?");}}
+		throw RuntimeException();}}

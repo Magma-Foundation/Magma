@@ -63,10 +63,10 @@ public class Main {
         var parseResult = JavaLang.createRootRule().toNode(input);
         return parseResult.create().match(
                 root -> handle(root, targetParent, relativized, name, target),
-                Main::getCompileException);
+                Main::writeError);
     }
 
-    private static Optional<CompileException> getCompileException(Error_ err) {
+    private static Optional<CompileException> writeError(Error_ err) {
         try {
             var result = print(err, 0);
             writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
@@ -89,8 +89,12 @@ public class Main {
 
             Rule rule = MagmaLang.createRootRule();
             var generateResult = rule.fromNode(generated);
-            var generateError = generateResult.findErr();
-            generateError.ifPresent(error -> print(error, 0));
+            var generateErrorOptional = generateResult.findErr();
+            if(generateErrorOptional.isPresent()) {
+                var generateError = generateErrorOptional.get();
+                print(generateError, 0);
+                writeError(generateError);
+            }
 
             writeImpl(target, generateResult.findValue().orElseThrow(() -> new CompileException("Nothing was generated.")));
             return Optional.empty();
