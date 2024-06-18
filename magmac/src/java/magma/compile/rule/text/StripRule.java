@@ -9,8 +9,8 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 
 public record StripRule(Rule child, String left, String right) implements Rule {
-    public static final String DEFAULT_LEFT = "left-indent";
-    public static final String DEFAULT_RIGHT = "right-indent";
+    public static final String DEFAULT_LEFT = "left";
+    public static final String DEFAULT_RIGHT = "right";
 
     public StripRule(Rule child) {
         this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
