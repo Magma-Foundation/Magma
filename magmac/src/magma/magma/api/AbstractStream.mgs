@@ -10,8 +10,6 @@ public abstract class def AbstractStream() => {
 				}
 			};
 		})())();
-		
-		;
 	}
 	public def collect(collector : Collector<T, C>) : C => {
 		

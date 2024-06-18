@@ -32,7 +32,7 @@ public class def JavaToMagmaGenerator() => {
 		
 		newBlock : var=
 		node.mapNodes("children", () => {
-			return children.stream().map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
+			return children.stream().filter(() => !child.is("empty")).map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
 		}).withString("after-content", "\n" + "\t".repeat(depth==0?0:depth-1));
 		return Optional.of(Tuple(newBlock, depth-1));
 	}

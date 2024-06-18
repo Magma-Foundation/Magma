@@ -36,6 +36,7 @@ public class JavaToMagmaGenerator extends Generator {
         var prefix = "\n" + "\t".repeat(depth);
         var newBlock = node.mapNodes("children", children -> {
             return children.stream()
+                    .filter(child -> !child.is("empty"))
                     .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
                     .toList();
         }).withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));

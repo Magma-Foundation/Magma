@@ -15,8 +15,6 @@ public class def Collectors() => {
 				}
 			};
 		})())();
-		
-		;
 	}
 	public static def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
 		return Collector((() => {
@@ -29,7 +27,5 @@ public class def Collectors() => {
 				}
 			};
 		})())();
-		
-		;
 	}
 }
