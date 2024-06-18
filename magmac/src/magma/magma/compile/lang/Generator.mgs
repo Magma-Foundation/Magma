@@ -11,8 +11,7 @@ import java.util.List;
 public class def Generator() => {
 	private def generateAttribute(attribute : Attribute, depth : int) : Tuple<Attribute, Integer> => {
 		let mut nodeList = attribute.asNodeList();
-		if
-		(nodeList.isPresent())
+		if(nodeList.isPresent())
 		{
 			let mut list = ArrayList();
 			let mut current = depth;

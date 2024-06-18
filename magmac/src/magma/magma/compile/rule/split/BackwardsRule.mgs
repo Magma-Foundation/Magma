@@ -20,30 +20,26 @@ import java.util.List;
 			let mut leftSlice = input.substring(0, index);
 			let mut rightSlice = input.substring(index+slice.length());
 			let mut leftResult = leftRule.toNode(leftSlice);
-			if
-			(leftResult.findError().isPresent())
+			if(leftResult.findError().isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, leftResult.findError().get()));
 				continue
 				;
 			}
 			let mut rightResult = rightRule.toNode(rightSlice);
-			if
-			(rightResult.findError().isPresent())
+			if(rightResult.findError().isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, rightResult.findError().get()));
 				continue
 				;
 			}
 			let mut optional = leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
-			if
-			(optional.isPresent())
+			if(optional.isPresent())
 			{
 				return optional.get();
 			}
 		}
-		if
-		(errors.isEmpty())
+		if(errors.isEmpty())
 		{
 			return ErrorRuleResult(CompileError("No rules were present.", input));
 		}
@@ -58,8 +54,7 @@ import java.util.List;
 	private def findAllIndexesReverse(input : String) : List<Integer> => {
 		let mut indexes : List<Integer> = ArrayList();
 		let mut index : int = input.indexOf(slice);
-		while
-		(index>=0)
+		while(index>=0)
 		{
 			indexes.add(index);
 			index=input.indexOf(slice, index+1);

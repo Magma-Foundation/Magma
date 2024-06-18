@@ -13,8 +13,7 @@ import java.util.stream.Stream;
 		this(Collections.emptyMap());
 	}
 	public def mapValue<T>(key : String, factory : Factory<T>, mapper : (T) => T) : Attributes => {
-		if
-		(!values.containsKey(key))
+		if(!values.containsKey(key))
 		return this;
 		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map(() => with(key, inner)).orElse(this);
 	}

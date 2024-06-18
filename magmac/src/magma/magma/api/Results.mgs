@@ -2,12 +2,10 @@
 public class def Results() => {
 	public static def unwrap<T, E extends Throwable>(result : Result<T, E>) : T => {
 		let mut value = result.findValue();
-		if
-		(value.isPresent())
+		if(value.isPresent())
 		return value.get();
 		let mut err = result.findErr();
-		if
-		(err.isPresent())
+		if(err.isPresent())
 		throw err.get();
 		throw RuntimeException("No value or err present?");
 	}

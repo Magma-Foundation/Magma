@@ -37,8 +37,7 @@ public class def Main() => {
 		let mut sources = Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
 		for(source : var in sources){
 			let mut error = compileSource(source);
-			if
-			(error.isPresent())
+			if(error.isPresent())
 			{
 				throw error.get();
 			}
@@ -69,12 +68,10 @@ public class def Main() => {
 	private static def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException> => {
 		try 
 		{
-			if
-			(!Files.exists(targetParent))
+			if(!Files.exists(targetParent))
 			createDirectory(targetParent);
 			let mut relativizedDebug = DEBUG_DIRECTORY.resolve(relativized);
-			if
-			(!Files.exists(relativizedDebug))
+			if(!Files.exists(relativizedDebug))
 			createDirectory(relativizedDebug);
 			writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());
 			let mut generated = generate(root);
@@ -82,8 +79,7 @@ public class def Main() => {
 			let mut rule : Rule = MagmaLang.createRootRule();
 			let mut generateResult = rule.fromNode(generated);
 			let mut generateErrorOptional = generateResult.findErr();
-			if
-			(generateErrorOptional.isPresent())
+			if(generateErrorOptional.isPresent())
 			{
 				let mut generateError = generateErrorOptional.get();
 				print(generateError, 0);
@@ -132,14 +128,12 @@ public class def Main() => {
 		let mut causes = error.findCauses().orElse(Collections.emptyList());
 		let mut escapedContext = error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
 		let mut formattedContext = "\n"+escapedContext;
-		if
-		(causes.isEmpty())
+		if(causes.isEmpty())
 		{
 			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
 		}
 		let mut contextAttribute = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
-		if
-		(causes.size()==1)
+		if(causes.size()==1)
 		{
 			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
 		}
@@ -153,8 +147,7 @@ public class def Main() => {
 	}
 	private static def formatContext(e : Error_, depth : int) : String => {
 		let mut actualContext = e.findContext().orElse("");
-		if
-		(e.findCauses().isPresent())
+		if(e.findCauses().isPresent())
 		return actualContext;
 		let mut spacing = " ".repeat(depth+1);
 		let mut formatted = actualContext.replace("\n", "\n" + " ".repeat(depth-1));

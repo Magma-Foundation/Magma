@@ -121,7 +121,7 @@ public class Lang {
 
     static TypeRule createConditionRule(String type, Rule value, Rule statement) {
         var child = new ExtractNodeRule("condition", value);
-        var conditionParent = new StripRule(new LeftRule("(", child));
+        var conditionParent = new StripRule(new LeftRule("(", child), "before-condition", "after-condition");
 
         var valueWithBlock = new LeftRule("{", new RightRule(new ExtractNodeRule("value", createBlock(statement)), "}"));
         var valueWithoutBlock = new ExtractNodeRule("value", statement);

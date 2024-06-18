@@ -21,8 +21,7 @@ public abstract class def ExtractStringListRule() => {
 		let mut list = split(content);
 		for(format : String in list){
 			let mut qualified = qualify(format);
-			if
-			(qualified.isPresent())
+			if(qualified.isPresent())
 			{
 				return Err(qualified.get());
 			}
@@ -32,12 +31,10 @@ public abstract class def ExtractStringListRule() => {
 	private def split(content : String) : List<String> => {
 		let mut result : List<String> = ArrayList();
 		let mut start : int = 0;
-		while
-		(true)
+		while(true)
 		{
 			let mut end = content.indexOf(delimiter, start);
-			if
-			(end==-1)
+			if(end==-1)
 			break;
 			result.add(content.substring(start, end));
 			start=end+delimiter.length();

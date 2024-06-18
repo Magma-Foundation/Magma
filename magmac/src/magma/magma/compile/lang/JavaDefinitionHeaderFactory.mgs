@@ -44,8 +44,7 @@ public class def JavaDefinitionHeaderFactory() => {
 			super("modifiers", " ");
 		}
 		protected def qualify(child : String) : Optional<Error_> => {
-			if
-			(MODIFIERS.contains(child))
+			if(MODIFIERS.contains(child))
 			{
 				return Optional.empty();
 			}

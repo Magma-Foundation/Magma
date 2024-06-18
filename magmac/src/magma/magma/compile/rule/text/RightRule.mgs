@@ -8,8 +8,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 () => {
 	public def toNode(input : String) : RuleResult => {
-		if
-		(input.endsWith(slice))
+		if(input.endsWith(slice))
 		{
 			let mut contentEnd = input.length()-slice.length();
 			let mut content = input.substring(0, contentEnd);

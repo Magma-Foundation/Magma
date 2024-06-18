@@ -4,16 +4,13 @@ public final class def NumberRule() => {
 		super(child);
 	}
 	private static def allDigits(input : String) : boolean => {
-		if
-		(input.isEmpty())
+		if(input.isEmpty())
 		return false;
 		let mut i : int = 0;
-		while
-		(i<input.length())
+		while(i<input.length())
 		{
 			let mut c = input.charAt(i);
-			if
-			(!Character.isDigit(c))
+			if(!Character.isDigit(c))
 			{
 				return false;
 			}

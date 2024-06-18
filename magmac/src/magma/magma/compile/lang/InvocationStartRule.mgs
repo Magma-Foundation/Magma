@@ -13,44 +13,36 @@ class def InvocationStartRule() => {
 	protected def computeIndex(input : String) : Optional<Integer> => {
 		let mut depth = 0;
 		let mut queue = IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-		while
-		(!queue.isEmpty())
+		while(!queue.isEmpty())
 		{
 			let mut pop = queue.pop();
 			let mut i = pop.left();
 			let mut c = pop.right();
-			if
-			(c=='\"')
+			if(c=='\"')
 			{
-				while
-				(!queue.isEmpty())
+				while(!queue.isEmpty())
 				{
 					let mut next = queue.pop().right();
-					if
-					(next=='\"')
+					if(next=='\"')
 					{
-						if
-						(!queue.isEmpty())
+						if(!queue.isEmpty())
 						{
 							let mut after = queue.peek().right();
-							if
-							(after=='\\')
+							if(after=='\\')
 							{
 								continue
 								;
 							}
 						}
 					}
-					if
-					(next=='\"')
+					if(next=='\"')
 					{
 						break
 						;
 					}
 				}
 			}
-			if
-			(c=='('&&depth==0)
+			if(c=='('&&depth==0)
 			return Optional.of(i);
 			else if(c==')')depth++;
 			else if(c=='(')depth--;

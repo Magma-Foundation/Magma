@@ -10,16 +10,14 @@ import magma.compile.rule.result.RuleResult;
 	let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
 	public def toNode(input : String) : RuleResult => {
 		let mut result = child.toNode(input);
-		if
-		(result.findError().isEmpty())
+		if(result.findError().isEmpty())
 		return result.withType(type);
 		let mut format = "Cannot attach type '%s' because of child failure.";
 		let mut message = format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		if
-		(!node.type().equals(type))
+		if(!node.type().equals(type))
 		{
 			let mut message = String.format(FORMAT, type, node.type());
 			return Err(CompileError(message, node.toString()));

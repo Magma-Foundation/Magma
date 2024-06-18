@@ -29,12 +29,10 @@ public abstract class def SplitOnceRule() => {
 			let mut left = contentStart.left();
 			let mut right = contentStart.right();
 			let mut leftResult = leftRule.toNode(left);
-			if
-			(leftResult.findError().isPresent())
+			if(leftResult.findError().isPresent())
 			return leftResult;
 			let mut rightResult = rightRule.toNode(right);
-			if
-			(rightResult.findError().isPresent())
+			if(rightResult.findError().isPresent())
 			return rightResult;
 			return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();
 		}).orElseGet(() => {

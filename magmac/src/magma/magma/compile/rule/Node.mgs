@@ -67,8 +67,7 @@ import java.util.function.Supplier;
 		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
 	}
 	public def mapOrSetNodeList(key : String, onPresent : (List<Node>) => List<Node>, onEmpty : Supplier<List<Node>>) : Node => {
-		if
-		(has(key))
+		if(has(key))
 		{
 			return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, onPresent));
 		}
@@ -78,8 +77,7 @@ import java.util.function.Supplier;
 		}
 	}
 	public def mapOrSetStringList(key : String, onPresent : (List<String>) => List<String>, onEmpty : Supplier<List<String>>) : Node => {
-		if
-		(has(key))
+		if(has(key))
 		{
 			return mapAttributes(() => attributes.mapValue(key, StringListAttribute.Factory, onPresent));
 		}

@@ -33,12 +33,10 @@ public final class def SplitMultipleRule() => {
 		let mut members = ArrayList();
 		for(childString : String in split){
 			let mut result = childRule.toNode(childString);
-			if
-			(result.findError().isPresent())
+			if(result.findError().isPresent())
 			return result.mapErr(() => CompileParentError("Cannot process child.", childString, err));
 			let mut optional = result.tryCreate();
-			if
-			(optional.isEmpty())
+			if(optional.isEmpty())
 			{
 				return ErrorRuleResult(CompileError("No name present for.", childString));
 			}

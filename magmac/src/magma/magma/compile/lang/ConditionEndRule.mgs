@@ -17,35 +17,29 @@ class def ConditionEndRule() => {
          */
 		let mut queue = IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
 		let mut depth = 0;
-		while
-		(!queue.isEmpty())
+		while(!queue.isEmpty())
 		{
 			let mut pop = queue.pop();
 			let mut i = pop.left();
 			let mut c = pop.right();
-			if
-			(c=='\'')
+			if(c=='\'')
 			{
 				let mut next = queue.pop();
-				if
-				(next.right()=='\\')
+				if(next.right()=='\\')
 				{
 					queue.pop();
 				}
 				queue.pop();
 			}
-			if
-			(c==')'&&depth==1)
+			if(c==')'&&depth==1)
 			{
 				return Optional.of(i);
 			}
 			else
 			{
-				if
-				(c=='(')
+				if(c=='(')
 				depth++;
-				if
-				(c==')')
+				if(c==')')
 				depth--;
 			}
 		}

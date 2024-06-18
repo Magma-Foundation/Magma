@@ -17,15 +17,13 @@ import java.util.Optional;
 		let mut errors = ArrayList();
 		for(rule : Rule in rules()){
 			let mut result = rule.toNode(input);
-			if
-			(result.findAttributes().isPresent())
+			if(result.findAttributes().isPresent())
 			{
 				return result;
 			}
 			result.findError().ifPresent(errors.add);
 		}
-		if
-		(errors.isEmpty())
+		if(errors.isEmpty())
 		{
 			return ErrorRuleResult(CompileError("No rules were present.", input));
 		}
@@ -42,8 +40,7 @@ import java.util.Optional;
 		}
 		let mut anyOk : Optional<Result<String, Error_>> = Optional.empty();
 		for(result : Result<String, Error_> in results){
-			if
-			(result.isOk())
+			if(result.isOk())
 			{
 				anyOk=Optional.of(result);
 				break

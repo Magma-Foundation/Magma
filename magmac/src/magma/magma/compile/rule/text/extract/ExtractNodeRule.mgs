@@ -14,20 +14,17 @@ import magma.compile.rule.result.UntypedRuleResult;
 () => {
 	public def toNode(input : String) : RuleResult => {
 		let mut node = child.toNode(input);
-		if
-		(node.findError().isPresent())
+		if(node.findError().isPresent())
 		return node;
 		return node.tryCreate().map(NodeAttribute.new).map(() => MapAttributes().with(propertyKey, attribute)).<RuleResult>map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		let mut attributes = node.attributes();
 		let mut propertyValue = attributes.apply(propertyKey);
-		if
-		(propertyValue.isEmpty())
+		if(propertyValue.isEmpty())
 		return createErr(node);
 		let mut asNode = propertyValue.get().asNode();
-		if
-		(asNode.isEmpty())
+		if(asNode.isEmpty())
 		return createErr(node);
 		return child.fromNode(asNode.get());
 	}

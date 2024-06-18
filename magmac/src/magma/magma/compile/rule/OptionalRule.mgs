@@ -18,8 +18,7 @@ public final class def OptionalRule() => {
 		return orRule.toNode(input);
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		if
-		(node.has(key))
+		if(node.has(key))
 		{
 			return onPresent.fromNode(node);
 		}

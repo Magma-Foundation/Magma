@@ -10,8 +10,7 @@ public abstract class def FilterRule() => {
 		this=child;
 	}
 	public def toNode(input : String) : RuleResult => {
-		if
-		(filter(input))
+		if(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
