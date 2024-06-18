@@ -109,8 +109,44 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Tuple<Node, Integer>> replaceConstructorsWithInvocation(Node node, int depth) {
         if (!node.is("constructor")) return Optional.empty();
 
-        var children = node.findNodeList("children").orElse(Collections.emptyList());
-        return Optional.of(new Tuple<>(node.retype("invocation").withNodeList("arguments", children), depth));
+        var oldChildrenOptional = node.findNodeList("children");
+        if (oldChildrenOptional.isPresent()) {
+            var originalArguments = node.findNodeList("arguments").orElse(Collections.emptyList());
+            var oldChildren = oldChildrenOptional.get();
+
+            var nonFunctions = new ArrayList<Node>();
+            var functions = new ArrayList<Node>();
+            for (Node oldChild : oldChildren) {
+                if(oldChild.is("method")) {
+                    functions.add(oldChild);
+                } else {
+                    nonFunctions.add(oldChild);
+                }
+            }
+
+            var construction = node.clear("construction")
+                    .withNode("child", node.clear("block").withNodeList("children", functions));
+
+            var newChildren = new ArrayList<>(nonFunctions);
+            newChildren.add(new Node("return").withNode("child", construction));
+
+            var lambdaBody = node.clear("block").withNodeList("children", newChildren);
+            var lambda = node.clear("function").withNode("child", lambdaBody);
+
+            var lambda1 = node.clear("invocation")
+                    .withNode("caller", node.clear("quantity").withNode("value", lambda))
+                    .withNodeList("arguments", Collections.emptyList());
+
+            var classCreator = node.retype("invocation")
+                    .remove("children")
+                    .withNodeList("arguments", Collections.singletonList(lambda1));
+
+            return Optional.of(new Tuple<>(node.clear("invocation")
+                    .withNode("caller", classCreator)
+                    .withNodeList("arguments", originalArguments), depth));
+        } else {
+            return Optional.of(new Tuple<>(node.retype("invocation"), depth));
+        }
     }
 
     private Optional<Tuple<Node, Integer>> replaceMethodWithFunction(Node node, int depth) {

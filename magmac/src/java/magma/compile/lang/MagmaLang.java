@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalRule;
@@ -24,7 +25,7 @@ public class MagmaLang {
         var value = new LazyRule();
 
         var definition = createDefinitionRule();
-        value.setRule(new OrRule(List.of(
+        value.setRule(new ContextRule("Not a value.", new OrRule(List.of(
                 createFunctionRule(statement, value),
                 Lang.createCharRule(),
                 Lang.createStringRule(),
@@ -42,10 +43,12 @@ public class MagmaLang {
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("less-than", "<", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
-                Lang.createNotRule(value)
-        )));
+                Lang.createNotRule(value),
+                new TypeRule("quantity", new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("value", value), ")")))),
+                new TypeRule("construction", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))))
+        ))));
 
-        statement.setRule(new OrRule(List.of(
+        statement.setRule(new ContextRule("Not a statement.", new OrRule(List.of(
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
@@ -70,7 +73,7 @@ public class MagmaLang {
                 Lang.createKeywordRule("break"),
                 Lang.createKeywordRule("continue"),
                 new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";")))
-        )));
+        ))));
 
         return Lang.createBlock(new OrRule(List.of(
                 Lang.createImportRule(Lang.createNamespaceRule()),

@@ -3,6 +3,7 @@ package magma.compile.lang;
 import magma.api.Tuple;
 import magma.compile.CompileError;
 import magma.compile.Error_;
+import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.NumberRule;
@@ -130,7 +131,8 @@ public class Lang {
     }
 
     static Rule createReturnRule(Rule value) {
-        var withValue = new LeftRule(" ", new ExtractNodeRule("child", new StripRule(value)));
+        var child = new ExtractNodeRule("child", new StripRule(value));
+        var withValue = new LeftRule(" ", new ContextRule("Invalid value.", child));
         var maybeChild = new OrRule(List.of(withValue, new EmptyRule("child")));
         var after = new OrRule(List.of(new RightRule(maybeChild, ";"), maybeChild));
         return new TypeRule("return", new LeftRule("return", after));

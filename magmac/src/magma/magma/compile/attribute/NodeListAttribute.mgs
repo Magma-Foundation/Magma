@@ -6,7 +6,12 @@ import java.util.stream.Collectors;
 () => {
 	
 	public static final Factory : Factory<List<Node>>=
-	Factory();
+	Factory((() => {
+		return {
+			public def fromAttribute(attribute : Attribute) : Optional<List<Node>> => {
+				return attribute.asNodeList();}
+			public def toAttribute(value : List<Node>) : Attribute => {
+				return NodeListAttribute(value);}};})())();
 	
 	;
 	public def asNodeList() : Optional<List<Node>> => {

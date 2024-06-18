@@ -4,7 +4,12 @@ import java.util.Optional;
 () => {
 	
 	public static final Factory : Factory<Node>=
-	Factory();
+	Factory((() => {
+		return {
+			public def fromAttribute(attribute : Attribute) : Optional<Node> => {
+				return attribute.asNode();}
+			public def toAttribute(value : Node) : Attribute => {
+				return NodeAttribute(value);}};})())();
 	
 	;
 	public def asNode() : Optional<Node> => {

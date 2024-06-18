@@ -7,12 +7,12 @@ import java.util.function.Function;
 	public def findErr() : Optional<E> => {
 		return Optional.of(value);}
 	public def flatMapValue(mapper : Function<T, Result<R, E>>) : Result<R, E> => {
-		return Err();}
+		return Err(value);}
 	public def mapValue(mapper : Function<T, R>) : Result<R, E> => {
-		return Err();}
+		return Err(value);}
 	public def isOk() : boolean => {
 		return false;}
 	public def mapErr(mapper : Function<E, R>) : Result<T, R> => {
-		return Err();}
+		return Err(mapper.apply(value));}
 	public def match(onOk : Function<T, R>, onErr : Function<E, R>) : R => {
 		return onErr.apply(value);}}

@@ -70,8 +70,8 @@ public class def Main() => {
 		
 		parseResult : var=
 		JavaLang.createRootRule().toNode(input);
-		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.getCompileException);}
-	private static def getCompileException(err : Error_) : Optional<CompileException> => {
+		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.writeError);}
+	private static def writeError(err : Error_) : Optional<CompileException> => {
 		try 
 		{
 			
@@ -105,9 +105,16 @@ public class def Main() => {
 			generateResult : var=
 			rule.fromNode(generated);
 			
-			generateError : var=
+			generateErrorOptional : var=
 			generateResult.findErr();
-			generateError.ifPresent(() => print(error, 0));
+			if
+			(generateErrorOptional.isPresent())
+			{
+				
+				generateError : var=
+				generateErrorOptional.get();
+				print(generateError, 0);
+				writeError(generateError);}
 			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
 			return Optional.empty();}
 		catch (e : CompileException){

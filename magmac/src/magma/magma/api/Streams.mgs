@@ -3,6 +3,19 @@ import java.util.List;
 import java.util.Optional;
 public class def Streams() => {
 	public static def fromNativeList(list : List<T>) : Stream<T> => {
-		return AbstractStream();
+		return AbstractStream((() => {
+			
+			private counter : int=
+			0;
+			return {
+				public def head() : Optional<T> => {
+					if
+					(counter>=list.size())
+					return Optional.empty();
+					
+					next : var=
+					list.get(counter);
+					counter++;
+					return Optional.of(next);}};})())();
 		
 		;}}
