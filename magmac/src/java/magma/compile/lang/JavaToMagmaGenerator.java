@@ -106,6 +106,16 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Tuple<Node, Integer>> replaceClassWithFunction(Node node, int depth) {
         if (!node.is("class")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("function"), depth));
+        var name = node.findNode("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
+
+        var modifiers = node.findStringList("modifiers").orElseThrow();
+
+        var definition = node.clear("definition")
+                .withNode("name", name)
+                .withStringList("modifiers", modifiers);
+
+        var function = node.retype("function").withNode("definition", definition);
+
+        return Optional.of(new Tuple<>(function, depth));
     }
 }

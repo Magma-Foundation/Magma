@@ -54,4 +54,10 @@ import java.util.function.Supplier;
 		{
 			return with(key, StringListAttribute(onEmpty.get()));}}
 	public findNode : Optional<Node> => {
-		return attributes.apply(key).flatMap(Attribute.asNode);}}
+		return attributes.apply(key).flatMap(Attribute.asNode);}
+	public findString : Optional<String> => {
+		return attributes.apply(key).flatMap(Attribute.asString);}
+	public findStringList : Optional<List<String>> => {
+		return attributes.apply(key).flatMap(Attribute.asStringList);}
+	public clear : Node => {
+		return Node(type);}}

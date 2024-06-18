@@ -95,4 +95,16 @@ public record Node(String type, Attributes attributes) {
     public Optional<Node> findNode(String key) {
         return attributes.apply(key).flatMap(Attribute::asNode);
     }
+
+    public Optional<String> findString(String key) {
+        return attributes.apply(key).flatMap(Attribute::asString);
+    }
+
+    public Optional<List<String>> findStringList(String key) {
+        return attributes.apply(key).flatMap(Attribute::asStringList);
+    }
+
+    public Node clear(String type) {
+        return new Node(type);
+    }
 }

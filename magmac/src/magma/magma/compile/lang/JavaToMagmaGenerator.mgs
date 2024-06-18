@@ -80,4 +80,16 @@ import java.util.Optional;
 		if
 		(!node.is("class"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("function"), depth));}}
+		
+		name : var=
+		node.findNode("name").orElseThrow(() => RuntimeException("No name present: "+node));
+		
+		modifiers : var=
+		node.findStringList("modifiers").orElseThrow();
+		
+		definition : var=
+		node.clear("definition").withNode("name", name).withStringList("modifiers", modifiers);
+		
+		function : var=
+		node.retype("function").withNode("definition", definition);
+		return Optional.of(Tuple(function, depth));}}
