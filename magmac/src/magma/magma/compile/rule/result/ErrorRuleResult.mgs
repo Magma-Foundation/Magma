@@ -11,7 +11,7 @@ import java.util.function.Function;
 	public def findError() : Optional<Error_> => {
 		return Optional.of(e);
 	}
-	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
+	public def mapErr(mapper : (Error_) => Error_) : RuleResult => {
 		return ErrorRuleResult(mapper.apply(e));
 	}
 	public def findAttributes() : Optional<Attributes> => {

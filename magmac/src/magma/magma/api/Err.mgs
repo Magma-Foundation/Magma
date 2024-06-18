@@ -8,19 +8,19 @@ import java.util.function.Function;
 	public def findErr() : Optional<E> => {
 		return Optional.of(value);
 	}
-	public def flatMapValue<R>(mapper : Function<T, Result<R, E>>) : Result<R, E> => {
+	public def flatMapValue<R>(mapper : (T) => Result<R, E>) : Result<R, E> => {
 		return Err(value);
 	}
-	public def mapValue<R>(mapper : Function<T, R>) : Result<R, E> => {
+	public def mapValue<R>(mapper : (T) => R) : Result<R, E> => {
 		return Err(value);
 	}
 	public def isOk() : boolean => {
 		return false;
 	}
-	public def mapErr<R>(mapper : Function<E, R>) : Result<T, R> => {
+	public def mapErr<R>(mapper : (E) => R) : Result<T, R> => {
 		return Err(mapper.apply(value));
 	}
-	public def match<R>(onOk : Function<T, R>, onErr : Function<E, R>) : R => {
+	public def match<R>(onOk : (T) => R, onErr : (E) => R) : R => {
 		return onErr.apply(value);
 	}
 }

@@ -1,7 +1,7 @@
 
 import java.util.function.Function;
 () => {
-	public def mapLeft<T>(mapper : Function<L, T>) : Tuple<T, R> => {
+	public def mapLeft<T>(mapper : (L) => T) : Tuple<T, R> => {
 		return Tuple(mapper.apply(left), right);
 	}
 }

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 	def MapAttributes() : public => {
 		this(Collections.emptyMap());
 	}
-	public def mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
+	public def mapValue<T>(key : String, factory : Factory<T>, mapper : (T) => T) : Attributes => {
 		if
 		(!values.containsKey(key))
 		return this;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 	public def streamEntries() : Stream<Tuple<String, Attribute>> => {
 		return values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
 	}
-	public def mapValues(mapper : Function<Attribute, Attribute>) : Attributes => {
+	public def mapValues(mapper : (Attribute) => Attribute) : Attributes => {
 		
 		copy : var=
 		HashMap();

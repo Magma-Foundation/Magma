@@ -80,7 +80,27 @@ public class JavaToMagmaGenerator extends Generator {
                 .or(() -> replaceConstructorsWithInvocation(node, depth))
                 .or(() -> replaceInterfaceWithStruct(node, depth))
                 .or(() -> replaceMethodReferenceWithAccess(node, depth))
+                .or(() -> replaceGenericWithFunctionType(node, depth))
                 .orElse(new Tuple<>(node, depth));
+    }
+
+    private Optional<Tuple<Node, Integer>> replaceGenericWithFunctionType(Node node, int depth) {
+        if (!node.is("generic")) return Optional.empty();
+
+        var parent = node.findString("parent").orElseThrow();
+        if (!parent.equals("Function")) return Optional.of(new Tuple<>(node, depth));
+
+        var children = node.findNodeList("children").orElseThrow();
+        if (children.size() != 2) {
+            return Optional.empty();
+        }
+
+        var from = children.get(0);
+        var to = children.get(1);
+
+        return Optional.of(new Tuple<>(node.clear("function-type")
+                .withNodeList("params", List.of(from))
+                .withNode("returns", to), depth));
     }
 
     private Optional<Tuple<Node, Integer>> replaceMethodReferenceWithAccess(Node node, int depth) {

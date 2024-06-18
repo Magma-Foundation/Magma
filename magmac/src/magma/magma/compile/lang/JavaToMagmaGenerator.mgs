@@ -72,7 +72,33 @@ public class def JavaToMagmaGenerator() => {
 		return Optional.empty();
 	}
 	protected def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).orElse(Tuple(node, depth));
+		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).or(() => replaceGenericWithFunctionType(node, depth)).orElse(Tuple(node, depth));
+	}
+	private def replaceGenericWithFunctionType(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
+		if
+		(!node.is("generic"))
+		return Optional.empty();
+		
+		parent : var=
+		node.findString("parent").orElseThrow();
+		if
+		(!parent.equals("Function"))
+		return Optional.of(Tuple(node, depth));
+		
+		children : var=
+		node.findNodeList("children").orElseThrow();
+		if
+		(children.size()!=2)
+		{
+			return Optional.empty();
+		}
+		
+		from : var=
+		children.get(0);
+		
+		to : var=
+		children.get(1);
+		return Optional.of(Tuple(node.clear("function-type").withNodeList("params", List.of(from)).withNode("returns", to), depth));
 	}
 	private def replaceMethodReferenceWithAccess(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if

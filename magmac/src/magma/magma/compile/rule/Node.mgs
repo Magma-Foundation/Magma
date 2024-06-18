@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 	def Node(type : String) : public => {
 		this(type, MapAttributes());
 	}
-	public def mapNode(key : String, nodeNodeFunction : Function<Node, Node>) : Node => {
+	public def mapNode(key : String, nodeNodeFunction : (Node) => Node) : Node => {
 		return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));
 	}
 	public def withString(key : String, value : String) : Node => {
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 	public def is(type : String) : boolean => {
 		return this.type.equals(type);
 	}
-	public def mapAttributes(mapper : Function<Attributes, Attributes>) : Node => {
+	public def mapAttributes(mapper : (Attributes) => Attributes) : Node => {
 		return Node(type, mapper.apply(attributes));
 	}
 	public def retype(type : String) : Node => {
@@ -59,10 +59,10 @@ import java.util.function.Supplier;
 	public def has(child : String) : boolean => {
 		return attributes.has(child);
 	}
-	public def mapNodes(key : String, mapper : Function<List<Node>, List<Node>>) : Node => {
+	public def mapNodes(key : String, mapper : (List<Node>) => List<Node>) : Node => {
 		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
 	}
-	public def mapOrSetNodeList(key : String, onPresent : Function<List<Node>, List<Node>>, onEmpty : Supplier<List<Node>>) : Node => {
+	public def mapOrSetNodeList(key : String, onPresent : (List<Node>) => List<Node>, onEmpty : Supplier<List<Node>>) : Node => {
 		if
 		(has(key))
 		{
@@ -73,7 +73,7 @@ import java.util.function.Supplier;
 			return with(key, NodeListAttribute(onEmpty.get()));
 		}
 	}
-	public def mapOrSetStringList(key : String, onPresent : Function<List<String>, List<String>>, onEmpty : Supplier<List<String>>) : Node => {
+	public def mapOrSetStringList(key : String, onPresent : (List<String>) => List<String>, onEmpty : Supplier<List<String>>) : Node => {
 		if
 		(has(key))
 		{
