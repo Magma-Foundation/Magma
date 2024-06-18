@@ -2,14 +2,10 @@ package magma;
 
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.ClassSplitter;
 import magma.compile.lang.Generator;
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.JavaNormalizer;
-import magma.compile.lang.MagmaFormatter;
-import magma.compile.lang.MagmaGenerator;
+import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 
@@ -178,11 +174,7 @@ public class Main {
 
     private static Node generate(Node root) {
         var list = Arrays.asList(
-                new PackageRemover(),
-                new ClassSplitter(),
-                new JavaNormalizer(),
-                new MagmaGenerator(),
-                new MagmaFormatter()
+                new JavaToMagmaGenerator()
         );
 
         Node acc = root;

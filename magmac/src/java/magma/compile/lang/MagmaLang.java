@@ -80,7 +80,8 @@ public class MagmaLang {
         var modifiers = new SimpleExtractStringListRule("modifiers", " ");
 
         var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
-        var child = new FirstRule(new ExtractNodeRule("name", Lang.createNamePrototypeRule()), " {", new RightRule(children, "}"));
+        var name = new ExtractNodeRule("name", Lang.createNamePrototypeRule());
+        var child = new FirstRule(name, " {", new RightRule(children, "}"));
 
         return new TypeRule("struct", new OptionalRule("modifiers",
                 new FirstRule(modifiers, " struct ", child),
