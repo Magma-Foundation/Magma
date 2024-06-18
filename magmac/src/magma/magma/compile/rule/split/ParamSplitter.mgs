@@ -7,24 +7,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 public class def ParamSplitter() => {
 	public def split(input : String) : List<String> => {
-		
-		segments : var=
-		ArrayList();
-		
-		buffer : var=
-		StringBuilder();
-		
-		depth : var=
-		0;
-		
-		queue : var=
-		IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		segments : var=ArrayList();
+		buffer : var=StringBuilder();
+		depth : var=0;
+		queue : var=IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while
 		(!queue.isEmpty())
 		{
-			
-			c : var=
-			queue.pop();
+			c : var=queue.pop();
 			if
 			(c=='\"')
 			{
@@ -32,9 +22,7 @@ public class def ParamSplitter() => {
 				while
 				(!queue.isEmpty())
 				{
-					
-					next : var=
-					queue.pop();
+					next : var=queue.pop();
 					buffer.append(next);
 					if
 					(next=='\\')
@@ -60,9 +48,7 @@ public class def ParamSplitter() => {
 				if
 				(!queue.isEmpty())
 				{
-					
-					next : var=
-					queue.peek();
+					next : var=queue.peek();
 					if
 					(next=='>')
 					{

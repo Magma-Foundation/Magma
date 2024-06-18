@@ -34,7 +34,7 @@ import java.util.stream.IntStream;
 
 public class Lang {
     static Rule createBlock(Rule member) {
-        return new StripRule( new TypeRule("block", createMembersRule(member)), "before-content", "after-content");
+        return new StripRule(new TypeRule("block", createMembersRule(member)), "before-content", "after-content");
     }
 
     static SplitMultipleRule createMembersRule(Rule member) {
@@ -173,14 +173,13 @@ public class Lang {
     }
 
     static TypeRule createDeclarationRule(Rule definition, Rule value) {
-        var extractNodeRule = new ExtractNodeRule("definition", new TypeRule("definition", definition));
-        var left = new StripRule(extractNodeRule);
+        var definitionWrapped = new ExtractNodeRule("definition", new TypeRule("definition", definition));
 
         var withoutTerminator = new ExtractNodeRule("value", value);
-        var maybeTerminating = new OrRule(List.of(new RightRule(withoutTerminator, ";"), withoutTerminator));
+        var withTerminator = new StripRule(new RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");
+        var maybeTerminating = new OrRule(List.of(withTerminator, withoutTerminator));
 
-        Rule rule = new StripRule(maybeTerminating);
-        return new TypeRule("declaration", new FirstRule(left, "=", rule));
+        return new TypeRule("declaration", new FirstRule(definitionWrapped, "=", maybeTerminating));
     }
 
     static Rule createParamsRule(Rule definition) {

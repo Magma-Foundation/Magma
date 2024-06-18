@@ -201,7 +201,7 @@ public class JavaLang {
                 before
         ));
 
-        return new TypeRule("constructor", new LeftRule("new ", child));
+        return new TypeRule("constructor", new StripRule(new LeftRule("new ", child)));
     }
 
     private static class SplitThrows implements Splitter {

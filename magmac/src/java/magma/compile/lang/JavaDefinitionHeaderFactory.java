@@ -2,6 +2,7 @@ package magma.compile.lang;
 
 import magma.compile.CompileError;
 import magma.compile.Error_;
+import magma.compile.rule.ContextRule;
 import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.TypeRule;
@@ -11,6 +12,7 @@ import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
@@ -25,19 +27,23 @@ public class JavaDefinitionHeaderFactory {
         var name = new ExtractStringRule("name");
 
         var generics = new LeftRule("<", new RightRule(new SimpleExtractStringListRule("type-params", ","), ">"));
-        var withGenerics = new BackwardsRule(generics, " ", type);
-        var maybeGenerics = new OrRule(List.of(withGenerics, type));
+        var withGenerics = new ContextRule("With generics.", new StripRule(new BackwardsRule(generics, " ", type)));
+        var withoutGenerics = new ContextRule("Without generics.", type);
+        var maybeGenerics = new OrRule(List.of(withGenerics, withoutGenerics));
 
         var modifiers = new ModifiersRule();
-        var withModifiers = new BackwardsRule(modifiers, " ", maybeGenerics);
-        var maybeModifiers = new OrRule(List.of(withModifiers, maybeGenerics));
+        var withModifiers = new ContextRule("With modifiers.", new BackwardsRule(modifiers, " ", maybeGenerics));
+        var withoutModifiers = new ContextRule("Without modifiers.", maybeGenerics);
+        var maybeModifiers = new OrRule(List.of(withModifiers, withoutModifiers));
 
         var annotation = new TypeRule("annotation", new LeftRule("@", new ExtractStringRule("value")));
         var annotations = new SplitMultipleRule(new SimpleSplitter(), ", ", "annotations", annotation);
-        var withAnnotations = new LastRule(annotations, "\n", maybeModifiers);
-        var maybeAnnotations = new OrRule(List.of(withAnnotations, maybeModifiers));
+        var withAnnotations = new ContextRule("With annotations.",new LastRule(annotations, "\n", maybeModifiers));
+        var withoutAnnotations = new ContextRule("Without annotations.", maybeModifiers);
+        var maybeAnnotations = new OrRule(List.of(withAnnotations, withoutAnnotations));
 
-        return new TypeRule("definition", new LastRule(maybeAnnotations, " ", name));
+        var beforeName = new ContextRule("Cannot parse before name.", maybeAnnotations);
+        return new TypeRule("definition", new StripRule(new LastRule(beforeName, " ", name)));
     }
 
     private static class ModifiersRule extends ExtractStringListRule {

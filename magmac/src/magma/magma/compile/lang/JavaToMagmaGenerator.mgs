@@ -11,9 +11,7 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("block"))
 		return Optional.empty();
-		
-		newBlock : var=
-		node.mapNodes("children", JavaToMagmaGenerator.removePackagesFromList);
+		newBlock : var=node.mapNodes("children", JavaToMagmaGenerator.removePackagesFromList);
 		return Optional.of(Tuple(newBlock, depth+1));
 	}
 	private static def removePackagesFromList(children : List<Node>) : List<Node> => {
@@ -26,12 +24,8 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("block"))
 		return Optional.empty();
-		
-		prefix : var=
-		"\n" + "\t".repeat(depth);
-		
-		newBlock : var=
-		node.mapNodes("children", () => {
+		prefix : var="\n" + "\t".repeat(depth);
+		newBlock : var=node.mapNodes("children", () => {
 			return children.stream().filter(() => !child.is("empty")).map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
 		}).withString("after-content", "\n" + "\t".repeat(depth==0?0:depth-1));
 		return Optional.of(Tuple(newBlock, depth-1));
@@ -40,24 +34,16 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(node.is("function"))
 		{
-			
-			oldDefinition : var=
-			node.findNode("definition");
+			oldDefinition : var=node.findNode("definition");
 			if
 			(oldDefinition.isPresent())
 			{
-				
-				params : var=
-				node.findNodeList("params").orElse(Collections.emptyList());
+				params : var=node.findNodeList("params").orElse(Collections.emptyList());
 				if
 				(node.has("child"))
 				{
-					
-					newDefinition : var=
-					oldDefinition.get().withNodeList("params", params).mapOrSetStringList("modifiers", () => {
-						
-						copy : var=
-						ArrayList(list);
+					newDefinition : var=oldDefinition.get().withNodeList("params", params).mapOrSetStringList("modifiers", () => {
+						copy : var=ArrayList(list);
 						copy.add("def");
 						return copy;
 					}, () => List.of("def"));
@@ -78,26 +64,18 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("generic"))
 		return Optional.empty();
-		
-		parent : var=
-		node.findString("parent").orElseThrow();
+		parent : var=node.findString("parent").orElseThrow();
 		if
 		(!parent.equals("Function"))
 		return Optional.of(Tuple(node, depth));
-		
-		children : var=
-		node.findNodeList("children").orElseThrow();
+		children : var=node.findNodeList("children").orElseThrow();
 		if
 		(children.size()!=2)
 		{
 			return Optional.empty();
 		}
-		
-		from : var=
-		children.get(0);
-		
-		to : var=
-		children.get(1);
+		from : var=children.get(0);
+		to : var=children.get(1);
 		return Optional.of(Tuple(node.clear("function-type").withNodeList("params", List.of(from)).withNode("returns", to), depth));
 	}
 	private def replaceMethodReferenceWithAccess(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
@@ -128,24 +106,14 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("constructor"))
 		return Optional.empty();
-		
-		oldChildrenOptional : var=
-		node.findNodeList("children");
+		oldChildrenOptional : var=node.findNodeList("children");
 		if
 		(oldChildrenOptional.isPresent())
 		{
-			
-			originalArguments : var=
-			node.findNodeList("arguments").orElse(Collections.emptyList());
-			
-			oldChildren : var=
-			oldChildrenOptional.get();
-			
-			nonFunctions : var=
-			ArrayList();
-			
-			functions : var=
-			ArrayList();
+			originalArguments : var=node.findNodeList("arguments").orElse(Collections.emptyList());
+			oldChildren : var=oldChildrenOptional.get();
+			nonFunctions : var=ArrayList();
+			functions : var=ArrayList();
 			for(oldChild : Node in oldChildren){
 				if
 				(oldChild.is("method"))
@@ -157,25 +125,13 @@ public class def JavaToMagmaGenerator() => {
 					nonFunctions.add(oldChild);
 				}
 			}
-			
-			construction : var=
-			node.clear("construction").withNode("child", node.clear("block").withNodeList("children", functions));
-			
-			newChildren : var=
-			ArrayList(nonFunctions);
+			construction : var=node.clear("construction").withNode("child", node.clear("block").withNodeList("children", functions));
+			newChildren : var=ArrayList(nonFunctions);
 			newChildren.add(Node("return").withNode("child", construction));
-			
-			lambdaBody : var=
-			node.clear("block").withNodeList("children", newChildren);
-			
-			lambda : var=
-			node.clear("function").withNode("child", lambdaBody);
-			
-			lambda1 : var=
-			node.clear("invocation").withNode("caller", node.clear("quantity").withNode("value", lambda)).withNodeList("arguments", Collections.emptyList());
-			
-			classCreator : var=
-			node.retype("invocation").remove("children").withNodeList("arguments", Collections.singletonList(lambda1));
+			lambdaBody : var=node.clear("block").withNodeList("children", newChildren);
+			lambda : var=node.clear("function").withNode("child", lambdaBody);
+			lambda1 : var=node.clear("invocation").withNode("caller", node.clear("quantity").withNode("value", lambda)).withNodeList("arguments", Collections.emptyList());
+			classCreator : var=node.retype("invocation").remove("children").withNodeList("arguments", Collections.singletonList(lambda1));
 			return Optional.of(Tuple(node.clear("invocation").withNode("caller", classCreator).withNodeList("arguments", originalArguments), depth));
 		}
 		else
@@ -193,22 +149,12 @@ public class def JavaToMagmaGenerator() => {
 		if
 		(!node.is("class"))
 		return Optional.empty();
-		
-		name : var=
-		node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
-		
-		modifiers : var=
-		node.findStringList("modifiers").orElseThrow();
-		
-		newModifiers : var=
-		ArrayList(modifiers);
+		name : var=node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
+		modifiers : var=node.findStringList("modifiers").orElseThrow();
+		newModifiers : var=ArrayList(modifiers);
 		newModifiers.add("class");
-		
-		definition : var=
-		node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
-		
-		function : var=
-		node.retype("function").withNode("definition", definition);
+		definition : var=node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
+		function : var=node.retype("function").withNode("definition", definition);
 		return Optional.of(Tuple(function, depth));
 	}
 }

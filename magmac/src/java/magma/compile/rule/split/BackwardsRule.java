@@ -2,6 +2,7 @@ package magma.compile.rule.split;
 
 import magma.api.Result;
 import magma.compile.CompileError;
+import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.MultipleError;
 import magma.compile.rule.Node;
@@ -26,13 +27,13 @@ public record BackwardsRule(Rule leftRule, String slice, Rule rightRule) impleme
 
             var leftResult = leftRule.toNode(leftSlice);
             if (leftResult.findError().isPresent()) {
-                errors.add(leftResult.findError().get());
+                errors.add(wrapError(leftSlice, rightSlice, leftResult.findError().get()));
                 continue;
             }
 
             var rightResult = rightRule.toNode(rightSlice);
             if (rightResult.findError().isPresent()) {
-                errors.add(rightResult.findError().get());
+                errors.add(wrapError(leftSlice, rightSlice, rightResult.findError().get()));
                 continue;
             }
 
@@ -50,6 +51,10 @@ public record BackwardsRule(Rule leftRule, String slice, Rule rightRule) impleme
         } else {
             return new ErrorRuleResult(new MultipleError(errors));
         }
+    }
+
+    private static CompileParentError wrapError(String leftSlice, String rightSlice, Error_ error) {
+        return new CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
     }
 
     private List<Integer> findAllIndexesReverse(String input) {
