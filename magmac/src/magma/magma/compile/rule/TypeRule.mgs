@@ -7,26 +7,26 @@ import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 () => {
-	public static final FORMAT : String = "Node was not of type '%s', but rather '%s'.";
+	let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
 	public def toNode(input : String) : RuleResult => {
-		result = child.toNode(input);
+		let mut result = child.toNode(input);
 		if
 		(result.findError().isEmpty())
 		return result.withType(type);
-		format = "Cannot attach type '%s' because of child failure.";
-		message = format.formatted(type);
+		let mut format = "Cannot attach type '%s' because of child failure.";
+		let mut message = format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));
 	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		if
 		(!node.type().equals(type))
 		{
-			message = String.format(FORMAT, type, node.type());
+			let mut message = String.format(FORMAT, type, node.type());
 			return Err(CompileError(message, node.toString()));
 		}
 		return child.fromNode(node).mapErr(() => {
-			format = "Cannot generate '%s' from node.";
-			message = format.formatted(type);
+			let mut format = "Cannot generate '%s' from node.";
+			let mut message = format.formatted(type);
 			return CompileParentError(message, node.toString(), err);
 		});
 	}

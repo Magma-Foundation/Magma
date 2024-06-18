@@ -4,13 +4,13 @@ import java.util.Optional;
 public class def Streams() => {
 	public static def fromNativeList<T>(list : List<T>) : Stream<T> => {
 		return AbstractStream((() => {
-			private counter : int = 0;
+			let mut counter : int = 0;
 			return {
 				public def head() : Optional<T> => {
 					if
 					(counter>=list.size())
 					return Optional.empty();
-					next = list.get(counter);
+					let mut next = list.get(counter);
 					counter++;
 					return Optional.of(next);
 				}

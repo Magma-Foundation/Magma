@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 public class def Generator() => {
 	private def generateAttribute(attribute : Attribute, depth : int) : Tuple<Attribute, Integer> => {
-		nodeList = attribute.asNodeList();
+		let mut nodeList = attribute.asNodeList();
 		if
 		(nodeList.isPresent())
 		{
-			list = ArrayList();
-			current = depth;
+			let mut list = ArrayList();
+			let mut current = depth;
 			for(node : var in nodeList.get()){
-				nodeIntegerTuple : Tuple<Node, Integer> = generateWithDepth(node, current);
+				let mut nodeIntegerTuple : Tuple<Node, Integer> = generateWithDepth(node, current);
 				list.add(nodeIntegerTuple.left());
 				current=nodeIntegerTuple.right();
 			}
@@ -32,15 +32,15 @@ public class def Generator() => {
 		return generateWithDepth(node, state).left();
 	}
 	private def generateWithDepth(node : Node, depth : int) : Tuple<Node, Integer> => {
-		preVisitedTuple = preVisit(node, depth);
-		preVisited = preVisitedTuple.left();
-		preVisitedAttributes = preVisited.attributes().streamEntries().toList();
-		newAttributes : Attributes = MapAttributes();
-		current = preVisitedTuple.right();
+		let mut preVisitedTuple = preVisit(node, depth);
+		let mut preVisited = preVisitedTuple.left();
+		let mut preVisitedAttributes = preVisited.attributes().streamEntries().toList();
+		let mut newAttributes : Attributes = MapAttributes();
+		let mut current = preVisitedTuple.right();
 		for(preVisitedAttribute : Tuple<String, Attribute> in preVisitedAttributes){
-			key = preVisitedAttribute.left();
-			value = preVisitedAttribute.right();
-			newTuple = generateAttribute(value, current);
+			let mut key = preVisitedAttribute.left();
+			let mut value = preVisitedAttribute.right();
+			let mut newTuple = generateAttribute(value, current);
 			newAttributes=newAttributes.with(key, newTuple.left());
 			current=newTuple.right();
 		}

@@ -7,11 +7,11 @@ public final class def NumberRule() => {
 		if
 		(input.isEmpty())
 		return false;
-		i : int = 0;
+		let mut i : int = 0;
 		while
 		(i<input.length())
 		{
-			c = input.charAt(i);
+			let mut c = input.charAt(i);
 			if
 			(!Character.isDigit(c))
 			{

@@ -12,12 +12,12 @@ public abstract class def AbstractStream() => {
 		})())();
 	}
 	public def collect<C>(collector : Collector<T, C>) : C => {
-		current = collector.createInitial();
+		let mut current = collector.createInitial();
 		while
 		(true)
 		{
-			finalCurrent : C = current;
-			tuple = Options.toTuple(head().map(() => collector.fold(finalCurrent, head)), current);
+			let mut finalCurrent : C = current;
+			let mut tuple = Options.toTuple(head().map(() => collector.fold(finalCurrent, head)), current);
 			if
 			(tuple.left())
 			{

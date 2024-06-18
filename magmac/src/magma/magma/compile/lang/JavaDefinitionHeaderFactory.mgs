@@ -20,26 +20,26 @@ import java.util.List;
 import java.util.Optional;
 public class def JavaDefinitionHeaderFactory() => {
 	static def createDefinitionHeaderRule() : Rule => {
-		type = ExtractNodeRule("type", Lang.createTypeRule());
-		name = ExtractStringRule("name");
-		generics = LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
-		withGenerics = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
-		withoutGenerics = ContextRule("Without generics.", type);
-		maybeGenerics = OrRule(List.of(withGenerics, withoutGenerics));
-		modifiers = ModifiersRule();
-		withModifiers = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
-		withoutModifiers = ContextRule("Without modifiers.", maybeGenerics);
-		maybeModifiers = OrRule(List.of(withModifiers, withoutModifiers));
-		annotation = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
-		annotations = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
-		withAnnotations = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
-		withoutAnnotations = ContextRule("Without annotations.", maybeModifiers);
-		maybeAnnotations = OrRule(List.of(withAnnotations, withoutAnnotations));
-		beforeName = ContextRule("Cannot parse before name.", maybeAnnotations);
+		let mut type = ExtractNodeRule("type", Lang.createTypeRule());
+		let mut name = ExtractStringRule("name");
+		let mut generics = LeftRule("<", RightRule(SimpleExtractStringListRule("type-params", ","), ">"));
+		let mut withGenerics = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
+		let mut withoutGenerics = ContextRule("Without generics.", type);
+		let mut maybeGenerics = OrRule(List.of(withGenerics, withoutGenerics));
+		let mut modifiers = ModifiersRule();
+		let mut withModifiers = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
+		let mut withoutModifiers = ContextRule("Without modifiers.", maybeGenerics);
+		let mut maybeModifiers = OrRule(List.of(withModifiers, withoutModifiers));
+		let mut annotation = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+		let mut annotations = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+		let mut withAnnotations = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
+		let mut withoutAnnotations = ContextRule("Without annotations.", maybeModifiers);
+		let mut maybeAnnotations = OrRule(List.of(withAnnotations, withoutAnnotations));
+		let mut beforeName = ContextRule("Cannot parse before name.", maybeAnnotations);
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
 	private static class def ModifiersRule() => {
-		public static final MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
 		def ModifiersRule() : public => {
 			super("modifiers", " ");
 		}

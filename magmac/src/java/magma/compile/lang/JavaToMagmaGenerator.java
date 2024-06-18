@@ -25,9 +25,8 @@ public class JavaToMagmaGenerator extends Generator {
 
     private static Node removeType(Node node) {
         var definition = node.findNode("definition").orElseThrow();
-        var typeOptional = definition.findNode("type").orElseThrow();
+        var type = definition.findNode("type").orElseThrow();
 
-        var type = typeOptional;
         if (!type.is("symbol")) return node;
 
         var value = type.findString("value").orElseThrow();
@@ -37,60 +36,71 @@ public class JavaToMagmaGenerator extends Generator {
         return node;
     }
 
+    private static List<Node> attachFormatting(List<Node> children, String prefix) {
+        return children.stream()
+                .filter(child -> !child.is("empty"))
+                .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
+                .toList();
+    }
+
     @Override
     protected Tuple<Node, Integer> postVisit(Node node, int depth) {
         return postVisitFunction(node, depth)
                 .or(() -> postVisitBlock(node, depth))
-                .or(() -> formatDeclaration(node, depth))
+                .or(() -> postVisitDeclaration(node, depth))
                 .orElse(new Tuple<>(node, depth));
     }
 
-    private Optional<? extends Tuple<Node, Integer>> formatDeclaration(Node node, int depth) {
+    private Optional<? extends Tuple<Node, Integer>> postVisitDeclaration(Node node, int depth) {
         if (!node.is("declaration")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node
+        var withMutator = attachMutator(node);
+
+        return Optional.of(new Tuple<>(withMutator
                 .withString("after-definition", " ")
                 .withString("after-value-separator", " "), depth));
+    }
+
+    private Node attachMutator(Node node) {
+        return node.mapNode("definition", definition -> {
+            return definition.mapOrSetStringList("modifiers", modifiers -> {
+                if (modifiers.contains("final")) {
+                    return List.of("let");
+                } else {
+                    return List.of("let", "mut");
+                }
+            }, () -> List.of("let", "mut"));
+        });
     }
 
     private Optional<Tuple<Node, Integer>> postVisitBlock(Node node, int depth) {
         if (!node.is("block")) return Optional.empty();
 
         var prefix = "\n" + "\t".repeat(depth);
-        var newBlock = node.mapNodes("children", children -> {
-            return children.stream()
-                    .filter(child -> !child.is("empty"))
-                    .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
-                    .toList();
-        }).withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));
+        var newBlock = node
+                .mapNodes("children", children -> attachFormatting(children, prefix))
+                .withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));
 
         return Optional.of(new Tuple<>(newBlock, depth - 1));
     }
 
     private Optional<Tuple<Node, Integer>> postVisitFunction(Node node, int depth) {
-        if (node.is("function")) {
-            var oldDefinition = node.findNode("definition");
+        if (!node.is("function")) return Optional.empty();
+        var oldDefinition = node.findNode("definition");
 
-            if (oldDefinition.isPresent()) {
-                var params = node.findNodeList("params").orElse(Collections.emptyList());
+        if (oldDefinition.isEmpty()) return Optional.empty();
+        var params = node.findNodeList("params").orElse(Collections.emptyList());
 
-                if (node.has("child")) {
-                    var newDefinition = oldDefinition.get()
-                            .withNodeList("params", params)
-                            .mapOrSetStringList("modifiers", list -> {
-                                var copy = new ArrayList<>(list);
-                                copy.add("def");
-                                return copy;
-                            }, () -> List.of("def"));
+        if (!node.has("child")) return Optional.of(new Tuple<>(oldDefinition.get(), depth));
+        var newDefinition = oldDefinition.get()
+                .withNodeList("params", params)
+                .mapOrSetStringList("modifiers", list -> {
+                    var copy = new ArrayList<>(list);
+                    copy.add("def");
+                    return copy;
+                }, () -> List.of("def"));
 
-                    return Optional.of(new Tuple<>(node.withNode("definition", newDefinition), depth));
-                } else {
-                    return Optional.of(new Tuple<>(oldDefinition.get(), depth));
-                }
-            }
-        }
-
-        return Optional.empty();
+        return Optional.of(new Tuple<>(node.withNode("definition", newDefinition), depth));
     }
 
     @Override
