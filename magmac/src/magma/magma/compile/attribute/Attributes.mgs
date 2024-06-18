@@ -11,7 +11,8 @@ import java.util.stream.Stream;
  * streaming entries.
  */
 public struct Attributes {
-	mapValue : Attributes;
+	
+	mapValue<T> : Attributes;
 	;
 	with : Attributes;
 	;

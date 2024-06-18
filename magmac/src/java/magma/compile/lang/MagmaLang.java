@@ -105,8 +105,11 @@ public class MagmaLang {
                 new ExtractStringRule("name"),
                 new EmptyRule("name"));
 
-        var withModifiers = new LastRule(modifiers, " ", withoutModifiers);
-        var maybeModifiers = new OptionalRule("modifiers", withModifiers, withoutModifiers);
+        var withTypeParams = new StripRule(new FirstRule(withoutModifiers, "<", new RightRule(new SimpleExtractStringListRule("type-params", ", "), ">")));
+        var maybeTypeParams = new OptionalRule("type-params", withTypeParams, withoutModifiers);
+
+        var withModifiers = new LastRule(modifiers, " ", maybeTypeParams);
+        var maybeModifiers = new OptionalRule("modifiers", withModifiers, maybeTypeParams);
 
         var definition = new LazyRule();
         var params = new FirstRule(maybeModifiers, "(", new RightRule(Lang.createParamsRule(definition), ")"));

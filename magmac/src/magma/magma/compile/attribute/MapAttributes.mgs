@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 	def MapAttributes() : public => {
 		this(Collections.emptyMap());
 	}
-	public def mapValue(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
+	public def mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
 		if
 		(!values.containsKey(key))
 		return this;

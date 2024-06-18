@@ -1,6 +1,6 @@
 
 public class def Results() => {
-	public static def unwrap(result : Result<T, E>) : T => {
+	public static def unwrap<T, E extends Throwable>(result : Result<T, E>) : T => {
 		
 		value : var=
 		result.findValue();

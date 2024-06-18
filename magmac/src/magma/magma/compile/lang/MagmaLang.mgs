@@ -62,11 +62,17 @@ public class def MagmaLang() => {
 		withoutModifiers : var=
 		OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
 		
+		withTypeParams : var=
+		StripRule(FirstRule(withoutModifiers, "<", RightRule(SimpleExtractStringListRule("type-params", ", "), ">")));
+		
+		maybeTypeParams : var=
+		OptionalRule("type-params", withTypeParams, withoutModifiers);
+		
 		withModifiers : var=
-		LastRule(modifiers, " ", withoutModifiers);
+		LastRule(modifiers, " ", maybeTypeParams);
 		
 		maybeModifiers : var=
-		OptionalRule("modifiers", withModifiers, withoutModifiers);
+		OptionalRule("modifiers", withModifiers, maybeTypeParams);
 		
 		definition : var=
 		LazyRule();

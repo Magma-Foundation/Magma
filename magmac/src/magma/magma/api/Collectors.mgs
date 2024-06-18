@@ -16,7 +16,7 @@ public class def Collectors() => {
 			};
 		})())();
 	}
-	public static def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
+	public static def exceptionally<T, C, E>(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
 		return Collector((() => {
 			return {
 				public def createInitial() : Result<C, E> => {

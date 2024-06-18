@@ -3,6 +3,8 @@ import java.util.Optional;
 import java.util.function.Function;
 public struct Stream {
 	head : Optional<T>;
-	map : Stream<R>;
-	collect : C;
+	
+	map<R> : Stream<R>;
+	
+	collect<C> : C;
 }
