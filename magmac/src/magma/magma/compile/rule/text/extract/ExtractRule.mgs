@@ -1,1 +1,34 @@
-import magma.api.Err;import magma.api.Ok;import magma.api.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.attribute.Attribute;import magma.compile.attribute.MapAttributes;import magma.compile.rule.Node;import magma.compile.rule.Rule;import magma.compile.rule.result.ErrorRuleResult;import magma.compile.rule.result.RuleResult;import magma.compile.rule.result.UntypedRuleResult;import java.util.Optional;() => {protected final key : String;ExtractRule : public => {this=key;}protected abstract fromAttribute : Optional<String>;protected abstract toAttribute : Result<Attribute, Error_>;public toNode : RuleResult => {return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}public fromNode : Result<String, Error_> => {return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}private static getStringErrorOk : Result<String, Error_> => {return Ok(value);}private createErr : Err<String, Error_> => {format : var="Property '%s' does not exist.";message : var=format.formatted(key);return Err(CompileError(message, node.toString()));}}
+
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.MapAttributes;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+import java.util.Optional;
+() => {
+	protected final key : String;
+	ExtractRule : public => {
+		this=key;}
+	protected abstract fromAttribute : Optional<String>;
+	protected abstract toAttribute : Result<Attribute, Error_>;
+	public toNode : RuleResult => {
+		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}
+	public fromNode : Result<String, Error_> => {
+		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}
+	private static getStringErrorOk : Result<String, Error_> => {
+		return Ok(value);}
+	private createErr : Err<String, Error_> => {
+		
+		format : var=
+		"Property '%s' does not exist.";
+		
+		message : var=
+		format.formatted(key);
+		return Err(CompileError(message, node.toString()));}}

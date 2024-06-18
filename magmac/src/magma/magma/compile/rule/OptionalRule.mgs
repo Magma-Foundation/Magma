@@ -1,1 +1,25 @@
-import magma.api.Result;import magma.compile.Error_;import magma.compile.rule.result.RuleResult;import java.util.List;() => {private final key : String;private final child : Rule;private final onEmpty : Rule;private final orRule : OrRule;OptionalRule : public => {this=key;this=child;this=onEmpty;this=OrRule(List.of(child, onEmpty));}public toNode : RuleResult => {return orRule.toNode(input);}public fromNode : Result<String, Error_> => {if(node.has(key)){return child.fromNode(node);}else{return onEmpty.fromNode(node);}}}
+
+import magma.api.Result;
+import magma.compile.Error_;
+import magma.compile.rule.result.RuleResult;
+import java.util.List;
+() => {
+	private final key : String;
+	private final child : Rule;
+	private final onEmpty : Rule;
+	private final orRule : OrRule;
+	OptionalRule : public => {
+		this=key;
+		this=child;
+		this=onEmpty;
+		this=OrRule(List.of(child, onEmpty));}
+	public toNode : RuleResult => {
+		return orRule.toNode(input);}
+	public fromNode : Result<String, Error_> => {
+		if
+		(node.has(key))
+		{
+			return child.fromNode(node);}
+		else
+		{
+			return onEmpty.fromNode(node);}}}

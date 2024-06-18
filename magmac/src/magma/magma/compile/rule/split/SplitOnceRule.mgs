@@ -1,1 +1,75 @@
-import magma.api.Result;import magma.api.Tuple;import magma.compile.CompileError;import magma.compile.CompileParentError;import magma.compile.Error_;import magma.compile.rule.Node;import magma.compile.rule.Rule;import magma.compile.rule.result.ErrorRuleResult;import magma.compile.rule.result.RuleResult;import magma.compile.rule.result.UntypedRuleResult;import java.util.Optional;() => {protected final leftRule : Rule;protected final slice : String;protected final rightRule : Rule;SplitOnceRule : public => {this=leftRule;this=slice;this=rightRule;}public toNode : RuleResult => {tuple : var=computeIndex(input).map(() => {left1 : var=input.substring(0, keywordIndex);right1 : var=input.substring(keywordIndex+slice.length());return Tuple(left1, right1);});return tuple.map(() => {left : var=contentStart.left();right : var=contentStart.right();leftResult : var=leftRule.toNode(left);if(leftResult.findError().isPresent())return leftResult;rightResult : var=rightRule.toNode(right);if(rightResult.findError().isPresent())return rightResult;return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();}).orElseGet(() => {format : var="Slice '%s' not present.";message : var=format.formatted(slice);return ErrorRuleResult(CompileError(message, input));});}protected abstract computeIndex : Optional<Integer>;public fromNode : Result<String, Error_> => {leftResult : var=leftRule.fromNode(node);rightValue : var=rightRule.fromNode(node);return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));}private createError : CompileParentError => {format : var="Cannot merge node using slice '%s'.";message : var=format.formatted(slice);return CompileParentError(message, node.toString(), err);}}
+
+import magma.api.Result;
+import magma.api.Tuple;
+import magma.compile.CompileError;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+import java.util.Optional;
+() => {
+	protected final leftRule : Rule;
+	protected final slice : String;
+	protected final rightRule : Rule;
+	SplitOnceRule : public => {
+		this=leftRule;
+		this=slice;
+		this=rightRule;}
+	public toNode : RuleResult => {
+		
+		tuple : var=
+		computeIndex(input).map(() => {
+			
+			left1 : var=
+			input.substring(0, keywordIndex);
+			
+			right1 : var=
+			input.substring(keywordIndex+slice.length());
+			return Tuple(left1, right1);});
+		return tuple.map(() => {
+			
+			left : var=
+			contentStart.left();
+			
+			right : var=
+			contentStart.right();
+			
+			leftResult : var=
+			leftRule.toNode(left);
+			if
+			(leftResult.findError().isPresent())
+			return leftResult;
+			
+			rightResult : var=
+			rightRule.toNode(right);
+			if
+			(rightResult.findError().isPresent())
+			return rightResult;
+			return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();}).orElseGet(() => {
+			
+			format : var=
+			"Slice '%s' not present.";
+			
+			message : var=
+			format.formatted(slice);
+			return ErrorRuleResult(CompileError(message, input));});}
+	protected abstract computeIndex : Optional<Integer>;
+	public fromNode : Result<String, Error_> => {
+		
+		leftResult : var=
+		leftRule.fromNode(node);
+		
+		rightValue : var=
+		rightRule.fromNode(node);
+		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));}
+	private createError : CompileParentError => {
+		
+		format : var=
+		"Cannot merge node using slice '%s'.";
+		
+		message : var=
+		format.formatted(slice);
+		return CompileParentError(message, node.toString(), err);}}

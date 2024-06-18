@@ -1,1 +1,8 @@
-import magma.compile.Error_;import java.util.Optional;() => {SimpleExtractStringListRule : public => {super(key, delimiter);}protected qualify : Optional<Error_> => {return Optional.empty();}}
+
+import magma.compile.Error_;
+import java.util.Optional;
+() => {
+	SimpleExtractStringListRule : public => {
+		super(key, delimiter);}
+	protected qualify : Optional<Error_> => {
+		return Optional.empty();}}

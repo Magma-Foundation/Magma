@@ -1,1 +1,24 @@
-() => {SymbolRule : public => {super(child);}protected computeMessage : String => {return "Not a symbol.";}protected filter : boolean => {i : int=0;while(i<input.length()){c : var=input.charAt(i);if(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c))){i++;continue;}return false;}return true;}}
+
+() => {
+	SymbolRule : public => {
+		super(child);}
+	protected computeMessage : String => {
+		return "Not a symbol.";}
+	protected filter : boolean => {
+		
+		i : int=
+		0;
+		while
+		(i<input.length())
+		{
+			
+			c : var=
+			input.charAt(i);
+			if
+			(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c)))
+			{
+				i++;
+				continue
+				;}
+			return false;}
+		return true;}}

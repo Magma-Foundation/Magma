@@ -1,1 +1,57 @@
-import magma.compile.attribute.Attribute;import magma.compile.attribute.Attributes;import magma.compile.attribute.MapAttributes;import magma.compile.attribute.NodeAttribute;import magma.compile.attribute.NodeListAttribute;import magma.compile.attribute.StringAttribute;import magma.compile.attribute.StringListAttribute;import java.util.List;import java.util.Optional;import java.util.function.Function;import java.util.function.Supplier;() => {Node : public => {this(type, MapAttributes());}public mapNode : Node => {return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));}public withString : Node => {return with(key, StringAttribute(value));}private with : Node => {return mapAttributes(() => attributes.with(key, value));}public formatWithDepth : String => {return "\t".repeat(depth)+format(depth);}public format : String => {return type+" = "+attributes.format(depth);}public toString : String => {return formatWithDepth(0);}public is : boolean => {return this.type.equals(type);}public mapAttributes : Node => {return Node(type, mapper.apply(attributes));}public retype : Node => {return Node(type, attributes);}public withAttributes : Node => {return Node(type, attributes);}public withNode : Node => {return with(key, NodeAttribute(value));}public withNodeList : Node => {return with(key, NodeListAttribute(values));}public withStringList : Node => {return with(key, StringListAttribute(values));}public remove : Node => {return Node(type, attributes.remove(key));}public has : boolean => {return attributes.has(child);}public mapNodes : Node => {return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));}public mapOrSetStringList : Node => {if(has(key)){return mapAttributes(() => attributes.mapValue(key, StringListAttribute.Factory, onPresent));}else{return with(key, StringListAttribute(onEmpty.get()));}}public findNode : Optional<Node> => {return attributes.apply(key).flatMap(Attribute.asNode);}}
+
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
+import magma.compile.attribute.MapAttributes;
+import magma.compile.attribute.NodeAttribute;
+import magma.compile.attribute.NodeListAttribute;
+import magma.compile.attribute.StringAttribute;
+import magma.compile.attribute.StringListAttribute;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+() => {
+	Node : public => {
+		this(type, MapAttributes());}
+	public mapNode : Node => {
+		return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));}
+	public withString : Node => {
+		return with(key, StringAttribute(value));}
+	private with : Node => {
+		return mapAttributes(() => attributes.with(key, value));}
+	public formatWithDepth : String => {
+		return "\t".repeat(depth)+format(depth);}
+	public format : String => {
+		return type+" = "+attributes.format(depth);}
+	public toString : String => {
+		return formatWithDepth(0);}
+	public is : boolean => {
+		return this.type.equals(type);}
+	public mapAttributes : Node => {
+		return Node(type, mapper.apply(attributes));}
+	public retype : Node => {
+		return Node(type, attributes);}
+	public withAttributes : Node => {
+		return Node(type, attributes);}
+	public withNode : Node => {
+		return with(key, NodeAttribute(value));}
+	public withNodeList : Node => {
+		return with(key, NodeListAttribute(values));}
+	public withStringList : Node => {
+		return with(key, StringListAttribute(values));}
+	public remove : Node => {
+		return Node(type, attributes.remove(key));}
+	public has : boolean => {
+		return attributes.has(child);}
+	public mapNodes : Node => {
+		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));}
+	public mapOrSetStringList : Node => {
+		if
+		(has(key))
+		{
+			return mapAttributes(() => attributes.mapValue(key, StringListAttribute.Factory, onPresent));}
+		else
+		{
+			return with(key, StringListAttribute(onEmpty.get()));}}
+	public findNode : Optional<Node> => {
+		return attributes.apply(key).flatMap(Attribute.asNode);}}

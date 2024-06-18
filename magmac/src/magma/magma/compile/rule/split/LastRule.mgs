@@ -1,1 +1,9 @@
-import magma.compile.rule.Rule;import magma.compile.rule.Rules;import java.util.Optional;() => {LastRule : public => {super(leftRule, slice, rightRule);}protected computeIndex : Optional<Integer> => {return Rules.wrapIndex(input.lastIndexOf(slice));}}
+
+import magma.compile.rule.Rule;
+import magma.compile.rule.Rules;
+import java.util.Optional;
+() => {
+	LastRule : public => {
+		super(leftRule, slice, rightRule);}
+	protected computeIndex : Optional<Integer> => {
+		return Rules.wrapIndex(input.lastIndexOf(slice));}}

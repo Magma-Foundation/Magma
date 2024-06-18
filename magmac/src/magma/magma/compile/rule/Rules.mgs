@@ -1,1 +1,5 @@
-import java.util.Optional;() => {public static wrapIndex : Optional<Integer> => {return index==-1?Optional.empty():Optional.of(index);}}
+
+import java.util.Optional;
+() => {
+	public static wrapIndex : Optional<Integer> => {
+		return index==-1?Optional.empty():Optional.of(index);}}

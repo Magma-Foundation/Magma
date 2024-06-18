@@ -1,1 +1,21 @@
-import magma.api.Err;import magma.api.Ok;import magma.api.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.attribute.Attributes;import magma.compile.rule.Node;import java.util.Optional;import java.util.function.Function;public struct RuleResult {();(inner : Node);findName : Optional<String>;findError : Optional<Error_>;findAttributes : Optional<Attributes>;tryCreate : Optional<Node>;withType : RuleResult;mapErr : RuleResult;();();}
+
+import magma.api.Err;
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
+import java.util.Optional;
+import java.util.function.Function;
+public struct RuleResult {
+	();
+	(inner : Node);
+	findName : Optional<String>;
+	findError : Optional<Error_>;
+	findAttributes : Optional<Attributes>;
+	tryCreate : Optional<Node>;
+	withType : RuleResult;
+	mapErr : RuleResult;
+	();
+	();}

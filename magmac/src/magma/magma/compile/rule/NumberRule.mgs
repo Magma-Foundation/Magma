@@ -1,1 +1,27 @@
-() => {NumberRule : public => {super(child);}private static allDigits : boolean => {if(input.isEmpty())return false;i : int=0;while(i<input.length()){c : var=input.charAt(i);if(!Character.isDigit(c)){return false;}i++;}return true;}protected computeMessage : String => {return "Not a number.";}protected filter : boolean => {return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);}}
+
+() => {
+	NumberRule : public => {
+		super(child);}
+	private static allDigits : boolean => {
+		if
+		(input.isEmpty())
+		return false;
+		
+		i : int=
+		0;
+		while
+		(i<input.length())
+		{
+			
+			c : var=
+			input.charAt(i);
+			if
+			(!Character.isDigit(c))
+			{
+				return false;}
+			i++;}
+		return true;}
+	protected computeMessage : String => {
+		return "Not a number.";}
+	protected filter : boolean => {
+		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);}}

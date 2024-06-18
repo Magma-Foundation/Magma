@@ -1,1 +1,19 @@
-import magma.compile.Error_;import magma.compile.attribute.Attributes;import magma.compile.rule.Node;import java.util.Optional;import java.util.function.Function;() => {public findName : Optional<String> => {return Optional.empty();}public findError : Optional<Error_> => {return Optional.of(e);}public mapErr : RuleResult => {return ErrorRuleResult(mapper.apply(e));}public findAttributes : Optional<Attributes> => {return Optional.empty();}public tryCreate : Optional<Node> => {return Optional.empty();}public withType : RuleResult => {return this;}}
+
+import magma.compile.Error_;
+import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
+import java.util.Optional;
+import java.util.function.Function;
+() => {
+	public findName : Optional<String> => {
+		return Optional.empty();}
+	public findError : Optional<Error_> => {
+		return Optional.of(e);}
+	public mapErr : RuleResult => {
+		return ErrorRuleResult(mapper.apply(e));}
+	public findAttributes : Optional<Attributes> => {
+		return Optional.empty();}
+	public tryCreate : Optional<Node> => {
+		return Optional.empty();}
+	public withType : RuleResult => {
+		return this;}}

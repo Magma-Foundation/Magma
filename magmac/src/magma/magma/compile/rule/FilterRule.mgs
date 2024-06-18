@@ -1,1 +1,19 @@
-import magma.api.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.rule.result.ErrorRuleResult;import magma.compile.rule.result.RuleResult;() => {protected final child : Rule;FilterRule : public => {this=child;}public toNode : RuleResult => {if(filter(input))return child.toNode(input);return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));}protected abstract computeMessage : String;protected abstract filter : boolean;public fromNode : Result<String, Error_> => {return child.fromNode(node);}}
+
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+() => {
+	protected final child : Rule;
+	FilterRule : public => {
+		this=child;}
+	public toNode : RuleResult => {
+		if
+		(filter(input))
+		return child.toNode(input);
+		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));}
+	protected abstract computeMessage : String;
+	protected abstract filter : boolean;
+	public fromNode : Result<String, Error_> => {
+		return child.fromNode(node);}}

@@ -1,1 +1,202 @@
-import magma.compile.CompileException;import magma.compile.Error_;import magma.compile.lang.Generator;import magma.compile.lang.JavaLang;import magma.compile.lang.JavaToMagmaGenerator;import magma.compile.lang.MagmaLang;import magma.compile.rule.Node;import magma.compile.rule.Rule;import java.io.IOException;import java.nio.file.Files;import java.nio.file.Path;import java.nio.file.Paths;import java.util.Arrays;import java.util.Collections;import java.util.Comparator;import java.util.Optional;() => {public static final TARGET_DIRECTORY : Path=Paths.get(".", "magmac", "src", "magma");public static final SOURCE_DIRECTORY : Path=Paths.get(".", "magmac", "src", "java");public static final DEBUG_DIRECTORY : Path=Paths.get(".", "magmac", "debug", "java-mgs");public static main : void => {try {run();}catch (e : IOException){//noinspection CallToPrintStackTracee.printStackTrace();}catch (e : CompileException){//noinspection CallToPrintStackTracee.printStackTrace();}}private static run : void => {sources : var=Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();for(source : var in sources){error : var=compileSource(source);if(error.isPresent()){throw error.get();}}}private static compileSource : Optional<CompileException> => {relativized : var=SOURCE_DIRECTORY.relativize(source.getParent());System.out.println("Compiling source: "+SOURCE_DIRECTORY.relativize(source));targetParent : var=TARGET_DIRECTORY.resolve(relativized);fileName : var=source.getFileName().toString();name : var=fileName.substring(0, fileName.indexOf('.'));target : var=targetParent.resolve(name+".mgs");input : var=readImpl(source);parseResult : var=JavaLang.createRootRule().toNode(input);return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.getCompileException);}private static getCompileException : Optional<CompileException> => {try {result : var=print(err, 0);writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);return Optional.of(CompileException());}catch (e : CompileException){return Optional.of(e);}}private static handle : Optional<CompileException> => {try {if(!Files.exists(targetParent))createDirectory(targetParent);relativizedDebug : var=DEBUG_DIRECTORY.resolve(relativized);if(!Files.exists(relativizedDebug))createDirectory(relativizedDebug);writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());generated : var=generate(root);writeImpl(relativizedDebug.resolve(name+".output.ast"), generated.toString());rule : Rule=MagmaLang.createRootRule();generateResult : var=rule.fromNode(generated);generateError : var=generateResult.findErr();generateError.ifPresent(() => print(error, 0));writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));return Optional.empty();}catch (e : CompileException){return Optional.of(e);}}private static readImpl : String => {try {return Files.readString(source);}catch (e : IOException){throw CompileException("Failed to read input: "+source, e);}}private static createDirectory : Path => {try {return Files.createDirectories(targetParent);}catch (e : IOException){throw CompileException("Failed to make parent.", e);}}private static writeImpl : void => {try {Files.writeString(target, csq);}catch (e : IOException){throw CompileException("Cannot write.", e);}}private static print : String => {context : var=formatContext(error, depth);anyMessage : var=error.findMessage();anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));message : var=error.findMessage().orElse("");messageAttribute : var=message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";causes : var=error.findCauses().orElse(Collections.emptyList());escapedContext : var=error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");formattedContext : var="\n"+escapedContext;if(causes.isEmpty()){return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";}contextAttribute : var=escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";if(causes.size()==1){return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";}list : var=causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();builder : var=StringBuilder();for(cause : var in list){result : var=print(cause, depth+1);builder.append(result);}return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";}private static formatContext : String => {actualContext : var=e.findContext().orElse("");if(e.findCauses().isPresent())return actualContext;spacing : var=" ".repeat(depth+1);formatted : var=actualContext.replace("\n", "\n" + " ".repeat(depth-1));return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";}private static generate : Node => {list : var=Arrays.asList(JavaToMagmaGenerator());acc : Node=root;for(generator : Generator in list){acc=generator.generate(acc, -1);}return acc;}}
+
+import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.lang.Generator;
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaToMagmaGenerator;
+import magma.compile.lang.MagmaLang;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Optional;
+() => {
+	
+	public static final TARGET_DIRECTORY : Path=
+	Paths.get(".", "magmac", "src", "magma");
+	
+	public static final SOURCE_DIRECTORY : Path=
+	Paths.get(".", "magmac", "src", "java");
+	
+	public static final DEBUG_DIRECTORY : Path=
+	Paths.get(".", "magmac", "debug", "java-mgs");
+	public static main : void => {
+		try 
+		{
+			run();}
+		catch (e : IOException){
+			//noinspection CallToPrintStackTrace
+			e.printStackTrace();}
+		catch (e : CompileException){
+			//noinspection CallToPrintStackTrace
+			e.printStackTrace();}}
+	private static run : void => {
+		
+		sources : var=
+		Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
+		for(source : var in sources){
+			
+			error : var=
+			compileSource(source);
+			if
+			(error.isPresent())
+			{
+				throw error.get();}}}
+	private static compileSource : Optional<CompileException> => {
+		
+		relativized : var=
+		SOURCE_DIRECTORY.relativize(source.getParent());
+		System.out.println("Compiling source: "+SOURCE_DIRECTORY.relativize(source));
+		
+		targetParent : var=
+		TARGET_DIRECTORY.resolve(relativized);
+		
+		fileName : var=
+		source.getFileName().toString();
+		
+		name : var=
+		fileName.substring(0, fileName.indexOf('.'));
+		
+		target : var=
+		targetParent.resolve(name+".mgs");
+		
+		input : var=
+		readImpl(source);
+		
+		parseResult : var=
+		JavaLang.createRootRule().toNode(input);
+		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.getCompileException);}
+	private static getCompileException : Optional<CompileException> => {
+		try 
+		{
+			
+			result : var=
+			print(err, 0);
+			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
+			return Optional.of(CompileException());}
+		catch (e : CompileException){
+			return Optional.of(e);}}
+	private static handle : Optional<CompileException> => {
+		try 
+		{
+			if
+			(!Files.exists(targetParent))
+			createDirectory(targetParent);
+			
+			relativizedDebug : var=
+			DEBUG_DIRECTORY.resolve(relativized);
+			if
+			(!Files.exists(relativizedDebug))
+			createDirectory(relativizedDebug);
+			writeImpl(relativizedDebug.resolve(name+".input.ast"), root.toString());
+			
+			generated : var=
+			generate(root);
+			writeImpl(relativizedDebug.resolve(name+".output.ast"), generated.toString());
+			
+			rule : Rule=
+			MagmaLang.createRootRule();
+			
+			generateResult : var=
+			rule.fromNode(generated);
+			
+			generateError : var=
+			generateResult.findErr();
+			generateError.ifPresent(() => print(error, 0));
+			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
+			return Optional.empty();}
+		catch (e : CompileException){
+			return Optional.of(e);}}
+	private static readImpl : String => {
+		try 
+		{
+			return Files.readString(source);}
+		catch (e : IOException){
+			throw CompileException("Failed to read input: "+source, e);}}
+	private static createDirectory : Path => {
+		try 
+		{
+			return Files.createDirectories(targetParent);}
+		catch (e : IOException){
+			throw CompileException("Failed to make parent.", e);}}
+	private static writeImpl : void => {
+		try 
+		{
+			Files.writeString(target, csq);}
+		catch (e : IOException){
+			throw CompileException("Cannot write.", e);}}
+	private static print : String => {
+		
+		context : var=
+		formatContext(error, depth);
+		
+		anyMessage : var=
+		error.findMessage();
+		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
+		
+		message : var=
+		error.findMessage().orElse("");
+		
+		messageAttribute : var=
+		message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";
+		
+		causes : var=
+		error.findCauses().orElse(Collections.emptyList());
+		
+		escapedContext : var=
+		error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
+		
+		formattedContext : var=
+		"\n"+escapedContext;
+		if
+		(causes.isEmpty())
+		{
+			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";}
+		
+		contextAttribute : var=
+		escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
+		if
+		(causes.size()==1)
+		{
+			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";}
+		
+		list : var=
+		causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
+		
+		builder : var=
+		StringBuilder();
+		for(cause : var in list){
+			
+			result : var=
+			print(cause, depth+1);
+			builder.append(result);}
+		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";}
+	private static formatContext : String => {
+		
+		actualContext : var=
+		e.findContext().orElse("");
+		if
+		(e.findCauses().isPresent())
+		return actualContext;
+		
+		spacing : var=
+		" ".repeat(depth+1);
+		
+		formatted : var=
+		actualContext.replace("\n", "\n" + " ".repeat(depth-1));
+		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";}
+	private static generate : Node => {
+		
+		list : var=
+		Arrays.asList(JavaToMagmaGenerator());
+		
+		acc : Node=
+		root;
+		for(generator : Generator in list){
+			acc=generator.generate(acc, -1);}
+		return acc;}}

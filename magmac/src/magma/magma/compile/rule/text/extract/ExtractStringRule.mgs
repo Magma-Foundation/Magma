@@ -1,1 +1,14 @@
-import magma.api.Ok;import magma.api.Result;import magma.compile.Error_;import magma.compile.attribute.Attribute;import magma.compile.attribute.StringAttribute;import java.util.Optional;() => {ExtractStringRule : public => {super(key);}protected fromAttribute : Optional<String> => {return attribute.asString();}protected toAttribute : Result<Attribute, Error_> => {return Ok(StringAttribute(content));}}
+
+import magma.api.Ok;
+import magma.api.Result;
+import magma.compile.Error_;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringAttribute;
+import java.util.Optional;
+() => {
+	ExtractStringRule : public => {
+		super(key);}
+	protected fromAttribute : Optional<String> => {
+		return attribute.asString();}
+	protected toAttribute : Result<Attribute, Error_> => {
+		return Ok(StringAttribute(content));}}
