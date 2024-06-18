@@ -1,13 +1,1 @@
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-export class def StringListAttribute(List<String> values)() => {
-	const Factory : Factory<List<String>> = Factory();
-	public def asStringList() : Optional<List<String>> => {
-		return Optional.of(values);
-	}
-	public def format(depth : int) : String => {
-		return values.stream().map((value) => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
-	}
-	implements Attribute;
-}
+import java.util.List;import java.util.Optional;import java.util.stream.Collectors;() => {public static final Factory : Factory<List<String>>=Factory();;public asStringList : Optional<List<String>> => {return Optional.of(values);}public format : String => {return values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));}}

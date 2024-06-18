@@ -28,9 +28,16 @@ public class JavaToMagmaGenerator extends Generator {
                 .or(() -> replaceRecordWithFunction(node))
                 .or(() -> replaceConstructorsWithInvocation(node))
                 .or(() -> replaceInterfaceWithStruct(node))
+                .or(() -> replaceMethodReferenceWithAccess(node))
                 .orElse(node);
 
         return new Tuple<>(newNode, depth);
+    }
+
+    private Optional<Node> replaceMethodReferenceWithAccess(Node node) {
+        if (!node.is("method-reference")) return Optional.empty();
+
+        return Optional.of(node.retype("access"));
     }
 
     private Optional<Node> replaceRecordWithFunction(Node node) {

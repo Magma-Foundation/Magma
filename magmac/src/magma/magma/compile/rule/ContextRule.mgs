@@ -1,13 +1,1 @@
-import magma.api.Result;
-import magma.compile.CompileParentError;
-import magma.compile.Error_;
-import magma.compile.rule.result.RuleResult;
-export class def ContextRule(String message, Rule child)() => {
-	public def toNode(input : String) : RuleResult => {
-		return child.toNode(input).mapErr((err) => CompileParentError(message, input, err));
-	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
-		return child.fromNode(node);
-	}
-	implements Rule;
-}
+import magma.api.Result;import magma.compile.CompileParentError;import magma.compile.Error_;import magma.compile.rule.result.RuleResult;() => {public toNode : RuleResult => {return child.toNode(input).mapErr(() => CompileParentError(message, input, err));}public fromNode : Result<String, Error_> => {return child.fromNode(node);}}
