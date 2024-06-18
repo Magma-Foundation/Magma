@@ -8,7 +8,14 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 
-public record StripRule(Rule child) implements Rule {
+public record StripRule(Rule child, String left, String right) implements Rule {
+    public static final String DEFAULT_LEFT = "left-indent";
+    public static final String DEFAULT_RIGHT = "right-indent";
+
+    public StripRule(Rule child) {
+        this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
+    }
+
     @Override
     public RuleResult toNode(String input) {
         return child.toNode(input.strip()).mapErr(error -> new CompileParentError("Cannot strip input.", input, error));
@@ -17,12 +24,12 @@ public record StripRule(Rule child) implements Rule {
     @Override
     public Result<String, Error_> fromNode(Node node) {
         var leftIndent = node.attributes()
-                .apply("left-indent")
+                .apply(left)
                 .flatMap(Attribute::asString)
                 .orElse("");
 
         var rightIndent = node.attributes()
-                .apply("right-indent")
+                .apply(right)
                 .flatMap(Attribute::asString)
                 .orElse("");
 
