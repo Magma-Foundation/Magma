@@ -23,9 +23,16 @@ public class JavaToMagmaGenerator extends Generator {
     protected Tuple<Node, Integer> preVisit(Node node, int depth) {
         var newNode = removePackagesFromBlock(node)
                 .or(() -> replaceClassWithFunction(node))
+                .or(() -> replaceMethodWithFunction(node))
                 .orElse(node);
 
         return new Tuple<>(newNode, depth);
+    }
+
+    private Optional<Node> replaceMethodWithFunction(Node node) {
+        if (!node.is("method")) return Optional.empty();
+
+        return Optional.of(node.retype("function"));
     }
 
     private Optional<Node> replaceClassWithFunction(Node node) {
