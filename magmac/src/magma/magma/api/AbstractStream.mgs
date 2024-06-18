@@ -6,9 +6,13 @@ public abstract class def AbstractStream() => {
 		return AbstractStream((() => {
 			return {
 				public def head() : Optional<R> => {
-					return AbstractStream.this.head().map(mapper);}};})())();
+					return AbstractStream.this.head().map(mapper);
+				}
+			};
+		})())();
 		
-		;}
+		;
+	}
 	public def collect(collector : Collector<T, C>) : C => {
 		
 		current : var=
@@ -25,7 +29,12 @@ public abstract class def AbstractStream() => {
 			if
 			(tuple.left())
 			{
-				current=tuple.right();}
+				current=tuple.right();
+			}
 			else
 			{
-				return current;}}}}
+				return current;
+			}
+		}
+	}
+}

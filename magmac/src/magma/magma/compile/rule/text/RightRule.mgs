@@ -17,9 +17,14 @@ import magma.compile.rule.result.RuleResult;
 			
 			content : var=
 			input.substring(0, contentEnd);
-			return child.toNode(content);}
+			return child.toNode(content);
+		}
 		else
 		{
-			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));}}
+			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
+		}
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return child.fromNode(node).mapValue(() => inner+slice);}}
+		return child.fromNode(node).mapValue(() => inner+slice);
+	}
+}

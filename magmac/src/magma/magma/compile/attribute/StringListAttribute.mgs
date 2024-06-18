@@ -8,12 +8,19 @@ import java.util.stream.Collectors;
 	Factory((() => {
 		return {
 			public def fromAttribute(attribute : Attribute) : Optional<List<String>> => {
-				return attribute.asStringList();}
+				return attribute.asStringList();
+			}
 			public def toAttribute(value : List<String>) : Attribute => {
-				return StringListAttribute(value);}};})())();
+				return StringListAttribute(value);
+			}
+		};
+	})())();
 	
 	;
 	public def asStringList() : Optional<List<String>> => {
-		return Optional.of(values);}
+		return Optional.of(values);
+	}
 	public def format(depth : int) : String => {
-		return values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));}}
+		return values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
+	}
+}

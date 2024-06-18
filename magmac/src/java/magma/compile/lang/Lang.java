@@ -33,8 +33,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Lang {
-    static Rule createBlock(Rule child) {
-        return new TypeRule("block", new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(child)));
+    static Rule createBlock(Rule member) {
+        return new StripRule( new TypeRule("block", createMembersRule(member)), "before-content", "after-content");
+    }
+
+    static SplitMultipleRule createMembersRule(Rule member) {
+        return new SplitMultipleRule(new MembersSplitter(), "", "children", new StripRule(member));
     }
 
     static TypeRule createImportRule(TypeRule namespace) {

@@ -7,12 +7,19 @@ import java.util.Optional;
 	Factory((() => {
 		return {
 			public def fromAttribute(attribute : Attribute) : Optional<Node> => {
-				return attribute.asNode();}
+				return attribute.asNode();
+			}
 			public def toAttribute(value : Node) : Attribute => {
-				return NodeAttribute(value);}};})())();
+				return NodeAttribute(value);
+			}
+		};
+	})())();
 	
 	;
 	public def asNode() : Optional<Node> => {
-		return Optional.of(value);}
+		return Optional.of(value);
+	}
 	public def format(depth : int) : String => {
-		return value.format(depth);}}
+		return value.format(depth);
+	}
+}

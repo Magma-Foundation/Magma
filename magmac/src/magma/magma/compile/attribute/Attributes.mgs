@@ -24,4 +24,5 @@ public struct Attributes {
 	format : String;
 	remove : Attributes;
 	has : boolean;
-	isEmpty : boolean;}
+	isEmpty : boolean;
+}

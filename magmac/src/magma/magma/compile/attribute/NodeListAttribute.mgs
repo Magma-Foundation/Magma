@@ -9,15 +9,22 @@ import java.util.stream.Collectors;
 	Factory((() => {
 		return {
 			public def fromAttribute(attribute : Attribute) : Optional<List<Node>> => {
-				return attribute.asNodeList();}
+				return attribute.asNodeList();
+			}
 			public def toAttribute(value : List<Node>) : Attribute => {
-				return NodeListAttribute(value);}};})())();
+				return NodeListAttribute(value);
+			}
+		};
+	})())();
 	
 	;
 	public def asNodeList() : Optional<List<Node>> => {
-		return Optional.of(nodeList);}
+		return Optional.of(nodeList);
+	}
 	public def format(depth : int) : String => {
 		if
 		(nodeList.isEmpty())
 		return "[]";
-		return nodeList.stream().map(() => child.formatWithDepth(depth+1)).collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));}}
+		return nodeList.stream().map(() => child.formatWithDepth(depth+1)).collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));
+	}
+}

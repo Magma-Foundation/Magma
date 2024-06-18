@@ -15,4 +15,5 @@ public struct Attribute {
 	();
 	;
 	();
-	format : String;}
+	format : String;
+}

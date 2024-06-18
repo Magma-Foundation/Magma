@@ -14,9 +14,14 @@ import magma.compile.rule.result.RuleResult;
 			
 			content : var=
 			input.substring(slice.length());
-			return child.toNode(content);}
+			return child.toNode(content);
+		}
 		else
 		{
-			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));}}
+			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));
+		}
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return child.fromNode(node).mapValue(() => slice+inner);}}
+		return child.fromNode(node).mapValue(() => slice+inner);
+	}
+}

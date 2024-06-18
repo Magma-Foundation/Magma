@@ -41,14 +41,18 @@ public class def ParamSplitter() => {
 					{
 						buffer.append(queue.pop());
 						continue
-						;}
+						;
+					}
 					if
 					(next=='\"')
 					{
 						break
-						;}}
+						;
+					}
+				}
 				continue
-				;}
+				;
+			}
 			if
 			(c=='-')
 			{
@@ -64,14 +68,18 @@ public class def ParamSplitter() => {
 					{
 						buffer.append(queue.pop());
 						continue
-						;}}
+						;
+					}
+				}
 				continue
-				;}
+				;
+			}
 			if
 			(c==','&&depth==0)
 			{
 				segments.add(buffer.toString());
-				buffer=StringBuilder();}
+				buffer=StringBuilder();
+			}
 			else
 			{
 				if
@@ -80,6 +88,10 @@ public class def ParamSplitter() => {
 				if
 				(c==')' || c == '>')
 				depth--;
-				buffer.append(c);}}
+				buffer.append(c);
+			}
+		}
 		segments.add(buffer.toString());
-		return segments.stream().filter(() => !value.isBlank()).toList();}}
+		return segments.stream().filter(() => !value.isBlank()).toList();
+	}
+}

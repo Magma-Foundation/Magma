@@ -34,7 +34,8 @@ import java.util.List;
 			{
 				errors.add(leftResult.findError().get());
 				continue
-				;}
+				;
+			}
 			
 			rightResult : var=
 			rightRule.toNode(rightSlice);
@@ -43,21 +44,27 @@ import java.util.List;
 			{
 				errors.add(rightResult.findError().get());
 				continue
-				;}
+				;
+			}
 			
 			optional : var=
 			leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if
 			(optional.isPresent())
 			{
-				return optional.get();}}
+				return optional.get();
+			}
+		}
 		if
 		(errors.isEmpty())
 		{
-			return ErrorRuleResult(CompileError("No rules were present.", input));}
+			return ErrorRuleResult(CompileError("No rules were present.", input));
+		}
 		else
 		{
-			return ErrorRuleResult(MultipleError(errors));}}
+			return ErrorRuleResult(MultipleError(errors));
+		}
+	}
 	private def findAllIndexesReverse(input : String) : List<Integer> => {
 		
 		indexes : List<Integer>=
@@ -69,8 +76,12 @@ import java.util.List;
 		(index>=0)
 		{
 			indexes.add(index);
-			index=input.indexOf(slice, index+1);}
+			index=input.indexOf(slice, index+1);
+		}
 		Collections.reverse(indexes);
-		return indexes;}
+		return indexes;
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));}}
+		return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	}
+}

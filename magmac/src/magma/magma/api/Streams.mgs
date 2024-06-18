@@ -16,6 +16,11 @@ public class def Streams() => {
 					next : var=
 					list.get(counter);
 					counter++;
-					return Optional.of(next);}};})())();
+					return Optional.of(next);
+				}
+			};
+		})())();
 		
-		;}}
+		;
+	}
+}

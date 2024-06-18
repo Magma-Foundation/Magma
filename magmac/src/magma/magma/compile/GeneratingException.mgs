@@ -3,10 +3,14 @@ public class def GeneratingException() => {
 	public final content : String;
 	def GeneratingException(message : String) : public => {
 		super(message);
-		this="";}
+		this="";
+	}
 	def GeneratingException(message : String, content : String) : public => {
 		super(message);
-		this=content;}
+		this=content;
+	}
 	def GeneratingException(message : String, content : String, cause : Throwable) : public => {
 		super(message, cause);
-		this=content;}}
+		this=content;
+	}
+}

@@ -10,4 +10,5 @@ import magma.compile.rule.result.RuleResult;
  */
 public struct Rule {
 	toNode : RuleResult;
-	fromNode : Result<String, Error_>;}
+	fromNode : Result<String, Error_>;
+}

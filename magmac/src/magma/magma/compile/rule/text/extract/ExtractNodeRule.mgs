@@ -19,7 +19,8 @@ import magma.compile.rule.result.UntypedRuleResult;
 		if
 		(node.findError().isPresent())
 		return node;
-		return node.tryCreate().map(NodeAttribute.new).map(() => MapAttributes().with(propertyKey, attribute)).<RuleResult>map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));}
+		return node.tryCreate().map(NodeAttribute.new).map(() => MapAttributes().with(propertyKey, attribute)).<RuleResult>map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		
 		attributes : var=
@@ -36,7 +37,8 @@ import magma.compile.rule.result.UntypedRuleResult;
 		if
 		(asNode.isEmpty())
 		return createErr(node);
-		return child.fromNode(asNode.get());}
+		return child.fromNode(asNode.get());
+	}
 	private def createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=
@@ -44,4 +46,6 @@ import magma.compile.rule.result.UntypedRuleResult;
 		
 		message : var=
 		format.formatted(propertyKey);
-		return Err(CompileError(message, node.toString()));}}
+		return Err(CompileError(message, node.toString()));
+	}
+}

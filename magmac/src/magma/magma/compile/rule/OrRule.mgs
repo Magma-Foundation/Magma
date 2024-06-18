@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 () => {
 	private static def toError(results : List<Result<String, Error_>>) : Err<String, Error_> => {
-		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));}
+		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
+	}
 	public def toNode(input : String) : RuleResult => {
 		
 		errors : var=
@@ -23,15 +24,20 @@ import java.util.Optional;
 			if
 			(result.findAttributes().isPresent())
 			{
-				return result;}
-			result.findError().ifPresent(errors.add);}
+				return result;
+			}
+			result.findError().ifPresent(errors.add);
+		}
 		if
 		(errors.isEmpty())
 		{
-			return ErrorRuleResult(CompileError("No rules were present.", input));}
+			return ErrorRuleResult(CompileError("No rules were present.", input));
+		}
 		else
 		{
-			return ErrorRuleResult(MultipleError(errors));}}
+			return ErrorRuleResult(MultipleError(errors));
+		}
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		
 		results : var=
@@ -40,7 +46,8 @@ import java.util.Optional;
 			
 			result : var=
 			rule.fromNode(node);
-			results.add(result);}
+			results.add(result);
+		}
 		
 		anyOk : Optional<Result<String, Error_>>=
 		Optional.empty();
@@ -50,5 +57,9 @@ import java.util.Optional;
 			{
 				anyOk=Optional.of(result);
 				break
-				;}}
-		return anyOk.orElseGet(() => toError(results));}}
+				;
+			}
+		}
+		return anyOk.orElseGet(() => toError(results));
+	}
+}

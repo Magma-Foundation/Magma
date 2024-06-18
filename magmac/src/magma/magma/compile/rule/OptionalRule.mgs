@@ -12,14 +12,20 @@ public final class def OptionalRule() => {
 		this=key;
 		this=onPresent;
 		this=onEmpty;
-		this=OrRule(List.of(onPresent, onEmpty));}
+		this=OrRule(List.of(onPresent, onEmpty));
+	}
 	public def toNode(input : String) : RuleResult => {
-		return orRule.toNode(input);}
+		return orRule.toNode(input);
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		if
 		(node.has(key))
 		{
-			return onPresent.fromNode(node);}
+			return onPresent.fromNode(node);
+		}
 		else
 		{
-			return onEmpty.fromNode(node);}}}
+			return onEmpty.fromNode(node);
+		}
+	}
+}

@@ -28,13 +28,17 @@ public class def Main() => {
 	public static def main(args : String[]) : void => {
 		try 
 		{
-			run();}
+			run();
+		}
 		catch (e : IOException){
 			//noinspection CallToPrintStackTrace
-			e.printStackTrace();}
+			e.printStackTrace();
+		}
 		catch (e : CompileException){
 			//noinspection CallToPrintStackTrace
-			e.printStackTrace();}}
+			e.printStackTrace();
+		}
+	}
 	private static def run() : void => {
 		
 		sources : var=
@@ -46,7 +50,10 @@ public class def Main() => {
 			if
 			(error.isPresent())
 			{
-				throw error.get();}}}
+				throw error.get();
+			}
+		}
+	}
 	private static def compileSource(source : Path) : Optional<CompileException> => {
 		
 		relativized : var=
@@ -70,7 +77,8 @@ public class def Main() => {
 		
 		parseResult : var=
 		JavaLang.createRootRule().toNode(input);
-		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.writeError);}
+		return parseResult.create().match(() => handle(root, targetParent, relativized, name, target), Main.writeError);
+	}
 	private static def writeError(err : Error_) : Optional<CompileException> => {
 		try 
 		{
@@ -78,9 +86,12 @@ public class def Main() => {
 			result : var=
 			print(err, 0);
 			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-			return Optional.of(CompileException());}
+			return Optional.of(CompileException());
+		}
 		catch (e : CompileException){
-			return Optional.of(e);}}
+			return Optional.of(e);
+		}
+	}
 	private static def handle(root : Node, targetParent : Path, relativized : Path, name : String, target : Path) : Optional<CompileException> => {
 		try 
 		{
@@ -114,29 +125,42 @@ public class def Main() => {
 				generateError : var=
 				generateErrorOptional.get();
 				print(generateError, 0);
-				writeError(generateError);}
+				writeError(generateError);
+			}
 			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
-			return Optional.empty();}
+			return Optional.empty();
+		}
 		catch (e : CompileException){
-			return Optional.of(e);}}
+			return Optional.of(e);
+		}
+	}
 	private static def readImpl(source : Path) : String => {
 		try 
 		{
-			return Files.readString(source);}
+			return Files.readString(source);
+		}
 		catch (e : IOException){
-			throw CompileException("Failed to read input: "+source, e);}}
+			throw CompileException("Failed to read input: "+source, e);
+		}
+	}
 	private static def createDirectory(targetParent : Path) : Path => {
 		try 
 		{
-			return Files.createDirectories(targetParent);}
+			return Files.createDirectories(targetParent);
+		}
 		catch (e : IOException){
-			throw CompileException("Failed to make parent.", e);}}
+			throw CompileException("Failed to make parent.", e);
+		}
+	}
 	private static def writeImpl(target : Path, csq : String) : void => {
 		try 
 		{
-			Files.writeString(target, csq);}
+			Files.writeString(target, csq);
+		}
 		catch (e : IOException){
-			throw CompileException("Cannot write.", e);}}
+			throw CompileException("Cannot write.", e);
+		}
+	}
 	private static def print(error : Error_, depth : int) : String => {
 		
 		context : var=
@@ -163,14 +187,16 @@ public class def Main() => {
 		if
 		(causes.isEmpty())
 		{
-			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";}
+			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
+		}
 		
 		contextAttribute : var=
 		escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
 		if
 		(causes.size()==1)
 		{
-			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";}
+			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
+		}
 		
 		list : var=
 		causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
@@ -181,8 +207,10 @@ public class def Main() => {
 			
 			result : var=
 			print(cause, depth+1);
-			builder.append(result);}
-		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";}
+			builder.append(result);
+		}
+		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
+	}
 	private static def formatContext(e : Error_, depth : int) : String => {
 		
 		actualContext : var=
@@ -196,7 +224,8 @@ public class def Main() => {
 		
 		formatted : var=
 		actualContext.replace("\n", "\n" + " ".repeat(depth-1));
-		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";}
+		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
+	}
 	private static def generate(root : Node) : Node => {
 		
 		list : var=
@@ -205,5 +234,8 @@ public class def Main() => {
 		acc : Node=
 		root;
 		for(generator : Generator in list){
-			acc=generator.generate(acc, -1);}
-		return acc;}}
+			acc=generator.generate(acc, -1);
+		}
+		return acc;
+	}
+}

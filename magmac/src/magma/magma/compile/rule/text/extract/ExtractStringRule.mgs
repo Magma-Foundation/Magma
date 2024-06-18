@@ -7,8 +7,12 @@ import magma.compile.attribute.StringAttribute;
 import java.util.Optional;
 public final class def ExtractStringRule() => {
 	def ExtractStringRule(key : String) : public => {
-		super(key);}
+		super(key);
+	}
 	protected def fromAttribute(attribute : Attribute) : Optional<String> => {
-		return attribute.asString();}
+		return attribute.asString();
+	}
 	protected def toAttribute(content : String) : Result<Attribute, Error_> => {
-		return Ok(StringAttribute(content));}}
+		return Ok(StringAttribute(content));
+	}
+}

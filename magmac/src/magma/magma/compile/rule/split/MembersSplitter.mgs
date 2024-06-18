@@ -46,10 +46,13 @@ public class def MembersSplitter() => {
 						(next=='\n')
 						{
 							break
-							;}}
+							;
+						}
+					}
 					current=withAfter.advance();
 					continue
-					;}
+					;
+				}
 				else if(after=='*'){
 					// We are in a block comment.
 					
@@ -67,10 +70,14 @@ public class def MembersSplitter() => {
 						{
 							withAfter=withAfter.append(queue.pop());
 							break
-							;}}
+							;
+						}
+					}
 					current=withAfter.advance();
 					continue
-					;}}
+					;
+				}
+			}
 			if
 			(c=='\'')
 			{
@@ -85,7 +92,8 @@ public class def MembersSplitter() => {
 				next=='\\'?current.append(queue.pop()):withNext;
 				current=escaped.append(queue.pop());
 				continue
-				;}
+				;
+			}
 			if
 			(c=='\"')
 			{
@@ -104,45 +112,65 @@ public class def MembersSplitter() => {
 					{
 						withString.append(queue.pop());
 						continue
-						;}
+						;
+					}
 					if
 					(next=='\"')
 					{
 						break
-						;}}
+						;
+					}
+				}
 				current=withString;
 				continue
-				;}
+				;
+			}
 			if
 			(c==';'&&state.isLevel())
 			{
-				current=state.advance();}
+				current=state.advance();
+			}
 			else if(c=='}'&&state.isShallow()){
-				current=state.exit().advance();}
+				current=state.exit().advance();
+			}
 			else if(c=='{' || c == '('){
-				current=state.enter();}
+				current=state.enter();
+			}
 			else if(c=='}' || c == ')'){
-				current=state.exit();}
+				current=state.exit();
+			}
 			else
 			{
-				current=state;}}
-		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();}
+				current=state;
+			}
+		}
+		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();
+	}
 	() => {
 		def State() : public => {
-			this(Collections.emptyList(), StringBuilder(), 0);}
+			this(Collections.emptyList(), StringBuilder(), 0);
+		}
 		private def advance() : State => {
 			
 			copy : var=
 			ArrayList(this.tokens);
 			copy.add(this.buffer.toString());
-			return State(copy, StringBuilder(), depth);}
+			return State(copy, StringBuilder(), depth);
+		}
 		private def append(c : char) : State => {
-			return State(tokens, this.buffer.append(c), depth);}
+			return State(tokens, this.buffer.append(c), depth);
+		}
 		public def isLevel() : boolean => {
-			return this.depth==0;}
+			return this.depth==0;
+		}
 		public def enter() : State => {
-			return State(tokens, buffer, depth+1);}
+			return State(tokens, buffer, depth+1);
+		}
 		public def exit() : State => {
-			return State(tokens, buffer, depth-1);}
+			return State(tokens, buffer, depth-1);
+		}
 		public def isShallow() : boolean => {
-			return depth==1;}}}
+			return depth==1;
+		}
+	}
+}

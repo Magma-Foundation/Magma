@@ -8,4 +8,5 @@ public struct Result {
 	mapValue : Result<R, E>;
 	isOk : boolean;
 	mapErr : Result<T, R>;
-	match : R;}
+	match : R;
+}

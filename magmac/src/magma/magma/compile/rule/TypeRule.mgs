@@ -23,7 +23,8 @@ import magma.compile.rule.result.RuleResult;
 		
 		message : var=
 		format.formatted(type);
-		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));}
+		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		if
 		(!node.type().equals(type))
@@ -31,7 +32,8 @@ import magma.compile.rule.result.RuleResult;
 			
 			message : var=
 			String.format(FORMAT, type, node.type());
-			return Err(CompileError(message, node.toString()));}
+			return Err(CompileError(message, node.toString()));
+		}
 		return child.fromNode(node).mapErr(() => {
 			
 			format : var=
@@ -39,4 +41,7 @@ import magma.compile.rule.result.RuleResult;
 			
 			message : var=
 			format.formatted(type);
-			return CompileParentError(message, node.toString(), err);});}}
+			return CompileParentError(message, node.toString(), err);
+		});
+	}
+}

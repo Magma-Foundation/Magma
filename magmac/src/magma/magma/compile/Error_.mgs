@@ -5,4 +5,5 @@ public struct Error_ {
 	findMessage : Optional<String>;
 	findCauses : Optional<List<Error_>>;
 	findContext : Optional<String>;
-	calculateDepth : int;}
+	calculateDepth : int;
+}

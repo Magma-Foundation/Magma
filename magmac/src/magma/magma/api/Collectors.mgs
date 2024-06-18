@@ -2,22 +2,34 @@
 import java.util.Optional;
 public class def Collectors() => {
 	public static def joining() : Collector<String, Optional<String>> => {
-		return joining("");}
+		return joining("");
+	}
 	public static def joining(final delimiter : String) : Collector<String, Optional<String>> => {
 		return Collector((() => {
 			return {
 				public def createInitial() : Optional<String> => {
-					return Optional.empty();}
+					return Optional.empty();
+				}
 				public def fold(current : Optional<String>, next : String) : Optional<String> => {
-					return current.isEmpty()?Optional.of(next):current.map(() => inner+delimiter+next);}};})())();
+					return current.isEmpty()?Optional.of(next):current.map(() => inner+delimiter+next);
+				}
+			};
+		})())();
 		
-		;}
+		;
+	}
 	public static def exceptionally(collector : Collector<T, C>) : Collector<Result<T, E>, Result<C, E>> => {
 		return Collector((() => {
 			return {
 				public def createInitial() : Result<C, E> => {
-					return Ok(collector.createInitial());}
+					return Ok(collector.createInitial());
+				}
 				public def fold(current : Result<C, E>, next : Result<T, E>) : Result<C, E> => {
-					return current.flatMapValue(() => next.mapValue(() => collector.fold(inner, inner0)));}};})())();
+					return current.flatMapValue(() => next.mapValue(() => collector.fold(inner, inner0)));
+				}
+			};
+		})())();
 		
-		;}}
+		;
+	}
+}

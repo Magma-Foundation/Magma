@@ -4,6 +4,9 @@ import magma.compile.rule.Rules;
 import java.util.Optional;
 public final class def FirstRule() => {
 	def FirstRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
-		super(leftRule, slice, rightRule);}
+		super(leftRule, slice, rightRule);
+	}
 	protected def computeIndex(input : String) : Optional<Integer> => {
-		return Rules.wrapIndex(input.indexOf(slice));}}
+		return Rules.wrapIndex(input.indexOf(slice));
+	}
+}

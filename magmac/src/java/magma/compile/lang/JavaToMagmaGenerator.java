@@ -38,7 +38,7 @@ public class JavaToMagmaGenerator extends Generator {
             return children.stream()
                     .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
                     .toList();
-        });
+        }).withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));
 
         return Optional.of(new Tuple<>(newBlock, depth - 1));
     }
@@ -117,7 +117,7 @@ public class JavaToMagmaGenerator extends Generator {
             var nonFunctions = new ArrayList<Node>();
             var functions = new ArrayList<Node>();
             for (Node oldChild : oldChildren) {
-                if(oldChild.is("method")) {
+                if (oldChild.is("method")) {
                     functions.add(oldChild);
                 } else {
                     nonFunctions.add(oldChild);

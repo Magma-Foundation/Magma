@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 class def InvocationStartRule() => {
 	def InvocationStartRule(caller : Rule, arguments : Rule) : public => {
-		super(caller, "(", arguments);}
+		super(caller, "(", arguments);
+	}
 	protected def computeIndex(input : String) : Optional<Integer> => {
 		
 		depth : var=
@@ -50,15 +51,24 @@ class def InvocationStartRule() => {
 							(after=='\\')
 							{
 								continue
-								;}}}
+								;
+							}
+						}
+					}
 					if
 					(next=='\"')
 					{
 						break
-						;}}}
+						;
+					}
+				}
+			}
 			if
 			(c=='('&&depth==0)
 			return Optional.of(i);
 			else if(c==')')depth++;
-			else if(c=='(')depth--;}
-		return Optional.empty();}}
+			else if(c=='(')depth--;
+		}
+		return Optional.empty();
+	}
+}

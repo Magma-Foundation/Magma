@@ -45,7 +45,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
                 Lang.createNotRule(value),
                 new TypeRule("quantity", new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("value", value), ")")))),
-                new TypeRule("construction", new StripRule(new LeftRule("{", new RightRule(new ExtractNodeRule("child", Lang.createBlock(statement)), "}"))))
+                createConstructionRule(statement)
         ))));
 
         statement.setRule(new ContextRule("Not a statement.", new OrRule(List.of(
@@ -78,6 +78,12 @@ public class MagmaLang {
         return Lang.createBlock(new OrRule(List.of(
                 Lang.createImportRule(Lang.createNamespaceRule()),
                 statement)));
+    }
+
+    private static TypeRule createConstructionRule(Rule statement) {
+        var child1 = new ExtractNodeRule("child", Lang.createBlock(statement));
+        var child = new LeftRule("{", new RightRule(child1, "}"));
+        return new TypeRule("construction", new StripRule(child));
     }
 
     private static TypeRule createStructRule(Rule definition) {

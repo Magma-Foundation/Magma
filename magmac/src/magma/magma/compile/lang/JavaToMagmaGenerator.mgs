@@ -14,11 +14,14 @@ public class def JavaToMagmaGenerator() => {
 		
 		newBlock : var=
 		node.mapNodes("children", JavaToMagmaGenerator.removePackagesFromList);
-		return Optional.of(Tuple(newBlock, depth+1));}
+		return Optional.of(Tuple(newBlock, depth+1));
+	}
 	private static def removePackagesFromList(children : List<Node>) : List<Node> => {
-		return children.stream().filter(() => !child.is("package")).toList();}
+		return children.stream().filter(() => !child.is("package")).toList();
+	}
 	protected def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return postVisitFunction(node, depth).or(() => postVisitBlock(node, depth)).orElse(Tuple(node, depth));}
+		return postVisitFunction(node, depth).or(() => postVisitBlock(node, depth)).orElse(Tuple(node, depth));
+	}
 	private def postVisitBlock(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("block"))
@@ -29,8 +32,10 @@ public class def JavaToMagmaGenerator() => {
 		
 		newBlock : var=
 		node.mapNodes("children", () => {
-			return children.stream().map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();});
-		return Optional.of(Tuple(newBlock, depth-1));}
+			return children.stream().map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
+		}).withString("after-content", "\n" + "\t".repeat(depth==0?0:depth-1));
+		return Optional.of(Tuple(newBlock, depth-1));
+	}
 	private def postVisitFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(node.is("function"))
@@ -54,34 +59,45 @@ public class def JavaToMagmaGenerator() => {
 						copy : var=
 						ArrayList(list);
 						copy.add("def");
-						return copy;}, () => List.of("def"));
-					return Optional.of(Tuple(node.withNode("definition", newDefinition), depth));}
+						return copy;
+					}, () => List.of("def"));
+					return Optional.of(Tuple(node.withNode("definition", newDefinition), depth));
+				}
 				else
 				{
-					return Optional.of(Tuple(oldDefinition.get(), depth));}}}
-		return Optional.empty();}
+					return Optional.of(Tuple(oldDefinition.get(), depth));
+				}
+			}
+		}
+		return Optional.empty();
+	}
 	protected def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).orElse(Tuple(node, depth));}
+		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).orElse(Tuple(node, depth));
+	}
 	private def replaceMethodReferenceWithAccess(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("method-reference"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("access"), depth));}
+		return Optional.of(Tuple(node.retype("access"), depth));
+	}
 	private def replaceRecordWithFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("record"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("function"), depth));}
+		return Optional.of(Tuple(node.retype("function"), depth));
+	}
 	private def replaceInterfaceWithStruct(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("interface"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("struct"), depth));}
+		return Optional.of(Tuple(node.retype("struct"), depth));
+	}
 	private def replaceLambdaWithFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("lambda"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("function"), depth));}
+		return Optional.of(Tuple(node.retype("function"), depth));
+	}
 	private def replaceConstructorsWithInvocation(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("constructor"))
@@ -108,10 +124,13 @@ public class def JavaToMagmaGenerator() => {
 				if
 				(oldChild.is("method"))
 				{
-					functions.add(oldChild);}
+					functions.add(oldChild);
+				}
 				else
 				{
-					nonFunctions.add(oldChild);}}
+					nonFunctions.add(oldChild);
+				}
+			}
 			
 			construction : var=
 			node.clear("construction").withNode("child", node.clear("block").withNodeList("children", functions));
@@ -131,15 +150,19 @@ public class def JavaToMagmaGenerator() => {
 			
 			classCreator : var=
 			node.retype("invocation").remove("children").withNodeList("arguments", Collections.singletonList(lambda1));
-			return Optional.of(Tuple(node.clear("invocation").withNode("caller", classCreator).withNodeList("arguments", originalArguments), depth));}
+			return Optional.of(Tuple(node.clear("invocation").withNode("caller", classCreator).withNodeList("arguments", originalArguments), depth));
+		}
 		else
 		{
-			return Optional.of(Tuple(node.retype("invocation"), depth));}}
+			return Optional.of(Tuple(node.retype("invocation"), depth));
+		}
+	}
 	private def replaceMethodWithFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("method"))
 		return Optional.empty();
-		return Optional.of(Tuple(node.retype("function"), depth));}
+		return Optional.of(Tuple(node.retype("function"), depth));
+	}
 	private def replaceClassWithFunction(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if
 		(!node.is("class"))
@@ -160,4 +183,6 @@ public class def JavaToMagmaGenerator() => {
 		
 		function : var=
 		node.retype("function").withNode("definition", definition);
-		return Optional.of(Tuple(function, depth));}}
+		return Optional.of(Tuple(function, depth));
+	}
+}

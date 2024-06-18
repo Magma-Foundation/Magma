@@ -27,13 +27,18 @@ public class def Generator() => {
 				nodeIntegerTuple : Tuple<Node, Integer>=
 				generateWithDepth(node, current);
 				list.add(nodeIntegerTuple.left());
-				current=nodeIntegerTuple.right();}
-			return Tuple(NodeListAttribute(list), current);}
-		return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));}
+				current=nodeIntegerTuple.right();
+			}
+			return Tuple(NodeListAttribute(list), current);
+		}
+		return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));
+	}
 	private def getAttributeIntegerTuple(depth : int, value : Node) : Tuple<Attribute, Integer> => {
-		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);}
+		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);
+	}
 	public def generate(node : Node, state : int) : Node => {
-		return generateWithDepth(node, state).left();}
+		return generateWithDepth(node, state).left();
+	}
 	private def generateWithDepth(node : Node, depth : int) : Tuple<Node, Integer> => {
 		
 		preVisitedTuple : var=
@@ -61,9 +66,14 @@ public class def Generator() => {
 			newTuple : var=
 			generateAttribute(value, current);
 			newAttributes=newAttributes.with(key, newTuple.left());
-			current=newTuple.right();}
-		return postVisit(preVisited.withAttributes(newAttributes), current);}
+			current=newTuple.right();
+		}
+		return postVisit(preVisited.withAttributes(newAttributes), current);
+	}
 	protected def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return Tuple(node, depth);}
+		return Tuple(node, depth);
+	}
 	protected def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
-		return Tuple(node, depth);}}
+		return Tuple(node, depth);
+	}
+}

@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 class def ConditionEndRule() => {
 	def ConditionEndRule(conditionParent : Rule, valueParent : Rule) : public => {
-		super(conditionParent, ")", valueParent);}
+		super(conditionParent, ")", valueParent);
+	}
 	protected def computeIndex(input : String) : Optional<Integer> => {
 		
 		/*
@@ -41,12 +42,15 @@ class def ConditionEndRule() => {
 				if
 				(next.right()=='\\')
 				{
-					queue.pop();}
-				queue.pop();}
+					queue.pop();
+				}
+				queue.pop();
+			}
 			if
 			(c==')'&&depth==1)
 			{
-				return Optional.of(i);}
+				return Optional.of(i);
+			}
 			else
 			{
 				if
@@ -54,5 +58,9 @@ class def ConditionEndRule() => {
 				depth++;
 				if
 				(c==')')
-				depth--;}}
-		return Optional.empty();}}
+				depth--;
+			}
+		}
+		return Optional.empty();
+	}
+}

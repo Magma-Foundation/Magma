@@ -6,14 +6,21 @@ import java.util.Optional;
 import java.util.function.Function;
 () => {
 	public def findName() : Optional<String> => {
-		return Optional.empty();}
+		return Optional.empty();
+	}
 	public def findAttributes() : Optional<Attributes> => {
-		return Optional.of(attributes);}
+		return Optional.of(attributes);
+	}
 	public def tryCreate() : Optional<Node> => {
-		return Optional.empty();}
+		return Optional.empty();
+	}
 	public def findError() : Optional<Error_> => {
-		return Optional.empty();}
+		return Optional.empty();
+	}
 	public def withType(type : String) : RuleResult => {
-		return TypedRuleResult(type, attributes);}
+		return TypedRuleResult(type, attributes);
+	}
 	public def mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
-		return this;}}
+		return this;
+	}
+}

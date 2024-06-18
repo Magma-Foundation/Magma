@@ -26,7 +26,8 @@ public final class def SplitMultipleRule() => {
 		this=propertyKey;
 		this=childRule;
 		this=splitter;
-		this=delimiter;}
+		this=delimiter;
+	}
 	public def toNode(input : String) : RuleResult => {
 		
 		split : var=
@@ -47,13 +48,18 @@ public final class def SplitMultipleRule() => {
 			if
 			(optional.isEmpty())
 			{
-				return ErrorRuleResult(CompileError("No name present for.", childString));}
-			members.add(optional.get());}
-		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));}
+				return ErrorRuleResult(CompileError("No name present for.", childString));
+			}
+			members.add(optional.get());
+		}
+		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
+	}
 	private def joinNodes(list : List<Node>) : Result<String, Error_> => {
-		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));}
+		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));}
+		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));
+	}
 	private def createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=
@@ -61,4 +67,6 @@ public final class def SplitMultipleRule() => {
 		
 		message : var=
 		format.formatted(propertyKey);
-		return Err(CompileError(message, node.toString()));}}
+		return Err(CompileError(message, node.toString()));
+	}
+}

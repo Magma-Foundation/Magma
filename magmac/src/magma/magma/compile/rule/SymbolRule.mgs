@@ -1,9 +1,11 @@
 
 public final class def SymbolRule() => {
 	def SymbolRule(child : Rule) : public => {
-		super(child);}
+		super(child);
+	}
 	protected def computeMessage() : String => {
-		return "Not a symbol.";}
+		return "Not a symbol.";
+	}
 	protected def filter(input : String) : boolean => {
 		
 		i : int=
@@ -19,6 +21,10 @@ public final class def SymbolRule() => {
 			{
 				i++;
 				continue
-				;}
-			return false;}
-		return true;}}
+				;
+			}
+			return false;
+		}
+		return true;
+	}
+}

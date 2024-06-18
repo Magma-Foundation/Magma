@@ -12,9 +12,11 @@ public abstract class def ExtractStringListRule() => {
 	protected final delimiter : String;
 	def ExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key);
-		this=delimiter;}
+		this=delimiter;
+	}
 	protected def fromAttribute(attribute : Attribute) : Optional<String> => {
-		return attribute.asStringList().map(() => String.join(delimiter, list));}
+		return attribute.asStringList().map(() => String.join(delimiter, list));
+	}
 	protected def toAttribute(content : String) : Result<Attribute, Error_> => {
 		
 		list : var=
@@ -26,8 +28,11 @@ public abstract class def ExtractStringListRule() => {
 			if
 			(qualified.isPresent())
 			{
-				return Err(qualified.get());}}
-		return Ok(StringListAttribute(list));}
+				return Err(qualified.get());
+			}
+		}
+		return Ok(StringListAttribute(list));
+	}
 	private def split(content : String) : List<String> => {
 		
 		result : List<String>=
@@ -45,7 +50,10 @@ public abstract class def ExtractStringListRule() => {
 			(end==-1)
 			break;
 			result.add(content.substring(start, end));
-			start=end+delimiter.length();}
+			start=end+delimiter.length();
+		}
 		result.add(content.substring(start));
-		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();}
-	protected abstract qualify : Optional<Error_>;}
+		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();
+	}
+	protected abstract qualify : Optional<Error_>;
+}

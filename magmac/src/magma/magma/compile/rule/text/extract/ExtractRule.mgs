@@ -15,15 +15,19 @@ import java.util.Optional;
 public abstract class def ExtractRule() => {
 	protected final key : String;
 	def ExtractRule(key : String) : public => {
-		this=key;}
+		this=key;
+	}
 	protected abstract fromAttribute : Optional<String>;
 	protected abstract toAttribute : Result<Attribute, Error_>;
 	public def toNode(input : String) : RuleResult => {
-		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}
+		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
+	}
 	public def fromNode(node : Node) : Result<String, Error_> => {
-		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}
+		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
+	}
 	private static def getStringErrorOk(value : String) : Result<String, Error_> => {
-		return Ok(value);}
+		return Ok(value);
+	}
 	private def createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=
@@ -31,4 +35,6 @@ public abstract class def ExtractRule() => {
 		
 		message : var=
 		format.formatted(key);
-		return Err(CompileError(message, node.toString()));}}
+		return Err(CompileError(message, node.toString()));
+	}
+}

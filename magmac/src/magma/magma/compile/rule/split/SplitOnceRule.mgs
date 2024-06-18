@@ -17,7 +17,8 @@ public abstract class def SplitOnceRule() => {
 	def SplitOnceRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		this=leftRule;
 		this=slice;
-		this=rightRule;}
+		this=rightRule;
+	}
 	public def toNode(input : String) : RuleResult => {
 		
 		tuple : var=
@@ -28,7 +29,8 @@ public abstract class def SplitOnceRule() => {
 			
 			right1 : var=
 			input.substring(keywordIndex+slice.length());
-			return Tuple(left1, right1);});
+			return Tuple(left1, right1);
+		});
 		return tuple.map(() => {
 			
 			left : var=
@@ -48,14 +50,17 @@ public abstract class def SplitOnceRule() => {
 			if
 			(rightResult.findError().isPresent())
 			return rightResult;
-			return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();}).orElseGet(() => {
+			return leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new).orElseThrow();
+		}).orElseGet(() => {
 			
 			format : var=
 			"Slice '%s' not present.";
 			
 			message : var=
 			format.formatted(slice);
-			return ErrorRuleResult(CompileError(message, input));});}
+			return ErrorRuleResult(CompileError(message, input));
+		});
+	}
 	protected abstract computeIndex : Optional<Integer>;
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		
@@ -64,7 +69,8 @@ public abstract class def SplitOnceRule() => {
 		
 		rightValue : var=
 		rightRule.fromNode(node);
-		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));}
+		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
+	}
 	private def createError(node : Node, err : Error_) : CompileParentError => {
 		
 		format : var=
@@ -72,4 +78,6 @@ public abstract class def SplitOnceRule() => {
 		
 		message : var=
 		format.formatted(slice);
-		return CompileParentError(message, node.toString(), err);}}
+		return CompileParentError(message, node.toString(), err);
+	}
+}
