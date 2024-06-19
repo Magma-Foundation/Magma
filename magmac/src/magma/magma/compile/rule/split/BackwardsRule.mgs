@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		let mut allIndexes = findAllIndexesReverse(input);
 		let mut errors = ArrayList();
 		for(index : Integer in allIndexes){
@@ -48,10 +48,10 @@ export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	private static def wrapError(leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => {
+	private static def wrapError(this, leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => {
 		return CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 	}
-	private def findAllIndexesReverse(input : String) : List<Integer> => {
+	private def findAllIndexesReverse(this, input : String) : List<Integer> => {
 		let mut indexes : List<Integer> = ArrayList();
 		let mut index : int = input.indexOf(slice);
 		while(index>=0)
@@ -62,7 +62,7 @@ export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule
 		Collections.reverse(indexes);
 		return indexes;
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
 	}
 }

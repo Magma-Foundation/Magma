@@ -9,11 +9,11 @@ import java.util.Optional;
  * the attribute value as a string or a list of strings.
  */
 public struct Attribute {
-	();
-	();
+	(this);
+	(this);
 	;
-	();
+	(this);
 	;
-	();
+	(this);
 	format : String;
 }

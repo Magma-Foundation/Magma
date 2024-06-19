@@ -1,6 +1,6 @@
 
 export class def Results() => {
-	public static def unwrap<T, E extends Throwable>(result : Result<T, E>) : T => {
+	public static def unwrap<T, E extends Throwable>(this, result : Result<T, E>) : T => {
 		let mut value = result.findValue();
 		if(value.isPresent())
 		return value.get();

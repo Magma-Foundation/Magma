@@ -14,12 +14,12 @@ export let mut SplitOnceRule = () => class () => {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
-	def SplitOnceRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
+	def SplitOnceRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		this=leftRule;
 		this=slice;
 		this=rightRule;
 	}
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		let mut tuple = computeIndex(input).map(() => {
 			let mut left1 = input.substring(0, keywordIndex);
 			let mut right1 = input.substring(keywordIndex+slice.length());
@@ -42,12 +42,12 @@ export let mut SplitOnceRule = () => class () => {
 		});
 	}
 	protected abstract computeIndex : Optional<Integer>;
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		let mut leftResult = leftRule.fromNode(node);
 		let mut rightValue = rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
 	}
-	private def createError(node : Node, err : Error_) : CompileParentError => {
+	private def createError(this, node : Node, err : Error_) : CompileParentError => {
 		let mut format = "Cannot merge node using slice '%s'.";
 		let mut message = format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);

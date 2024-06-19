@@ -1,11 +1,11 @@
 
 export class def CompileException() => {
-	def CompileException(message : String, cause : Throwable) : public => {
+	def CompileException(this, message : String, cause : Throwable) : public => {
 		super(message, cause);
 	}
-	def CompileException(message : String) : public => {
+	def CompileException(this, message : String) : public => {
 		super(message);
 	}
-	def CompileException() : public => {
+	def CompileException(this) : public => {
 	}
 }

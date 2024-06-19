@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ParamSplitter() => {
-	public def split(input : String) : List<String> => {
+	public def split(this, input : String) : List<String> => {
 		let mut segments = ArrayList();
 		let mut buffer = StringBuilder();
 		let mut depth = 0;

@@ -7,7 +7,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export class def LeftRule(slice : String, child : Rule) => {
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		if(input.startsWith(slice))
 		{
 			let mut content = input.substring(slice.length());
@@ -18,7 +18,7 @@ export class def LeftRule(slice : String, child : Rule) => {
 			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));
 		}
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		return child.fromNode(node).mapValue(() => slice+inner);
 	}
 }

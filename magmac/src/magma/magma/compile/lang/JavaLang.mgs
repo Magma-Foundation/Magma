@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 export class def JavaLang() => {
-	public static def createRootRule() : Rule => {
+	public static def createRootRule(this) : Rule => {
 		return Lang.createBlock(createRootMemberRule());
 	}
-	private static def createRootMemberRule() : OrRule => {
+	private static def createRootMemberRule(this) : OrRule => {
 		let mut namespace = Lang.createNamespaceRule();
 		let mut importRule = Lang.createImportRule(namespace);
 		let mut member = LazyRule();
@@ -37,7 +37,7 @@ export class def JavaLang() => {
 		contents.setRule(OrRule(List.of(createContentRule("class", member, Lang.createTypeRule(), definition), createContentRule("record", member, Lang.createTypeRule(), definition), createContentRule("interface", member, Lang.createTypeRule(), definition))));
 		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));
 	}
-	private static def initContentMember(contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) : void => {
+	private static def initContentMember(this, contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) : void => {
 		let mut content = StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
 		let mut withoutThrows = ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));
 		let mut thrownValues = SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));
@@ -50,13 +50,13 @@ export class def JavaLang() => {
 		let mut methodRule = TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
 		contentMember.setRule(OrRule(List.of(Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), contents)));
 	}
-	private static def initStatements(definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : void => {
+	private static def initStatements(this, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : void => {
 		let mut rules = List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createReturnRule(value), Lang.createConditionRule("if", value, statement), Lang.createElseRule(statement), Lang.createConditionRule("while", value, statement), Lang.createForRule(definition, value, statement, ":"), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createThrowRule(value), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value));
 		let mut copy = ArrayList(rules);
 		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
 		statement.setRule(OrRule(copy));
 	}
-	private static def createContentRule(keyword : String, classMember : LazyRule, type : LazyRule, definition : Rule) : TypeRule => {
+	private static def createContentRule(this, keyword : String, classMember : LazyRule, type : LazyRule, definition : Rule) : TypeRule => {
 		let mut modifiers = Lang.createModifiersRule();
 		let mut block = ExtractNodeRule("child", Lang.createBlock(classMember));
 		let mut name = StripRule(SymbolRule(ExtractStringRule("name")));
@@ -73,19 +73,19 @@ export class def JavaLang() => {
 		let mut withoutModifiers = FirstRule(maybeImplements, "{", RightRule(block, "}"));
 		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
 	}
-	private static def createValueRule(classMember : LazyRule, statement : Rule) : LazyRule => {
+	private static def createValueRule(this, classMember : LazyRule, statement : Rule) : LazyRule => {
 		let mut value = LazyRule();
 		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
 		return value;
 	}
-	private static def createLambdaRule(value : Rule, statement : Rule) : Rule => {
+	private static def createLambdaRule(this, value : Rule, statement : Rule) : Rule => {
 		let mut child = SymbolRule(ExtractStringRule("param-name"));
 		let mut left = StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
 		let mut maybeValue = OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
 		let mut right = StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));
 	}
-	private static def createConstructorRule(value : Rule, classMember : Rule) : Rule => {
+	private static def createConstructorRule(this, value : Rule, classMember : Rule) : Rule => {
 		let mut arguments = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
 		let mut caller = ExtractNodeRule("caller", value);
 		let mut withGenerics = OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
@@ -94,7 +94,7 @@ export class def JavaLang() => {
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}
 	class def SplitThrows() => {
-		public def split(input : String) : List<String> => {
+		public def split(this, input : String) : List<String> => {
 			return Arrays.asList(input.split(","));
 		}
 	}

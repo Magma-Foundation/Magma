@@ -9,13 +9,13 @@ import magma.compile.rule.result.RuleResult;
 export class def StripRule(child : Rule, left : String, right : String) => {
 	public static final let DEFAULT_LEFT : String = "left";
 	public static final let DEFAULT_RIGHT : String = "right";
-	def StripRule(child : Rule) : public => {
+	def StripRule(this, child : Rule) : public => {
 		this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
 	}
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		return child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		let mut leftIndent = node.attributes().apply(left).flatMap(Attribute.asString).orElse("");
 		let mut rightIndent = node.attributes().apply(right).flatMap(Attribute.asString).orElse("");
 		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));

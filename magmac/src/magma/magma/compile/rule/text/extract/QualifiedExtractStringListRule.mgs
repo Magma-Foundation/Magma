@@ -4,11 +4,11 @@ import magma.compile.rule.Rule;
 import java.util.Optional;
 export class def QualifiedExtractStringListRule() => {
 	private final qualifier : Rule;
-	def QualifiedExtractStringListRule(key : String, delimiter : String, qualifier : Rule) : public => {
+	def QualifiedExtractStringListRule(this, key : String, delimiter : String, qualifier : Rule) : public => {
 		super(key, delimiter);
 		this=qualifier;
 	}
-	protected def qualify(child : String) : Optional<Error_> => {
+	protected def qualify(this, child : String) : Optional<Error_> => {
 		return qualifier.toNode(child).findError();
 	}
 }

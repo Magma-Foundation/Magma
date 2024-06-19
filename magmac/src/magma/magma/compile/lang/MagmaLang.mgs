@@ -16,7 +16,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 export class def MagmaLang() => {
-	public static def createRootRule() : Rule => {
+	public static def createRootRule(this) : Rule => {
 		let mut statement = LazyRule();
 		let mut value = LazyRule();
 		let mut definition = createDefinitionRule();
@@ -24,19 +24,19 @@ export class def MagmaLang() => {
 		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), createStructRule(definition), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";")))))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
-	private static def createConstructionRule(statement : Rule) : TypeRule => {
+	private static def createConstructionRule(this, statement : Rule) : TypeRule => {
 		let mut child1 = ExtractNodeRule("child", Lang.createBlock(statement));
 		let mut child = LeftRule("{", RightRule(child1, "}"));
 		return TypeRule("construction", StripRule(child));
 	}
-	private static def createStructRule(definition : Rule) : TypeRule => {
+	private static def createStructRule(this, definition : Rule) : TypeRule => {
 		let mut modifiers = SimpleExtractStringListRule("modifiers", " ");
 		let mut children = ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
 		let mut name = ExtractStringRule("name");
 		let mut child = FirstRule(name, " {", RightRule(children, "}"));
 		return TypeRule("struct", OptionalRule("modifiers", FirstRule(modifiers, " struct ", child), LeftRule("struct ", child)));
 	}
-	private static def createDefinitionRule() : Rule => {
+	private static def createDefinitionRule(this) : Rule => {
 		let mut modifiers = Lang.createModifiersRule();
 		let mut withoutModifiers = OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
 		let mut withTypeParams = StripRule(FirstRule(withoutModifiers, "<", RightRule(Lang.createTypeParamsRule(), ">")));
@@ -52,7 +52,7 @@ export class def MagmaLang() => {
 		definition.setRule(maybeType);
 		return definition;
 	}
-	private static def createFunctionRule(statement : Rule, value : Rule) : TypeRule => {
+	private static def createFunctionRule(this, statement : Rule, value : Rule) : TypeRule => {
 		let mut block = LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
 		let mut asBlock = ExtractNodeRule("child", OrRule(List.of(block, statement)));
 		let mut asValue = ExtractNodeRule("child", value);

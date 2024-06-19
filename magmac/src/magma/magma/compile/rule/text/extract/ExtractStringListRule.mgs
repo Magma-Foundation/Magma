@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Optional;
 export let mut ExtractStringListRule = () => class () => {
 	protected final delimiter : String;
-	def ExtractStringListRule(key : String, delimiter : String) : public => {
+	def ExtractStringListRule(this, key : String, delimiter : String) : public => {
 		super(key);
 		this=delimiter;
 	}
-	protected def fromAttribute(attribute : Attribute) : Optional<String> => {
+	protected def fromAttribute(this, attribute : Attribute) : Optional<String> => {
 		return attribute.asStringList().map(() => String.join(delimiter, list));
 	}
-	protected def toAttribute(content : String) : Result<Attribute, Error_> => {
+	protected def toAttribute(this, content : String) : Result<Attribute, Error_> => {
 		let mut list = split(content);
 		for(format : String in list){
 			let mut qualified = qualify(format);
@@ -28,7 +28,7 @@ export let mut ExtractStringListRule = () => class () => {
 		}
 		return Ok(StringListAttribute(list));
 	}
-	private def split(content : String) : List<String> => {
+	private def split(this, content : String) : List<String> => {
 		let mut result : List<String> = ArrayList();
 		let mut start : int = 0;
 		while(true)

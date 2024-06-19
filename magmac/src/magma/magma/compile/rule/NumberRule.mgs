@@ -1,9 +1,9 @@
 
 export class def NumberRule() => {
-	def NumberRule(child : Rule) : public => {
+	def NumberRule(this, child : Rule) : public => {
 		super(child);
 	}
-	private static def allDigits(input : String) : boolean => {
+	private static def allDigits(this, input : String) : boolean => {
 		if(input.isEmpty())
 		return false;
 		let mut i : int = 0;
@@ -18,10 +18,10 @@ export class def NumberRule() => {
 		}
 		return true;
 	}
-	protected def computeMessage() : String => {
+	protected def computeMessage(this) : String => {
 		return "Not a number.";
 	}
-	protected def filter(input : String) : boolean => {
+	protected def filter(this, input : String) : boolean => {
 		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
 	}
 }

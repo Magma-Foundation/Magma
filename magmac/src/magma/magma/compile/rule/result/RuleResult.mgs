@@ -9,14 +9,14 @@ import magma.compile.rule.Node;
 import java.util.Optional;
 import java.util.function.Function;
 public struct RuleResult {
-	();
-	(inner : Node);
+	(this);
+	(this, inner : Node);
 	findName : Optional<String>;
 	findError : Optional<Error_>;
 	findAttributes : Optional<Attributes>;
 	tryCreate : Optional<Node>;
 	withType : RuleResult;
 	mapErr : RuleResult;
-	();
-	();
+	(this);
+	(this);
 }

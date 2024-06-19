@@ -5,18 +5,18 @@ import java.util.stream.Collectors;
 export class def StringListAttribute(values : List<String>) => {
 	public static final let Factory : Factory<List<String>> = Factory((() => {
 		return {
-			public def fromAttribute(attribute : Attribute) : Optional<List<String>> => {
+			public def fromAttribute(this, attribute : Attribute) : Optional<List<String>> => {
 				return attribute.asStringList();
 			}
-			public def toAttribute(value : List<String>) : Attribute => {
+			public def toAttribute(this, value : List<String>) : Attribute => {
 				return StringListAttribute(value);
 			}
 		};
 	})())();
-	public def asStringList() : Optional<List<String>> => {
+	public def asStringList(this) : Optional<List<String>> => {
 		return Optional.of(values);
 	}
-	public def format(depth : int) : String => {
+	public def format(this, depth : int) : String => {
 		return values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
 	}
 }

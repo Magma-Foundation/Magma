@@ -2,11 +2,11 @@
 import java.util.List;
 import java.util.Optional;
 export class def Streams() => {
-	public static def fromNativeList<T>(list : List<T>) : Stream<T> => {
+	public static def fromNativeList<T>(this, list : List<T>) : Stream<T> => {
 		return AbstractStream(Head((() => {
 			private let mut counter : int = 0;
 			return {
-				public def head() : Optional<T> => {
+				public def head(this) : Optional<T> => {
 					if(counter>=list.size())
 					return Optional.empty();
 					let mut next = list.get(counter);

@@ -22,13 +22,13 @@ export class def SplitMultipleRule() => {
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	def SplitMultipleRule(splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
+	def SplitMultipleRule(this, splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) : public => {
 		this=propertyKey;
 		this=childRule;
 		this=splitter;
 		this=delimiter;
 	}
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		let mut split = splitter.split(input);
 		let mut members = ArrayList();
 		for(childString : String in split){
@@ -44,13 +44,13 @@ export class def SplitMultipleRule() => {
 		}
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
 	}
-	private def joinNodes(list : List<Node>) : Result<String, Error_> => {
+	private def joinNodes(this, list : List<Node>) : Result<String, Error_> => {
 		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		return node.attributes().apply(propertyKey).flatMap(Attribute.asNodeList).map(this.joinNodes).orElseGet(() => createErr(node));
 	}
-	private def createErr(node : Node) : Err<String, Error_> => {
+	private def createErr(this, node : Node) : Err<String, Error_> => {
 		let mut format = "Property '%s' does not exist on node.";
 		let mut message = format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));

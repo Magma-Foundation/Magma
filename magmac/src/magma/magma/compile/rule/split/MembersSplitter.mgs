@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def MembersSplitter() => {
-	public def split(input : String) : List<String> => {
+	public def split(this, input : String) : List<String> => {
 		let mut current = State();
 		let mut queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
@@ -106,27 +106,27 @@ export class def MembersSplitter() => {
 		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();
 	}
 	class def State(tokens : List<String>, buffer : StringBuilder, depth : int) => {
-		def State() : public => {
+		def State(this) : public => {
 			this(Collections.emptyList(), StringBuilder(), 0);
 		}
-		private def advance() : State => {
+		private def advance(this) : State => {
 			let mut copy = ArrayList(this.tokens);
 			copy.add(this.buffer.toString());
 			return State(copy, StringBuilder(), depth);
 		}
-		private def append(c : char) : State => {
+		private def append(this, c : char) : State => {
 			return State(tokens, this.buffer.append(c), depth);
 		}
-		public def isLevel() : boolean => {
+		public def isLevel(this) : boolean => {
 			return this.depth==0;
 		}
-		public def enter() : State => {
+		public def enter(this) : State => {
 			return State(tokens, buffer, depth+1);
 		}
-		public def exit() : State => {
+		public def exit(this) : State => {
 			return State(tokens, buffer, depth-1);
 		}
-		public def isShallow() : boolean => {
+		public def isShallow(this) : boolean => {
 			return depth==1;
 		}
 	}

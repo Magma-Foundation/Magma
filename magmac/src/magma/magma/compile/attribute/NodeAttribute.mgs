@@ -4,18 +4,18 @@ import java.util.Optional;
 export class def NodeAttribute(value : Node) => {
 	public static final let Factory : Factory<Node> = Factory((() => {
 		return {
-			public def fromAttribute(attribute : Attribute) : Optional<Node> => {
+			public def fromAttribute(this, attribute : Attribute) : Optional<Node> => {
 				return attribute.asNode();
 			}
-			public def toAttribute(value : Node) : Attribute => {
+			public def toAttribute(this, value : Node) : Attribute => {
 				return NodeAttribute(value);
 			}
 		};
 	})())();
-	public def asNode() : Optional<Node> => {
+	public def asNode(this) : Optional<Node> => {
 		return Optional.of(value);
 	}
-	public def format(depth : int) : String => {
+	public def format(this, depth : int) : String => {
 		return value.format(depth);
 	}
 }

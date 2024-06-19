@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 export class def OrRule(rules : List<Rule>) => {
-	private static def toError(results : List<Result<String, Error_>>) : Err<String, Error_> => {
+	private static def toError(this, results : List<Result<String, Error_>>) : Err<String, Error_> => {
 		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
 	}
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		let mut errors = ArrayList();
 		for(rule : Rule in rules()){
 			let mut result = rule.toNode(input);
@@ -32,7 +32,7 @@ export class def OrRule(rules : List<Rule>) => {
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		let mut results = ArrayList();
 		for(rule : var in rules){
 			let mut result = rule.fromNode(node);

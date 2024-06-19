@@ -5,22 +5,22 @@ import magma.compile.rule.Node;
 import java.util.Optional;
 import java.util.function.Function;
 export class def TypedRuleResult(name : String, attributes : Attributes) => {
-	public def findName() : Optional<String> => {
+	public def findName(this) : Optional<String> => {
 		return Optional.of(name);
 	}
-	public def findAttributes() : Optional<Attributes> => {
+	public def findAttributes(this) : Optional<Attributes> => {
 		return Optional.of(attributes);
 	}
-	public def tryCreate() : Optional<Node> => {
+	public def tryCreate(this) : Optional<Node> => {
 		return Optional.of(Node(name, attributes));
 	}
-	public def findError() : Optional<Error_> => {
+	public def findError(this) : Optional<Error_> => {
 		return Optional.empty();
 	}
-	public def withType(type : String) : RuleResult => {
+	public def withType(this, type : String) : RuleResult => {
 		return this;
 	}
-	public def mapErr(mapper : (Error_) => Error_) : RuleResult => {
+	public def mapErr(this, mapper : (Error_) => Error_) : RuleResult => {
 		return this;
 	}
 }

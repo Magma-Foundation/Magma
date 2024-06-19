@@ -6,17 +6,17 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export let mut FilterRule = () => class () => {
 	protected final child : Rule;
-	def FilterRule(child : Rule) : public => {
+	def FilterRule(this, child : Rule) : public => {
 		this=child;
 	}
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		if(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
 	protected abstract computeMessage : String;
 	protected abstract filter : boolean;
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);
 	}
 };

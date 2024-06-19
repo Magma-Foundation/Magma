@@ -8,7 +8,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export class def TypeRule(type : String, child : Rule) => {
 	public static final let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
-	public def toNode(input : String) : RuleResult => {
+	public def toNode(this, input : String) : RuleResult => {
 		let mut result = child.toNode(input);
 		if(result.findError().isEmpty())
 		return result.withType(type);
@@ -16,7 +16,7 @@ export class def TypeRule(type : String, child : Rule) => {
 		let mut message = format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));
 	}
-	public def fromNode(node : Node) : Result<String, Error_> => {
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		if(!node.type().equals(type))
 		{
 			let mut message = String.format(FORMAT, type, node.type());

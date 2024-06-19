@@ -24,7 +24,7 @@ export class def Main() => {
 	public static final let TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
 	public static final let SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
 	public static final let DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
-	public static def main(args : String[]) : void => {
+	public static def main(this, args : String[]) : void => {
 		try 
 		{
 			run();
@@ -38,7 +38,7 @@ export class def Main() => {
 			e.printStackTrace();
 		}
 	}
-	private static def run() : void => {
+	private static def run(this) : void => {
 		let mut sources = Files.walk(SOURCE_DIRECTORY).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList();
 		let mut sourceTrees = parseSources(sources);
 		let mut targetTrees = HashMap();
@@ -76,7 +76,7 @@ export class def Main() => {
 			writeImpl(target, generateResult.findValue().orElseThrow(() => CompileException("Nothing was generated.")));
 		}
 	}
-	private static def parseSources(sources : List<Path>) : Map<List<String>, Node> => {
+	private static def parseSources(this, sources : List<Path>) : Map<List<String>, Node> => {
 		let mut trees = HashMap();
 		for(source : var in sources){
 			let mut relativized = SOURCE_DIRECTORY.relativize(source.getParent());
@@ -97,18 +97,18 @@ export class def Main() => {
 		}
 		return trees;
 	}
-	private static def parseSource(source : Path, namespace : List<String>, name : String) : Result<Node, CompileException> => {
+	private static def parseSource(this, source : Path, namespace : List<String>, name : String) : Result<Node, CompileException> => {
 		System.out.println("Parsing source: "+SOURCE_DIRECTORY.relativize(source));
 		let mut input = readImpl(source);
 		let mut parseResult = JavaLang.createRootRule().toNode(input);
 		return parseResult.create().match(() => parse(root, namespace, name), Main.writeError);
 	}
-	private static def computeName(source : Path) : String => {
+	private static def computeName(this, source : Path) : String => {
 		let mut fileName = source.getFileName().toString();
 		let mut name = fileName.substring(0, fileName.indexOf('.'));
 		return name;
 	}
-	private static def parse(root : Node, namespace : List<String>, name : String) : Result<Node, CompileException> => {
+	private static def parse(this, root : Node, namespace : List<String>, name : String) : Result<Node, CompileException> => {
 		try 
 		{
 			let mut relativizedDebug = createDebug(namespace);
@@ -119,10 +119,10 @@ export class def Main() => {
 			return Err(e);
 		}
 	}
-	private static def computeNamespace(relativized : Path) : List<String> => {
+	private static def computeNamespace(this, relativized : Path) : List<String> => {
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
-	private static def createDebug(namespace : List<String>) : Path => {
+	private static def createDebug(this, namespace : List<String>) : Path => {
 		let mut relativizedDebug = DEBUG_DIRECTORY;
 		for(s : String in namespace){
 			relativizedDebug=relativizedDebug.resolve(s);
@@ -131,7 +131,7 @@ export class def Main() => {
 		createDirectory(relativizedDebug);
 		return relativizedDebug;
 	}
-	private static def writeError(err : Error_) : Err<Node, CompileException> => {
+	private static def writeError(this, err : Error_) : Err<Node, CompileException> => {
 		try 
 		{
 			let mut result = print(err, 0);
@@ -142,7 +142,7 @@ export class def Main() => {
 			return Err(e);
 		}
 	}
-	private static def readImpl(source : Path) : String => {
+	private static def readImpl(this, source : Path) : String => {
 		try 
 		{
 			return Files.readString(source);
@@ -151,7 +151,7 @@ export class def Main() => {
 			throw CompileException("Failed to read input: "+source, e);
 		}
 	}
-	private static def createDirectory(targetParent : Path) : Path => {
+	private static def createDirectory(this, targetParent : Path) : Path => {
 		try 
 		{
 			return Files.createDirectories(targetParent);
@@ -160,7 +160,7 @@ export class def Main() => {
 			throw CompileException("Failed to make parent.", e);
 		}
 	}
-	private static def writeImpl(target : Path, csq : String) : void => {
+	private static def writeImpl(this, target : Path, csq : String) : void => {
 		try 
 		{
 			Files.writeString(target, csq);
@@ -169,7 +169,7 @@ export class def Main() => {
 			throw CompileException("Cannot write.", e);
 		}
 	}
-	private static def print(error : Error_, depth : int) : String => {
+	private static def print(this, error : Error_, depth : int) : String => {
 		let mut context = formatContext(error, depth);
 		let mut anyMessage = error.findMessage();
 		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
@@ -195,7 +195,7 @@ export class def Main() => {
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	private static def formatContext(e : Error_, depth : int) : String => {
+	private static def formatContext(this, e : Error_, depth : int) : String => {
 		let mut actualContext = e.findContext().orElse("");
 		if(e.findCauses().isPresent())
 		return actualContext;
