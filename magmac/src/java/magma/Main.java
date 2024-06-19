@@ -58,7 +58,7 @@ public class Main {
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
             var generated = Results.unwrap(new JavaToMagmaGenerator()
-                    .generate(entry.getValue(), new State(-1))
+                    .generate(entry.getValue(), new State())
                     .mapErr(error -> {
                         writeError(error);
                         return new CompileException(error.findMessage().orElse(""));

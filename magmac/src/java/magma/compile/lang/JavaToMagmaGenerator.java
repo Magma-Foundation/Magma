@@ -6,7 +6,6 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
-import magma.compile.Error_;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 
@@ -65,7 +64,7 @@ public class JavaToMagmaGenerator extends Generator {
         }, () -> List.of("def"));
     }
 
-    private static Optional<Result<Tuple<Node, State>, Error_>> replaceConcreteWithFunction(Node node, State depth) {
+    private static Result<Tuple<Node, State>, Error_> replaceConcreteWithFunction(Node node, State depth) {
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
         var oldModifiers = node.findStringList("modifiers").orElseThrow();
         var newModifiers = computeAccess(oldModifiers);
@@ -85,7 +84,7 @@ public class JavaToMagmaGenerator extends Generator {
                 .remove("type-params")
                 .withNode("definition", withMaybeTypeParams);
 
-        return Optional.of(new Ok<>(new Tuple<>(function, depth)));
+        return new Ok<>(new Tuple<>(function, depth));
     }
 
     private static ArrayList<String> computeAccess(List<String> oldModifiers) {
@@ -170,7 +169,7 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Result<Tuple<Node, State>, Error_>> postVisitBlock(Node node, State state) {
         if (!node.is("block")) return Optional.empty();
 
-        var depth = state.depth();
+        var depth = state.computeDepth();
         var prefix = "\n" + "\t".repeat(depth);
         var newBlock = node
                 .mapNodes("children", children -> attachFormatting(children, prefix))
@@ -248,10 +247,25 @@ public class JavaToMagmaGenerator extends Generator {
         return Optional.of(new Ok<>(new Tuple<>(node.retype("access"), depth)));
     }
 
-    private Optional<Result<Tuple<Node, State>, Error_>> replaceRecordWithFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, Error_>> replaceRecordWithFunction(Node node, State state) {
         if (!node.is("record")) return Optional.empty();
 
-        return replaceConcreteWithFunction(node, depth);
+        var params = node.findNodeList("params").orElse(Collections.emptyList());
+        Result<State, Error_> next = new Ok<>(state);
+        for (Node param : params) {
+            if (!param.is("definition")) {
+                return Optional.of(new Err<>(new CompileError("Not a definition.", param.toString())));
+            }
+
+            var name = param.findString("name");
+            if (name.isEmpty()) {
+                return Optional.of(new Err<>(new CompileError("Definition has no name.", param.toString())));
+            }
+
+            next = next.flatMapValue(inner -> inner.define(name.get()));
+        }
+
+        return Optional.of(next.flatMapValue(inner -> replaceConcreteWithFunction(node, inner)));
     }
 
     private Optional<Result<Tuple<Node, State>, Error_>> replaceInterfaceWithStruct(Node node, State depth) {
@@ -333,7 +347,7 @@ public class JavaToMagmaGenerator extends Generator {
         if (oldModifiers.contains("abstract")) {
             return replaceAbstractClassWithDefinition(node, depth);
         } else {
-            return replaceConcreteWithFunction(node, depth);
+            return Optional.of(replaceConcreteWithFunction(node, depth));
         }
     }
 
