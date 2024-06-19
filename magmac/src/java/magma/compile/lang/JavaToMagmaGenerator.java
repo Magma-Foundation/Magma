@@ -231,7 +231,7 @@ public class JavaToMagmaGenerator extends Generator {
     }
 
     private Optional<Tuple<Node, State>> replaceInterfaceWithStruct(Node node, State depth) {
-        if (!node.is("Stateerface")) return Optional.empty();
+        if (!node.is("interface")) return Optional.empty();
 
         return Optional.of(new Tuple<>(node.retype("struct"), depth));
     }

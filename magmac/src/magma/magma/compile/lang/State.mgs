@@ -1,0 +1,9 @@
+
+export class def State(depth : int) => {
+	public def exit(this) : State => {
+		return State(depth-1);
+	}
+	public def enter(this) : State => {
+		return State(depth+1);
+	}
+}
