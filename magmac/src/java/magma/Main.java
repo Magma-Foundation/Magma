@@ -61,7 +61,7 @@ public class Main {
                     .generate(entry.getValue(), new State(-1))
                     .mapErr(error -> {
                         writeError(error);
-                        return new CompileException(error.message());
+                        return new CompileException(error.findMessage().orElse(""));
                     }));
 
             var relativizedDebug = createDebug(namespace);
