@@ -4,7 +4,6 @@ import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.Generator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -48,7 +47,7 @@ export class def Main() => {
 			let mut namespace = location.subList(0, location.size()-1);
 			let mut name = location.get(location.size()-1);
 			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
-			let mut generated = generate(entry.getValue());
+			let mut generated = JavaToMagmaGenerator().generate(entry.getValue(), -1);
 			let mut relativizedDebug = createDebug(namespace);
 			writeImpl(relativizedDebug.resolve(name+".output.ast"), generated.toString());
 			targetTrees.put(location, generated);
@@ -203,13 +202,5 @@ export class def Main() => {
 		let mut spacing = " ".repeat(depth+1);
 		let mut formatted = actualContext.replace("\n", "\n" + " ".repeat(depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
-	}
-	private static def generate(root : Node) : Node => {
-		let mut list = List.of(JavaToMagmaGenerator());
-		let mut acc : Node = root;
-		for(generator : Generator in list){
-			acc=generator.generate(acc, -1);
-		}
-		return acc;
 	}
 }

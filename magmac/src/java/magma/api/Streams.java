@@ -6,7 +6,7 @@ import java.util.Optional;
 public class Streams {
 
     public static <T> Stream<T> fromNativeList(List<T> list) {
-        return new AbstractStream<T>() {
+        return new AbstractStream<T>(new Head<T>() {
             private int counter = 0;
 
             @Override
@@ -16,6 +16,6 @@ public class Streams {
                 counter++;
                 return Optional.of(next);
             }
-        };
+        });
     }
 }

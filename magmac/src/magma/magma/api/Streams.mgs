@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.Optional;
 export class def Streams() => {
 	public static def fromNativeList<T>(list : List<T>) : Stream<T> => {
-		return AbstractStream((() => {
+		return AbstractStream(Head((() => {
 			private let mut counter : int = 0;
 			return {
 				public def head() : Optional<T> => {
@@ -14,6 +14,6 @@ export class def Streams() => {
 					return Optional.of(next);
 				}
 			};
-		})())();
+		})())());
 	}
 }

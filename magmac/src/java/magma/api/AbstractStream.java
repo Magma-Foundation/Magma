@@ -3,15 +3,16 @@ package magma.api;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class AbstractStream<T> implements Stream<T> {
+public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
+    @Override
+    public Optional<T> head() {
+        return this.provider.head();
+    }
+
     @Override
     public <R> Stream<R> map(Function<T, R> mapper) {
-        return new AbstractStream<R>() {
-            @Override
-            public Optional<R> head() {
-                return AbstractStream.this.head().map(mapper);
-            }
-        };
+        var outer = this.provider;
+        return new AbstractStream<>(() -> outer.head().map(mapper));
     }
 
     @Override
