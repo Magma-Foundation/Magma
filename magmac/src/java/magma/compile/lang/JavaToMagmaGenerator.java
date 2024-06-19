@@ -1,6 +1,7 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileError;
@@ -130,7 +131,19 @@ public class JavaToMagmaGenerator extends Generator {
         return postVisitFunction(node, depth)
                 .or(() -> postVisitBlock(node, depth))
                 .or(() -> postVisitDeclaration(node, depth))
+                .or(() -> postVisitSymbol(node, depth))
                 .orElse(new Ok<>(new Tuple<>(node, depth)));
+    }
+
+    private Optional<? extends Result<Tuple<Node, State>, CompileError>> postVisitSymbol(Node node, State state) {
+        if (!node.is("symbol")) return Optional.empty();
+
+        var value = node.findString("value").orElseThrow();
+        if (state.isDefined(value)) {
+            return Optional.of(new Ok<>(new Tuple<>(node, state)));
+        } else {
+            return Optional.of(new Err<>(new CompileError("Value is not defined.", value)));
+        }
     }
 
     private Optional<Result<Tuple<Node, State>, CompileError>> postVisitDeclaration(Node node, State depth) {

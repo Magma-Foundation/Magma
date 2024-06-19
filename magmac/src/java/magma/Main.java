@@ -59,7 +59,10 @@ public class Main {
 
             var generated = Results.unwrap(new JavaToMagmaGenerator()
                     .generate(entry.getValue(), new State(-1))
-                    .mapErr(error -> new CompileException(error.message())));
+                    .mapErr(error -> {
+                        writeError(error);
+                        return new CompileException(error.message());
+                    }));
 
             var relativizedDebug = createDebug(namespace);
             writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
@@ -237,7 +240,7 @@ public class Main {
         if (e.findCauses().isPresent()) return actualContext;
 
         var spacing = " ".repeat(depth + 1);
-        var formatted = actualContext.replace("\n", "\n" + " ".repeat(depth - 1));
+        var formatted = actualContext.replace("\n", "\n" + " ".repeat(depth == 0 ? 0 : depth - 1));
         return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
     }
 

@@ -8,4 +8,8 @@ public record State(int depth) {
     public State enter() {
         return new State(depth + 1);
     }
+
+    public boolean isDefined(String value) {
+        return false;
+    }
 }
