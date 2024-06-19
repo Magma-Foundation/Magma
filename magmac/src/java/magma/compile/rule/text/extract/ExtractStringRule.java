@@ -1,7 +1,7 @@
 package magma.compile.rule.text.extract;
 
-import magma.api.Ok;
-import magma.api.Result;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;

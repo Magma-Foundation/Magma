@@ -1,8 +1,8 @@
 package magma.compile.rule.result;
 
-import magma.api.Err;
-import magma.api.Ok;
-import magma.api.Result;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;

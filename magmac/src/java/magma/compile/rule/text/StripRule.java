@@ -1,6 +1,6 @@
 package magma.compile.rule.text;
 
-import magma.api.Result;
+import magma.api.result.Result;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;

@@ -1,6 +1,6 @@
 package magma.compile.rule.split;
 
-import magma.api.Result;
+import magma.api.result.Result;
 import magma.api.Tuple;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;

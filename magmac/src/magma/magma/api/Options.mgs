@@ -1,7 +1,0 @@
-
-import java.util.Optional;
-export class def Options() => {
-	public static def toTuple<C>(this, optional : Optional<C>, other : C) : Tuple<Boolean, C> => {
-		return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));
-	}
-}

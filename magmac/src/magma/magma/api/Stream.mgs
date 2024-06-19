@@ -1,9 +1,0 @@
-
-import java.util.Optional;
-import java.util.function.Function;
-public struct Stream {
-	
-	map<R> : Stream<R>;
-	
-	collect<C> : C;
-}
