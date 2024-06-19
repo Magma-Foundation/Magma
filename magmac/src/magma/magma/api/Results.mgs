@@ -1,5 +1,5 @@
 
-public class def Results() => {
+export class def Results() => {
 	public static def unwrap<T, E extends Throwable>(result : Result<T, E>) : T => {
 		let mut value = result.findValue();
 		if(value.isPresent())

@@ -15,7 +15,7 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
-public class def MagmaLang() => {
+export class def MagmaLang() => {
 	public static def createRootRule() : Rule => {
 		let mut statement = LazyRule();
 		let mut value = LazyRule();

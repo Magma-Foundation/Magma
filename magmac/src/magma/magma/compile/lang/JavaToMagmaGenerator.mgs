@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-public class def JavaToMagmaGenerator() => {
+export class def JavaToMagmaGenerator() => {
 	private static def preVisitBlock(node : Node, depth : int) : Optional<Tuple<Node, Integer>> => {
 		if(!node.is("block"))
 		return Optional.empty();
@@ -165,7 +165,11 @@ public class def JavaToMagmaGenerator() => {
 		return Optional.empty();
 		let mut name = node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
 		let mut modifiers = node.findStringList("modifiers").orElseThrow();
-		let mut newModifiers = ArrayList(modifiers);
+		let mut newModifiers = ArrayList();
+		if(modifiers.contains("public"))
+		{
+			newModifiers.add("export");
+		}
 		newModifiers.add("class");
 		let mut definition = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
 		let mut function = node.retype("function").withNode("definition", definition);

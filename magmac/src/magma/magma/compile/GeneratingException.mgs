@@ -1,5 +1,5 @@
 
-public class def GeneratingException() => {
+export class def GeneratingException() => {
 	public final content : String;
 	def GeneratingException(message : String) : public => {
 		super(message);

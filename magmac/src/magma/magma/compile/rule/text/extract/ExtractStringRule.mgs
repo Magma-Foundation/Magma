@@ -5,7 +5,7 @@ import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;
 import java.util.Optional;
-public final class def ExtractStringRule() => {
+export class def ExtractStringRule() => {
 	def ExtractStringRule(key : String) : public => {
 		super(key);
 	}

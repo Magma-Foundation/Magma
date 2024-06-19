@@ -17,7 +17,7 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-public final class def SplitMultipleRule() => {
+export class def SplitMultipleRule() => {
 	private final propertyKey : String;
 	private final childRule : Rule;
 	private final splitter : Splitter;

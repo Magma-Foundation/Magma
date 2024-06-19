@@ -1,5 +1,5 @@
 
-public class def CompileException() => {
+export class def CompileException() => {
 	def CompileException(message : String, cause : Throwable) : public => {
 		super(message, cause);
 	}

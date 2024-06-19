@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-public class def MembersSplitter() => {
+export class def MembersSplitter() => {
 	public def split(input : String) : List<String> => {
 		let mut current = State();
 		let mut queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));

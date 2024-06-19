@@ -8,7 +8,7 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
-public class def Generator() => {
+export class def Generator() => {
 	private def generateAttribute(attribute : Attribute, depth : int) : Tuple<Attribute, Integer> => {
 		let mut nodeList = attribute.asNodeList();
 		if(nodeList.isPresent())

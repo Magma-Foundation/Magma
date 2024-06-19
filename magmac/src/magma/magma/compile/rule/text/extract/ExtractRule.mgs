@@ -12,7 +12,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
-public abstract class def ExtractRule() => {
+export class def ExtractRule() => {
 	protected final key : String;
 	def ExtractRule(key : String) : public => {
 		this=key;

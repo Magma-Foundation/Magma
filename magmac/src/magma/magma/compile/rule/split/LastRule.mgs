@@ -2,7 +2,7 @@
 import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
 import java.util.Optional;
-public final class def LastRule() => {
+export class def LastRule() => {
 	def LastRule(leftRule : Rule, slice : String, rightRule : Rule) : public => {
 		super(leftRule, slice, rightRule);
 	}

@@ -1,7 +1,7 @@
 
 import magma.compile.Error_;
 import java.util.Optional;
-public final class def SimpleExtractStringListRule() => {
+export class def SimpleExtractStringListRule() => {
 	def SimpleExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key, delimiter);
 	}

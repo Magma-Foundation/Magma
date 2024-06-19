@@ -221,11 +221,12 @@ public class JavaToMagmaGenerator extends Generator {
         if (!node.is("class")) return Optional.empty();
 
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
+        var modifiers = node.findStringList("modifiers").orElseThrow();
+        var newModifiers = new ArrayList<String>();
+        if (modifiers.contains("public")) {
+            newModifiers.add("export");
+        }
 
-        var modifiers = node.findStringList("modifiers")
-                .orElseThrow();
-
-        var newModifiers = new ArrayList<>(modifiers);
         newModifiers.add("class");
 
         var definition = node.clear("definition")

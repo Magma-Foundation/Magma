@@ -1,5 +1,5 @@
 
-public final class def NumberRule() => {
+export class def NumberRule() => {
 	def NumberRule(child : Rule) : public => {
 		super(child);
 	}

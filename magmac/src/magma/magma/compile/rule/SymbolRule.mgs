@@ -1,5 +1,5 @@
 
-public final class def SymbolRule() => {
+export class def SymbolRule() => {
 	def SymbolRule(child : Rule) : public => {
 		super(child);
 	}

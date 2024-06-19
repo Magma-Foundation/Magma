@@ -6,7 +6,7 @@ import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import java.util.Optional;
-public class def LazyRule() => {
+export class def LazyRule() => {
 	private child : Optional<Rule>;
 	def LazyRule() : public => {
 		this=Optional.empty();

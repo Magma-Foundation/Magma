@@ -2,7 +2,7 @@
 import magma.compile.Error_;
 import magma.compile.rule.Rule;
 import java.util.Optional;
-public final class def QualifiedExtractStringListRule() => {
+export class def QualifiedExtractStringListRule() => {
 	private final qualifier : Rule;
 	def QualifiedExtractStringListRule(key : String, delimiter : String, qualifier : Rule) : public => {
 		super(key, delimiter);

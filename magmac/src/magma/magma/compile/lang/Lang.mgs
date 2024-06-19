@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-public class def Lang() => {
+export class def Lang() => {
 	static def createBlock(member : Rule) : Rule => {
 		return StripRule(TypeRule("block", createMembersRule(member)), "before-content", "after-content");
 	}
@@ -188,7 +188,7 @@ public class def Lang() => {
 	static def createKeywordRule(keyword : String) : TypeRule => {
 		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	}
-	private static class def OperatorFinderRule() => {
+	class def OperatorFinderRule() => {
 		def OperatorFinderRule(value : Rule, slice : String) : public => {
 			super(StripRule(ExtractNodeRule("leftRule", value)), slice, StripRule(ExtractNodeRule("right", value)));
 		}

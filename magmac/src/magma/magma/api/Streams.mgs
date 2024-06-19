@@ -1,7 +1,7 @@
 
 import java.util.List;
 import java.util.Optional;
-public class def Streams() => {
+export class def Streams() => {
 	public static def fromNativeList<T>(list : List<T>) : Stream<T> => {
 		return AbstractStream((() => {
 			let mut counter : int = 0;
