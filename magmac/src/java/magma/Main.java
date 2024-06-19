@@ -5,7 +5,6 @@ import magma.api.Ok;
 import magma.api.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.Generator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -56,7 +55,7 @@ public class Main {
             var name = location.get(location.size() - 1);
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = generate(entry.getValue());
+            var generated = new JavaToMagmaGenerator().generate(entry.getValue(), -1);
             var relativizedDebug = createDebug(namespace);
             writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
             targetTrees.put(location, generated);
@@ -237,15 +236,4 @@ public class Main {
         return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
     }
 
-    private static Node generate(Node root) {
-        var list = List.of(
-                new JavaToMagmaGenerator()
-        );
-
-        Node acc = root;
-        for (Generator generator : list) {
-            acc = generator.generate(acc, -1);
-        }
-        return acc;
-    }
 }
