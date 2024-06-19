@@ -1,7 +1,7 @@
 
 import java.util.Optional;
 import java.util.function.Function;
-() => {
+export class def Ok<T, E>(value : T) => {
 	public def findValue() : Optional<T> => {
 		return Optional.of(value);
 	}

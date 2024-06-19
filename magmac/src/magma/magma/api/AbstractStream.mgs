@@ -1,7 +1,7 @@
 
 import java.util.Optional;
 import java.util.function.Function;
-() => {
+export class def AbstractStream<T>(provider : Head<T>) => {
 	public def head() : Optional<T> => {
 		return this.provider.head();
 	}

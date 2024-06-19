@@ -9,7 +9,7 @@ import magma.compile.rule.result.RuleResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-() => {
+export class def OrRule(rules : List<Rule>) => {
 	private static def toError(results : List<Result<String, Error_>>) : Err<String, Error_> => {
 		return Err(MultipleError(results.stream().map(Result.findErr).flatMap(Optional.stream).toList()));
 	}

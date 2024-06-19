@@ -11,7 +11,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
-() => {
+export class def ExtractNodeRule(propertyKey : String, child : Rule) => {
 	public def toNode(input : String) : RuleResult => {
 		let mut node = child.toNode(input);
 		if(node.findError().isPresent())

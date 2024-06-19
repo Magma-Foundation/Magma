@@ -6,7 +6,7 @@ import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-() => {
+export class def TypeRule(type : String, child : Rule) => {
 	public static final let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
 	public def toNode(input : String) : RuleResult => {
 		let mut result = child.toNode(input);

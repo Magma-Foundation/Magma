@@ -6,7 +6,7 @@ import magma.compile.attribute.Attribute;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
-() => {
+export class def StripRule(child : Rule, left : String, right : String) => {
 	public static final let DEFAULT_LEFT : String = "left";
 	public static final let DEFAULT_RIGHT : String = "right";
 	def StripRule(child : Rule) : public => {
