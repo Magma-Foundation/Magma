@@ -64,7 +64,7 @@ public class Lang {
         type.setRule(new OrRule(List.of(
                 new TypeRule("array", new RightRule(new ExtractNodeRule("child", type), "[]")),
                 generic,
-                new TypeRule("symbol", new StripRule(new SymbolRule(new ExtractStringRule("value")))),
+                new TypeRule("placeholder", new StripRule(new SymbolRule(new ExtractStringRule("value")))),
                 new TypeRule("access", new LastRule(new ExtractNodeRule("parent", type), ".", new ExtractStringRule("member"))),
                 createFunctionType(type)
         )));
@@ -256,7 +256,7 @@ public class Lang {
 
     static SplitMultipleRule createTypeParamsRule() {
         var typeParam = new LazyRule();
-        var symbol = new TypeRule("symbol", new StripRule(new SymbolRule(new ExtractStringRule("value"))));
+        var symbol = new TypeRule("symbol-type", new StripRule(new SymbolRule(new ExtractStringRule("value"))));
         var extendsRule = new TypeRule("extends", new StripRule(new FirstRule(new ExtractStringRule("name"), " extends ", new ExtractNodeRule("child", typeParam))));
 
         typeParam.setRule(new OrRule(List.of(

@@ -3,13 +3,7 @@ package magma.api.option;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Some<T> implements Option<T> {
-    private final T value;
-
-    public Some(T value) {
-        this.value = value;
-    }
-
+public record Some<T>(T value) implements Option<T> {
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
         return new Some<>(mapper.apply(value));
