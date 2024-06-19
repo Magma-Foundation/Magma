@@ -1,19 +1,27 @@
 
 import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
 import magma.java.JavaOptionals;
-import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 export class def AbstractStream<T>(provider : Head<T>) => {
+	public def foldRightToResult<R, E>(this, initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => {
+		return this.fold(Ok.from(initial), (reResult, t)->reResult.flatMapValue(() => mapper.apply(inner, t)));
+	}
 	public def map<R>(this, mapper : (T) => R) : Stream<R> => {
 		let mut outer = this.provider;
 		return AbstractStream(() => outer.head().map(mapper));
 	}
 	public def collect<C>(this, collector : Collector<T, C>) : C => {
 		let mut current = collector.createInitial();
+		return fold(current, collector.fold);
+	}
+	private def fold<C>(this, current : C, folder : BiFunction<C, T, C>) : C => {
 		while(true)
 		{
 			let mut finalCurrent : C = current;
-			let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => collector.fold(finalCurrent, head)), current);
+			let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
 			if(tuple.left())
 			{
 				current=tuple.right();

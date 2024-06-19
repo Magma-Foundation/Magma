@@ -1,5 +1,7 @@
 
 import magma.api.option.Option;
+import magma.api.result.Result;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 public struct Stream {
 	
@@ -7,4 +9,6 @@ public struct Stream {
 	
 	collect<C> : C;
 	head : Option<T>;
+	
+	foldRightToResult<R, E> : Result<R, E>;
 }

@@ -4,6 +4,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record Ok<T, E>(T value) implements Result<T, E> {
+    public static <E, R> Result<R, E> from(R value) {
+        return new Ok<>(value);
+    }
+
     @Override
     public Optional<T> findValue() {
         return Optional.of(value);

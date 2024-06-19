@@ -2,6 +2,9 @@
 import java.util.Optional;
 import java.util.function.Function;
 export class def Ok<T, E>(value : T) => {
+	public static def from<E, R>(this, value : R) : Result<R, E> => {
+		return Ok(value);
+	}
 	public def findValue(this) : Optional<T> => {
 		return Optional.of(value);
 	}

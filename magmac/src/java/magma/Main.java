@@ -3,6 +3,7 @@ package magma;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
+import magma.api.result.Results;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.lang.JavaLang;
@@ -56,7 +57,10 @@ public class Main {
             var name = location.get(location.size() - 1);
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = new JavaToMagmaGenerator().generate(entry.getValue(), new State(-1));
+            var generated = Results.unwrap(new JavaToMagmaGenerator()
+                    .generate(entry.getValue(), new State(-1))
+                    .mapErr(error -> new CompileException(error.message())));
+
             var relativizedDebug = createDebug(namespace);
             writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
             targetTrees.put(location, generated);

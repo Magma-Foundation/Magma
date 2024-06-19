@@ -1,5 +1,9 @@
 
 import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.api.stream.Streams;
+import magma.compile.CompileError;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
@@ -9,41 +13,38 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
 export class def Generator() => {
-	private def generateAttribute(this, attribute : Attribute, depth : State) : Tuple<Attribute, State> => {
+	private def generateAttribute(this, attribute : Attribute, state : State) : Result<Tuple<Attribute, State>, CompileError> => {
 		let mut nodeList = attribute.asNodeList();
 		if(nodeList.isPresent())
 		{
-			let mut list = ArrayList();
-			let mut current = depth;
-			for(node : var in nodeList.get()){
-				let mut nodeIntegerTuple = generateWithDepth(node, current);
-				list.add(nodeIntegerTuple.left());
-				current=nodeIntegerTuple.right();
-			}
-			return Tuple(NodeListAttribute(list), current);
+			let mut initial = Tuple(ArrayList(), state);
+			return Streams.fromNativeList(nodeList.get()).foldRightToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(NodeListAttribute.new));
 		}
-		return attribute.asNode().map(() => getAttributeIntegerTuple(depth, value)).orElseGet(() => Tuple(attribute, depth));
+		return attribute.asNode().map(() => generateWithState(value, state).mapValue(() => inner.<Attribute>mapLeft(NodeAttribute.new))).orElseGet(() => Ok(Tuple(attribute, state)));
 	}
-	private def getAttributeIntegerTuple(this, depth : State, value : Node) : Tuple<Attribute, State> => {
-		return generateWithDepth(value, depth).mapLeft(NodeAttribute.new);
+	private def generateThenFold(this, current : Tuple<List<Node>, State>, node : Node) : Result<Tuple<List<Node>, State>, CompileError> => {
+		return generateWithState(node, current.right()).mapValue(() => {
+			let mut newNode = tuple.left();
+			let mut newState = tuple.right();
+			let mut list = current.left();
+			list.add(newNode);
+			return Tuple(list, newState);
+		});
 	}
-	public def generate(this, node : Node, state : State) : Node => {
-		return generateWithDepth(node, state).left();
+	public def generate(this, node : Node, state : State) : Result<Node, CompileError> => {
+		return generateWithState(node, state).mapValue(Tuple.left);
 	}
-	private def generateWithDepth(this, node : Node, depth : State) : Tuple<Node, State> => {
+	private def generateWithState(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
 		let mut preVisitedTuple = preVisit(node, depth);
 		let mut preVisited = preVisitedTuple.left();
 		let mut preVisitedAttributes = preVisited.attributes().streamEntries().toList();
-		let mut newAttributes : Attributes = MapAttributes();
-		let mut current = preVisitedTuple.right();
-		for(preVisitedAttribute : var in preVisitedAttributes){
-			let mut key = preVisitedAttribute.left();
-			let mut value = preVisitedAttribute.right();
-			let mut newTuple = generateAttribute(value, current);
-			newAttributes=newAttributes.with(key, newTuple.left());
-			current=newTuple.right();
-		}
-		return postVisit(preVisited.withAttributes(newAttributes), current);
+		let mut preVisitedState = preVisitedTuple.right();
+		return Streams.fromNativeList(preVisitedAttributes).foldRightToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).mapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+	}
+	private def generateAttributeWithState(this, current : Tuple<Attributes, State>, next : Tuple<String, Attribute>) : Result<Tuple<Attributes, State>, CompileError> => {
+		let mut key = next.left();
+		let mut value = next.right();
+		return generateAttribute(value, current.right()).mapValue(() => Tuple(current.left().with(key, inner.left()), inner.right()));
 	}
 	protected def preVisit(this, node : Node, depth : State) : Tuple<Node, State> => {
 		return Tuple(node, depth);
