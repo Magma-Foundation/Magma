@@ -61,7 +61,7 @@ public class Main {
                     .generate(entry.getValue(), new State())
                     .mapErr(error -> {
                         writeError(error);
-                        return new CompileException(error.findMessage().orElse(""));
+                        return new CompileException("Failed to generate: " + String.join(".", location));
                     }));
 
             var relativizedDebug = createDebug(namespace);
