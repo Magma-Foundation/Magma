@@ -35,21 +35,22 @@ export class def Generator() => {
 		return generateWithState(node, state).mapValue(Tuple.left);
 	}
 	private def generateWithState(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
-		let mut preVisitedTuple = preVisit(node, depth);
-		let mut preVisited = preVisitedTuple.left();
-		let mut preVisitedAttributes = preVisited.attributes().streamEntries().toList();
-		let mut preVisitedState = preVisitedTuple.right();
-		return Streams.fromNativeList(preVisitedAttributes).foldRightToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).mapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+		return preVisit(node, depth).flatMapValue(() => {
+			let mut preVisited = preVisitedTuple.left();
+			let mut preVisitedAttributes = preVisited.attributes().streamEntries().toList();
+			let mut preVisitedState = preVisitedTuple.right();
+			return Streams.fromNativeList(preVisitedAttributes).foldRightToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).flatMapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+		});
 	}
 	private def generateAttributeWithState(this, current : Tuple<Attributes, State>, next : Tuple<String, Attribute>) : Result<Tuple<Attributes, State>, CompileError> => {
 		let mut key = next.left();
 		let mut value = next.right();
 		return generateAttribute(value, current.right()).mapValue(() => Tuple(current.left().with(key, inner.left()), inner.right()));
 	}
-	protected def preVisit(this, node : Node, depth : State) : Tuple<Node, State> => {
-		return Tuple(node, depth);
+	protected def preVisit(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
+		return Ok(Tuple(node, depth));
 	}
-	protected def postVisit(this, node : Node, depth : State) : Tuple<Node, State> => {
-		return Tuple(node, depth);
+	protected def postVisit(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
+		return Ok(Tuple(node, depth));
 	}
 }

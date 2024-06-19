@@ -1,6 +1,9 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 
@@ -10,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class JavaToMagmaGenerator extends Generator {
-    private static Optional<Tuple<Node, State>> preVisitBlock(Node node, State state) {
+    private static Optional<Result<Tuple<Node, State>, CompileError>> preVisitBlock(Node node, State state) {
         if (!node.is("block")) return Optional.empty();
 
         var newBlock = node.mapNodes("children", JavaToMagmaGenerator::removePackagesFromList);
-        return Optional.of(new Tuple<>(newBlock, state.enter()));
+        return Optional.of(new Ok<>(new Tuple<>(newBlock, state.enter())));
     }
 
     private static List<Node> removePackagesFromList(List<Node> children) {
@@ -59,7 +62,7 @@ public class JavaToMagmaGenerator extends Generator {
         }, () -> List.of("def"));
     }
 
-    private static Optional<Tuple<Node, State>> replaceConcreteWithFunction(Node node, State depth) {
+    private static Optional<Result<Tuple<Node, State>, CompileError>> replaceConcreteWithFunction(Node node, State depth) {
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
         var oldModifiers = node.findStringList("modifiers").orElseThrow();
         var newModifiers = computeAccess(oldModifiers);
@@ -79,7 +82,7 @@ public class JavaToMagmaGenerator extends Generator {
                 .remove("type-params")
                 .withNode("definition", withMaybeTypeParams);
 
-        return Optional.of(new Tuple<>(function, depth));
+        return Optional.of(new Ok<>(new Tuple<>(function, depth)));
     }
 
     private static ArrayList<String> computeAccess(List<String> oldModifiers) {
@@ -90,7 +93,7 @@ public class JavaToMagmaGenerator extends Generator {
         return newModifiers;
     }
 
-    private static Optional<Tuple<Node, State>> replaceAbstractClassWithDefinition(Node node, State depth) {
+    private static Optional<Result<Tuple<Node, State>, CompileError>> replaceAbstractClassWithDefinition(Node node, State depth) {
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
         var oldModifiers = node.findStringList("modifiers").orElseThrow();
         var newModifiers = computeAccess(oldModifiers);
@@ -119,25 +122,24 @@ public class JavaToMagmaGenerator extends Generator {
                 .withNode("definition", withTypeParams)
                 .withNode("value", assigneeValue);
 
-        return Optional.of(new Tuple<>(declaration, depth));
+        return Optional.of(new Ok<>(new Tuple<>(declaration, depth)));
     }
 
     @Override
-    protected Tuple<Node, State> postVisit(Node node, State depth) {
+    protected Result<Tuple<Node, State>, CompileError> postVisit(Node node, State depth) {
         return postVisitFunction(node, depth)
                 .or(() -> postVisitBlock(node, depth))
                 .or(() -> postVisitDeclaration(node, depth))
-                .orElse(new Tuple<>(node, depth));
+                .orElse(new Ok<>(new Tuple<>(node, depth)));
     }
 
-    private Optional<? extends Tuple<Node, State>> postVisitDeclaration(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> postVisitDeclaration(Node node, State depth) {
         if (!node.is("declaration")) return Optional.empty();
 
         var withMutator = attachMutator(node);
-
-        return Optional.of(new Tuple<>(withMutator
+        return Optional.of(new Ok<>(new Tuple<>(withMutator
                 .withString("after-definition", " ")
-                .withString("after-value-separator", " "), depth));
+                .withString("after-value-separator", " "), depth)));
     }
 
     private Node attachMutator(Node node) {
@@ -150,7 +152,7 @@ public class JavaToMagmaGenerator extends Generator {
         });
     }
 
-    private Optional<Tuple<Node, State>> postVisitBlock(Node node, State state) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> postVisitBlock(Node node, State state) {
         if (!node.is("block")) return Optional.empty();
 
         var depth = state.depth();
@@ -159,26 +161,26 @@ public class JavaToMagmaGenerator extends Generator {
                 .mapNodes("children", children -> attachFormatting(children, prefix))
                 .withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));
 
-        return Optional.of(new Tuple<>(newBlock, state.exit()));
+        return Optional.of(new Ok<>(new Tuple<>(newBlock, state.exit())));
     }
 
-    private Optional<Tuple<Node, State>> postVisitFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> postVisitFunction(Node node, State depth) {
         if (!node.is("function")) return Optional.empty();
         var oldDefinition = node.findNode("definition");
 
         if (oldDefinition.isEmpty()) return Optional.empty();
         var params = node.findNodeList("params").orElse(Collections.emptyList());
 
-        if (!node.has("child")) return Optional.of(new Tuple<>(oldDefinition.get(), depth));
+        if (!node.has("child")) return Optional.of(new Ok<>(new Tuple<>(oldDefinition.get(), depth)));
 
         var withParams = oldDefinition.get().withNodeList("params", params);
         var newDefinition = withParams.has("name") ? attachModifiers(withParams) : withParams;
 
-        return Optional.of(new Tuple<>(node.withNode("definition", newDefinition), depth));
+        return Optional.of(new Ok<>(new Tuple<>(node.withNode("definition", newDefinition), depth)));
     }
 
     @Override
-    protected Tuple<Node, State> preVisit(Node node, State depth) {
+    protected Result<Tuple<Node, State>, CompileError> preVisit(Node node, State depth) {
         return preVisitBlock(node, depth)
                 .or(() -> replaceClassWithFunction(node, depth))
                 .or(() -> replaceMethodWithFunction(node, depth))
@@ -189,17 +191,17 @@ public class JavaToMagmaGenerator extends Generator {
                 .or(() -> replaceMethodReferenceWithAccess(node, depth))
                 .or(() -> replaceGenericWithFunctionType(node, depth))
                 .or(() -> preVisitDeclaration(node, depth))
-                .orElse(new Tuple<>(node, depth));
+                .orElse(new Ok<>(new Tuple<>(node, depth)));
     }
 
-    private Optional<? extends Tuple<Node, State>> preVisitDeclaration(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> preVisitDeclaration(Node node, State depth) {
         if (!node.is("declaration")) return Optional.empty();
 
         var removed = removeType(node);
-        return Optional.of(new Tuple<>(removed, depth));
+        return Optional.of(new Ok<>(new Tuple<>(removed, depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceGenericWithFunctionType(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceGenericWithFunctionType(Node node, State depth) {
         if (!node.is("generic")) return Optional.empty();
 
         var parent = node.findString("parent").orElseThrow();
@@ -213,43 +215,43 @@ public class JavaToMagmaGenerator extends Generator {
             var from = children.get(0);
             var to = children.get(1);
 
-            return Optional.of(new Tuple<>(node.clear("function-type")
+            return Optional.of(new Ok<>(new Tuple<>(node.clear("function-type")
                     .withNodeList("params", List.of(from))
-                    .withNode("returns", to), depth));
-        } else if(parent.equals("Supplier")) {
+                    .withNode("returns", to), depth)));
+        } else if (parent.equals("Supplier")) {
             var returns = children.get(0);
             var returns1 = node.clear("function-type").withNode("returns", returns);
-            return Optional.of(new Tuple<>(returns1, depth));
+            return Optional.of(new Ok<>(new Tuple<>(returns1, depth)));
         }
 
-        return Optional.of(new Tuple<>(node, depth));
+        return Optional.of(new Ok<>(new Tuple<>(node, depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceMethodReferenceWithAccess(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceMethodReferenceWithAccess(Node node, State depth) {
         if (!node.is("method-reference")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("access"), depth));
+        return Optional.of(new Ok<>(new Tuple<>(node.retype("access"), depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceRecordWithFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceRecordWithFunction(Node node, State depth) {
         if (!node.is("record")) return Optional.empty();
 
         return replaceConcreteWithFunction(node, depth);
     }
 
-    private Optional<Tuple<Node, State>> replaceInterfaceWithStruct(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceInterfaceWithStruct(Node node, State depth) {
         if (!node.is("interface")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("struct"), depth));
+        return Optional.of(new Ok<>(new Tuple<>(node.retype("struct"), depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceLambdaWithFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceLambdaWithFunction(Node node, State depth) {
         if (!node.is("lambda")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("function"), depth));
+        return Optional.of(new Ok<>(new Tuple<>(node.retype("function"), depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceConstructorsWithInvocation(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceConstructorsWithInvocation(Node node, State depth) {
         if (!node.is("constructor")) return Optional.empty();
 
         var oldChildrenOptional = node.findNodeList("children");
@@ -284,15 +286,15 @@ public class JavaToMagmaGenerator extends Generator {
                     .remove("children")
                     .withNodeList("arguments", Collections.singletonList(lambda1));
 
-            return Optional.of(new Tuple<>(node.clear("invocation")
+            return Optional.of(new Ok<>(new Tuple<>(node.clear("invocation")
                     .withNode("caller", classCreator)
-                    .withNodeList("arguments", originalArguments), depth));
+                    .withNodeList("arguments", originalArguments), depth)));
         } else {
-            return Optional.of(new Tuple<>(node.retype("invocation"), depth));
+            return Optional.of(new Ok<>(new Tuple<>(node.retype("invocation"), depth)));
         }
     }
 
-    private Optional<Tuple<Node, State>> replaceMethodWithFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceMethodWithFunction(Node node, State depth) {
         if (!node.is("method")) return Optional.empty();
 
         var newFunction = node.retype("function").mapNodes("params", params -> {
@@ -306,10 +308,10 @@ public class JavaToMagmaGenerator extends Generator {
             return copy;
         });
 
-        return Optional.of(new Tuple<>(newFunction, depth));
+        return Optional.of(new Ok<>(new Tuple<>(newFunction, depth)));
     }
 
-    private Optional<Tuple<Node, State>> replaceClassWithFunction(Node node, State depth) {
+    private Optional<Result<Tuple<Node, State>, CompileError>> replaceClassWithFunction(Node node, State depth) {
         if (!node.is("class")) return Optional.empty();
 
         var oldModifiers = node.findStringList("modifiers").orElseThrow();

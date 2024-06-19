@@ -48,15 +48,15 @@ public class Generator {
     }
 
     private Result<Tuple<Node, State>, CompileError> generateWithState(Node node, State depth) {
-        var preVisitedTuple = preVisit(node, depth);
+        return preVisit(node, depth).flatMapValue(preVisitedTuple -> {
+            var preVisited = preVisitedTuple.left();
+            var preVisitedAttributes = preVisited.attributes().streamEntries().toList();
+            var preVisitedState = preVisitedTuple.right();
 
-        var preVisited = preVisitedTuple.left();
-        var preVisitedAttributes = preVisited.attributes().streamEntries().toList();
-        var preVisitedState = preVisitedTuple.right();
-
-        return Streams.fromNativeList(preVisitedAttributes)
-                .foldRightToResult(new Tuple<>(new MapAttributes(), preVisitedState), this::generateAttributeWithState)
-                .mapValue(tuple -> postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+            return Streams.fromNativeList(preVisitedAttributes)
+                    .foldRightToResult(new Tuple<>(new MapAttributes(), preVisitedState), this::generateAttributeWithState)
+                    .flatMapValue(tuple -> postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+        });
     }
 
     private Result<Tuple<Attributes, State>, CompileError> generateAttributeWithState(
@@ -69,11 +69,11 @@ public class Generator {
         return generateAttribute(value, current.right()).mapValue(inner -> new Tuple<>(current.left().with(key, inner.left()), inner.right()));
     }
 
-    protected Tuple<Node, State> preVisit(Node node, State depth) {
-        return new Tuple<>(node, depth);
+    protected Result<Tuple<Node, State>, CompileError> preVisit(Node node, State depth) {
+        return new Ok<>(new Tuple<>(node, depth));
     }
 
-    protected Tuple<Node, State> postVisit(Node node, State depth) {
-        return new Tuple<>(node, depth);
+    protected Result<Tuple<Node, State>, CompileError> postVisit(Node node, State depth) {
+        return new Ok<>(new Tuple<>(node, depth));
     }
 }
