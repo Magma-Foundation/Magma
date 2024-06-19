@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Generator {
-    private Tuple<Attribute, Integer> generateAttribute(Attribute attribute, int depth) {
+    private Tuple<Attribute, State> generateAttribute(Attribute attribute, State depth) {
         var nodeList = attribute.asNodeList();
         if (nodeList.isPresent()) {
             var list = new ArrayList<Node>();
             var current = depth;
             for (var node : nodeList.get()) {
-                Tuple<Node, Integer> nodeIntegerTuple = generateWithDepth(node, current);
+                var nodeIntegerTuple = generateWithDepth(node, current);
                 list.add(nodeIntegerTuple.left());
                 current = nodeIntegerTuple.right();
             }
@@ -32,15 +32,15 @@ public class Generator {
 
     }
 
-    private Tuple<Attribute, Integer> getAttributeIntegerTuple(int depth, Node value) {
+    private Tuple<Attribute, State> getAttributeIntegerTuple(State depth, Node value) {
         return generateWithDepth(value, depth).mapLeft(NodeAttribute::new);
     }
 
-    public Node generate(Node node, int state) {
+    public Node generate(Node node, State state) {
         return generateWithDepth(node, state).left();
     }
 
-    private Tuple<Node, Integer> generateWithDepth(Node node, int depth) {
+    private Tuple<Node, State> generateWithDepth(Node node, State depth) {
         var preVisitedTuple = preVisit(node, depth);
 
         var preVisited = preVisitedTuple.left();
@@ -49,7 +49,7 @@ public class Generator {
         Attributes newAttributes = new MapAttributes();
         var current = preVisitedTuple.right();
 
-        for (Tuple<String, Attribute> preVisitedAttribute : preVisitedAttributes) {
+        for (var preVisitedAttribute : preVisitedAttributes) {
             var key = preVisitedAttribute.left();
             var value = preVisitedAttribute.right();
 
@@ -61,11 +61,11 @@ public class Generator {
         return postVisit(preVisited.withAttributes(newAttributes), current);
     }
 
-    protected Tuple<Node, Integer> preVisit(Node node, int depth) {
+    protected Tuple<Node, State> preVisit(Node node, State depth) {
         return new Tuple<>(node, depth);
     }
 
-    protected Tuple<Node, Integer> postVisit(Node node, int depth) {
+    protected Tuple<Node, State> postVisit(Node node, State depth) {
         return new Tuple<>(node, depth);
     }
 }
