@@ -250,8 +250,12 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Result<Tuple<Node, State>, Error_>> replaceRecordWithFunction(Node node, State state) {
         if (!node.is("record")) return Optional.empty();
 
+        var name = node.findString("name").orElseThrow();
         var params = node.findNodeList("params").orElse(Collections.emptyList());
-        return Optional.of(defineParams(params, state).flatMapValue(defined -> replaceConcreteWithFunction(node, defined)));
+
+        return Optional.of(state.define(name)
+                .flatMapValue(inner -> defineParams(params, inner))
+                .flatMapValue(defined -> replaceConcreteWithFunction(node, defined)));
     }
 
     private Result<State, Error_> defineParams(List<Node> params, State state) {
@@ -330,8 +334,14 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Result<Tuple<Node, State>, Error_>> replaceMethodWithFunction(Node node, State state) {
         if (!node.is("method")) return Optional.empty();
 
+        var name = node.findNode("definition")
+                .orElseThrow()
+                .findString("name")
+                .orElseThrow();
+
         var params = node.findNodeList("params").orElse(Collections.emptyList());
-        return Optional.of(defineParams(params, state).mapValue(defined -> {
+        var definedResult = state.define(name).flatMapValue(inner -> defineParams(params, inner));
+        return Optional.of(definedResult.mapValue(defined -> {
             var copy = new ArrayList<Node>();
 
             var thisDefinition = node.clear("definition")
