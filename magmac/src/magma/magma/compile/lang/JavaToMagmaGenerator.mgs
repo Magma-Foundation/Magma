@@ -131,16 +131,23 @@ export class def JavaToMagmaGenerator() => {
 		if(!node.is("generic"))
 		return Optional.empty();
 		let mut parent = node.findString("parent").orElseThrow();
-		if(!parent.equals("Function"))
-		return Optional.of(Tuple(node, depth));
 		let mut children = node.findNodeList("children").orElseThrow();
-		if(children.size()!=2)
+		if(parent.equals("Function"))
 		{
-			return Optional.empty();
+			if(children.size()!=2)
+			{
+				return Optional.empty();
+			}
+			let mut from = children.get(0);
+			let mut to = children.get(1);
+			return Optional.of(Tuple(node.clear("function-type").withNodeList("params", List.of(from)).withNode("returns", to), depth));
 		}
-		let mut from = children.get(0);
-		let mut to = children.get(1);
-		return Optional.of(Tuple(node.clear("function-type").withNodeList("params", List.of(from)).withNode("returns", to), depth));
+		else if(parent.equals("Supplier")){
+			let mut returns = children.get(0);
+			let mut returns1 = node.clear("function-type").withNode("returns", returns);
+			return Optional.of(Tuple(returns1, depth));
+		}
+		return Optional.of(Tuple(node, depth));
 	}
 	private def replaceMethodReferenceWithAccess(this, node : Node, depth : State) : Optional<Tuple<Node, State>> => {
 		if(!node.is("method-reference"))

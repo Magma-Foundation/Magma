@@ -5,7 +5,7 @@ export class def None<T>() => {
 	public def map<R>(this, mapper : (T) => R) : Option<R> => {
 		return None();
 	}
-	public def orElseGet(this, supplier : Supplier<T>) : T => {
+	public def orElseGet(this, supplier : () => T) : T => {
 		return supplier.get();
 	}
 }

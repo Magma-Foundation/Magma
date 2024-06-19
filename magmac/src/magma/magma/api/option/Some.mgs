@@ -9,7 +9,7 @@ export class def Some<T>() => {
 	public def map<R>(this, mapper : (T) => R) : Option<R> => {
 		return Some(mapper.apply(value));
 	}
-	public def orElseGet(this, supplier : Supplier<T>) : T => {
+	public def orElseGet(this, supplier : () => T) : T => {
 		return value;
 	}
 }

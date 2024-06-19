@@ -203,19 +203,26 @@ public class JavaToMagmaGenerator extends Generator {
         if (!node.is("generic")) return Optional.empty();
 
         var parent = node.findString("parent").orElseThrow();
-        if (!parent.equals("Function")) return Optional.of(new Tuple<>(node, depth));
-
         var children = node.findNodeList("children").orElseThrow();
-        if (children.size() != 2) {
-            return Optional.empty();
+
+        if (parent.equals("Function")) {
+            if (children.size() != 2) {
+                return Optional.empty();
+            }
+
+            var from = children.get(0);
+            var to = children.get(1);
+
+            return Optional.of(new Tuple<>(node.clear("function-type")
+                    .withNodeList("params", List.of(from))
+                    .withNode("returns", to), depth));
+        } else if(parent.equals("Supplier")) {
+            var returns = children.get(0);
+            var returns1 = node.clear("function-type").withNode("returns", returns);
+            return Optional.of(new Tuple<>(returns1, depth));
         }
 
-        var from = children.get(0);
-        var to = children.get(1);
-
-        return Optional.of(new Tuple<>(node.clear("function-type")
-                .withNodeList("params", List.of(from))
-                .withNode("returns", to), depth));
+        return Optional.of(new Tuple<>(node, depth));
     }
 
     private Optional<Tuple<Node, State>> replaceMethodReferenceWithAccess(Node node, State depth) {
