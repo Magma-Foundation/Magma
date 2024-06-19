@@ -39,7 +39,7 @@ export class def JavaDefinitionHeaderFactory() => {
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
 	class def ModifiersRule() => {
-		let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
+		public static final let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
 		def ModifiersRule() : public => {
 			super("modifiers", " ");
 		}

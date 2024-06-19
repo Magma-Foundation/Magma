@@ -10,7 +10,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
-export class def SplitOnceRule() => {
+export let mut SplitOnceRule = () => class () => {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
@@ -52,4 +52,4 @@ export class def SplitOnceRule() => {
 		let mut message = format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);
 	}
-}
+};

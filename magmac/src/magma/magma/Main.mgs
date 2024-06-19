@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 export class def Main() => {
-	let TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
-	let SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
-	let DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
+	public static final let TARGET_DIRECTORY : Path = Paths.get(".", "magmac", "src", "magma");
+	public static final let SOURCE_DIRECTORY : Path = Paths.get(".", "magmac", "src", "java");
+	public static final let DEBUG_DIRECTORY : Path = Paths.get(".", "magmac", "debug", "java-mgs");
 	public static def main(args : String[]) : void => {
 		try 
 		{

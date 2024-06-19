@@ -31,6 +31,16 @@ export class def JavaToMagmaGenerator() => {
 	private static def attachFormatting(children : List<Node>, prefix : String) : List<Node> => {
 		return children.stream().filter(() => !child.is("empty")).map(() => child.withString(StripRule.DEFAULT_LEFT, prefix)).toList();
 	}
+	private static def computeAccess(modifiers : List<String>) : List<String> => {
+		if(modifiers.contains("final"))
+		{
+			return List.of("let");
+		}
+		else
+		{
+			return List.of("let", "mut");
+		}
+	}
 	protected def postVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		return postVisitFunction(node, depth).or(() => postVisitBlock(node, depth)).or(() => postVisitDeclaration(node, depth)).orElse(Tuple(node, depth));
 	}
@@ -43,14 +53,9 @@ export class def JavaToMagmaGenerator() => {
 	private def attachMutator(node : Node) : Node => {
 		return node.mapNode("definition", () => {
 			return definition.mapOrSetStringList("modifiers", () => {
-				if(modifiers.contains("final"))
-				{
-					return List.of("let");
-				}
-				else
-				{
-					return List.of("let", "mut");
-				}
+				let mut oldModifiers = ArrayList(modifiers);
+				oldModifiers.addAll(computeAccess(modifiers));
+				return oldModifiers;
 			}, () => List.of("let", "mut"));
 		});
 	}
@@ -70,12 +75,16 @@ export class def JavaToMagmaGenerator() => {
 		let mut params = node.findNodeList("params").orElse(Collections.emptyList());
 		if(!node.has("child"))
 		return Optional.of(Tuple(oldDefinition.get(), depth));
-		let mut newDefinition = oldDefinition.get().withNodeList("params", params).mapOrSetStringList("modifiers", () => {
+		let mut withParams = oldDefinition.get().withNodeList("params", params);
+		let mut newDefinition = withParams.has("name")?attachModifiers(withParams):withParams;
+		return Optional.of(Tuple(node.withNode("definition", newDefinition), depth));
+	}
+	private static def attachModifiers(withParams : Node) : Node => {
+		return withParams.mapOrSetStringList("modifiers", () => {
 			let mut copy = ArrayList(list);
 			copy.add("def");
 			return copy;
 		}, () => List.of("def"));
-		return Optional.of(Tuple(node.withNode("definition", newDefinition), depth));
 	}
 	protected def preVisit(node : Node, depth : int) : Tuple<Node, Integer> => {
 		return preVisitBlock(node, depth).or(() => replaceClassWithFunction(node, depth)).or(() => replaceMethodWithFunction(node, depth)).or(() => replaceLambdaWithFunction(node, depth)).or(() => replaceRecordWithFunction(node, depth)).or(() => replaceConstructorsWithInvocation(node, depth)).or(() => replaceInterfaceWithStruct(node, depth)).or(() => replaceMethodReferenceWithAccess(node, depth)).or(() => replaceGenericWithFunctionType(node, depth)).or(() => preVisitDeclaration(node, depth)).orElse(Tuple(node, depth));
@@ -170,10 +179,24 @@ export class def JavaToMagmaGenerator() => {
 		{
 			newModifiers.add("export");
 		}
-		newModifiers.add("class");
-		let mut definition = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
-		let mut withMaybeTypeParams = node.findNodeList("type-params").map(() => definition.withNodeList("type-params", nodes)).orElse(definition);
-		let mut function = node.retype("function").remove("name").remove("modifiers").remove("type-params").withNode("definition", withMaybeTypeParams);
-		return Optional.of(Tuple(function, depth));
+		if(oldModifiers.contains("abstract"))
+		{
+			let mut withMaybeTypeParams = node.clear("definition").withStringList("modifiers", Collections.singletonList("class"));
+			let mut function = node.retype("function").remove("name").remove("type-params").withNode("definition", withMaybeTypeParams);
+			let mut factoryDefinition = node.clear("definition");
+			let mut assigneeValue = node.clear("function").withNode("definition", factoryDefinition).withNode("child", function);
+			let mut assignee = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
+			let mut withTypeParams = node.findNodeList("type-params").map(() => assignee.withNodeList("type-params", params)).orElse(assignee);
+			let mut declaration = node.clear("declaration").withNode("definition", withTypeParams).withNode("value", assigneeValue);
+			return Optional.of(Tuple(declaration, depth));
+		}
+		else
+		{
+			newModifiers.add("class");
+			let mut definition = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
+			let mut withMaybeTypeParams = node.findNodeList("type-params").map(() => definition.withNodeList("type-params", nodes)).orElse(definition);
+			let mut function = node.retype("function").remove("name").remove("modifiers").remove("type-params").withNode("definition", withMaybeTypeParams);
+			return Optional.of(Tuple(function, depth));
+		}
 	}
 }

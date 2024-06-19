@@ -8,7 +8,7 @@ import magma.compile.attribute.StringListAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-export class def ExtractStringListRule() => {
+export let mut ExtractStringListRule = () => class () => {
 	protected final delimiter : String;
 	def ExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key);
@@ -43,4 +43,4 @@ export class def ExtractStringListRule() => {
 		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();
 	}
 	protected abstract qualify : Optional<Error_>;
-}
+};

@@ -4,7 +4,7 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-export class def FilterRule() => {
+export let mut FilterRule = () => class () => {
 	protected final child : Rule;
 	def FilterRule(child : Rule) : public => {
 		this=child;
@@ -19,4 +19,4 @@ export class def FilterRule() => {
 	public def fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node);
 	}
-}
+};

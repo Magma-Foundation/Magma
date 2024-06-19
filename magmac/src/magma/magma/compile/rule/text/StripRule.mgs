@@ -7,8 +7,8 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 () => {
-	let DEFAULT_LEFT : String = "left";
-	let DEFAULT_RIGHT : String = "right";
+	public static final let DEFAULT_LEFT : String = "left";
+	public static final let DEFAULT_RIGHT : String = "right";
 	def StripRule(child : Rule) : public => {
 		this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
 	}
