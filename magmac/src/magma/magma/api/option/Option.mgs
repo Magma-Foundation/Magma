@@ -1,0 +1,8 @@
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+public struct Option {
+	
+	map<R> : Option<R>;
+	orElseGet : T;
+}

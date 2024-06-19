@@ -14,6 +14,12 @@ public class JavaOptionals {
                 .orElse(new None<>());
     }
 
+    public static <T> Optional<T> toNative(Option<T> value) {
+        return value
+                .map(Optional::of)
+                .orElseGet(Optional::empty);
+    }
+
     public static <C> Tuple<Boolean, C> toTuple(Optional<C> optional, C other) {
         return optional.map(value -> new Tuple<>(true, value)).orElse(new Tuple<>(false, other));
     }

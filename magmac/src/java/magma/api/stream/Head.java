@@ -1,7 +1,7 @@
 package magma.api.stream;
 
-import java.util.Optional;
+import magma.api.option.Option;
 
 public interface Head<T> {
-    Optional<T> head();
+    Option<T> head();
 }

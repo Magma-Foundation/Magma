@@ -1,15 +1,12 @@
 package magma.api.stream;
 
+import magma.api.option.Option;
 import magma.java.JavaOptionals;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
-    @Override
-    public Optional<T> head() {
-        return this.provider.head();
-    }
 
     @Override
     public <R> Stream<R> map(Function<T, R> mapper) {
@@ -23,12 +20,17 @@ public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
 
         while (true) {
             C finalCurrent = current;
-            var tuple = JavaOptionals.toTuple(head().map(head -> collector.fold(finalCurrent, head)), current);
+            var tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(head -> collector.fold(finalCurrent, head)), current);
             if (tuple.left()) {
                 current = tuple.right();
             } else {
                 return current;
             }
         }
+    }
+
+    @Override
+    public Option<T> head() {
+        return provider.head();
     }
 }
