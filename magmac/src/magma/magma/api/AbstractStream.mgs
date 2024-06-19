@@ -2,14 +2,14 @@
 import java.util.Optional;
 import java.util.function.Function;
 export class def AbstractStream<T>(provider : Head<T>) => {
-	public def head() : Optional<T> => {
+	public def head(this) : Optional<T> => {
 		return this.provider.head();
 	}
-	public def map<R>(mapper : (T) => R) : Stream<R> => {
+	public def map<R>(this, mapper : (T) => R) : Stream<R> => {
 		let mut outer = this.provider;
 		return AbstractStream(() => outer.head().map(mapper));
 	}
-	public def collect<C>(collector : Collector<T, C>) : C => {
+	public def collect<C>(this, collector : Collector<T, C>) : C => {
 		let mut current = collector.createInitial();
 		while(true)
 		{

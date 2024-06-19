@@ -287,7 +287,18 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Tuple<Node, Integer>> replaceMethodWithFunction(Node node, int depth) {
         if (!node.is("method")) return Optional.empty();
 
-        return Optional.of(new Tuple<>(node.retype("function"), depth));
+        var newFunction = node.retype("function").mapNodes("params", params -> {
+            var copy = new ArrayList<Node>();
+
+            var thisDefinition = node.clear("definition")
+                            .withString("name", "this");
+
+            copy.add(thisDefinition);
+            copy.addAll(params);
+            return copy;
+        });
+
+        return Optional.of(new Tuple<>(newFunction, depth));
     }
 
     private Optional<Tuple<Node, Integer>> replaceClassWithFunction(Node node, int depth) {
