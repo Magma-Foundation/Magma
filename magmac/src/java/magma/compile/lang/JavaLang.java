@@ -124,8 +124,7 @@ public class JavaLang {
 
         var name = new StripRule(new SymbolRule(new ExtractStringRule("name")));
 
-        var typeParam = new TypeRule("type-param", new StripRule(new SymbolRule(new ExtractStringRule("value"))));
-        var typeParams = new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
+        var typeParams = Lang.createTypeParamsRule();
         var withTypeParams = new StripRule(new FirstRule(name, "<", new RightRule(typeParams, ">")));
         var maybeTypeParams = new OptionalRule("type-params", withTypeParams, name);
 

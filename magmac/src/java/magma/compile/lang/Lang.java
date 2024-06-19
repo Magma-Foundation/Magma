@@ -254,6 +254,19 @@ public class Lang {
         return new TypeRule(keyword, new LeftRule(keyword, new RightRule(new StripRule(new EmptyRule("value")), ";")));
     }
 
+    static SplitMultipleRule createTypeParamsRule() {
+        var typeParam = new LazyRule();
+        var symbol = new TypeRule("symbol", new StripRule(new SymbolRule(new ExtractStringRule("value"))));
+        var extendsRule = new TypeRule("extends", new StripRule(new FirstRule(new ExtractStringRule("name"), " extends ", new ExtractNodeRule("child", typeParam))));
+
+        typeParam.setRule(new OrRule(List.of(
+                extendsRule,
+                symbol
+        )));
+
+        return new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
+    }
+
     private static class OperatorFinderRule extends SplitOnceRule {
         public OperatorFinderRule(Rule value, String slice) {
             super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));

@@ -26,7 +26,7 @@ public class JavaDefinitionHeaderFactory {
         var type = new ExtractNodeRule("type", Lang.createTypeRule());
         var name = new ExtractStringRule("name");
 
-        var generics = new LeftRule("<", new RightRule(new SimpleExtractStringListRule("type-params", ","), ">"));
+        var generics = new LeftRule("<", new RightRule(Lang.createTypeParamsRule(), ">"));
         var withGenerics = new ContextRule("With generics.", new StripRule(new BackwardsRule(generics, " ", type)));
         var withoutGenerics = new ContextRule("Without generics.", type);
         var maybeGenerics = new OrRule(List.of(withGenerics, withoutGenerics));

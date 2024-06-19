@@ -164,15 +164,16 @@ export class def JavaToMagmaGenerator() => {
 		if(!node.is("class"))
 		return Optional.empty();
 		let mut name = node.findString("name").orElseThrow(() => RuntimeException("No name present: "+node));
-		let mut modifiers = node.findStringList("modifiers").orElseThrow();
+		let mut oldModifiers = node.findStringList("modifiers").orElseThrow();
 		let mut newModifiers = ArrayList();
-		if(modifiers.contains("public"))
+		if(oldModifiers.contains("public"))
 		{
 			newModifiers.add("export");
 		}
 		newModifiers.add("class");
 		let mut definition = node.clear("definition").withString("name", name).withStringList("modifiers", newModifiers);
-		let mut function = node.retype("function").withNode("definition", definition);
+		let mut withMaybeTypeParams = node.findNodeList("type-params").map(() => definition.withNodeList("type-params", nodes)).orElse(definition);
+		let mut function = node.retype("function").remove("name").remove("modifiers").remove("type-params").withNode("definition", withMaybeTypeParams);
 		return Optional.of(Tuple(function, depth));
 	}
 }

@@ -221,19 +221,27 @@ public class JavaToMagmaGenerator extends Generator {
         if (!node.is("class")) return Optional.empty();
 
         var name = node.findString("name").orElseThrow(() -> new RuntimeException("No name present: " + node));
-        var modifiers = node.findStringList("modifiers").orElseThrow();
+
+        var oldModifiers = node.findStringList("modifiers").orElseThrow();
         var newModifiers = new ArrayList<String>();
-        if (modifiers.contains("public")) {
+        if (oldModifiers.contains("public")) {
             newModifiers.add("export");
         }
-
         newModifiers.add("class");
 
         var definition = node.clear("definition")
                 .withString("name", name)
                 .withStringList("modifiers", newModifiers);
 
-        var function = node.retype("function").withNode("definition", definition);
+        var withMaybeTypeParams = node.findNodeList("type-params")
+                .map(nodes -> definition.withNodeList("type-params", nodes))
+                .orElse(definition);
+
+        var function = node.retype("function")
+                .remove("name")
+                .remove("modifiers")
+                .remove("type-params")
+                .withNode("definition", withMaybeTypeParams);
 
         return Optional.of(new Tuple<>(function, depth));
     }
