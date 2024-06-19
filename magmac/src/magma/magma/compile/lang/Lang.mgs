@@ -188,6 +188,13 @@ export class def Lang() => {
 	static def createKeywordRule(keyword : String) : TypeRule => {
 		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	}
+	static def createTypeParamsRule() : SplitMultipleRule => {
+		let mut typeParam = LazyRule();
+		let mut symbol = TypeRule("symbol", StripRule(SymbolRule(ExtractStringRule("value"))));
+		let mut extendsRule = TypeRule("extends", StripRule(FirstRule(ExtractStringRule("name"), " extends ", ExtractNodeRule("child", typeParam))));
+		typeParam.setRule(OrRule(List.of(extendsRule, symbol)));
+		return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);
+	}
 	class def OperatorFinderRule() => {
 		def OperatorFinderRule(value : Rule, slice : String) : public => {
 			super(StripRule(ExtractNodeRule("leftRule", value)), slice, StripRule(ExtractNodeRule("right", value)));
