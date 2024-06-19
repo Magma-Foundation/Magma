@@ -1,0 +1,11 @@
+
+public class def CompileException() => {
+	def CompileException(message : String, cause : Throwable) : public => {
+		super(message, cause);
+	}
+	def CompileException(message : String) : public => {
+		super(message);
+	}
+	def CompileException() : public => {
+	}
+}

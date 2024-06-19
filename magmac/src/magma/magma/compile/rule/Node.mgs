@@ -1,0 +1,104 @@
+
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.Attributes;
+import magma.compile.attribute.MapAttributes;
+import magma.compile.attribute.NodeAttribute;
+import magma.compile.attribute.NodeListAttribute;
+import magma.compile.attribute.StringAttribute;
+import magma.compile.attribute.StringListAttribute;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+() => {
+	def Node(type : String) : public => {
+		this(type, MapAttributes());
+	}
+	public def mapNode(key : String, nodeNodeFunction : (Node) => Node) : Node => {
+		return mapAttributes(() => attributes.mapValue(key, NodeAttribute.Factory, nodeNodeFunction));
+	}
+	public def withString(key : String, value : String) : Node => {
+		return with(key, StringAttribute(value));
+	}
+	private def with(key : String, value : Attribute) : Node => {
+		return mapAttributes(() => attributes.with(key, value));
+	}
+	public def formatWithDepth(depth : int) : String => {
+		return "\t".repeat(depth)+format(depth);
+	}
+	public def format(depth : int) : String => {
+		return type+" = "+attributes.format(depth);
+	}
+	public def toString() : String => {
+		return formatWithDepth(0);
+	}
+	public def is(type : String) : boolean => {
+		return this.type.equals(type);
+	}
+	public def mapAttributes(mapper : (Attributes) => Attributes) : Node => {
+		return Node(type, mapper.apply(attributes));
+	}
+	public def retype(type : String) : Node => {
+		return Node(type, attributes);
+	}
+	public def withAttributes(attributes : Attributes) : Node => {
+		return Node(type, attributes);
+	}
+	public def withNode(key : String, value : Node) : Node => {
+		return with(key, NodeAttribute(value));
+	}
+	public def withNodeList(key : String, values : List<Node>) : Node => {
+		return with(key, NodeListAttribute(values));
+	}
+	public def withStringList(key : String, values : List<String>) : Node => {
+		return with(key, StringListAttribute(values));
+	}
+	
+	/*
+    TODO: throw an error if the property requested doesn't exist.
+     */
+	public def remove(key : String) : Node => {
+		return Node(type, attributes.remove(key));
+	}
+	public def has(child : String) : boolean => {
+		return attributes.has(child);
+	}
+	public def mapNodes(key : String, mapper : (List<Node>) => List<Node>) : Node => {
+		return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, mapper));
+	}
+	public def mapOrSetNodeList(key : String, onPresent : (List<Node>) => List<Node>, onEmpty : Supplier<List<Node>>) : Node => {
+		if(has(key))
+		{
+			return mapAttributes(() => attributes.mapValue(key, NodeListAttribute.Factory, onPresent));
+		}
+		else
+		{
+			return with(key, NodeListAttribute(onEmpty.get()));
+		}
+	}
+	public def mapOrSetStringList(key : String, onPresent : (List<String>) => List<String>, onEmpty : Supplier<List<String>>) : Node => {
+		if(has(key))
+		{
+			return mapAttributes(() => attributes.mapValue(key, StringListAttribute.Factory, onPresent));
+		}
+		else
+		{
+			return with(key, StringListAttribute(onEmpty.get()));
+		}
+	}
+	public def findNode(key : String) : Optional<Node> => {
+		return attributes.apply(key).flatMap(Attribute.asNode);
+	}
+	public def findString(key : String) : Optional<String> => {
+		return attributes.apply(key).flatMap(Attribute.asString);
+	}
+	public def findStringList(key : String) : Optional<List<String>> => {
+		return attributes.apply(key).flatMap(Attribute.asStringList);
+	}
+	public def clear(type : String) : Node => {
+		return Node(type);
+	}
+	public def findNodeList(key : String) : Optional<List<Node>> => {
+		return attributes.apply(key).flatMap(Attribute.asNodeList);
+	}
+}

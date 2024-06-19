@@ -1,0 +1,68 @@
+
+import magma.api.Result;
+import magma.compile.CompileError;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
+import magma.compile.MultipleError;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+() => {
+	public def toNode(input : String) : RuleResult => {
+		let mut allIndexes = findAllIndexesReverse(input);
+		let mut errors = ArrayList();
+		for(index : Integer in allIndexes){
+			let mut leftSlice = input.substring(0, index);
+			let mut rightSlice = input.substring(index+slice.length());
+			let mut leftResult = leftRule.toNode(leftSlice);
+			if(leftResult.findError().isPresent())
+			{
+				errors.add(wrapError(leftSlice, rightSlice, leftResult.findError().get()));
+				continue
+				;
+			}
+			let mut rightResult = rightRule.toNode(rightSlice);
+			if(rightResult.findError().isPresent())
+			{
+				errors.add(wrapError(leftSlice, rightSlice, rightResult.findError().get()));
+				continue
+				;
+			}
+			let mut optional = leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			if(optional.isPresent())
+			{
+				return optional.get();
+			}
+		}
+		if(errors.isEmpty())
+		{
+			return ErrorRuleResult(CompileError("No rules were present.", input));
+		}
+		else
+		{
+			return ErrorRuleResult(MultipleError(errors));
+		}
+	}
+	private static def wrapError(leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => {
+		return CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+	}
+	private def findAllIndexesReverse(input : String) : List<Integer> => {
+		let mut indexes : List<Integer> = ArrayList();
+		let mut index : int = input.indexOf(slice);
+		while(index>=0)
+		{
+			indexes.add(index);
+			index=input.indexOf(slice, index+1);
+		}
+		Collections.reverse(indexes);
+		return indexes;
+	}
+	public def fromNode(node : Node) : Result<String, Error_> => {
+		return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	}
+}

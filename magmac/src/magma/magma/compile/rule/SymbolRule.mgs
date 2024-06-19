@@ -1,0 +1,24 @@
+
+public final class def SymbolRule() => {
+	def SymbolRule(child : Rule) : public => {
+		super(child);
+	}
+	protected def computeMessage() : String => {
+		return "Not a symbol.";
+	}
+	protected def filter(input : String) : boolean => {
+		let mut i : int = 0;
+		while(i<input.length())
+		{
+			let mut c = input.charAt(i);
+			if(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c)))
+			{
+				i++;
+				continue
+				;
+			}
+			return false;
+		}
+		return true;
+	}
+}

@@ -1,0 +1,18 @@
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+() => {
+	public def findMessage() : Optional<String> => {
+		return Optional.of(message);
+	}
+	public def findCauses() : Optional<List<Error_>> => {
+		return Optional.of(Collections.singletonList(parent));
+	}
+	public def findContext() : Optional<String> => {
+		return Optional.of(context);
+	}
+	public def calculateDepth() : int => {
+		return 1+parent.calculateDepth();
+	}
+}

@@ -1,0 +1,21 @@
+
+import magma.compile.rule.Node;
+import java.util.Optional;
+() => {
+	let Factory : Factory<Node> = Factory((() => {
+		return {
+			public def fromAttribute(attribute : Attribute) : Optional<Node> => {
+				return attribute.asNode();
+			}
+			public def toAttribute(value : Node) : Attribute => {
+				return NodeAttribute(value);
+			}
+		};
+	})())();
+	public def asNode() : Optional<Node> => {
+		return Optional.of(value);
+	}
+	public def format(depth : int) : String => {
+		return value.format(depth);
+	}
+}

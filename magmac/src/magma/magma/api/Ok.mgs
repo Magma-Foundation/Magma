@@ -1,0 +1,26 @@
+
+import java.util.Optional;
+import java.util.function.Function;
+() => {
+	public def findValue() : Optional<T> => {
+		return Optional.of(value);
+	}
+	public def findErr() : Optional<E> => {
+		return Optional.empty();
+	}
+	public def flatMapValue<R>(mapper : (T) => Result<R, E>) : Result<R, E> => {
+		return mapper.apply(value);
+	}
+	public def mapValue<R>(mapper : (T) => R) : Result<R, E> => {
+		return Ok(mapper.apply(value));
+	}
+	public def isOk() : boolean => {
+		return true;
+	}
+	public def mapErr<R>(mapper : (E) => R) : Result<T, R> => {
+		return Ok(value);
+	}
+	public def match<R>(onOk : (T) => R, onErr : (E) => R) : R => {
+		return onOk.apply(value);
+	}
+}

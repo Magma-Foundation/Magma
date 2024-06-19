@@ -1,0 +1,27 @@
+
+public final class def NumberRule() => {
+	def NumberRule(child : Rule) : public => {
+		super(child);
+	}
+	private static def allDigits(input : String) : boolean => {
+		if(input.isEmpty())
+		return false;
+		let mut i : int = 0;
+		while(i<input.length())
+		{
+			let mut c = input.charAt(i);
+			if(!Character.isDigit(c))
+			{
+				return false;
+			}
+			i++;
+		}
+		return true;
+	}
+	protected def computeMessage() : String => {
+		return "Not a number.";
+	}
+	protected def filter(input : String) : boolean => {
+		return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	}
+}
