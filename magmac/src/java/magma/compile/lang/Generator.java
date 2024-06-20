@@ -66,11 +66,11 @@ public class Generator {
         return generateAttribute(value, current.right()).mapValue(inner -> new Tuple<>(current.left().with(key, inner.left()), inner.right()));
     }
 
-    protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State depth) {
-        return new Ok<>(new Tuple<>(node, depth));
+    protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
+        return new Ok<>(new Tuple<>(node, state));
     }
 
-    protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State depth) {
-        return new Ok<>(new Tuple<>(node, depth));
+    protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
+        return new Ok<>(new Tuple<>(node, state));
     }
 }

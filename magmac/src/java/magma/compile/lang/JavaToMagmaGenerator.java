@@ -1,8 +1,10 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
+import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
@@ -156,7 +158,12 @@ public class JavaToMagmaGenerator extends Generator {
     private Optional<Result<Node, Error_>> postVisitBlock(Node node) {
         if (!node.is("block")) return Optional.empty();
 
-        var depth = Integer.parseInt(node.findString("depth").orElseThrow());
+        var depthString = node.findString("depth");
+        if(depthString.isEmpty()) {
+            return Optional.of(new Err<>(new CompileError("No depth present.", node.toString())));
+        }
+
+        var depth = Integer.parseInt(depthString.get());
         var prefix = "\n" + "\t".repeat(depth);
         var newBlock = node
                 .mapNodes("children", children -> attachFormatting(children, prefix))
