@@ -81,6 +81,12 @@ public class JavaAnnotator extends Generator {
             return new Err<>(new CompileError("Symbol not defined.", value));
         }
 
+        if(node.is("declaration")) {
+            var definition = node.findNode("definition").orElseThrow();
+            var name = definition.findString("name").orElseThrow();
+            return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
+        }
+
         return new Ok<>(new Tuple<>(node, state));
     }
 }
