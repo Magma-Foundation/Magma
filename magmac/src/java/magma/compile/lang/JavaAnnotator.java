@@ -10,10 +10,18 @@ import magma.compile.rule.Node;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class JavaAnnotator extends Generator {
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
+        if(node.is("lambda")) {
+            var nameOptional = node.findString("param-name");
+            if (nameOptional.isPresent()) {
+                return state.define(nameOptional.get()).mapValue(inner -> new Tuple<>(node, inner));
+            }
+        }
+
         if (node.is("block")) {
             return new Ok<>(new Tuple<>(node, state.enter()));
         }
