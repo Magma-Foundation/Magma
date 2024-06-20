@@ -9,6 +9,7 @@ import magma.compile.Error_;
 import magma.compile.rule.Node;
 
 import java.util.Collections;
+import java.util.List;
 
 public class JavaAnnotator extends Generator {
     @Override
@@ -17,18 +18,25 @@ public class JavaAnnotator extends Generator {
             return new Ok<>(new Tuple<>(node, state.enter()));
         }
 
-        if (node.is("method")) {
-            var params = node.findNodeList("params").orElse(Collections.emptyList());
-            Result<State, Error_> defined = new Ok<>(state);
-            for (Node param : params) {
-                var name = param.findString("name").orElseThrow();
-                defined = defined.flatMapValue(inner -> inner.define(name));
-            }
+
+
+        if (node.is("method") || node.is("record")) {
+            var defined = defineParams(state, node.findNodeList("params")
+                    .orElse(Collections.emptyList()));
 
             return defined.mapValue(newState -> new Tuple<>(node, newState));
         }
 
         return new Ok<>(new Tuple<>(node, state));
+    }
+
+    private static Result<State, Error_> defineParams(State state, List<Node> params) {
+        Result<State, Error_> defined = new Ok<>(state);
+        for (Node param : params) {
+            var name = param.findString("name").orElseThrow();
+            defined = defined.flatMapValue(inner -> inner.define(name));
+        }
+        return defined;
     }
 
     @Override
