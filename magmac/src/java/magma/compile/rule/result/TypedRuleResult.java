@@ -8,10 +8,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record TypedRuleResult(String name, Attributes attributes) implements RuleResult{
-    @Override
-    public Optional<String> findName() {
-        return Optional.of(name);
-    }
 
     @Override
     public Optional<Attributes> findAttributes() {

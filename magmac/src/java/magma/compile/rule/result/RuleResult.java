@@ -20,8 +20,6 @@ public interface RuleResult {
         return new Ok<>(inner);
     }
 
-    Optional<String> findName();
-
     Optional<Error_> findError();
 
     Optional<Attributes> findAttributes();

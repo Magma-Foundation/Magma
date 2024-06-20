@@ -8,10 +8,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record ErrorRuleResult(Error_ e) implements RuleResult {
-    @Override
-    public Optional<String> findName() {
-        return Optional.empty();
-    }
 
     @Override
     public Optional<Error_> findError() {

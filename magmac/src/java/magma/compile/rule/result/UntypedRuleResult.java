@@ -8,10 +8,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record UntypedRuleResult(Attributes attributes) implements RuleResult {
-    @Override
-    public Optional<String> findName() {
-        return Optional.empty();
-    }
 
     @Override
     public Optional<Attributes> findAttributes() {
