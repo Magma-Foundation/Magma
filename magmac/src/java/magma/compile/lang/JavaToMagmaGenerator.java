@@ -140,7 +140,7 @@ public class JavaToMagmaGenerator extends Generator {
         if (!node.is("symbol")) return Optional.empty();
 
         var value = node.findString("value").orElseThrow();
-        if (state.isDefined(value)) {
+        if (value.equals("true") || value.equals("false") || state.isDefined(value)) {
             return Optional.of(new Ok<>(new Tuple<>(node, state)));
         } else {
             return Optional.of(new Err<>(new CompileError("Value is not defined.", value)));
