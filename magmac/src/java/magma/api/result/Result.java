@@ -1,12 +1,13 @@
 package magma.api.result;
 
-import java.util.Optional;
+import magma.api.option.Option;
+
 import java.util.function.Function;
 
 public interface Result<T, E> {
-    Optional<T> findValue();
+    Option<T> findValue();
 
-    Optional<E> findErr();
+    Option<E> findErr();
 
     <R> Result<R, E> flatMapValue(Function<T, Result<R, E>> mapper);
 

@@ -12,6 +12,7 @@ import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.java.JavaOptionals;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,14 +86,14 @@ public class Main {
 
             Rule rule = MagmaLang.createRootRule();
             var generateResult = rule.fromNode(entry.getValue());
-            var generateErrorOptional = generateResult.findErr();
+            var generateErrorOptional = JavaOptionals.toNative(generateResult.findErr());
             if (generateErrorOptional.isPresent()) {
                 var generateError = generateErrorOptional.get();
                 print(generateError, 0);
                 writeError(generateError);
             }
 
-            writeImpl(target, generateResult.findValue().orElseThrow(() -> new CompileException("Nothing was generated.")));
+            writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
         }
     }
 
@@ -104,14 +105,14 @@ public class Main {
             var name = computeName(source);
 
             var result = parseSource(source, namespace, name);
-            var error = result.findErr();
+            var error = JavaOptionals.toNative(result.findErr());
             if (error.isPresent()) {
                 throw error.get();
             } else {
                 var list = new ArrayList<>(namespace);
                 list.add(name);
 
-                trees.put(list, result.findValue().orElseThrow());
+                trees.put(list, JavaOptionals.toNative(result.findValue()).orElseThrow());
             }
         }
 

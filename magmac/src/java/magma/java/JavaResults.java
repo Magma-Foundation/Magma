@@ -4,12 +4,12 @@ import magma.api.result.Result;
 
 public class JavaResults {
     public static <T, E extends Throwable> T unwrap(Result<T, E> result) throws E {
-        var value = result.findValue();
+        var value = JavaOptionals.toNative(result.findValue());
         if (value.isPresent()) {
             return value.orElseThrow();
         }
 
-        var error = result.findErr();
+        var error = JavaOptionals.toNative(result.findErr());
         if (error.isPresent()) {
             throw error.get();
         }

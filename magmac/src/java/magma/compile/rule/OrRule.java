@@ -7,6 +7,7 @@ import magma.compile.Error_;
 import magma.compile.MultipleError;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
+import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.Optional;
 public record OrRule(List<Rule> rules) implements Rule {
     private static Err<String, Error_> toError(List<Result<String, Error_>> results) {
         return new Err<>(new MultipleError(results.stream()
-                .map(Result::findErr)
+                .map(stringErrorResult -> JavaOptionals.toNative(stringErrorResult.findErr()))
                 .flatMap(Optional::stream)
                 .toList()));
     }
