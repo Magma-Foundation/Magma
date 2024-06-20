@@ -3,11 +3,14 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
+import magma.api.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.MagmaAnnotator;
+import magma.compile.lang.Generator;
+import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
+import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
@@ -52,8 +55,8 @@ export class def Main() => {
 			let mut namespace : var = location.subList(0, location.size()-1);
 			let mut name : var = location.get(location.size()-1);
 			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
-			let mut generated : var = Results.unwrap(getGenerate(entry, sourceTrees).mapValue(Tuple.left).mapErr(() => {
-				writeError(error);
+			let mut generated : var = Results.unwrap(generate(entry, sourceTrees).mapValue(Tuple.left).mapErr(() => {
+				writeError(error, location);
 				return CompileException("Failed to generate: "+String.join(".", location));
 			}));
 			let mut relativizedDebug : var = createDebug(namespace);
@@ -79,20 +82,21 @@ export class def Main() => {
 			{
 				let mut generateError : var = generateErrorOptional.get();
 				print(generateError, 0);
-				writeError(generateError);
+				writeError(generateError, location);
 			}
 			writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() => CompileException("Nothing was generated.")));
 		}
 	}
-	private static def getGenerate(this, entry : Map.Entry<List<String>, Node>, sourceTrees : Map<List<String>, Node>) : Result<Tuple<Node, State>, Error_> => {
+	private static def generate(this, entry : Map.Entry<List<String>, Node>, sourceTrees : Map<List<String>, Node>) : Result<Tuple<Node, State>, Error_> => {
 		let mut state : var = State(sourceTrees.keySet());
-		let mut generate : var = JavaToMagmaGenerator().generate(entry.getValue(), state);
-		return generate.flatMapValue(() => {
-			let mut generate1 : var = MagmaAnnotator().generate(inner.left(), inner.right());
-			return generate1.flatMapValue(() => {
-				return MagmaFormatter().generate(inner0.left(), inner0.right());
-			});
-		});
+		let mut list : var = List.of(JavaAnnotator(), JavaToMagmaGenerator(), MagmaAnnotator(), MagmaFormatter());
+		let mut initial : var = Tuple(entry.getValue(), state);
+		return Streams.fromNativeList(list).foldRightToResult(initial, Main.generateImpl);
+	}
+	private static def generateImpl(this, tuple : Tuple<Node, State>, generator : Generator) : Result<Tuple<Node, State>, Error_> => {
+		let mut node : var = tuple.left();
+		let mut state1 : var = tuple.right();
+		return generator.generate(node, state1);
 	}
 	private static def parseSources(this, sources : List<Path>) : Map<List<String>, Node> => {
 		let mut trees : var = HashMap();
@@ -117,9 +121,10 @@ export class def Main() => {
 	}
 	private static def parseSource(this, source : Path, namespace : List<String>, name : String) : Result<Node, CompileException> => {
 		System.out.println("Parsing source: "+SOURCE_DIRECTORY.relativize(source));
+		let mut location : var = ArrayList(namespace);
+		location.add(name);
 		let mut input : var = readImpl(source);
-		let mut parseResult : var = JavaLang.createRootRule().toNode(input);
-		return parseResult.create().match(() => parse(root, namespace, name), Main.writeError);
+		return JavaLang.createRootRule().toNode(input).create().match(() => parse(root, namespace, name), () => writeError(err, location));
 	}
 	private static def computeName(this, source : Path) : String => {
 		let mut fileName : var = source.getFileName().toString();
@@ -149,12 +154,12 @@ export class def Main() => {
 		createDirectory(relativizedDebug);
 		return relativizedDebug;
 	}
-	private static def writeError(this, err : Error_) : Err<Node, CompileException> => {
+	private static def writeError(this, err : Error_, location : List<String>) : Err<Node, CompileException> => {
 		try 
 		{
 			let mut result : var = print(err, 0);
 			writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-			return Err(CompileException());
+			return Err(CompileException(String.join(".", location)));
 		}
 		catch (e : CompileException){
 			return Err(e);
