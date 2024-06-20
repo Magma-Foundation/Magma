@@ -133,6 +133,13 @@ public class Main {
             var namespace = computeNamespace(relativized);
             var name = computeName(source);
 
+            if(namespace.size() >= 2) {
+                var slice = namespace.subList(0, 2);
+                if(slice.equals(List.of("magma", "java"))) {
+                    continue;
+                }
+            }
+
             var result = parseSource(source, namespace, name);
             var error = JavaOptionals.toNative(result.findErr());
             if (error.isPresent()) {
