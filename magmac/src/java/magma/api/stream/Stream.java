@@ -5,6 +5,7 @@ import magma.api.result.Result;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface Stream<T> extends Head<T> {
     <R> Stream<R> map(Function<T, R> mapper);
@@ -14,4 +15,10 @@ public interface Stream<T> extends Head<T> {
     Option<T> head();
 
     <R, E> Result<R, E> foldRightToResult(R initial, BiFunction<R, T, Result<R, E>> mapper);
+
+    boolean anyMatch(Predicate<T> predicate);
+
+    Stream<T> filter(Predicate<T> filter);
+
+    <R> Stream<R> flatMap(Function<T, Head<R>> mapper);
 }

@@ -18,7 +18,9 @@ import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
+import magma.java.JavaSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -104,7 +106,7 @@ public class Main {
     }
 
     private static Result<Tuple<Node, State>, Error_> generate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
-        var state = new State(sourceTrees.keySet());
+        var state = new State(JavaSet.fromNative(sourceTrees.keySet(), JavaList::new), new JavaList<>());
 
         var list = List.of(
                 new JavaAnnotator(),

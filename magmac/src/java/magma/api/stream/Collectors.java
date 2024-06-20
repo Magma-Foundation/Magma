@@ -27,7 +27,7 @@ public class Collectors {
     }
 
     public static <T, C, E> Collector<Result<T, E>, Result<C, E>> exceptionally(Collector<T, C> collector) {
-        return new Collector<Result<T, E>, Result<C, E>>() {
+        return new Collector<>() {
             @Override
             public Result<C, E> createInitial() {
                 return new Ok<>(collector.createInitial());
@@ -39,4 +39,5 @@ public class Collectors {
             }
         };
     }
+
 }

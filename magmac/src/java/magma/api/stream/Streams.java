@@ -10,12 +10,12 @@ public class Streams {
 
     public static <T> Stream<T> fromNativeList(List<T> list) {
         return new AbstractStream<T>(new Head<T>() {
+            private int counter = 0;
+
             @Override
             public Option<T> head() {
                 return JavaOptionals.fromNative(head0());
             }
-
-            private int counter = 0;
 
             private Optional<T> head0() {
                 if (counter >= list.size()) return Optional.empty();
@@ -24,5 +24,11 @@ public class Streams {
                 return Optional.of(next);
             }
         });
+    }
+
+    public static <T> Stream<T> fromOption(Option<T> option) {
+        return new AbstractStream<>(option
+                .<Head<T>>map(SingleHead::new)
+                .orElseGet(EmptyHead::new));
     }
 }
