@@ -5,11 +5,14 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
+import magma.api.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.MagmaAnnotator;
+import magma.compile.lang.Generator;
+import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
+import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
@@ -61,10 +64,10 @@ public class Main {
             var name = location.get(location.size() - 1);
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = Results.unwrap(getGenerate(entry, sourceTrees)
+            var generated = Results.unwrap(generate(entry, sourceTrees)
                     .mapValue(Tuple::left)
                     .mapErr(error -> {
-                        writeError(error);
+                        writeError(error, location);
                         return new CompileException("Failed to generate: " + String.join(".", location));
                     }));
 
@@ -93,22 +96,32 @@ public class Main {
             if (generateErrorOptional.isPresent()) {
                 var generateError = generateErrorOptional.get();
                 print(generateError, 0);
-                writeError(generateError);
+                writeError(generateError, location);
             }
 
             writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
         }
     }
 
-    private static Result<Tuple<Node, State>, Error_> getGenerate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
+    private static Result<Tuple<Node, State>, Error_> generate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
         var state = new State(sourceTrees.keySet());
-        var generate = new JavaToMagmaGenerator().generate(entry.getValue(), state);
-        return generate.flatMapValue(inner -> {
-            var generate1 = new MagmaAnnotator().generate(inner.left(), inner.right());
-            return generate1.flatMapValue(inner0 -> {
-                return new MagmaFormatter().generate(inner0.left(), inner0.right());
-            });
-        });
+
+        var list = List.of(
+                new JavaAnnotator(),
+                new JavaToMagmaGenerator(),
+                new MagmaAnnotator(),
+                new MagmaFormatter()
+        );
+
+        var initial = new Tuple<>(entry.getValue(), state);
+        return Streams.fromNativeList(list).foldRightToResult(initial, Main::generateImpl);
+    }
+
+    private static Result<Tuple<Node, State>, Error_> generateImpl(Tuple<Node, State> tuple, Generator generator) {
+        var node = tuple.left();
+        var state1 = tuple.right();
+
+        return generator.generate(node, state1);
     }
 
     private static Map<List<String>, Node> parseSources(List<Path> sources) throws CompileException {
@@ -136,12 +149,14 @@ public class Main {
     private static Result<Node, CompileException> parseSource(Path source, List<String> namespace, String name) throws CompileException {
         System.out.println("Parsing source: " + SOURCE_DIRECTORY.relativize(source));
 
+        var location = new ArrayList<>(namespace);
+        location.add(name);
+
         var input = readImpl(source);
 
-        var parseResult = JavaLang.createRootRule().toNode(input);
-        return parseResult.create().match(
+        return JavaLang.createRootRule().toNode(input).create().match(
                 root -> parse(root, namespace, name),
-                Main::writeError);
+                err -> writeError(err, location));
     }
 
     private static String computeName(Path source) {
@@ -176,11 +191,11 @@ public class Main {
         return relativizedDebug;
     }
 
-    private static Err<Node, CompileException> writeError(Error_ err) {
+    private static Err<Node, CompileException> writeError(Error_ err, List<String> location) {
         try {
             var result = print(err, 0);
             writeImpl(DEBUG_DIRECTORY.resolve("error.xml"), result);
-            return new Err<>(new CompileException());
+            return new Err<>(new CompileException(String.join(".", location)));
         } catch (CompileException e) {
             return new Err<>(e);
         }
