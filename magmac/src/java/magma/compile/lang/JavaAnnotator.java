@@ -18,8 +18,6 @@ public class JavaAnnotator extends Generator {
             return new Ok<>(new Tuple<>(node, state.enter()));
         }
 
-
-
         if (node.is("method") || node.is("record")) {
             var defined = defineParams(state, node.findNodeList("params")
                     .orElse(Collections.emptyList()));
@@ -45,12 +43,13 @@ public class JavaAnnotator extends Generator {
             return new Ok<>(new Tuple<>(node, state.exit()));
         }
 
-
         if (node.is("symbol")) {
             var value = node.findString("value").orElseThrow();
-            if (!state.isDefined(value)) {
-                return new Err<>(new CompileError("Symbol not defined.", value));
+            if (value.equals("true") || value.equals("false") || state.isDefined(value)) {
+                return new Ok<>(new Tuple<>(node, state));
             }
+
+            return new Err<>(new CompileError("Symbol not defined.", value));
         }
 
         return new Ok<>(new Tuple<>(node, state));
