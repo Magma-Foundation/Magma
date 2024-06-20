@@ -1,4 +1,3 @@
-
 export class def SymbolRule() => {
 	def SymbolRule(this, child : Rule) : public => {
 		super(child);
@@ -10,7 +9,7 @@ export class def SymbolRule() => {
 		let mut i : int = 0;
 		while(i<input.length())
 		{
-			let mut c = input.charAt(i);
+			let mut c : var = input.charAt(i);
 			if(Character.isLetter(c)||c=='_'||(i!=0&&Character.isDigit(c)))
 			{
 				i++;

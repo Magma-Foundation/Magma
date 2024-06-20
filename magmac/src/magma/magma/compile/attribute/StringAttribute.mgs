@@ -1,4 +1,3 @@
-
 import java.util.Optional;
 export class def StringAttribute(value : String) => {
 	public def asString(this) : Optional<String> => {

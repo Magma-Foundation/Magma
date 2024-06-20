@@ -1,4 +1,3 @@
-
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
@@ -10,8 +9,8 @@ export class def RightRule(child : Rule, slice : String) => {
 	public def toNode(this, input : String) : RuleResult => {
 		if(input.endsWith(slice))
 		{
-			let mut contentEnd = input.length()-slice.length();
-			let mut content = input.substring(0, contentEnd);
+			let mut contentEnd : var = input.length()-slice.length();
+			let mut content : var = input.substring(0, contentEnd);
 			return child.toNode(content);
 		}
 		else

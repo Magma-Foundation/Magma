@@ -1,11 +1,6 @@
-
 import java.util.function.Function;
 import java.util.function.Supplier;
-export class def Some<T>() => {
-	private final value : T;
-	def Some(this, value : T) : public => {
-		this=value;
-	}
+export class def Some<T>(value : T) => {
 	public def map<R>(this, mapper : (T) => R) : Option<R> => {
 		return Some(mapper.apply(value));
 	}

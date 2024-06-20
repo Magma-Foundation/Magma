@@ -1,4 +1,3 @@
-
 import magma.api.result.Err;
 import magma.api.result.Result;
 import magma.compile.CompileError;
@@ -9,22 +8,22 @@ import magma.compile.rule.result.RuleResult;
 export class def TypeRule(type : String, child : Rule) => {
 	public static final let FORMAT : String = "Node was not of type '%s', but rather '%s'.";
 	public def toNode(this, input : String) : RuleResult => {
-		let mut result = child.toNode(input);
+		let mut result : var = child.toNode(input);
 		if(result.findError().isEmpty())
 		return result.withType(type);
-		let mut format = "Cannot attach type '%s' because of child failure.";
-		let mut message = format.formatted(type);
+		let mut format : var = "Cannot attach type '%s' because of child failure.";
+		let mut message : var = format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, result.findError().get()));
 	}
 	public def fromNode(this, node : Node) : Result<String, Error_> => {
 		if(!node.type().equals(type))
 		{
-			let mut message = String.format(FORMAT, type, node.type());
+			let mut message : var = String.format(FORMAT, type, node.type());
 			return Err(CompileError(message, node.toString()));
 		}
 		return child.fromNode(node).mapErr(() => {
-			let mut format = "Cannot generate '%s' from node.";
-			let mut message = format.formatted(type);
+			let mut format : var = "Cannot generate '%s' from node.";
+			let mut message : var = format.formatted(type);
 			return CompileParentError(message, node.toString(), err);
 		});
 	}

@@ -1,4 +1,3 @@
-
 import java.util.Optional;
 export class def Rules() => {
 	public static def wrapIndex(this, index : int) : Optional<Integer> => {

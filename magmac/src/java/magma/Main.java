@@ -7,9 +7,10 @@ import magma.api.result.Result;
 import magma.api.result.Results;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.JavaAnnotator;
+import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
+import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
 import magma.compile.rule.Node;
@@ -101,8 +102,13 @@ public class Main {
 
     private static Result<Tuple<Node, State>, Error_> getGenerate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
         var state = new State(sourceTrees.keySet());
-        var generate = new JavaAnnotator().generate(entry.getValue(), state);
-        return generate.flatMapValue(inner -> new JavaToMagmaGenerator().generate(inner.left(), inner.right()));
+        var generate = new JavaToMagmaGenerator().generate(entry.getValue(), state);
+        return generate.flatMapValue(inner -> {
+            var generate1 = new MagmaAnnotator().generate(inner.left(), inner.right());
+            return generate1.flatMapValue(inner0 -> {
+                return new MagmaFormatter().generate(inner0.left(), inner0.right());
+            });
+        });
     }
 
     private static Map<List<String>, Node> parseSources(List<Path> sources) throws CompileException {

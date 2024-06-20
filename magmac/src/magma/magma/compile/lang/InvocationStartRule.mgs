@@ -1,4 +1,3 @@
-
 import magma.api.Tuple;
 import magma.compile.rule.Rule;
 import magma.compile.rule.split.SplitOnceRule;
@@ -11,23 +10,23 @@ class def InvocationStartRule() => {
 		super(caller, "(", arguments);
 	}
 	protected def computeIndex(this, input : String) : Optional<Integer> => {
-		let mut depth = 0;
-		let mut queue = IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		let mut depth : var = 0;
+		let mut queue : var = IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
 		{
-			let mut pop = queue.pop();
-			let mut i = pop.left();
-			let mut c = pop.right();
+			let mut pop : var = queue.pop();
+			let mut i : var = pop.left();
+			let mut c : var = pop.right();
 			if(c=='\"')
 			{
 				while(!queue.isEmpty())
 				{
-					let mut next = queue.pop().right();
+					let mut next : var = queue.pop().right();
 					if(next=='\"')
 					{
 						if(!queue.isEmpty())
 						{
-							let mut after = queue.peek().right();
+							let mut after : var = queue.peek().right();
 							if(after=='\\')
 							{
 								continue

@@ -1,9 +1,9 @@
-
 import magma.api.Tuple;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.stream.Streams;
-import magma.compile.CompileError;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
@@ -13,44 +13,41 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
 export class def Generator() => {
-	private def generateAttribute(this, attribute : Attribute, state : State) : Result<Tuple<Attribute, State>, CompileError> => {
-		let mut nodeList = attribute.asNodeList();
+	private def generateAttribute(this, attribute : Attribute, state : State) : Result<Tuple<Attribute, State>, Error_> => {
+		let mut nodeList : var = attribute.asNodeList();
 		if(nodeList.isPresent())
 		{
-			let mut initial = Tuple(ArrayList(), state);
+			let mut initial : var = Tuple(ArrayList(), state);
 			return Streams.fromNativeList(nodeList.get()).foldRightToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(NodeListAttribute.new));
 		}
-		return attribute.asNode().map(() => generateWithState(value, state).mapValue(() => inner.<Attribute>mapLeft(NodeAttribute.new))).orElseGet(() => Ok(Tuple(attribute, state)));
+		return attribute.asNode().map(() => generate(value, state).mapValue(() => inner.<Attribute>mapLeft(NodeAttribute.new))).orElseGet(() => Ok(Tuple(attribute, state)));
 	}
-	private def generateThenFold(this, current : Tuple<List<Node>, State>, node : Node) : Result<Tuple<List<Node>, State>, CompileError> => {
-		return generateWithState(node, current.right()).mapValue(() => {
-			let mut newNode = tuple.left();
-			let mut newState = tuple.right();
-			let mut list = current.left();
+	private def generateThenFold(this, current : Tuple<List<Node>, State>, node : Node) : Result<Tuple<List<Node>, State>, Error_> => {
+		return generate(node, current.right()).mapValue(() => {
+			let mut newNode : var = tuple.left();
+			let mut newState : var = tuple.right();
+			let mut list : var = current.left();
 			list.add(newNode);
 			return Tuple(list, newState);
 		});
 	}
-	public def generate(this, node : Node, state : State) : Result<Node, CompileError> => {
-		return generateWithState(node, state).mapValue(Tuple.left);
-	}
-	private def generateWithState(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
+	public def generate(this, node : Node, depth : State) : Result<Tuple<Node, State>, Error_> => {
 		return preVisit(node, depth).flatMapValue(() => {
-			let mut preVisited = preVisitedTuple.left();
-			let mut preVisitedAttributes = preVisited.attributes().streamEntries().toList();
-			let mut preVisitedState = preVisitedTuple.right();
+			let mut preVisited : var = preVisitedTuple.left();
+			let mut preVisitedAttributes : var = preVisited.attributes().streamEntries().toList();
+			let mut preVisitedState : var = preVisitedTuple.right();
 			return Streams.fromNativeList(preVisitedAttributes).foldRightToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).flatMapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
-		});
+		}).mapErr(() => CompileParentError("Failed to parse node.", node.toString(), err));
 	}
-	private def generateAttributeWithState(this, current : Tuple<Attributes, State>, next : Tuple<String, Attribute>) : Result<Tuple<Attributes, State>, CompileError> => {
-		let mut key = next.left();
-		let mut value = next.right();
+	private def generateAttributeWithState(this, current : Tuple<Attributes, State>, next : Tuple<String, Attribute>) : Result<Tuple<Attributes, State>, Error_> => {
+		let mut key : var = next.left();
+		let mut value : var = next.right();
 		return generateAttribute(value, current.right()).mapValue(() => Tuple(current.left().with(key, inner.left()), inner.right()));
 	}
-	protected def preVisit(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
-		return Ok(Tuple(node, depth));
+	protected def preVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+		return Ok(Tuple(node, state));
 	}
-	protected def postVisit(this, node : Node, depth : State) : Result<Tuple<Node, State>, CompileError> => {
-		return Ok(Tuple(node, depth));
+	protected def postVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+		return Ok(Tuple(node, state));
 	}
 }

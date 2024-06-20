@@ -1,4 +1,3 @@
-
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -10,18 +9,18 @@ export class def AbstractStream<T>(provider : Head<T>) => {
 		return this.fold(Ok.from(initial), (reResult, t)->reResult.flatMapValue(() => mapper.apply(inner, t)));
 	}
 	public def map<R>(this, mapper : (T) => R) : Stream<R> => {
-		let mut outer = this.provider;
+		let mut outer : var = this.provider;
 		return AbstractStream(() => outer.head().map(mapper));
 	}
 	public def collect<C>(this, collector : Collector<T, C>) : C => {
-		let mut current = collector.createInitial();
+		let mut current : var = collector.createInitial();
 		return fold(current, collector.fold);
 	}
 	private def fold<C>(this, current : C, folder : BiFunction<C, T, C>) : C => {
 		while(true)
 		{
 			let mut finalCurrent : C = current;
-			let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+			let mut tuple : var = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
 			if(tuple.left())
 			{
 				current=tuple.right();

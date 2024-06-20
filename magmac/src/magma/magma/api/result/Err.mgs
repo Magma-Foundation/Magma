@@ -1,11 +1,12 @@
-
+import magma.api.option.Option;
+import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
 export class def Err<T, E>(value : E) => {
-	public def findValue(this) : Optional<T> => {
+	private def findValue1(this) : Optional<T> => {
 		return Optional.empty();
 	}
-	public def findErr(this) : Optional<E> => {
+	private def findErr0(this) : Optional<E> => {
 		return Optional.of(value);
 	}
 	public def flatMapValue<R>(this, mapper : (T) => Result<R, E>) : Result<R, E> => {
@@ -22,5 +23,11 @@ export class def Err<T, E>(value : E) => {
 	}
 	public def match<R>(this, onOk : (T) => R, onErr : (E) => R) : R => {
 		return onErr.apply(value);
+	}
+	public def findValue(this) : Option<T> => {
+		return JavaOptionals.fromNative(findValue1());
+	}
+	public def findErr(this) : Option<E> => {
+		return JavaOptionals.fromNative(findErr0());
 	}
 }

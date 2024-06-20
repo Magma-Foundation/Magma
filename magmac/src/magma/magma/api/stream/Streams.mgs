@@ -1,4 +1,3 @@
-
 import magma.api.option.Option;
 import magma.java.JavaOptionals;
 import java.util.List;
@@ -14,7 +13,7 @@ export class def Streams() => {
 				private def head0(this) : Optional<T> => {
 					if(counter>=list.size())
 					return Optional.empty();
-					let mut next = list.get(counter);
+					let mut next : var = list.get(counter);
 					counter++;
 					return Optional.of(next);
 				}

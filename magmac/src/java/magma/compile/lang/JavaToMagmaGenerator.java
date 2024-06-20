@@ -1,13 +1,10 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
-import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.Node;
-import magma.compile.rule.text.StripRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,13 +36,6 @@ public class JavaToMagmaGenerator extends Generator {
             return node.withNode("definition", definition.remove("type"));
         }
         return node;
-    }
-
-    private static List<Node> attachFormatting(List<Node> children, String prefix) {
-        return children.stream()
-                .filter(child -> !child.is("empty"))
-                .map(child -> child.withString(StripRule.DEFAULT_LEFT, prefix))
-                .toList();
     }
 
     private static List<String> computeMutator(List<String> modifiers) {
@@ -130,7 +120,6 @@ public class JavaToMagmaGenerator extends Generator {
     @Override
     protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State depth) {
         return postVisitFunction(node)
-                .or(() -> postVisitBlock(node))
                 .or(() -> postVisitDeclaration(node))
                 .map(result -> result.mapValue(newNode -> new Tuple<>(newNode, depth)))
                 .orElse(new Ok<>(new Tuple<>(node, depth)));
@@ -153,23 +142,6 @@ public class JavaToMagmaGenerator extends Generator {
                 return oldModifiers;
             }, () -> List.of("let", "mut"));
         });
-    }
-
-    private Optional<Result<Node, Error_>> postVisitBlock(Node node) {
-        if (!node.is("block")) return Optional.empty();
-
-        var depthString = node.findString("depth");
-        if(depthString.isEmpty()) {
-            return Optional.of(new Err<>(new CompileError("No depth present.", node.toString())));
-        }
-
-        var depth = Integer.parseInt(depthString.get());
-        var prefix = "\n" + "\t".repeat(depth);
-        var newBlock = node
-                .mapNodes("children", children -> attachFormatting(children, prefix))
-                .withString("after-content", "\n" + "\t".repeat(depth == 0 ? 0 : depth - 1));
-
-        return Optional.of(new Ok<>(newBlock));
     }
 
     private Optional<Result<Node, Error_>> postVisitFunction(Node node) {

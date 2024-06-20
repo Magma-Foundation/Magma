@@ -1,4 +1,3 @@
-
 import java.util.Optional;
 public struct Factory {
 	fromAttribute : Optional<T>;

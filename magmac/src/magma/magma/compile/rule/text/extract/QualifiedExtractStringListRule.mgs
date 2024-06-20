@@ -1,4 +1,3 @@
-
 import magma.compile.Error_;
 import magma.compile.rule.Rule;
 import java.util.Optional;

@@ -1,4 +1,3 @@
-
 export class def NumberRule() => {
 	def NumberRule(this, child : Rule) : public => {
 		super(child);
@@ -9,7 +8,7 @@ export class def NumberRule() => {
 		let mut i : int = 0;
 		while(i<input.length())
 		{
-			let mut c = input.charAt(i);
+			let mut c : var = input.charAt(i);
 			if(!Character.isDigit(c))
 			{
 				return false;

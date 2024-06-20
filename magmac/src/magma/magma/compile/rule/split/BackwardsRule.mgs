@@ -1,4 +1,3 @@
-
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;
@@ -14,26 +13,26 @@ import java.util.Collections;
 import java.util.List;
 export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
 	public def toNode(this, input : String) : RuleResult => {
-		let mut allIndexes = findAllIndexesReverse(input);
-		let mut errors = ArrayList();
+		let mut allIndexes : var = findAllIndexesReverse(input);
+		let mut errors : var = ArrayList();
 		for(index : Integer in allIndexes){
-			let mut leftSlice = input.substring(0, index);
-			let mut rightSlice = input.substring(index+slice.length());
-			let mut leftResult = leftRule.toNode(leftSlice);
+			let mut leftSlice : var = input.substring(0, index);
+			let mut rightSlice : var = input.substring(index+slice.length());
+			let mut leftResult : var = leftRule.toNode(leftSlice);
 			if(leftResult.findError().isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, leftResult.findError().get()));
 				continue
 				;
 			}
-			let mut rightResult = rightRule.toNode(rightSlice);
+			let mut rightResult : var = rightRule.toNode(rightSlice);
 			if(rightResult.findError().isPresent())
 			{
 				errors.add(wrapError(leftSlice, rightSlice, rightResult.findError().get()));
 				continue
 				;
 			}
-			let mut optional = leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
+			let mut optional : var = leftResult.findAttributes().flatMap(() => rightResult.findAttributes().map(() => rightAttributes.merge(leftAttributes))).map(UntypedRuleResult.new);
 			if(optional.isPresent())
 			{
 				return optional.get();

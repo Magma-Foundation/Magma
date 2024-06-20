@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -7,19 +6,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export class def ParamSplitter() => {
 	public def split(this, input : String) : List<String> => {
-		let mut segments = ArrayList();
-		let mut buffer = StringBuilder();
-		let mut depth = 0;
-		let mut queue = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		let mut segments : var = ArrayList();
+		let mut buffer : var = StringBuilder();
+		let mut depth : var = 0;
+		let mut queue : var = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
 		while(!queue.isEmpty())
 		{
-			let mut c = queue.pop();
+			let mut c : var = queue.pop();
 			if(c=='\"')
 			{
 				buffer.append(c);
 				while(!queue.isEmpty())
 				{
-					let mut next = queue.pop();
+					let mut next : var = queue.pop();
 					buffer.append(next);
 					if(next=='\\')
 					{
@@ -41,7 +40,7 @@ export class def ParamSplitter() => {
 				buffer.append(c);
 				if(!queue.isEmpty())
 				{
-					let mut next = queue.peek();
+					let mut next : var = queue.peek();
 					if(next=='>')
 					{
 						buffer.append(queue.pop());

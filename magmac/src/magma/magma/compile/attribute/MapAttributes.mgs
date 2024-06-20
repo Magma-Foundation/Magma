@@ -1,4 +1,3 @@
-
 import magma.api.Tuple;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,7 +17,7 @@ export class def MapAttributes(values : Map<String, Attribute>) => {
 		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map(() => with(key, inner)).orElse(this);
 	}
 	public def with(this, key : String, value : Attribute) : Attributes => {
-		let mut copy = HashMap(values);
+		let mut copy : var = HashMap(values);
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
@@ -26,7 +25,7 @@ export class def MapAttributes(values : Map<String, Attribute>) => {
 		return values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
 	}
 	public def merge(this, other : Attributes) : Attributes => {
-		let mut entries = other.streamEntries().collect(Collectors.toSet());
+		let mut entries : var = other.streamEntries().collect(Collectors.toSet());
 		let mut current : Attributes = this;
 		for(entry : var in entries){
 			current=current.with(entry.left(), entry.right());
@@ -37,7 +36,7 @@ export class def MapAttributes(values : Map<String, Attribute>) => {
 		return values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
 	}
 	public def mapValues(this, mapper : (Attribute) => Attribute) : Attributes => {
-		let mut copy = HashMap();
+		let mut copy : var = HashMap();
 		for(stringAttributeEntry : Map.Entry<String, Attribute> in values.entrySet()){
 			copy.put(stringAttributeEntry.getKey(), mapper.apply(stringAttributeEntry.getValue()));
 		}
@@ -47,7 +46,7 @@ export class def MapAttributes(values : Map<String, Attribute>) => {
 		return values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
 	}
 	public def remove(this, key : String) : Attributes => {
-		let mut copy = HashMap(values);
+		let mut copy : var = HashMap(values);
 		copy.remove(key);
 		return MapAttributes(copy);
 	}

@@ -1,4 +1,3 @@
-
 import magma.api.option.Option;
 public struct Head {
 	head : Option<T>;

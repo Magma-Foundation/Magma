@@ -1,4 +1,3 @@
-
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
@@ -10,7 +9,7 @@ export class def LeftRule(slice : String, child : Rule) => {
 	public def toNode(this, input : String) : RuleResult => {
 		if(input.startsWith(slice))
 		{
-			let mut content = input.substring(slice.length());
+			let mut content : var = input.substring(slice.length());
 			return child.toNode(content);
 		}
 		else

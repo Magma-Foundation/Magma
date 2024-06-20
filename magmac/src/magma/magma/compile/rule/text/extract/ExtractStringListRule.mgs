@@ -1,4 +1,3 @@
-
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -18,9 +17,9 @@ export let mut ExtractStringListRule = () => class () => {
 		return attribute.asStringList().map(() => String.join(delimiter, list));
 	}
 	protected def toAttribute(this, content : String) : Result<Attribute, Error_> => {
-		let mut list = split(content);
+		let mut list : var = split(content);
 		for(format : String in list){
-			let mut qualified = qualify(format);
+			let mut qualified : var = qualify(format);
 			if(qualified.isPresent())
 			{
 				return Err(qualified.get());
@@ -33,7 +32,7 @@ export let mut ExtractStringListRule = () => class () => {
 		let mut start : int = 0;
 		while(true)
 		{
-			let mut end = content.indexOf(delimiter, start);
+			let mut end : var = content.indexOf(delimiter, start);
 			if(end==-1)
 			break;
 			result.add(content.substring(start, end));

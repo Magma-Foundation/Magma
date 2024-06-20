@@ -1,4 +1,3 @@
-
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;

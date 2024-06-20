@@ -1,4 +1,3 @@
-
 import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
@@ -25,72 +24,72 @@ export class def JavaLang() => {
 		return Lang.createBlock(createRootMemberRule());
 	}
 	private static def createRootMemberRule(this) : OrRule => {
-		let mut namespace = Lang.createNamespaceRule();
-		let mut importRule = Lang.createImportRule(namespace);
-		let mut member = LazyRule();
-		let mut statement = LazyRule();
-		let mut definition = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
-		let mut value = createValueRule(member, statement);
+		let mut namespace : var = Lang.createNamespaceRule();
+		let mut importRule : var = Lang.createImportRule(namespace);
+		let mut member : var = LazyRule();
+		let mut statement : var = LazyRule();
+		let mut definition : var = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
+		let mut value : var = createValueRule(member, statement);
 		initStatements(definition, statement, member, value);
-		let mut contents = LazyRule();
+		let mut contents : var = LazyRule();
 		initContentMember(member, contents, definition, statement, value);
 		contents.setRule(OrRule(List.of(createContentRule("class", member, Lang.createTypeRule(), definition), createContentRule("record", member, Lang.createTypeRule(), definition), createContentRule("interface", member, Lang.createTypeRule(), definition))));
 		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));
 	}
 	private static def initContentMember(this, contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) : void => {
-		let mut content = StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
-		let mut withoutThrows = ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));
-		let mut thrownValues = SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));
-		let mut withThrows = ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", thrownValues));
-		let mut maybeThrows = OrRule(List.of(withThrows, withoutThrows));
-		let mut withValue = ContextRule("Value present.", FirstRule(maybeThrows, "{", content));
-		let mut withoutValue = ContextRule("No value present.", RightRule(maybeThrows, ";"));
-		let mut maybeValue = OrRule(List.of(withValue, withoutValue));
-		let mut definitionNode = ExtractNodeRule("definition", TypeRule("definition", definition));
-		let mut methodRule = TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
+		let mut content : var = StripRule(RightRule(ExtractNodeRule("child", Lang.createBlock(statement)), "}"));
+		let mut withoutThrows : var = ContextRule("No throws statement present.", StripRule(RightRule(Lang.createParamsRule(definition), ")")));
+		let mut thrownValues : var = SplitMultipleRule(SplitThrows(), ", ", "thrown", StripRule(Lang.createTypeRule()));
+		let mut withThrows : var = ContextRule("Throws statement present.", LastRule(withoutThrows, "throws ", thrownValues));
+		let mut maybeThrows : var = OrRule(List.of(withThrows, withoutThrows));
+		let mut withValue : var = ContextRule("Value present.", FirstRule(maybeThrows, "{", content));
+		let mut withoutValue : var = ContextRule("No value present.", RightRule(maybeThrows, ";"));
+		let mut maybeValue : var = OrRule(List.of(withValue, withoutValue));
+		let mut definitionNode : var = ExtractNodeRule("definition", TypeRule("definition", definition));
+		let mut methodRule : var = TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
 		contentMember.setRule(OrRule(List.of(Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), contents)));
 	}
 	private static def initStatements(this, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) : void => {
-		let mut rules = List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createReturnRule(value), Lang.createConditionRule("if", value, statement), Lang.createElseRule(statement), Lang.createConditionRule("while", value, statement), Lang.createForRule(definition, value, statement, ":"), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createThrowRule(value), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value));
-		let mut copy = ArrayList(rules);
+		let mut rules : var = List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createReturnRule(value), Lang.createConditionRule("if", value, statement), Lang.createElseRule(statement), Lang.createConditionRule("while", value, statement), Lang.createForRule(definition, value, statement, ":"), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createThrowRule(value), Lang.createDeclarationRule(definition, value), Lang.createAssignmentRule(value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value));
+		let mut copy : var = ArrayList(rules);
 		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
 		statement.setRule(OrRule(copy));
 	}
 	private static def createContentRule(this, keyword : String, classMember : LazyRule, type : LazyRule, definition : Rule) : TypeRule => {
-		let mut modifiers = Lang.createModifiersRule();
-		let mut block = ExtractNodeRule("child", Lang.createBlock(classMember));
-		let mut name = StripRule(SymbolRule(ExtractStringRule("name")));
-		let mut typeParams = Lang.createTypeParamsRule();
-		let mut withTypeParams = StripRule(FirstRule(name, "<", RightRule(typeParams, ">")));
-		let mut maybeTypeParams = OptionalRule("type-params", withTypeParams, name);
-		let mut params = Lang.createParamsRule(definition);
-		let mut withParams = FirstRule(maybeTypeParams, "(", StripRule(RightRule(params, ")")));
-		let mut maybeParams = OptionalRule("params", withParams, maybeTypeParams);
-		let mut withExtends = FirstRule(maybeParams, " extends ", StripRule(ExtractStringRule("superclass")));
-		let mut maybeExtends = OptionalRule("extends", withExtends, maybeParams);
-		let mut withImplements = FirstRule(maybeExtends, " implements ", ExtractNodeRule("interface", type));
-		let mut maybeImplements = OptionalRule("implements", withImplements, maybeExtends);
-		let mut withoutModifiers = FirstRule(maybeImplements, "{", RightRule(block, "}"));
+		let mut modifiers : var = Lang.createModifiersRule();
+		let mut block : var = ExtractNodeRule("child", Lang.createBlock(classMember));
+		let mut name : var = StripRule(SymbolRule(ExtractStringRule("name")));
+		let mut typeParams : var = Lang.createTypeParamsRule();
+		let mut withTypeParams : var = StripRule(FirstRule(name, "<", RightRule(typeParams, ">")));
+		let mut maybeTypeParams : var = OptionalRule("type-params", withTypeParams, name);
+		let mut params : var = Lang.createParamsRule(definition);
+		let mut withParams : var = FirstRule(maybeTypeParams, "(", StripRule(RightRule(params, ")")));
+		let mut maybeParams : var = OptionalRule("params", withParams, maybeTypeParams);
+		let mut withExtends : var = FirstRule(maybeParams, " extends ", StripRule(ExtractStringRule("superclass")));
+		let mut maybeExtends : var = OptionalRule("extends", withExtends, maybeParams);
+		let mut withImplements : var = FirstRule(maybeExtends, " implements ", ExtractNodeRule("interface", type));
+		let mut maybeImplements : var = OptionalRule("implements", withImplements, maybeExtends);
+		let mut withoutModifiers : var = FirstRule(maybeImplements, "{", RightRule(block, "}"));
 		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
 	}
 	private static def createValueRule(this, classMember : LazyRule, statement : Rule) : LazyRule => {
-		let mut value = LazyRule();
+		let mut value : var = LazyRule();
 		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
 		return value;
 	}
 	private static def createLambdaRule(this, value : Rule, statement : Rule) : Rule => {
-		let mut child = SymbolRule(ExtractStringRule("param-name"));
-		let mut left = StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
-		let mut maybeValue = OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
-		let mut right = StripRule(ExtractNodeRule("child", maybeValue));
+		let mut child : var = SymbolRule(ExtractStringRule("param-name"));
+		let mut left : var = StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
+		let mut maybeValue : var = OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
+		let mut right : var = StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));
 	}
 	private static def createConstructorRule(this, value : Rule, classMember : Rule) : Rule => {
-		let mut arguments = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
-		let mut caller = ExtractNodeRule("caller", value);
-		let mut withGenerics = OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
-		let mut before = RightRule(InvocationStartRule(withGenerics, arguments), ")");
-		let mut child = OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
+		let mut arguments : var = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		let mut caller : var = ExtractNodeRule("caller", value);
+		let mut withGenerics : var = OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
+		let mut before : var = RightRule(InvocationStartRule(withGenerics, arguments), ")");
+		let mut child : var = OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}
 	class def SplitThrows() => {
