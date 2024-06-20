@@ -15,11 +15,6 @@ public record State(Set<List<String>> locations, List<List<String>> frames) {
         this(locations, new ArrayList<>());
     }
 
-    public State(Set<List<String>> locations, List<List<String>> frames) {
-        this.locations = locations;
-        this.frames = frames;
-    }
-
     public State exit() {
         var previous = frames.subList(0, frames.size() - 1);
         return new State(locations, previous);
