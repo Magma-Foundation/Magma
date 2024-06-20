@@ -8,25 +8,42 @@ import magma.compile.Error_;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-public record State(List<List<String>> frames) {
-    public State() {
-        this(new ArrayList<>());
+public record State(Set<List<String>> locations, List<List<String>> frames) {
+    public State(Set<List<String>> locations) {
+        this(locations, new ArrayList<>());
+    }
+
+    public State(Set<List<String>> locations, List<List<String>> frames) {
+        this.locations = locations;
+        this.frames = frames;
     }
 
     public State exit() {
         var previous = frames.subList(0, frames.size() - 1);
-        return new State(previous);
+        return new State(locations, previous);
     }
 
     public State enter() {
         var copy = new ArrayList<>(frames);
         copy.add(new ArrayList<>());
-        return new State(copy);
+        return new State(locations, copy);
     }
 
     public boolean isDefined(String value) {
+        if (isDefinedAsLocation(value)) {
+            return true;
+        }
+
         return frames.stream().anyMatch(frame -> frame.contains(value));
+    }
+
+    private boolean isDefinedAsLocation(String value) {
+        return locations.stream()
+                .filter(location -> !location.isEmpty())
+                .map(location -> location.get(location.size() - 1))
+                .anyMatch(last -> last.equals(value));
     }
 
     public int computeDepth() {
@@ -42,6 +59,6 @@ public record State(List<List<String>> frames) {
         var frameCopy = new ArrayList<>(framesCopy.remove(framesCopy.size() - 1));
         frameCopy.add(name);
         framesCopy.add(frameCopy);
-        return new Ok<>(new State(framesCopy));
+        return new Ok<>(new State(locations, framesCopy));
     }
 }

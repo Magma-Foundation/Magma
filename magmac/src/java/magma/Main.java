@@ -59,7 +59,7 @@ public class Main {
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
             var generated = Results.unwrap(new JavaToMagmaGenerator()
-                    .generate(entry.getValue(), new State())
+                    .generate(entry.getValue(), new State(sourceTrees.keySet()))
                     .mapErr(error -> {
                         writeError(error);
                         return new CompileException("Failed to generate: " + String.join(".", location));
