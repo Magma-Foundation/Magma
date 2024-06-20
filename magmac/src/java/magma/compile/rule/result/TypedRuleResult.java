@@ -1,26 +1,25 @@
 package magma.compile.rule.result;
 
+import magma.api.option.Option;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 public record TypedRuleResult(String name, Attributes attributes) implements RuleResult{
 
-    @Override
-    public Optional<Attributes> findAttributes() {
+    private Optional<Attributes> findAttributes0() {
         return Optional.of(attributes);
     }
 
-    @Override
-    public Optional<Node> tryCreate() {
+    private Optional<Node> tryCreate0() {
         return Optional.of(new Node(name, attributes));
     }
 
-    @Override
-    public Optional<Error_> findError() {
+    private Optional<Error_> findError0() {
         return Optional.empty();
     }
 
@@ -32,5 +31,20 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
     @Override
     public RuleResult mapErr(Function<Error_, Error_> mapper) {
         return this;
+    }
+
+    @Override
+    public Option<Error_> findError() {
+        return JavaOptionals.fromNative(findError0());
+    }
+
+    @Override
+    public Option<Attributes> findAttributes() {
+        return JavaOptionals.fromNative(findAttributes0());
+    }
+
+    @Override
+    public Option<Node> tryCreate() {
+        return JavaOptionals.fromNative(tryCreate0());
     }
 }

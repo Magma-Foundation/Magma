@@ -15,6 +15,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +40,10 @@ public final class SplitMultipleRule implements Rule {
         var members = new ArrayList<Node>();
         for (String childString : split) {
             var result = childRule.toNode(childString);
-            if (result.findError().isPresent())
+            if (JavaOptionals.toNative(result.findError()).isPresent())
                 return result.mapErr(err -> new CompileParentError("Cannot process child.", childString, err));
 
-            var optional = result.tryCreate();
+            var optional = JavaOptionals.toNative(result.tryCreate());
             if (optional.isEmpty()) {
                 return new ErrorRuleResult(new CompileError("No name present for.", childString));
             }

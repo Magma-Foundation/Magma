@@ -7,6 +7,8 @@ import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.compile.rule.Node;
+import magma.compile.rule.result.RuleResult;
+import magma.java.JavaOptionals;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -29,12 +31,12 @@ class JavaDefinitionHeaderFactoryTest {
     private static Optional<Node> parseImpl(String input) {
         var rule = JavaDefinitionHeaderFactory.createDefinitionHeaderRule();
         var result = rule.toNode(input);
-        if (result.findError().isPresent()) {
-            var error = result.findError().orElseThrow();
+        if (JavaOptionals.toNative(result.findError()).isPresent()) {
+            var error = JavaOptionals.toNative(result.findError()).orElseThrow();
             fail(toException(error));
         }
 
-        return result.tryCreate();
+        return JavaOptionals.toNative(result.tryCreate());
     }
 
     private static RuntimeException toException(Error_ error) {
@@ -55,9 +57,9 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void spaceInType() {
-        assertParse("public <L, R> First<L, R> test", "type", new NodeAttribute(Lang.createTypeRule()
-                .toNode("First<L, R>")
-                .tryCreate()
+        RuleResult ruleResult = Lang.createTypeRule()
+                .toNode("First<L, R>");
+        assertParse("public <L, R> First<L, R> test", "type", new NodeAttribute(JavaOptionals.toNative(ruleResult.tryCreate())
                 .orElseThrow()));
     }
 
@@ -112,6 +114,7 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void type() {
-        assertParse("var test", "type", new NodeAttribute(Lang.createTypeRule().toNode("var").tryCreate().orElseThrow()));
+        RuleResult ruleResult = Lang.createTypeRule().toNode("var");
+        assertParse("var test", "type", new NodeAttribute(JavaOptionals.toNative(ruleResult.tryCreate()).orElseThrow()));
     }
 }

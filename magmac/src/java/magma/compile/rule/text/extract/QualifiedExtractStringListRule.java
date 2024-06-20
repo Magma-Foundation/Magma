@@ -2,6 +2,8 @@ package magma.compile.rule.text.extract;
 
 import magma.compile.Error_;
 import magma.compile.rule.Rule;
+import magma.compile.rule.result.RuleResult;
+import magma.java.JavaOptionals;
 
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ public final class QualifiedExtractStringListRule extends ExtractStringListRule 
 
     @Override
     protected Optional<Error_> qualify(String child) {
-        return qualifier.toNode(child).findError();
+        RuleResult ruleResult = qualifier.toNode(child);
+        return JavaOptionals.toNative(ruleResult.findError());
     }
 }

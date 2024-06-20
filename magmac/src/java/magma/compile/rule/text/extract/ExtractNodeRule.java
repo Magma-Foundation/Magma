@@ -11,15 +11,15 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaOptionals;
 
 public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
     @Override
     public RuleResult toNode(String input) {
         var node = child.toNode(input);
-        if (node.findError().isPresent()) return node;
+        if (JavaOptionals.toNative(node.findError()).isPresent()) return node;
 
-        return node
-                .tryCreate()
+        return JavaOptionals.toNative(node.tryCreate())
                 .map(NodeAttribute::new)
                 .map(attribute -> new MapAttributes().with(propertyKey, attribute))
                 .<RuleResult>map(UntypedRuleResult::new)

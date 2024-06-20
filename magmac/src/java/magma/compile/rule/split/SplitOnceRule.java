@@ -10,6 +10,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaOptionals;
 
 import java.util.Optional;
 
@@ -36,13 +37,13 @@ public abstract class SplitOnceRule implements Rule {
             var right = contentStart.right();
 
             var leftResult = leftRule.toNode(left);
-            if (leftResult.findError().isPresent()) return leftResult;
+            if (JavaOptionals.toNative(leftResult.findError()).isPresent()) return leftResult;
 
             var rightResult = rightRule.toNode(right);
-            if (rightResult.findError().isPresent()) return rightResult;
+            if (JavaOptionals.toNative(rightResult.findError()).isPresent()) return rightResult;
 
-            return leftResult.findAttributes()
-                    .flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)))
+            return JavaOptionals.toNative(leftResult.findAttributes())
+                    .flatMap(leftAttributes -> JavaOptionals.toNative(rightResult.findAttributes()).map(rightAttributes -> rightAttributes.merge(leftAttributes)))
                     .map(UntypedRuleResult::new)
                     .orElseThrow();
         }).orElseGet(() -> {

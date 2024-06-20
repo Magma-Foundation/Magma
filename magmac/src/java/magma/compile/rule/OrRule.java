@@ -26,11 +26,11 @@ public record OrRule(List<Rule> rules) implements Rule {
         var errors = new ArrayList<Error_>();
         for (Rule rule : rules()) {
             var result = rule.toNode(input);
-            if (result.findAttributes().isPresent()) {
+            if (JavaOptionals.toNative(result.findAttributes()).isPresent()) {
                 return result;
             }
 
-            result.findError().ifPresent(errors::add);
+            JavaOptionals.toNative(result.findError()).ifPresent(errors::add);
         }
 
         if (errors.isEmpty()) {

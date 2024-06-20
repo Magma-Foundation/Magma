@@ -10,6 +10,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,19 +27,19 @@ public record BackwardsRule(Rule leftRule, String slice, Rule rightRule) impleme
             var rightSlice = input.substring(index + slice.length());
 
             var leftResult = leftRule.toNode(leftSlice);
-            if (leftResult.findError().isPresent()) {
-                errors.add(wrapError(leftSlice, rightSlice, leftResult.findError().get()));
+            if (JavaOptionals.toNative(leftResult.findError()).isPresent()) {
+                errors.add(wrapError(leftSlice, rightSlice, JavaOptionals.toNative(leftResult.findError()).get()));
                 continue;
             }
 
             var rightResult = rightRule.toNode(rightSlice);
-            if (rightResult.findError().isPresent()) {
-                errors.add(wrapError(leftSlice, rightSlice, rightResult.findError().get()));
+            if (JavaOptionals.toNative(rightResult.findError()).isPresent()) {
+                errors.add(wrapError(leftSlice, rightSlice, JavaOptionals.toNative(rightResult.findError()).get()));
                 continue;
             }
 
-            var optional = leftResult.findAttributes()
-                    .flatMap(leftAttributes -> rightResult.findAttributes().map(rightAttributes -> rightAttributes.merge(leftAttributes)))
+            var optional = JavaOptionals.toNative(leftResult.findAttributes())
+                    .flatMap(leftAttributes -> JavaOptionals.toNative(rightResult.findAttributes()).map(rightAttributes -> rightAttributes.merge(leftAttributes)))
                     .map(UntypedRuleResult::new);
 
             if (optional.isPresent()) {
