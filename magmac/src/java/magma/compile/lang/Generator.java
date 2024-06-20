@@ -4,7 +4,6 @@ import magma.api.Tuple;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.stream.Streams;
-import magma.compile.CompileError;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
@@ -28,13 +27,13 @@ public class Generator {
         }
 
         return attribute.asNode()
-                .map(value -> generateWithState(value, state).mapValue(inner -> inner.<Attribute>mapLeft(NodeAttribute::new)))
+                .map(value -> generate(value, state).mapValue(inner -> inner.<Attribute>mapLeft(NodeAttribute::new)))
                 .orElseGet(() -> new Ok<>(new Tuple<>(attribute, state)));
 
     }
 
     private Result<Tuple<List<Node>, State>, Error_> generateThenFold(Tuple<List<Node>, State> current, Node node) {
-        return generateWithState(node, current.right()).mapValue(tuple -> {
+        return generate(node, current.right()).mapValue(tuple -> {
             var newNode = tuple.left();
             var newState = tuple.right();
 
@@ -45,11 +44,7 @@ public class Generator {
         });
     }
 
-    public Result<Node, Error_> generate(Node node, State state) {
-        return generateWithState(node, state).mapValue(Tuple::left);
-    }
-
-    private Result<Tuple<Node, State>, Error_> generateWithState(Node node, State depth) {
+    public Result<Tuple<Node, State>, Error_> generate(Node node, State depth) {
         return preVisit(node, depth).flatMapValue(preVisitedTuple -> {
             var preVisited = preVisitedTuple.left();
             var preVisitedAttributes = preVisited.attributes().streamEntries().toList();

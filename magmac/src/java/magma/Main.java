@@ -1,11 +1,13 @@
 package magma;
 
+import magma.api.Tuple;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
 import magma.compile.CompileException;
 import magma.compile.Error_;
+import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaLang;
@@ -58,8 +60,8 @@ public class Main {
             var name = location.get(location.size() - 1);
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = Results.unwrap(new JavaToMagmaGenerator()
-                    .generate(entry.getValue(), new State(sourceTrees.keySet()))
+            var generated = Results.unwrap(getGenerate(entry, sourceTrees)
+                    .mapValue(Tuple::left)
                     .mapErr(error -> {
                         writeError(error);
                         return new CompileException("Failed to generate: " + String.join(".", location));
@@ -95,6 +97,12 @@ public class Main {
 
             writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
         }
+    }
+
+    private static Result<Tuple<Node, State>, Error_> getGenerate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
+        var state = new State(sourceTrees.keySet());
+        var generate = new JavaAnnotator().generate(entry.getValue(), state);
+        return generate.flatMapValue(inner -> new JavaToMagmaGenerator().generate(inner.left(), inner.right()));
     }
 
     private static Map<List<String>, Node> parseSources(List<Path> sources) throws CompileException {
