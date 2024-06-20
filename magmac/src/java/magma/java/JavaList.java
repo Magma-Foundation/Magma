@@ -14,62 +14,69 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public record JavaList<T>(List<T> list) {
+public record JavaList<T>(List<T> list) implements magma.api.List<T> {
     public JavaList() {
         this(Collections.emptyList());
     }
 
-    public static <T, R> JavaList<R> fromNative(List<T> frames, Function<T, R> mapper) {
+    public static <T, R> magma.api.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
         return Streams.fromNativeList(frames)
                 .map(mapper)
                 .collect(toList());
     }
 
-    public static <T> Collector<T, JavaList<T>> toList() {
+    public static <T> Collector<T, magma.api.List<T>> toList() {
         return new Collector<>() {
             @Override
-            public JavaList<T> createInitial() {
+            public magma.api.List<T> createInitial() {
                 return new JavaList<>();
             }
 
             @Override
-            public JavaList<T> fold(JavaList<T> current, T next) {
+            public magma.api.List<T> fold(magma.api.List<T> current, T next) {
                 return current.add(next);
             }
         };
     }
 
-    public JavaList<T> add(T next) {
+    @Override
+    public magma.api.List<T> add(T next) {
         var copy = new ArrayList<>(list);
         copy.add(next);
         return new JavaList<>(copy);
     }
 
-    public Option<Tuple<T, JavaList<T>>> pop() {
+    @Override
+    public Option<Tuple<T, magma.api.List<T>>> pop() {
         if (list.isEmpty()) return new None<>();
         var last = list.get(list.size() - 1);
         var slice = new JavaList<>(list.subList(0, list.size() - 1));
         return new Some<>(new Tuple<>(last, slice));
     }
 
+    @Override
     public JavaList<T> push(T element) {
         var copy = new ArrayList<>(list);
         copy.add(element);
         return new JavaList<>(copy);
     }
 
+    @Override
     public Stream<T> stream() {
         return new AbstractStream<>(new NativeListStream<>(list));
     }
 
+    @Override
     public boolean contains(T element) {
         return this.list.contains(element);
     }
 
+    @Override
     public boolean isEmpty() {
         return list.isEmpty();
     }
 
+    @Override
     public Option<T> last() {
         if (list.isEmpty()) {
             return new None<>();
@@ -78,11 +85,13 @@ public record JavaList<T>(List<T> list) {
         }
     }
 
+    @Override
     public int size() {
         return list.size();
     }
 
-    public Option<JavaList<T>> mapLast(Function<T, T> mapper) {
+    @Override
+    public Option<magma.api.List<T>> mapLast(Function<T, T> mapper) {
         if (list.isEmpty()) {
             return new None<>();
         }

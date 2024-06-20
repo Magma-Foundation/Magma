@@ -1,5 +1,6 @@
 package magma.compile.lang;
 
+import magma.api.List;
 import magma.api.Tuple;
 import magma.api.result.Err;
 import magma.api.result.Ok;
@@ -8,18 +9,18 @@ import magma.api.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.java.JavaList;
-import magma.java.JavaSet;
+import magma.java.Set;
 
 public final class State {
-    private final JavaSet<JavaList<String>> locations;
-    private final JavaList<JavaList<String>> frames;
+    private final Set<List<String>> locations;
+    private final List<List<String>> frames;
 
-    public State(JavaSet<JavaList<String>> locations, JavaList<JavaList<String>> frames) {
+    public State(Set<List<String>> locations, List<List<String>> frames) {
         this.locations = locations;
         this.frames = frames;
     }
 
-    public State(JavaSet<JavaList<String>> locations) {
+    public State(Set<List<String>> locations) {
         this(locations, new JavaList<>());
     }
 
@@ -41,7 +42,7 @@ public final class State {
 
     private boolean isDefinedAsLocation(String value) {
         return locations.stream()
-                .map(JavaList::last)
+                .map(List::last)
                 .flatMap(Streams::fromOption)
                 .anyMatch(last -> last.equals(value));
     }
