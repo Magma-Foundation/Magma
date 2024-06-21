@@ -8,7 +8,6 @@ import magma.api.result.Results;
 import magma.api.collect.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.Generator;
 import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
@@ -16,6 +15,7 @@ import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.State;
+import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -119,7 +119,7 @@ public class Main {
         return Streams.fromNativeList(list).foldRightToResult(initial, Main::generateImpl);
     }
 
-    private static Result<Tuple<Node, State>, Error_> generateImpl(Tuple<Node, State> tuple, Generator generator) {
+    private static Result<Tuple<Node, State>, Error_> generateImpl(Tuple<Node, State> tuple, TreeGenerator generator) {
         var node = tuple.left();
         var state1 = tuple.right();
 

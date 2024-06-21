@@ -6,7 +6,7 @@ import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.rule.Node;
 
-public class MagmaAnnotator extends Generator {
+public class MagmaAnnotator extends TreeGenerator {
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
         if(node.is("block")) {

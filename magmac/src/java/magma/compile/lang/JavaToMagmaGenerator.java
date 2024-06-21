@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class JavaToMagmaGenerator extends Generator {
+public class JavaToMagmaGenerator extends TreeGenerator {
     private static Optional<Result<Node, Error_>> preVisitBlock(Node node) {
         if (!node.is("block")) return Optional.empty();
 

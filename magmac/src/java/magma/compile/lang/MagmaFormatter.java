@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class MagmaFormatter extends Generator {
+public class MagmaFormatter extends TreeGenerator {
     private static List<Node> attachFormatting(List<Node> children, String prefix, int depth) {
         List<Node> list = new ArrayList<>();
         int i = 0;

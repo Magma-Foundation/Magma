@@ -10,7 +10,7 @@ import magma.compile.rule.Node;
 
 import java.util.List;
 
-public class JavaAnnotator extends Generator {
+public class JavaAnnotator extends TreeGenerator {
     private static Result<State, Error_> defineParams(State state, List<Node> params) {
         Result<State, Error_> defined = new Ok<>(state);
         for (Node param : params) {
