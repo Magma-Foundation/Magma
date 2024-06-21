@@ -5,7 +5,7 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
-import magma.api.stream.Streams;
+import magma.api.collect.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.lang.Generator;

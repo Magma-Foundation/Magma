@@ -15,4 +15,10 @@ public interface Option<T> {
     boolean isPresent();
 
     Tuple<Boolean, T> toTuple(T other);
+
+    boolean isEmpty();
+
+    <R> Option<R> flatMap(Function<T, Option<R>> mapper);
+
+    T orElsePanic();
 }

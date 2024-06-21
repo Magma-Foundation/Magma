@@ -1,8 +1,8 @@
-package magma.api;
+package magma.api.collect;
 
+import magma.api.Tuple;
 import magma.api.option.Option;
-import magma.api.stream.Stream;
-import magma.java.JavaList;
+import magma.api.collect.stream.Stream;
 
 import java.util.function.Function;
 
@@ -11,7 +11,7 @@ public interface List<T> {
 
     Option<Tuple<T, List<T>>> pop();
 
-    JavaList<T> push(T element);
+    List<T> push(T element);
 
     Stream<T> stream();
 

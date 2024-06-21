@@ -4,50 +4,50 @@ import magma.api.Tuple;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.api.stream.AbstractStream;
-import magma.api.stream.Collector;
-import magma.api.stream.Stream;
-import magma.api.stream.Streams;
+import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.Stream;
+import magma.api.collect.stream.Streams;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public record JavaList<T>(List<T> list) implements magma.api.List<T> {
+public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     public JavaList() {
         this(Collections.emptyList());
     }
 
-    public static <T, R> magma.api.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
+    public static <T, R> magma.api.collect.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
         return Streams.fromNativeList(frames)
                 .map(mapper)
                 .collect(toList());
     }
 
-    public static <T> Collector<T, magma.api.List<T>> toList() {
+    public static <T> Collector<T, magma.api.collect.List<T>> toList() {
         return new Collector<>() {
             @Override
-            public magma.api.List<T> createInitial() {
+            public magma.api.collect.List<T> createInitial() {
                 return new JavaList<>();
             }
 
             @Override
-            public magma.api.List<T> fold(magma.api.List<T> current, T next) {
+            public magma.api.collect.List<T> fold(magma.api.collect.List<T> current, T next) {
                 return current.add(next);
             }
         };
     }
 
     @Override
-    public magma.api.List<T> add(T next) {
+    public magma.api.collect.List<T> add(T next) {
         var copy = new ArrayList<>(list);
         copy.add(next);
         return new JavaList<>(copy);
     }
 
     @Override
-    public Option<Tuple<T, magma.api.List<T>>> pop() {
+    public Option<Tuple<T, magma.api.collect.List<T>>> pop() {
         if (list.isEmpty()) return new None<>();
         var last = list.get(list.size() - 1);
         var slice = new JavaList<>(list.subList(0, list.size() - 1));
@@ -55,7 +55,7 @@ public record JavaList<T>(List<T> list) implements magma.api.List<T> {
     }
 
     @Override
-    public JavaList<T> push(T element) {
+    public magma.api.collect.List<T> push(T element) {
         var copy = new ArrayList<>(list);
         copy.add(element);
         return new JavaList<>(copy);
@@ -91,7 +91,7 @@ public record JavaList<T>(List<T> list) implements magma.api.List<T> {
     }
 
     @Override
-    public Option<magma.api.List<T>> mapLast(Function<T, T> mapper) {
+    public Option<magma.api.collect.List<T>> mapLast(Function<T, T> mapper) {
         if (list.isEmpty()) {
             return new None<>();
         }

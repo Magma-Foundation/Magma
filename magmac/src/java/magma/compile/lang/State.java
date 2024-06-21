@@ -1,14 +1,14 @@
 package magma.compile.lang;
 
-import magma.api.List;
 import magma.api.Tuple;
+import magma.api.collect.LinkedList;
+import magma.api.collect.List;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.api.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.Error_;
-import magma.java.JavaList;
 import magma.java.Set;
 
 public final class State {
@@ -21,7 +21,7 @@ public final class State {
     }
 
     public State(Set<List<String>> locations) {
-        this(locations, new JavaList<>());
+        this(locations, new LinkedList<>());
     }
 
     public State exit() {
@@ -29,7 +29,7 @@ public final class State {
     }
 
     public State enter() {
-        return new State(locations, frames.push(new JavaList<>()));
+        return new State(locations, frames.push(new LinkedList<>()));
     }
 
     public boolean isDefined(String value) {

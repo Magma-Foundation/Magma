@@ -1,9 +1,9 @@
 package magma.java;
 
-import magma.api.stream.AbstractStream;
-import magma.api.stream.Collector;
-import magma.api.stream.Stream;
-import magma.api.stream.Streams;
+import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.Stream;
+import magma.api.collect.stream.Streams;
 
 import java.util.ArrayList;
 import java.util.Collections;

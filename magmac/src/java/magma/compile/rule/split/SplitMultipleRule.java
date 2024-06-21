@@ -1,9 +1,9 @@
 package magma.compile.rule.split;
 
-import magma.api.stream.Collectors;
+import magma.api.collect.stream.Collectors;
 import magma.api.result.Err;
 import magma.api.result.Result;
-import magma.api.stream.Streams;
+import magma.api.collect.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;

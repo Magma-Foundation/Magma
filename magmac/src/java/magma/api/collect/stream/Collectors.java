@@ -1,4 +1,4 @@
-package magma.api.stream;
+package magma.api.collect.stream;
 
 import magma.api.result.Ok;
 import magma.api.result.Result;

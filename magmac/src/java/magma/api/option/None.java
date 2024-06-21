@@ -30,4 +30,19 @@ public class None<T> implements Option<T> {
     public Tuple<Boolean, T> toTuple(T other) {
         return new Tuple<>(false, other);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return new None<>();
+    }
+
+    @Override
+    public T orElsePanic() {
+        throw new RuntimeException("Option was empty!");
+    }
 }

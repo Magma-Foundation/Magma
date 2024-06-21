@@ -30,4 +30,19 @@ public record Some<T>(T value) implements Option<T> {
     public Tuple<Boolean, T> toTuple(T other) {
         return new Tuple<>(true, value);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
+        return mapper.apply(value);
+    }
+
+    @Override
+    public T orElsePanic() {
+        return value;
+    }
 }
