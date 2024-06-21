@@ -8,7 +8,6 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
-import magma.java.JavaOptionals;
 
 import java.util.function.Function;
 
@@ -32,14 +31,10 @@ public interface RuleResult {
     RuleResult mapErr(Function<Error_, Error_> mapper);
 
     default Result<Node, Error_> create() {
-        return JavaOptionals.toNative(tryCreate())
-                .map(RuleResult::wrapInOk)
-                .orElseGet(this::wrapInErr);
+        return tryCreate().map(RuleResult::wrapInOk).orElseGet(this::wrapInErr);
     }
 
     private Result<Node, Error_> wrapInErr() {
-        return JavaOptionals.toNative(findError())
-                .map(err -> new Err<Node, Error_>(err))
-                .orElseGet(RuleResult::createNothingPresentError);
+        return findError().map(err -> new Err<Node, Error_>(err)).orElseGet(RuleResult::createNothingPresentError);
     }
 }
