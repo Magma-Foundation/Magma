@@ -12,12 +12,12 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.AbstractSplitOnceRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
-import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -267,13 +267,13 @@ public class Lang {
         return new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
     }
 
-    private static class OperatorFinderRule extends SplitOnceRule {
+    private static class OperatorFinderRule extends AbstractSplitOnceRule {
         public OperatorFinderRule(Rule value, String slice) {
             super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));
         }
 
         @Override
-        protected Optional<Integer> computeIndex(String input) {
+        protected Optional<Integer> computeIndexImpl(String input) {
             if (!input.contains(slice)) return Optional.empty();
 
             var queue = IntStream.range(0, input.length())

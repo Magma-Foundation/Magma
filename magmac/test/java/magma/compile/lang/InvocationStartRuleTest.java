@@ -8,7 +8,7 @@ class InvocationStartRuleTest {
     @Test
     void computeIndex() {
         var present = new InvocationStartRule(null, null)
-                .computeIndex("TypeRule(\"string\", new LeftRule(\"\\\"\", new RightRule(new ExtractStringRule(\"value\"), \"\\\"\"))")
+                .computeIndexImpl("TypeRule(\"string\", new LeftRule(\"\\\"\", new RightRule(new ExtractStringRule(\"value\"), \"\\\"\"))")
                 .isPresent();
 
         Assertions.assertTrue(present);

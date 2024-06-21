@@ -2,20 +2,20 @@ package magma.compile.lang;
 
 import magma.api.Tuple;
 import magma.compile.rule.Rule;
-import magma.compile.rule.split.SplitOnceRule;
+import magma.compile.rule.split.AbstractSplitOnceRule;
 
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-class InvocationStartRule extends SplitOnceRule {
+class InvocationStartRule extends AbstractSplitOnceRule {
     public InvocationStartRule(Rule caller, Rule arguments) {
         super(caller, "(", arguments);
     }
 
     @Override
-    protected Optional<Integer> computeIndex(String input) {
+    protected Optional<Integer> computeIndexImpl(String input) {
         var depth = 0;
 
         var queue = IntStream.range(0, input.length())

@@ -5,13 +5,13 @@ import magma.compile.rule.Rules;
 
 import java.util.Optional;
 
-public final class FirstRule extends SplitOnceRule implements Rule {
+public final class FirstRule extends AbstractSplitOnceRule implements Rule {
     public FirstRule(Rule leftRule, String slice, Rule rightRule) {
         super(leftRule, slice, rightRule);
     }
 
     @Override
-    protected Optional<Integer> computeIndex(String input) {
+    protected Optional<Integer> computeIndexImpl(String input) {
         return Rules.wrapIndex(input.indexOf(slice));
     }
 }
