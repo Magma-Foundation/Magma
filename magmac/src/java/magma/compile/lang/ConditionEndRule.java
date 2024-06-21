@@ -14,6 +14,49 @@ class ConditionEndRule extends SplitOnceRule {
         super(conditionParent, ")", valueParent);
     }
 
+    private static Optional<Integer> getInteger(LinkedList<Tuple<Integer, Character>> queue, int depth) {
+        var current = new State(queue, depth, Optional.empty());
+        while (!queue.isEmpty()) {
+            var result = ok(current);
+            if (result.index.isPresent()) {
+                return result.index;
+            } else {
+                current = result;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private static State ok(State state) {
+        var queue = state.queue;
+        var depth = state.depth;
+
+        var pop = queue.pop();
+        var i = pop.left();
+        var c = pop.right();
+
+        if (c == '\'') {
+            var next = queue.pop();
+            if (next.right() == '\\') {
+                queue.pop();
+            }
+
+            queue.pop();
+            return new State(queue, depth, Optional.empty());
+        }
+
+        if (c == ')' && depth == 1) {
+            return new State(queue, depth, Optional.of(i));
+        } else {
+            if (c == '(')
+                return new State(queue, depth + 1, Optional.empty());
+            if (c == ')')
+                return new State(queue, depth - 1, Optional.empty());
+            return new State(queue, depth, Optional.empty());
+        }
+    }
+
     @Override
     protected Optional<Integer> computeIndex(String input) {
         /*
@@ -25,28 +68,9 @@ class ConditionEndRule extends SplitOnceRule {
                 .collect(Collectors.toCollection(LinkedList::new));
 
         var depth = 0;
-        while (!queue.isEmpty()) {
-            var pop = queue.pop();
-            var i = pop.left();
-            var c = pop.right();
+        return getInteger(queue, depth);
+    }
 
-            if (c == '\'') {
-                var next = queue.pop();
-                if(next.right() == '\\') {
-                    queue.pop();
-                }
-
-                queue.pop();
-            }
-
-            if (c == ')' && depth == 1) {
-                return Optional.of(i);
-            } else {
-                if (c == '(') depth++;
-                if (c == ')') depth--;
-            }
-        }
-
-        return Optional.empty();
+    record State(LinkedList<Tuple<Integer, Character>> queue, int depth, Optional<Integer> index) {
     }
 }
