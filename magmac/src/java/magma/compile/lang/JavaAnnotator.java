@@ -20,6 +20,32 @@ public class JavaAnnotator extends Generator {
         return defined;
     }
 
+    private static Result<Tuple<Node, State>, Error_> hoistMethods(Node node, State state) {
+        var children = node.findNode("child")
+                .orElseThrow()
+                .findNodeList("children")
+                .orElseThrow();
+
+        Result<State, Error_> defined = new Ok<>(state.enter());
+        for (Node child : children) {
+            if (child.is("method")) {
+                var name = child.findNode("definition")
+                        .orElseThrow()
+                        .findString("name")
+                        .orElseThrow();
+
+                defined = defined.flatMapValue(inner -> inner.define(name));
+            }
+        }
+
+        return defined.mapValue(inner -> new Tuple<>(node, inner));
+    }
+
+    private static Result<Tuple<Node, State>, Error_> defineParams(Node node, State state) {
+        var params = node.findNodeList("params").orElseThrow();
+        return defineParams(state, params).mapValue(inner -> new Tuple<>(node, inner));
+    }
+
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
         if (node.is("lambda")) {
@@ -33,30 +59,16 @@ public class JavaAnnotator extends Generator {
             return new Ok<>(new Tuple<>(node, state.enter()));
         }
 
-        if (node.is("method") || node.is("record")) {
-            var params = node.findNodeList("params").orElseThrow();
-            return defineParams(state, params).mapValue(inner -> new Tuple<>(node, inner));
+        if (node.is("method")) {
+            return defineParams(node, state);
         }
 
-        if (node.is("class")) {
-            var children = node.findNode("child")
-                    .orElseThrow()
-                    .findNodeList("children")
-                    .orElseThrow();
+        if (node.is("class") || node.is("interface")) {
+            return hoistMethods(node, state);
+        }
 
-            Result<State, Error_> defined = new Ok<>(state.enter());
-            for (Node child : children) {
-                if (child.is("method")) {
-                    var name = child.findNode("definition")
-                            .orElseThrow()
-                            .findString("name")
-                            .orElseThrow();
-
-                    defined = defined.flatMapValue(inner -> inner.define(name));
-                }
-            }
-
-            return defined.mapValue(inner -> new Tuple<>(node, inner));
+        if (node.is("record")) {
+            return defineParams(node, state).flatMapValue(inner -> hoistMethods(inner.left(), inner.right()));
         }
 
         return new Ok<>(new Tuple<>(node, state));
@@ -81,7 +93,7 @@ public class JavaAnnotator extends Generator {
             return new Err<>(new CompileError("Symbol not defined.", value));
         }
 
-        if(node.is("declaration")) {
+        if (node.is("declaration")) {
             var definition = node.findNode("definition").orElseThrow();
             var name = definition.findString("name").orElseThrow();
             return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
