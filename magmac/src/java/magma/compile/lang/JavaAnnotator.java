@@ -86,7 +86,11 @@ public class JavaAnnotator extends TreeGenerator {
 
         if (node.is("symbol")) {
             var value = node.findString("value").orElseThrow();
-            if (value.equals("true") || value.equals("false") || value.equals("this") || state.isDefined(value)) {
+            if (value.equals("true")
+                || value.equals("false")
+                || value.equals("this")
+                || value.equals("super")
+                || state.isDefined(value)) {
                 return new Ok<>(new Tuple<>(node, state));
             }
 
