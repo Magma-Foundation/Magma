@@ -1,6 +1,8 @@
 package magma.api.collect.stream;
 
+import magma.api.option.None;
 import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.java.JavaOptionals;
 
 import java.util.List;
@@ -30,5 +32,19 @@ public class Streams {
         return new AbstractStream<>(option
                 .<Head<T>>map(SingleHead::new)
                 .orElseGet(EmptyHead::new));
+    }
+
+    public static Stream<Integer> from(int extent) {
+        return new AbstractStream<>(new Head<>() {
+            private int counter = 0;
+
+            @Override
+            public Option<Integer> head() {
+                if (counter >= extent) return new None<>();
+                var value = counter;
+                counter++;
+                return new Some<>(value);
+            }
+        });
     }
 }

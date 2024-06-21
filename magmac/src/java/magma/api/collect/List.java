@@ -9,7 +9,11 @@ import java.util.function.Function;
 public interface List<T> {
     List<T> add(T next);
 
-    Option<Tuple<T, List<T>>> pop();
+    Option<Tuple<T, List<T>>> popFirst();
+
+    default Option<List<T>> popFirstAndDiscard() {
+        return popFirst().map(Tuple::right);
+    }
 
     List<T> push(T element);
 

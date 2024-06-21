@@ -1,13 +1,13 @@
 package magma.java;
 
 import magma.api.Tuple;
-import magma.api.option.None;
-import magma.api.option.Option;
-import magma.api.option.Some;
 import magma.api.collect.stream.AbstractStream;
 import magma.api.collect.stream.Collector;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +47,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public Option<Tuple<T, magma.api.collect.List<T>>> pop() {
+    public Option<Tuple<T, magma.api.collect.List<T>>> popFirst() {
         if (list.isEmpty()) return new None<>();
         var last = list.get(list.size() - 1);
         var slice = new JavaList<>(list.subList(0, list.size() - 1));

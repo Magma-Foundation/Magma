@@ -23,12 +23,9 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
     }
 
     @Override
-    public Option<Tuple<T, List<T>>> pop() {
+    public Option<Tuple<T, List<T>>> popFirst() {
         if (head.isEmpty()) return new None<>();
-        return head.flatMap(link -> {
-            var popped = link.pop();
-            return popped.right().map(newLink -> new Tuple<>(popped.left(), new LinkedList<>(new Some<>(newLink))));
-        });
+        return head.map(link -> link.popFirst().mapRight(LinkedList::new));
     }
 
     @Override
@@ -81,7 +78,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
 
         Option<T> last();
 
-        Tuple<T, Option<Link<T>>> pop();
+        Tuple<T, Option<Link<T>>> popFirst();
     }
 
     record Parent<T>(T value, Link<T> child) implements Link<T> {
@@ -116,15 +113,8 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
         }
 
         @Override
-        public Tuple<T, Option<Link<T>>> pop() {
-            return child.pop()
-                    .mapRight(this::withNewChild)
-                    .mapRight(Some::new);
-        }
-
-        private Link<T> withNewChild(Option<Link<T>> child) {
-            return child.<Link<T>>map(rightInner -> new Parent<>(value, rightInner))
-                    .orElse(new Child<>(value));
+        public Tuple<T, Option<Link<T>>> popFirst() {
+            return new Tuple<>(value, new Some<>(child));
         }
     }
 
@@ -160,7 +150,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
         }
 
         @Override
-        public Tuple<T, Option<Link<T>>> pop() {
+        public Tuple<T, Option<Link<T>>> popFirst() {
             return new Tuple<>(value, new None<>());
         }
     }
@@ -177,7 +167,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
             if (current.isEmpty()) return new None<>();
             var link = current.orElsePanic();
 
-            var popped = link.pop();
+            var popped = link.popFirst();
             current = popped.right();
             return new Some<>(popped.left());
         }

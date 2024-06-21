@@ -25,7 +25,7 @@ public final class State {
     }
 
     public State exit() {
-        return new State(locations, frames.pop().map(Tuple::right).orElse(frames));
+        return new State(locations, frames.popFirst().map(Tuple::right).orElse(frames));
     }
 
     public State enter() {
