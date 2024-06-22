@@ -48,6 +48,16 @@ public class JavaAnnotator extends TreeGenerator {
 
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
+        if(node.is("import")) {
+            var namespace = node.findNode("external")
+                    .orElseThrow()
+                    .findStringList("namespace")
+                    .orElseThrow();
+
+            var last = namespace.get(namespace.size() - 1);
+            return state.define(last).mapValue(newState -> new Tuple<>(node, newState));
+        }
+
         if (node.is("lambda")) {
             var nameOptional = node.findString("param-name");
             if (nameOptional.isPresent()) {
