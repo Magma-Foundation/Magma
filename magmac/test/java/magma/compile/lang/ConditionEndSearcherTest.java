@@ -13,6 +13,11 @@ class ConditionEndSearcherTest {
     }
 
     @Test
+    void ignoreWithinCharsAfterEscape() {
+        assertSearch("('\\\\' ')')", 9);
+    }
+
+    @Test
     void ignoreWithinChars() {
         assertSearch("(')')", 4);
     }

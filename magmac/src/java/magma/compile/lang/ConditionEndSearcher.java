@@ -23,7 +23,11 @@ public class ConditionEndSearcher implements Searcher {
             var c = tuple.right();
 
             if (c == '\'') {
-                queue.pop();
+                var popped = queue.pop();
+                if(popped.right() == '\\') {
+                    queue.pop();
+                }
+
                 queue.pop();
                 continue;
             }
