@@ -28,7 +28,7 @@ public class TreeGenerator implements Generator {
         }
 
         return attribute.asNode()
-                .map(value -> generate(value, state).mapValue(inner -> inner.<Attribute>mapLeft(NodeAttribute::new)))
+                .map(value -> generate(value, state).mapValue(inner -> inner.mapLeft(NodeAttribute::from)))
                 .orElseGet(() -> new Ok<>(new Tuple<>(attribute, state)));
 
     }

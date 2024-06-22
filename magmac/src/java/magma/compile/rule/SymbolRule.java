@@ -15,7 +15,7 @@ public final class SymbolRule extends FilterRule {
         int i = 0;
         while (i < input.length()) {
             var c = input.charAt(i);
-            if (Character.isLetter(c) || c == '_' || (i != 0 && Character.isDigit(c))) {
+            if (Character.isLetter(c) || isUnderscore(c) || isValidDigit(i, c)) {
                 i++;
                 continue;
             }
@@ -24,5 +24,13 @@ public final class SymbolRule extends FilterRule {
         }
 
         return true;
+    }
+
+    private static boolean isValidDigit(int i, char c) {
+        return i != 0 && Character.isDigit(c);
+    }
+
+    private static boolean isUnderscore(char c) {
+        return c == '_';
     }
 }

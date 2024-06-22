@@ -26,4 +26,8 @@ public record NodeAttribute(Node value) implements Attribute {
     public String format(int depth) {
         return value.format(depth);
     }
+
+    public static Attribute from(Node node) {
+        return new NodeAttribute(node);
+    }
 }
