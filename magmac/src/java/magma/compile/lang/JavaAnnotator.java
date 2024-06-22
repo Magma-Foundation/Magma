@@ -36,6 +36,11 @@ public class JavaAnnotator extends TreeGenerator {
 
                 defined = defined.flatMapValue(inner -> inner.define(name));
             }
+
+            if(child.is("class")) {
+                var name = child.findString("name").orElseThrow();
+                defined = defined.flatMapValue(inner -> inner.define(name));
+            }
         }
 
         return defined.mapValue(inner -> new Tuple<>(node, inner));
@@ -96,11 +101,7 @@ public class JavaAnnotator extends TreeGenerator {
 
         if (node.is("symbol")) {
             var value = node.findString("value").orElseThrow();
-            if (value.equals("true")
-                || value.equals("false")
-                || value.equals("this")
-                || value.equals("super")
-                || state.isDefined(value)) {
+            if (exists(state, value)) {
                 return new Ok<>(new Tuple<>(node, state));
             }
 
@@ -114,5 +115,23 @@ public class JavaAnnotator extends TreeGenerator {
         }
 
         return new Ok<>(new Tuple<>(node, state));
+    }
+
+    private static boolean exists(State state, String value) {
+        var b = value.equals("true")
+                || value.equals("false")
+                || value.equals("this")
+                || value.equals("super")
+                || state.isDefined(value);
+        return b && isInJavaLang(value);
+    }
+
+    private static boolean isInJavaLang(String value) {
+        try {
+            Class.forName("java.lang." + value);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
