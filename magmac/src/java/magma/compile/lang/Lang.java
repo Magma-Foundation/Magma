@@ -12,12 +12,13 @@ import magma.compile.rule.OrRule;
 import magma.compile.rule.Rule;
 import magma.compile.rule.SymbolRule;
 import magma.compile.rule.TypeRule;
-import magma.compile.rule.split.AbstractSplitOnceRule;
 import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.Searcher;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
@@ -112,7 +113,7 @@ public class Lang {
         ));
 
         var caller = new ExtractNodeRule("caller", new StripRule(value));
-        return new TypeRule("invocation", new RightRule(new InvocationStartRule(caller, arguments), ")"));
+        return new TypeRule("invocation", new RightRule(new SplitOnceRule(caller, "(", arguments, new InvocationStartSearcher()), ")"));
     }
 
     static TypeRule createCommentRule() {
@@ -131,7 +132,7 @@ public class Lang {
                 valueWithoutBlock
         )));
 
-        return new TypeRule(type, new LeftRule(type, new ConditionEndRule(conditionParent, valueParent)));
+        return new TypeRule(type, new LeftRule(type, new SplitOnceRule(conditionParent, ")", valueParent, new ConditionEndSearcher())));
     }
 
     static Rule createReturnRule(Rule value) {
@@ -209,7 +210,9 @@ public class Lang {
     }
 
     static TypeRule createOperatorRule(String name, String slice, Rule value) {
-        return new TypeRule(name, new OperatorFinderRule(value, slice));
+        var left = new StripRule(new ExtractNodeRule("leftRule", value));
+        var right = new StripRule(new ExtractNodeRule("right", value));
+        return new TypeRule(name, new SplitOnceRule(left, slice, right, new OperatorSearcher(slice)));
     }
 
     static TypeRule createNumberRule() {
@@ -267,13 +270,15 @@ public class Lang {
         return new SplitMultipleRule(new ParamSplitter(), ", ", "type-params", typeParam);
     }
 
-    private static class OperatorFinderRule extends AbstractSplitOnceRule {
-        public OperatorFinderRule(Rule value, String slice) {
-            super(new StripRule(new ExtractNodeRule("leftRule", value)), slice, new StripRule(new ExtractNodeRule("right", value)));
+    private static class OperatorSearcher implements Searcher {
+        private final String slice;
+
+        public OperatorSearcher(String slice) {
+            this.slice = slice;
         }
 
         @Override
-        protected Optional<Integer> computeIndexImpl(String input) {
+        public Optional<Integer> computeIndex(String input) {
             if (!input.contains(slice)) return Optional.empty();
 
             var queue = IntStream.range(0, input.length())
@@ -302,9 +307,9 @@ public class Lang {
                 }
             }
 
-            /*
-            TODO: find the operator
-             */
+        /*
+        TODO: find the operator
+         */
 
             return Optional.empty();
         }

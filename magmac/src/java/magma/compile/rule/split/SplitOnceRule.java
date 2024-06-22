@@ -14,19 +14,21 @@ import magma.java.JavaOptionals;
 
 import java.util.Optional;
 
-public abstract class SplitOnceRule implements Rule {
+public class SplitOnceRule implements Rule {
     protected final Rule leftRule;
     protected final String slice;
     protected final Rule rightRule;
+    private final Searcher searcher;
 
-    public SplitOnceRule(Rule leftRule, String slice, Rule rightRule) {
+    public SplitOnceRule(Rule leftRule, String slice, Rule rightRule, Searcher searcher) {
         this.leftRule = leftRule;
         this.slice = slice;
         this.rightRule = rightRule;
+        this.searcher = searcher;
     }
 
     public RuleResult toNode(String input) {
-        var tuple = computeIndex(input).map(keywordIndex -> {
+        var tuple = searcher.computeIndex(input).map(keywordIndex -> {
             var left1 = input.substring(0, keywordIndex);
             var right1 = input.substring(keywordIndex + slice.length());
             return new Tuple<>(left1, right1);
@@ -52,8 +54,6 @@ public abstract class SplitOnceRule implements Rule {
             return new ErrorRuleResult(new CompileError(message, input));
         });
     }
-
-    protected abstract Optional<Integer> computeIndex(String input);
 
     @Override
     public Result<String, Error_> fromNode(Node node) {

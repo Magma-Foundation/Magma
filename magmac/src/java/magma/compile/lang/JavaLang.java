@@ -12,6 +12,7 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
@@ -194,7 +195,7 @@ public class JavaLang {
                 caller
         ));
 
-        var before = new RightRule(new InvocationStartRule(withGenerics, arguments), ")");
+        var before = new RightRule(new SplitOnceRule(withGenerics, "(", arguments, new InvocationStartSearcher()), ")");
         var child = new OrRule(List.of(
                 new FirstRule(new StripRule(before), "{", new RightRule(Lang.createBlock(classMember), "}")),
                 before

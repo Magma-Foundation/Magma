@@ -1,21 +1,16 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
-import magma.compile.rule.Rule;
-import magma.compile.rule.split.AbstractSplitOnceRule;
+import magma.compile.rule.split.Searcher;
 
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-class InvocationStartRule extends AbstractSplitOnceRule {
-    public InvocationStartRule(Rule caller, Rule arguments) {
-        super(caller, "(", arguments);
-    }
-
+class InvocationStartSearcher implements Searcher {
     @Override
-    protected Optional<Integer> computeIndexImpl(String input) {
+    public Optional<Integer> computeIndex(String input) {
         var depth = 0;
 
         var queue = IntStream.range(0, input.length())
@@ -32,10 +27,10 @@ class InvocationStartRule extends AbstractSplitOnceRule {
                 while (!queue.isEmpty()) {
                     var next = queue.pop().right();
 
-                    if(next == '\"') {
+                    if (next == '\"') {
                         if (!queue.isEmpty()) {
                             var after = queue.peek().right();
-                            if(after == '\\') {
+                            if (after == '\\') {
                                 continue;
                             }
                         }
