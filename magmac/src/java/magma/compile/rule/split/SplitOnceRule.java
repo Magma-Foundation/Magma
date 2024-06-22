@@ -12,8 +12,6 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
 
-import java.util.Optional;
-
 public class SplitOnceRule implements Rule {
     protected final Rule leftRule;
     protected final String slice;
@@ -28,7 +26,7 @@ public class SplitOnceRule implements Rule {
     }
 
     public RuleResult toNode(String input) {
-        var tuple = searcher.computeIndex(input).map(keywordIndex -> {
+        var tuple = searcher.search(input).map(keywordIndex -> {
             var left1 = input.substring(0, keywordIndex);
             var right1 = input.substring(keywordIndex + slice.length());
             return new Tuple<>(left1, right1);

@@ -278,7 +278,7 @@ public class Lang {
         }
 
         @Override
-        public Optional<Integer> computeIndex(String input) {
+        public Optional<Integer> search(String input) {
             if (!input.contains(slice)) return Optional.empty();
 
             var queue = IntStream.range(0, input.length())

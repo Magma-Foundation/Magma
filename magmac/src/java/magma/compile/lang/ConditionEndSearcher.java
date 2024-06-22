@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public class ConditionEndSearcher implements Searcher {
     @Override
-    public Optional<Integer> computeIndex(String input) {
+    public Optional<Integer> search(String input) {
         return Optional.empty();
     }
 }

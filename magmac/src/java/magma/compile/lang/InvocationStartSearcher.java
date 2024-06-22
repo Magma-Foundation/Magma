@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 class InvocationStartSearcher implements Searcher {
     @Override
-    public Optional<Integer> computeIndex(String input) {
+    public Optional<Integer> search(String input) {
         var depth = 0;
 
         var queue = IntStream.range(0, input.length())
