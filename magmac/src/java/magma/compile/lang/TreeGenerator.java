@@ -6,6 +6,7 @@ import magma.api.result.Result;
 import magma.api.collect.stream.Streams;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
+import magma.compile.annotate.State;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;

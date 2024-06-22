@@ -14,7 +14,7 @@ import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.State;
+import magma.compile.annotate.State;
 import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;

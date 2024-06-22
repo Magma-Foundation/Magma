@@ -1,4 +1,4 @@
-package magma.compile.lang;
+package magma.compile.annotate;
 
 import magma.api.Tuple;
 import magma.api.collect.LinkedList;

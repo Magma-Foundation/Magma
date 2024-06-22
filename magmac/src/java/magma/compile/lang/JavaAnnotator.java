@@ -6,6 +6,7 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
+import magma.compile.annotate.State;
 import magma.compile.rule.Node;
 
 import java.util.List;
@@ -70,6 +71,15 @@ public class JavaAnnotator extends TreeGenerator {
             }
         }
 
+        if(node.is("for")) {
+            var name = node.findNode("condition-parent")
+                    .orElseThrow()
+                    .findString("name")
+                    .orElseThrow();
+
+            return state.enter().define(name).mapValue(inner -> new Tuple<>(node, inner));
+        }
+
         if (node.is("block")) {
             return new Ok<>(new Tuple<>(node, state.enter()));
         }
@@ -91,11 +101,7 @@ public class JavaAnnotator extends TreeGenerator {
 
     @Override
     protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
-        if (node.is("block")) {
-            return new Ok<>(new Tuple<>(node, state.exit()));
-        }
-
-        if (node.is("class")) {
+        if (node.is("block") || node.is("for") || node.is("class")) {
             return new Ok<>(new Tuple<>(node, state.exit()));
         }
 
@@ -110,11 +116,19 @@ public class JavaAnnotator extends TreeGenerator {
 
         if (node.is("declaration")) {
             var definition = node.findNode("definition").orElseThrow();
-            var name = definition.findString("name").orElseThrow();
-            return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
+            return define(node, state, definition);
+        }
+
+        if(node.is("definition")) {
+            return define(node, state, node);
         }
 
         return new Ok<>(new Tuple<>(node, state));
+    }
+
+    private static Result<Tuple<Node, State>, Error_> define(Node node, State state, Node definition) {
+        var name = definition.findString("name").orElseThrow();
+        return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
     }
 
     private static boolean exists(State state, String value) {
@@ -123,7 +137,7 @@ public class JavaAnnotator extends TreeGenerator {
                 || value.equals("this")
                 || value.equals("super")
                 || state.isDefined(value);
-        return b && isInJavaLang(value);
+        return b || isInJavaLang(value);
     }
 
     private static boolean isInJavaLang(String value) {

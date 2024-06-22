@@ -2,12 +2,14 @@ package magma.api.collect;
 
 import magma.api.Tuple;
 import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.Collectors;
 import magma.api.collect.stream.Head;
 import magma.api.collect.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
@@ -65,6 +67,14 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
                 .map(LinkedList::new);
     }
 
+    @Override
+    public String toString() {
+        return "[" + stream()
+                .map(Objects::toString)
+                .collect(Collectors.joining(", "))
+                .orElse("") + "]";
+    }
+
     interface Link<T> {
         Link<T> mapLast(Function<Link<T>, Link<T>> mapper);
 
@@ -116,6 +126,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
         public Tuple<T, Option<Link<T>>> popFirst() {
             return new Tuple<>(value, new Some<>(child));
         }
+
     }
 
     record Child<T>(T value) implements Link<T> {
@@ -153,6 +164,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
         public Tuple<T, Option<Link<T>>> popFirst() {
             return new Tuple<>(value, new None<>());
         }
+
     }
 
     private static class LinkedHead<T> implements Head<T> {

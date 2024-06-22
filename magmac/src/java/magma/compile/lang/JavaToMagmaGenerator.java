@@ -4,6 +4,7 @@ import magma.api.Tuple;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.Error_;
+import magma.compile.annotate.State;
 import magma.compile.rule.Node;
 
 import java.util.ArrayList;
@@ -238,43 +239,43 @@ public class JavaToMagmaGenerator extends TreeGenerator {
         if (!node.is("constructor")) return Optional.empty();
 
         var oldChildrenOptional = node.findNodeList("children");
-        if (oldChildrenOptional.isPresent()) {
-            var originalArguments = node.findNodeList("arguments").orElse(Collections.emptyList());
-            var oldChildren = oldChildrenOptional.get();
-
-            var nonFunctions = new ArrayList<Node>();
-            var functions = new ArrayList<Node>();
-            for (Node oldChild : oldChildren) {
-                if (oldChild.is("method")) {
-                    functions.add(oldChild);
-                } else {
-                    nonFunctions.add(oldChild);
-                }
-            }
-
-            var construction = node.clear("construction")
-                    .withNode("child", node.clear("block").withNodeList("children", functions));
-
-            var newChildren = new ArrayList<>(nonFunctions);
-            newChildren.add(new Node("return").withNode("child", construction));
-
-            var lambdaBody = node.clear("block").withNodeList("children", newChildren);
-            var lambda = node.clear("function").withNode("child", lambdaBody);
-
-            var lambda1 = node.clear("invocation")
-                    .withNode("caller", node.clear("quantity").withNode("value", lambda))
-                    .withNodeList("arguments", Collections.emptyList());
-
-            var classCreator = node.retype("invocation")
-                    .remove("children")
-                    .withNodeList("arguments", Collections.singletonList(lambda1));
-
-            return Optional.of(new Ok<>(node.clear("invocation")
-                    .withNode("caller", classCreator)
-                    .withNodeList("arguments", originalArguments)));
-        } else {
+        if (oldChildrenOptional.isEmpty()) {
             return Optional.of(new Ok<>(node.retype("invocation")));
         }
+
+        var originalArguments = node.findNodeList("arguments").orElse(Collections.emptyList());
+        var oldChildren = oldChildrenOptional.get();
+
+        var nonFunctions = new ArrayList<Node>();
+        var functions = new ArrayList<Node>();
+        for (Node oldChild : oldChildren) {
+            if (oldChild.is("method")) {
+                functions.add(oldChild);
+            } else {
+                nonFunctions.add(oldChild);
+            }
+        }
+
+        var construction = node.clear("construction")
+                .withNode("child", node.clear("block").withNodeList("children", functions));
+
+        var newChildren = new ArrayList<>(nonFunctions);
+        newChildren.add(new Node("return").withNode("child", construction));
+
+        var lambdaBody = node.clear("block").withNodeList("children", newChildren);
+        var lambda = node.clear("function").withNode("child", lambdaBody);
+
+        var lambda1 = node.clear("invocation")
+                .withNode("caller", node.clear("quantity").withNode("value", lambda))
+                .withNodeList("arguments", Collections.emptyList());
+
+        var classCreator = node.retype("invocation")
+                .remove("children")
+                .withNodeList("arguments", Collections.singletonList(lambda1));
+
+        return Optional.of(new Ok<>(node.clear("invocation")
+                .withNode("caller", classCreator)
+                .withNodeList("arguments", originalArguments)));
     }
 
     private Optional<Result<Node, Error_>> replaceMethodWithFunction(Node node) {
