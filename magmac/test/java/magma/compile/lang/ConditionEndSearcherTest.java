@@ -13,6 +13,11 @@ class ConditionEndSearcherTest {
     }
 
     @Test
+    void ignoreWithinChars() {
+        assertSearch("(')')", 4);
+    }
+
+    @Test
     void empty() {
         assertTrue(new ConditionEndSearcher()
                 .search("")
