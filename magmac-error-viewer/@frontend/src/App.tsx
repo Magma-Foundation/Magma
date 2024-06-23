@@ -45,41 +45,45 @@ function createElementFromTreeNode(tree: TreeNode): Element {
     if (!tree) return <></>;
 
     const children = Object.keys(tree).map((key) => {
-        if (key === '$' || key == "_") {
+        if (key === '$') {
             // Skip attributes
-            return;
+            return null;
         }
-
         const value = tree[key];
         if (Array.isArray(value)) {
             return value.map((item, index) => (
                 <div key={index} style={{paddingLeft: '1rem'}}>
-                    <strong>{"Array: " + key}</strong>: {createElementFromTreeNode(item)}
+                    {createElementFromTreeNode(item)}
                 </div>
             ));
         } else if (typeof value === 'object') {
             return (
                 <div key={key} style={{paddingLeft: '1rem'}}>
-                    <strong>{"Object: " + key}</strong>: {createElementFromTreeNode(value)}
+                    {createElementFromTreeNode(value)}
                 </div>
             );
         } else {
-            return (
-                <div key={key} style={{paddingLeft: '1rem'}}>
-                    <strong>{"Leaf: " + key}</strong>: {value.toString()}
-                </div>
-            );
+            return null;
         }
     });
 
-    return <>{children}</>;
+    // Extract message attribute if present
+    const message = tree.$?.message;
+
+    return (
+        <>
+            {message && <div style={{paddingLeft: '1rem'}}>{message}</div>}
+            {children}
+        </>
+    );
 }
 
 function createElementFromTree(tree: TreeNode) {
     return <div style={{
         overflow: "scroll",
         width: "100%",
-        height: "90%"
+        height: "90%",
+        whiteSpace: "nowrap"
     }}>
         {createElementFromTreeNode(tree)}
     </div>;
