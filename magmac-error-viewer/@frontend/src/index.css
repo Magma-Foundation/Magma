@@ -8,7 +8,7 @@ html, body, #root {
     left: 0;
 }
 
-pre {
+pre, hr {
   margin: 0;
   padding: 0;
 }

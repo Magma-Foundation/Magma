@@ -11,6 +11,27 @@ function format(index: number, length: number) {
     return " ".repeat(totalLength - number) + index;
 }
 
+function Card({title, lines} : {title : string, lines : string[]}) {
+    return (
+        <div>
+            <div style={{padding: "1rem"}}>
+                {title}
+            </div>
+            <hr/>
+            <div style={{
+                padding: "1rem"
+            }}>
+                <pre>
+                    {lines.map((line, index) => (
+                        <div key={index}>{line}
+                        </div>
+                    ))}
+                </pre>
+            </div>
+        </div>
+    );
+}
+
 function App() {
     const [state, setState] = useState<string[]>([]);
 
@@ -30,16 +51,7 @@ function App() {
 
     return (
         <>
-            <div style={{
-                padding: "1rem"
-            }}>
-                <pre>
-                    {state.map((line, index) => (
-                        <div key={index}>{line}
-                        </div>
-                    ))}
-                </pre>
-            </div>
+            <Card title="Viewer" lines={state}></Card>
         </>
     )
 }
