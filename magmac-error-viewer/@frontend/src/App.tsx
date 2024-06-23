@@ -63,12 +63,19 @@ function extracted(node: XMLObject): Element {
         return extracted(parent);
     });
 
+    const collections = node.findChildrenByTag("collection").map(collection => {
+        return extracted(collection);
+    });
+
     return <>
         <div>
             {node.findAttribute("message")?.toString()}
         </div>
         <div>
             {parents}
+        </div>
+        <div>
+            {collections}
         </div>
     </>
 }
