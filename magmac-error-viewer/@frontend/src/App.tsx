@@ -35,8 +35,58 @@ function Card({label, children}: { label: string, children: Element }) {
 
 const ROOT = "http://localhost:3000";
 
+interface TreeNode {
+    $?: { [key: string]: string };
+
+    [key: string]: any;
+}
+
+function createElementFromTreeNode(tree: TreeNode): Element {
+    if (!tree) return <></>;
+
+    const children = Object.keys(tree).map((key) => {
+        if (key === '$' || key == "_") {
+            // Skip attributes
+            return;
+        }
+
+        const value = tree[key];
+        if (Array.isArray(value)) {
+            return value.map((item, index) => (
+                <div key={index} style={{paddingLeft: '1rem'}}>
+                    <strong>{"Array: " + key}</strong>: {createElementFromTreeNode(item)}
+                </div>
+            ));
+        } else if (typeof value === 'object') {
+            return (
+                <div key={key} style={{paddingLeft: '1rem'}}>
+                    <strong>{"Object: " + key}</strong>: {createElementFromTreeNode(value)}
+                </div>
+            );
+        } else {
+            return (
+                <div key={key} style={{paddingLeft: '1rem'}}>
+                    <strong>{"Leaf: " + key}</strong>: {value.toString()}
+                </div>
+            );
+        }
+    });
+
+    return <>{children}</>;
+}
+
+function createElementFromTree(tree: TreeNode) {
+    return <div style={{
+        overflow: "scroll",
+        width: "100%",
+        height: "90%"
+    }}>
+        {createElementFromTreeNode(tree)}
+    </div>;
+}
+
 function App() {
-    const [tree, setTree] = useState<string>("");
+    const [tree, setTree] = useState<TreeNode | undefined>(undefined);
     const [content, setContent] = useState<string[]>([]);
 
     useEffect(() => {
@@ -60,6 +110,8 @@ function App() {
         });
     }, []);
 
+    const treeElement = tree && createElementFromTree(tree);
+
     return (
         <>
             <div style={{
@@ -69,17 +121,10 @@ function App() {
                 height: "100%"
             }}>
                 <div style={{
-                    width: "30%",
-                    height: "100%"
+                    width: "50%"
                 }}>
                     <Card label="Navigator">
-                        <div style={{
-                            overflow: "scroll",
-                            width: "100%",
-                            height: "100%"
-                        }}>
-                            {JSON.stringify(tree)}
-                        </div>
+                        {treeElement}
                     </Card>
                 </div>
                 <Card label="Viewer">
