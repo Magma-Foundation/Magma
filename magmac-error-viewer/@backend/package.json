@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node esbuild.config.js"
+    "build": "node esbuild.config.js",
+    "start": "npm run build && node ./dist/bundle.js"
   },
   "author": "",
   "license": "ISC",
