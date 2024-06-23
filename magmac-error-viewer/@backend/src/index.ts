@@ -1,6 +1,9 @@
-import {Builder, Parser} from "xml2js";
+import {Parser} from "xml2js";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
+import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 
 async function main() {
     const target = path.join(process.cwd(), "../../magmac/debug/java-mgs/error.xml");
@@ -9,7 +12,20 @@ async function main() {
 
     const parser = new Parser();
     const result = await parser.parseStringPromise(valueAsString);
-    console.log(result);
+
+    const app = new Koa();
+
+    app.use(cors());
+    app.use(bodyParser());
+
+    app.use(ctx => {
+        ctx.body = 'Hello World';
+    });
+
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
 }
 
 main().catch(e => {
