@@ -24,7 +24,8 @@ function Card({label, children}: { label: string, children: Element }) {
             </div>
             <hr/>
             <div style={{
-                padding: "1rem"
+                padding: "1rem",
+                height: "calc(100% - (2 * 1rem))"
             }}>
                 {children}
             </div>
@@ -68,10 +69,15 @@ function App() {
                 height: "100%"
             }}>
                 <div style={{
-                    width: "30%"
+                    width: "30%",
+                    height: "100%"
                 }}>
                     <Card label="Navigator">
-                        <div>
+                        <div style={{
+                            overflow: "scroll",
+                            width: "100%",
+                            height: "100%"
+                        }}>
                             {JSON.stringify(tree)}
                         </div>
                     </Card>
