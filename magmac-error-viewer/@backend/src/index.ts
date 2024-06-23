@@ -20,8 +20,13 @@ async function main() {
     app.use(cors());
     app.use(bodyParser());
 
-    router.get('/', ctx => {
+    router.get('/content', ctx => {
         ctx.body = result.parent.$.context;
+        ctx.status = 200;
+    });
+
+    router.get("/tree", ctx => {
+        ctx.body = result;
         ctx.status = 200;
     });
 

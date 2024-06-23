@@ -32,18 +32,28 @@ function Card({label, children}: { label: string, children: Element }) {
     );
 }
 
+const ROOT = "http://localhost:3000";
+
 function App() {
-    const [state, setState] = useState<string[]>([]);
+    const [tree, setTree] = useState<string>("");
+    const [content, setContent] = useState<string[]>([]);
 
     useEffect(() => {
         axios({
             method: "get",
-            url: "http://localhost:3000"
+            url: ROOT + "/tree"
+        }).then(response => setTree(response.data));
+    }, []);
+
+    useEffect(() => {
+        axios({
+            method: "get",
+            url: ROOT + "/content"
         }).then(response => {
             const data1 = response.data as string;
             const lines = data1.split("\\r\\n");
             const formattedLines = lines.map((line, index) => format(index, lines.length) + " " + line);
-            setState(formattedLines);
+            setContent(formattedLines);
         }).catch(error => {
             console.error("There was an error fetching the data!", error);
         });
@@ -62,12 +72,13 @@ function App() {
                 }}>
                     <Card label="Navigator">
                         <div>
+                            {JSON.stringify(tree)}
                         </div>
                     </Card>
                 </div>
                 <Card label="Viewer">
                 <pre>
-                    {state.map((line, index) => (
+                    {content.map((line, index) => (
                         <div key={index}>{line}
                         </div>
                     ))}
