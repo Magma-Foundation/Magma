@@ -59,4 +59,8 @@ public final class State {
         var newFrames = frames.mapLast(last -> last.add(name)).orElse(frames);
         return new Ok<>(new State(locations, newFrames));
     }
+
+    public Result<State, Error_> defineAll(List<String> names) {
+        return names.stream().foldRightToResult(this, State::define);
+    }
 }

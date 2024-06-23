@@ -8,8 +8,10 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.rule.Node;
+import magma.java.JavaList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class JavaAnnotator extends TreeGenerator {
     private static Result<State, Error_> defineParams(State state, List<Node> params) {
@@ -65,9 +67,14 @@ public class JavaAnnotator extends TreeGenerator {
         }
 
         if (node.is("lambda")) {
-            var nameOptional = node.findString("param-name");
+            var nameOptional = node.findString("param");
             if (nameOptional.isPresent()) {
                 return state.define(nameOptional.get()).mapValue(inner -> new Tuple<>(node, inner));
+            }
+
+            var params = node.findStringList("params");
+            if(params.isPresent()) {
+                return state.defineAll(new JavaList<>(params.get())).mapValue(inner -> new Tuple<>(node, inner));
             }
         }
 
