@@ -241,21 +241,12 @@ public class Main {
         anyMessage.ifPresent(s -> System.err.println(" ".repeat(depth) + depth + " = " + s + " " + context));
 
         var message = error.findMessage().orElse("");
-        var messageAttribute = message.isEmpty() ? "" : " message=\"" + message.replace("\"", "&quot;") + "\"";
+        var replaced = escape(message);
+
+        var messageAttribute = message.isEmpty() ? "" : " message=\"" + replaced + "\"";
         var causes = error.findCauses().orElse(Collections.emptyList());
 
-        var escapedContext = error.findContext().orElse("")
-                .replace("&", "&amp;")
-                .replace("\"", "&quot;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("'", "&apos;")
-                .replace("\\n", "\\\\n")
-                .replace("\n", "\\n")
-                .replace("\\t", "\\\\t")
-                .replace("\t", "\\t")
-                .replace("\\r", "\\\\r")
-                .replace("\r", "\\r");
+        var escapedContext = escape(error.findContext().orElse(""));
 
         var formattedContext = "\n" + "\t".repeat(depth) + escapedContext;
         if (causes.isEmpty()) {
@@ -278,6 +269,20 @@ public class Main {
         }
 
         return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
+    }
+
+    private static String escape(String value) {
+        return value.replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;")
+                .replace("\\n", "\\\\n")
+                .replace("\n", "\\n")
+                .replace("\\t", "\\\\t")
+                .replace("\t", "\\t")
+                .replace("\\r", "\\\\r")
+                .replace("\r", "\\r");
     }
 
     private static String formatContext(Error_ e, int depth) {
