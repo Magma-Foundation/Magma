@@ -73,17 +73,19 @@ function extracted(node: XMLObject): Element {
     });
 
     return <>
-        <div>
-            {node.findAttribute("message")?.toString()}
-        </div>
-        <div>
-            {parents}
-        </div>
-        <div>
-            {collections}
-        </div>
-        <div>
-            {children}
+        <div style={{paddingLeft: "1rem"}}>
+            <div>
+                {node.findAttribute("message")?.toString()}
+            </div>
+            <div>
+                {parents}
+            </div>
+            <div>
+                {collections}
+            </div>
+            <div>
+                {children}
+            </div>
         </div>
     </>
 }
