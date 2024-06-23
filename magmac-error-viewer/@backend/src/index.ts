@@ -21,7 +21,7 @@ async function main() {
     app.use(bodyParser());
 
     router.get('/', ctx => {
-        ctx.body = result;
+        ctx.body = result.parent.$.context;
         ctx.status = 200;
     });
 
