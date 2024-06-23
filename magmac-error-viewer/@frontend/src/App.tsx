@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, {useEffect, useState} from "react";
+import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
 
 function countDigits(index: number) {
     return Math.floor(index === 0 ? 0 : Math.log10(index)) + 1;
@@ -13,20 +13,22 @@ function format(index: number, length: number) {
 
 type Element = React.JSX.Element;
 
-function Card({label, children}: { label: string, children?: Element }) {
+function Card({ label, children }: { label: string; children?: Element }) {
     return (
-        <div style={{
-            width: "100%",
-            height: "100%"
-        }}>
-            <div style={{padding: "1rem"}}>
-                {label}
-            </div>
-            <hr/>
-            <div style={{
-                padding: "1rem",
-                height: "calc(100% - (2 * 1rem))"
-            }}>
+        <div
+            style={{
+                width: "100%",
+                height: "100%"
+            }}
+        >
+            <div style={{ padding: "1rem" }}>{label}</div>
+            <hr />
+            <div
+                style={{
+                    padding: "1rem",
+                    height: "calc(100% - (2 * 1rem))"
+                }}
+            >
                 {children}
             </div>
         </div>
@@ -53,47 +55,46 @@ function XMLObject(tagName: string, value: any): XMLObject {
         findChildrenByTag(tagName: string): XMLObject[] {
             const bucket = value[tagName];
             if (!bucket || !Array.isArray(bucket)) return [];
-            return bucket.map(bucketItem => XMLObject(tagName, bucketItem));
+            return bucket.map((bucketItem, index) => XMLObject(tagName, bucketItem));
         }
     };
 }
 
-function extracted(node: XMLObject): Element {
-    const parents = node.findChildrenByTag("parent").map(parent => {
-        return extracted(parent);
+function TreeNode({ node, onClick }: { node: XMLObject, onClick: (object: XMLObject) => void }): Element {
+    const parents = node.findChildrenByTag("parent").map((parent, index) => {
+        return <TreeNode key={`parent-${index}`} node={parent} onClick={onClick} />;
     });
 
-    const collections = node.findChildrenByTag("collection").map(collection => {
-        return extracted(collection);
+    const collections = node.findChildrenByTag("collection").map((collection, index) => {
+        return <TreeNode key={`collection-${index}`} node={collection} onClick={onClick} />;
     });
 
-
-    const children = node.findChildrenByTag("child").map(collection => {
-        return extracted(collection);
+    const children = node.findChildrenByTag("child").map((child, index) => {
+        return <TreeNode key={`child-${index}`} node={child} onClick={onClick} />;
     });
 
-    return <>
-        <div style={{paddingLeft: "1rem"}}>
-            <div>
+    const ref = useRef<HTMLDivElement>(null);
+    const handleClick: MouseEventHandler<HTMLDivElement> = (event) => {
+        if (ref.current && event.target === ref.current) {
+            onClick(node);
+        }
+    };
+
+    return (
+        <div style={{ paddingLeft: "1rem" }}>
+            <span onClick={handleClick} ref={ref}>
                 {node.findAttribute("message")?.toString()}
-            </div>
-            <div>
-                {parents}
-            </div>
-            <div>
-                {collections}
-            </div>
-            <div>
-                {children}
-            </div>
+            </span>
+            <div>{parents}</div>
+            <div>{collections}</div>
+            <div>{children}</div>
         </div>
-    </>
+    );
 }
 
 function App() {
     const [tree, setTree] = useState<XMLObject | undefined>(undefined);
     const [content, setContent] = useState<string[]>([]);
-    const [selected, setSelected] = useState();
 
     useEffect(() => {
         axios({
@@ -116,49 +117,52 @@ function App() {
         });
     }, []);
 
-    type TreeNode = {
-        message: string;
-        context: string;
-        children: TreeNode[];
-    };
+    function createElementFromTree(tree: XMLObject, onClick: (obj: XMLObject) => void) {
+        return (
+            <div
+                style={{
+                    overflow: "scroll",
+                    width: "100%",
+                    height: "70%",
+                    whiteSpace: "nowrap"
+                }}
+            >
+                <TreeNode node={tree} onClick={onClick} />
+            </div>
+        );
+    }
 
-    function createElementFromTree(tree: XMLObject) {
-        return <div style={{
-            overflow: "scroll",
-            width: "100%",
-            height: "70%",
-            whiteSpace: "nowrap"
-        }}>
-            {extracted(tree)}
-        </div>;
+    function onClick(obj: XMLObject) {
+        console.log(obj.findAttribute("message"));
     }
 
     return (
-        <>
-            <div style={{
+        <div
+            style={{
                 display: "flex",
-                "flexDirection": "row",
+                flexDirection: "row",
                 width: "100%",
                 height: "100%"
-            }}>
-                <div style={{
+            }}
+        >
+            <div
+                style={{
                     width: "50%"
-                }}>
-                    <Card label="Navigator">
-                        {tree && createElementFromTree(tree)}
-                    </Card>
-                </div>
-                <Card label="Viewer">
-                <pre>
-                    {content.map((line, index) => (
-                        <div key={index}>{line}
-                        </div>
-                    ))}
-                </pre>
+                }}
+            >
+                <Card label="Navigator">
+                    {tree && createElementFromTree(tree, onClick)}
                 </Card>
             </div>
-        </>
-    )
+            <Card label="Viewer">
+                <pre>
+                    {content.map((line, index) => (
+                        <div key={index}>{line}</div>
+                    ))}
+                </pre>
+            </Card>
+        </div>
+    );
 }
 
-export default App
+export default App;
