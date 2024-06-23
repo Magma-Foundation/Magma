@@ -249,9 +249,15 @@ public class Main {
                 .replace("\"", "&quot;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
-                .replace("'", "&apos;");
+                .replace("'", "&apos;")
+                .replace("\\n", "\\\\n")
+                .replace("\n", "\\n")
+                .replace("\\t", "\\\\t")
+                .replace("\t", "\\t")
+                .replace("\\r", "\\\\r")
+                .replace("\r", "\\r");
 
-        var formattedContext = "\n" + escapedContext;
+        var formattedContext = "\n" + "\t".repeat(depth) + escapedContext;
         if (causes.isEmpty()) {
             return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
         }
