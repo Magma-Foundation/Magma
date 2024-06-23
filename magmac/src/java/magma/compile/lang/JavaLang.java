@@ -19,6 +19,7 @@ import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,8 +174,10 @@ public class JavaLang {
     }
 
     private static Rule createLambdaRule(Rule value, Rule statement) {
-        var child = new SymbolRule(new ExtractStringRule("param-name"));
-        var left = new StripRule(new OrRule(List.of(new LeftRule("()", new EmptyRule("param-name")), child)));
+        var asMultiple = new StripRule(new LeftRule("(", new RightRule(new SimpleExtractStringListRule("params", ","), ")")));
+        var asSingle = new StripRule(new SymbolRule(new ExtractStringRule("param")));
+
+        var left = new OrRule(List.of(asMultiple, asSingle));
         var maybeValue = new OrRule(List.of(
                 new StripRule(new LeftRule("{", new RightRule(Lang.createBlock(statement), "}"))),
                 value
