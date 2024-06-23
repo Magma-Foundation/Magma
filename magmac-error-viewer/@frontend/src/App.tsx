@@ -13,7 +13,7 @@ function format(index: number, length: number) {
 
 type Element = React.JSX.Element;
 
-function Card({label, children}: { label: string, children: Element }) {
+function Card({label, children}: { label: string, children?: Element }) {
     return (
         <div style={{
             width: "100%",
@@ -41,57 +41,10 @@ interface TreeNode {
     [key: string]: any;
 }
 
-function createElementFromTreeNode(tree: TreeNode): Element {
-    if (!tree) return <></>;
-
-    const children = Object.keys(tree).map((key) => {
-        if (key === '$') {
-            // Skip attributes
-            return null;
-        }
-        const value = tree[key];
-        if (Array.isArray(value)) {
-            return value.map((item, index) => (
-                <div key={index} style={{paddingLeft: '1rem'}}>
-                    {createElementFromTreeNode(item)}
-                </div>
-            ));
-        } else if (typeof value === 'object') {
-            return (
-                <div key={key} style={{paddingLeft: '1rem'}}>
-                    {createElementFromTreeNode(value)}
-                </div>
-            );
-        } else {
-            return null;
-        }
-    });
-
-    // Extract message attribute if present
-    const message = tree.$?.message;
-
-    return (
-        <>
-            {message && <div style={{paddingLeft: '1rem'}}>{message}</div>}
-            {children}
-        </>
-    );
-}
-
-function createElementFromTree(tree: TreeNode) {
-    return <div style={{
-        overflow: "scroll",
-        width: "100%",
-        height: "90%",
-        whiteSpace: "nowrap"
-    }}>
-        {createElementFromTreeNode(tree)}
-    </div>;
-}
-
 function App() {
     const [tree, setTree] = useState<TreeNode | undefined>(undefined);
     const [content, setContent] = useState<string[]>([]);
+    const [selected, setSelected] = useState();
 
     useEffect(() => {
         axios({
@@ -114,7 +67,20 @@ function App() {
         });
     }, []);
 
-    const treeElement = tree && createElementFromTree(tree);
+    function createElementFromTreeNode(tree: TreeNode): Element {
+        return <pre>{JSON.stringify(tree, null, 2)}</pre>;
+    }
+
+    function createElementFromTree(tree: TreeNode) {
+        return <div style={{
+            overflow: "scroll",
+            width: "100%",
+            height: "70%",
+            whiteSpace: "nowrap"
+        }}>
+            {createElementFromTreeNode(tree)}
+        </div>;
+    }
 
     return (
         <>
@@ -128,7 +94,7 @@ function App() {
                     width: "50%"
                 }}>
                     <Card label="Navigator">
-                        {treeElement}
+                        {tree && createElementFromTree(tree)}
                     </Card>
                 </div>
                 <Card label="Viewer">
