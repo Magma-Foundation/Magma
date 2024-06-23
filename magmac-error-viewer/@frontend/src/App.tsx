@@ -30,12 +30,16 @@ function App() {
 
     return (
         <>
-            <pre>
-                {state.map((line, index) => (
-                    <div key={index}>{line}
-                    </div>
-                ))}
-            </pre>
+            <div style={{
+                padding: "1rem"
+            }}>
+                <pre>
+                    {state.map((line, index) => (
+                        <div key={index}>{line}
+                        </div>
+                    ))}
+                </pre>
+            </div>
         </>
     )
 }
