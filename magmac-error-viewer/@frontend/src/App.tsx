@@ -35,14 +35,46 @@ function Card({label, children}: { label: string, children?: Element }) {
 
 const ROOT = "http://localhost:3000";
 
-interface TreeNode {
-    $?: { [key: string]: string };
+interface XMLObject {
+    tagName: string;
 
-    [key: string]: any;
+    findAttribute(key: string): unknown | undefined;
+
+    findChildrenByTag(tagName: string): XMLObject[];
+}
+
+function XMLObject(tagName: string, value: any): XMLObject {
+    return {
+        tagName,
+        findAttribute(key: string): unknown | undefined {
+            const $ = value.$;
+            return $ ? $[key] : undefined;
+        },
+        findChildrenByTag(tagName: string): XMLObject[] {
+            const bucket = value[tagName];
+            if (!bucket || !Array.isArray(bucket)) return [];
+            return bucket.map(bucketItem => XMLObject(tagName, bucketItem));
+        }
+    };
+}
+
+function extracted(node: XMLObject): Element {
+    const parents = node.findChildrenByTag("parent").map(parent => {
+        return extracted(parent);
+    });
+
+    return <>
+        <div>
+            {node.findAttribute("message")?.toString()}
+        </div>
+        <div>
+            {parents}
+        </div>
+    </>
 }
 
 function App() {
-    const [tree, setTree] = useState<TreeNode | undefined>(undefined);
+    const [tree, setTree] = useState<XMLObject | undefined>(undefined);
     const [content, setContent] = useState<string[]>([]);
     const [selected, setSelected] = useState();
 
@@ -50,7 +82,7 @@ function App() {
         axios({
             method: "get",
             url: ROOT + "/tree"
-        }).then(response => setTree(response.data));
+        }).then(response => setTree(XMLObject("parent", response.data.parent)));
     }, []);
 
     useEffect(() => {
@@ -67,18 +99,20 @@ function App() {
         });
     }, []);
 
-    function createElementFromTreeNode(tree: TreeNode): Element {
-        return <pre>{JSON.stringify(tree, null, 2)}</pre>;
-    }
+    type TreeNode = {
+        message: string;
+        context: string;
+        children: TreeNode[];
+    };
 
-    function createElementFromTree(tree: TreeNode) {
+    function createElementFromTree(tree: XMLObject) {
         return <div style={{
             overflow: "scroll",
             width: "100%",
             height: "70%",
             whiteSpace: "nowrap"
         }}>
-            {createElementFromTreeNode(tree)}
+            {extracted(tree)}
         </div>;
     }
 
