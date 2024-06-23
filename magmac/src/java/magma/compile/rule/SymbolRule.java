@@ -12,6 +12,10 @@ public final class SymbolRule extends FilterRule {
 
     @Override
     protected boolean filter(String input) {
+        if(input.isEmpty()) {
+            return false;
+        }
+
         int i = 0;
         while (i < input.length()) {
             var c = input.charAt(i);
