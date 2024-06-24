@@ -106,7 +106,7 @@ public class Main {
 
         return generate(sourceTrees, root)
                 .mapValue(Tuple::left)
-                .mapErr(error -> getCompileException(configuration, error, location))
+                .mapErr(error -> writeError(error, location, configuration))
                 .flatMapValue(generated -> {
                     return createDebug(namespace, configuration).flatMapValue(relativizedDebug -> {
                         return writeSafely(relativizedDebug.resolve(name + ".output.ast"), generated.toString())
@@ -114,11 +114,6 @@ public class Main {
                                 .orElseGet(() -> new Ok<>(generated));
                     });
                 });
-    }
-
-    private static CompileException getCompileException(Configuration configuration, Error_ error, List<String> location) {
-        writeError(error, location, configuration);
-        return new CompileException("Failed to generate: " + String.join(".", location));
     }
 
     private static Option<CompileException> writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) {
@@ -157,7 +152,8 @@ public class Main {
         if (generateErrorOptional.isPresent()) {
             var generateError = generateErrorOptional.get();
             print(generateError, 0);
-            writeError(generateError, location, configuration);
+
+            return new Some<>(writeError(generateError, location, configuration));
         }
 
         return generateResult.findValue()
