@@ -23,7 +23,6 @@ import magma.compile.lang.MagmaLang;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaOptionals;
 import magma.java.JavaResults;
 import magma.java.JavaSet;
 
@@ -195,19 +194,11 @@ public record Application(Configuration config) {
         }
 
         var target = targetParent.resolve(name + ".mgs");
-        var rule = MagmaLang.createRootRule();
-        var generateResult = rule.fromNode(root);
-        var generateErrorOptional = JavaOptionals.toNative(generateResult.findErr());
-        if (generateErrorOptional.isPresent()) {
-            var generateError = generateErrorOptional.get();
-            print(generateError, 0);
+        return MagmaLang.createRootRule().fromNode(root).match(value -> writeSafely(target, value), err -> {
+            print(err, 0);
 
-            return new Some<>(writeError(generateError, source));
-        }
-
-        return generateResult.findValue()
-                .map(inner -> writeSafely(target, inner))
-                .map(option -> option.orElseGet(() -> new CompileException("Nothing was generated.")));
+            return new Some<>(writeError(err, source));
+        });
     }
 
     Result<Map<Unit, Node>, CompileException> parseSources(List<Path> sources) {
