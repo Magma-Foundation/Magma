@@ -9,7 +9,9 @@ interface TreeContent {
 function TreeElement({content, children}: { content: TreeContent, children: JSX.Element }) {
     return (
         <div>
-            <span>
+            <span onClick={() => {
+                console.log(content);
+            }}>
                 {content.title}
             </span>
             <div style={{"padding-left": "1rem"}}>
@@ -22,14 +24,15 @@ function TreeElement({content, children}: { content: TreeContent, children: JSX.
 function createTreeElement(tree: XMLObject | undefined) {
     if (!tree) return <></>;
 
-    const message = tree.findAttribute("message") ?? "";
-
     const parents = tree.findChildren("parent").map(parent => createTreeElement(parent));
     const collections = tree.findChildren("collection").map(collection => createTreeElement(collection));
     const children = tree.findChildren("child").map(child => createTreeElement(child));
 
+    const message = tree.findAttribute("message") ?? "";
+    const context = tree.findAttribute("context") ?? "";
+
     const content: TreeContent = {
-        context: "", title: message
+        context: context, title: message
     }
 
     return <TreeElement content={content}>
