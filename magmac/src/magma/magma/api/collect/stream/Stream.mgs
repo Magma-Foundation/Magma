@@ -8,9 +8,11 @@ public struct Stream {
 	map<R> : Stream<R>;
 	
 	collect<C> : C;
+	
+	foldLeft<C> : C;
 	head : Option<T>;
 	
-	foldRightToResult<R, E> : Result<R, E>;
+	foldLeftToResult<R, E> : Result<R, E>;
 	anyMatch : boolean;
 	filter : Stream<T>;
 	

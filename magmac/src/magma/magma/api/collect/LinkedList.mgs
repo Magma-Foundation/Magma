@@ -1,5 +1,5 @@
 import magma.api.Tuple;
-import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collectors;
 import magma.api.collect.stream.Head;
 import magma.api.collect.stream.Stream;
@@ -24,7 +24,7 @@ export class def LinkedList<T>(head : Option<Link<T>>) => {
 		return add(element);
 	}
 	public def stream(this) : Stream<T> => {
-		return AbstractStream(LinkedHead(head));
+		return HeadedStream(LinkedHead(head));
 	}
 	public def contains(this, element : T) : boolean => {
 		return head.map(() => link.contains(element)).orElse(false);
