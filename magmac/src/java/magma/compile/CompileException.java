@@ -1,6 +1,8 @@
 package magma.compile;
 
-public class CompileException  extends Exception {
+import java.io.IOException;
+
+public class CompileException extends Exception {
     public CompileException(String message, Throwable cause) {
         super(message, cause);
     }
@@ -10,5 +12,9 @@ public class CompileException  extends Exception {
     }
 
     public CompileException() {
+    }
+
+    public CompileException(IOException cause) {
+        super(cause);
     }
 }

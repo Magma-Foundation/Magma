@@ -2,10 +2,12 @@ package magma;
 
 import magma.api.Tuple;
 import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.api.result.Results;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
@@ -38,69 +40,79 @@ public class Main {
     public static final Path CONFIG_PATH = Paths.get(".", "config.json");
 
     public static void main(String[] args) {
-        //TODO: #15
-        //noinspection TryWithIdenticalCatches
+        var result = run();
+        if (result.isPresent()) {
+            result.orElsePanic().printStackTrace();
+        }
+    }
+
+    private static Option<CompileException> run() {
+        return buildConfiguration().mapErr(CompileException::new).mapValue(configuration -> {
+            var listIOExceptionResult = walkImpl(configuration);
+            return listIOExceptionResult.mapErr(CompileException::new)
+                    .flatMapValue(sources -> parseSources(sources, configuration)
+                            .flatMapValue(sourceTrees -> generateTargets(configuration, sourceTrees)
+                                    .mapValue(targetTrees -> writeTargets(targetTrees, configuration))))
+                    .match(value -> value, Some::new);
+        }).match(value -> value, Some::new);
+    }
+
+    private static Result<List<Path>, IOException> walkImpl(Configuration configuration) {
         try {
-            run();
+            //TODO: #14
+            //noinspection resource
+            return new Ok<>(Files.walk(configuration.sourceDirectory())
+                    .filter(value -> value.toString().endsWith(".java"))
+                    .filter(Files::isRegularFile)
+                    .toList());
         } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
-        } catch (CompileException e) {
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            return new Err<>(e);
         }
     }
 
-    private static void run() throws IOException, CompileException {
-        var configuration = buildConfiguration();
-
-        //TODO: #14
-        //noinspection resource
-        var sources = Files.walk(configuration.sourceDirectory())
-                .filter(value -> value.toString().endsWith(".java"))
-                .filter(Files::isRegularFile)
-                .toList();
-
-        var sourceTrees = parseSources(sources, configuration);
-        var targetTrees = generateTargets(sourceTrees, configuration);
-        writeTargets(targetTrees, configuration);
+    private static Result<Configuration, IOException> buildConfiguration() {
+        return readConfiguration().mapValue(map -> {
+            var sourceDirectory = Paths.get(map.get("sources"));
+            var debugDirectory = Paths.get(map.get("debug"));
+            var targetDirectory = Paths.get(map.get("targets"));
+            return new Configuration(sourceDirectory, targetDirectory, debugDirectory);
+        });
     }
 
-    private static Configuration buildConfiguration() throws IOException {
-        var map = readConfiguration();
-        var sourceDirectory = Paths.get(map.get("sources"));
-        var debugDirectory = Paths.get(map.get("debug"));
-        var targetDirectory = Paths.get(map.get("targets"));
-        return new Configuration(sourceDirectory, targetDirectory, debugDirectory);
-    }
+    private static Result<Map<List<String>, Node>, CompileException> generateTargets(Configuration configuration, Map<List<String>, Node> sourceTrees) {
+        Result<Map<List<String>, Node>, CompileException> targetTrees = new Ok<>(Collections.emptyMap());
 
-    private static HashMap<List<String>, Node> generateTargets(Map<List<String>, Node> sourceTrees, Configuration configuration) throws CompileException {
-        var targetTrees = new HashMap<List<String>, Node>();
         for (Map.Entry<List<String>, Node> entry : sourceTrees.entrySet()) {
-            generateTarget(configuration, sourceTrees, targetTrees, entry.getKey(), entry.getValue());
+            var location = entry.getKey();
+            targetTrees = targetTrees.flatMapValue(inner0 -> generateTarget(configuration, sourceTrees, location, entry.getValue()).mapValue(inner1 -> {
+                var copy = new HashMap<>(inner0);
+                copy.put(location, inner1);
+                return copy;
+            }));
         }
+
         return targetTrees;
     }
 
-    private static void generateTarget(
+    private static Result<Node, CompileException> generateTarget(
             Configuration configuration,
             Map<List<String>, Node> sourceTrees,
-            Map<List<String>, Node> targetTrees,
             List<String> location,
-            Node root
-    ) throws CompileException {
+            Node root) {
         var namespace = location.subList(0, location.size() - 1);
         var name = location.get(location.size() - 1);
 
         System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-        var generated = Results.unwrap(generate(sourceTrees, root)
+        return generate(sourceTrees, root)
                 .mapValue(Tuple::left)
-                .mapErr(error -> getCompileException(configuration, error, location)));
-
-        var relativizedDebug = createDebug(namespace, configuration);
-        writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
-        targetTrees.put(location, generated);
+                .mapErr(error -> getCompileException(configuration, error, location))
+                .flatMapValue(generated -> {
+                    var relativizedDebug = createDebug(namespace, configuration);
+                    return writeSafely(relativizedDebug.resolve(name + ".output.ast"), generated.toString())
+                            .<Result<Node, CompileException>>map(Err::new)
+                            .orElseGet(() -> new Ok<>(generated));
+                });
     }
 
     private static CompileException getCompileException(Configuration configuration, Error_ error, List<String> location) {
@@ -108,14 +120,19 @@ public class Main {
         return new CompileException("Failed to generate: " + String.join(".", location));
     }
 
-    private static void writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) throws CompileException {
+    private static Option<CompileException> writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) {
         for (Map.Entry<List<String>, Node> entry : targetTrees.entrySet()) {
             var location = entry.getKey();
-            writeTarget(configuration, location, entry.getValue());
+            var option = writeTarget(configuration, location, entry.getValue());
+            if (option.isPresent()) {
+                return option;
+            }
         }
+
+        return new None<>();
     }
 
-    private static void writeTarget(Configuration configuration, List<String> location, Node root) throws CompileException {
+    private static Option<CompileException> writeTarget(Configuration configuration, List<String> location, Node root) {
         var namespace = location.subList(0, location.size() - 1);
         var name = location.get(location.size() - 1);
         System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
@@ -137,20 +154,26 @@ public class Main {
             writeError(generateError, location, configuration);
         }
 
-        writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
+        return generateResult.findValue()
+                .map(inner -> writeSafely(target, inner))
+                .map(option -> option.orElseGet(() -> new CompileException("Nothing was generated.")));
     }
 
-    private static Map<String, String> readConfiguration() throws IOException {
-        var absolutePath = CONFIG_PATH.toAbsolutePath();
-        if (Files.exists(CONFIG_PATH)) {
-            System.out.println("Found configuration file at '" + absolutePath + "'.");
-        } else {
-            System.out.printf("Configuration file did not exist and will be created at '%s'.%n", absolutePath);
-            Files.writeString(CONFIG_PATH, "{}");
-        }
+    private static Result<Map<String, String>, IOException> readConfiguration() {
+        try {
+            var absolutePath = CONFIG_PATH.toAbsolutePath();
+            if (Files.exists(CONFIG_PATH)) {
+                System.out.println("Found configuration file at '" + absolutePath + "'.");
+            } else {
+                System.out.printf("Configuration file did not exist and will be created at '%s'.%n", absolutePath);
+                Files.writeString(CONFIG_PATH, "{}");
+            }
 
-        var configurationString = Files.readString(CONFIG_PATH);
-        return parseConfigurationFromJSON(configurationString);
+            var configurationString = Files.readString(CONFIG_PATH);
+            return new Ok<>(parseConfigurationFromJSON(configurationString));
+        } catch (IOException e) {
+            return new Err<>(e);
+        }
     }
 
     private static Map<String, String> parseConfigurationFromJSON(String configurationJSON) {
@@ -195,62 +218,60 @@ public class Main {
         return generator.generate(node, state1);
     }
 
-    private static Map<List<String>, Node> parseSources(List<Path> sources, Configuration configuration) throws CompileException {
-        var trees = new HashMap<List<String>, Node>();
+    private static Result<Map<List<String>, Node>, CompileException> parseSources(List<Path> sources, Configuration configuration) {
+        Result<Map<List<String>, Node>, CompileException> trees = new Ok<>(new HashMap<>());
         for (var source : sources) {
-            parseSource(configuration, source, trees);
+            trees = trees.flatMapValue(inner -> parseSource(configuration, source).mapValue(inner0 -> {
+                var copy = new HashMap<>(inner);
+                copy.putAll(inner0);
+                return copy;
+            }));
         }
 
         return trees;
     }
 
-    private static void parseSource(Configuration configuration, Path source, HashMap<List<String>, Node> trees) throws CompileException {
+    private static Result<Map<ArrayList<String>, Node>, CompileException> parseSource(Configuration configuration, Path source) {
         var relativized = configuration.sourceDirectory().relativize(source.getParent());
         var namespace = computeNamespace(relativized);
         var name = computeName(source);
 
         if (namespace.size() >= 2) {
             var slice = namespace.subList(0, 2);
+
+            // Essentially, we want to skip this package.
             if (slice.equals(List.of("magma", "java"))) {
-                return;
+                return new Ok<>(Collections.emptyMap());
             }
         }
 
-        var result = parseSource(new PathSource(source, namespace, name), configuration);
-        var error = JavaOptionals.toNative(result.findErr());
-        if (error.isPresent()) {
-            throw error.get();
-        } else {
-            var list = new ArrayList<>(namespace);
-            list.add(name);
-
-            trees.put(list, JavaOptionals.toNative(result.findValue()).orElseThrow());
-        }
+        var location = new ArrayList<>(namespace);
+        location.add(name);
+        return parseSource(new PathSource(source, namespace, name), configuration)
+                .mapValue(value -> Map.of(location, value));
     }
 
-    private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) throws CompileException {
+    private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) {
         System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(pathSource.path()));
 
-        var input = readImpl(pathSource.path());
-        return JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(pathSource, configuration, root),
-                err -> writeErrorImpl(configuration, pathSource, err));
+        return readImpl(pathSource.path()).mapValue(input -> {
+            return JavaLang.createRootRule().toNode(input).create().match(
+                    root -> parse(pathSource, configuration, root),
+                    err -> new Err<Node, CompileException>(writeErrorImpl(configuration, pathSource, err)));
+        }).match(result -> result, Err::new);
     }
 
-    private static Err<Node, CompileException> writeErrorImpl(Configuration configuration, PathSource source, Error_ err) {
+    private static CompileException writeErrorImpl(Configuration configuration, PathSource source, Error_ err) {
         var location = new ArrayList<>(source.namespace());
         location.add(source.name());
         return writeError(err, location, configuration);
     }
 
     private static Result<Node, CompileException> parse(PathSource pathSource, Configuration configuration, Node root) {
-        try {
-            var relativizedDebug = createDebug(pathSource.namespace(), configuration);
-            writeImpl(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString());
-            return new Ok<>(root);
-        } catch (CompileException e) {
-            return new Err<>(e);
-        }
+        var relativizedDebug = createDebug(pathSource.namespace(), configuration);
+        return writeSafely(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString())
+                .<Result<Node, CompileException>>map(Err::new)
+                .orElseGet(() -> new Ok<>(root));
     }
 
     private static String computeName(Path source) {
@@ -264,7 +285,7 @@ public class Main {
                 .toList();
     }
 
-    private static Path createDebug(List<String> namespace, Configuration config) throws CompileException {
+    private static Path createDebug(List<String> namespace, Configuration config) {
         var relativizedDebug = config.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
@@ -274,37 +295,35 @@ public class Main {
         return relativizedDebug;
     }
 
-    private static Err<Node, CompileException> writeError(Error_ err, List<String> location, Configuration config) {
-        try {
-            var result = print(err, 0);
-            writeImpl(config.debugDirectory().resolve("error.xml"), result);
-            return new Err<>(new CompileException(String.join(".", location)));
-        } catch (CompileException e) {
-            return new Err<>(e);
-        }
+    private static CompileException writeError(Error_ err, List<String> location, Configuration config) {
+        var result = print(err, 0);
+        return writeSafely(config.debugDirectory().resolve("error.xml"), result)
+                .orElseGet(() -> new CompileException(String.join(".", location)));
     }
 
-    private static String readImpl(Path source) throws CompileException {
+    private static Result<String, CompileException> readImpl(Path source) {
         try {
-            return Files.readString(source);
+            return new Ok<>(Files.readString(source));
         } catch (IOException e) {
-            throw new CompileException("Failed to read input: " + source, e);
+            return new Err<>(new CompileException("Failed to read input: " + source, e));
         }
     }
 
-    private static void createDirectory(Path targetParent) throws CompileException {
+    private static Option<CompileException> createDirectory(Path targetParent) {
         try {
             Files.createDirectories(targetParent);
+            return new None<>();
         } catch (IOException e) {
-            throw new CompileException("Failed to make parent.", e);
+            return new Some<>(new CompileException("Failed to make parent.", e));
         }
     }
 
-    private static void writeImpl(Path target, String csq) throws CompileException {
+    private static Option<CompileException> writeSafely(Path target, String csq) {
         try {
             Files.writeString(target, csq);
+            return new None<>();
         } catch (IOException e) {
-            throw new CompileException("Cannot write.", e);
+            return new Some<>(new CompileException("Cannot write.", e));
         }
     }
 
