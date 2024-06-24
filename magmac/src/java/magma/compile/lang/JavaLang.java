@@ -1,7 +1,6 @@
 package magma.compile.lang;
 
 import magma.compile.rule.ContextRule;
-import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
@@ -146,6 +145,7 @@ public class JavaLang {
 
     private static LazyRule createValueRule(LazyRule classMember, Rule statement) {
         var value = new LazyRule();
+        var parent = new ExtractNodeRule("parent", new StripRule(value));
         value.setRule(new OrRule(List.of(
                 Lang.createStringRule(),
                 Lang.createCharRule(),
@@ -156,7 +156,7 @@ public class JavaLang {
                 createConstructorRule(value, classMember),
                 Lang.createTernaryRule(value),
                 Lang.createInvocationRule(value),
-                Lang.createAccessRule("access", ".", value),
+                createAccessRule(parent, Lang.createTypeRule()),
                 Lang.createAccessRule("method-reference", "::", value),
 
                 Lang.createOperatorRule("and", "&&", value),
@@ -171,6 +171,13 @@ public class JavaLang {
                 Lang.createNotRule(value)
         )));
         return value;
+    }
+
+    private static TypeRule createAccessRule(Rule parent, Rule type) {
+        var withoutTypeArguments = new StripRule(new SymbolRule(new ExtractStringRule("child")));
+        var withTypeArguments = new StripRule(new LeftRule("<", new LastRule(new ExtractNodeRule("type", type), ">", withoutTypeArguments)));
+        var child = new StripRule(new OrRule(List.of(withTypeArguments, withoutTypeArguments)));
+        return new TypeRule("access", new LastRule(parent, ".", child));
     }
 
     private static Rule createLambdaRule(Rule value, Rule statement) {
