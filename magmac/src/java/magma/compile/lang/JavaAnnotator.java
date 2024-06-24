@@ -11,7 +11,6 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 
 import java.util.List;
-import java.util.Optional;
 
 public class JavaAnnotator extends TreeGenerator {
     private static Result<State, Error_> defineParams(State state, List<Node> params) {
@@ -23,12 +22,7 @@ public class JavaAnnotator extends TreeGenerator {
         return defined;
     }
 
-    private static Result<Tuple<Node, State>, Error_> hoistMethods(Node node, State state) {
-        var children = node.findNode("child")
-                .orElseThrow()
-                .findNodeList("children")
-                .orElseThrow();
-
+    private static Result<State, Error_> hoistMethods(State state, List<Node> children) {
         Result<State, Error_> defined = new Ok<>(state.enter());
         for (Node child : children) {
             if (child.is("method")) {
@@ -40,13 +34,12 @@ public class JavaAnnotator extends TreeGenerator {
                 defined = defined.flatMapValue(inner -> inner.define(name));
             }
 
-            if(child.is("class")) {
+            if (child.is("class")) {
                 var name = child.findString("name").orElseThrow();
                 defined = defined.flatMapValue(inner -> inner.define(name));
             }
         }
-
-        return defined.mapValue(inner -> new Tuple<>(node, inner));
+        return defined;
     }
 
     private static Result<Tuple<Node, State>, Error_> defineParams(Node node, State state) {
@@ -54,9 +47,32 @@ public class JavaAnnotator extends TreeGenerator {
         return defineParams(state, params).mapValue(inner -> new Tuple<>(node, inner));
     }
 
+    private static Result<Tuple<Node, State>, Error_> define(Node node, State state, Node definition) {
+        var name = definition.findString("name").orElseThrow();
+        return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
+    }
+
+    private static boolean exists(State state, String value) {
+        var b = value.equals("true")
+                || value.equals("false")
+                || value.equals("this")
+                || value.equals("super")
+                || state.isDefined(value);
+        return b || isInJavaLang(value);
+    }
+
+    private static boolean isInJavaLang(String value) {
+        try {
+            Class.forName("java.lang." + value);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        if(node.is("import")) {
+        if (node.is("import")) {
             var namespace = node.findNode("external")
                     .orElseThrow()
                     .findStringList("namespace")
@@ -73,12 +89,12 @@ public class JavaAnnotator extends TreeGenerator {
             }
 
             var params = node.findStringList("params");
-            if(params.isPresent()) {
+            if (params.isPresent()) {
                 return state.defineAll(new JavaList<>(params.get())).mapValue(inner -> new Tuple<>(node, inner));
             }
         }
 
-        if(node.is("for")) {
+        if (node.is("for")) {
             var name = node.findNode("condition-parent")
                     .orElseThrow()
                     .findString("name")
@@ -95,12 +111,21 @@ public class JavaAnnotator extends TreeGenerator {
             return defineParams(node, state);
         }
 
+        if (node.is("constructor")) {
+            var children = node.findNodeList("children");
+            if (children.isPresent()) {
+                return hoistMethods(state, children.get()).mapValue(inner -> new Tuple<>(node, inner));
+            }
+        }
+
         if (node.is("class") || node.is("interface")) {
-            return hoistMethods(node, state);
+            return hoistMethods(state, node.findNode("child")
+                    .orElseThrow().findNodeList("children").orElseThrow()).mapValue(inner -> new Tuple<>(node, inner));
         }
 
         if (node.is("record")) {
-            return defineParams(node, state).flatMapValue(inner -> hoistMethods(inner.left(), inner.right()));
+            return defineParams(node, state).flatMapValue(inner -> hoistMethods(inner.right(), inner.left().findNode("child")
+                    .orElseThrow().findNodeList("children").orElseThrow()).mapValue(inner1 -> new Tuple<>(inner.left(), inner1)));
         }
 
         return new Ok<>(new Tuple<>(node, state));
@@ -126,33 +151,10 @@ public class JavaAnnotator extends TreeGenerator {
             return define(node, state, definition);
         }
 
-        if(node.is("definition")) {
+        if (node.is("definition")) {
             return define(node, state, node);
         }
 
         return new Ok<>(new Tuple<>(node, state));
-    }
-
-    private static Result<Tuple<Node, State>, Error_> define(Node node, State state, Node definition) {
-        var name = definition.findString("name").orElseThrow();
-        return state.define(name).mapValue(inner -> new Tuple<>(node, inner));
-    }
-
-    private static boolean exists(State state, String value) {
-        var b = value.equals("true")
-                || value.equals("false")
-                || value.equals("this")
-                || value.equals("super")
-                || state.isDefined(value);
-        return b || isInJavaLang(value);
-    }
-
-    private static boolean isInJavaLang(String value) {
-        try {
-            Class.forName("java.lang." + value);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 }
