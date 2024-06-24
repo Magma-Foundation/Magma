@@ -20,7 +20,6 @@ import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.rule.Node;
-import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
 import magma.java.JavaOptionals;
@@ -200,9 +199,9 @@ public record Application(Configuration config) {
                 return result;
             }
         }
-        var target = targetParent.resolve(name + ".mgs");
 
-        Rule rule = MagmaLang.createRootRule();
+        var target = targetParent.resolve(name + ".mgs");
+        var rule = MagmaLang.createRootRule();
         var generateResult = rule.fromNode(root);
         var generateErrorOptional = JavaOptionals.toNative(generateResult.findErr());
         if (generateErrorOptional.isPresent()) {
@@ -218,31 +217,35 @@ public record Application(Configuration config) {
     }
 
     Result<Map<Unit, Node>, CompileException> parseSources(List<Path> sources) {
-        Result<Map<Unit, Node>, CompileException> trees = new Ok<>(new JavaMap<>());
-        for (var source : sources) {
-            trees = trees.flatMapValue(inner -> parseSource(new PathUnit(config.sourceDirectory(), source)).mapValue(inner::putAll));
-        }
-
-        return trees;
+        return new JavaList<>(sources).stream()
+                .map(source -> new PathUnit(config.sourceDirectory(), source))
+                .map(this::parseSource)
+                .flatMap(Streams::fromOption)
+                .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    Result<Map<Unit, Node>, CompileException> parseSource(Unit source) {
+    Option<Result<Tuple<Unit, Node>, CompileException>> parseSource(Unit source) {
         var namespace = source.computeNamespace();
         if (namespace.size() >= 2) {
             var slice = namespace.subList(0, 2);
 
             // Essentially, we want to skip this package.
             if (slice.equals(List.of("magma", "java"))) {
-                return new Ok<>(new JavaMap<>());
+                return new None<>();
             }
         }
 
         System.out.println("Parsing source: " + source);
 
-        return source.read().mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
-                        root -> parse(source, root),
-                        err -> new Err<Node, CompileException>(writeError(err, source))))
-                .<Result<Node, CompileException>>match(result -> result, Err::new).mapValue(value -> new JavaMap<>(java.util.Map.of(source, value)));
+        return new Some<>(source.read().mapValue(input -> parseWithInput(source, input))
+                .<Result<Node, CompileException>>match(result -> result, Err::new)
+                .mapValue(value -> new Tuple<>(source, value)));
+    }
+
+    private Result<Node, CompileException> parseWithInput(Unit source, String input) {
+        return JavaLang.createRootRule().toNode(input).create().match(
+                root -> parse(source, root),
+                err -> new Err<>(writeError(err, source)));
     }
 
     Result<Node, CompileException> parse(Unit unit, Node root) {
