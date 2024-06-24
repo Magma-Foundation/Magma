@@ -19,7 +19,6 @@ import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -126,14 +125,8 @@ public record Application(Configuration config) {
         );
 
         var initial = new Tuple<>(root, state);
-        return Streams.fromNativeList(list).foldLeftToResult(initial, Application::generateImpl);
-    }
-
-    private static Result<Tuple<Node, State>, Error_> generateImpl(Tuple<Node, State> tuple, TreeGenerator generator) {
-        var node = tuple.left();
-        var state1 = tuple.right();
-
-        return generator.generate(node, state1);
+        return Streams.fromNativeList(list).foldLeftToResult(initial,
+                (tuple, generator) -> generator.generate(tuple.left(), tuple.right()));
     }
 
     Option<CompileException> run() {
@@ -247,8 +240,8 @@ public record Application(Configuration config) {
         System.out.println("Parsing source: " + source);
 
         return source.read().mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(source, root),
-                err -> new Err<Node, CompileException>(writeError(err, source))))
+                        root -> parse(source, root),
+                        err -> new Err<Node, CompileException>(writeError(err, source))))
                 .<Result<Node, CompileException>>match(result -> result, Err::new).mapValue(value -> new JavaMap<>(java.util.Map.of(source, value)));
     }
 
