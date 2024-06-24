@@ -36,6 +36,20 @@ public record JavaSet<T>(Set<T> set) implements magma.java.Set<T> {
         };
     }
 
+    public static <T> Collector<T, magma.java.Set<T>> collecting() {
+        return new Collector<>() {
+            @Override
+            public magma.java.Set<T> createInitial() {
+                return new JavaSet<>();
+            }
+
+            @Override
+            public magma.java.Set<T> fold(magma.java.Set<T> current, T next) {
+                return current.add(next);
+            }
+        };
+    }
+
     @Override
     public Stream<T> stream() {
         return new AbstractStream<>(new NativeListStream<>(new ArrayList<>(set)));

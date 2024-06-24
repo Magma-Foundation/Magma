@@ -1,6 +1,8 @@
 package magma;
 
 import magma.api.Tuple;
+import magma.api.collect.Map;
+import magma.api.collect.stream.Collectors;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -21,6 +23,7 @@ import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
+import magma.java.JavaMap;
 import magma.java.JavaOptionals;
 import magma.java.JavaSet;
 
@@ -33,7 +36,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import static magma.java.JavaResults.$;
@@ -70,40 +72,33 @@ public class Main {
 
     private static Result<Configuration, IOException> buildConfiguration() {
         return readConfiguration().mapValue(map -> {
-            var sourceDirectory = Paths.get(map.get("sources"));
-            var debugDirectory = Paths.get(map.get("debug"));
-            var targetDirectory = Paths.get(map.get("targets"));
+            var sourceDirectory = Paths.get(map.get("sources").orElsePanic());
+            var debugDirectory = Paths.get(map.get("debug").orElsePanic());
+            var targetDirectory = Paths.get(map.get("targets").orElsePanic());
             return new Configuration(sourceDirectory, targetDirectory, debugDirectory);
         });
     }
 
     private static Result<Map<List<String>, Node>, CompileException> generateTargets(Configuration configuration, Map<List<String>, Node> sourceTrees) {
-        Result<Map<List<String>, Node>, CompileException> targetTrees = new Ok<>(Collections.emptyMap());
-
-        for (Map.Entry<List<String>, Node> entry : sourceTrees.entrySet()) {
-            var location = entry.getKey();
-            targetTrees = targetTrees.flatMapValue(inner0 -> generateTarget(configuration, sourceTrees, location, entry.getValue()).mapValue(inner1 -> {
-                var copy = new HashMap<>(inner0);
-                copy.put(location, inner1);
-                return copy;
-            }));
-        }
-
-        return targetTrees;
+        return sourceTrees.streamEntries()
+                .map(entry -> generateTarget(configuration, sourceTrees, entry))
+                .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    private static Result<Node, CompileException> generateTarget(
+    private static Result<Tuple<List<String>, Node>, CompileException> generateTarget(
             Configuration configuration,
             Map<List<String>, Node> sourceTrees,
-            List<String> location,
-            Node root) {
+            Tuple<List<String>, Node> entry) {
         return $(() -> {
+            var location = entry.left();
+            var right = entry.right();
+
             var namespace = location.subList(0, location.size() - 1);
             var name = location.get(location.size() - 1);
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = $(generate(sourceTrees, root)
+            var generated = $(generate(sourceTrees, right)
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(error, location, configuration)));
 
@@ -111,20 +106,15 @@ public class Main {
             var debugTarget = debug.resolve(name + ".output.ast");
 
             $(writeSafely(debugTarget, generated.toString()));
-            return generated;
+            return new Tuple<>(location, generated);
         });
     }
 
     private static Option<CompileException> writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) {
-        for (Map.Entry<List<String>, Node> entry : targetTrees.entrySet()) {
-            var location = entry.getKey();
-            var option = writeTarget(configuration, location, entry.getValue());
-            if (option.isPresent()) {
-                return option;
-            }
-        }
-
-        return new None<>();
+        return targetTrees.streamEntries()
+                .map(entry -> writeTarget(configuration, entry.left(), entry.right()))
+                .flatMap(Streams::fromOption)
+                .head();
     }
 
     private static Option<CompileException> writeTarget(Configuration configuration, List<String> location, Node root) {
@@ -195,11 +185,13 @@ public class Main {
 
         System.out.println("Parsed configuration.");
         System.out.println(map);
-        return map;
+        return new JavaMap<>(map);
     }
 
     private static Result<Tuple<Node, State>, Error_> generate(Map<List<String>, Node> sourceTrees, Node root) {
-        var state = new State(JavaSet.fromNative(sourceTrees.keySet(), JavaList::new), new JavaList<>());
+        var state = new State(sourceTrees.keyStream()
+                .<magma.api.collect.List<String>>map(JavaList::new)
+                .collect(JavaSet.collecting()), new JavaList<>());
 
         var list = List.of(
                 new JavaAnnotator(),
@@ -220,19 +212,15 @@ public class Main {
     }
 
     private static Result<Map<List<String>, Node>, CompileException> parseSources(List<Path> sources, Configuration configuration) {
-        Result<Map<List<String>, Node>, CompileException> trees = new Ok<>(new HashMap<>());
+        Result<Map<List<String>, Node>, CompileException> trees = new Ok<>(new JavaMap<>());
         for (var source : sources) {
-            trees = trees.flatMapValue(inner -> parseSource(configuration, source).mapValue(inner0 -> {
-                var copy = new HashMap<>(inner);
-                copy.putAll(inner0);
-                return copy;
-            }));
+            trees = trees.flatMapValue(inner -> parseSource(configuration, source).mapValue(inner::putAll));
         }
 
         return trees;
     }
 
-    private static Result<Map<ArrayList<String>, Node>, CompileException> parseSource(Configuration configuration, Path source) {
+    private static Result<Map<List<String>, Node>, CompileException> parseSource(Configuration configuration, Path source) {
         var relativized = configuration.sourceDirectory().relativize(source.getParent());
         var namespace = computeNamespace(relativized);
         var name = computeName(source);
@@ -242,24 +230,22 @@ public class Main {
 
             // Essentially, we want to skip this package.
             if (slice.equals(List.of("magma", "java"))) {
-                return new Ok<>(Collections.emptyMap());
+                return new Ok<>(new JavaMap<>());
             }
         }
 
         var location = new ArrayList<>(namespace);
         location.add(name);
         return parseSource(new PathSource(source, namespace, name), configuration)
-                .mapValue(value -> Map.of(location, value));
+                .mapValue(value -> new JavaMap<>(java.util.Map.of(location, value)));
     }
 
     private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) {
         System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(pathSource.path()));
 
-        return readImpl(pathSource.path()).mapValue(input -> {
-            return JavaLang.createRootRule().toNode(input).create().match(
-                    root -> parse(pathSource, configuration, root),
-                    err -> new Err<Node, CompileException>(writeErrorImpl(configuration, pathSource, err)));
-        }).match(result -> result, Err::new);
+        return readImpl(pathSource.path()).mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
+                root -> parse(pathSource, configuration, root),
+                err -> new Err<Node, CompileException>(writeErrorImpl(configuration, pathSource, err)))).match(result -> result, Err::new);
     }
 
     private static CompileException writeErrorImpl(Configuration configuration, PathSource source, Error_ err) {
