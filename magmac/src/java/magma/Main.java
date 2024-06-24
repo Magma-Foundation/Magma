@@ -108,10 +108,11 @@ public class Main {
                 .mapValue(Tuple::left)
                 .mapErr(error -> getCompileException(configuration, error, location))
                 .flatMapValue(generated -> {
-                    var relativizedDebug = createDebug(namespace, configuration);
-                    return writeSafely(relativizedDebug.resolve(name + ".output.ast"), generated.toString())
-                            .<Result<Node, CompileException>>map(Err::new)
-                            .orElseGet(() -> new Ok<>(generated));
+                    return createDebug(namespace, configuration).flatMapValue(relativizedDebug -> {
+                        return writeSafely(relativizedDebug.resolve(name + ".output.ast"), generated.toString())
+                                .<Result<Node, CompileException>>map(Err::new)
+                                .orElseGet(() -> new Ok<>(generated));
+                    });
                 });
     }
 
@@ -142,7 +143,12 @@ public class Main {
             targetParent = targetParent.resolve(segment);
         }
 
-        if (!Files.exists(targetParent)) createDirectory(targetParent);
+        if (!Files.exists(targetParent)) {
+            var result = createDirectory(targetParent);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
         var target = targetParent.resolve(name + ".mgs");
 
         Rule rule = MagmaLang.createRootRule();
@@ -268,10 +274,11 @@ public class Main {
     }
 
     private static Result<Node, CompileException> parse(PathSource pathSource, Configuration configuration, Node root) {
-        var relativizedDebug = createDebug(pathSource.namespace(), configuration);
-        return writeSafely(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString())
-                .<Result<Node, CompileException>>map(Err::new)
-                .orElseGet(() -> new Ok<>(root));
+        return createDebug(pathSource.namespace(), configuration).flatMapValue(relativizedDebug -> {
+            return writeSafely(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString())
+                    .<Result<Node, CompileException>>map(Err::new)
+                    .orElseGet(() -> new Ok<>(root));
+        });
     }
 
     private static String computeName(Path source) {
@@ -285,14 +292,20 @@ public class Main {
                 .toList();
     }
 
-    private static Path createDebug(List<String> namespace, Configuration config) {
+    private static Result<Path, CompileException> createDebug(List<String> namespace, Configuration config) {
         var relativizedDebug = config.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }
 
-        if (!Files.exists(relativizedDebug)) createDirectory(relativizedDebug);
-        return relativizedDebug;
+        if (!Files.exists(relativizedDebug)) {
+            var directoryError = createDirectory(relativizedDebug);
+            if (directoryError.isPresent()) {
+                return new Err<>(directoryError.orElsePanic());
+            }
+        }
+
+        return new Ok<>(relativizedDebug);
     }
 
     private static CompileException writeError(Error_ err, List<String> location, Configuration config) {
