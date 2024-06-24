@@ -77,51 +77,67 @@ public class Main {
     private static HashMap<List<String>, Node> generateTargets(Map<List<String>, Node> sourceTrees, Configuration configuration) throws CompileException {
         var targetTrees = new HashMap<List<String>, Node>();
         for (Map.Entry<List<String>, Node> entry : sourceTrees.entrySet()) {
-            var location = entry.getKey();
-            var namespace = location.subList(0, location.size() - 1);
-            var name = location.get(location.size() - 1);
-            System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
-
-            var generated = Results.unwrap(generate(entry, sourceTrees)
-                    .mapValue(Tuple::left)
-                    .mapErr(error -> {
-                        writeError(error, location, configuration);
-                        return new CompileException("Failed to generate: " + String.join(".", location));
-                    }));
-
-            var relativizedDebug = createDebug(namespace, configuration);
-            writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
-            targetTrees.put(location, generated);
+            generateTarget(configuration, sourceTrees, targetTrees, entry.getKey(), entry.getValue());
         }
         return targetTrees;
     }
 
-    private static void writeTargets(HashMap<List<String>, Node> targetTrees, Configuration configuration) throws CompileException {
+    private static void generateTarget(
+            Configuration configuration,
+            Map<List<String>, Node> sourceTrees,
+            Map<List<String>, Node> targetTrees,
+            List<String> location,
+            Node root
+    ) throws CompileException {
+        var namespace = location.subList(0, location.size() - 1);
+        var name = location.get(location.size() - 1);
+
+        System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
+
+        var generated = Results.unwrap(generate(sourceTrees, root)
+                .mapValue(Tuple::left)
+                .mapErr(error -> getCompileException(configuration, error, location)));
+
+        var relativizedDebug = createDebug(namespace, configuration);
+        writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
+        targetTrees.put(location, generated);
+    }
+
+    private static CompileException getCompileException(Configuration configuration, Error_ error, List<String> location) {
+        writeError(error, location, configuration);
+        return new CompileException("Failed to generate: " + String.join(".", location));
+    }
+
+    private static void writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) throws CompileException {
         for (Map.Entry<List<String>, Node> entry : targetTrees.entrySet()) {
             var location = entry.getKey();
-            var namespace = location.subList(0, location.size() - 1);
-            var name = location.get(location.size() - 1);
-            System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
-
-            var targetParent = configuration.targetDirectory();
-            for (String segment : namespace) {
-                targetParent = targetParent.resolve(segment);
-            }
-
-            if (!Files.exists(targetParent)) createDirectory(targetParent);
-            var target = targetParent.resolve(name + ".mgs");
-
-            Rule rule = MagmaLang.createRootRule();
-            var generateResult = rule.fromNode(entry.getValue());
-            var generateErrorOptional = JavaOptionals.toNative(generateResult.findErr());
-            if (generateErrorOptional.isPresent()) {
-                var generateError = generateErrorOptional.get();
-                print(generateError, 0);
-                writeError(generateError, location, configuration);
-            }
-
-            writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
+            writeTarget(configuration, location, entry.getValue());
         }
+    }
+
+    private static void writeTarget(Configuration configuration, List<String> location, Node root) throws CompileException {
+        var namespace = location.subList(0, location.size() - 1);
+        var name = location.get(location.size() - 1);
+        System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
+
+        var targetParent = configuration.targetDirectory();
+        for (String segment : namespace) {
+            targetParent = targetParent.resolve(segment);
+        }
+
+        if (!Files.exists(targetParent)) createDirectory(targetParent);
+        var target = targetParent.resolve(name + ".mgs");
+
+        Rule rule = MagmaLang.createRootRule();
+        var generateResult = rule.fromNode(root);
+        var generateErrorOptional = JavaOptionals.toNative(generateResult.findErr());
+        if (generateErrorOptional.isPresent()) {
+            var generateError = generateErrorOptional.get();
+            print(generateError, 0);
+            writeError(generateError, location, configuration);
+        }
+
+        writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
     }
 
     private static Map<String, String> readConfiguration() throws IOException {
@@ -158,7 +174,7 @@ public class Main {
         return map;
     }
 
-    private static Result<Tuple<Node, State>, Error_> generate(Map.Entry<List<String>, Node> entry, Map<List<String>, Node> sourceTrees) {
+    private static Result<Tuple<Node, State>, Error_> generate(Map<List<String>, Node> sourceTrees, Node root) {
         var state = new State(JavaSet.fromNative(sourceTrees.keySet(), JavaList::new), new JavaList<>());
 
         var list = List.of(
@@ -168,7 +184,7 @@ public class Main {
                 new MagmaFormatter()
         );
 
-        var initial = new Tuple<>(entry.getValue(), state);
+        var initial = new Tuple<>(root, state);
         return Streams.fromNativeList(list).foldRightToResult(initial, Main::generateImpl);
     }
 
@@ -182,30 +198,34 @@ public class Main {
     private static Map<List<String>, Node> parseSources(List<Path> sources, Configuration configuration) throws CompileException {
         var trees = new HashMap<List<String>, Node>();
         for (var source : sources) {
-            var relativized = configuration.sourceDirectory().relativize(source.getParent());
-            var namespace = computeNamespace(relativized);
-            var name = computeName(source);
-
-            if (namespace.size() >= 2) {
-                var slice = namespace.subList(0, 2);
-                if (slice.equals(List.of("magma", "java"))) {
-                    continue;
-                }
-            }
-
-            var result = parseSource(new PathSource(source, namespace, name), configuration);
-            var error = JavaOptionals.toNative(result.findErr());
-            if (error.isPresent()) {
-                throw error.get();
-            } else {
-                var list = new ArrayList<>(namespace);
-                list.add(name);
-
-                trees.put(list, JavaOptionals.toNative(result.findValue()).orElseThrow());
-            }
+            parseSource(configuration, source, trees);
         }
 
         return trees;
+    }
+
+    private static void parseSource(Configuration configuration, Path source, HashMap<List<String>, Node> trees) throws CompileException {
+        var relativized = configuration.sourceDirectory().relativize(source.getParent());
+        var namespace = computeNamespace(relativized);
+        var name = computeName(source);
+
+        if (namespace.size() >= 2) {
+            var slice = namespace.subList(0, 2);
+            if (slice.equals(List.of("magma", "java"))) {
+                return;
+            }
+        }
+
+        var result = parseSource(new PathSource(source, namespace, name), configuration);
+        var error = JavaOptionals.toNative(result.findErr());
+        if (error.isPresent()) {
+            throw error.get();
+        } else {
+            var list = new ArrayList<>(namespace);
+            list.add(name);
+
+            trees.put(list, JavaOptionals.toNative(result.findValue()).orElseThrow());
+        }
     }
 
     private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) throws CompileException {
@@ -345,5 +365,4 @@ public class Main {
         var formatted = actualContext.replace("\n", "\n" + " ".repeat(depth == 0 ? 0 : depth - 1));
         return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
     }
-
 }
