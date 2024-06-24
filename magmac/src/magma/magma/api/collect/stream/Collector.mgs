@@ -1,0 +1,5 @@
+
+	public struct Collector {
+		createInitial : C;
+		fold : C;
+	}
