@@ -12,15 +12,15 @@ import java.util.function.Predicate;
 
 public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
     @Override
-    public <R, E> Result<R, E> foldRightToResult(R initial, BiFunction<R, T, Result<R, E>> mapper) {
-        return this.fold(Ok.from(initial),
+    public <R, E> Result<R, E> foldLeftToResult(R initial, BiFunction<R, T, Result<R, E>> mapper) {
+        return this.foldLeft(Ok.from(initial),
                 (reResult, t) -> reResult.flatMapValue(
                         inner -> mapper.apply(inner, t)));
     }
 
     @Override
     public boolean anyMatch(Predicate<T> predicate) {
-        return fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        return foldLeft(false, (aBoolean, t) -> aBoolean || predicate.test(t));
     }
 
     @Override
@@ -46,10 +46,11 @@ public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
     @Override
     public <C> C collect(Collector<T, C> collector) {
         var current = collector.createInitial();
-        return fold(current, collector::fold);
+        return foldLeft(current, collector::fold);
     }
 
-    private <C> C fold(C current, BiFunction<C, T, C> folder) {
+    @Override
+    public <C> C foldLeft(C current, BiFunction<C, T, C> folder) {
         while (true) {
             C finalCurrent = current;
             var tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(head -> folder.apply(finalCurrent, head)), current);

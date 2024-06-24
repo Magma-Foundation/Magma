@@ -63,7 +63,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
     @Override
     public Stream<T> stream() {
-        return new AbstractStream<>(new NativeListStream<>(list));
+        return new AbstractStream<>(new NativeListHead<>(list));
     }
 
     @Override

@@ -23,7 +23,7 @@ public class TreeGenerator implements Generator {
         if (nodeList.isPresent()) {
             var initial = new Tuple<List<Node>, State>(new ArrayList<>(), state);
             return Streams.fromNativeList(nodeList.get())
-                    .foldRightToResult(initial, this::generateThenFold)
+                    .foldLeftToResult(initial, this::generateThenFold)
                     .mapValue(tuple -> tuple.mapLeft(NodeListAttribute::new));
         }
 
@@ -53,7 +53,7 @@ public class TreeGenerator implements Generator {
             var preVisitedState = preVisitedTuple.right();
 
             return Streams.fromNativeList(preVisitedAttributes)
-                    .foldRightToResult(new Tuple<>(new MapAttributes(), preVisitedState), this::generateAttributeWithState)
+                    .foldLeftToResult(new Tuple<>(new MapAttributes(), preVisitedState), this::generateAttributeWithState)
                     .flatMapValue(tuple -> postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
         }).mapErr(err -> new CompileParentError("Failed to parse node.", node.toString(), err));
     }

@@ -52,7 +52,7 @@ public record JavaSet<T>(Set<T> set) implements magma.java.Set<T> {
 
     @Override
     public Stream<T> stream() {
-        return new AbstractStream<>(new NativeListStream<>(new ArrayList<>(set)));
+        return new AbstractStream<>(new NativeListHead<>(new ArrayList<>(set)));
     }
 
     @Override

@@ -126,7 +126,7 @@ public record Application(Configuration config) {
         );
 
         var initial = new Tuple<>(root, state);
-        return Streams.fromNativeList(list).foldRightToResult(initial, Application::generateImpl);
+        return Streams.fromNativeList(list).foldLeftToResult(initial, Application::generateImpl);
     }
 
     private static Result<Tuple<Node, State>, Error_> generateImpl(Tuple<Node, State> tuple, TreeGenerator generator) {

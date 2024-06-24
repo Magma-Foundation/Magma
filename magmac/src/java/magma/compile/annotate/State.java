@@ -60,6 +60,6 @@ public final class State {
     }
 
     public Result<State, Error_> defineAll(List<String> names) {
-        return names.stream().foldRightToResult(this, State::define);
+        return names.stream().foldLeftToResult(this, State::define);
     }
 }
