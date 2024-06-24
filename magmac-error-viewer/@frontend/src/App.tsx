@@ -14,7 +14,7 @@ function unescape(value: string): string {
 }
 
 interface TreeContent {
-    context: string;
+    context?: string;
     title: string;
 }
 
@@ -45,10 +45,10 @@ function createTreeElement(tree: XMLObject | undefined, onClick: (content: TreeC
     const children = tree.findChildren("child").map(child => createTreeElement(child, onClick));
 
     const message = tree.findAttribute("message") ?? "";
-    const context = tree.findAttribute("context") ?? tree.findContent() ?? "";
+    const context = tree.findAttribute("context") ?? tree.findContent()
 
     const content: TreeContent = {
-        context: unescape(context),
+        context: context ? unescape(context) : undefined,
         title: unescape(message)
     }
 
@@ -106,15 +106,32 @@ function App() {
             method: "get",
             url: "http://localhost:3000/content"
         }).then(e => {
-            setContent(e.data);
-            setBefore(e.data);
+            const unescaped = unescape(e.data);
+            setContent(unescaped);
+            setBefore(unescaped);
         }).catch(e => {
             console.error(e);
         });
     });
 
-    function onClick(content: TreeContent) {
-        console.log(content);
+    function onClick(clicked: TreeContent) {
+        console.log(clicked);
+        const context = clicked.context;
+        if (!context) return;
+
+        const currentContent = content();
+        const index = currentContent.indexOf(context);
+        if (index == -1) {
+            console.error("Context does not exist in content: " + context);
+        }
+
+        const beforeSlice = currentContent.slice(0, index);
+        const highlightedSlice = currentContent.slice(index, index + context.length);
+        const afterSlice = currentContent.slice(index + context.length);
+
+        setBefore(beforeSlice);
+        setHighlighted(highlightedSlice);
+        setAfter(afterSlice);
     }
 
     return (
