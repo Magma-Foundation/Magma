@@ -188,7 +188,7 @@ public class Main {
                 }
             }
 
-            var result = parseSource(source, namespace, name, configuration);
+            var result = parseSource(new PathSource(source, namespace, name), configuration);
             var error = JavaOptionals.toNative(result.findErr());
             if (error.isPresent()) {
                 throw error.get();
@@ -203,33 +203,34 @@ public class Main {
         return trees;
     }
 
-    private static Result<Node, CompileException> parseSource(Path source, List<String> namespace, String name, Configuration configuration) throws CompileException {
-        System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(source));
+    private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) throws CompileException {
+        System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(pathSource.path()));
 
-        var location = new ArrayList<>(namespace);
-        location.add(name);
-
-        var input = readImpl(source);
-
+        var input = readImpl(pathSource.path());
         return JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(root, namespace, name, configuration),
-                err -> writeError(err, location, configuration));
+                root -> parse(pathSource, configuration, root),
+                err -> writeErrorImpl(configuration, pathSource, err));
     }
 
-    private static String computeName(Path source) {
-        var fileName = source.getFileName().toString();
-        var name = fileName.substring(0, fileName.indexOf('.'));
-        return name;
+    private static Err<Node, CompileException> writeErrorImpl(Configuration configuration, PathSource source, Error_ err) {
+        var location = new ArrayList<>(source.namespace());
+        location.add(source.name());
+        return writeError(err, location, configuration);
     }
 
-    private static Result<Node, CompileException> parse(Node root, List<String> namespace, String name, Configuration debugDirectory) {
+    private static Result<Node, CompileException> parse(PathSource pathSource, Configuration configuration, Node root) {
         try {
-            var relativizedDebug = createDebug(namespace, debugDirectory);
-            writeImpl(relativizedDebug.resolve(name + ".input.ast"), root.toString());
+            var relativizedDebug = createDebug(pathSource.namespace(), configuration);
+            writeImpl(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString());
             return new Ok<>(root);
         } catch (CompileException e) {
             return new Err<>(e);
         }
+    }
+
+    private static String computeName(Path source) {
+        var fileName = source.getFileName().toString();
+        return fileName.substring(0, fileName.indexOf('.'));
     }
 
     private static List<String> computeNamespace(Path relativized) {
@@ -266,9 +267,9 @@ public class Main {
         }
     }
 
-    private static Path createDirectory(Path targetParent) throws CompileException {
+    private static void createDirectory(Path targetParent) throws CompileException {
         try {
-            return Files.createDirectories(targetParent);
+            Files.createDirectories(targetParent);
         } catch (IOException e) {
             throw new CompileException("Failed to make parent.", e);
         }
