@@ -1,1 +1,32 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;import magma.java.JavaOptionals;import java.util.List;import java.util.Optional;export class def Streams() => {public static def fromNativeList<T>(this, list : List<T>) : Stream<T> => {return AbstractStream(Head((() => {private let mut counter : int = 0;return {public def head(this) : Option<T> => {return JavaOptionals.fromNative(head0());}private def head0(this) : Optional<T> => {if(counter>=list.size())return Optional.empty();let mut next : var = list.get(counter);counter++;return Optional.of(next);}};})())());}public static def fromOption<T>(this, option : Option<T>) : Stream<T> => {return AbstractStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));}public static def from(this, extent : int) : Stream<Integer> => {return AbstractStream(Head((() => {private let mut counter : int = 0;return {public def head(this) : Option<Integer> => {if(counter>=extent)return None();let mut value : var = counter;counter++;return Some(value);}};})())());}}
+
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.java.JavaOptionals;
+import java.util.List;
+import java.util.Optional;
+export class def Streams() => {
+public static def fromNativeList<T>(this, list : List<T>) : Stream<T> => {
+return AbstractStream(Head((() => {
+private let mut counter : int = 0;
+return {
+public def head(this) : Option<T> => {
+return JavaOptionals.fromNative(head0());}
+private def head0(this) : Optional<T> => {
+if(counter>=list.size())
+return Optional.empty();
+let mut next : var = list.get(counter);
+counter++;
+return Optional.of(next);}};})())());}
+public static def fromOption<T>(this, option : Option<T>) : Stream<T> => {
+return AbstractStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));}
+public static def from(this, extent : int) : Stream<Integer> => {
+return AbstractStream(Head((() => {
+private let mut counter : int = 0;
+return {
+public def head(this) : Option<Integer> => {
+if(counter>=extent)
+return None();
+let mut value : var = counter;
+counter++;
+return Some(value);}};})())());}}

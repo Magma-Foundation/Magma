@@ -1,1 +1,11 @@
-import magma.java.JavaOptionals;export class def Results() => {public static def unwrap<T, E extends Throwable>(this, result : Result<T, E>) : T => {let mut value : var = JavaOptionals.toNative(result.findValue());if(value.isPresent())return value.get();let mut err : var = JavaOptionals.toNative(result.findErr());if(err.isPresent())throw err.get();throw RuntimeException("No value or err present?");}}
+
+import magma.java.JavaOptionals;
+export class def Results() => {
+public static def unwrap<T, E extends Throwable>(this, result : Result<T, E>) : T => {
+let mut value : var = JavaOptionals.toNative(result.findValue());
+if(value.isPresent())
+return value.get();
+let mut err : var = JavaOptionals.toNative(result.findErr());
+if(err.isPresent())
+throw err.get();
+throw RuntimeException("No value or err present?");}}

@@ -1,1 +1,6 @@
-import magma.compile.rule.Rule;import magma.compile.rule.Rules;export class def LastRule() => {def LastRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {super(leftRule, slice, rightRule, () => Rules.wrapIndex(input.lastIndexOf(slice)));}}
+
+import magma.compile.rule.Rule;
+import magma.compile.rule.Rules;
+export class def LastRule() => {
+def LastRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {
+super(leftRule, slice, rightRule, () => Rules.wrapIndex(input.lastIndexOf(slice)));}}

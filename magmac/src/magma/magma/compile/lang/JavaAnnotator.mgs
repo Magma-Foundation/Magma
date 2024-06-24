@@ -1,1 +1,104 @@
-import magma.api.Tuple;import magma.api.result.Err;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;import magma.java.JavaList;import java.util.List;export class def JavaAnnotator() => {private static def defineParams(this, state : State, params : List<Node>) : Result<State, Error_> => {let mut defined : Result<State, Error_> = Ok(state);for(param : Node in params){let mut name : var = param.findString("name").orElseThrow();defined=defined.flatMapValue(() => inner.define(name));}return defined;}private static def hoistMethods(this, children : List<Node>, enteredState : State) : Result<State, Error_> => {let mut defined : Result<State, Error_> = Ok(enteredState);for(child : Node in children){if(child.is("method")){let mut name : var = child.findNode("definition").orElseThrow().findString("name").orElseThrow();defined=defined.flatMapValue(() => inner.define(name));}if(child.is("class")||child.is("record")||child.is("interface")){let mut name : var = child.findString("name").orElseThrow();defined=defined.flatMapValue(() => inner.define(name));}}return defined;}private static def defineParams(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {let mut params : var = node.findNodeList("params").orElseThrow();return defineParams(state, params).mapValue(() => Tuple(node, inner));}private static def define(this, node : Node, state : State, definition : Node) : Result<Tuple<Node, State>, Error_> => {let mut name : var = definition.findString("name").orElseThrow();return state.define(name).mapValue(() => Tuple(node, inner));}private static def exists(this, state : State, value : String) : boolean => {let mut b : var = value.equals("true")||value.equals("false")||value.equals("this")||value.equals("super")||state.isDefined(value);return b||isInJavaLang(value);}private static def isInJavaLang(this, value : String) : boolean => {try {Class.forName("java.lang."+value);return true;}catch (e : ClassNotFoundException){return false;}}protected def preVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {if(node.is("import")){let mut namespace : var = node.findNode("external").orElseThrow().findStringList("namespace").orElseThrow();let mut last : var = namespace.get(namespace.size()-1);return state.define(last).mapValue(() => Tuple(node, newState));}if(node.is("lambda")){let mut nameOptional : var = node.findString("param");if(nameOptional.isPresent()){return state.define(nameOptional.get()).mapValue(() => Tuple(node, inner));}let mut params : var = node.findStringList("params");if(params.isPresent()){return state.defineAll(JavaList(params.get())).mapValue(() => Tuple(node, inner));}}if(node.is("for")){let mut name : var = node.findNode("condition-parent").orElseThrow().findString("name").orElseThrow();return state.enter().define(name).mapValue(() => Tuple(node, inner));}if(node.is("block")){return Ok(Tuple(node, state.enter()));}if(node.is("method")){return defineParams(node, state);}if(node.is("constructor")){let mut children : var = node.findNodeList("children");if(children.isPresent()){return hoistMethods(children.get(), state.enter()).mapValue(() => Tuple(node, inner));}}if(node.is("class")||node.is("interface")){return hoistMethods(node.findNode("child").orElseThrow().findNodeList("children").orElseThrow(), state.enter()).mapValue(() => Tuple(node, inner));}if(node.is("record")){return defineParams(node, state).flatMapValue(() => hoistMethods(inner.left().findNode("child").orElseThrow().findNodeList("children").orElseThrow(), inner.right().enter()).mapValue(() => Tuple(inner.left(), inner1)));}return Ok(Tuple(node, state));}protected def postVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {if(node.is("block")||node.is("for")||node.is("class")||node.is("record")||node.is("interface")){return Ok(Tuple(node, state.exit()));}if(node.is("symbol")){let mut value : var = node.findString("value").orElseThrow();if(exists(state, value)){return Ok(Tuple(node, state));}return Err(CompileError("Symbol not defined.", value));}if(node.is("declaration")){let mut definition : var = node.findNode("definition").orElseThrow();return define(node, state, definition);}if(node.is("definition")){return define(node, state, node);}return Ok(Tuple(node, state));}}
+
+import magma.api.Tuple;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+import java.util.List;
+export class def JavaAnnotator() => {
+private static def defineParams(this, state : State, params : List<Node>) : Result<State, Error_> => {
+let mut defined : Result<State, Error_> = Ok(state);
+for(param : Node in params){
+let mut name : var = param.findString("name").orElseThrow();
+defined=defined.flatMapValue(() => inner.define(name));}
+return defined;}
+private static def hoistMethods(this, children : List<Node>, enteredState : State) : Result<State, Error_> => {
+let mut defined : Result<State, Error_> = Ok(enteredState);
+for(child : Node in children){
+if(child.is("method"))
+{
+let mut name : var = child.findNode("definition").orElseThrow().findString("name").orElseThrow();
+defined=defined.flatMapValue(() => inner.define(name));}
+if(child.is("class")||child.is("record")||child.is("interface"))
+{
+let mut name : var = child.findString("name").orElseThrow();
+defined=defined.flatMapValue(() => inner.define(name));}}
+return defined;}
+private static def defineParams(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+let mut params : var = node.findNodeList("params").orElseThrow();
+return defineParams(state, params).mapValue(() => Tuple(node, inner));}
+private static def define(this, node : Node, state : State, definition : Node) : Result<Tuple<Node, State>, Error_> => {
+let mut name : var = definition.findString("name").orElseThrow();
+return state.define(name).mapValue(() => Tuple(node, inner));}
+private static def exists(this, state : State, value : String) : boolean => {
+let mut b : var = value.equals("true")||value.equals("false")||value.equals("this")||value.equals("super")||state.isDefined(value);
+return b||isInJavaLang(value);}
+private static def isInJavaLang(this, value : String) : boolean => {
+try 
+{
+Class.forName("java.lang."+value);
+return true;}
+catch (e : ClassNotFoundException){
+return false;}}
+protected def preVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+if(node.is("import"))
+{
+let mut namespace : var = node.findNode("external").orElseThrow().findStringList("namespace").orElseThrow();
+let mut last : var = namespace.get(namespace.size()-1);
+return state.define(last).mapValue(() => Tuple(node, newState));}
+if(node.is("lambda"))
+{
+let mut nameOptional : var = node.findString("param");
+if(nameOptional.isPresent())
+{
+return state.define(nameOptional.get()).mapValue(() => Tuple(node, inner));}
+let mut params : var = node.findStringList("params");
+if(params.isPresent())
+{
+return state.defineAll(JavaList(params.get())).mapValue(() => Tuple(node, inner));}}
+if(node.is("for"))
+{
+let mut name : var = node.findNode("condition-parent").orElseThrow().findString("name").orElseThrow();
+return state.enter().define(name).mapValue(() => Tuple(node, inner));}
+if(node.is("block"))
+{
+return Ok(Tuple(node, state.enter()));}
+if(node.is("method"))
+{
+return defineParams(node, state);}
+if(node.is("constructor"))
+{
+let mut children : var = node.findNodeList("children");
+if(children.isPresent())
+{
+return hoistMethods(children.get(), state.enter()).mapValue(() => Tuple(node, inner));}}
+if(node.is("class")||node.is("interface"))
+{
+return hoistMethods(node.findNode("child").orElseThrow().findNodeList("children").orElseThrow(), state.enter()).mapValue(() => Tuple(node, inner));}
+if(node.is("record"))
+{
+return defineParams(node, state).flatMapValue(() => hoistMethods(inner.left().findNode("child").orElseThrow().findNodeList("children").orElseThrow(), inner.right().enter()).mapValue(() => Tuple(inner.left(), inner1)));}
+return Ok(Tuple(node, state));}
+protected def postVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+if(node.is("block")||node.is("for")||node.is("class")||node.is("record")||node.is("interface"))
+{
+return Ok(Tuple(node, state.exit()));}
+if(node.is("symbol"))
+{
+let mut value : var = node.findString("value").orElseThrow();
+if(exists(state, value))
+{
+return Ok(Tuple(node, state));}
+return Err(CompileError("Symbol not defined.", value));}
+if(node.is("declaration"))
+{
+let mut definition : var = node.findNode("definition").orElseThrow();
+return define(node, state, definition);}
+if(node.is("definition"))
+{
+return define(node, state, node);}
+return Ok(Tuple(node, state));}}

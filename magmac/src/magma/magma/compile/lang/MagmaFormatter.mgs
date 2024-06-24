@@ -1,1 +1,21 @@
-import magma.api.Tuple;import magma.api.result.Err;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;import magma.compile.rule.text.StripRule;import java.util.ArrayList;import java.util.List;import java.util.Optional;export class def MagmaFormatter() => {}
+
+import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.rule.Node;
+import magma.compile.rule.text.StripRule;
+export class def MagmaFormatter() => {
+protected def preVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+if(node.is("block"))
+{
+return Ok(Tuple(node, state.enter()));}
+return Ok(Tuple(node, state));}
+protected def postVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+if(node.is("block"))
+{
+let mut node1 : var = node.mapNodes("children", () => {
+return children.stream().map(() => child.withString(StripRule.DEFAULT_LEFT, "\n")).toList();});
+return Ok(Tuple(node1, state.exit()));}
+return Ok(Tuple(node, state));}}

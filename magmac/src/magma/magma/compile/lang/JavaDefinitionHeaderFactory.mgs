@@ -1,1 +1,53 @@
-import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.rule.ContextRule;import magma.compile.rule.OrRule;import magma.compile.rule.Rule;import magma.compile.rule.TypeRule;import magma.compile.rule.split.BackwardsRule;import magma.compile.rule.split.LastRule;import magma.compile.rule.split.SplitMultipleRule;import magma.compile.rule.split.Splitter;import magma.compile.rule.text.LeftRule;import magma.compile.rule.text.RightRule;import magma.compile.rule.text.StripRule;import magma.compile.rule.text.extract.ExtractNodeRule;import magma.compile.rule.text.extract.ExtractStringListRule;import magma.compile.rule.text.extract.ExtractStringRule;import magma.compile.rule.text.extract.SimpleExtractStringListRule;import java.util.List;import java.util.Optional;export class def JavaDefinitionHeaderFactory() => {static def createDefinitionHeaderRule(this) : Rule => {let mut type : var = ExtractNodeRule("type", Lang.createTypeRule());let mut name : var = ExtractStringRule("name");let mut generics : var = LeftRule("<", RightRule(Lang.createTypeParamsRule(), ">"));let mut withGenerics : var = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));let mut withoutGenerics : var = ContextRule("Without generics.", type);let mut maybeGenerics : var = OrRule(List.of(withGenerics, withoutGenerics));let mut modifiers : var = ModifiersRule();let mut withModifiers : var = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));let mut withoutModifiers : var = ContextRule("Without modifiers.", maybeGenerics);let mut maybeModifiers : var = OrRule(List.of(withModifiers, withoutModifiers));let mut annotation : var = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));let mut annotations : var = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);let mut withAnnotations : var = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));let mut withoutAnnotations : var = ContextRule("Without annotations.", maybeModifiers);let mut maybeAnnotations : var = OrRule(List.of(withAnnotations, withoutAnnotations));let mut beforeName : var = ContextRule("Cannot parse before name.", maybeAnnotations);return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));}class def ModifiersRule() => {public static final let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");def ModifiersRule(this) : public => {super("modifiers", " ");}protected def qualify(this, child : String) : Optional<Error_> => {if(MODIFIERS.contains(child)){return Optional.empty();}else{return Optional.of(CompileError("Invalid modifier.", child));}}}class def SimpleSplitter() => {public def split(this, input : String) : List<String> => {return List.of(input.split("\n"));}}}
+
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.ContextRule;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.BackwardsRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.Splitter;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
+import java.util.List;
+import java.util.Optional;
+export class def JavaDefinitionHeaderFactory() => {
+static def createDefinitionHeaderRule(this) : Rule => {
+let mut type : var = ExtractNodeRule("type", Lang.createTypeRule());
+let mut name : var = ExtractStringRule("name");
+let mut generics : var = LeftRule("<", RightRule(Lang.createTypeParamsRule(), ">"));
+let mut withGenerics : var = ContextRule("With generics.", StripRule(BackwardsRule(generics, " ", type)));
+let mut withoutGenerics : var = ContextRule("Without generics.", type);
+let mut maybeGenerics : var = OrRule(List.of(withGenerics, withoutGenerics));
+let mut modifiers : var = ModifiersRule();
+let mut withModifiers : var = ContextRule("With modifiers.", BackwardsRule(modifiers, " ", maybeGenerics));
+let mut withoutModifiers : var = ContextRule("Without modifiers.", maybeGenerics);
+let mut maybeModifiers : var = OrRule(List.of(withModifiers, withoutModifiers));
+let mut annotation : var = TypeRule("annotation", LeftRule("@", ExtractStringRule("value")));
+let mut annotations : var = SplitMultipleRule(SimpleSplitter(), ", ", "annotations", annotation);
+let mut withAnnotations : var = ContextRule("With annotations.", LastRule(annotations, "\n", maybeModifiers));
+let mut withoutAnnotations : var = ContextRule("Without annotations.", maybeModifiers);
+let mut maybeAnnotations : var = OrRule(List.of(withAnnotations, withoutAnnotations));
+let mut beforeName : var = ContextRule("Cannot parse before name.", maybeAnnotations);
+return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));}
+class def ModifiersRule() => {
+public static final let MODIFIERS : List<String> = List.of("public", "static", "final", "private", "default", "protected", "abstract");
+def ModifiersRule(this) : public => {
+super("modifiers", " ");}
+protected def qualify(this, child : String) : Optional<Error_> => {
+if(MODIFIERS.contains(child))
+{
+return Optional.empty();}
+else
+{
+return Optional.of(CompileError("Invalid modifier.", child));}}}
+class def SimpleSplitter() => {
+public def split(this, input : String) : List<String> => {
+return List.of(input.split("\n"));}}}
