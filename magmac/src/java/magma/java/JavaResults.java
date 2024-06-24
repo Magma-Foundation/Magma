@@ -1,6 +1,8 @@
 package magma.java;
 
+import magma.api.option.None;
 import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -24,6 +26,16 @@ public class JavaResults {
         }
 
         throw new RuntimeException("Neither a value nor an error is present. This result contains nothing.");
+    }
+
+    public static <E extends Throwable> Option<E> $Void(JavaRunnable<E> action) {
+        try {
+            action.execute();
+            return new None<>();
+        } catch (Throwable e) {
+            //noinspection unchecked
+            return new Some<>((E) e);
+        }
     }
 
     public static <T, E extends Throwable> Result<T, E> $(JavaAction<T, E> action) {

@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static magma.java.JavaResults.$;
+import static magma.java.JavaResults.$Void;
 
 public class Main {
     public static final Path CONFIG_PATH = Paths.get(".", "config.json");
@@ -49,14 +50,14 @@ public class Main {
     }
 
     private static Option<CompileException> run() {
-        return buildConfiguration().mapErr(CompileException::new).mapValue(configuration -> {
-            var listIOExceptionResult = walkImpl(configuration);
-            return listIOExceptionResult.mapErr(CompileException::new)
-                    .flatMapValue(sources -> parseSources(sources, configuration)
-                            .flatMapValue(sourceTrees -> generateTargets(configuration, sourceTrees)
-                                    .mapValue(targetTrees -> writeTargets(targetTrees, configuration))))
-                    .match(value -> value, Some::new);
-        }).match(value -> value, Some::new);
+        return $Void(() -> {
+            var configuration = $(buildConfiguration().mapErr(CompileException::new));
+            var sources = $(walkImpl(configuration).mapErr(CompileException::new));
+
+            var sourceTrees = $(parseSources(sources, configuration));
+            var targetTrees = $(generateTargets(configuration, sourceTrees));
+            $(writeTargets(targetTrees, configuration));
+        });
     }
 
     private static Result<List<Path>, IOException> walkImpl(Configuration configuration) {
