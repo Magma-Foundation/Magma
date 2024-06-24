@@ -1,0 +1,27 @@
+
+	import magma.compile.rule.Node;
+	import java.util.List;
+	import java.util.Optional;
+	import java.util.stream.Collectors;
+	export class def NodeListAttribute(nodeList : List<Node>) => {
+		public static final let Factory : Factory<List<Node>> = Factory((() => {
+			return {
+				public def fromAttribute(this, attribute : Attribute) : Optional<List<Node>> => {
+					return attribute.asNodeList();
+				}
+				public def toAttribute(this, value : List<Node>) : Attribute => {
+					return NodeListAttribute(value);
+				}
+			};
+		})())();
+		
+		;
+		public def asNodeList(this) : Optional<List<Node>> => {
+			return Optional.of(nodeList);
+		}
+		public def format(this, depth : int) : String => {
+			if(nodeList.isEmpty())
+			return "[]";
+			return nodeList.stream().map(() => child.formatWithDepth(depth+1)).collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));
+		}
+	}

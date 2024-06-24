@@ -1,0 +1,22 @@
+import magma.api.result.Err;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import java.util.Optional;
+export class def LazyRule() => {
+	private child : Optional<Rule>;
+	def LazyRule(this) : public => {
+		this=Optional.empty();
+	}
+	public def setRule(this, child : Rule) : void => {
+		this=Optional.of(child);
+	}
+	public def toNode(this, input : String) : RuleResult => {
+		return child.map(() => inner.toNode(input)).orElse(ErrorRuleResult(CompileError("Child was not set.", input)));
+	}
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
+		return child.map(() => inner.fromNode(node)).orElse(Err(CompileError("No child set.", node.toString())));
+	}
+}

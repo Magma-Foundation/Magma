@@ -1,0 +1,51 @@
+import magma.api.Tuple;
+import magma.api.collect.LinkedList;
+import magma.api.collect.List;
+import magma.api.collect.stream.Streams;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.java.Set;
+export class def State() => {
+	private final locations : Set<List<String>>;
+	private final frames : List<List<String>>;
+	def State(this, locations : Set<List<String>>, frames : List<List<String>>) : public => {
+		this=locations;
+		this=frames;
+	}
+	def State(this, locations : Set<List<String>>) : public => {
+		this(locations, LinkedList());
+	}
+	public def exit(this) : State => {
+		return State(locations, frames.popFirst().map(Tuple.right).orElse(frames));
+	}
+	public def enter(this) : State => {
+		return State(locations, frames.push(LinkedList()));
+	}
+	public def isDefined(this, value : String) : boolean => {
+		if(isDefinedAsLocation(value))
+		{
+			return true;
+		}
+		return frames.stream().anyMatch(() => frame.contains(value));
+	}
+	private def isDefinedAsLocation(this, value : String) : boolean => {
+		return locations.stream().map(List.last).flatMap(Streams.fromOption).anyMatch(() => last.equals(value));
+	}
+	public def computeDepth(this) : int => {
+		return frames.size();
+	}
+	public def define(this, name : String) : Result<State, Error_> => {
+		if(frames.isEmpty())
+		{
+			return Err(CompileError("No frames present.", frames.toString()));
+		}
+		let mut newFrames : var = frames.mapLast(() => last.add(name)).orElse(frames);
+		return Ok(State(locations, newFrames));
+	}
+	public def defineAll(this, names : List<String>) : Result<State, Error_> => {
+		return names.stream().foldRightToResult(this, State.define);
+	}
+}
