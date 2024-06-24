@@ -54,17 +54,18 @@ public class Main {
     private static Option<CompileException> run() {
         return $Void(() -> {
             var configuration = $(buildConfiguration().mapErr(CompileException::new));
-            var sources = $(walkImpl(configuration).mapErr(CompileException::new));
 
-            var sourceTrees = $(parseSources(sources, configuration));
-            var targetTrees = $(generateTargets(configuration, sourceTrees));
+            var application = new Application(configuration);
+            var sources = $(findSources(application).mapErr(CompileException::new));
+            var sourceTrees = $(parseSources(sources, application));
+            var targetTrees = $(generateTargets(sourceTrees, application));
             $(writeTargets(targetTrees, configuration));
         });
     }
 
-    private static Result<List<Path>, IOException> walkImpl(Configuration configuration) {
+    private static Result<List<Path>, IOException> findSources(Application configuration) {
         //noinspection resource
-        return $(() -> Files.walk(configuration.sourceDirectory())
+        return $(() -> Files.walk(configuration.config().sourceDirectory())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
                 .toList());
@@ -79,16 +80,16 @@ public class Main {
         });
     }
 
-    private static Result<Map<List<String>, Node>, CompileException> generateTargets(Configuration configuration, Map<List<String>, Node> sourceTrees) {
+    private static Result<Map<List<String>, Node>, CompileException> generateTargets(Map<List<String>, Node> sourceTrees, Application application) {
         return sourceTrees.streamEntries()
-                .map(entry -> generateTarget(configuration, sourceTrees, entry))
+                .map(entry -> generateTarget(sourceTrees, entry, application))
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
     private static Result<Tuple<List<String>, Node>, CompileException> generateTarget(
-            Configuration configuration,
             Map<List<String>, Node> sourceTrees,
-            Tuple<List<String>, Node> entry) {
+            Tuple<List<String>, Node> entry,
+            Application application) {
         return $(() -> {
             var location = entry.left();
             var right = entry.right();
@@ -100,9 +101,9 @@ public class Main {
 
             var generated = $(generate(sourceTrees, right)
                     .mapValue(Tuple::left)
-                    .mapErr(error -> writeError(error, location, configuration)));
+                    .mapErr(error -> writeError(error, location, application)));
 
-            var debug = $(createDebug(namespace, configuration));
+            var debug = $(createDebug(namespace, application));
             var debugTarget = debug.resolve(name + ".output.ast");
 
             $(writeSafely(debugTarget, generated.toString()));
@@ -142,7 +143,7 @@ public class Main {
             var generateError = generateErrorOptional.get();
             print(generateError, 0);
 
-            return new Some<>(writeError(generateError, location, configuration));
+            return new Some<>(writeError(generateError, location, new Application(configuration)));
         }
 
         return generateResult.findValue()
@@ -211,17 +212,17 @@ public class Main {
         return generator.generate(node, state1);
     }
 
-    private static Result<Map<List<String>, Node>, CompileException> parseSources(List<Path> sources, Configuration configuration) {
+    private static Result<Map<List<String>, Node>, CompileException> parseSources(List<Path> sources, Application application) {
         Result<Map<List<String>, Node>, CompileException> trees = new Ok<>(new JavaMap<>());
         for (var source : sources) {
-            trees = trees.flatMapValue(inner -> parseSource(configuration, source).mapValue(inner::putAll));
+            trees = trees.flatMapValue(inner -> parseSource(source, application).mapValue(inner::putAll));
         }
 
         return trees;
     }
 
-    private static Result<Map<List<String>, Node>, CompileException> parseSource(Configuration configuration, Path source) {
-        var relativized = configuration.sourceDirectory().relativize(source.getParent());
+    private static Result<Map<List<String>, Node>, CompileException> parseSource(Path source, Application application) {
+        var relativized = application.config().sourceDirectory().relativize(source.getParent());
         var namespace = computeNamespace(relativized);
         var name = computeName(source);
 
@@ -236,26 +237,26 @@ public class Main {
 
         var location = new ArrayList<>(namespace);
         location.add(name);
-        return parseSource(new PathSource(source, namespace, name), configuration)
+        return parseSource(new PathSource(source, namespace, name), application)
                 .mapValue(value -> new JavaMap<>(java.util.Map.of(location, value)));
     }
 
-    private static Result<Node, CompileException> parseSource(PathSource pathSource, Configuration configuration) {
-        System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(pathSource.path()));
+    private static Result<Node, CompileException> parseSource(PathSource pathSource, Application application) {
+        System.out.println("Parsing source: " + application.config().sourceDirectory().relativize(pathSource.path()));
 
         return readImpl(pathSource.path()).mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(pathSource, configuration, root),
-                err -> new Err<Node, CompileException>(writeErrorImpl(configuration, pathSource, err)))).match(result -> result, Err::new);
+                root -> parse(pathSource, root, application),
+                err -> new Err<Node, CompileException>(writeErrorImpl(pathSource, err, application)))).match(result -> result, Err::new);
     }
 
-    private static CompileException writeErrorImpl(Configuration configuration, PathSource source, Error_ err) {
+    private static CompileException writeErrorImpl(PathSource source, Error_ err, Application application) {
         var location = new ArrayList<>(source.namespace());
         location.add(source.name());
-        return writeError(err, location, configuration);
+        return writeError(err, location, application);
     }
 
-    private static Result<Node, CompileException> parse(PathSource pathSource, Configuration configuration, Node root) {
-        return createDebug(pathSource.namespace(), configuration).flatMapValue(relativizedDebug -> {
+    private static Result<Node, CompileException> parse(PathSource pathSource, Node root, Application application) {
+        return createDebug(pathSource.namespace(), application).flatMapValue(relativizedDebug -> {
             return writeSafely(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString())
                     .<Result<Node, CompileException>>map(Err::new)
                     .orElseGet(() -> new Ok<>(root));
@@ -273,8 +274,8 @@ public class Main {
                 .toList();
     }
 
-    private static Result<Path, CompileException> createDebug(List<String> namespace, Configuration config) {
-        var relativizedDebug = config.debugDirectory();
+    private static Result<Path, CompileException> createDebug(List<String> namespace, Application application) {
+        var relativizedDebug = application.config().debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }
@@ -289,9 +290,9 @@ public class Main {
         return new Ok<>(relativizedDebug);
     }
 
-    private static CompileException writeError(Error_ err, List<String> location, Configuration config) {
+    private static CompileException writeError(Error_ err, List<String> location, Application application) {
         var result = print(err, 0);
-        return writeSafely(config.debugDirectory().resolve("error.xml"), result)
+        return writeSafely(application.config().debugDirectory().resolve("error.xml"), result)
                 .orElseGet(() -> new CompileException(String.join(".", location)));
     }
 
