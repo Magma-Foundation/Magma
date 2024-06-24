@@ -154,18 +154,25 @@ function App() {
                     height: "100%"
                 }}>
                     <div style={{
-                        width: "100%",
+                        width: "50%",
                         height: "100%"
                     }}>
                         <span>
                             Navigator
                         </span>
-                        {
-                            createTreeElement(tree(), onClick)
-                        }
+                        <div style={{
+                            overflow: "scroll",
+                            "white-space": "nowrap",
+                            width: "100%",
+                            height: "100%"
+                        }}>
+                            {
+                                createTreeElement(tree(), onClick)
+                            }
+                        </div>
                     </div>
                     <div style={{
-                        width: "100%",
+                        width: "50%",
                         height: "100%"
                     }}>
                         <span>
