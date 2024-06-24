@@ -1,4 +1,3 @@
-
 import magma.compile.rule.Node;
 import java.util.List;
 import java.util.Optional;

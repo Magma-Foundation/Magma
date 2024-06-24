@@ -1,4 +1,3 @@
-
 import magma.compile.rule.ContextRule;
 import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;

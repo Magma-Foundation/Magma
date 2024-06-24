@@ -1,4 +1,3 @@
-
 import magma.api.option.Option;
 import magma.java.JavaOptionals;
 import java.util.Optional;

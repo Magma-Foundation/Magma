@@ -1,4 +1,3 @@
-
 import magma.api.result.Err;
 import magma.api.result.Result;
 import magma.compile.CompileError;

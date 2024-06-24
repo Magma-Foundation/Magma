@@ -1,4 +1,3 @@
-
 import magma.api.Tuple;
 import magma.api.collect.stream.AbstractStream;
 import magma.api.collect.stream.Collectors;

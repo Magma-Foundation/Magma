@@ -1,4 +1,3 @@
-
 export class def GeneratingException() => {
 public final content : String;
 def GeneratingException(this, message : String) : public => {

@@ -1,4 +1,3 @@
-
 import magma.api.option.Option;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;

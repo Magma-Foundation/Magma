@@ -8,7 +8,18 @@ import magma.compile.annotate.State;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MagmaFormatter extends TreeGenerator {
+    private static Node attachIndent(int i, Node child, State state) {
+        if (i == 0 && state.computeDepth() == 1) {
+            return child;
+        } else {
+            return child.withString(StripRule.DEFAULT_LEFT, "\n");
+        }
+    }
+
     @Override
     protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
         if (node.is("block")) {
@@ -22,9 +33,15 @@ public class MagmaFormatter extends TreeGenerator {
     protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
         if (node.is("block")) {
             var node1 = node.mapNodes("children", children -> {
-                return children.stream()
-                        .map(child -> child.withString(StripRule.DEFAULT_LEFT, "\n"))
-                        .toList();
+                List<Node> list = new ArrayList<>();
+                int i = 0;
+                while (i < children.size()) {
+                    Node child = children.get(i);
+                    var withString = attachIndent(i, child, state);
+                    list.add(withString);
+                    i++;
+                }
+                return list;
             });
 
             return new Ok<>(new Tuple<>(node1, state.exit()));

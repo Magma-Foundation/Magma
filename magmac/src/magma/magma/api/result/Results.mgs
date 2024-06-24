@@ -1,4 +1,3 @@
-
 import magma.java.JavaOptionals;
 export class def Results() => {
 public static def unwrap<T, E extends Throwable>(this, result : Result<T, E>) : T => {

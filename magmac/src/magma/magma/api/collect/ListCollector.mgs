@@ -1,4 +1,3 @@
-
 import magma.api.collect.stream.Collector;
 export class def ListCollector<T>(initial : List<T>) => {
 public def createInitial(this) : List<T> => {

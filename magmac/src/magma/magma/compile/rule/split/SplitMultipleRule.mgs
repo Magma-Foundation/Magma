@@ -1,4 +1,3 @@
-
 import magma.api.collect.stream.Collectors;
 import magma.api.result.Err;
 import magma.api.result.Result;

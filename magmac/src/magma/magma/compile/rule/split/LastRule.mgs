@@ -1,4 +1,3 @@
-
 import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
 export class def LastRule() => {

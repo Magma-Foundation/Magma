@@ -1,4 +1,3 @@
-
 import magma.compile.Error_;
 import java.util.Optional;
 export class def SimpleExtractStringListRule() => {

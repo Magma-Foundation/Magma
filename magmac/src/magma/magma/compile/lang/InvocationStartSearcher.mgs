@@ -1,4 +1,3 @@
-
 import magma.api.Tuple;
 import magma.compile.rule.split.Searcher;
 import java.util.LinkedList;

@@ -1,4 +1,3 @@
-
 import magma.api.Tuple;
 import magma.api.result.Ok;
 import magma.api.result.Result;

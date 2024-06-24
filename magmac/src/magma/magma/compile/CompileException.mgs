@@ -1,4 +1,3 @@
-
 export class def CompileException() => {
 def CompileException(this, message : String, cause : Throwable) : public => {
 super(message, cause);}
