@@ -1,24 +1,25 @@
-import magma.api.result.Result;
-import magma.compile.CompileError;
-import magma.compile.Error_;
-import magma.compile.rule.Node;
-import magma.compile.rule.Rule;
-import magma.compile.rule.result.ErrorRuleResult;
-import magma.compile.rule.result.RuleResult;
-export class def RightRule(child : Rule, slice : String) => {
-	public def toNode(this, input : String) : RuleResult => {
-		if(input.endsWith(slice))
-		{
-			let mut contentEnd : var = input.length()-slice.length();
-			let mut content : var = input.substring(0, contentEnd);
-			return child.toNode(content);
+
+	import magma.api.result.Result;
+	import magma.compile.CompileError;
+	import magma.compile.Error_;
+	import magma.compile.rule.Node;
+	import magma.compile.rule.Rule;
+	import magma.compile.rule.result.ErrorRuleResult;
+	import magma.compile.rule.result.RuleResult;
+	export class def RightRule(child : Rule, slice : String) => {
+		public def toNode(this, input : String) : RuleResult => {
+			if(input.endsWith(slice))
+			{
+				let mut contentEnd : var = input.length()-slice.length();
+				let mut content : var = input.substring(0, contentEnd);
+				return child.toNode(content);
+			}
+			else
+			{
+				return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
+			}
 		}
-		else
-		{
-			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
+		public def fromNode(this, node : Node) : Result<String, Error_> => {
+			return child.fromNode(node).mapValue(() => inner+slice);
 		}
 	}
-	public def fromNode(this, node : Node) : Result<String, Error_> => {
-		return child.fromNode(node).mapValue(() => inner+slice);
-	}
-}

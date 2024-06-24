@@ -1,28 +1,29 @@
-import magma.api.Tuple;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
-/**
+	import magma.api.Tuple;
+	import java.util.Optional;
+	import java.util.function.Function;
+	import java.util.stream.Stream;
+	
+	/**
  * The Node interface provides methods to manipulate key-value pairs
  * where keys are strings and values are attributes. It supports
  * adding attributes, applying attributes, merging nodes, and
  * streaming entries.
  */
-public struct Attributes {
-	
-	mapValue<T> : Attributes;
-	;
-	with : Attributes;
-	;
-	apply : Optional<Attribute>;
-	;
-	merge : Attributes;
-	;
-	streamEntries : Stream<Tuple<String, Attribute>>;
-	mapValues : Attributes;
-	format : String;
-	remove : Attributes;
-	has : boolean;
-	isEmpty : boolean;
-}
+	public struct Attributes {
+		
+		mapValue<T> : Attributes;
+		;
+		with : Attributes;
+		;
+		apply : Optional<Attribute>;
+		;
+		merge : Attributes;
+		;
+		streamEntries : Stream<Tuple<String, Attribute>>;
+		mapValues : Attributes;
+		format : String;
+		remove : Attributes;
+		has : boolean;
+		isEmpty : boolean;
+	}

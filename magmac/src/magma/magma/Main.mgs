@@ -3,20 +3,22 @@ import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
-import magma.api.stream.Streams;
+import magma.api.collect.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.lang.Generator;
 import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.lang.State;
+import magma.compile.annotate.State;
+import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
+import magma.java.JavaSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,12 +90,12 @@ export class def Main() => {
 		}
 	}
 	private static def generate(this, entry : Map.Entry<List<String>, Node>, sourceTrees : Map<List<String>, Node>) : Result<Tuple<Node, State>, Error_> => {
-		let mut state : var = State(sourceTrees.keySet());
+		let mut state : var = State(JavaSet.fromNative(sourceTrees.keySet(), JavaList.new), JavaList());
 		let mut list : var = List.of(JavaAnnotator(), JavaToMagmaGenerator(), MagmaAnnotator(), MagmaFormatter());
 		let mut initial : var = Tuple(entry.getValue(), state);
 		return Streams.fromNativeList(list).foldRightToResult(initial, Main.generateImpl);
 	}
-	private static def generateImpl(this, tuple : Tuple<Node, State>, generator : Generator) : Result<Tuple<Node, State>, Error_> => {
+	private static def generateImpl(this, tuple : Tuple<Node, State>, generator : TreeGenerator) : Result<Tuple<Node, State>, Error_> => {
 		let mut node : var = tuple.left();
 		let mut state1 : var = tuple.right();
 		return generator.generate(node, state1);
@@ -104,6 +106,15 @@ export class def Main() => {
 			let mut relativized : var = SOURCE_DIRECTORY.relativize(source.getParent());
 			let mut namespace : var = computeNamespace(relativized);
 			let mut name : var = computeName(source);
+			if(namespace.size()>=2)
+			{
+				let mut slice : var = namespace.subList(0, 2);
+				if(slice.equals(List.of("magma", "java")))
+				{
+					continue
+					;
+				}
+			}
 			let mut result : var = parseSource(source, namespace, name);
 			let mut error : var = JavaOptionals.toNative(result.findErr());
 			if(error.isPresent())
@@ -197,10 +208,11 @@ export class def Main() => {
 		let mut anyMessage : var = error.findMessage();
 		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
 		let mut message : var = error.findMessage().orElse("");
-		let mut messageAttribute : var = message.isEmpty()?"":" message=\"" + message.replace("\"", "&quot;") + "\"";
+		let mut replaced : var = escape(message);
+		let mut messageAttribute : var = message.isEmpty()?"":" message=\"" + replaced + "\"";
 		let mut causes : var = error.findCauses().orElse(Collections.emptyList());
-		let mut escapedContext : var = error.findContext().orElse("").replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;");
-		let mut formattedContext : var = "\n"+escapedContext;
+		let mut escapedContext : var = escape(error.findContext().orElse(""));
+		let mut formattedContext : var = "\n"+"\t".repeat(depth)+escapedContext;
 		if(causes.isEmpty())
 		{
 			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
@@ -217,6 +229,9 @@ export class def Main() => {
 			builder.append(result);
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
+	}
+	private static def escape(this, value : String) : String => {
+		return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
 	}
 	private static def formatContext(this, e : Error_, depth : int) : String => {
 		let mut actualContext : var = e.findContext().orElse("");

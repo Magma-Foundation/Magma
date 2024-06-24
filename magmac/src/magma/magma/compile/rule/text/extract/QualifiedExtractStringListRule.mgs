@@ -1,5 +1,7 @@
 import magma.compile.Error_;
 import magma.compile.rule.Rule;
+import magma.compile.rule.result.RuleResult;
+import magma.java.JavaOptionals;
 import java.util.Optional;
 export class def QualifiedExtractStringListRule() => {
 	private final qualifier : Rule;
@@ -8,6 +10,7 @@ export class def QualifiedExtractStringListRule() => {
 		this=qualifier;
 	}
 	protected def qualify(this, child : String) : Optional<Error_> => {
-		return qualifier.toNode(child).findError();
+		let mut ruleResult : RuleResult = qualifier.toNode(child);
+		return JavaOptionals.toNative(ruleResult.findError());
 	}
 }

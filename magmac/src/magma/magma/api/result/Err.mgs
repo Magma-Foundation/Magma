@@ -1,33 +1,34 @@
-import magma.api.option.Option;
-import magma.java.JavaOptionals;
-import java.util.Optional;
-import java.util.function.Function;
-export class def Err<T, E>(value : E) => {
-	private def findValue1(this) : Optional<T> => {
-		return Optional.empty();
+
+	import magma.api.option.Option;
+	import magma.java.JavaOptionals;
+	import java.util.Optional;
+	import java.util.function.Function;
+	export class def Err<T, E>(value : E) => {
+		private def findValue1(this) : Optional<T> => {
+			return Optional.empty();
+		}
+		private def findErr0(this) : Optional<E> => {
+			return Optional.of(value);
+		}
+		public def flatMapValue<R>(this, mapper : (T) => Result<R, E>) : Result<R, E> => {
+			return Err(value);
+		}
+		public def mapValue<R>(this, mapper : (T) => R) : Result<R, E> => {
+			return Err(value);
+		}
+		public def isOk(this) : boolean => {
+			return false;
+		}
+		public def mapErr<R>(this, mapper : (E) => R) : Result<T, R> => {
+			return Err(mapper.apply(value));
+		}
+		public def match<R>(this, onOk : (T) => R, onErr : (E) => R) : R => {
+			return onErr.apply(value);
+		}
+		public def findValue(this) : Option<T> => {
+			return JavaOptionals.fromNative(findValue1());
+		}
+		public def findErr(this) : Option<E> => {
+			return JavaOptionals.fromNative(findErr0());
+		}
 	}
-	private def findErr0(this) : Optional<E> => {
-		return Optional.of(value);
-	}
-	public def flatMapValue<R>(this, mapper : (T) => Result<R, E>) : Result<R, E> => {
-		return Err(value);
-	}
-	public def mapValue<R>(this, mapper : (T) => R) : Result<R, E> => {
-		return Err(value);
-	}
-	public def isOk(this) : boolean => {
-		return false;
-	}
-	public def mapErr<R>(this, mapper : (E) => R) : Result<T, R> => {
-		return Err(mapper.apply(value));
-	}
-	public def match<R>(this, onOk : (T) => R, onErr : (E) => R) : R => {
-		return onErr.apply(value);
-	}
-	public def findValue(this) : Option<T> => {
-		return JavaOptionals.fromNative(findValue1());
-	}
-	public def findErr(this) : Option<E> => {
-		return JavaOptionals.fromNative(findErr0());
-	}
-}

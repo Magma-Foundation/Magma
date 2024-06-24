@@ -1,11 +1,7 @@
 import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
-import java.util.Optional;
 export class def FirstRule() => {
 	def FirstRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {
-		super(leftRule, slice, rightRule);
-	}
-	protected def computeIndex(this, input : String) : Optional<Integer> => {
-		return Rules.wrapIndex(input.indexOf(slice));
+		super(leftRule, slice, rightRule, () => Rules.wrapIndex(input.indexOf(slice)));
 	}
 }

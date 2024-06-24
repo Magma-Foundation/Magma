@@ -1,5 +1,4 @@
 import magma.compile.rule.ContextRule;
-import magma.compile.rule.EmptyRule;
 import magma.compile.rule.LazyRule;
 import magma.compile.rule.OptionalRule;
 import magma.compile.rule.OrRule;
@@ -10,12 +9,14 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.ParamSplitter;
 import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.split.Splitter;
 import magma.compile.rule.text.LeftRule;
 import magma.compile.rule.text.RightRule;
 import magma.compile.rule.text.StripRule;
 import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,12 +75,20 @@ export class def JavaLang() => {
 	}
 	private static def createValueRule(this, classMember : LazyRule, statement : Rule) : LazyRule => {
 		let mut value : var = LazyRule();
-		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
+		let mut parent : var = ExtractNodeRule("parent", StripRule(value));
+		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), createAccessRule(parent, Lang.createTypeRule()), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
 		return value;
 	}
+	private static def createAccessRule(this, parent : Rule, type : Rule) : TypeRule => {
+		let mut withoutTypeArguments : var = StripRule(SymbolRule(ExtractStringRule("child")));
+		let mut withTypeArguments : var = StripRule(LeftRule("<", LastRule(ExtractNodeRule("type", type), ">", withoutTypeArguments)));
+		let mut child : var = StripRule(OrRule(List.of(withTypeArguments, withoutTypeArguments)));
+		return TypeRule("access", LastRule(parent, ".", child));
+	}
 	private static def createLambdaRule(this, value : Rule, statement : Rule) : Rule => {
-		let mut child : var = SymbolRule(ExtractStringRule("param-name"));
-		let mut left : var = StripRule(OrRule(List.of(LeftRule("()", EmptyRule("param-name")), child)));
+		let mut asMultiple : var = StripRule(LeftRule("(", RightRule(SimpleExtractStringListRule("params", ","), ")")));
+		let mut asSingle : var = StripRule(SymbolRule(ExtractStringRule("param")));
+		let mut left : var = OrRule(List.of(asMultiple, asSingle));
 		let mut maybeValue : var = OrRule(List.of(StripRule(LeftRule("{", RightRule(Lang.createBlock(statement), "}"))), value));
 		let mut right : var = StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));
@@ -88,7 +97,7 @@ export class def JavaLang() => {
 		let mut arguments : var = OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
 		let mut caller : var = ExtractNodeRule("caller", value);
 		let mut withGenerics : var = OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
-		let mut before : var = RightRule(InvocationStartRule(withGenerics, arguments), ")");
+		let mut before : var = RightRule(SplitOnceRule(withGenerics, "(", arguments, InvocationStartSearcher()), ")");
 		let mut child : var = OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}

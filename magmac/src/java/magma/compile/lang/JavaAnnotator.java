@@ -34,7 +34,7 @@ public class JavaAnnotator extends TreeGenerator {
                 defined = defined.flatMapValue(inner -> inner.define(name));
             }
 
-            if (child.is("class")) {
+            if (child.is("class") || child.is("record") || child.is("interface")) {
                 var name = child.findString("name").orElseThrow();
                 defined = defined.flatMapValue(inner -> inner.define(name));
             }
