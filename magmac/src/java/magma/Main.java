@@ -38,6 +38,8 @@ public class Main {
     public static final Path CONFIG_PATH = Paths.get(".", "config.json");
 
     public static void main(String[] args) {
+        //TODO: #15
+        //noinspection TryWithIdenticalCatches
         try {
             run();
         } catch (IOException e) {
@@ -51,6 +53,9 @@ public class Main {
 
     private static void run() throws IOException, CompileException {
         var configuration = buildConfiguration();
+
+        //TODO: #14
+        //noinspection resource
         var sources = Files.walk(configuration.sourceDirectory())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
