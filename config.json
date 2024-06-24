@@ -1,5 +1,14 @@
 {
-  "sources": "./magmac/src/java",
-  "targets": "./magmac/src/magma",
-  "debug": "./magmac/debug/java-mgs"
+  "builds": {
+    "java-to-magma": {
+      "sources": "./magmac/src/java",
+      "targets": "./magmac/src/magma",
+      "debug": "./magmac/debug/java-mgs"
+    },
+    "magma-to-js": {
+      "sources": "./magmac/src/magma",
+      "targets": "./magmac/dist/js",
+      "debug": "./magmac/debug/magma-js"
+    }
+  }
 }
