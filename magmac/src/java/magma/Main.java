@@ -55,30 +55,28 @@ public class Main {
             }
 
             var configurationString = Files.readString(CONFIG_PATH);
-            return new Ok<>(parseConfigurationFromJSON(configurationString));
+            var map = new HashMap<String, String>();
+            var stripped = configurationString.strip();
+            var lines = stripped
+                    .substring(1, stripped.length() - 1)
+                    .split(",");
+
+            for (String line : lines) {
+                var separator = line.indexOf(":");
+                var left = line.substring(0, separator).strip();
+                var right = line.substring(separator + 1).strip();
+                var propertyName = left.substring(1, left.length() - 1);
+                var propertyValue = right.substring(1, right.length() - 1);
+                map.put(propertyName, propertyValue);
+            }
+
+            System.out.println("Parsed configuration.");
+            System.out.println(map);
+
+            return new Ok<>(new JavaMap<>(map));
         } catch (IOException e) {
             return new Err<>(e);
         }
     }
 
-    private static Map<String, String> parseConfigurationFromJSON(String configurationJSON) {
-        var map = new HashMap<String, String>();
-        var stripped = configurationJSON.strip();
-        var lines = stripped
-                .substring(1, stripped.length() - 1)
-                .split(",");
-
-        for (String line : lines) {
-            var separator = line.indexOf(":");
-            var left = line.substring(0, separator).strip();
-            var right = line.substring(separator + 1).strip();
-            var propertyName = left.substring(1, left.length() - 1);
-            var propertyValue = right.substring(1, right.length() - 1);
-            map.put(propertyName, propertyValue);
-        }
-
-        System.out.println("Parsed configuration.");
-        System.out.println(map);
-        return new JavaMap<>(map);
-    }
 }
