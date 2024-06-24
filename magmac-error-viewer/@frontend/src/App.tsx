@@ -1,5 +1,5 @@
 import axios from "axios";
-import {createSignal, JSX, onMount} from "solid-js";
+import {createMemo, createSignal, JSX, onMount, Show} from "solid-js";
 
 function unescape(value: string): string {
     return value.replace(/&quot;/g, "\"")
@@ -23,16 +23,37 @@ function TreeElement({content, children, onClick}: {
     children: JSX.Element,
     onClick: (content: TreeContent) => void;
 }) {
+    const [expanded, setExpanded] = createSignal(false);
+
+    const expandedText = createMemo(() => {
+        return expanded() ? "^" : "V";
+    });
+
+    function toggleExpanded() {
+        setExpanded(value => !value);
+    }
+
     return (
         <div>
-            <span onClick={() => {
-                onClick(content);
+            <div style={{
+                display: "flex",
+                "flex-direction": "row",
+                gap: "0.5rem"
             }}>
+                <button onClick={toggleExpanded}>
+                    {expandedText()}
+                </button>
+                <span onClick={() => {
+                    onClick(content);
+                }}>
                 {content.title}
             </span>
-            <div style={{"border-left": "1px solid black", "padding-left": "1rem"}}>
-                {children}
             </div>
+            <Show when={expanded()}>
+                <div style={{"border-left": "1px solid black", "padding-left": "1rem"}}>
+                    {children}
+                </div>
+            </Show>
         </div>
     );
 }
