@@ -8,6 +8,7 @@ import magma.compile.CompileException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -18,6 +19,13 @@ public final class PathUnit implements Unit {
     public PathUnit(Path root, Path child) {
         this.root = root;
         this.child = child;
+    }
+
+    @Override
+    public String toString() {
+        var list = new ArrayList<>(computeNamespace());
+        list.add(computeName());
+        return String.join(".", list);
     }
 
     @Override

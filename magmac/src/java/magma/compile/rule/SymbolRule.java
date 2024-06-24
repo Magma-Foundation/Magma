@@ -5,6 +5,14 @@ public final class SymbolRule extends FilterRule {
         super(child);
     }
 
+    private static boolean isValidDigit(int i, char c) {
+        return i != 0 && Character.isDigit(c);
+    }
+
+    private static boolean isUnderscore(char c) {
+        return c == '_';
+    }
+
     @Override
     protected String computeMessage() {
         return "Not a symbol.";
@@ -12,14 +20,14 @@ public final class SymbolRule extends FilterRule {
 
     @Override
     protected boolean filter(String input) {
-        if(input.isEmpty()) {
+        if (input.isEmpty()) {
             return false;
         }
 
         int i = 0;
         while (i < input.length()) {
             var c = input.charAt(i);
-            if (Character.isLetter(c) || isUnderscore(c) || isValidDigit(i, c)) {
+            if (Character.isLetter(c) || isUnderscore(c) || isDollar(c) || isValidDigit(i, c)) {
                 i++;
                 continue;
             }
@@ -30,11 +38,7 @@ public final class SymbolRule extends FilterRule {
         return true;
     }
 
-    private static boolean isValidDigit(int i, char c) {
-        return i != 0 && Character.isDigit(c);
-    }
-
-    private static boolean isUnderscore(char c) {
-        return c == '_';
+    private static boolean isDollar(char c) {
+        return c == '$';
     }
 }
