@@ -1,0 +1,5 @@
+{
+  "sources": "./magmac/src/java",
+  "targets": "./magmac/src/magma",
+  "debug": "./magmac/debug/java-mgs"
+}
