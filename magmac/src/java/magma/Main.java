@@ -50,15 +50,26 @@ public class Main {
     }
 
     private static void run() throws IOException, CompileException {
-        var map = readConfiguration();
-        var sourceDirectory = Paths.get(map.get("sources"));
-        var sources = Files.walk(sourceDirectory)
+        var configuration = buildConfiguration();
+        var sources = Files.walk(configuration.sourceDirectory())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
                 .toList();
 
+        var sourceTrees = parseSources(sources, configuration);
+        var targetTrees = generateTargets(sourceTrees, configuration);
+        writeTargets(targetTrees, configuration);
+    }
+
+    private static Configuration buildConfiguration() throws IOException {
+        var map = readConfiguration();
+        var sourceDirectory = Paths.get(map.get("sources"));
         var debugDirectory = Paths.get(map.get("debug"));
-        var sourceTrees = parseSources(sources, sourceDirectory, debugDirectory);
+        var targetDirectory = Paths.get(map.get("targets"));
+        return new Configuration(sourceDirectory, targetDirectory, debugDirectory);
+    }
+
+    private static HashMap<List<String>, Node> generateTargets(Map<List<String>, Node> sourceTrees, Configuration configuration) throws CompileException {
         var targetTrees = new HashMap<List<String>, Node>();
         for (Map.Entry<List<String>, Node> entry : sourceTrees.entrySet()) {
             var location = entry.getKey();
@@ -69,23 +80,25 @@ public class Main {
             var generated = Results.unwrap(generate(entry, sourceTrees)
                     .mapValue(Tuple::left)
                     .mapErr(error -> {
-                        writeError(error, location, debugDirectory);
+                        writeError(error, location, configuration);
                         return new CompileException("Failed to generate: " + String.join(".", location));
                     }));
 
-            var relativizedDebug = createDebug(namespace, debugDirectory);
+            var relativizedDebug = createDebug(namespace, configuration);
             writeImpl(relativizedDebug.resolve(name + ".output.ast"), generated.toString());
             targetTrees.put(location, generated);
         }
+        return targetTrees;
+    }
 
-        var targetDirectory = Paths.get(map.get("targets"));
+    private static void writeTargets(HashMap<List<String>, Node> targetTrees, Configuration configuration) throws CompileException {
         for (Map.Entry<List<String>, Node> entry : targetTrees.entrySet()) {
             var location = entry.getKey();
             var namespace = location.subList(0, location.size() - 1);
             var name = location.get(location.size() - 1);
             System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
 
-            var targetParent = targetDirectory;
+            var targetParent = configuration.targetDirectory();
             for (String segment : namespace) {
                 targetParent = targetParent.resolve(segment);
             }
@@ -99,7 +112,7 @@ public class Main {
             if (generateErrorOptional.isPresent()) {
                 var generateError = generateErrorOptional.get();
                 print(generateError, 0);
-                writeError(generateError, location, debugDirectory);
+                writeError(generateError, location, configuration);
             }
 
             writeImpl(target, JavaOptionals.toNative(generateResult.findValue()).orElseThrow(() -> new CompileException("Nothing was generated.")));
@@ -161,10 +174,10 @@ public class Main {
         return generator.generate(node, state1);
     }
 
-    private static Map<List<String>, Node> parseSources(List<Path> sources, Path sourceDirectory, Path debugDirectory) throws CompileException {
+    private static Map<List<String>, Node> parseSources(List<Path> sources, Configuration configuration) throws CompileException {
         var trees = new HashMap<List<String>, Node>();
         for (var source : sources) {
-            var relativized = sourceDirectory.relativize(source.getParent());
+            var relativized = configuration.sourceDirectory().relativize(source.getParent());
             var namespace = computeNamespace(relativized);
             var name = computeName(source);
 
@@ -175,7 +188,7 @@ public class Main {
                 }
             }
 
-            var result = parseSource(source, namespace, name, sourceDirectory, debugDirectory);
+            var result = parseSource(source, namespace, name, configuration);
             var error = JavaOptionals.toNative(result.findErr());
             if (error.isPresent()) {
                 throw error.get();
@@ -190,13 +203,8 @@ public class Main {
         return trees;
     }
 
-    private static Result<Node, CompileException> parseSource(
-            Path source,
-            List<String> namespace,
-            String name,
-            Path sourceDirectory,
-            Path debugDirectory) throws CompileException {
-        System.out.println("Parsing source: " + sourceDirectory.relativize(source));
+    private static Result<Node, CompileException> parseSource(Path source, List<String> namespace, String name, Configuration configuration) throws CompileException {
+        System.out.println("Parsing source: " + configuration.sourceDirectory().relativize(source));
 
         var location = new ArrayList<>(namespace);
         location.add(name);
@@ -204,8 +212,8 @@ public class Main {
         var input = readImpl(source);
 
         return JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(root, namespace, name, debugDirectory),
-                err -> writeError(err, location, debugDirectory));
+                root -> parse(root, namespace, name, configuration),
+                err -> writeError(err, location, configuration));
     }
 
     private static String computeName(Path source) {
@@ -214,7 +222,7 @@ public class Main {
         return name;
     }
 
-    private static Result<Node, CompileException> parse(Node root, List<String> namespace, String name, Path debugDirectory) {
+    private static Result<Node, CompileException> parse(Node root, List<String> namespace, String name, Configuration debugDirectory) {
         try {
             var relativizedDebug = createDebug(namespace, debugDirectory);
             writeImpl(relativizedDebug.resolve(name + ".input.ast"), root.toString());
@@ -230,8 +238,8 @@ public class Main {
                 .toList();
     }
 
-    private static Path createDebug(List<String> namespace, Path debugDirectory) throws CompileException {
-        var relativizedDebug = debugDirectory;
+    private static Path createDebug(List<String> namespace, Configuration config) throws CompileException {
+        var relativizedDebug = config.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }
@@ -240,10 +248,10 @@ public class Main {
         return relativizedDebug;
     }
 
-    private static Err<Node, CompileException> writeError(Error_ err, List<String> location, Path debugDirectory) {
+    private static Err<Node, CompileException> writeError(Error_ err, List<String> location, Configuration config) {
         try {
             var result = print(err, 0);
-            writeImpl(debugDirectory.resolve("error.xml"), result);
+            writeImpl(config.debugDirectory().resolve("error.xml"), result);
             return new Err<>(new CompileException(String.join(".", location)));
         } catch (CompileException e) {
             return new Err<>(e);
