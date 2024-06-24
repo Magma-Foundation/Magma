@@ -63,6 +63,7 @@ function XMLObject(tag: string, obj: any): XMLObject {
 
 function App() {
     const [tree, setTree] = createSignal<XMLObject | undefined>(undefined);
+    const [content, setContent] = createSignal("");
 
     onMount(() => {
         axios({
@@ -71,6 +72,15 @@ function App() {
         }).then(e => {
             const root = XMLObject("parent", e.data.parent);
             setTree(root);
+        }).catch(e => {
+            console.error(e);
+        });
+
+        axios({
+            method: "get",
+            url: "http://localhost:3000/content"
+        }).then(e => {
+            setContent(e.data);
         }).catch(e => {
             console.error(e);
         });
@@ -110,9 +120,12 @@ function App() {
                         width: "100%",
                         height: "100%"
                     }}>
-                <span>
-                    Content
-                </span>
+                        <span>
+                            Content
+                        </span>
+                        <div>
+                            {content()}
+                        </div>
                     </div>
                 </div>
             </div>
