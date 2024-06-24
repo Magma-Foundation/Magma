@@ -1,3 +1,18 @@
+import {JSX} from "solid-js";
+
+function TreeElement({title, children}: { title: string, children: JSX.Element }) {
+    return (
+        <div>
+            <span>
+                {title}
+            </span>
+            <div style={{"padding-left": "1rem"}}>
+                {children}
+            </div>
+        </div>
+    );
+}
+
 function App() {
     return (
         <div style={{
@@ -22,7 +37,12 @@ function App() {
                         width: "100%",
                         height: "100%"
                     }}>
-                        Navigator
+                        <span>
+                            Navigator
+                        </span>
+                        <TreeElement title={"test"}>
+                            <TreeElement title={"Child"}/>
+                        </TreeElement>
                     </div>
                     <div style={{
                         width: "100%",
