@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Void;
@@ -116,26 +115,7 @@ public record Application(Configuration config) {
         }
     }
 
-    static Result<String, CompileException> readSafely(Path source) {
-        try {
-            return new Ok<>(Files.readString(source));
-        } catch (IOException e) {
-            return new Err<>(new CompileException("Failed to read input: " + source, e));
-        }
-    }
-
-    static String computeName(Path source) {
-        var fileName = source.getFileName().toString();
-        return fileName.substring(0, fileName.indexOf('.'));
-    }
-
-    static List<String> computeNamespace(Path relativized) {
-        return IntStream.range(0, relativized.getNameCount())
-                .mapToObj(index -> relativized.getName(index).toString())
-                .toList();
-    }
-
-    static Result<Tuple<Node, State>, Error_> generate(Map<PathSource, Node> sourceTrees, Node root) {
+    static Result<Tuple<Node, State>, Error_> generate(Map<Unit, Node> sourceTrees, Node root) {
         var state = new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>());
 
         var list = List.of(
@@ -167,27 +147,27 @@ public record Application(Configuration config) {
 
     Result<List<Path>, IOException> findSources() {
         //noinspection resource
-        return $(() -> Files.walk(config().sourceDirectory())
+        return $(() -> Files.walk(config.sourceDirectory())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
                 .toList());
     }
 
-    Result<Map<PathSource, Node>, CompileException> generateTargets(Map<PathSource, Node> sourceTrees) {
+    Result<Map<Unit, Node>, CompileException> generateTargets(Map<Unit, Node> sourceTrees) {
         return sourceTrees.streamEntries()
                 .map(entry -> generateTarget(sourceTrees, entry))
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    Result<Tuple<PathSource, Node>, CompileException> generateTarget(
-            Map<PathSource, Node> sourceTrees,
-            Tuple<PathSource, Node> entry) {
+    Result<Tuple<Unit, Node>, CompileException> generateTarget(
+            Map<Unit, Node> sourceTrees,
+            Tuple<Unit, Node> entry) {
         return $(() -> {
             var source = entry.left();
             var right = entry.right();
 
-            var namespace = source.namespace();
-            var name = source.name();
+            var namespace = source.computeNamespace();
+            var name = source.computeName();
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
@@ -203,20 +183,20 @@ public record Application(Configuration config) {
         });
     }
 
-    Option<CompileException> writeTargets(Map<PathSource, Node> targetTrees) {
+    Option<CompileException> writeTargets(Map<Unit, Node> targetTrees) {
         return targetTrees.streamEntries()
                 .map(entry -> writeTarget(entry.left(), entry.right()))
                 .flatMap(Streams::fromOption)
                 .head();
     }
 
-    Option<CompileException> writeTarget(PathSource source, Node root) {
-        var namespace = source.namespace();
-        var name = source.name();
+    Option<CompileException> writeTarget(Unit source, Node root) {
+        var namespace = source.computeNamespace();
+        var name = source.computeName();
 
         System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
 
-        var targetParent = config().targetDirectory();
+        var targetParent = config.targetDirectory();
         for (String segment : namespace) {
             targetParent = targetParent.resolve(segment);
         }
@@ -244,21 +224,17 @@ public record Application(Configuration config) {
                 .map(option -> option.orElseGet(() -> new CompileException("Nothing was generated.")));
     }
 
-    Result<Map<PathSource, Node>, CompileException> parseSources(List<Path> sources) {
-        Result<Map<PathSource, Node>, CompileException> trees = new Ok<>(new JavaMap<>());
+    Result<Map<Unit, Node>, CompileException> parseSources(List<Path> sources) {
+        Result<Map<Unit, Node>, CompileException> trees = new Ok<>(new JavaMap<>());
         for (var source : sources) {
-            trees = trees.flatMapValue(inner -> parseSource(source).mapValue(inner::putAll));
+            trees = trees.flatMapValue(inner -> parseSource(new PathUnit(config.sourceDirectory(), source)).mapValue(inner::putAll));
         }
 
         return trees;
     }
 
-    Result<Map<PathSource, Node>, CompileException> parseSource(Path source) {
-        var relativized = config().sourceDirectory().relativize(source.getParent());
-        var namespace = computeNamespace(relativized);
-        var name = computeName(source);
-        var source1 = new PathSource(source, namespace, name);
-
+    Result<Map<Unit, Node>, CompileException> parseSource(Unit source) {
+        var namespace = source.computeNamespace();
         if (namespace.size() >= 2) {
             var slice = namespace.subList(0, 2);
 
@@ -268,31 +244,28 @@ public record Application(Configuration config) {
             }
         }
 
-        return parseSource(source1).mapValue(value -> new JavaMap<>(java.util.Map.of(source1, value)));
+        System.out.println("Parsing source: " + source);
+
+        return source.read().mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
+                root -> parse(source, root),
+                err -> new Err<Node, CompileException>(writeError(err, source))))
+                .<Result<Node, CompileException>>match(result -> result, Err::new).mapValue(value -> new JavaMap<>(java.util.Map.of(source, value)));
     }
 
-    Result<Node, CompileException> parseSource(PathSource pathSource) {
-        System.out.println("Parsing source: " + config().sourceDirectory().relativize(pathSource.path()));
-
-        return readSafely(pathSource.path()).mapValue(input -> JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(pathSource, root),
-                err -> new Err<Node, CompileException>(writeError(err, pathSource)))).match(result -> result, Err::new);
-    }
-
-    Result<Node, CompileException> parse(PathSource pathSource, Node root) {
-        return createDebugDirectory(pathSource.namespace()).flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(pathSource.name() + ".input.ast"), root.toString())
+    Result<Node, CompileException> parse(Unit unit, Node root) {
+        return createDebugDirectory(unit.computeNamespace()).flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(unit.computeName() + ".input.ast"), root.toString())
                 .<Result<Node, CompileException>>map(Err::new)
                 .orElseGet(() -> new Ok<>(root)));
     }
 
-    CompileException writeError(Error_ err, PathSource location) {
+    CompileException writeError(Error_ err, Unit location) {
         var result = print(err, 0);
-        return writeSafely(config().debugDirectory().resolve("error.xml"), result)
+        return writeSafely(config.debugDirectory().resolve("error.xml"), result)
                 .orElseGet(() -> new CompileException(location.toString()));
     }
 
     Result<Path, CompileException> createDebugDirectory(List<String> namespace) {
-        var relativizedDebug = config().debugDirectory();
+        var relativizedDebug = config.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }

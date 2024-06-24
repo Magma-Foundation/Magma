@@ -1,6 +1,6 @@
 package magma.compile.annotate;
 
-import magma.PathSource;
+import magma.Unit;
 import magma.api.Tuple;
 import magma.api.collect.LinkedList;
 import magma.api.collect.List;
@@ -12,15 +12,15 @@ import magma.compile.Error_;
 import magma.java.Set;
 
 public final class State {
-    private final Set<PathSource> sources;
+    private final Set<Unit> sources;
     private final List<List<String>> frames;
 
-    public State(Set<PathSource> sources, List<List<String>> frames) {
+    public State(Set<Unit> sources, List<List<String>> frames) {
         this.sources = sources;
         this.frames = frames;
     }
 
-    public State(Set<PathSource> sources) {
+    public State(Set<Unit> sources) {
         this(sources, new LinkedList<>());
     }
 
@@ -42,7 +42,7 @@ public final class State {
 
     private boolean isDefinedAsLocation(String value) {
         return sources.stream()
-                .map(PathSource::name)
+                .map(Unit::computeName)
                 .anyMatch(name -> name.equals(value));
     }
 
