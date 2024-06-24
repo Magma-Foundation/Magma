@@ -1,0 +1,23 @@
+import magma.api.option.Option;
+import magma.java.JavaOptionals;
+import java.util.List;
+import java.util.Optional;
+export class def Streams() => {
+	public static def fromNativeList<T>(this, list : List<T>) : Stream<T> => {
+		return AbstractStream(Head((() => {
+			private let mut counter : int = 0;
+			return {
+				public def head(this) : Option<T> => {
+					return JavaOptionals.fromNative(head0());
+				}
+				private def head0(this) : Optional<T> => {
+					if(counter>=list.size())
+					return Optional.empty();
+					let mut next : var = list.get(counter);
+					counter++;
+					return Optional.of(next);
+				}
+			};
+		})())());
+	}
+}

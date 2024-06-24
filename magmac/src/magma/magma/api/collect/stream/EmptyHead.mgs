@@ -1,0 +1,1 @@
+import magma.api.option.None;import magma.api.option.Option;export class def EmptyHead<T>() => {public def head(this) : Option<T> => {return None();}}

@@ -1,0 +1,16 @@
+package magma.compile.lang;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+class InvocationStartRuleTest {
+
+    @Test
+    void computeIndex() {
+        var present = new InvocationStartSearcher()
+                .search("TypeRule(\"string\", new LeftRule(\"\\\"\", new RightRule(new ExtractStringRule(\"value\"), \"\\\"\"))")
+                .isPresent();
+
+        Assertions.assertTrue(present);
+    }
+}

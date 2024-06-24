@@ -1,0 +1,16 @@
+import magma.api.Tuple;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import java.util.Optional;
+export class def JavaOptionals() => {
+	public static def fromNative<T>(this, value : Optional<T>) : Option<T> => {
+		return value.<Option<T>>map(Some.new).orElse(None());
+	}
+	public static def toNative<T>(this, value : Option<T>) : Optional<T> => {
+		return value.map(Optional.of).orElseGet(Optional.empty);
+	}
+	public static def toTuple<C>(this, optional : Optional<C>, other : C) : Tuple<Boolean, C> => {
+		return optional.map(() => Tuple(true, value)).orElse(Tuple(false, other));
+	}
+}

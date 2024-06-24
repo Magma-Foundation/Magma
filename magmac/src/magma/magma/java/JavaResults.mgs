@@ -1,0 +1,16 @@
+import magma.api.result.Result;
+export class def JavaResults() => {
+	public static def unwrap<T, E extends Throwable>(this, result : Result<T, E>) : T => {
+		let mut value : var = JavaOptionals.toNative(result.findValue());
+		if(value.isPresent())
+		{
+			return value.orElseThrow();
+		}
+		let mut error : var = JavaOptionals.toNative(result.findErr());
+		if(error.isPresent())
+		{
+			throw error.get();
+		}
+		throw RuntimeException("Neither a value nor an error is present. This result contains nothing.");
+	}
+}

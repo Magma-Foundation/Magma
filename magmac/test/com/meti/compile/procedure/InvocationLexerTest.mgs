@@ -1,9 +1,0 @@
-import { Content } from import com.meti.compile.node;
-import { Node } from import com.meti.compile.node;
-import { JavaString } from import com.meti.java;
-import { Test } from import org.junit.jupiter.api;
-import import static org.junit.jupiter.api.Assertions;
-actual = InvocationLexer(JavaString("runWithSource()")).lex().orElseNull();
-        assertEquals(new InvocationNode(new Content("runWithSource", 0)), actual);
-    }
-}
