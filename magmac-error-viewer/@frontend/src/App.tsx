@@ -30,7 +30,7 @@ function TreeElement({content, children, onClick}: {
             }}>
                 {content.title}
             </span>
-            <div style={{"padding-left": "1rem"}}>
+            <div style={{"border-left": "1px solid black", padding: "1rem"}}>
                 {children}
             </div>
         </div>
