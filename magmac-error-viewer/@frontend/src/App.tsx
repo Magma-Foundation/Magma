@@ -172,6 +172,7 @@ function App() {
                             Content
                         </span>
                         <div>
+                            <pre>
                             <span>
                                 {before()}
                             </span>
@@ -179,8 +180,9 @@ function App() {
                                 {highlighted()}
                             </span>
                             <span>
-                            {after()}
-                        </span>
+                                {after()}
+                            </span>
+                            </pre>
                         </div>
                     </div>
                 </div>
