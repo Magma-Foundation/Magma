@@ -1,20 +1,20 @@
 package magma;
 
 import magma.api.Tuple;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.api.result.Results;
-import magma.api.collect.stream.Streams;
 import magma.compile.CompileException;
 import magma.compile.Error_;
+import magma.compile.annotate.State;
 import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
 import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
-import magma.compile.annotate.State;
 import magma.compile.lang.TreeGenerator;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -35,10 +35,10 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 public class Main {
-
     public static final Path TARGET_DIRECTORY = Paths.get(".", "magmac", "src", "magma");
     public static final Path SOURCE_DIRECTORY = Paths.get(".", "magmac", "src", "java");
     public static final Path DEBUG_DIRECTORY = Paths.get(".", "magmac", "debug", "java-mgs");
+    public static final Path CONFIG_PATH = Paths.get(".", "config.json");
 
     public static void main(String[] args) {
         try {
@@ -53,6 +53,10 @@ public class Main {
     }
 
     private static void run() throws IOException, CompileException {
+        if (!Files.exists(CONFIG_PATH)) {
+            Files.writeString(CONFIG_PATH, "{}");
+        }
+
         var sources = Files.walk(SOURCE_DIRECTORY)
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
@@ -133,9 +137,9 @@ public class Main {
             var namespace = computeNamespace(relativized);
             var name = computeName(source);
 
-            if(namespace.size() >= 2) {
+            if (namespace.size() >= 2) {
                 var slice = namespace.subList(0, 2);
-                if(slice.equals(List.of("magma", "java"))) {
+                if (slice.equals(List.of("magma", "java"))) {
                     continue;
                 }
             }
