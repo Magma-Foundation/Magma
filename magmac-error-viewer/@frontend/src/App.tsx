@@ -123,6 +123,7 @@ function App() {
         const index = currentContent.indexOf(context);
         if (index == -1) {
             console.error("Context does not exist in content: " + context);
+            return;
         }
 
         const beforeSlice = currentContent.slice(0, index);
@@ -155,7 +156,7 @@ function App() {
                 }}>
                     <div style={{
                         width: "50%",
-                        height: "100%"
+                        height: "100%",
                     }}>
                         <span>
                             Navigator
@@ -175,21 +176,31 @@ function App() {
                         width: "50%",
                         height: "100%"
                     }}>
-                        <span>
-                            Content
-                        </span>
-                        <div>
-                            <pre>
+                        <div style={{
+                            padding: "1rem",
+                            width: "100%",
+                            height: "100%"
+                        }}>
                             <span>
-                                {before()}
+                                Content
                             </span>
-                            <span style={{"background-color": "red"}}>
-                                {highlighted()}
-                            </span>
-                            <span>
-                                {after()}
-                            </span>
-                            </pre>
+                            <div style={{
+                                overflow: "scroll",
+                                width: "100%",
+                                height: "100%"
+                            }}>
+                                <pre>
+                                    <span>
+                                        {before()}
+                                    </span>
+                                    <span style={{"background-color": "red"}}>
+                                        {highlighted()}
+                                    </span>
+                                    <span>
+                                        {after()}
+                                    </span>
+                                </pre>
+                            </div>
                         </div>
                     </div>
                 </div>
