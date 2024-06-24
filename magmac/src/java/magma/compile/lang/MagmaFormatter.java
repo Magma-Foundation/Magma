@@ -13,10 +13,11 @@ import java.util.List;
 
 public class MagmaFormatter extends TreeGenerator {
     private static Node attachIndent(int i, Node child, State state) {
-        if (i == 0 && state.computeDepth() == 1) {
+        var depth = state.computeDepth();
+        if (i == 0 && depth == 1) {
             return child;
         } else {
-            return child.withString(StripRule.DEFAULT_LEFT, "\n");
+            return child.withString(StripRule.DEFAULT_LEFT, "\n" + "\t".repeat(depth - 1));
         }
     }
 
@@ -32,6 +33,7 @@ public class MagmaFormatter extends TreeGenerator {
     @Override
     protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
         if (node.is("block")) {
+            var count = state.computeDepth() - 2;
             var node1 = node.mapNodes("children", children -> {
                 List<Node> list = new ArrayList<>();
                 int i = 0;
@@ -42,9 +44,9 @@ public class MagmaFormatter extends TreeGenerator {
                     i++;
                 }
                 return list;
-            });
-
-            return new Ok<>(new Tuple<>(node1, state.exit()));
+            }).withString("after-content", "\n" + "\t".repeat(Math.max(count, 0)));
+            var exited = state.exit();
+            return new Ok<>(new Tuple<>(node1, exited));
         }
 
         return new Ok<>(new Tuple<>(node, state));

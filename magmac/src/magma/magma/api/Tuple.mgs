@@ -1,6 +1,9 @@
 import java.util.function.Function;
 export class def Tuple<L, R>(left : L, right : R) => {
-public def mapLeft<T>(this, mapper : (L) => T) : Tuple<T, R> => {
-return Tuple(mapper.apply(left), right);}
-public def mapRight<T>(this, mapper : (R) => T) : Tuple<L, T> => {
-return Tuple(left, mapper.apply(right));}}
+	public def mapLeft<T>(this, mapper : (L) => T) : Tuple<T, R> => {
+		return Tuple(mapper.apply(left), right);
+	}
+	public def mapRight<T>(this, mapper : (R) => T) : Tuple<L, T> => {
+		return Tuple(left, mapper.apply(right));
+	}
+}

@@ -1,24 +1,33 @@
 export class def SymbolRule() => {
-def SymbolRule(this, child : Rule) : public => {
-super(child);}
-protected def computeMessage(this) : String => {
-return "Not a symbol.";}
-protected def filter(this, input : String) : boolean => {
-if(input.isEmpty())
-{
-return false;}
-let mut i : int = 0;
-while(i<input.length())
-{
-let mut c : var = input.charAt(i);
-if(Character.isLetter(c)||isUnderscore(c)||isValidDigit(i, c))
-{
-i++;
-continue
-;}
-return false;}
-return true;}
-private static def isValidDigit(this, i : int, c : char) : boolean => {
-return i!=0&&Character.isDigit(c);}
-private static def isUnderscore(this, c : char) : boolean => {
-return c=='_';}}
+	def SymbolRule(this, child : Rule) : public => {
+		super(child);
+	}
+	protected def computeMessage(this) : String => {
+		return "Not a symbol.";
+	}
+	protected def filter(this, input : String) : boolean => {
+		if(input.isEmpty())
+		{
+			return false;
+		}
+		let mut i : int = 0;
+		while(i<input.length())
+		{
+			let mut c : var = input.charAt(i);
+			if(Character.isLetter(c)||isUnderscore(c)||isValidDigit(i, c))
+			{
+				i++;
+				continue
+				;
+			}
+			return false;
+		}
+		return true;
+	}
+	private static def isValidDigit(this, i : int, c : char) : boolean => {
+		return i!=0&&Character.isDigit(c);
+	}
+	private static def isUnderscore(this, c : char) : boolean => {
+		return c=='_';
+	}
+}

@@ -12,18 +12,24 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 export let mut ExtractRule = () => class () => {
-protected final key : String;
-def ExtractRule(this, key : String) : public => {
-this=key;}
-protected abstract fromAttribute : Optional<String>;
-protected abstract toAttribute : Result<Attribute, Error_>;
-public def toNode(this, input : String) : RuleResult => {
-return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);}
-public def fromNode(this, node : Node) : Result<String, Error_> => {
-return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));}
-private static def getStringErrorOk(this, value : String) : Result<String, Error_> => {
-return Ok(value);}
-private def createErr(this, node : Node) : Err<String, Error_> => {
-let mut format : var = "Property '%s' does not exist.";
-let mut message : var = format.formatted(key);
-return Err(CompileError(message, node.toString()));}};
+	protected final key : String;
+	def ExtractRule(this, key : String) : public => {
+		this=key;
+	}
+	protected abstract fromAttribute : Optional<String>;
+	protected abstract toAttribute : Result<Attribute, Error_>;
+	public def toNode(this, input : String) : RuleResult => {
+		return toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
+	}
+	public def fromNode(this, node : Node) : Result<String, Error_> => {
+		return node.attributes().apply(key).flatMap(this.fromAttribute).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
+	}
+	private static def getStringErrorOk(this, value : String) : Result<String, Error_> => {
+		return Ok(value);
+	}
+	private def createErr(this, node : Node) : Err<String, Error_> => {
+		let mut format : var = "Property '%s' does not exist.";
+		let mut message : var = format.formatted(key);
+		return Err(CompileError(message, node.toString()));
+	}
+};

@@ -1,5 +1,7 @@
 import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
 export class def FirstRule() => {
-def FirstRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {
-super(leftRule, slice, rightRule, () => Rules.wrapIndex(input.indexOf(slice)));}}
+	def FirstRule(this, leftRule : Rule, slice : String, rightRule : Rule) : public => {
+		super(leftRule, slice, rightRule, () => Rules.wrapIndex(input.indexOf(slice)));
+	}
+}

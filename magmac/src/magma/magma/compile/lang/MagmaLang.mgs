@@ -15,44 +15,50 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 export class def MagmaLang() => {
-public static def createRootRule(this) : Rule => {
-let mut statement : var = LazyRule();
-let mut value : var = LazyRule();
-let mut definition : var = createDefinitionRule();
-value.setRule(ContextRule("Not a value.", OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createNotRule(value), TypeRule("quantity", StripRule(LeftRule("(", RightRule(ExtractNodeRule("value", value), ")")))), createConstructionRule(statement)))));
-statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), createStructRule(definition), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";")))))));
-return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));}
-private static def createConstructionRule(this, statement : Rule) : TypeRule => {
-let mut child1 : var = ExtractNodeRule("child", Lang.createBlock(statement));
-let mut child : var = LeftRule("{", RightRule(child1, "}"));
-return TypeRule("construction", StripRule(child));}
-private static def createStructRule(this, definition : Rule) : TypeRule => {
-let mut modifiers : var = SimpleExtractStringListRule("modifiers", " ");
-let mut children : var = ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
-let mut name : var = ExtractStringRule("name");
-let mut child : var = FirstRule(name, " {", RightRule(children, "}"));
-return TypeRule("struct", OptionalRule("modifiers", FirstRule(modifiers, " struct ", child), LeftRule("struct ", child)));}
-private static def createDefinitionRule(this) : Rule => {
-let mut modifiers : var = Lang.createModifiersRule();
-let mut withoutModifiers : var = OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
-let mut withTypeParams : var = StripRule(FirstRule(withoutModifiers, "<", RightRule(Lang.createTypeParamsRule(), ">")));
-let mut maybeTypeParams : var = OptionalRule("type-params", withTypeParams, withoutModifiers);
-let mut withModifiers : var = LastRule(modifiers, " ", maybeTypeParams);
-let mut maybeModifiers : var = OptionalRule("modifiers", withModifiers, maybeTypeParams);
-let mut definition : var = LazyRule();
-let mut params : var = FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
-let mut maybeParams : var = OptionalRule("params", params, maybeModifiers);
-let mut type : var = Lang.createTypeRule();
-let mut withType : var = LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
-let mut maybeType : var = OptionalRule("type", withType, maybeParams);
-definition.setRule(maybeType);
-return definition;}
-private static def createFunctionRule(this, statement : Rule, value : Rule) : TypeRule => {
-let mut block : var = LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
-let mut asBlock : var = ExtractNodeRule("child", OrRule(List.of(block, statement)));
-let mut asValue : var = ExtractNodeRule("child", value);
-let mut definition : var = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
-let mut content : var = OrRule(List.of(asValue, asBlock));
-let mut withDefinition : var = FirstRule(definition, " => ", content);
-let mut withoutDefinition : var = LeftRule("() => ", content);
-return TypeRule("function", OrRule(List.of(withDefinition, withoutDefinition)));}}
+	public static def createRootRule(this) : Rule => {
+		let mut statement : var = LazyRule();
+		let mut value : var = LazyRule();
+		let mut definition : var = createDefinitionRule();
+		value.setRule(ContextRule("Not a value.", OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createNotRule(value), TypeRule("quantity", StripRule(LeftRule("(", RightRule(ExtractNodeRule("value", value), ")")))), createConstructionRule(statement)))));
+		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createAssignmentRule(value), Lang.createForRule(definition, value, statement, " in "), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createEmptyStatementRule(), createStructRule(definition), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";")))))));
+		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
+	}
+	private static def createConstructionRule(this, statement : Rule) : TypeRule => {
+		let mut child1 : var = ExtractNodeRule("child", Lang.createBlock(statement));
+		let mut child : var = LeftRule("{", RightRule(child1, "}"));
+		return TypeRule("construction", StripRule(child));
+	}
+	private static def createStructRule(this, definition : Rule) : TypeRule => {
+		let mut modifiers : var = SimpleExtractStringListRule("modifiers", " ");
+		let mut children : var = ExtractNodeRule("child", Lang.createBlock(RightRule(definition, ";")));
+		let mut name : var = ExtractStringRule("name");
+		let mut child : var = FirstRule(name, " {", RightRule(children, "}"));
+		return TypeRule("struct", OptionalRule("modifiers", FirstRule(modifiers, " struct ", child), LeftRule("struct ", child)));
+	}
+	private static def createDefinitionRule(this) : Rule => {
+		let mut modifiers : var = Lang.createModifiersRule();
+		let mut withoutModifiers : var = OptionalRule("name", ExtractStringRule("name"), EmptyRule("name"));
+		let mut withTypeParams : var = StripRule(FirstRule(withoutModifiers, "<", RightRule(Lang.createTypeParamsRule(), ">")));
+		let mut maybeTypeParams : var = OptionalRule("type-params", withTypeParams, withoutModifiers);
+		let mut withModifiers : var = LastRule(modifiers, " ", maybeTypeParams);
+		let mut maybeModifiers : var = OptionalRule("modifiers", withModifiers, maybeTypeParams);
+		let mut definition : var = LazyRule();
+		let mut params : var = FirstRule(maybeModifiers, "(", RightRule(Lang.createParamsRule(definition), ")"));
+		let mut maybeParams : var = OptionalRule("params", params, maybeModifiers);
+		let mut type : var = Lang.createTypeRule();
+		let mut withType : var = LastRule(maybeParams, " : ", ExtractNodeRule("type", type));
+		let mut maybeType : var = OptionalRule("type", withType, maybeParams);
+		definition.setRule(maybeType);
+		return definition;
+	}
+	private static def createFunctionRule(this, statement : Rule, value : Rule) : TypeRule => {
+		let mut block : var = LeftRule("{", RightRule(Lang.createBlock(statement), "}"));
+		let mut asBlock : var = ExtractNodeRule("child", OrRule(List.of(block, statement)));
+		let mut asValue : var = ExtractNodeRule("child", value);
+		let mut definition : var = ExtractNodeRule("definition", TypeRule("definition", createDefinitionRule()));
+		let mut content : var = OrRule(List.of(asValue, asBlock));
+		let mut withDefinition : var = FirstRule(definition, " => ", content);
+		let mut withoutDefinition : var = LeftRule("() => ", content);
+		return TypeRule("function", OrRule(List.of(withDefinition, withoutDefinition)));
+	}
+}

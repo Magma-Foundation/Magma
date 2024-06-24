@@ -6,13 +6,19 @@ import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 export class def UntypedRuleResult(attributes : Attributes) => {
-public def withType(this, type : String) : RuleResult => {
-return TypedRuleResult(type, attributes);}
-public def mapErr(this, mapper : (Error_) => Error_) : RuleResult => {
-return this;}
-public def findError(this) : Option<Error_> => {
-return None();}
-public def findAttributes(this) : Option<Attributes> => {
-return Some(attributes);}
-public def tryCreate(this) : Option<Node> => {
-return None();}}
+	public def withType(this, type : String) : RuleResult => {
+		return TypedRuleResult(type, attributes);
+	}
+	public def mapErr(this, mapper : (Error_) => Error_) : RuleResult => {
+		return this;
+	}
+	public def findError(this) : Option<Error_> => {
+		return None();
+	}
+	public def findAttributes(this) : Option<Attributes> => {
+		return Some(attributes);
+	}
+	public def tryCreate(this) : Option<Node> => {
+		return None();
+	}
+}

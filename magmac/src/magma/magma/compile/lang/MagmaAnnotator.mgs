@@ -4,4 +4,5 @@ import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.rule.Node;
-export class def MagmaAnnotator() => {}
+export class def MagmaAnnotator() => {
+}
