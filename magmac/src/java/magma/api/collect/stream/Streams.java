@@ -11,7 +11,7 @@ import java.util.Optional;
 public class Streams {
 
     public static <T> Stream<T> fromNativeList(List<T> list) {
-        return new AbstractStream<T>(new Head<T>() {
+        return new HeadedStream<T>(new Head<T>() {
             private int counter = 0;
 
             @Override
@@ -29,13 +29,13 @@ public class Streams {
     }
 
     public static <T> Stream<T> fromOption(Option<T> option) {
-        return new AbstractStream<>(option
+        return new HeadedStream<>(option
                 .<Head<T>>map(SingleHead::new)
                 .orElseGet(EmptyHead::new));
     }
 
     public static Stream<Integer> from(int extent) {
-        return new AbstractStream<>(new Head<>() {
+        return new HeadedStream<>(new Head<>() {
             private int counter = 0;
 
             @Override

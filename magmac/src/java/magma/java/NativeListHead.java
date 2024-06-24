@@ -7,11 +7,11 @@ import magma.api.collect.stream.Head;
 
 import java.util.List;
 
-class NativeListStream<T> implements Head<T> {
+class NativeListHead<T> implements Head<T> {
     private final List<T> list;
     private int counter = 0;
 
-    public NativeListStream(List<T> list) {
+    public NativeListHead(List<T> list) {
         this.list = list;
     }
 

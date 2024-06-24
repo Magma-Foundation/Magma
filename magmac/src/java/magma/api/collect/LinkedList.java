@@ -1,7 +1,7 @@
 package magma.api.collect;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collectors;
 import magma.api.collect.stream.Head;
 import magma.api.collect.stream.Stream;
@@ -37,7 +37,7 @@ public record LinkedList<T>(Option<Link<T>> head) implements List<T> {
 
     @Override
     public Stream<T> stream() {
-        return new AbstractStream<>(new LinkedHead<>(head));
+        return new HeadedStream<>(new LinkedHead<>(head));
     }
 
     @Override

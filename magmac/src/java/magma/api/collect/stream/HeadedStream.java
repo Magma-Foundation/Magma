@@ -10,29 +10,29 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
+public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
     @Override
-    public <R, E> Result<R, E> foldRightToResult(R initial, BiFunction<R, T, Result<R, E>> mapper) {
-        return this.fold(Ok.from(initial),
+    public <R, E> Result<R, E> foldLeftToResult(R initial, BiFunction<R, T, Result<R, E>> mapper) {
+        return this.foldLeft(Ok.from(initial),
                 (reResult, t) -> reResult.flatMapValue(
                         inner -> mapper.apply(inner, t)));
     }
 
     @Override
     public boolean anyMatch(Predicate<T> predicate) {
-        return fold(false, (aBoolean, t) -> aBoolean || predicate.test(t));
+        return foldLeft(false, (aBoolean, t) -> aBoolean || predicate.test(t));
     }
 
     @Override
     public Stream<T> filter(Predicate<T> filter) {
-        return flatMap(value -> new AbstractStream<>(filter.test(value)
+        return flatMap(value -> new HeadedStream<>(filter.test(value)
                 ? new SingleHead<>(value)
                 : new EmptyHead<>()));
     }
 
     @Override
     public <R> Stream<R> flatMap(Function<T, Head<R>> mapper) {
-        return new AbstractStream<>(head()
+        return new HeadedStream<>(head()
                 .map(mapper)
                 .<Head<R>>map(initial -> new FlatMapHead<>(initial, this, mapper))
                 .orElse(new EmptyHead<>()));
@@ -40,16 +40,17 @@ public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
 
     @Override
     public <R> Stream<R> map(Function<T, R> mapper) {
-        return new AbstractStream<>(() -> this.provider.head().map(mapper));
+        return new HeadedStream<>(() -> this.provider.head().map(mapper));
     }
 
     @Override
     public <C> C collect(Collector<T, C> collector) {
         var current = collector.createInitial();
-        return fold(current, collector::fold);
+        return foldLeft(current, collector::fold);
     }
 
-    private <C> C fold(C current, BiFunction<C, T, C> folder) {
+    @Override
+    public <C> C foldLeft(C current, BiFunction<C, T, C> folder) {
         while (true) {
             C finalCurrent = current;
             var tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(head -> folder.apply(finalCurrent, head)), current);
@@ -71,7 +72,7 @@ public record AbstractStream<T>(Head<T> provider) implements Stream<T> {
         private final Function<T, Head<R>> mapper;
         private Head<R> current;
 
-        public FlatMapHead(Head<R> initial, AbstractStream<T> outer, Function<T, Head<R>> mapper) {
+        public FlatMapHead(Head<R> initial, HeadedStream<T> outer, Function<T, Head<R>> mapper) {
             this.outer = outer;
             this.mapper = mapper;
             current = initial;
