@@ -1,6 +1,18 @@
 import axios from "axios";
 import {createSignal, JSX, onMount} from "solid-js";
 
+function unescape(value: string): string {
+    return value.replace(/&quot;/g, "\"")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, "&")
+        .replace(/\\\\/g, "\\")
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, "\t")
+        .replace(/\\r/g, "\r");
+}
+
 interface TreeContent {
     context: string;
     title: string;
@@ -32,7 +44,8 @@ function createTreeElement(tree: XMLObject | undefined) {
     const context = tree.findAttribute("context") ?? "";
 
     const content: TreeContent = {
-        context: context, title: message
+        context: unescape(context),
+        title: unescape(message)
     }
 
     return <TreeElement content={content}>
@@ -80,7 +93,7 @@ function App() {
             method: "get",
             url: "http://localhost:3000/content"
         }).then(e => {
-            setContent(e.data);
+            setContent(unescape(e.data));
         }).catch(e => {
             console.error(e);
         });
@@ -123,9 +136,9 @@ function App() {
                         <span>
                             Content
                         </span>
-                        <div>
+                        <pre>
                             {content()}
-                        </div>
+                        </pre>
                     </div>
                 </div>
             </div>
