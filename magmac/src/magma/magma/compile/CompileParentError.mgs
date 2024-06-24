@@ -1,18 +1,1 @@
-
-	import java.util.Collections;
-	import java.util.List;
-	import java.util.Optional;
-	export class def CompileParentError(message : String, context : String, parent : Error_) => {
-		public def findMessage(this) : Optional<String> => {
-			return Optional.of(message);
-		}
-		public def findCauses(this) : Optional<List<Error_>> => {
-			return Optional.of(Collections.singletonList(parent));
-		}
-		public def findContext(this) : Optional<String> => {
-			return Optional.of(context);
-		}
-		public def calculateDepth(this) : int => {
-			return 1+parent.calculateDepth();
-		}
-	}
+import java.util.Collections;import java.util.List;import java.util.Optional;export class def CompileParentError(message : String, context : String, parent : Error_) => {public def findMessage(this) : Optional<String> => {return Optional.of(message);}public def findCauses(this) : Optional<List<Error_>> => {return Optional.of(Collections.singletonList(parent));}public def findContext(this) : Optional<String> => {return Optional.of(context);}public def calculateDepth(this) : int => {return 1+parent.calculateDepth();}}

@@ -22,8 +22,8 @@ public class JavaAnnotator extends TreeGenerator {
         return defined;
     }
 
-    private static Result<State, Error_> hoistMethods(State state, List<Node> children) {
-        Result<State, Error_> defined = new Ok<>(state.enter());
+    private static Result<State, Error_> hoistMethods(List<Node> children, State enteredState) {
+        Result<State, Error_> defined = new Ok<>(enteredState);
         for (Node child : children) {
             if (child.is("method")) {
                 var name = child.findNode("definition")
@@ -114,18 +114,18 @@ public class JavaAnnotator extends TreeGenerator {
         if (node.is("constructor")) {
             var children = node.findNodeList("children");
             if (children.isPresent()) {
-                return hoistMethods(state, children.get()).mapValue(inner -> new Tuple<>(node, inner));
+                return hoistMethods(children.get(), state.enter()).mapValue(inner -> new Tuple<>(node, inner));
             }
         }
 
         if (node.is("class") || node.is("interface")) {
-            return hoistMethods(state, node.findNode("child")
-                    .orElseThrow().findNodeList("children").orElseThrow()).mapValue(inner -> new Tuple<>(node, inner));
+            return hoistMethods(node.findNode("child")
+                    .orElseThrow().findNodeList("children").orElseThrow(), state.enter()).mapValue(inner -> new Tuple<>(node, inner));
         }
 
         if (node.is("record")) {
-            return defineParams(node, state).flatMapValue(inner -> hoistMethods(inner.right(), inner.left().findNode("child")
-                    .orElseThrow().findNodeList("children").orElseThrow()).mapValue(inner1 -> new Tuple<>(inner.left(), inner1)));
+            return defineParams(node, state).flatMapValue(inner -> hoistMethods(inner.left().findNode("child")
+                    .orElseThrow().findNodeList("children").orElseThrow(), inner.right().enter()).mapValue(inner1 -> new Tuple<>(inner.left(), inner1)));
         }
 
         return new Ok<>(new Tuple<>(node, state));
@@ -133,7 +133,7 @@ public class JavaAnnotator extends TreeGenerator {
 
     @Override
     protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
-        if (node.is("block") || node.is("for") || node.is("class")) {
+        if (node.is("block") || node.is("for") || node.is("class") || node.is("record") || node.is("interface")) {
             return new Ok<>(new Tuple<>(node, state.exit()));
         }
 

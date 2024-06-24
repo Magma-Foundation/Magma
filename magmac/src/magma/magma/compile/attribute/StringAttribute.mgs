@@ -1,13 +1,1 @@
-
-	import java.util.Optional;
-	export class def StringAttribute(value : String) => {
-		public def asString(this) : Optional<String> => {
-			return Optional.of(value);
-		}
-		public def format(this, depth : int) : String => {
-			return "\"" + escape() + "\"";
-		}
-		private def escape(this) : String => {
-			return value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");
-		}
-	}
+import java.util.Optional;export class def StringAttribute(value : String) => {public def asString(this) : Optional<String> => {return Optional.of(value);}public def format(this, depth : int) : String => {return "\"" + escape() + "\"";}private def escape(this) : String => {return value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");}}

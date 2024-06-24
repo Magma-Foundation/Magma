@@ -1,9 +1,1 @@
-
-	import magma.api.Tuple;
-	import magma.api.result.Result;
-	import magma.compile.Error_;
-	import magma.compile.annotate.State;
-	import magma.compile.rule.Node;
-	public struct Generator {
-		generate : Result<Tuple<Node, State>, Error_>;
-	}
+import magma.api.Tuple;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;public struct Generator {generate : Result<Tuple<Node, State>, Error_>;}

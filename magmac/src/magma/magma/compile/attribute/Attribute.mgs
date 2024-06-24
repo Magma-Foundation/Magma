@@ -1,19 +1,5 @@
-
-	import magma.compile.rule.Node;
-	import java.util.List;
-	import java.util.Optional;
-	
-	/**
+import magma.compile.rule.Node;import java.util.List;import java.util.Optional;/**
  * The Attribute interface provides methods to retrieve attribute values
  * as different types. This interface includes default methods to get
  * the attribute value as a string or a list of strings.
- */
-	public struct Attribute {
-		(this);
-		(this);
-		;
-		(this);
-		;
-		(this);
-		format : String;
-	}
+ */public struct Attribute {(this);(this);;(this);;(this);format : String;}

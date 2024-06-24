@@ -1,10 +1,1 @@
-export class def CompileException() => {
-	def CompileException(this, message : String, cause : Throwable) : public => {
-		super(message, cause);
-	}
-	def CompileException(this, message : String) : public => {
-		super(message);
-	}
-	def CompileException(this) : public => {
-	}
-}
+export class def CompileException() => {def CompileException(this, message : String, cause : Throwable) : public => {super(message, cause);}def CompileException(this, message : String) : public => {super(message);}def CompileException(this) : public => {}}
