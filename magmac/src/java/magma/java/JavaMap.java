@@ -2,7 +2,7 @@ package magma.java;
 
 import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collector;
 import magma.api.collect.stream.Stream;
 import magma.api.option.None;
@@ -48,7 +48,7 @@ public record JavaMap<K, V>(java.util.Map<K, V> internal) implements Map<K, V> {
 
     @Override
     public Stream<Tuple<K, V>> streamEntries() {
-        return new AbstractStream<>(new NativeListHead<>(new ArrayList<>(internal.entrySet())))
+        return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(internal.entrySet())))
                 .map(inner -> new Tuple<>(inner.getKey(), inner.getValue()));
     }
 
@@ -61,6 +61,6 @@ public record JavaMap<K, V>(java.util.Map<K, V> internal) implements Map<K, V> {
 
     @Override
     public Stream<K> keyStream() {
-        return new AbstractStream<>(new NativeListHead<>(new ArrayList<>(internal.keySet())));
+        return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(internal.keySet())));
     }
 }

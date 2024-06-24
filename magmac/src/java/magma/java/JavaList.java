@@ -1,7 +1,7 @@
 package magma.java;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collector;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
@@ -63,7 +63,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
     @Override
     public Stream<T> stream() {
-        return new AbstractStream<>(new NativeListHead<>(list));
+        return new HeadedStream<>(new NativeListHead<>(list));
     }
 
     @Override

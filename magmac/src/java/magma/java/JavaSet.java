@@ -1,6 +1,6 @@
 package magma.java;
 
-import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collector;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
@@ -52,7 +52,7 @@ public record JavaSet<T>(Set<T> set) implements magma.java.Set<T> {
 
     @Override
     public Stream<T> stream() {
-        return new AbstractStream<>(new NativeListHead<>(new ArrayList<>(set)));
+        return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(set)));
     }
 
     @Override
