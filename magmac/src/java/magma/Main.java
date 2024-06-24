@@ -277,12 +277,10 @@ public class Main {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("'", "&apos;")
-                .replace("\\n", "\\\\n")
-                .replace("\n", "\\n")
-                .replace("\\t", "\\\\t")
-                .replace("\t", "\\t")
-                .replace("\\r", "\\\\r")
-                .replace("\r", "\\r");
+                .replace("\\", "\\\\") // escape backslashes
+                .replace("\n", "\\n") // escape newlines
+                .replace("\t", "\\t") // escape tabs
+                .replace("\r", "\\r"); // escape carriage returns
     }
 
     private static String formatContext(Error_ e, int depth) {
