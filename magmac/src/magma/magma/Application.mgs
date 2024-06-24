@@ -1,0 +1,192 @@
+import magma.api.Tuple;
+import magma.api.collect.Map;
+import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileException;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Generator;
+import magma.compile.lang.JavaAnnotator;
+import magma.compile.lang.JavaLang;
+import magma.compile.lang.JavaToMagmaGenerator;
+import magma.compile.lang.MagmaAnnotator;
+import magma.compile.lang.MagmaFormatter;
+import magma.compile.lang.MagmaLang;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+import magma.java.JavaMap;
+import magma.java.JavaResults;
+import magma.java.JavaSet;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import static magma.java.JavaResults.$;
+import static magma.java.JavaResults.$Void;
+export class def Application(config : Configuration) => {
+	static def createDirectory(this, targetParent : Path) : Option<CompileException> => {
+		try 
+		{
+			Files.createDirectories(targetParent);
+			return None();
+		}
+		catch (e : IOException){
+			return Some(CompileException("Failed to make parent.", e));
+		}
+	}
+	static def print(this, error : Error_, depth : int) : String => {
+		let mut context : var = formatContext(error, depth);
+		let mut anyMessage : var = error.findMessage();
+		anyMessage.ifPresent(() => System.err.println(" ".repeat(depth)+depth+" = "+s+" "+context));
+		let mut message : var = error.findMessage().orElse("");
+		let mut replaced : var = escape(message);
+		let mut messageAttribute : var = message.isEmpty()?"":" message=\"" + replaced + "\"";
+		let mut causes : var = error.findCauses().orElse(Collections.emptyList());
+		let mut escapedContext : var = escape(error.findContext().orElse(""));
+		let mut formattedContext : var = "\n"+"\t".repeat(depth)+escapedContext;
+		if(causes.isEmpty())
+		{
+			return "\n" + "\t".repeat(depth) + "<child" + messageAttribute + ">" + formattedContext + "</child>";
+		}
+		let mut contextAttribute : var = escapedContext.isEmpty()?"":" context=\"" + escapedContext + "\"";
+		if(causes.size()==1)
+		{
+			return "\n" + "\t".repeat(depth) + "<parent" + messageAttribute + contextAttribute + ">" + print(causes.get(0), depth + 1) + "</parent>";
+		}
+		let mut list : var = causes.stream().sorted(Comparator.comparingInt(Error_.calculateDepth)).toList();
+		let mut builder : var = StringBuilder();
+		for(cause : var in list){
+			let mut result : var = print(cause, depth+1);
+			builder.append(result);
+		}
+		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
+	}
+	private static def escape(this, value : String) : String => {
+		return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	}
+	private static def formatContext(this, e : Error_, depth : int) : String => {
+		let mut actualContext : var = e.findContext().orElse("");
+		if(e.findCauses().isPresent())
+		return actualContext;
+		let mut spacing : var = " ".repeat(depth+1);
+		let mut formatted : var = actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
+		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
+	}
+	static def writeSafely(this, target : Path, csq : String) : Option<CompileException> => {
+		try 
+		{
+			Files.writeString(target, csq);
+			return None();
+		}
+		catch (e : IOException){
+			return Some(CompileException("Cannot write.", e));
+		}
+	}
+	private static def listGenerators(this) : List<Generator> => {
+		return List.of(JavaAnnotator(), JavaToMagmaGenerator(), MagmaAnnotator(), MagmaFormatter());
+	}
+	def run(this) : Option<CompileException> => {
+		return $Void(() => {
+			let mut sources : var = $(findSources().mapErr(CompileException.new));
+			let mut sourceTrees : var = $(parseSources(sources));
+			let mut targetTrees : var = $(generateTargets(sourceTrees));
+			$(writeTargets(targetTrees));
+		});
+	}
+	def findSources(this) : Result<List<Path>, IOException> => {
+		//noinspection resource
+		return $(() => Files.walk(config.sourceDirectory()).filter(() => value.toString().endsWith(".java")).filter(Files.isRegularFile).toList());
+	}
+	def generateTargets(this, sourceTrees : Map<Unit, Node>) : Result<Map<Unit, Node>, CompileException> => {
+		return sourceTrees.streamEntries().map(() => generateTarget(sourceTrees, entry)).collect(Collectors.exceptionally(JavaMap.collecting()));
+	}
+	def generateTarget(this, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) : Result<Tuple<Unit, Node>, CompileException> => {
+		return $(() => {
+			let mut source : var = entry.left();
+			let mut right : var = entry.right();
+			let mut namespace : var = source.computeNamespace();
+			let mut name : var = source.computeName();
+			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
+			let mut generated : var = JavaResults.$(CompoundGenerator(listGenerators()).generate(right, State(sourceTrees.keyStream().collect(JavaSet.collecting()), JavaList())).mapValue(Tuple.left).mapErr(() => writeError(error, source)));
+			let mut debug : var = $(createDebugDirectory(namespace));
+			let mut debugTarget : var = debug.resolve(name+".output.ast");
+			$(writeSafely(debugTarget, generated.toString()));
+			return Tuple(source, generated);
+		});
+	}
+	def writeTargets(this, targetTrees : Map<Unit, Node>) : Option<CompileException> => {
+		return targetTrees.streamEntries().map(() => writeTarget(entry.left(), entry.right())).flatMap(Streams.fromOption).head();
+	}
+	def writeTarget(this, source : Unit, root : Node) : Option<CompileException> => {
+		let mut namespace : var = source.computeNamespace();
+		let mut name : var = source.computeName();
+		System.out.println("Writing target: "+String.join(".", namespace)+"."+name);
+		let mut targetParent : var = config.targetDirectory();
+		for(segment : String in namespace){
+			targetParent=targetParent.resolve(segment);
+		}
+		if(!Files.exists(targetParent))
+		{
+			let mut result : var = createDirectory(targetParent);
+			if(result.isPresent())
+			{
+				return result;
+			}
+		}
+		let mut target : var = targetParent.resolve(name+".mgs");
+		return MagmaLang.createRootRule().fromNode(root).match(() => writeSafely(target, value), () => {
+			print(err, 0);
+			return Some(writeError(err, source));
+		});
+	}
+	def parseSources(this, sources : List<Path>) : Result<Map<Unit, Node>, CompileException> => {
+		return JavaList(Collectors.exceptionally(JavaMap.collecting()));
+	}
+	def parseSource(this, source : Unit) : Option<Result<Tuple<Unit, Node>, CompileException>> => {
+		let mut namespace : var = source.computeNamespace();
+		if(namespace.size()>=2)
+		{
+			let mut slice : var = namespace.subList(0, 2);
+			// Essentially, we want to skip this package.
+			if(slice.equals(List.of("magma", "java")))
+			{
+				return None();
+			}
+		}
+		System.out.println("Parsing source: "+source);
+		return Some(source.read().mapValue(() => parseWithInput(source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
+	}
+	private def parseWithInput(this, source : Unit, input : String) : Result<Node, CompileException> => {
+		return JavaLang.createRootRule().toNode(input).create().match(() => parse(source, root), () => Err(writeError(err, source)));
+	}
+	def parse(this, unit : Unit, root : Node) : Result<Node, CompileException> => {
+		return createDebugDirectory(unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
+	}
+	def writeError(this, err : Error_, location : Unit) : CompileException => {
+		let mut result : var = print(err, 0);
+		return writeSafely(config.debugDirectory().resolve("error.xml"), result).orElseGet(() => CompileException(location.toString()));
+	}
+	def createDebugDirectory(this, namespace : List<String>) : Result<Path, CompileException> => {
+		let mut relativizedDebug : var = config.debugDirectory();
+		for(s : String in namespace){
+			relativizedDebug=relativizedDebug.resolve(s);
+		}
+		if(!Files.exists(relativizedDebug))
+		{
+			let mut directoryError : var = createDirectory(relativizedDebug);
+			if(directoryError.isPresent())
+			{
+				return Err(directoryError.orElsePanic());
+			}
+		}
+		return Ok(relativizedDebug);
+	}
+}
