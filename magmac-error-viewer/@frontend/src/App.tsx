@@ -1,10 +1,16 @@
-import {JSX} from "solid-js";
+import axios from "axios";
+import {createSignal, JSX, onMount} from "solid-js";
 
-function TreeElement({title, children}: { title: string, children: JSX.Element }) {
+interface TreeContent {
+    context: string;
+    title: string;
+}
+
+function TreeElement({content, children}: { content: TreeContent, children: JSX.Element }) {
     return (
         <div>
             <span>
-                {title}
+                {content.title}
             </span>
             <div style={{"padding-left": "1rem"}}>
                 {children}
@@ -13,7 +19,60 @@ function TreeElement({title, children}: { title: string, children: JSX.Element }
     );
 }
 
+function createTreeElement(tree: XMLObject | undefined) {
+    if (!tree) return <></>;
+
+    const message = tree.findAttribute("message") ?? "";
+
+    const parents = tree.findChildren("parent").map(parent => createTreeElement(parent));
+    const collections = tree.findChildren("collection").map(collection => createTreeElement(collection));
+    const children = tree.findChildren("child").map(child => createTreeElement(child));
+
+    const content: TreeContent = {
+        context: "", title: message
+    }
+
+    return <TreeElement content={content}>
+        {parents}
+        {collections}
+        {children}
+    </TreeElement>
+}
+
+interface XMLObject {
+    findAttribute(key: string): string | undefined;
+
+    findChildren(key: string): XMLObject[];
+}
+
+function XMLObject(tag: string, obj: any): XMLObject {
+    return {
+        findAttribute(propertyKey: string): string | undefined {
+            const properties = obj.$;
+            if (!properties) return undefined;
+            return properties[propertyKey];
+        }, findChildren(key: string): XMLObject[] {
+            const children = obj[key] ?? [];
+            return children.map((child: any) => XMLObject(tag, child));
+        }
+    }
+}
+
 function App() {
+    const [tree, setTree] = createSignal<XMLObject | undefined>(undefined);
+
+    onMount(() => {
+        axios({
+            method: "get",
+            url: "http://localhost:3000/tree"
+        }).then(e => {
+            const root = XMLObject("parent", e.data.parent);
+            setTree(root);
+        }).catch(e => {
+            console.error(e);
+        });
+    });
+
     return (
         <div style={{
             display: "flex",
@@ -40,9 +99,9 @@ function App() {
                         <span>
                             Navigator
                         </span>
-                        <TreeElement title={"test"}>
-                            <TreeElement title={"Child"}/>
-                        </TreeElement>
+                        {
+                            createTreeElement(tree())
+                        }
                     </div>
                     <div style={{
                         width: "100%",
