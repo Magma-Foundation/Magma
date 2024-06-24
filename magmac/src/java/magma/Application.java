@@ -217,7 +217,8 @@ public record Application(Configuration config) {
     }
 
     Result<Map<Unit, Node>, CompileException> parseSources(List<Path> sources) {
-        return new JavaList<>(sources).stream()
+        return new JavaList<>(sources)
+                .stream()
                 .map(source -> new PathUnit(config.sourceDirectory(), source))
                 .map(this::parseSource)
                 .flatMap(Streams::fromOption)
@@ -236,7 +237,6 @@ public record Application(Configuration config) {
         }
 
         System.out.println("Parsing source: " + source);
-
         return new Some<>(source.read().mapValue(input -> parseWithInput(source, input))
                 .<Result<Node, CompileException>>match(result -> result, Err::new)
                 .mapValue(value -> new Tuple<>(source, value)));
