@@ -18,11 +18,15 @@ interface TreeContent {
     title: string;
 }
 
-function TreeElement({content, children}: { content: TreeContent, children: JSX.Element }) {
+function TreeElement({content, children, onClick}: {
+    content: TreeContent,
+    children: JSX.Element,
+    onClick: (content: TreeContent) => void;
+}) {
     return (
         <div>
             <span onClick={() => {
-                console.log(content);
+                onClick(content);
             }}>
                 {content.title}
             </span>
@@ -33,22 +37,22 @@ function TreeElement({content, children}: { content: TreeContent, children: JSX.
     );
 }
 
-function createTreeElement(tree: XMLObject | undefined) {
+function createTreeElement(tree: XMLObject | undefined, onClick: (content: TreeContent) => void) {
     if (!tree) return <></>;
 
-    const parents = tree.findChildren("parent").map(parent => createTreeElement(parent));
-    const collections = tree.findChildren("collection").map(collection => createTreeElement(collection));
-    const children = tree.findChildren("child").map(child => createTreeElement(child));
+    const parents = tree.findChildren("parent").map(parent => createTreeElement(parent, onClick));
+    const collections = tree.findChildren("collection").map(collection => createTreeElement(collection, onClick));
+    const children = tree.findChildren("child").map(child => createTreeElement(child, onClick));
 
     const message = tree.findAttribute("message") ?? "";
-    const context = tree.findAttribute("context") ?? "";
+    const context = tree.findAttribute("context") ?? tree.findContent() ?? "";
 
     const content: TreeContent = {
         context: unescape(context),
         title: unescape(message)
     }
 
-    return <TreeElement content={content}>
+    return <TreeElement content={content} onClick={onClick}>
         {parents}
         {collections}
         {children}
@@ -59,6 +63,8 @@ interface XMLObject {
     findAttribute(key: string): string | undefined;
 
     findChildren(key: string): XMLObject[];
+
+    findContent(): string | undefined;
 }
 
 function XMLObject(tag: string, obj: any): XMLObject {
@@ -70,13 +76,20 @@ function XMLObject(tag: string, obj: any): XMLObject {
         }, findChildren(key: string): XMLObject[] {
             const children = obj[key] ?? [];
             return children.map((child: any) => XMLObject(tag, child));
+        },
+        findContent(): string | undefined {
+            return obj["_"];
         }
     }
 }
 
 function App() {
     const [tree, setTree] = createSignal<XMLObject | undefined>(undefined);
+
     const [content, setContent] = createSignal("");
+    const [before, setBefore] = createSignal("");
+    const [highlighted, setHighlighted] = createSignal("");
+    const [after, setAfter] = createSignal("");
 
     onMount(() => {
         axios({
@@ -93,11 +106,16 @@ function App() {
             method: "get",
             url: "http://localhost:3000/content"
         }).then(e => {
-            setContent(unescape(e.data));
+            setContent(e.data);
+            setBefore(e.data);
         }).catch(e => {
             console.error(e);
         });
     });
+
+    function onClick(content: TreeContent) {
+        console.log(content);
+    }
 
     return (
         <div style={{
@@ -126,7 +144,7 @@ function App() {
                             Navigator
                         </span>
                         {
-                            createTreeElement(tree())
+                            createTreeElement(tree(), onClick)
                         }
                     </div>
                     <div style={{
@@ -136,9 +154,17 @@ function App() {
                         <span>
                             Content
                         </span>
-                        <pre>
-                            {content()}
-                        </pre>
+                        <div>
+                            <span>
+                                {before()}
+                            </span>
+                            <span style={{"background-color": "red"}}>
+                                {highlighted()}
+                            </span>
+                            <span>
+                            {after()}
+                        </span>
+                        </div>
                     </div>
                 </div>
             </div>
