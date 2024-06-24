@@ -61,16 +61,11 @@ public class Main {
     }
 
     private static Result<List<Path>, IOException> walkImpl(Configuration configuration) {
-        try {
-            //TODO: #14
-            //noinspection resource
-            return new Ok<>(Files.walk(configuration.sourceDirectory())
-                    .filter(value -> value.toString().endsWith(".java"))
-                    .filter(Files::isRegularFile)
-                    .toList());
-        } catch (IOException e) {
-            return new Err<>(e);
-        }
+        //noinspection resource
+        return $(() -> Files.walk(configuration.sourceDirectory())
+                .filter(value -> value.toString().endsWith(".java"))
+                .filter(Files::isRegularFile)
+                .toList());
     }
 
     private static Result<Configuration, IOException> buildConfiguration() {
