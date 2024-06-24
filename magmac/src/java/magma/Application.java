@@ -13,6 +13,7 @@ import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
+import magma.compile.lang.Generator;
 import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.JavaToMagmaGenerator;
@@ -113,19 +114,13 @@ public record Application(Configuration config) {
         }
     }
 
-    static Result<Tuple<Node, State>, Error_> generate(Map<Unit, Node> sourceTrees, Node root) {
-        var state = new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>());
-
-        var list = List.of(
+    private static List<Generator> listGenerators() {
+        return List.of(
                 new JavaAnnotator(),
                 new JavaToMagmaGenerator(),
                 new MagmaAnnotator(),
                 new MagmaFormatter()
         );
-
-        var initial = new Tuple<>(root, state);
-        return Streams.fromNativeList(list).foldLeftToResult(initial,
-                (tuple, generator) -> generator.generate(tuple.left(), tuple.right()));
     }
 
     Option<CompileException> run() {
@@ -151,9 +146,7 @@ public record Application(Configuration config) {
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    Result<Tuple<Unit, Node>, CompileException> generateTarget(
-            Map<Unit, Node> sourceTrees,
-            Tuple<Unit, Node> entry) {
+    Result<Tuple<Unit, Node>, CompileException> generateTarget(Map<Unit, Node> sourceTrees, Tuple<Unit, Node> entry) {
         return $(() -> {
             var source = entry.left();
             var right = entry.right();
@@ -163,7 +156,8 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = JavaResults.$(generate(sourceTrees, right)
+            var generated = JavaResults.$(new CompoundGenerator(listGenerators())
+                    .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(error, source)));
 
