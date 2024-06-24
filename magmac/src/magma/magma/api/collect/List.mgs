@@ -1,1 +1,16 @@
-import magma.api.Tuple;import magma.api.option.Option;import magma.api.collect.stream.Stream;import java.util.function.Function;public struct List {add : List<T>;popFirst : Option<Tuple<T, List<T>>>;(this);push : List<T>;stream : Stream<T>;contains : boolean;isEmpty : boolean;last : Option<T>;size : int;mapLast : Option<List<T>>;}
+import magma.api.Tuple;
+import magma.api.option.Option;
+import magma.api.collect.stream.Stream;
+import java.util.function.Function;
+public struct List {
+	add : List<T>;
+	popFirst : Option<Tuple<T, List<T>>>;
+	(this);
+	push : List<T>;
+	stream : Stream<T>;
+	contains : boolean;
+	isEmpty : boolean;
+	last : Option<T>;
+	size : int;
+	mapLast : Option<List<T>>;
+}

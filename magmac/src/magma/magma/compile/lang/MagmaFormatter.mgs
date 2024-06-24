@@ -1,1 +1,50 @@
-import magma.api.Tuple;import magma.api.result.Err;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;import magma.compile.rule.text.StripRule;import java.util.ArrayList;import java.util.List;import java.util.Optional;export class def MagmaFormatter() => {}
+import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.rule.Node;
+import magma.compile.rule.text.StripRule;
+import java.util.ArrayList;
+import java.util.List;
+export class def MagmaFormatter() => {
+	private static def attachIndent(this, i : int, child : Node, state : State) : Node => {
+		let mut depth : var = state.computeDepth();
+		if(i==0&&depth==1)
+		{
+			return child;
+		}
+		else
+		{
+			return child.withString(StripRule.DEFAULT_LEFT, "\n" + "\t".repeat(depth-1));
+		}
+	}
+	protected def preVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+		if(node.is("block"))
+		{
+			return Ok(Tuple(node, state.enter()));
+		}
+		return Ok(Tuple(node, state));
+	}
+	protected def postVisit(this, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+		if(node.is("block"))
+		{
+			let mut count : var = state.computeDepth()-2;
+			let mut node1 : var = node.mapNodes("children", () => {
+				let mut list : List<Node> = ArrayList();
+				let mut i : int = 0;
+				while(i<children.size())
+				{
+					let mut child : Node = children.get(i);
+					let mut withString : var = attachIndent(i, child, state);
+					list.add(withString);
+					i++;
+				}
+				return list;
+			}).withString("after-content", "\n" + "\t".repeat(Math.max(count, 0)));
+			let mut exited : var = state.exit();
+			return Ok(Tuple(node1, exited));
+		}
+		return Ok(Tuple(node, state));
+	}
+}

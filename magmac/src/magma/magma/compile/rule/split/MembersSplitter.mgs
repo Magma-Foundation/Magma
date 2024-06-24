@@ -1,1 +1,132 @@
-import java.util.ArrayList;import java.util.Collections;import java.util.LinkedList;import java.util.List;import java.util.stream.Collectors;import java.util.stream.IntStream;export class def MembersSplitter() => {public def split(this, input : String) : List<String> => {let mut current : var = State();let mut queue : var = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));while(!queue.isEmpty()){let mut c : var = queue.pop();let mut state : var = current.append(c);if(c=='/'&&state.isLevel()&&!queue.isEmpty()){let mut after : var = queue.peek();if(after=='/'){// We are in a single-line comment.let mut withAfter : var = state.append(queue.pop());while(!queue.isEmpty()){let mut next : var = queue.pop();withAfter=withAfter.append(next);if(next=='\n'){break;}}current=withAfter.advance();continue;}else if(after=='*'){// We are in a block comment.let mut withAfter : var = state.append(queue.pop());while(!queue.isEmpty()){let mut next : var = queue.pop();withAfter=withAfter.append(next);if(next=='*'&&!queue.isEmpty()&&queue.peek()=='/'){withAfter=withAfter.append(queue.pop());break;}}current=withAfter.advance();continue;}}if(c=='\''){let mut next : var = queue.pop();let mut withNext : var = current.append(next);let mut escaped : var = next=='\\'?current.append(queue.pop()):withNext;current=escaped.append(queue.pop());continue;}if(c=='\"'){let mut withString : var = current;while(!queue.isEmpty()){let mut next : var = queue.pop();withString=withString.append(next);if(next=='\\'){withString.append(queue.pop());continue;}if(next=='\"'){break;}}current=withString;continue;}if(c==';'&&state.isLevel()){current=state.advance();}else if(c=='}'&&state.isShallow()){current=state.exit().advance();}else if(c=='{' || c == '('){current=state.enter();}else if(c=='}' || c == ')'){current=state.exit();}else{current=state;}}return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();}class def State(tokens : List<String>, buffer : StringBuilder, depth : int) => {def State(this) : public => {this(Collections.emptyList(), StringBuilder(), 0);}private def advance(this) : State => {let mut copy : var = ArrayList(this.tokens);copy.add(this.buffer.toString());return State(copy, StringBuilder(), depth);}private def append(this, c : char) : State => {return State(tokens, this.buffer.append(c), depth);}public def isLevel(this) : boolean => {return this.depth==0;}public def enter(this) : State => {return State(tokens, buffer, depth+1);}public def exit(this) : State => {return State(tokens, buffer, depth-1);}public def isShallow(this) : boolean => {return depth==1;}}}
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+export class def MembersSplitter() => {
+	public def split(this, input : String) : List<String> => {
+		let mut current : var = State();
+		let mut queue : var = IntStream.range(0, input.length()).mapToObj(input.charAt).collect(Collectors.toCollection(LinkedList.new));
+		while(!queue.isEmpty())
+		{
+			let mut c : var = queue.pop();
+			let mut state : var = current.append(c);
+			if(c=='/'&&state.isLevel()&&!queue.isEmpty())
+			{
+				let mut after : var = queue.peek();
+				if(after=='/')
+				{
+					// We are in a single-line comment.
+					let mut withAfter : var = state.append(queue.pop());
+					while(!queue.isEmpty())
+					{
+						let mut next : var = queue.pop();
+						withAfter=withAfter.append(next);
+						if(next=='\n')
+						{
+							break
+							;
+						}
+					}
+					current=withAfter.advance();
+					continue
+					;
+				}
+				else if(after=='*'){
+					// We are in a block comment.
+					let mut withAfter : var = state.append(queue.pop());
+					while(!queue.isEmpty())
+					{
+						let mut next : var = queue.pop();
+						withAfter=withAfter.append(next);
+						if(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
+						{
+							withAfter=withAfter.append(queue.pop());
+							break
+							;
+						}
+					}
+					current=withAfter.advance();
+					continue
+					;
+				}
+			}
+			if(c=='\'')
+			{
+				let mut next : var = queue.pop();
+				let mut withNext : var = current.append(next);
+				let mut escaped : var = next=='\\'?current.append(queue.pop()):withNext;
+				current=escaped.append(queue.pop());
+				continue
+				;
+			}
+			if(c=='\"')
+			{
+				let mut withString : var = current;
+				while(!queue.isEmpty())
+				{
+					let mut next : var = queue.pop();
+					withString=withString.append(next);
+					if(next=='\\')
+					{
+						withString.append(queue.pop());
+						continue
+						;
+					}
+					if(next=='\"')
+					{
+						break
+						;
+					}
+				}
+				current=withString;
+				continue
+				;
+			}
+			if(c==';'&&state.isLevel())
+			{
+				current=state.advance();
+			}
+			else if(c=='}'&&state.isShallow()){
+				current=state.exit().advance();
+			}
+			else if(c=='{' || c == '('){
+				current=state.enter();
+			}
+			else if(c=='}' || c == ')'){
+				current=state.exit();
+			}
+			else
+			{
+				current=state;
+			}
+		}
+		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();
+	}
+	class def State(tokens : List<String>, buffer : StringBuilder, depth : int) => {
+		def State(this) : public => {
+			this(Collections.emptyList(), StringBuilder(), 0);
+		}
+		private def advance(this) : State => {
+			let mut copy : var = ArrayList(this.tokens);
+			copy.add(this.buffer.toString());
+			return State(copy, StringBuilder(), depth);
+		}
+		private def append(this, c : char) : State => {
+			return State(tokens, this.buffer.append(c), depth);
+		}
+		public def isLevel(this) : boolean => {
+			return this.depth==0;
+		}
+		public def enter(this) : State => {
+			return State(tokens, buffer, depth+1);
+		}
+		public def exit(this) : State => {
+			return State(tokens, buffer, depth-1);
+		}
+		public def isShallow(this) : boolean => {
+			return depth==1;
+		}
+	}
+}

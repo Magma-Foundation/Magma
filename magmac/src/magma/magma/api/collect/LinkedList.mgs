@@ -1,4 +1,119 @@
-import magma.api.Tuple;import magma.api.collect.stream.AbstractStream;import magma.api.collect.stream.Collectors;import magma.api.collect.stream.Head;import magma.api.collect.stream.Stream;import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;import java.util.Objects;import java.util.function.Function;export class def LinkedList<T>(head : Option<Link<T>>) => {def LinkedList(this) : public => {this(None());}public def add(this, next : T) : List<T> => {return LinkedList(Some(head.map(() => inner.mapLast(() => last.push(next))).orElseGet(() => Child(next))));}public def popFirst(this) : Option<Tuple<T, List<T>>> => {if(head.isEmpty())return None();return head.map(() => link.popFirst().mapRight(LinkedList.new));}public def push(this, element : T) : List<T> => {return add(element);}public def stream(this) : Stream<T> => {return AbstractStream(LinkedHead(head));}public def contains(this, element : T) : boolean => {return head.map(() => link.contains(element)).orElse(false);}public def isEmpty(this) : boolean => {return head.isEmpty();}public def last(this) : Option<T> => {return head.flatMap(Link.last);}public def size(this) : int => {return head.map(Link.size).orElse(0);}public def mapLast(this, mapper : (T) => T) : Option<List<T>> => {return head.map(() => link.mapLast(() => last.mapValue(mapper))).map(Some.new).map(LinkedList.new);}public def toString(this) : String => {return "[" + stream()
+import magma.api.Tuple;
+import magma.api.collect.stream.AbstractStream;
+import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Head;
+import magma.api.collect.stream.Stream;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import java.util.Objects;
+import java.util.function.Function;
+export class def LinkedList<T>(head : Option<Link<T>>) => {
+	def LinkedList(this) : public => {
+		this(None());
+	}
+	public def add(this, next : T) : List<T> => {
+		return LinkedList(Some(head.map(() => inner.mapLast(() => last.push(next))).orElseGet(() => Child(next))));
+	}
+	public def popFirst(this) : Option<Tuple<T, List<T>>> => {
+		if(head.isEmpty())
+		return None();
+		return head.map(() => link.popFirst().mapRight(LinkedList.new));
+	}
+	public def push(this, element : T) : List<T> => {
+		return add(element);
+	}
+	public def stream(this) : Stream<T> => {
+		return AbstractStream(LinkedHead(head));
+	}
+	public def contains(this, element : T) : boolean => {
+		return head.map(() => link.contains(element)).orElse(false);
+	}
+	public def isEmpty(this) : boolean => {
+		return head.isEmpty();
+	}
+	public def last(this) : Option<T> => {
+		return head.flatMap(Link.last);
+	}
+	public def size(this) : int => {
+		return head.map(Link.size).orElse(0);
+	}
+	public def mapLast(this, mapper : (T) => T) : Option<List<T>> => {
+		return head.map(() => link.mapLast(() => last.mapValue(mapper))).map(Some.new).map(LinkedList.new);
+	}
+	public def toString(this) : String => {
+		return "[" + stream()
                 .map(Objects::toString)
                 .collect(Collectors.joining(", "))
-                .orElse("") + "]";} struct Link {mapLast : Link<T>;push : Link<T>;contains : boolean;mapValue : Link<T>;size : int;last : Option<T>;popFirst : Tuple<T, Option<Link<T>>>;}class def Parent<T>(value : T, child : Link<T>) => {public def mapLast(this, mapper : (Link<T>) => Link<T>) : Link<T> => {return Parent(value, child.mapLast(mapper));}public def push(this, element : T) : Link<T> => {return child.push(element);}public def contains(this, element : T) : boolean => {return value.equals(element)||child.contains(element);}public def mapValue(this, mapper : (T) => T) : Link<T> => {return Parent(mapper.apply(value), child.mapValue(mapper));}public def size(this) : int => {return 1+child.size();}public def last(this) : Option<T> => {return child.last();}public def popFirst(this) : Tuple<T, Option<Link<T>>> => {return Tuple(value, Some(child));}}class def Child<T>(value : T) => {public def mapLast(this, mapper : (Link<T>) => Link<T>) : Link<T> => {return mapper.apply(this);}public def push(this, element : T) : Link<T> => {return Parent(value, Child(element));}public def contains(this, element : T) : boolean => {return value.equals(element);}public def mapValue(this, mapper : (T) => T) : Link<T> => {return Child(mapper.apply(value));}public def size(this) : int => {return 1;}public def last(this) : Option<T> => {return Some(value);}public def popFirst(this) : Tuple<T, Option<Link<T>>> => {return Tuple(value, None());}}class def LinkedHead<T>() => {private current : Option<Link<T>>;def LinkedHead(this, initial : Option<Link<T>>) : public => {this=initial;}public def head(this) : Option<T> => {if(current.isEmpty())return None();let mut link : var = current.orElsePanic();let mut popped : var = link.popFirst();current=popped.right();return Some(popped.left());}}}
+                .orElse("") + "]";
+	}
+	 struct Link {
+		mapLast : Link<T>;
+		push : Link<T>;
+		contains : boolean;
+		mapValue : Link<T>;
+		size : int;
+		last : Option<T>;
+		popFirst : Tuple<T, Option<Link<T>>>;
+	}
+	class def Parent<T>(value : T, child : Link<T>) => {
+		public def mapLast(this, mapper : (Link<T>) => Link<T>) : Link<T> => {
+			return Parent(value, child.mapLast(mapper));
+		}
+		public def push(this, element : T) : Link<T> => {
+			return child.push(element);
+		}
+		public def contains(this, element : T) : boolean => {
+			return value.equals(element)||child.contains(element);
+		}
+		public def mapValue(this, mapper : (T) => T) : Link<T> => {
+			return Parent(mapper.apply(value), child.mapValue(mapper));
+		}
+		public def size(this) : int => {
+			return 1+child.size();
+		}
+		public def last(this) : Option<T> => {
+			return child.last();
+		}
+		public def popFirst(this) : Tuple<T, Option<Link<T>>> => {
+			return Tuple(value, Some(child));
+		}
+	}
+	class def Child<T>(value : T) => {
+		public def mapLast(this, mapper : (Link<T>) => Link<T>) : Link<T> => {
+			return mapper.apply(this);
+		}
+		public def push(this, element : T) : Link<T> => {
+			return Parent(value, Child(element));
+		}
+		public def contains(this, element : T) : boolean => {
+			return value.equals(element);
+		}
+		public def mapValue(this, mapper : (T) => T) : Link<T> => {
+			return Child(mapper.apply(value));
+		}
+		public def size(this) : int => {
+			return 1;
+		}
+		public def last(this) : Option<T> => {
+			return Some(value);
+		}
+		public def popFirst(this) : Tuple<T, Option<Link<T>>> => {
+			return Tuple(value, None());
+		}
+	}
+	class def LinkedHead<T>() => {
+		private current : Option<Link<T>>;
+		def LinkedHead(this, initial : Option<Link<T>>) : public => {
+			this=initial;
+		}
+		public def head(this) : Option<T> => {
+			if(current.isEmpty())
+			return None();
+			let mut link : var = current.orElsePanic();
+			let mut popped : var = link.popFirst();
+			current=popped.right();
+			return Some(popped.left());
+		}
+	}
+}

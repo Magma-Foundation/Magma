@@ -1,1 +1,15 @@
-import magma.api.option.Option;import java.util.function.Function;public struct Result {findValue : Option<T>;findErr : Option<E>;flatMapValue<R> : Result<R, E>;mapValue<R> : Result<R, E>;isOk : boolean;mapErr<R> : Result<T, R>;match<R> : R;}
+import magma.api.option.Option;
+import java.util.function.Function;
+public struct Result {
+	findValue : Option<T>;
+	findErr : Option<E>;
+	
+	flatMapValue<R> : Result<R, E>;
+	
+	mapValue<R> : Result<R, E>;
+	isOk : boolean;
+	
+	mapErr<R> : Result<T, R>;
+	
+	match<R> : R;
+}

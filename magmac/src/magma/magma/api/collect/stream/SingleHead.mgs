@@ -1,1 +1,19 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;export class def SingleHead<T>() => {private final value : T;private let mut retrieved : boolean = false;def SingleHead(this, value : T) : public => {this=value;}public def head(this) : Option<T> => {if(retrieved)return None();else{retrieved=true;return Some(value);}}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+export class def SingleHead<T>() => {
+	private final value : T;
+	private let mut retrieved : boolean = false;
+	def SingleHead(this, value : T) : public => {
+		this=value;
+	}
+	public def head(this) : Option<T> => {
+		if(retrieved)
+		return None();
+		else
+		{
+			retrieved=true;
+			return Some(value);
+		}
+	}
+}

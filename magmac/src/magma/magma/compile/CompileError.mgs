@@ -1,1 +1,17 @@
-import java.util.Collections;import java.util.List;import java.util.Optional;export class def CompileError(message : String, context : String) => {public def findMessage(this) : Optional<String> => {return Optional.of(message);}public def findCauses(this) : Optional<List<Error_>> => {return Optional.empty();}public def findContext(this) : Optional<String> => {return Optional.of(context);}public def calculateDepth(this) : int => {return 1;}}
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+export class def CompileError(message : String, context : String) => {
+	public def findMessage(this) : Optional<String> => {
+		return Optional.of(message);
+	}
+	public def findCauses(this) : Optional<List<Error_>> => {
+		return Optional.empty();
+	}
+	public def findContext(this) : Optional<String> => {
+		return Optional.of(context);
+	}
+	public def calculateDepth(this) : int => {
+		return 1;
+	}
+}

@@ -1,1 +1,74 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.result.Ok;import magma.api.result.Result;import magma.java.JavaOptionals;import java.util.function.BiFunction;import java.util.function.Function;import java.util.function.Predicate;export class def AbstractStream<T>(provider : Head<T>) => {public def foldRightToResult<R, E>(this, initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => {return this.fold(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));}public def anyMatch(this, predicate : Predicate<T>) : boolean => {return fold(false, () => aBoolean||predicate.test(t));}public def filter(this, filter : Predicate<T>) : Stream<T> => {return flatMap(() => AbstractStream(filter.test(value)?SingleHead(value):EmptyHead()));}public def flatMap<R>(this, mapper : (T) => Head<R>) : Stream<R> => {return AbstractStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead()));}public def map<R>(this, mapper : (T) => R) : Stream<R> => {return AbstractStream(() => this.provider.head().map(mapper));}public def collect<C>(this, collector : Collector<T, C>) : C => {let mut current : var = collector.createInitial();return fold(current, collector.fold);}private def fold<C>(this, current : C, folder : BiFunction<C, T, C>) : C => {while(true){let mut finalCurrent : C = current;let mut tuple : var = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);if(tuple.left()){current=tuple.right();}else{return current;}}}public def head(this) : Option<T> => {return provider.head();}class def FlatMapHead<R>() => {private final outer : Head<T>;private final mapper : (T) => Head<R>;private current : Head<R>;def FlatMapHead(this, initial : Head<R>, outer : AbstractStream<T>, mapper : (T) => Head<R>) : public => {this=outer;this=mapper;current=initial;}public def head(this) : Option<R> => {while(true){let mut currentHead : var = current.head();if(currentHead.isPresent())return currentHead;let mut tuple : var = outer.head().map(mapper).toTuple(current);if(tuple.left()){current=tuple.right();}else{return None();}}}}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.java.JavaOptionals;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+export class def AbstractStream<T>(provider : Head<T>) => {
+	public def foldRightToResult<R, E>(this, initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => {
+		return this.fold(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
+	}
+	public def anyMatch(this, predicate : Predicate<T>) : boolean => {
+		return fold(false, () => aBoolean||predicate.test(t));
+	}
+	public def filter(this, filter : Predicate<T>) : Stream<T> => {
+		return flatMap(() => AbstractStream(filter.test(value)?SingleHead(value):EmptyHead()));
+	}
+	public def flatMap<R>(this, mapper : (T) => Head<R>) : Stream<R> => {
+		return AbstractStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead()));
+	}
+	public def map<R>(this, mapper : (T) => R) : Stream<R> => {
+		return AbstractStream(() => this.provider.head().map(mapper));
+	}
+	public def collect<C>(this, collector : Collector<T, C>) : C => {
+		let mut current : var = collector.createInitial();
+		return fold(current, collector.fold);
+	}
+	private def fold<C>(this, current : C, folder : BiFunction<C, T, C>) : C => {
+		while(true)
+		{
+			let mut finalCurrent : C = current;
+			let mut tuple : var = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+			if(tuple.left())
+			{
+				current=tuple.right();
+			}
+			else
+			{
+				return current;
+			}
+		}
+	}
+	public def head(this) : Option<T> => {
+		return provider.head();
+	}
+	class def FlatMapHead<R>() => {
+		private final outer : Head<T>;
+		private final mapper : (T) => Head<R>;
+		private current : Head<R>;
+		def FlatMapHead(this, initial : Head<R>, outer : AbstractStream<T>, mapper : (T) => Head<R>) : public => {
+			this=outer;
+			this=mapper;
+			current=initial;
+		}
+		public def head(this) : Option<R> => {
+			while(true)
+			{
+				let mut currentHead : var = current.head();
+				if(currentHead.isPresent())
+				return currentHead;
+				let mut tuple : var = outer.head().map(mapper).toTuple(current);
+				if(tuple.left())
+				{
+					current=tuple.right();
+				}
+				else
+				{
+					return None();
+				}
+			}
+		}
+	}
+}
