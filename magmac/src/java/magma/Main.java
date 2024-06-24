@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static magma.java.JavaResults.$;
+
 public class Main {
     public static final Path CONFIG_PATH = Paths.get(".", "config.json");
 
@@ -99,21 +101,22 @@ public class Main {
             Map<List<String>, Node> sourceTrees,
             List<String> location,
             Node root) {
-        var namespace = location.subList(0, location.size() - 1);
-        var name = location.get(location.size() - 1);
+        return $(() -> {
+            var namespace = location.subList(0, location.size() - 1);
+            var name = location.get(location.size() - 1);
 
-        System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
+            System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-        return generate(sourceTrees, root)
-                .mapValue(Tuple::left)
-                .mapErr(error -> writeError(error, location, configuration))
-                .flatMapValue(generated -> {
-                    return createDebug(namespace, configuration).flatMapValue(relativizedDebug -> {
-                        return writeSafely(relativizedDebug.resolve(name + ".output.ast"), generated.toString())
-                                .<Result<Node, CompileException>>map(Err::new)
-                                .orElseGet(() -> new Ok<>(generated));
-                    });
-                });
+            var generated = $(generate(sourceTrees, root)
+                    .mapValue(Tuple::left)
+                    .mapErr(error -> writeError(error, location, configuration)));
+
+            var debug = $(createDebug(namespace, configuration));
+            var debugTarget = debug.resolve(name + ".output.ast");
+
+            $(writeSafely(debugTarget, generated.toString()));
+            return generated;
+        });
     }
 
     private static Option<CompileException> writeTargets(Map<List<String>, Node> targetTrees, Configuration configuration) {
