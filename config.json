@@ -7,14 +7,14 @@
       },
       "targets": {
         "location": "./magmac/src/magma",
-        "platform": "magma"
+        "platform": "mgs"
       },
       "debug": "./magmac/debug/java-mgs"
     },
     {
       "sources": {
         "location": "./magmac/src/magma",
-        "platform": "magma"
+        "platform": "mgs"
       },
       "targets": {
         "location": "./magmac/dist/js",

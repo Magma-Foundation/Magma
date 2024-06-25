@@ -73,13 +73,12 @@ public class Main {
             var map = builds.stream().orElsePanic().map(build -> {
                 var sources = buildSet(build, "sources");
                 var targets = buildSet(build, "targets");
-
                 var debug = Path.of(build.find("debug")
                         .orElsePanic()
                         .findValue()
                         .orElsePanic());
 
-                return new Build(sources, debug, targets);
+                return new Build(sources, targets, debug);
             }).collect(JavaList.collecting());
 
             return new Ok<>(new Configuration(map));

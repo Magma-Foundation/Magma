@@ -26,4 +26,7 @@ export class def None<T>() => {
 	public def orElsePanic(this) : T => {
 		throw RuntimeException("Option was empty!");
 	}
+	public def and<R>(this, other : Option<R>) : Option<Tuple<T, R>> => {
+		return None();
+	}
 }

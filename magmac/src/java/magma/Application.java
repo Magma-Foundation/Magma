@@ -23,7 +23,6 @@ import magma.compile.lang.MagmaLang;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaResults;
 import magma.java.JavaSet;
 
 import java.io.IOException;
@@ -131,19 +130,21 @@ public record Application(Configuration config) {
 
     private Option<CompileException> compile(Build build) {
         return $Void(() -> {
-            var sources = $(findSources(build).mapErr(CompileException::new));
+            var sources = $(findSources(build.sourceDirectory()).mapErr(CompileException::new));
             var sourceTrees = $(parseSources(build, sources));
             var targetTrees = $(generateTargets(build, sourceTrees));
             $(writeTargets(build, targetTrees));
         });
     }
 
-    Result<List<Path>, IOException> findSources(Build build) {
-        //noinspection resource
-        return $(() -> Files.walk(build.sourceDirectory().location())
-                .filter(value -> value.toString().endsWith(".java"))
-                .filter(Files::isRegularFile)
-                .toList());
+    Result<List<Path>, IOException> findSources(BuildSet buildSet) {
+        return $(() -> {
+            //noinspection resource
+            return Files.walk(buildSet.location())
+                    .filter(value -> value.toString().endsWith("." + buildSet.platform()))
+                    .filter(Files::isRegularFile)
+                    .toList();
+        });
     }
 
     Result<Map<Unit, Node>, CompileException> generateTargets(Build build, Map<Unit, Node> sourceTrees) {
@@ -162,7 +163,7 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = JavaResults.$(new CompoundGenerator(listGenerators())
+            var generated = $(new CompoundGenerator(listGenerators())
                     .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
@@ -188,7 +189,8 @@ public record Application(Configuration config) {
 
         System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
 
-        var targetParent = build.targetDirectory();
+        var targetSet = build.targetDirectory();
+        var targetParent = targetSet.location();
         for (String segment : namespace) {
             targetParent = targetParent.resolve(segment);
         }
@@ -200,7 +202,7 @@ public record Application(Configuration config) {
             }
         }
 
-        var target = targetParent.resolve(name + ".mgs");
+        var target = targetParent.resolve(name + "." + targetSet.platform());
         return MagmaLang.createRootRule().fromNode(root).match(value -> writeSafely(target, value), err -> {
             print(err, 0);
 
@@ -241,19 +243,24 @@ public record Application(Configuration config) {
     }
 
     Result<Node, CompileException> parse(Build build, Unit unit, Node root) {
-        return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(unit.computeName() + ".input.ast"), root.toString())
-                .<Result<Node, CompileException>>map(Err::new)
-                .orElseGet(() -> new Ok<>(root)));
+        return createDebugDirectory(build, unit.computeNamespace())
+                .flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(unit.computeName() + ".input.ast"), root.toString())
+                        .<Result<Node, CompileException>>map(Err::new)
+                        .orElseGet(() -> new Ok<>(root)));
     }
 
     CompileException writeError(Build build, Error_ err, Unit location) {
         var result = print(err, 0);
-        return writeSafely(build.debugDirectory().location().resolve("error.xml"), result)
-                .orElseGet(() -> new CompileException(location.toString()));
+
+        return $Void(() -> {
+            var debugDirectory = $(createDebugDirectory(build, Collections.emptyList()));
+            var errorPath = debugDirectory.resolve("error.xml");
+            $(writeSafely(errorPath, result));
+        }).orElseGet(() -> new CompileException(location.toString()));
     }
 
     Result<Path, CompileException> createDebugDirectory(Build build, List<String> namespace) {
-        var relativizedDebug = build.debugDirectory().location();
+        var relativizedDebug = build.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }

@@ -1,3 +1,11 @@
-import java.nio.file.Path;
-export class def Configuration(sourceDirectory : Path, targetDirectory : Path, debugDirectory : Path) => {
+import magma.api.collect.List;
+import magma.api.collect.stream.Stream;
+export class def Configuration() => {
+	private final builds : List<Build>;
+	def Configuration(this, builds : List<Build>) : public => {
+		this=builds;
+	}
+	public def streamBuilds(this) : Stream<Build> => {
+		return builds.stream();
+	}
 }

@@ -1,15 +1,20 @@
-import magma.api.collect.Map;
+import magma.api.json.CompoundJSONParser;
+import magma.api.json.JSONArrayParser;
+import magma.api.json.JSONObjectParser;
+import magma.api.json.JSONStringParser;
+import magma.api.json.JSONValue;
+import magma.api.json.LazyJSONParser;
 import magma.api.option.Option;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
-import magma.java.JavaMap;
+import magma.java.JavaList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.List;
 import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Void;
 export class def Main() => {
@@ -29,20 +34,12 @@ export class def Main() => {
 		});
 	}
 	private static def buildConfiguration(this) : Result<Configuration, IOException> => {
-		return readConfiguration().mapValue(() => {
-			let mut sourceDirectory : var = Paths.get(map.get("sources").orElsePanic());
-			let mut debugDirectory : var = Paths.get(map.get("debug").orElsePanic());
-			let mut targetDirectory : var = Paths.get(map.get("targets").orElsePanic());
-			return Configuration(sourceDirectory, targetDirectory, debugDirectory);
-		});
-	}
-	private static def readConfiguration(this) : Result<Map<String, String>, IOException> => {
 		try 
 		{
 			let mut absolutePath : var = CONFIG_PATH.toAbsolutePath();
 			if(Files.exists(CONFIG_PATH))
 			{
-				System.out.println("Found configuration file at '" + absolutePath + "'.");
+				System.out.printf("Found configuration file at '%s'.%n", absolutePath);
 			}
 			else
 			{
@@ -50,26 +47,33 @@ export class def Main() => {
 				Files.writeString(CONFIG_PATH, "{}");
 			}
 			let mut configurationString : var = Files.readString(CONFIG_PATH);
-			return Ok(parseConfigurationFromJSON(configurationString));
+			let mut valueParser : var = LazyJSONParser();
+			valueParser.setValue(CompoundJSONParser(JavaList(List.of(JSONStringParser(), JSONArrayParser(valueParser), JSONObjectParser(valueParser)))));
+			let mut parsedOption : var = valueParser.parse(configurationString);
+			if(parsedOption.isEmpty())
+			{
+				return Err(IOException("Failed to parse configuration: "+configurationString));
+			}
+			let mut parsed : var = parsedOption.orElsePanic();
+			System.out.println("Parsed configuration.");
+			System.out.println(parsed);
+			let mut builds : var = parsed.find("builds").orElsePanic();
+			let mut map : var = builds.stream().orElsePanic().map(() => {
+				let mut sources : var = buildSet(build, "sources");
+				let mut targets : var = buildSet(build, "targets");
+				let mut debug : var = Path.of(build.find("debug").orElsePanic().findValue().orElsePanic());
+				return Build(sources, targets, debug);
+			}).collect(JavaList.collecting());
+			return Ok(Configuration(map));
 		}
 		catch (e : IOException){
 			return Err(e);
 		}
 	}
-	private static def parseConfigurationFromJSON(this, configurationJSON : String) : Map<String, String> => {
-		let mut map : var = HashMap();
-		let mut stripped : var = configurationJSON.strip();
-		let mut lines : var = stripped.substring(1, stripped.length()-1).split(",");
-		for(line : String in lines){
-			let mut separator : var = line.indexOf(":");
-			let mut left : var = line.substring(0, separator).strip();
-			let mut right : var = line.substring(separator+1).strip();
-			let mut propertyName : var = left.substring(1, left.length()-1);
-			let mut propertyValue : var = right.substring(1, right.length()-1);
-			map.put(propertyName, propertyValue);
-		}
-		System.out.println("Parsed configuration.");
-		System.out.println(map);
-		return JavaMap(map);
+	private static def buildSet(this, build : JSONValue, key : String) : BuildSet => {
+		let mut root : var = build.find(key).orElsePanic();
+		let mut location : var = root.find("location").orElsePanic().findValue().orElsePanic();
+		let mut platform : var = root.find("platform").orElsePanic().findValue().orElsePanic();
+		return BuildSet(Path.of(location), platform);
 	}
 }

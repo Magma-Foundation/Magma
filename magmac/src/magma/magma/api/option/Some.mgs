@@ -26,4 +26,7 @@ export class def Some<T>(value : T) => {
 	public def orElsePanic(this) : T => {
 		return value;
 	}
+	public def and<R>(this, other : Option<R>) : Option<Tuple<T, R>> => {
+		return other.map(() => Tuple(value, inner));
+	}
 }
