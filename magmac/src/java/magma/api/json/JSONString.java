@@ -1,4 +1,4 @@
 package magma.api.json;
 
-public class JSONString implements JSONValue {
+public record JSONString(String value) implements JSONValue {
 }
