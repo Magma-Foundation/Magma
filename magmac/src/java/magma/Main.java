@@ -1,7 +1,5 @@
 package magma;
 
-import magma.api.Tuple;
-import magma.api.collect.Map;
 import magma.api.json.CompoundJSONParser;
 import magma.api.json.JSONArrayParser;
 import magma.api.json.JSONObjectParser;
@@ -14,7 +12,6 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.java.JavaList;
-import magma.java.JavaMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -74,17 +71,10 @@ public class Main {
 
             var builds = parsed.find("builds").orElsePanic();
             var map = builds.stream().orElsePanic().map(build -> {
-                var sources = Path.of(build.find("sources")
-                        .orElsePanic()
-                        .findValue()
-                        .orElsePanic());
+                var sources = buildSet(build, "sources");
+                var targets = buildSet(build, "targets");
 
                 var debug = Path.of(build.find("debug")
-                        .orElsePanic()
-                        .findValue()
-                        .orElsePanic());
-
-                var targets = Path.of(build.find("debug")
                         .orElsePanic()
                         .findValue()
                         .orElsePanic());
@@ -96,5 +86,12 @@ public class Main {
         } catch (IOException e) {
             return new Err<>(e);
         }
+    }
+
+    private static BuildSet buildSet(JSONValue build, String key) {
+        var root = build.find(key).orElsePanic();
+        var location = root.find("location").orElsePanic().findValue().orElsePanic();
+        var platform = root.find("platform").orElsePanic().findValue().orElsePanic();
+        return new BuildSet(Path.of(location), platform);
     }
 }

@@ -2,5 +2,5 @@ package magma;
 
 import java.nio.file.Path;
 
-public record Build(Path sourceDirectory, Path targetDirectory, Path debugDirectory) {
+public record Build(BuildSet sourceDirectory, Path targetDirectory, BuildSet debugDirectory) {
 }

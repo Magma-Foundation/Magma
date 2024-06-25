@@ -140,7 +140,7 @@ public record Application(Configuration config) {
 
     Result<List<Path>, IOException> findSources(Build build) {
         //noinspection resource
-        return $(() -> Files.walk(build.sourceDirectory())
+        return $(() -> Files.walk(build.sourceDirectory().location())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
                 .toList());
@@ -211,7 +211,7 @@ public record Application(Configuration config) {
     Result<Map<Unit, Node>, CompileException> parseSources(Build build, List<Path> sources) {
         return new JavaList<>(sources)
                 .stream()
-                .map(source -> new PathUnit(build.sourceDirectory(), source))
+                .map(source -> new PathUnit(build.sourceDirectory().location(), source))
                 .map((unit) -> parseSource(build, unit))
                 .flatMap(Streams::fromOption)
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
@@ -248,12 +248,12 @@ public record Application(Configuration config) {
 
     CompileException writeError(Build build, Error_ err, Unit location) {
         var result = print(err, 0);
-        return writeSafely(build.debugDirectory().resolve("error.xml"), result)
+        return writeSafely(build.debugDirectory().location().resolve("error.xml"), result)
                 .orElseGet(() -> new CompileException(location.toString()));
     }
 
     Result<Path, CompileException> createDebugDirectory(Build build, List<String> namespace) {
-        var relativizedDebug = build.debugDirectory();
+        var relativizedDebug = build.debugDirectory().location();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }
