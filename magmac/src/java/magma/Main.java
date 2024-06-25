@@ -1,6 +1,5 @@
 package magma;
 
-import magma.api.collect.Map;
 import magma.api.option.Option;
 import magma.api.result.Err;
 import magma.api.result.Ok;
@@ -36,15 +35,6 @@ public class Main {
     }
 
     private static Result<Configuration, IOException> buildConfiguration() {
-        return readConfiguration().mapValue(map -> {
-            var sourceDirectory = Paths.get(map.get("sources").orElsePanic());
-            var debugDirectory = Paths.get(map.get("debug").orElsePanic());
-            var targetDirectory = Paths.get(map.get("targets").orElsePanic());
-            return new Configuration(sourceDirectory, targetDirectory, debugDirectory);
-        });
-    }
-
-    private static Result<Map<String, String>, IOException> readConfiguration() {
         try {
             var absolutePath = CONFIG_PATH.toAbsolutePath();
             if (Files.exists(CONFIG_PATH)) {
@@ -55,7 +45,7 @@ public class Main {
             }
 
             var configurationString = Files.readString(CONFIG_PATH);
-            var map = new HashMap<String, String>();
+            var map1 = new HashMap<String, String>();
             var stripped = configurationString.strip();
             var lines = stripped
                     .substring(1, stripped.length() - 1)
@@ -67,16 +57,19 @@ public class Main {
                 var right = line.substring(separator + 1).strip();
                 var propertyName = left.substring(1, left.length() - 1);
                 var propertyValue = right.substring(1, right.length() - 1);
-                map.put(propertyName, propertyValue);
+                map1.put(propertyName, propertyValue);
             }
 
             System.out.println("Parsed configuration.");
-            System.out.println(map);
+            System.out.println(map1);
 
-            return new Ok<>(new JavaMap<>(map));
+            var map = new JavaMap<>(map1);
+            var sourceDirectory = Paths.get(map.get("sources").orElsePanic());
+            var debugDirectory = Paths.get(map.get("debug").orElsePanic());
+            var targetDirectory = Paths.get(map.get("targets").orElsePanic());
+            return new Ok<>(new Configuration(sourceDirectory, targetDirectory, debugDirectory));
         } catch (IOException e) {
             return new Err<>(e);
         }
     }
-
 }
