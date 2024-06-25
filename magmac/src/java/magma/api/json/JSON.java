@@ -11,7 +11,8 @@ public class JSON {
         var buffer = new StringBuilder();
         var depth = 0;
 
-        for (int i = 0; i < input.length(); i++) {
+        int i = 0;
+        while (i < input.length()) {
             var c = input.charAt(i);
             if (c == ',' && depth == 0) {
                 list.add(buffer.toString());
@@ -21,6 +22,7 @@ public class JSON {
                 if (c == '}' || c == ']') depth--;
                 buffer.append(c);
             }
+            i++;
         }
 
         list.add(buffer.toString());
