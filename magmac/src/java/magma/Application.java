@@ -129,12 +129,8 @@ public record Application(Configuration config) {
                 .head();
     }
 
-    private Option<CompileException> compile(Tuple<String, Build> entry) {
+    private Option<CompileException> compile(Build build) {
         return $Void(() -> {
-            var name = entry.left();
-            System.out.println("Build '" + name + "' starting.");
-
-            var build = entry.right();
             var sources = $(findSources(build).mapErr(CompileException::new));
             var sourceTrees = $(parseSources(build, sources));
             var targetTrees = $(generateTargets(build, sourceTrees));

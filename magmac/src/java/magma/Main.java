@@ -73,25 +73,24 @@ public class Main {
             System.out.println(parsed);
 
             var builds = parsed.find("builds").orElsePanic();
-            var map = builds.entryStream().orElsePanic().map(build -> {
-                var buildValue = build.right();
-                var sources = Path.of(buildValue.find("sources")
+            var map = builds.stream().orElsePanic().map(build -> {
+                var sources = Path.of(build.find("sources")
                         .orElsePanic()
                         .findValue()
                         .orElsePanic());
 
-                var debug = Path.of(buildValue.find("debug")
+                var debug = Path.of(build.find("debug")
                         .orElsePanic()
                         .findValue()
                         .orElsePanic());
 
-                var targets = Path.of(buildValue.find("debug")
+                var targets = Path.of(build.find("debug")
                         .orElsePanic()
                         .findValue()
                         .orElsePanic());
 
-                return new Tuple<>(build.left(), new Build(sources, debug, targets));
-            }).collect(JavaMap.collecting());
+                return new Build(sources, debug, targets);
+            }).collect(JavaList.collecting());
 
             return new Ok<>(new Configuration(map));
         } catch (IOException e) {

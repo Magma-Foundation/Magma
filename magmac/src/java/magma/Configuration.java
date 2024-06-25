@@ -1,17 +1,16 @@
 package magma;
 
-import magma.api.Tuple;
-import magma.api.collect.Map;
+import magma.api.collect.List;
 import magma.api.collect.stream.Stream;
 
 public final class Configuration {
-    private final Map<String, Build> builds;
+    private final List<Build> builds;
 
-    public Configuration(Map<String, Build> builds) {
+    public Configuration(List<Build> builds) {
         this.builds = builds;
     }
 
-    public Stream<Tuple<String, Build>> streamBuilds() {
-        return builds.streamEntries();
+    public Stream<Build> streamBuilds() {
+        return builds.stream();
     }
 }

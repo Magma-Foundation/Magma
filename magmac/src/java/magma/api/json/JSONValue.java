@@ -17,4 +17,8 @@ public interface JSONValue {
     default Option<String> findValue() {
         return new None<>();
     }
+
+    default Option<Stream<JSONValue>> stream() {
+        return new None<>();
+    }
 }
