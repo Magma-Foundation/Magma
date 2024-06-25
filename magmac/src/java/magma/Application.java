@@ -123,29 +123,40 @@ public record Application(Configuration config) {
     }
 
     Option<CompileException> run() {
+        return config.streamBuilds()
+                .map(this::compile)
+                .flatMap(Streams::fromOption)
+                .head();
+    }
+
+    private Option<CompileException> compile(Tuple<String, Build> entry) {
         return $Void(() -> {
-            var sources = $(findSources().mapErr(CompileException::new));
-            var sourceTrees = $(parseSources(sources));
-            var targetTrees = $(generateTargets(sourceTrees));
-            $(writeTargets(targetTrees));
+            var name = entry.left();
+            System.out.println("Build '" + name + "' starting.");
+
+            var build = entry.right();
+            var sources = $(findSources(build).mapErr(CompileException::new));
+            var sourceTrees = $(parseSources(build, sources));
+            var targetTrees = $(generateTargets(build, sourceTrees));
+            $(writeTargets(build, targetTrees));
         });
     }
 
-    Result<List<Path>, IOException> findSources() {
+    Result<List<Path>, IOException> findSources(Build build) {
         //noinspection resource
-        return $(() -> Files.walk(config.sourceDirectory())
+        return $(() -> Files.walk(build.sourceDirectory())
                 .filter(value -> value.toString().endsWith(".java"))
                 .filter(Files::isRegularFile)
                 .toList());
     }
 
-    Result<Map<Unit, Node>, CompileException> generateTargets(Map<Unit, Node> sourceTrees) {
+    Result<Map<Unit, Node>, CompileException> generateTargets(Build build, Map<Unit, Node> sourceTrees) {
         return sourceTrees.streamEntries()
-                .map(entry -> generateTarget(sourceTrees, entry))
+                .map(entry -> generateTarget(build, sourceTrees, entry))
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    Result<Tuple<Unit, Node>, CompileException> generateTarget(Map<Unit, Node> sourceTrees, Tuple<Unit, Node> entry) {
+    Result<Tuple<Unit, Node>, CompileException> generateTarget(Build build, Map<Unit, Node> sourceTrees, Tuple<Unit, Node> entry) {
         return $(() -> {
             var source = entry.left();
             var right = entry.right();
@@ -158,9 +169,9 @@ public record Application(Configuration config) {
             var generated = JavaResults.$(new CompoundGenerator(listGenerators())
                     .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
-                    .mapErr(error -> writeError(error, source)));
+                    .mapErr(error -> writeError(build, error, source)));
 
-            var debug = $(createDebugDirectory(namespace));
+            var debug = $(createDebugDirectory(build, namespace));
             var debugTarget = debug.resolve(name + ".output.ast");
 
             $(writeSafely(debugTarget, generated.toString()));
@@ -168,20 +179,20 @@ public record Application(Configuration config) {
         });
     }
 
-    Option<CompileException> writeTargets(Map<Unit, Node> targetTrees) {
+    Option<CompileException> writeTargets(Build build, Map<Unit, Node> targetTrees) {
         return targetTrees.streamEntries()
-                .map(entry -> writeTarget(entry.left(), entry.right()))
+                .map(entry -> writeTarget(build, entry.left(), entry.right()))
                 .flatMap(Streams::fromOption)
                 .head();
     }
 
-    Option<CompileException> writeTarget(Unit source, Node root) {
+    Option<CompileException> writeTarget(Build build, Unit source, Node root) {
         var namespace = source.computeNamespace();
         var name = source.computeName();
 
         System.out.println("Writing target: " + String.join(".", namespace) + "." + name);
 
-        var targetParent = config.targetDirectory();
+        var targetParent = build.targetDirectory();
         for (String segment : namespace) {
             targetParent = targetParent.resolve(segment);
         }
@@ -197,20 +208,20 @@ public record Application(Configuration config) {
         return MagmaLang.createRootRule().fromNode(root).match(value -> writeSafely(target, value), err -> {
             print(err, 0);
 
-            return new Some<>(writeError(err, source));
+            return new Some<>(writeError(build, err, source));
         });
     }
 
-    Result<Map<Unit, Node>, CompileException> parseSources(List<Path> sources) {
+    Result<Map<Unit, Node>, CompileException> parseSources(Build build, List<Path> sources) {
         return new JavaList<>(sources)
                 .stream()
-                .map(source -> new PathUnit(config.sourceDirectory(), source))
-                .map(this::parseSource)
+                .map(source -> new PathUnit(build.sourceDirectory(), source))
+                .map((unit) -> parseSource(build, unit))
                 .flatMap(Streams::fromOption)
                 .collect(Collectors.exceptionally(JavaMap.collecting()));
     }
 
-    Option<Result<Tuple<Unit, Node>, CompileException>> parseSource(Unit source) {
+    Option<Result<Tuple<Unit, Node>, CompileException>> parseSource(Build build, Unit source) {
         var namespace = source.computeNamespace();
         if (namespace.size() >= 2) {
             var slice = namespace.subList(0, 2);
@@ -222,31 +233,31 @@ public record Application(Configuration config) {
         }
 
         System.out.println("Parsing source: " + source);
-        return new Some<>(source.read().mapValue(input -> parseWithInput(source, input))
+        return new Some<>(source.read().mapValue(input -> parseWithInput(build, source, input))
                 .<Result<Node, CompileException>>match(result -> result, Err::new)
                 .mapValue(value -> new Tuple<>(source, value)));
     }
 
-    private Result<Node, CompileException> parseWithInput(Unit source, String input) {
+    private Result<Node, CompileException> parseWithInput(Build build, Unit source, String input) {
         return JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(source, root),
-                err -> new Err<>(writeError(err, source)));
+                root -> parse(build, source, root),
+                err -> new Err<>(writeError(build, err, source)));
     }
 
-    Result<Node, CompileException> parse(Unit unit, Node root) {
-        return createDebugDirectory(unit.computeNamespace()).flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(unit.computeName() + ".input.ast"), root.toString())
+    Result<Node, CompileException> parse(Build build, Unit unit, Node root) {
+        return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(relativizedDebug -> writeSafely(relativizedDebug.resolve(unit.computeName() + ".input.ast"), root.toString())
                 .<Result<Node, CompileException>>map(Err::new)
                 .orElseGet(() -> new Ok<>(root)));
     }
 
-    CompileException writeError(Error_ err, Unit location) {
+    CompileException writeError(Build build, Error_ err, Unit location) {
         var result = print(err, 0);
-        return writeSafely(config.debugDirectory().resolve("error.xml"), result)
+        return writeSafely(build.debugDirectory().resolve("error.xml"), result)
                 .orElseGet(() -> new CompileException(location.toString()));
     }
 
-    Result<Path, CompileException> createDebugDirectory(List<String> namespace) {
-        var relativizedDebug = config.debugDirectory();
+    Result<Path, CompileException> createDebugDirectory(Build build, List<String> namespace) {
+        var relativizedDebug = build.debugDirectory();
         for (String s : namespace) {
             relativizedDebug = relativizedDebug.resolve(s);
         }

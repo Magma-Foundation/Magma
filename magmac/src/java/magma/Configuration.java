@@ -1,9 +1,8 @@
 package magma;
 
+import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.java.Set;
-
-import java.nio.file.Path;
+import magma.api.collect.stream.Stream;
 
 public final class Configuration {
     private final Map<String, Build> builds;
@@ -12,15 +11,7 @@ public final class Configuration {
         this.builds = builds;
     }
 
-    public Path sourceDirectory() {
-        return builds.streamValues().head().orElsePanic().sourceDirectory();
-    }
-
-    public Path targetDirectory() {
-        return builds.streamValues().head().orElsePanic().targetDirectory();
-    }
-
-    public Path debugDirectory() {
-        return builds.streamValues().head().orElsePanic().debugDirectory();
+    public Stream<Tuple<String, Build>> streamBuilds() {
+        return builds.streamEntries();
     }
 }
