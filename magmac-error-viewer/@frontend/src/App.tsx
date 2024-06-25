@@ -111,11 +111,17 @@ function App() {
     const [before, setBefore] = createSignal("");
     const [highlighted, setHighlighted] = createSignal("");
     const [after, setAfter] = createSignal("");
+    const [path, setPath] = createSignal("");
 
-    onMount(() => {
+    function update() {
+        const data = {
+            path: path()
+        };
+
         axios({
-            method: "get",
-            url: "http://localhost:3000/tree"
+            method: "post",
+            url: "http://localhost:3000/tree",
+            data: data
         }).then(e => {
             const root = XMLObject("parent", e.data.parent);
             setTree(root);
@@ -124,8 +130,9 @@ function App() {
         });
 
         axios({
-            method: "get",
-            url: "http://localhost:3000/content"
+            method: "post",
+            url: "http://localhost:3000/content",
+            data: data
         }).then(e => {
             const unescaped = unescape(e.data);
             setContent(unescaped);
@@ -133,6 +140,10 @@ function App() {
         }).catch(e => {
             console.error(e);
         });
+    }
+
+    onMount(() => {
+        update();
     });
 
     function onClick(clicked: TreeContent) {
@@ -156,6 +167,11 @@ function App() {
         setAfter(afterSlice);
     }
 
+    function updateImpl() {
+        update();
+        setPath("");
+    }
+
     return (
         <div style={{
             display: "flex",
@@ -171,45 +187,59 @@ function App() {
             }}>
                 <div style={{
                     display: "flex",
-                    "flex-direction": "row",
-                    width: "100%",
-                    height: "100%"
+                    "flex-direction": "column"
                 }}>
-                    <div style={{
-                        width: "50%",
-                        height: "100%",
-                    }}>
+                    <div>
                         <span>
-                            Navigator
+                            Path
                         </span>
-                        <div style={{
-                            overflow: "scroll",
-                            "white-space": "nowrap",
-                            width: "100%",
-                            height: "100%"
-                        }}>
-                            {
-                                createTreeElement(tree(), onClick)
-                            }
-                        </div>
+                        <input value={path()} onChange={e => setPath(e.target.value)}/>
+                        <button onClick={() => updateImpl()}>
+                            Submit
+                        </button>
                     </div>
+                    <hr/>
                     <div style={{
-                        width: "50%",
+                        display: "flex",
+                        "flex-direction": "row",
+                        width: "100%",
                         height: "100%"
                     }}>
                         <div style={{
-                            padding: "1rem",
-                            width: "100%",
-                            height: "100%"
+                            width: "50%",
+                            height: "100%",
                         }}>
-                            <span>
-                                Content
-                            </span>
+                        <span>
+                            Navigator
+                        </span>
                             <div style={{
                                 overflow: "scroll",
+                                "white-space": "nowrap",
                                 width: "100%",
                                 height: "100%"
                             }}>
+                                {
+                                    createTreeElement(tree(), onClick)
+                                }
+                            </div>
+                        </div>
+                        <div style={{
+                            width: "50%",
+                            height: "100%"
+                        }}>
+                            <div style={{
+                                padding: "1rem",
+                                width: "100%",
+                                height: "100%"
+                            }}>
+                            <span>
+                                Content
+                            </span>
+                                <div style={{
+                                    overflow: "scroll",
+                                    width: "100%",
+                                    height: "100%"
+                                }}>
                                 <pre>
                                     <span>
                                         {before()}
@@ -221,6 +251,7 @@ function App() {
                                         {after()}
                                     </span>
                                 </pre>
+                                </div>
                             </div>
                         </div>
                     </div>

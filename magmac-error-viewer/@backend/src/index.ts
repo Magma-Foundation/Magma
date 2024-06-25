@@ -6,27 +6,40 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import Router from "@koa/router";
 
-async function main() {
-    const target = path.join(process.cwd(), "../../magmac/debug/java-mgs/error.xml");
-    const value = await fs.readFile(target);
+const DEFAULT_PATH = path.join(process.cwd(), "../../magmac/debug/java-mgs/error.xml");
+
+async function read(path: string = DEFAULT_PATH) {
+    const value = await fs.readFile(path);
     const valueAsString = value.toString();
 
     const parser = new Parser();
-    const result = await parser.parseStringPromise(valueAsString);
+    return await parser.parseStringPromise(valueAsString);
+}
 
+async function main() {
     const app = new Koa();
     const router = new Router();
 
     app.use(cors());
     app.use(bodyParser());
 
-    router.get('/content', ctx => {
+    function findPath(body: Record<string, string>) {
+        const providedPath = (body && typeof body === "object") ? body["path"] : undefined;
+        return providedPath?.toString() ?? DEFAULT_PATH;
+    }
+
+    router.post('/content', async ctx => {
+        const body = ctx.request.body as Record<string, string>;
+        const actualPath = findPath(body);
+        const result = await read(actualPath);
         ctx.body = result.parent.$.context;
         ctx.status = 200;
     });
 
-    router.get("/tree", ctx => {
-        ctx.body = result;
+    router.post("/tree", async ctx => {
+        const body = ctx.request.body as Record<string, string>;
+        const actualPath = findPath(body);
+        ctx.body = await read(actualPath);
         ctx.status = 200;
     });
 
