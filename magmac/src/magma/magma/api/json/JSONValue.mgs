@@ -1,0 +1,10 @@
+import magma.api.Tuple;
+import magma.api.collect.stream.Stream;
+import magma.api.option.None;
+import magma.api.option.Option;
+public struct JSONValue {
+	(this, key : String);
+	(this);
+	(this);
+	(this);
+}

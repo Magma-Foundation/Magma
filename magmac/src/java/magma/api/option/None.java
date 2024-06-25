@@ -45,4 +45,9 @@ public class None<T> implements Option<T> {
     public T orElsePanic() {
         throw new RuntimeException("Option was empty!");
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return new None<>();
+    }
 }

@@ -7,7 +7,7 @@
 		import java.util.Optional;
 		export class def Streams() => {
 			public static def fromNativeList<T>(this, list : List<T>) : Stream<T> => {
-				return AbstractStream(Head((() => {
+				return HeadedStream(Head((() => {
 					private let mut counter : int = 0;
 					return {
 						public def head(this) : Option<T> => {
@@ -24,10 +24,10 @@
 				})())());
 			}
 			public static def fromOption<T>(this, option : Option<T>) : Stream<T> => {
-				return AbstractStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));
+				return HeadedStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));
 			}
 			public static def from(this, extent : int) : Stream<Integer> => {
-				return AbstractStream(Head((() => {
+				return HeadedStream(Head((() => {
 					private let mut counter : int = 0;
 					return {
 						public def head(this) : Option<Integer> => {

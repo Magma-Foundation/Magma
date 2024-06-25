@@ -63,4 +63,9 @@ public record JavaMap<K, V>(java.util.Map<K, V> internal) implements Map<K, V> {
     public Stream<K> keyStream() {
         return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(internal.keySet())));
     }
+
+    @Override
+    public Stream<V> streamValues() {
+        return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(internal.values())));
+    }
 }

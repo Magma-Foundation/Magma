@@ -19,7 +19,7 @@ export class def TreeGenerator() => {
 		if(nodeList.isPresent())
 		{
 			let mut initial : var = Tuple(ArrayList(), state);
-			return Streams.fromNativeList(nodeList.get()).foldRightToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(NodeListAttribute.new));
+			return Streams.fromNativeList(nodeList.get()).foldLeftToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(NodeListAttribute.new));
 		}
 		return attribute.asNode().map(() => generate(value, state).mapValue(() => inner.mapLeft(NodeAttribute.from))).orElseGet(() => Ok(Tuple(attribute, state)));
 	}
@@ -37,7 +37,7 @@ export class def TreeGenerator() => {
 			let mut preVisited : var = preVisitedTuple.left();
 			let mut preVisitedAttributes : var = preVisited.attributes().streamEntries().toList();
 			let mut preVisitedState : var = preVisitedTuple.right();
-			return Streams.fromNativeList(preVisitedAttributes).foldRightToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).flatMapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+			return Streams.fromNativeList(preVisitedAttributes).foldLeftToResult(Tuple(MapAttributes(), preVisitedState), this.generateAttributeWithState).flatMapValue(() => postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
 		}).mapErr(() => CompileParentError("Failed to parse node.", node.toString(), err));
 	}
 	private def generateAttributeWithState(this, current : Tuple<Attributes, State>, next : Tuple<String, Attribute>) : Result<Tuple<Attributes, State>, Error_> => {

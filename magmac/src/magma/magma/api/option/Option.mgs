@@ -12,4 +12,6 @@ public struct Option {
 	
 	flatMap<R> : Option<R>;
 	orElsePanic : T;
+	
+	and<R> : Option<Tuple<T, R>>;
 }

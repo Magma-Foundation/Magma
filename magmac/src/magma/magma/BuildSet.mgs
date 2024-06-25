@@ -1,0 +1,3 @@
+import java.nio.file.Path;
+export class def BuildSet(location : Path, platform : String) => {
+}

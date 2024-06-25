@@ -21,4 +21,6 @@ public interface Option<T> {
     <R> Option<R> flatMap(Function<T, Option<R>> mapper);
 
     T orElsePanic();
+
+    <R> Option<Tuple<T, R>> and(Option<R> other);
 }

@@ -8,13 +8,13 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 
 public class JavaResults {
-    public static <E extends Throwable> void $(Option<E> option) throws E {
+    public static <E extends Throwable> void $Option(Option<E> option) throws E {
         if (option.isPresent()) {
             throw option.orElsePanic();
         }
     }
 
-    public static <T, E extends Throwable> T $(Result<T, E> result) throws E {
+    public static <T, E extends Throwable> T $Result(Result<T, E> result) throws E {
         var value = JavaOptionals.toNative(result.findValue());
         if (value.isPresent()) {
             return value.orElseThrow();

@@ -1,5 +1,26 @@
 {
-  "sources": "./magmac/src/java",
-  "targets": "./magmac/src/magma",
-  "debug": "./magmac/debug/java-mgs"
+  "builds": [
+    {
+      "sources": {
+        "location": "./magmac/src/java",
+        "platform": "java"
+      },
+      "targets": {
+        "location": "./magmac/src/magma",
+        "platform": "mgs"
+      },
+      "debug": "./magmac/debug/java-mgs"
+    },
+    {
+      "sources": {
+        "location": "./magmac/src/magma",
+        "platform": "mgs"
+      },
+      "targets": {
+        "location": "./magmac/dist/js",
+        "platform": "js"
+      },
+      "debug": "./magmac/debug/magma-js"
+    }
+  ]
 }
