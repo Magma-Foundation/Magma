@@ -45,4 +45,9 @@ public record Some<T>(T value) implements Option<T> {
     public T orElsePanic() {
         return value;
     }
+
+    @Override
+    public <R> Option<Tuple<T, R>> and(Option<R> other) {
+        return other.map(inner -> new Tuple<>(value, inner));
+    }
 }

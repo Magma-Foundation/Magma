@@ -1,17 +1,26 @@
 package magma;
 
+import magma.api.Tuple;
+import magma.api.collect.Map;
+import magma.api.json.CompoundJSONParser;
+import magma.api.json.JSONArrayParser;
+import magma.api.json.JSONObjectParser;
+import magma.api.json.JSONStringParser;
+import magma.api.json.JSONValue;
+import magma.api.json.LazyJSONParser;
 import magma.api.option.Option;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
+import magma.java.JavaList;
 import magma.java.JavaMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.List;
 
 import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Void;
@@ -45,29 +54,46 @@ public class Main {
             }
 
             var configurationString = Files.readString(CONFIG_PATH);
-            var map1 = new HashMap<String, String>();
-            var stripped = configurationString.strip();
-            var lines = stripped
-                    .substring(1, stripped.length() - 1)
-                    .split(",");
 
-            for (String line : lines) {
-                var separator = line.indexOf(":");
-                var left = line.substring(0, separator).strip();
-                var right = line.substring(separator + 1).strip();
-                var propertyName = left.substring(1, left.length() - 1);
-                var propertyValue = right.substring(1, right.length() - 1);
-                map1.put(propertyName, propertyValue);
+            var valueParser = new LazyJSONParser();
+            valueParser.setValue(new CompoundJSONParser(new JavaList<>(List.of(
+                    new JSONStringParser(),
+                    new JSONArrayParser(valueParser),
+                    new JSONObjectParser(valueParser)
+            ))));
+
+            var parsedOption = valueParser.parse(configurationString);
+            if (parsedOption.isEmpty()) {
+                return new Err<>(new IOException("Failed to parse configuration: " + configurationString));
             }
 
-            System.out.println("Parsed configuration.");
-            System.out.println(map1);
+            var parsed = parsedOption.orElsePanic();
 
-            var map = new JavaMap<>(map1);
-            var sourceDirectory = Paths.get(map.get("sources").orElsePanic());
-            var debugDirectory = Paths.get(map.get("debug").orElsePanic());
-            var targetDirectory = Paths.get(map.get("targets").orElsePanic());
-            return new Ok<>(new Configuration(sourceDirectory, targetDirectory, debugDirectory));
+            System.out.println("Parsed configuration.");
+            System.out.println(parsed);
+
+            var builds = parsed.find("builds").orElsePanic();
+            var map = builds.entryStream().orElsePanic().map(build -> {
+                var buildValue = build.right();
+                var sources = Path.of(buildValue.find("sources")
+                        .orElsePanic()
+                        .findValue()
+                        .orElsePanic());
+
+                var debug = Path.of(buildValue.find("debug")
+                        .orElsePanic()
+                        .findValue()
+                        .orElsePanic());
+
+                var targets = Path.of(buildValue.find("debug")
+                        .orElsePanic()
+                        .findValue()
+                        .orElsePanic());
+
+                return new Tuple<>(build.left(), new Build(sources, debug, targets));
+            }).collect(JavaMap.collecting());
+
+            return new Ok<>(new Configuration(map));
         } catch (IOException e) {
             return new Err<>(e);
         }

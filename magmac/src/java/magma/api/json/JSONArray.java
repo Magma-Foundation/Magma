@@ -1,4 +1,6 @@
 package magma.api.json;
 
-public class JSONArray implements JSONValue {
+import magma.api.collect.List;
+
+public record JSONArray(List<JSONValue> items) implements JSONValue {
 }

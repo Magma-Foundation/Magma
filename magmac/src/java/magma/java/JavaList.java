@@ -22,10 +22,10 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     public static <T, R> magma.api.collect.List<R> fromNative(List<T> frames, Function<T, R> mapper) {
         return Streams.fromNativeList(frames)
                 .map(mapper)
-                .collect(toList());
+                .collect(collecting());
     }
 
-    public static <T> Collector<T, magma.api.collect.List<T>> toList() {
+    public static <T> Collector<T, magma.api.collect.List<T>> collecting() {
         return new Collector<>() {
             @Override
             public magma.api.collect.List<T> createInitial() {

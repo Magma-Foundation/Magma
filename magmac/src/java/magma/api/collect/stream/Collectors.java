@@ -1,5 +1,7 @@
 package magma.api.collect.stream;
 
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 
@@ -36,6 +38,20 @@ public class Collectors {
             @Override
             public Result<C, E> fold(Result<C, E> current, Result<T, E> next) {
                 return current.flatMapValue(inner -> next.mapValue(inner0 -> collector.fold(inner, inner0)));
+            }
+        };
+    }
+
+    public static <T, C> Collector<Option<T>, Option<C>> required(Collector<T, C> collector) {
+        return new Collector<>() {
+            @Override
+            public Option<C> createInitial() {
+                return new Some<>(collector.createInitial());
+            }
+
+            @Override
+            public Option<C> fold(Option<C> current, Option<T> next) {
+                return current.and(next).map(inner -> collector.fold(inner.left(), inner.right()));
             }
         };
     }
