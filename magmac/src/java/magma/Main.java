@@ -38,7 +38,7 @@ public class Main {
         try {
             var absolutePath = CONFIG_PATH.toAbsolutePath();
             if (Files.exists(CONFIG_PATH)) {
-                System.out.println("Found configuration file at '" + absolutePath + "'.");
+                System.out.printf("Found configuration file at '%s'.%n", absolutePath);
             } else {
                 System.out.printf("Configuration file did not exist and will be created at '%s'.%n", absolutePath);
                 Files.writeString(CONFIG_PATH, "{}");
