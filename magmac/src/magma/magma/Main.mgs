@@ -10,12 +10,12 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.java.JavaList;
+import magma.java.JavaResults;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Void;
 export class def Main() => {
 	public static final let CONFIG_PATH : Path = Paths.get(".", "config.json");
@@ -29,8 +29,8 @@ export class def Main() => {
 	}
 	private static def run(this) : Option<CompileException> => {
 		return $Void(() => {
-			let mut configuration : var = $(buildConfiguration().mapErr(CompileException.new));
-			$(Application(configuration).run());
+			let mut configuration : var = JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
+			JavaResults.$Option(Application(configuration).run());
 		});
 	}
 	private static def buildConfiguration(this) : Result<Configuration, IOException> => {

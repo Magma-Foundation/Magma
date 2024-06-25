@@ -12,6 +12,7 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.java.JavaList;
+import magma.java.JavaResults;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Void;
 
 public class Main {
@@ -35,8 +35,8 @@ public class Main {
 
     private static Option<CompileException> run() {
         return $Void(() -> {
-            var configuration = $(buildConfiguration().mapErr(CompileException::new));
-            $(new Application(configuration).run());
+            var configuration = JavaResults.$Result(buildConfiguration().mapErr(CompileException::new));
+            JavaResults.$Option(new Application(configuration).run());
         });
     }
 

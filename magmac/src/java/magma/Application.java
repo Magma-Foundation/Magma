@@ -21,6 +21,7 @@ import magma.compile.lang.MagmaAnnotator;
 import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
 import magma.java.JavaSet;
@@ -33,6 +34,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static magma.java.JavaResults.$;
+import static magma.java.JavaResults.$Option;
+import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
 
 public record Application(Configuration config) {
@@ -121,6 +124,18 @@ public record Application(Configuration config) {
         );
     }
 
+    private static Result<Rule, CompileException> findRootRule(String platform) {
+        if (platform.equals("java")) {
+            return new Ok<>(JavaLang.createRootRule());
+        }
+
+        if (platform.equals("mgs")) {
+            return new Ok<>(MagmaLang.createRootRule());
+        }
+
+        return new Err<>(new CompileException("Unknown platform: " + platform));
+    }
+
     Option<CompileException> run() {
         return config.streamBuilds()
                 .map(this::compile)
@@ -130,10 +145,10 @@ public record Application(Configuration config) {
 
     private Option<CompileException> compile(Build build) {
         return $Void(() -> {
-            var sources = $(findSources(build.sourceDirectory()).mapErr(CompileException::new));
-            var sourceTrees = $(parseSources(build, sources));
-            var targetTrees = $(generateTargets(build, sourceTrees));
-            $(writeTargets(build, targetTrees));
+            var sources = $Result(findSources(build.sourceDirectory()).mapErr(CompileException::new));
+            var sourceTrees = $Result(parseSources(build, sources));
+            var targetTrees = $Result(generateTargets(build, sourceTrees));
+            $Option(writeTargets(build, targetTrees));
         });
     }
 
@@ -163,15 +178,15 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = $(new CompoundGenerator(listGenerators())
+            var generated = $Result(new CompoundGenerator(listGenerators())
                     .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
 
-            var debug = $(createDebugDirectory(build, namespace));
+            var debug = $Result(createDebugDirectory(build, namespace));
             var debugTarget = debug.resolve(name + ".output.ast");
 
-            $(writeSafely(debugTarget, generated.toString()));
+            $Option(writeSafely(debugTarget, generated.toString()));
             return new Tuple<>(source, generated);
         });
     }
@@ -203,11 +218,12 @@ public record Application(Configuration config) {
         }
 
         var target = targetParent.resolve(name + "." + targetSet.platform());
-        return MagmaLang.createRootRule().fromNode(root).match(value -> writeSafely(target, value), err -> {
+
+        return findRootRule(targetSet.platform()).mapValue(rootRule -> rootRule.fromNode(root).match(value -> writeSafely(target, value), err -> {
             print(err, 0);
 
             return new Some<>(writeError(build, err, source));
-        });
+        })).match(inner -> inner, Some::new);
     }
 
     Result<Map<Unit, Node>, CompileException> parseSources(Build build, List<Path> sources) {
@@ -237,9 +253,12 @@ public record Application(Configuration config) {
     }
 
     private Result<Node, CompileException> parseWithInput(Build build, Unit source, String input) {
-        return JavaLang.createRootRule().toNode(input).create().match(
-                root -> parse(build, source, root),
-                err -> new Err<>(writeError(build, err, source)));
+        return $(() -> {
+            var s = $Result(findRootRule(build.sourceDirectory().platform()));
+            return $Result(s.toNode(input).create().match(
+                    root -> parse(build, source, root),
+                    err -> new Err<>(writeError(build, err, source))));
+        });
     }
 
     Result<Node, CompileException> parse(Build build, Unit unit, Node root) {
@@ -253,9 +272,9 @@ public record Application(Configuration config) {
         var result = print(err, 0);
 
         return $Void(() -> {
-            var debugDirectory = $(createDebugDirectory(build, Collections.emptyList()));
+            var debugDirectory = $Result(createDebugDirectory(build, Collections.emptyList()));
             var errorPath = debugDirectory.resolve("error.xml");
-            $(writeSafely(errorPath, result));
+            $Option(writeSafely(errorPath, result));
         }).orElseGet(() -> new CompileException(location.toString()));
     }
 
