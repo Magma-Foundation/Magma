@@ -2,13 +2,13 @@ package magma.compile.annotate;
 
 import magma.Unit;
 import magma.api.Tuple;
-import magma.api.collect.LinkedList;
 import magma.api.collect.List;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileError;
 import magma.compile.Error_;
+import magma.java.JavaList;
 import magma.java.Set;
 
 public final class State {
@@ -21,7 +21,7 @@ public final class State {
     }
 
     public State(Set<Unit> sources) {
-        this(sources, new LinkedList<>());
+        this(sources, new JavaList<>());
     }
 
     public State exit() {
@@ -29,7 +29,7 @@ public final class State {
     }
 
     public State enter() {
-        return new State(sources, frames.push(new LinkedList<>()));
+        return new State(sources, frames.push(new JavaList<>()));
     }
 
     public boolean isDefined(String value) {
