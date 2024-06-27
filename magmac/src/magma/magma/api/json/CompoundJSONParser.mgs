@@ -1,8 +1,0 @@
-import magma.api.collect.List;
-import magma.api.collect.stream.Streams;
-import magma.api.option.Option;
-export class def CompoundJSONParser(parsers : List<JSONParser>) => {
-	public def parse(this, input : String) : Option<JSONValue> => {
-		return parsers.stream().map(() => parser.parse(input)).flatMap(Streams.fromOption).head();
-	}
-}

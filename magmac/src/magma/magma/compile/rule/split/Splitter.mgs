@@ -1,4 +1,0 @@
-import java.util.List;
-public struct Splitter {
-	split : List<String>;
-}
