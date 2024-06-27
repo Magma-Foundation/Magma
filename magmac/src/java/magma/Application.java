@@ -14,11 +14,7 @@ import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Generator;
-import magma.compile.lang.JavaAnnotator;
 import magma.compile.lang.JavaLang;
-import magma.compile.lang.JavaToMagmaGenerator;
-import magma.compile.lang.MagmaAnnotator;
-import magma.compile.lang.MagmaFormatter;
 import magma.compile.lang.MagmaLang;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -117,10 +113,6 @@ public record Application(Configuration config) {
 
     private static List<Generator> listGenerators() {
         return List.of(
-                new JavaAnnotator(),
-                new JavaToMagmaGenerator(),
-                new MagmaAnnotator(),
-                new MagmaFormatter()
         );
     }
 
