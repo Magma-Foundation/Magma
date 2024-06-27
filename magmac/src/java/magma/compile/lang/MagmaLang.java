@@ -90,7 +90,8 @@ public class MagmaLang {
     private static TypeRule createStructRule(Rule definition) {
         var modifiers = new SimpleExtractStringListRule("modifiers", " ");
 
-        var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition, ";")));
+        var definition1 = new TypeRule("definition", definition);
+        var children = new ExtractNodeRule("child", Lang.createBlock(new RightRule(definition1, ";")));
         var name = new ExtractStringRule("name");
 
         var child = new FirstRule(name, " {", new RightRule(children, "}"));

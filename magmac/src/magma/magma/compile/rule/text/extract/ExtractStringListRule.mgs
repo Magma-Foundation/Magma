@@ -1,0 +1,45 @@
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringListAttribute;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+export let mut ExtractStringListRule = () => class () => {
+	protected final delimiter : String;
+	def ExtractStringListRule(this, key : String, delimiter : String) : public => {
+		super(key);
+		this=delimiter;
+	}
+	protected def fromAttribute(this, attribute : Attribute) : Optional<String> => {
+		return attribute.asStringList().map(() => String.join(delimiter, list));
+	}
+	protected def toAttribute(this, content : String) : Result<Attribute, Error_> => {
+		let mut list : var = split(content);
+		for(format : String in list){
+			let mut qualified : var = qualify(format);
+			if(qualified.isPresent())
+			{
+				return Err(qualified.get());
+			}
+		}
+		return Ok(StringListAttribute(list));
+	}
+	private def split(this, content : String) : List<String> => {
+		let mut result : List<String> = ArrayList();
+		let mut start : int = 0;
+		while(true)
+		{
+			let mut end : var = content.indexOf(delimiter, start);
+			if(end==-1)
+			break;
+			result.add(content.substring(start, end));
+			start=end+delimiter.length();
+		}
+		result.add(content.substring(start));
+		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();
+	}
+	protected abstract qualify : Optional<Error_>;
+};

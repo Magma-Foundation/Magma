@@ -1,0 +1,7 @@
+import magma.api.option.Option;
+import magma.api.option.Some;
+export class def JSONString(value : String) => {
+	public def findValue(this) : Option<String> => {
+		return Some(value);
+	}
+}

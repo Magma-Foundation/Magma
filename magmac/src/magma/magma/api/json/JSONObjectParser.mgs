@@ -1,0 +1,25 @@
+import magma.api.Tuple;
+import magma.api.collect.stream.Collectors;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.java.JavaMap;
+export class def JSONObjectParser(valueParser : JSONParser) => {
+	public def parse(this, input : String) : Option<JSONValue> => {
+		if(!input.startsWith("{")||!input.endsWith("}"))
+		return None();
+		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(Collectors.required(JavaMap.collecting())).map(JSONObject.new);
+	}
+	private def parseEntry(this, inner : String) : Option<Tuple<String, JSONValue>> => {
+		let mut separator : var = inner.indexOf(':');
+		if(separator==-1)
+		return None();
+		let mut left : var = inner.substring(0, separator).strip();
+		let mut right : var = inner.substring(separator+1).strip();
+		if(!left.startsWith("\"")||!left.endsWith("\""))
+		{
+			return None();
+		}
+		let mut key : var = left.substring(1, left.length()-1);
+		return valueParser.parse(right).map(() => Tuple(key, value));
+	}
+}

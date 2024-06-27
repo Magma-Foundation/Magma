@@ -1,0 +1,32 @@
+import magma.api.Tuple;
+import java.util.function.Function;
+import java.util.function.Supplier;
+export class def None<T>() => {
+	public def map<R>(this, mapper : (T) => R) : Option<R> => {
+		return None();
+	}
+	public def orElseGet(this, supplier : () => T) : T => {
+		return supplier.get();
+	}
+	public def orElse(this, other : T) : T => {
+		return other;
+	}
+	public def isPresent(this) : boolean => {
+		return false;
+	}
+	public def toTuple(this, other : T) : Tuple<Boolean, T> => {
+		return Tuple(false, other);
+	}
+	public def isEmpty(this) : boolean => {
+		return true;
+	}
+	public def flatMap<R>(this, mapper : (T) => Option<R>) : Option<R> => {
+		return None();
+	}
+	public def orElsePanic(this) : T => {
+		throw RuntimeException("Option was empty!");
+	}
+	public def and<R>(this, other : Option<R>) : Option<Tuple<T, R>> => {
+		return None();
+	}
+}

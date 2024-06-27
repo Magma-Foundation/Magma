@@ -1,0 +1,17 @@
+import magma.api.Tuple;
+import java.util.function.Function;
+import java.util.function.Supplier;
+public struct Option {
+	
+	map<R> : Option<R>;
+	orElseGet : T;
+	orElse : T;
+	isPresent : boolean;
+	toTuple : Tuple<Boolean, T>;
+	isEmpty : boolean;
+	
+	flatMap<R> : Option<R>;
+	orElsePanic : T;
+	
+	and<R> : Option<Tuple<T, R>>;
+}
