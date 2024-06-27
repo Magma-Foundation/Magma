@@ -18,7 +18,10 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.VisitingGenerator;
 import magma.compile.lang.Visitor;
+import magma.compile.lang.java.FilteringVisitor;
+import magma.compile.lang.java.InterfaceNormalizer;
 import magma.compile.lang.java.PackageRemover;
+import magma.compile.lang.java.RecordNormalizer;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -115,11 +118,12 @@ public record Application(Configuration config) {
         }
     }
 
-    private static List<Generator> listGenerators() {
-        return Stream.<Visitor>of(
-                        new PackageRemover())
-                .<Generator>map(VisitingGenerator::new)
-                .toList();
+    private static Stream<Visitor> streamVisitors() {
+        return Stream.of(
+                new FilteringVisitor("block", new PackageRemover()),
+                new FilteringVisitor("record", new RecordNormalizer()),
+                new FilteringVisitor("interface", new InterfaceNormalizer())
+        );
     }
 
     private static Result<Rule, CompileException> findRootRule(String platform) {
@@ -176,7 +180,9 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = $Result(new CompoundGenerator(listGenerators())
+            var generated = $Result(new CompoundGenerator(streamVisitors()
+                    .<Generator>map(VisitingGenerator::new)
+                    .toList())
                     .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));

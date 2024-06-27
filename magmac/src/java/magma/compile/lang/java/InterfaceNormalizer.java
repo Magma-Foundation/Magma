@@ -8,12 +8,9 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 
-public class PackageRemover implements Visitor {
+public class InterfaceNormalizer implements Visitor {
     @Override
     public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        return new Ok<>(new Tuple<>(node.mapNodes("children", children -> children.stream()
-                .filter(child -> !child.is("package"))
-                .toList()), state));
-
+        return new Ok<>(new Tuple<>(node.retype("struct"), state));
     }
 }
