@@ -49,29 +49,30 @@ public class MagmaLang {
         ))));
 
         statement.setRule(new ContextRule("Not a statement.", new OrRule(List.of(
+                Lang.createKeywordRule("break"),
+                Lang.createKeywordRule("continue"),
+                Lang.createEmptyStatementRule(),
                 Lang.createBlockCommentRule(),
                 Lang.createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
+                createStructRule(definition),
                 Lang.createConditionRule("if", value, statement),
                 Lang.createConditionRule("while", value, statement),
                 Lang.createElseRule(statement),
                 Lang.createReturnRule(value),
-                Lang.createAssignmentRule(value),
                 Lang.createForRule(definition, value, statement, " in "),
+
+                Lang.createAssignmentRule(value),
                 createFunctionRule(statement, value),
 
                 Lang.createDefinitionRule(definition),
                 Lang.createDeclarationRule(definition, value),
 
                 new TypeRule("invocation", new RightRule(Lang.createInvocationRule(value), ";")),
-                Lang.createEmptyStatementRule(),
-                createStructRule(definition),
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
-                Lang.createKeywordRule("break"),
-                Lang.createKeywordRule("continue"),
                 new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";")))
         ))));
 
