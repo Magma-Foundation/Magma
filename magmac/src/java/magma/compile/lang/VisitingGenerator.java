@@ -1,9 +1,9 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.api.collect.stream.Streams;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
@@ -17,7 +17,13 @@ import magma.compile.rule.Node;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeGenerator implements Generator {
+public class VisitingGenerator implements Generator {
+    private final Visitor visitor;
+
+    public VisitingGenerator(Visitor visitor) {
+        this.visitor = visitor;
+    }
+
     private Result<Tuple<Attribute, State>, Error_> generateAttribute(Attribute attribute, State state) {
         var nodeList = attribute.asNodeList();
         if (nodeList.isPresent()) {
@@ -47,14 +53,14 @@ public class TreeGenerator implements Generator {
 
     @Override
     public Result<Tuple<Node, State>, Error_> generate(Node node, State depth) {
-        return preVisit(node, depth).flatMapValue(preVisitedTuple -> {
+        return visitor.preVisit(node, depth).flatMapValue(preVisitedTuple -> {
             var preVisited = preVisitedTuple.left();
             var preVisitedAttributes = preVisited.attributes().streamEntries().toList();
             var preVisitedState = preVisitedTuple.right();
 
             return Streams.fromNativeList(preVisitedAttributes)
                     .foldLeftToResult(new Tuple<>(new MapAttributes(), preVisitedState), this::generateAttributeWithState)
-                    .flatMapValue(tuple -> postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
+                    .flatMapValue(tuple -> visitor.postVisit(preVisited.withAttributes(tuple.left()), tuple.right()));
         }).mapErr(err -> new CompileParentError("Failed to parse node.", node.toString(), err));
     }
 
@@ -68,11 +74,4 @@ public class TreeGenerator implements Generator {
         return generateAttribute(value, current.right()).mapValue(inner -> new Tuple<>(current.left().with(key, inner.left()), inner.right()));
     }
 
-    protected Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        return new Ok<>(new Tuple<>(node, state));
-    }
-
-    protected Result<Tuple<Node, State>, Error_> postVisit(Node node, State state) {
-        return new Ok<>(new Tuple<>(node, state));
-    }
 }

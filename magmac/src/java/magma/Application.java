@@ -16,6 +16,9 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Generator;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
+import magma.compile.lang.VisitingGenerator;
+import magma.compile.lang.Visitor;
+import magma.compile.lang.java.PackageRemover;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -28,6 +31,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Option;
@@ -112,8 +116,10 @@ public record Application(Configuration config) {
     }
 
     private static List<Generator> listGenerators() {
-        return List.of(
-        );
+        return Stream.<Visitor>of(
+                        new PackageRemover())
+                .<Generator>map(VisitingGenerator::new)
+                .toList();
     }
 
     private static Result<Rule, CompileException> findRootRule(String platform) {
