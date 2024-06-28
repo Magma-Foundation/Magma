@@ -1,7 +1,6 @@
 import magma.api.option.None;
 import magma.api.option.Option;
-() => {
-	public head : Option<T> => {
-		return None();
-	}
+
+export default const EmptyHead<T> = <Head<T>>{
+    head = () => None;
 }
