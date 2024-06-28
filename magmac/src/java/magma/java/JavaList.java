@@ -1,6 +1,5 @@
 package magma.java;
 
-import magma.api.Tuple;
 import magma.api.collect.stream.Collector;
 import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Stream;
@@ -55,14 +54,6 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
         var copy = new ArrayList<>(list);
         copy.add(next);
         return new JavaList<>(copy);
-    }
-
-    @Override
-    public Option<Tuple<T, magma.api.collect.List<T>>> popFirst() {
-        if (list.isEmpty()) return new None<>();
-        var last = list.get(list.size() - 1);
-        var slice = new JavaList<>(list.subList(0, list.size() - 1));
-        return new Some<>(new Tuple<>(last, slice));
     }
 
     @Override
