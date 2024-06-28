@@ -54,7 +54,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
             @Override
             public magma.api.collect.List<T> fold(magma.api.collect.List<T> current, T next) {
-                return current.add(next);
+                return current.addLast(next);
             }
         };
     }
@@ -107,7 +107,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public magma.api.collect.List<T> add(T next) {
+    public magma.api.collect.List<T> addLast(T next) {
         var copy = new ArrayList<>(list);
         copy.add(next);
         return new JavaList<>(copy);
@@ -161,7 +161,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
     @Override
     public Option<T> get(int index) {
-        if(index < list.size()) {
+        if (index < list.size()) {
             return new Some<>(list.get(index));
         }
 
@@ -170,12 +170,19 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
     @Override
     public magma.api.collect.List<T> addAll(magma.api.collect.List<T> other) {
-        return other.stream().<magma.api.collect.List<T>>foldLeft(this, magma.api.collect.List::add);
+        return other.stream().<magma.api.collect.List<T>>foldLeft(this, magma.api.collect.List::addLast);
     }
 
     @Override
     public Option<T> first() {
-        if(list.isEmpty()) return new None<>();
+        if (list.isEmpty()) return new None<>();
         return new Some<>(list.get(0));
+    }
+
+    @Override
+    public magma.api.collect.List<T> addFirst(T first) {
+        var copy = new ArrayList<>(list);
+        copy.add(0, first);
+        return new JavaList<>(copy);
     }
 }

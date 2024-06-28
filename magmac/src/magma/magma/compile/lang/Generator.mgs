@@ -18,5 +18,5 @@ export struct Generator {
      * @return a Result containing a Tuple of the new Node and State if successful,
      * or an Error_ if the generation fails
      */
-	generate : (Node, State) => Result<Tuple<Node, State>, Error_>;
+	generate : (Self, Node, State) => Result<Tuple<Node, State>, Error_>;
 }

@@ -3,7 +3,7 @@ import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;
-() => public def parse(input : String) => {
+() => public def parse(this : Self, input : String) => {
 	if
 	(!input.startsWith("[")||!input.endsWith("]"))
 	return None.None();

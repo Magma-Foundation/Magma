@@ -25,11 +25,11 @@ import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
 export default class def Lang() => {
-	def createBlock(member : Rule) => StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
-	def createMembersRule(member : Rule) => SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
-	def createImportRule(namespace : TypeRule) => TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
-	def createNamespaceRule() => TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
-	def createCatchRule(definition : Rule, statement : Rule) => {
+	def createBlock(this : Self, member : Rule) => StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
+	def createMembersRule(this : Self, member : Rule) => SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
+	def createImportRule(this : Self, namespace : TypeRule) => TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
+	def createNamespaceRule(this : Self) => TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
+	def createCatchRule(this : Self, definition : Rule, statement : Rule) => {
 		
 		declaration : var=
 		
@@ -44,7 +44,7 @@ export default class def Lang() => {
 		FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));
 		return TypeRule("catch", LeftRule("catch ", afterKeyword));
 	}
-	def createTypeRule() => {
+	def createTypeRule(this : Self) => {
 		
 		type : var=
 		
@@ -53,10 +53,10 @@ export default class def Lang() => {
 		generic : var=
 		
 		createGenericTypeRule(type);
-		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("placeholder", StripRule(SymbolRule(ExtractStringRule("value")))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));
+		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("reference", StripRule(SymbolRule(ExtractStringRule("value")))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));
 		return type;
 	}
-	def createGenericTypeRule(type : LazyRule) => {
+	def createGenericTypeRule(this : Self, type : LazyRule) => {
 		
 		children : var=
 		
@@ -67,7 +67,7 @@ export default class def Lang() => {
 		StripRule(ExtractStringRule("parent"));
 		return TypeRule("generic", StripRule(FirstRule(parent, "<", RightRule(children, ">"))));
 	}
-	def createFunctionType(type : LazyRule) => {
+	def createFunctionType(this : Self, type : LazyRule) => {
 		
 		params : var=
 		
@@ -86,14 +86,14 @@ export default class def Lang() => {
 		ExtractNodeRule("returns", type);
 		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
 	}
-	def createTryRule(statement : Rule) => TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
-	def createModifiersRule() => createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
-	def createModifiersRule(final modifiers : List<String>) => {
+	def createTryRule(this : Self, statement : Rule) => TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
+	def createModifiersRule(this : Self) => createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
+	def createModifiersRule(this : Self, final modifiers : List<String>) => {
 		return ExtractStringListRule("modifiers", " ");
 		
 		;
 	}
-	def createInvocationRule(value : Rule) => {
+	def createInvocationRule(this : Self, value : Rule) => {
 		
 		arguments : var=
 		
@@ -104,8 +104,8 @@ export default class def Lang() => {
 		ExtractNodeRule("caller", StripRule(value));
 		return TypeRule("invocation", RightRule(SplitOnceRule(caller, "(", arguments, InvocationStartSearcher()), ")"));
 	}
-	def createCommentRule() => TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
-	def createConditionRule(type : String, value : Rule, statement : Rule) => {
+	def createCommentRule(this : Self) => TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
+	def createConditionRule(this : Self, type : String, value : Rule, statement : Rule) => {
 		
 		child : var=
 		
@@ -128,7 +128,7 @@ export default class def Lang() => {
 		StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock)));
 		return TypeRule(type, LeftRule(type, SplitOnceRule(conditionParent, ")", valueParent, ConditionEndSearcher())));
 	}
-	def createReturnRule(value : Rule) => {
+	def createReturnRule(this : Self, value : Rule) => {
 		
 		child : var=
 		
@@ -147,7 +147,7 @@ export default class def Lang() => {
 		OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
 		return TypeRule("return", LeftRule("return", after));
 	}
-	def createForRule(definition : Rule, value : Rule, statement : Rule, delimiter : String) => {
+	def createForRule(this : Self, definition : Rule, value : Rule, statement : Rule, delimiter : String) => {
 		
 		collection : var=
 		
@@ -174,7 +174,7 @@ export default class def Lang() => {
 		FirstRule(leftRule, "{", content);
 		return TypeRule("for", LeftRule("for", after));
 	}
-	def createElseRule(statement : Rule) => {
+	def createElseRule(this : Self, statement : Rule) => {
 		
 		child : var=
 		
@@ -193,7 +193,7 @@ export default class def Lang() => {
 		LeftRule("else ", ExtractNodeRule("child", statement));
 		return TypeRule("else", OrRule(List.of(anElse, anElse1)));
 	}
-	def createAssignmentRule(value : Rule) => {
+	def createAssignmentRule(this : Self, value : Rule) => {
 		
 		reference : var=
 		
@@ -212,7 +212,7 @@ export default class def Lang() => {
 		RightRule(ExtractNodeRule("value", StripRule(value)), ";");
 		return TypeRule("assignment", FirstRule(left, "=", right));
 	}
-	def createDeclarationRule(definition : Rule, value : Rule) => {
+	def createDeclarationRule(this : Self, definition : Rule, value : Rule) => {
 		
 		wrappedDefinition : var=
 		
@@ -235,18 +235,18 @@ export default class def Lang() => {
 		StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
 		return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));
 	}
-	def createParamsRule(definition : Rule) => SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
-	def createStringRule() => TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
-	def createAccessRule(type : String, separator : String, value : Rule) => {
+	def createParamsRule(this : Self, definition : Rule) => SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
+	def createStringRule(this : Self) => TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
+	def createAccessRule(this : Self, type : String, separator : String, value : Rule) => {
 		
 		parent : var=
 		
 		ExtractNodeRule("parent", StripRule(value));
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
-	def createSymbolRule() => TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
-	def createTernaryRule(value : LazyRule) => TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
-	def createOperatorRule(name : String, slice : String, value : Rule) => {
+	def createSymbolRule(this : Self) => TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
+	def createTernaryRule(this : Self, value : LazyRule) => TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
+	def createOperatorRule(this : Self, name : String, slice : String, value : Rule) => {
 		
 		left : var=
 		
@@ -257,10 +257,10 @@ export default class def Lang() => {
 		StripRule(ExtractNodeRule("right", value));
 		return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
 	}
-	def createNumberRule() => TypeRule("number", NumberRule(ExtractStringRule("value")));
-	def createCharRule() => TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
-	def createEmptyStatementRule() => TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
-	def createThrowRule(value : Rule) => {
+	def createNumberRule(this : Self) => TypeRule("number", NumberRule(ExtractStringRule("value")));
+	def createCharRule(this : Self) => TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
+	def createEmptyStatementRule(this : Self) => TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
+	def createThrowRule(this : Self, value : Rule) => {
 		
 		rule : Rule=
 		
@@ -271,13 +271,13 @@ export default class def Lang() => {
 		RightRule(rule, ";");
 		return TypeRule("throw", LeftRule("throw ", after));
 	}
-	def createNotRule(value : LazyRule) => TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
-	def createDefinitionRule(definition : Rule) => TypeRule("definition", RightRule(definition, ";"));
-	def createBlockCommentRule() => TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
-	def createPostDecrementRule(value : LazyRule) => TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
-	def createPostIncrementRule(value : LazyRule) => TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
-	def createKeywordRule(keyword : String) => TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
-	def createTypeParamsRule() => {
+	def createNotRule(this : Self, value : LazyRule) => TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
+	def createDefinitionRule(this : Self, definition : Rule) => TypeRule("definition", RightRule(definition, ";"));
+	def createBlockCommentRule(this : Self) => TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
+	def createPostDecrementRule(this : Self, value : LazyRule) => TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
+	def createPostIncrementRule(this : Self, value : LazyRule) => TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
+	def createKeywordRule(this : Self, keyword : String) => TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
+	def createTypeParamsRule(this : Self) => {
 		
 		typeParam : var=
 		
@@ -293,7 +293,7 @@ export default class def Lang() => {
 		typeParam.setRule(OrRule(List.of(extendsRule, symbol)));
 		return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);
 	}
-	public def createStatementRule(value : LazyRule) => {
+	public def createStatementRule(this : Self, value : LazyRule) => {
 		
 		child : var=
 		

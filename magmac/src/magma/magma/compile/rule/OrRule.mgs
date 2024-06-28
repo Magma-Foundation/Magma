@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 () => {
-	def toError(results : List<Result<String, Error_>>) => Err(MultipleError(results.stream().map(() => JavaOptionals.toNative(stringErrorResult.findErr())).flatMap(Optional.stream).toList()));
-	public def toNode(input : String) => {
+	def toError(this : Self, results : List<Result<String, Error_>>) => Err(MultipleError(results.stream().map(() => JavaOptionals.toNative(stringErrorResult.findErr())).flatMap(Optional.stream).toList()));
+	public def toNode(this : Self, input : String) => {
 		
 		errors : var=
 		
@@ -38,7 +38,7 @@ import java.util.Optional;
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	public def fromNode(node : Node) => {
+	public def fromNode(this : Self, node : Node) => {
 		
 		results : var=
 		

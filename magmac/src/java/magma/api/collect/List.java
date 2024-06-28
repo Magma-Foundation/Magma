@@ -17,7 +17,7 @@ public interface List<T> {
      * @param next the element to add
      * @return the updated list with the added element
      */
-    List<T> add(T next);
+    List<T> addLast(T next);
 
     /**
      * Returns a stream of the elements in the list.
@@ -93,4 +93,6 @@ public interface List<T> {
      * @return The option.
      */
     Option<T> first();
+
+    List<T> addFirst(T first);
 }

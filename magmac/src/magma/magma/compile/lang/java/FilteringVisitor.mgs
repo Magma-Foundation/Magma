@@ -7,12 +7,12 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import java.util.function.BiFunction;
 () => {
-	public def preVisit(node : Node, state : State) => applyFilter(node, state, child.preVisit);
-	def applyFilter(node : Node, state : State, folder : BiFunction<Node, State, Result<Tuple<Node, State>, Error_>>) => {
+	public def preVisit(this : Self, node : Node, state : State) => applyFilter(node, state, child.preVisit);
+	def applyFilter(this : Self, node : Node, state : State, folder : BiFunction<Node, State, Result<Tuple<Node, State>, Error_>>) => {
 		if
 		(!node.is(type))
 		return Ok(Tuple(node, state));
 		return folder.apply(node, state);
 	}
-	public def postVisit(node : Node, state : State) => applyFilter(node, state, child.postVisit);
+	public def postVisit(this : Self, node : Node, state : State) => applyFilter(node, state, child.postVisit);
 }

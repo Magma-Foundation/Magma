@@ -1,4 +1,4 @@
 import java.util.List;
 export struct Splitter {
-	split : (String) => List<String>;
+	split : (Self, String) => List<String>;
 }

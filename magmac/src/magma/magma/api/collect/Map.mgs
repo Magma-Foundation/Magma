@@ -3,10 +3,10 @@ import magma.api.collect.stream.Head;
 import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 export struct Map {
-	putAll : (Map<K, V>) => Map<K, V>;
-	get : (K) => Option<V>;
-	streamEntries : () => Stream<Tuple<K, V>>;
-	put : (K, V) => Map<K, V>;
-	keyStream : () => Stream<K>;
-	streamValues : () => Stream<V>;
+	putAll : (Self, Map<K, V>) => Map<K, V>;
+	get : (Self, K) => Option<V>;
+	streamEntries : (Self) => Stream<Tuple<K, V>>;
+	put : (Self, K, V) => Map<K, V>;
+	keyStream : (Self) => Stream<K>;
+	streamValues : (Self) => Stream<V>;
 }

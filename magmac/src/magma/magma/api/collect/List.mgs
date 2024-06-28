@@ -15,14 +15,14 @@ export struct List {
      * @param next the element to add
      * @return the updated list with the added element
      */
-	add : (T) => List<T>;
+	addLast : (Self, T) => List<T>;
 	
 	/**
      * Returns a stream of the elements in the list.
      *
      * @return a Stream of the list's elements
      */
-	stream : () => Stream<T>;
+	stream : (Self) => Stream<T>;
 	
 	/**
      * Checks if the list contains the specified element.
@@ -30,28 +30,28 @@ export struct List {
      * @param element the element to check for
      * @return true if the list contains the element, false otherwise
      */
-	contains : (T) => boolean;
+	contains : (Self, T) => boolean;
 	
 	/**
      * Checks if the list is empty.
      *
      * @return true if the list is empty, false otherwise
      */
-	isEmpty : () => boolean;
+	isEmpty : (Self) => boolean;
 	
 	/**
      * Retrieves the last element in the list, if present.
      *
      * @return an Option containing the last element, or an empty Option if the list is empty
      */
-	last : () => Option<T>;
+	last : (Self) => Option<T>;
 	
 	/**
      * Returns the number of elements in the list.
      *
      * @return the size of the list
      */
-	size : () => int;
+	size : (Self) => int;
 	
 	/**
      * Removes and discards the last element of the list, returning the updated list if possible.
@@ -59,7 +59,7 @@ export struct List {
      * @return an Option containing the updated list with the last element removed,
      * or an empty Option if the list is empty
      */
-	popLastAndDiscard : () => Option<List<T>>;
+	popLastAndDiscard : (Self) => Option<List<T>>;
 	
 	/**
      * Adds an element to the end of the list and returns the updated list.
@@ -67,7 +67,7 @@ export struct List {
      * @param element the element to add
      * @return the updated list with the added element
      */
-	pushLast : (T) => List<T>;
+	pushLast : (Self, T) => List<T>;
 	
 	/**
      * Retrieves the element or None if the index is invalid.
@@ -75,7 +75,7 @@ export struct List {
      * @param index The index.
      * @return The element.
      */
-	get : (int) => Option<T>;
+	get : (Self, int) => Option<T>;
 	
 	/**
      * Adds all the items from the other list onto this list.
@@ -83,12 +83,13 @@ export struct List {
      * @param other The other list.
      * @return The new list, with this list's items first, and the other list's items second.
      */
-	addAll : (List<T>) => List<T>;
+	addAll : (Self, List<T>) => List<T>;
 	
 	/**
      * Returns the first item in this list, or None if this list is empty.
      *
      * @return The option.
      */
-	first : () => Option<T>;
+	first : (Self) => Option<T>;
+	addFirst : (Self, T) => List<T>;
 }

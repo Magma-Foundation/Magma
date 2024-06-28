@@ -10,17 +10,44 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
-import java.util.Collections;
 export default class def MethodNormalizer() => {
-	public def preVisit(node : Node, state : State) => {
+	def attachSelfReference(this : Self, oldParams : magma.api.collect.List<Node>, node : Node) => {
+		
+		selfType : var=
+		
+		node.clear("reference").withString("value", "Self");
+		
+		selfReference : var=
+		
+		node.clear("definition").withString("name", "this").withNode("type", selfType);
+		return Ok(oldParams.addFirst(selfReference));
+	}
+	public def preVisit(this : Self, node : Node, state : State) => {
 		
 		renamed : var=
 		
 		node.retype("function");
 		
-		params : var=
+		oldParams : var=
 		
-		node.findNodeList("params").map(JavaList.toNative).orElse(Collections.emptyList());
+		node.findNodeList("params").orElse(JavaList.empty());
+		
+		newParamsResult : var=
+		
+		attachSelfReference(oldParams, node);
+		
+		err : var=
+		
+		newParamsResult.findErr();
+		if
+		(err.isPresent())
+		{
+			return Err(err.orElsePanic());
+		}
+		
+		newParams : var=
+		
+		newParamsResult.findValue().orElsePanic();
 		
 		definitionOptional : var=
 		
@@ -38,7 +65,7 @@ export default class def MethodNormalizer() => {
 			newModifiers : var=
 			
 			oldModifiers.contains("public")?JavaList.of("public"):JavaList.empty();
-			return newModifiers.add("def");
+			return newModifiers.addLast("def");
 		});
 		if
 		(node.has("child"))
@@ -46,7 +73,7 @@ export default class def MethodNormalizer() => {
 			
 			withParams : var=
 			
-			definition.withNodeList("params", JavaList.fromNative(params));
+			definition.withNodeList("params", newParams);
 			return Ok(Tuple(renamed.withNode("definition", withParams), state));
 		}
 		else
@@ -68,7 +95,7 @@ export default class def MethodNormalizer() => {
 			paramTypes : var=
 			
 			ArrayList();
-			for(param : Node in params){
+			for(param : Node in JavaList.toNative(newParams)){
 				
 				paramTypeOptional : var=
 				

@@ -9,13 +9,13 @@ import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 export struct RuleResult {
-	def createNothingPresentError() => Err(CompileError("Neither value nor error is present.", ""));
-	def wrapInOk(inner : Node) => Ok(inner);
-	findError : () => Option<Error_>;
-	findAttributes : () => Option<Attributes>;
-	tryCreate : () => Option<Node>;
-	withType : (String) => RuleResult;
-	mapErr : (Function<Error_, Error_>) => RuleResult;
-	def create() => tryCreate().map(RuleResult.wrapInOk).orElseGet(this.wrapInErr);
-	def wrapInErr() => findError().map(() => Err(err)).orElseGet(RuleResult.createNothingPresentError);
+	def createNothingPresentError(this : Self) => Err(CompileError("Neither value nor error is present.", ""));
+	def wrapInOk(this : Self, inner : Node) => Ok(inner);
+	findError : (Self) => Option<Error_>;
+	findAttributes : (Self) => Option<Attributes>;
+	tryCreate : (Self) => Option<Node>;
+	withType : (Self, String) => RuleResult;
+	mapErr : (Self, Function<Error_, Error_>) => RuleResult;
+	def create(this : Self) => tryCreate().map(RuleResult.wrapInOk).orElseGet(this.wrapInErr);
+	def wrapInErr(this : Self) => findError().map(() => Err(err)).orElseGet(RuleResult.createNothingPresentError);
 }

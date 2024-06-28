@@ -5,15 +5,15 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export default class def FilterRule() => {
 	protected final child : Rule;
-	FilterRule(child : Rule) => this=child;
-	public def toNode(input : String) => {
+	FilterRule(this : Self, child : Rule) => this=child;
+	public def toNode(this : Self, input : String) => {
 		if
 		(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
-	def computeMessage : () => String;
-	def filter : (String) => boolean;
-	public def fromNode(node : Node) => child.fromNode(node);
+	def computeMessage : (Self) => String;
+	def filter : (Self, String) => boolean;
+	public def fromNode(this : Self, node : Node) => child.fromNode(node);
 	implements Rule;
 }

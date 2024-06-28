@@ -10,7 +10,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 export default class def ClassNormalizer() => {
-	def computeNewModifiers(node : Node) => {
+	def computeNewModifiers(this : Self, node : Node) => {
 		
 		oldModifiers : var=
 		
@@ -19,9 +19,9 @@ export default class def ClassNormalizer() => {
 		newModifiers : var=
 		
 		JavaList.empty();
-		return oldModifiers.contains("public")?newModifiers.add("export"):newModifiers;
+		return oldModifiers.contains("public")?newModifiers.addLast("export"):newModifiers;
 	}
-	def generateDefinition(name : String, node : Node, state : State) => {
+	def generateDefinition(this : Self, name : String, node : Node, state : State) => {
 		
 		classModifiers : var=
 		
@@ -48,13 +48,13 @@ export default class def ClassNormalizer() => {
 		Tuple(withImplements, state);
 		return Ok(tuple);
 	}
-	def moveImplements(function : Node, interfaceType : Node) => {
+	def moveImplements(this : Self, function : Node, interfaceType : Node) => {
 		
 		implementsStatement : var=
 		
 		function.clear("implements").withNode("type", interfaceType);
-		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.add(implementsStatement))).orElse(implementsStatement));
+		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.addLast(implementsStatement))).orElse(implementsStatement));
 	}
-	public def preVisit(node : Node, state : State) => node.findString("name").map(() => generateDefinition(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
+	public def preVisit(this : Self, node : Node, state : State) => node.findString("name").map(() => generateDefinition(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
 	implements Visitor;
 }

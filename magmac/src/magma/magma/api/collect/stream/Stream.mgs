@@ -8,18 +8,18 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 export struct Stream {
 	
-	map<R> : (Function<T, R>) => Stream<R>;
+	map<R> : (Self, Function<T, R>) => Stream<R>;
 	
-	collect<C> : (Collector<T, C>) => C;
+	collect<C> : (Self, Collector<T, C>) => C;
 	
-	foldLeft<C> : (C, BiFunction<C, T, C>) => C;
-	head : () => Option<T>;
+	foldLeft<C> : (Self, C, BiFunction<C, T, C>) => C;
+	head : (Self) => Option<T>;
 	
-	foldLeftToResult<R, E> : (R, BiFunction<R, T, Result<R, E>>) => Result<R, E>;
-	anyMatch : (Predicate<T>) => boolean;
-	filter : (Predicate<T>) => Stream<T>;
+	foldLeftToResult<R, E> : (Self, R, BiFunction<R, T, Result<R, E>>) => Result<R, E>;
+	anyMatch : (Self, Predicate<T>) => boolean;
+	filter : (Self, Predicate<T>) => Stream<T>;
 	
-	flatMap<R> : (Function<T, Head<R>>) => Stream<R>;
+	flatMap<R> : (Self, Function<T, Head<R>>) => Stream<R>;
 	
-	extend<R> : (Function<T, R>) => Stream<Tuple<T, R>>;
+	extend<R> : (Self, Function<T, R>) => Stream<Tuple<T, R>>;
 }

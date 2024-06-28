@@ -6,9 +6,9 @@ import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 () => {
-	public def withType(type : String) => TypedRuleResult(type, attributes);
-	public def mapErr(mapper : Function<Error_, Error_>) => this;
-	public def findError() => None.None();
-	public def findAttributes() => Some(attributes);
-	public def tryCreate() => None.None();
+	public def withType(this : Self, type : String) => TypedRuleResult(type, attributes);
+	public def mapErr(this : Self, mapper : Function<Error_, Error_>) => this;
+	public def findError(this : Self) => None.None();
+	public def findAttributes(this : Self) => Some(attributes);
+	public def tryCreate(this : Self) => None.None();
 }

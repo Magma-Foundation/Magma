@@ -8,20 +8,20 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 () => {
-	public def foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, T, Result<R, E>>) => this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
-	public def anyMatch(predicate : Predicate<T>) => foldLeft(false, () => aBoolean||predicate.test(t));
-	public def filter(filter : Predicate<T>) => flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
-	public def flatMap<R>(mapper : Function<T, Head<R>>) => HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
-	public def extend<R>(mapper : Function<T, R>) => map(() => Tuple(value, mapper.apply(value)));
-	public def map<R>(mapper : Function<T, R>) => HeadedStream(() => this.provider.head().map(mapper));
-	public def collect<C>(collector : Collector<T, C>) => {
+	public def foldLeftToResult<R, E>(this : Self, initial : R, mapper : BiFunction<R, T, Result<R, E>>) => this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
+	public def anyMatch(this : Self, predicate : Predicate<T>) => foldLeft(false, () => aBoolean||predicate.test(t));
+	public def filter(this : Self, filter : Predicate<T>) => flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
+	public def flatMap<R>(this : Self, mapper : Function<T, Head<R>>) => HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
+	public def extend<R>(this : Self, mapper : Function<T, R>) => map(() => Tuple(value, mapper.apply(value)));
+	public def map<R>(this : Self, mapper : Function<T, R>) => HeadedStream(() => this.provider.head().map(mapper));
+	public def collect<C>(this : Self, collector : Collector<T, C>) => {
 		
 		current : var=
 		
 		collector.createInitial();
 		return foldLeft(current, collector.fold);
 	}
-	public def foldLeft<C>(current : C, folder : BiFunction<C, T, C>) => while(true){
+	public def foldLeft<C>(this : Self, current : C, folder : BiFunction<C, T, C>) => while(true){
 		
 		finalCurrent : C=
 		
@@ -40,17 +40,17 @@ import java.util.function.Predicate;
 			return current;
 		}
 	}
-	public def head() => provider.head();
+	public def head(this : Self) => provider.head();
 	default class def FlatMapHead() => {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;
-		FlatMapHead(initial : Head<R>, outer : HeadedStream<T>, mapper : Function<T, Head<R>>) => {
+		FlatMapHead(this : Self, initial : Head<R>, outer : HeadedStream<T>, mapper : Function<T, Head<R>>) => {
 			this=outer;
 			this=mapper;
 			current=initial;
 		}
-		public def head() => while(true){
+		public def head(this : Self) => while(true){
 			
 			currentHead : var=
 			

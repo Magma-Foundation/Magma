@@ -10,6 +10,6 @@ public record ListCollector<T>(List<T> initial) implements Collector<T, List<T>>
 
     @Override
     public List<T> fold(List<T> current, T next) {
-        return current.add(next);
+        return current.addLast(next);
     }
 }

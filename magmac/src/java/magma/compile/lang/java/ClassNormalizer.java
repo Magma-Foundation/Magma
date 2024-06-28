@@ -16,7 +16,7 @@ public class ClassNormalizer implements Visitor {
     private static List<String> computeNewModifiers(Node node) {
         var oldModifiers = node.findStringList("modifiers").orElse(JavaList.empty());
         var newModifiers = JavaList.<String>empty();
-        return oldModifiers.contains("public") ? newModifiers.add("export") : newModifiers;
+        return oldModifiers.contains("public") ? newModifiers.addLast("export") : newModifiers;
     }
 
     private static Result<Tuple<Node, State>, Error_> generateDefinition(String name, Node node, State state) {
@@ -41,7 +41,7 @@ public class ClassNormalizer implements Visitor {
         var implementsStatement = function.clear("implements").withNode("type", interfaceType);
 
         return function.withNode("child", function.findNode("child")
-                .map(child -> child.mapNodes("children", children -> children.add(implementsStatement)))
+                .map(child -> child.mapNodes("children", children -> children.addLast(implementsStatement)))
                 .orElse(implementsStatement));
     }
 

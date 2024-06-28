@@ -4,11 +4,11 @@ import magma.api.option.Some;
 export default class def RangeHead() => {
 	private final extent : int;
 	private counter : int;
-	RangeHead(initial : int, extent : int) => {
+	RangeHead(this : Self, initial : int, extent : int) => {
 		this=initial;
 		this=extent;
 	}
-	public def head() => {
+	public def head(this : Self) => {
 		if
 		(counter>=extent)
 		return None.None();

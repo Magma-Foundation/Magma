@@ -18,7 +18,7 @@ export struct Visitor {
      * @param state the current state during the visit
      * @return a Result containing a Tuple of the node and state, or an error
      */
-	def preVisit(node : Node, state : State) => Ok(Tuple(node, state));
+	def preVisit(this : Self, node : Node, state : State) => Ok(Tuple(node, state));
 	
 	/**
      * Method to be called after the main visit operation on a node.
@@ -28,5 +28,5 @@ export struct Visitor {
      * @param state the current state during the visit
      * @return a Result containing a Tuple of the node and state, or an error
      */
-	def postVisit(node : Node, state : State) => Ok(Tuple(node, state));
+	def postVisit(this : Self, node : Node, state : State) => Ok(Tuple(node, state));
 }

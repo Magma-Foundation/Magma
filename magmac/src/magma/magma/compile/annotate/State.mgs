@@ -8,19 +8,19 @@ export struct State {
      *
      * @return the new state after entering
      */
-	enter : () => State;
+	enter : (Self) => State;
 	
 	/**
      * Computes the depth of the current state, typically representing how deep the state is in a hierarchical structure.
      *
      * @return an integer representing the depth of the current state
      */
-	computeDepth : () => int;
+	computeDepth : (Self) => int;
 	
 	/**
      * Exits the current state, often used to represent going up in a hierarchical structure.
      *
      * @return the new state after exiting
      */
-	exit : () => State;
+	exit : (Self) => State;
 }

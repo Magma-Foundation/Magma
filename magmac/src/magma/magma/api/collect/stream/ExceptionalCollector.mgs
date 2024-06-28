@@ -1,6 +1,6 @@
 import magma.api.result.Ok;
 import magma.api.result.Result;
 () => {
-	public def createInitial() => Ok(collector.createInitial());
-	public def fold(current : Result<C, E>, next : Result<T, E>) => current.flatMapValue(() => next.mapValue(() => collector.fold(inner, inner0)));
+	public def createInitial(this : Self) => Ok(collector.createInitial());
+	public def fold(this : Self, current : Result<C, E>, next : Result<T, E>) => current.flatMapValue(() => next.mapValue(() => collector.fold(inner, inner0)));
 }

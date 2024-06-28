@@ -1,6 +1,6 @@
 export default class def NumberRule() => {
-	NumberRule(child : Rule) => super(child)
-	def allDigits(input : String) => {
+	NumberRule(this : Self, child : Rule) => super(child)
+	def allDigits(this : Self, input : String) => {
 		if
 		(input.isEmpty())
 		return false;
@@ -24,6 +24,6 @@ export default class def NumberRule() => {
 		}
 		return true;
 	}
-	def computeMessage() => "Not a number.";
-	def filter(input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	def computeMessage(this : Self) => "Not a number.";
+	def filter(this : Self, input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
 }
