@@ -73,8 +73,17 @@ public interface List<T> {
 
     /**
      * Retrieves the element or None if the index is invalid.
+     *
      * @param index The index.
      * @return The element.
      */
     Option<T> get(int index);
+
+    /**
+     * Adds all the items from the other list onto this list.
+     *
+     * @param other The other list.
+     * @return The new list, with this list's items first, and the other list's items second.
+     */
+    List<T> addAll(List<T> other);
 }

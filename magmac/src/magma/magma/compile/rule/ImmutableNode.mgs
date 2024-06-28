@@ -57,6 +57,9 @@ import java.util.function.Function;
 	public withString : Node => {
 		return with(key, StringAttribute(value));
 	}
+	public withStringList : Node => {
+		return with(key, StringListAttribute(JavaList.toNative(values)));
+	}
 	public with : Node => {
 		return ImmutableNode(type, attributes.with(key, value));
 	}

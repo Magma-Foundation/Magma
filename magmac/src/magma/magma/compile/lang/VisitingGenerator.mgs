@@ -10,7 +10,7 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
-() => {
+export default class def VisitingGenerator() => {
 	private final visitor : Visitor;
 	VisitingGenerator : public => {
 		this=visitor;

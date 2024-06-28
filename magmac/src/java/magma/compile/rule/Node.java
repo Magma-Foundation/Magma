@@ -143,11 +143,20 @@ public interface Node {
     Node mapStringList(String key, Function<List<String>, List<String>> mapper);
 
     /**
-     * Adds a string with a specified string.
+     * Adds a string with a specified key.
      *
      * @param key   the key for the string
      * @param value the string to add
      * @return the updated Node
      */
     Node withString(String key, String value);
+
+    /**
+     * Adds a string list with a specified key.
+     *
+     * @param key    the key for the string
+     * @param values the string list to add
+     * @return the updated Node
+     */
+    Node withStringList(String key, List<String> values);
 }

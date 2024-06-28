@@ -1,12 +1,50 @@
 import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
+import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
-() => {
+import magma.java.JavaList;
+export default class def ClassNormalizer() => {
+	private static computeNewModifiers : List<String> => {
+		
+		oldModifiers : var=
+		
+		node.findStringList("modifiers").orElse(JavaList.empty());
+		
+		newModifiers : var=
+		
+		JavaList.empty();
+		return oldModifiers.contains("public")?newModifiers.add("export"):newModifiers;
+	}
 	public preVisit : Result<Tuple<Node, State>, Error_> => {
-		return Ok(Tuple(node.retype("function"), state));
+		return node.findString("name").map(() => getTupleObjectOk(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
+	}
+	private static getTupleObjectOk : Result<Tuple<Node, State>, Error_> => {
+		
+		classModifiers : var=
+		
+		JavaList.of("default", "class", "def");
+		
+		stringList : var=
+		
+		computeNewModifiers(node).addAll(classModifiers);
+		
+		definition : var=
+		
+		node.clear("definition").withString("name", name).withStringList("modifiers", stringList).withNodeList("params", JavaList.empty());
+		
+		function : var=
+		
+		node.retype("function").withNode("definition", definition);
+		
+		tuple : var=
+		
+		Tuple(function, state);
+		return Ok(tuple);
 	}
 }

@@ -5,7 +5,7 @@ import magma.java.JavaOptionals;
 import magma.java.NativeListHead;
 import java.util.List;
 import java.util.Optional;
-() => {
+export default class def Streams() => {
 	public static fromNativeList<T> : Stream<T> => {
 		return HeadedStream(Head());
 	}

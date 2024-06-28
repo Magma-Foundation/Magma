@@ -1,6 +1,6 @@
 import magma.api.collect.List;
 import magma.java.JavaList;
-() => {
+export default class def ImmutableState() => {
 	private final frames : List<List<String>>;
 	ImmutableState : public => {
 		this=frames;

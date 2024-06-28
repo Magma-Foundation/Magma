@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-() => {
+export default class def Lang() => {
 	static createBlock : Rule => {
 		return StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
 	}
@@ -338,7 +338,7 @@ import java.util.stream.IntStream;
 		typeParam.setRule(OrRule(List.of(extendsRule, symbol)));
 		return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);
 	}
-	() => {
+	default class def OperatorSearcher() => {
 		private final slice : String;
 		OperatorSearcher : public => {
 			this=slice;

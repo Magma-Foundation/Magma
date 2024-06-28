@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.Optional;
-() => {
+export default class def MultipleError() => {
 	private final errors : List<Error_>;
 	MultipleError : public => {
 		this=errors;

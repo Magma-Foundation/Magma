@@ -10,7 +10,7 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-() => {
+export default class def ExtractStringListRule() => {
 	protected final delimiter : String;
 	ExtractStringListRule : public => {
 		super(key);

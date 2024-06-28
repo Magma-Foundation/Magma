@@ -10,7 +10,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 import magma.java.JavaList;
-() => {
+export default class def BlockFormatter() => {
 	private static indentChildren : List<Node> => {
 		return Streams.rangeTo(children.size()).extend(children.get).map(Options.invertRight).flatMap(Streams.fromOption).map(() => attachAfterChild(child, state)).collect(JavaList.collecting());
 	}

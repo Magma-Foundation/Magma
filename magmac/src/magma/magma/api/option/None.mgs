@@ -2,7 +2,7 @@ import magma.api.Tuple;
 import magma.lang.Instance;
 import java.util.function.Function;
 import java.util.function.Supplier;
-() => {
+export default class def None() => {
 	public static None<T> : None<T> => {
 		return None();
 	}

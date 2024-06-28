@@ -1,5 +1,5 @@
 import magma.api.Tuple;
-() => {
+export default class def Options() => {
 	public static invertRight<A, B> : Option<Tuple<A, B>> => {
 		return tuple.right().map(() => Tuple(tuple.left(), inner));
 	}

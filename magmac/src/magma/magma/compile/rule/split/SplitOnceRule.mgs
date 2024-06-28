@@ -9,7 +9,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
-() => {
+export default class def SplitOnceRule() => {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;

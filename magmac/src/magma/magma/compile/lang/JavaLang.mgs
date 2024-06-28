@@ -20,7 +20,7 @@ import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-() => {
+export default class def JavaLang() => {
 	public static createRootRule : Rule => {
 		return Lang.createBlock(createRootMemberRule());
 	}
@@ -245,7 +245,7 @@ import java.util.List;
 		OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}
-	() => {
+	default class def SplitThrows() => {
 		public split : List<String> => {
 			return Arrays.asList(input.split(","));
 		}

@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import static magma.java.JavaResults.$Void;
-() => {
+export default class def Main() => {
 	
 	public static final CONFIG_PATH : Path=
 	

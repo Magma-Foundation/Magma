@@ -59,7 +59,7 @@ import java.util.function.Predicate;
 	public head : Option<T> => {
 		return provider.head();
 	}
-	() => {
+	default class def FlatMapHead() => {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;

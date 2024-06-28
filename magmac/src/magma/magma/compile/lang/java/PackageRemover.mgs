@@ -7,7 +7,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-() => {
+export default class def PackageRemover() => {
 	private static removeFromChildren : List<Node> => {
 		return children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	}

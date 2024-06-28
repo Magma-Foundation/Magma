@@ -1,5 +1,5 @@
 import java.io.IOException;
-() => {
+export default class def CompileException() => {
 	CompileException : public => {
 		super(message, cause);
 	}

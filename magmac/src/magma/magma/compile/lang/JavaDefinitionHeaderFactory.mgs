@@ -17,7 +17,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-() => {
+export default class def JavaDefinitionHeaderFactory() => {
 	static createDefinitionHeaderRule : Rule => {
 		
 		type : var=
@@ -85,7 +85,7 @@ import java.util.Optional;
 		ContextRule("Cannot parse before name.", maybeAnnotations);
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
-	() => {
+	default class def ModifiersRule() => {
 		
 		public static final MODIFIERS : List<String>=
 		
@@ -105,7 +105,7 @@ import java.util.Optional;
 			}
 		}
 	}
-	() => {
+	default class def SimpleSplitter() => {
 		public split : List<String> => {
 			return List.of(input.split("\n"));
 		}

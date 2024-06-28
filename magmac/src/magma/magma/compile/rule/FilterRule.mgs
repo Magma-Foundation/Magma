@@ -3,7 +3,7 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-() => {
+export default class def FilterRule() => {
 	protected final child : Rule;
 	FilterRule : public => {
 		this=child;

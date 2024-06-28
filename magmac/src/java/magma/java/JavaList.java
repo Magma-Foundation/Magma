@@ -167,4 +167,9 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
 
         return None.None();
     }
+
+    @Override
+    public magma.api.collect.List<T> addAll(magma.api.collect.List<T> other) {
+        return other.stream().<magma.api.collect.List<T>>foldLeft(this, magma.api.collect.List::add);
+    }
 }

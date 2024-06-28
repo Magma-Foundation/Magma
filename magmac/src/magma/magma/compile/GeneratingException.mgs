@@ -1,4 +1,4 @@
-() => {
+export default class def GeneratingException() => {
 	public final content : String;
 	GeneratingException : public => {
 		super(message);

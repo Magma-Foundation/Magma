@@ -90,6 +90,11 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return with(key, new StringAttribute(value));
     }
 
+    @Override
+    public Node withStringList(String key, List<String> values) {
+        return with(key, new StringListAttribute(JavaList.toNative(values)));
+    }
+
     public Node with(String key, Attribute value) {
         return new ImmutableNode(type, attributes.with(key, value));
     }

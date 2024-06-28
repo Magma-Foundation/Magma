@@ -6,7 +6,7 @@ import magma.compile.attribute.StringAttribute;
 import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import java.util.Optional;
-() => {
+export default class def ExtractStringRule() => {
 	ExtractStringRule : public => {
 		super(key);
 	}

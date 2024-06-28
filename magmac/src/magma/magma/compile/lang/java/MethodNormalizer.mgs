@@ -11,7 +11,7 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
-() => {
+export default class def MethodNormalizer() => {
 	public preVisit : Result<Tuple<Node, State>, Error_> => {
 		
 		renamed : var=
