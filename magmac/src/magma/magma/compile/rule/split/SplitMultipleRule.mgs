@@ -1,4 +1,6 @@
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.ExceptionalCollector;
+import magma.api.collect.stream.JoiningCollector;
 import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Result;
@@ -17,6 +19,7 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 () => {
 	private final propertyKey : String;
 	private final childRule : Rule;
@@ -59,7 +62,11 @@ import java.util.Map;
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
 	}
 	private joinNodes : Result<String, Error_> => {
-		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(Collectors.exceptionally(Collectors.joining(delimiter))).mapValue(() => inner.orElse(""));
+		
+		collector : Collector<String, Optional<String>>=
+		
+		JoiningCollector(delimiter);
+		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(ExceptionalCollector(collector)).mapValue(() => inner.orElse(""));
 	}
 	public fromNode : Result<String, Error_> => {
 		return JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));

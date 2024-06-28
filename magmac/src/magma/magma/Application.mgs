@@ -1,6 +1,6 @@
 import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.ExceptionalCollector;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
@@ -31,7 +31,6 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -192,7 +191,7 @@ import static magma.java.JavaResults.$Void;
 		});
 	}
 	generateTargets : Result<Map<Unit, Node>, CompileException> => {
-		return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(Collectors.exceptionally(JavaMap.collecting()));
+		return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
 	}
 	generateTarget : Result<Tuple<Unit, Node>, CompileException> => {
 		return $(() => {
@@ -283,7 +282,7 @@ import static magma.java.JavaResults.$Void;
 		})).match(() => inner, Some.new);
 	}
 	parseSources : Result<Map<Unit, Node>, CompileException> => {
-		return JavaList(Collectors.exceptionally(JavaMap.collecting()));
+		return JavaList(ExceptionalCollector(JavaMap.collecting()));
 	}
 	parseSource : Option<Result<Tuple<Unit, Node>, CompileException>> => {
 		

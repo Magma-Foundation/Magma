@@ -1,0 +1,10 @@
+import magma.api.result.Ok;
+import magma.api.result.Result;
+() => {
+	public createInitial : Result<C, E> => {
+		return Ok(collector.createInitial());
+	}
+	public fold : Result<C, E> => {
+		return current.flatMapValue(() => next.mapValue(() => collector.fold(inner, inner0)));
+	}
+}

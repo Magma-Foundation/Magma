@@ -1,5 +1,6 @@
 import magma.api.Tuple;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.Map;
+import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;
@@ -8,7 +9,7 @@ import magma.java.JavaMap;
 		if
 		(!input.startsWith("{")||!input.endsWith("}"))
 		return None();
-		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(Collectors.required(JavaMap.collecting())).map(JSONObject.new);
+		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(RequiredCollector(JavaMap.collecting())).map(JSONObject.new);
 	}
 	private parseEntry : Option<Tuple<String, JSONValue>> => {
 		

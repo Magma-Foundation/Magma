@@ -1,0 +1,10 @@
+import magma.api.option.Option;
+import magma.api.option.Some;
+() => {
+	public createInitial : Option<C> => {
+		return Some(collector.createInitial());
+	}
+	public fold : Option<C> => {
+		return current.and(next).map(() => collector.fold(inner.left(), inner.right()));
+	}
+}

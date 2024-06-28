@@ -1,4 +1,5 @@
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.List;
+import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;
@@ -7,6 +8,6 @@ import magma.java.JavaList;
 		if
 		(!input.startsWith("[")||!input.endsWith("]"))
 		return None();
-		return JSON.split(input.substring(1, input.length()-1)).stream().map(String.strip).map(valueParser.parse).collect(Collectors.required(JavaList.collecting())).map(JSONArray.new);
+		return JSON.split(input.substring(1, input.length()-1)).stream().map(String.strip).map(valueParser.parse).collect(RequiredCollector(JavaList.collecting())).map(JSONArray.new);
 	}
 }

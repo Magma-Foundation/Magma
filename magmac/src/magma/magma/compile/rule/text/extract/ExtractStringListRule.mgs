@@ -1,4 +1,4 @@
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.JoiningCollector;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -20,7 +20,7 @@ import java.util.Optional;
 		return JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
 	}
 	private join : String => {
-		return list.stream().collect(Collectors.joining(delimiter)).orElse("");
+		return list.stream().collect(JoiningCollector(delimiter)).orElse("");
 	}
 	protected toAttribute : Result<Attribute, Error_> => {
 		
