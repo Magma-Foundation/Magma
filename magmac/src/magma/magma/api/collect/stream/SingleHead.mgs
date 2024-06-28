@@ -8,7 +8,7 @@ export default class def SingleHead() => {
 	
 	false;
 	SingleHead(value : T) => this=value;
-	public head() => {
+	public def head() => {
 		if
 		(retrieved)
 		return None.None();

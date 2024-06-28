@@ -8,7 +8,7 @@ export default class def RangeHead() => {
 		this=initial;
 		this=extent;
 	}
-	public head() => {
+	public def head() => {
 		if
 		(counter>=extent)
 		return None.None();

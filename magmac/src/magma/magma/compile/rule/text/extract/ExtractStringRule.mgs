@@ -8,6 +8,6 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 export default class def ExtractStringRule() => {
 	ExtractStringRule(key : String) => super(key)
-	protected fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findString(key));
-	protected toAttribute(content : String) => Ok(StringAttribute(content));
+	def fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findString(key));
+	def toAttribute(content : String) => Ok(StringAttribute(content));
 }

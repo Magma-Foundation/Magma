@@ -3,8 +3,8 @@ import java.util.Optional;
 export default class def MultipleError() => {
 	private final errors : List<Error_>;
 	MultipleError(errors : List<Error_>) => this=errors;
-	public findMessage() => Optional.empty();
-	public findCauses() => Optional.of(errors);
-	public findContext() => Optional.empty();
-	public calculateDepth() => 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
+	public def findMessage() => Optional.empty();
+	public def findCauses() => Optional.of(errors);
+	public def findContext() => Optional.empty();
+	public def calculateDepth() => 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
 }

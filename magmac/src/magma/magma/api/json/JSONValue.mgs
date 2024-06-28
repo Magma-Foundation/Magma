@@ -2,7 +2,7 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 export struct JSONValue {
-	default find(key : String) => None.None();
-	default findValue() => None.None();
-	default stream() => None.None();
+	def find(key : String) => None.None();
+	def findValue() => None.None();
+	def stream() => None.None();
 }

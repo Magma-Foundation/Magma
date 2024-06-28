@@ -2,6 +2,6 @@ import magma.api.option.Option;
 import magma.lang.Instance;
 import static magma.api.option.None.None;
 export default class def EmptyHead() => {
-	public static EmptyHead<T>() => EmptyHead();
-	public head() => None();
+	public def EmptyHead<T>() => EmptyHead();
+	public def head() => None();
 }

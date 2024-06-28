@@ -9,7 +9,7 @@ export default class def QualifiedExtractStringListRule() => {
 		super(key, delimiter);
 		this=qualifier;
 	}
-	protected qualify(child : String) => {
+	def qualify(child : String) => {
 		
 		ruleResult : RuleResult=
 		

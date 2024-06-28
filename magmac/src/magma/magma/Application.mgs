@@ -43,7 +43,7 @@ import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
 () => {
-	static createDirectory(targetParent : Path) => {
+	def createDirectory(targetParent : Path) => {
 		try 
 		{
 			Files.createDirectories(targetParent);
@@ -53,7 +53,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Failed to make parent.", e));
 		}
 	}
-	static print(error : Error_, depth : int) => {
+	def print(error : Error_, depth : int) => {
 		
 		context : var=
 		
@@ -118,8 +118,8 @@ import static magma.java.JavaResults.$Void;
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	private static escape(value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-	private static formatContext(e : Error_, depth : int) => {
+	def escape(value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	def formatContext(e : Error_, depth : int) => {
 		
 		actualContext : var=
 		
@@ -137,7 +137,7 @@ import static magma.java.JavaResults.$Void;
 		actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
-	static writeSafely(target : Path, csq : String) => {
+	def writeSafely(target : Path, csq : String) => {
 		try 
 		{
 			Files.writeString(target, csq);
@@ -147,8 +147,8 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	private static streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
-	private static findRootRule(platform : String) => {
+	def streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
+	def findRootRule(platform : String) => {
 		if
 		(platform.equals("java"))
 		{
@@ -162,7 +162,7 @@ import static magma.java.JavaResults.$Void;
 		return Err(CompileException("Unknown platform: "+platform));
 	}
 	run() => config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
-	private compile(build : Build) => $Void(() => {
+	def compile(build : Build) => $Void(() => {
 		
 		sources : var=
 		
@@ -219,8 +219,8 @@ import static magma.java.JavaResults.$Void;
 		$Option(writeSafely(debugTarget, generated.toString()));
 		return Tuple(source, generated);
 	});
-	private streamOptimizers() => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
-	private streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()));
+	def streamOptimizers() => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
+	def streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()));
 	writeTargets(build : Build, targetTrees : Map<Unit, Node>) => targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
 	writeTarget(build : Build, source : Unit, root : Node) => {
 		
@@ -288,7 +288,7 @@ import static magma.java.JavaResults.$Void;
 		System.out.println("Parsing source: "+source);
 		return Some(source.read().mapValue(() => parseWithInput(build, source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
 	}
-	private parseWithInput(build : Build, source : Unit, input : String) => $(() => {
+	def parseWithInput(build : Build, source : Unit, input : String) => $(() => {
 		
 		s : var=
 		

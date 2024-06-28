@@ -1,0 +1,58 @@
+import magma.api.Tuple;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export default class def FunctionOptimizer() => {
+	def flattenChild(child : Node, node : Node, state : State) => {
+		if
+		(child.is("block"))
+		return flattenInner(child, node).mapValue(() => Tuple(newNode, state));
+		// Child is already flattened, probably in a lambda...
+		return Ok(Tuple(node, state));
+	}
+	def flattenInner(child : Node, node : Node) => {
+		
+		children : var=
+		
+		child.findNodeList("children").orElse(JavaList.empty());
+		if
+		(children.size()!=1)
+		{
+			return Ok(node);
+		}
+		
+		firstOptional : var=
+		
+		children.first();
+		if
+		(firstOptional.isPresent())
+		{
+			
+			first : var=
+			
+			firstOptional.orElsePanic();
+			
+			value : var=
+			
+			first.is("return")?first.retype("statement"):first;
+			return Ok(node.withNode("child", value));
+		}
+		else
+		{
+			return Err(CompileError("List implementation is malformed.", node.toString()));
+		}
+	}
+	public def preVisit(node : Node, state : State) => {
+		
+		withoutType : var=
+		
+		node.mapNode("definition", () => definition.remove("type"));
+		return withoutType.findNode("child").map(() => flattenChild(child, withoutType, state)).orElseGet(() => Err(CompileError("No child is present.", withoutType.toString())));
+	}
+}

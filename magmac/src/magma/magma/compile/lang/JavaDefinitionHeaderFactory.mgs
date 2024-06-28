@@ -18,7 +18,7 @@ import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
 export default class def JavaDefinitionHeaderFactory() => {
-	static createDefinitionHeaderRule() => {
+	def createDefinitionHeaderRule() => {
 		
 		type : var=
 		
@@ -91,7 +91,7 @@ export default class def JavaDefinitionHeaderFactory() => {
 		
 		List.of("public", "static", "final", "private", "default", "protected", "abstract");
 		ModifiersRule() => super("modifiers", " ")
-		protected qualify(child : String) => {
+		def qualify(child : String) => {
 			if
 			(MODIFIERS.contains(child))
 			{
@@ -103,5 +103,5 @@ export default class def JavaDefinitionHeaderFactory() => {
 			}
 		}
 	}
-	default class def SimpleSplitter() => public split(input : String) => List.of(input.split("\n"));
+	default class def SimpleSplitter() => public def split(input : String) => List.of(input.split("\n"));
 }

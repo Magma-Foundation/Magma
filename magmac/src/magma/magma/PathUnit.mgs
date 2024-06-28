@@ -15,7 +15,7 @@ export default class def PathUnit() => {
 		this=root;
 		this=child;
 	}
-	public toString() => {
+	public def toString() => {
 		
 		list : var=
 		
@@ -23,7 +23,7 @@ export default class def PathUnit() => {
 		list.add(computeName());
 		return String.join(".", list);
 	}
-	public read() => {
+	public def read() => {
 		try 
 		{
 			return Ok(Files.readString(child));
@@ -32,14 +32,14 @@ export default class def PathUnit() => {
 			return Err(CompileException(e));
 		}
 	}
-	public computeNamespace() => {
+	public def computeNamespace() => {
 		
 		relativized : var=
 		
 		root.relativize(child.getParent());
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
-	public computeName() => {
+	public def computeName() => {
 		
 		fileName : var=
 		

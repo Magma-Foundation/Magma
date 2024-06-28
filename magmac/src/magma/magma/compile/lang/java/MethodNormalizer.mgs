@@ -11,7 +11,7 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
-export default class def MethodNormalizer() => public preVisit(node : Node, state : State) => {
+export default class def MethodNormalizer() => public def preVisit(node : Node, state : State) => {
 	
 	renamed : var=
 	
@@ -29,21 +29,27 @@ export default class def MethodNormalizer() => public preVisit(node : Node, stat
 	{
 		return Err(CompileError("No definition present.", node.toString()));
 	}
+	
+	definition : var=
+	
+	definitionOptional.orElseThrow().mapStringList("modifiers", () => {
+		
+		newModifiers : var=
+		
+		oldModifiers.contains("public")?JavaList.of("public"):JavaList.empty();
+		return newModifiers.add("def");
+	});
 	if
 	(node.has("child"))
 	{
 		
 		withParams : var=
 		
-		definitionOptional.get().withNodeList("params", JavaList.fromNative(params));
+		definition.withNodeList("params", JavaList.fromNative(params));
 		return Ok(Tuple(renamed.withNode("definition", withParams), state));
 	}
 	else
 	{
-		
-		definition : var=
-		
-		definitionOptional.orElseThrow();
 		
 		returnsOptional : var=
 		

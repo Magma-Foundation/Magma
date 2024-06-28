@@ -1,5 +1,5 @@
 import magma.api.collect.stream.Collector;
 () => {
-	public createInitial() => initial;
-	public fold(current : List<T>, next : T) => current.add(next);
+	public def createInitial() => initial;
+	public def fold(current : List<T>, next : T) => current.add(next);
 }

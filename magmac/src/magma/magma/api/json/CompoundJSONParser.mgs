@@ -1,4 +1,4 @@
 import magma.api.collect.List;
 import magma.api.collect.stream.Streams;
 import magma.api.option.Option;
-() => public parse(input : String) => parsers.stream().map(() => parser.parse(input)).flatMap(Streams.fromOption).head();
+() => public def parse(input : String) => parsers.stream().map(() => parser.parse(input)).flatMap(Streams.fromOption).head();

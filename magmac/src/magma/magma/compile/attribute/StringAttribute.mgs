@@ -1,6 +1,6 @@
 import java.util.Optional;
 () => {
-	public asString() => Optional.of(value);
-	public format(depth : int) => "\"" + escape() + "\"";
-	private escape() => value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");
+	public def asString() => Optional.of(value);
+	public def format(depth : int) => "\"" + escape() + "\"";
+	def escape() => value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");
 }

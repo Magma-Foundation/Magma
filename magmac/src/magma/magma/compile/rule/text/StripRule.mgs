@@ -14,8 +14,8 @@ import magma.compile.rule.result.RuleResult;
 	
 	"right";
 	StripRule(child : Rule) => this(child, DEFAULT_LEFT, DEFAULT_RIGHT)
-	public toNode(input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
-	public fromNode(node : Node) => {
+	public def toNode(input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
+	public def fromNode(node : Node) => {
 		
 		leftIndent : var=
 		

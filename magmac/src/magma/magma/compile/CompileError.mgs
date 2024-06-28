@@ -2,8 +2,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 () => {
-	public findMessage() => Optional.of(message);
-	public findCauses() => Optional.empty();
-	public findContext() => Optional.of(context);
-	public calculateDepth() => 1;
+	public def findMessage() => Optional.of(message);
+	public def findCauses() => Optional.empty();
+	public def findContext() => Optional.of(context);
+	public def calculateDepth() => 1;
 }

@@ -14,12 +14,12 @@ import java.util.Optional;
 export default class def ExtractRule() => {
 	protected final key : String;
 	ExtractRule(key : String) => this=key;
-	protected abstract fromAttribute : (Node) => Optional<String>;
-	protected abstract toAttribute : (String) => Result<Attribute, Error_>;
-	public toNode(input : String) => toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
-	public fromNode(node : Node) => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
-	private static getStringErrorOk(value : String) => Ok(value);
-	private createErr(node : Node) => {
+	def fromAttribute : (Node) => Optional<String>;
+	def toAttribute : (String) => Result<Attribute, Error_>;
+	public def toNode(input : String) => toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
+	public def fromNode(node : Node) => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
+	def getStringErrorOk(value : String) => Ok(value);
+	def createErr(node : Node) => {
 		
 		format : var=
 		

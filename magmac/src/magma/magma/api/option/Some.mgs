@@ -2,13 +2,13 @@ import magma.api.Tuple;
 import java.util.function.Function;
 import java.util.function.Supplier;
 () => {
-	public map<R>(mapper : Function<T, R>) => Some(mapper.apply(value));
-	public orElseGet(supplier : Supplier<T>) => value;
-	public orElse(other : T) => value;
-	public isPresent() => true;
-	public toTuple(other : T) => Tuple(true, value);
-	public isEmpty() => false;
-	public flatMap<R>(mapper : Function<T, Option<R>>) => mapper.apply(value);
-	public orElsePanic() => value;
-	public and<R>(other : Option<R>) => other.map(() => Tuple(value, inner));
+	public def map<R>(mapper : Function<T, R>) => Some(mapper.apply(value));
+	public def orElseGet(supplier : Supplier<T>) => value;
+	public def orElse(other : T) => value;
+	public def isPresent() => true;
+	public def toTuple(other : T) => Tuple(true, value);
+	public def isEmpty() => false;
+	public def flatMap<R>(mapper : Function<T, Option<R>>) => mapper.apply(value);
+	public def orElsePanic() => value;
+	public def and<R>(other : Option<R>) => other.map(() => Tuple(value, inner));
 }

@@ -8,6 +8,6 @@ import java.util.stream.Collectors;
 	Factory();
 	
 	;
-	public asStringList() => Optional.of(values);
-	public format(depth : int) => values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
+	public def asStringList() => Optional.of(values);
+	public def format(depth : int) => values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
 }

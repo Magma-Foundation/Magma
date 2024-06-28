@@ -13,8 +13,8 @@ export default class def OptionalRule() => {
 		this=onEmpty;
 		this=OrRule(List.of(onPresent, onEmpty));
 	}
-	public toNode(input : String) => orRule.toNode(input);
-	public fromNode(node : Node) => {
+	public def toNode(input : String) => orRule.toNode(input);
+	public def fromNode(node : Node) => {
 		if
 		(node.has(key))
 		{

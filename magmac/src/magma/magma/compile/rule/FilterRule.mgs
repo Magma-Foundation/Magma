@@ -6,13 +6,13 @@ import magma.compile.rule.result.RuleResult;
 export default class def FilterRule() => {
 	protected final child : Rule;
 	FilterRule(child : Rule) => this=child;
-	public toNode(input : String) => {
+	public def toNode(input : String) => {
 		if
 		(filter(input))
 		return child.toNode(input);
 		return ErrorRuleResult(CompileError("Invalid filter: "+computeMessage(), input));
 	}
-	protected abstract computeMessage : () => String;
-	protected abstract filter : (String) => boolean;
-	public fromNode(node : Node) => child.fromNode(node);
+	def computeMessage : () => String;
+	def filter : (String) => boolean;
+	public def fromNode(node : Node) => child.fromNode(node);
 }

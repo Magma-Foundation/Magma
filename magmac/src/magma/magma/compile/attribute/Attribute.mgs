@@ -8,21 +8,21 @@ import java.util.Optional;
  * the attribute value as a string or a list of strings.
  */
 export struct Attribute {
-	default asNode() => Optional.empty();
-	default asNodeList() => Optional.empty();
+	def asNode() => Optional.empty();
+	def asNodeList() => Optional.empty();
 	
 	/**
      * Retrieves the attribute value as a string.
      *
      * @return an Optional containing the string value if present, otherwise empty
      */
-	default asString() => Optional.empty();
+	def asString() => Optional.empty();
 	
 	/**
      * Retrieves the attribute value as a list of strings.
      *
      * @return an Optional containing the list of string values if present, otherwise empty
      */
-	default asStringList() => Optional.empty();
+	def asStringList() => Optional.empty();
 	format : (int) => String;
 }

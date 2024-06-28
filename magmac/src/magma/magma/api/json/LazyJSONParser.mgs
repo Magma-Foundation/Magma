@@ -6,6 +6,6 @@ export default class def LazyJSONParser() => {
 	private value : Option<JSONParser>=
 	
 	None.None();
-	public setValue(value : JSONParser) => this=Some(value);
-	public parse(input : String) => value.flatMap(() => inner.parse(input));
+	public def setValue(value : JSONParser) => this=Some(value);
+	public def parse(input : String) => value.flatMap(() => inner.parse(input));
 }

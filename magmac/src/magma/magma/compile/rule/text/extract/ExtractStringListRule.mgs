@@ -16,9 +16,9 @@ export default class def ExtractStringListRule() => {
 		super(key);
 		this=delimiter;
 	}
-	protected fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
-	private join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
-	protected toAttribute(content : String) => {
+	def fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
+	def join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
+	def toAttribute(content : String) => {
 		
 		list : var=
 		
@@ -36,7 +36,7 @@ export default class def ExtractStringListRule() => {
 		}
 		return Ok(StringListAttribute(list));
 	}
-	private split(content : String) => {
+	def split(content : String) => {
 		
 		result : List<String>=
 		
@@ -61,5 +61,5 @@ export default class def ExtractStringListRule() => {
 		result.add(content.substring(start));
 		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();
 	}
-	protected abstract qualify : (String) => Optional<Error_>;
+	def qualify : (String) => Optional<Error_>;
 }

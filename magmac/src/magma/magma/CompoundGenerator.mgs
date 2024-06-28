@@ -6,7 +6,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Generator;
 import magma.compile.rule.Node;
 import java.util.List;
-() => public generate(root : Node, state : State) => {
+() => public def generate(root : Node, state : State) => {
 	
 	initial : var=
 	
