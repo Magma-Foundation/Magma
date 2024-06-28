@@ -23,4 +23,4 @@ import magma.api.Tuple;import java.util.Optional;import java.util.function.Funct
      * Streams the entries of the node as tuples of key and attribute.
      *
      * @return a Stream of tuples containing the keys and attributes
-     */streamEntries : () => Stream<Tuple<String, Attribute>>;mapValues : (Function<Attribute, Attribute>) => Attributes;format : (int) => String;remove : (String) => Attributes;has : (String) => boolean;isEmpty : () => boolean;}
+     */streamEntries : () => Stream<Tuple<String, Attribute>>;format : (int) => String;has : (String) => boolean;isEmpty : () => boolean;streamKeys : () => magma.api.collect.stream.Stream<String>;}

@@ -1,0 +1,1 @@
+import magma.Unit;import magma.api.collect.List;import magma.java.JavaList;import magma.java.Set;() => {private final sources : Set<Unit>;private final frames : List<List<String>>;ImmutableState : public => {this=sources;this=frames;}ImmutableState : public => {this(sources, JavaList());}}
