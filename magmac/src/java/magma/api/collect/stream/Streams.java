@@ -3,7 +3,6 @@ package magma.api.collect.stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import magma.java.NativeListHead;
 
@@ -42,7 +41,7 @@ public class Streams {
 
             @Override
             public Option<Integer> head() {
-                if (counter >= extent) return new None<>();
+                if (counter >= extent) return None.None();
                 var value = counter;
                 counter++;
                 return new Some<>(value);

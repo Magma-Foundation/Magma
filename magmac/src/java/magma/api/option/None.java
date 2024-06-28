@@ -1,14 +1,20 @@
 package magma.api.option;
 
 import magma.api.Tuple;
+import magma.lang.Instance;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
+    @Instance
+    public static <T> None<T> None() {
+        return new None<>();
+    }
+
     @Override
     public <R> Option<R> map(Function<T, R> mapper) {
-        return new None<>();
+        return None();
     }
 
     @Override
@@ -38,7 +44,7 @@ public class None<T> implements Option<T> {
 
     @Override
     public <R> Option<R> flatMap(Function<T, Option<R>> mapper) {
-        return new None<>();
+        return None();
     }
 
     @Override
@@ -48,6 +54,6 @@ public class None<T> implements Option<T> {
 
     @Override
     public <R> Option<Tuple<T, R>> and(Option<R> other) {
-        return new None<>();
+        return None();
     }
 }

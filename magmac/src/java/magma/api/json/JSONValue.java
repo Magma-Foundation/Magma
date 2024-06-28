@@ -6,14 +6,14 @@ import magma.api.option.Option;
 
 public interface JSONValue {
     default Option<JSONValue> find(String key) {
-        return new None<>();
+        return None.None();
     }
 
     default Option<String> findValue() {
-        return new None<>();
+        return None.None();
     }
 
     default Option<Stream<JSONValue>> stream() {
-        return new None<>();
+        return None.None();
     }
 }

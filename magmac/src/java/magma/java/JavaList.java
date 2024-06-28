@@ -131,7 +131,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     @Override
     public Option<T> last() {
         if (list.isEmpty()) {
-            return new None<>();
+            return None.None();
         } else {
             return new Some<>(list.get(list.size() - 1));
         }
@@ -145,7 +145,7 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     @Override
     public Option<magma.api.collect.List<T>> popLastAndDiscard() {
         if (list.isEmpty()) {
-            return new None<>();
+            return None.None();
         }
         var copy = new ArrayList<>(list);
         copy.remove(copy.size() - 1);
@@ -165,6 +165,6 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
             return new Some<>(list.get(index));
         }
 
-        return new None<>();
+        return None.None();
     }
 }

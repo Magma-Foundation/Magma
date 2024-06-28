@@ -50,7 +50,7 @@ public record Application(Configuration config) {
     static Option<CompileException> createDirectory(Path targetParent) {
         try {
             Files.createDirectories(targetParent);
-            return new None<>();
+            return None.None();
         } catch (IOException e) {
             return new Some<>(new CompileException("Failed to make parent.", e));
         }
@@ -117,7 +117,7 @@ public record Application(Configuration config) {
     static Option<CompileException> writeSafely(Path target, String csq) {
         try {
             Files.writeString(target, csq);
-            return new None<>();
+            return None.None();
         } catch (IOException e) {
             return new Some<>(new CompileException("Cannot write.", e));
         }
@@ -265,7 +265,7 @@ public record Application(Configuration config) {
 
             // Essentially, we want to skip this package.
             if (slice.equals(List.of("magma", "java"))) {
-                return new None<>();
+                return None.None();
             }
         }
 

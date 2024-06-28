@@ -22,7 +22,7 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
 
     @Override
     public Option<Error_> findError() {
-        return new None<>();
+        return None.None();
     }
 
     @Override
@@ -32,6 +32,6 @@ public record UntypedRuleResult(Attributes attributes) implements RuleResult {
 
     @Override
     public Option<Node> tryCreate() {
-        return new None<>();
+        return None.None();
     }
 }

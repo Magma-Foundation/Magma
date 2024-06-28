@@ -14,7 +14,7 @@ public final class SingleHead<T> implements Head<T> {
 
     @Override
     public Option<T> head() {
-        if (retrieved) return new None<>();
+        if (retrieved) return None.None();
         else {
             retrieved = true;
             return new Some<>(value);

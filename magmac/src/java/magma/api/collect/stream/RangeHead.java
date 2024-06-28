@@ -15,7 +15,7 @@ public final class RangeHead implements Head<Integer> {
 
     @Override
     public Option<Integer> head() {
-        if (counter >= extent) return new None<>();
+        if (counter >= extent) return None.None();
 
         var value = counter;
         counter++;

@@ -28,7 +28,7 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
     public Stream<T> filter(Predicate<T> filter) {
         return flatMap(value -> new HeadedStream<>(filter.test(value)
                 ? new SingleHead<>(value)
-                : new EmptyHead<>()));
+                : EmptyHead.EmptyHead()));
     }
 
     @Override
@@ -36,7 +36,7 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
         return new HeadedStream<>(head()
                 .map(mapper)
                 .<Head<R>>map(initial -> new FlatMapHead<>(initial, this, mapper))
-                .orElse(new EmptyHead<>()));
+                .orElse(EmptyHead.EmptyHead()));
     }
 
     @Override
@@ -97,7 +97,7 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
                 if (tuple.left()) {
                     current = tuple.right();
                 } else {
-                    return new None<>();
+                    return None.None();
                 }
             }
         }

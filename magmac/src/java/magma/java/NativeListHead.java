@@ -17,7 +17,7 @@ public class NativeListHead<T> implements Head<T> {
 
     @Override
     public Option<T> head() {
-        if (counter >= list.size()) return new None<>();
+        if (counter >= list.size()) return None.None();
 
         var value = list.get(counter);
         counter++;

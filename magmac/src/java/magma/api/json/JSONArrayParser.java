@@ -9,7 +9,7 @@ import magma.java.JavaList;
 public record JSONArrayParser(JSONParser valueParser) implements JSONParser {
     @Override
     public Option<JSONValue> parse(String input) {
-        if (!input.startsWith("[") || !input.endsWith("]")) return new None<>();
+        if (!input.startsWith("[") || !input.endsWith("]")) return None.None();
         return JSON.split(input.substring(1, input.length() - 1))
                 .stream()
                 .map(String::strip)

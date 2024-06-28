@@ -43,6 +43,6 @@ public record Ok<T, E>(T value) implements Result<T, E> {
 
     @Override
     public Option<E> findErr() {
-        return new None<>();
+        return None.None();
     }
 }
