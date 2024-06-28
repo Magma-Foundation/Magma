@@ -2,17 +2,11 @@ import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.rule.result.RuleResult;
 import java.util.List;
-export default class def OptionalRule() => {
+object OptionalRule {
 	private final key : String;
 	private final onPresent : Rule;
 	private final onEmpty : Rule;
 	private final orRule : OrRule;
-	 OptionalRule(this : Self, key : String, onPresent : Rule, onEmpty : Rule) => {
-		this=key;
-		this=onPresent;
-		this=onEmpty;
-		this=OrRule(List.of(onPresent, onEmpty));
-	}
 	public def toNode(this : Self, input : String) => orRule.toNode(input);
 	public def fromNode(this : Self, node : Node) => {
 		if

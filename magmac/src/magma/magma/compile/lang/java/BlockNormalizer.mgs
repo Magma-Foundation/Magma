@@ -4,6 +4,9 @@ import magma.api.collect.stream.ExceptionalCollector;
 import magma.api.collect.stream.ResultStream;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.Error_;
@@ -13,7 +16,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 object BlockNormalizer {
 	def removeFromChildren(this : Self, children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
-	def flattenChild(this : Self, flattening : Flattening, node : Node) => {
+	def flattenChild(this : Self, flattening : Flattening, node : Node, outerName : String) => {
 		if
 		(!node.is("function"))
 		return Ok(flattening.withInstanceMember(node));
@@ -33,21 +36,24 @@ object BlockNormalizer {
 		
 		definition.findStringList("modifiers").orElse(JavaList.empty());
 		
-		withNewModifiers : var=
+		cleanedOptional : var=
 		
-		definition.withStringList("modifiers", modifiers.remove("static"));
+		cleanup(node, outerName);
+		if
+		(cleanedOptional.isEmpty())
+		return Ok(flattening);
 		
-		withNewDefinition : var=
+		cleaned : var=
 		
-		node.withNode("definition", withNewModifiers);
+		cleanedOptional.orElsePanic();
 		if
 		(modifiers.contains("static"))
 		{
-			return Ok(flattening.withStaticMember(withNewDefinition));
+			return Ok(flattening.withStaticMember(cleaned));
 		}
 		else
 		{
-			return Ok(flattening.withInstanceMember(withNewDefinition));
+			return Ok(flattening.withInstanceMember(cleaned));
 		}
 	}
 	def splitIntoObject(this : Self, node : Node, flattening : Flattening, name : String) => {
@@ -93,6 +99,47 @@ object BlockNormalizer {
 		
 		node.clear("block").withNodeList("children", staticMembers);
 		return node.clear("object").withString("name", name).withNode("child", staticBlock);
+	}
+	def cleanup(this : Self, node : Node, outerName : String) => {
+		if
+		(!node.is("function"))
+		return Some(node);
+		
+		definitionOptional : var=
+		
+		node.findNode("definition");
+		if
+		(definitionOptional.isEmpty())
+		return Some(node);
+		
+		definition : var=
+		
+		definitionOptional.orElsePanic();
+		
+		nameOptional : var=
+		
+		definition.findString("name");
+		if
+		(nameOptional.isEmpty())
+		return Some(node);
+		if
+		(nameOptional.orElsePanic().equals(outerName))
+		{
+			return None();
+		}
+		
+		modifiers : var=
+		
+		definition.findStringList("modifiers").orElse(JavaList.empty());
+		
+		withNewModifiers : var=
+		
+		definition.withStringList("modifiers", modifiers.remove("static"));
+		
+		withNewDefinition : var=
+		
+		node.withNode("definition", withNewModifiers);
+		return Some(withNewDefinition);
 	}
 }
 export default class def BlockNormalizer() => {
@@ -147,8 +194,41 @@ export default class def BlockNormalizer() => {
 		if
 		(!child.is("block"))
 		return Ok(Streams.of(node));
-		return child.findNodeList("children").orElse(JavaList.empty()).stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), BlockNormalizer.flattenChild).mapValue(() => splitIntoObject(node, flattening, name));
+		
+		oldChildren : var=
+		
+		child.findNodeList("children").orElse(JavaList.empty());
+		if
+		(hasFactory(oldChildren, name))
+		{
+			
+			children1 : var=
+			
+			oldChildren.stream().map(() => cleanup(oldChild, name)).flatMap(Streams.fromOption).collect(JavaList.collecting());
+			return Ok(Streams.of(createObject(node, name, children1)));
+		}
+		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name));
 	}
+	def hasFactory(this : Self, children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
+		if
+		(!child.is("function"))
+		return false;
+		
+		definition : var=
+		
+		child.findNode("definition");
+		if
+		(definition.isEmpty())
+		return false;
+		
+		name : var=
+		
+		definition.orElsePanic().findString("name");
+		if
+		(name.isEmpty())
+		return false;
+		return name.orElsePanic().equals(outerName);
+	});
 	public def preVisit(this : Self, node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
 	() => {
 		public def withStaticMember(this : Self, staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));

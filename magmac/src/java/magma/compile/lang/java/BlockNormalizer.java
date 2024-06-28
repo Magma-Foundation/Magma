@@ -6,6 +6,9 @@ import magma.api.collect.stream.ExceptionalCollector;
 import magma.api.collect.stream.ResultStream;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.Error_;
@@ -21,7 +24,7 @@ public class BlockNormalizer implements Visitor {
                 .collect(JavaList.collecting());
     }
 
-    private static Result<Flattening, Error_> flattenChild(Flattening flattening, Node node) {
+    private static Result<Flattening, Error_> flattenChild(Flattening flattening, Node node, String outerName) {
         if (!node.is("function")) return new Ok<>(flattening.withInstanceMember(node));
 
         var definitionOptional = node.findNode("definition");
@@ -30,13 +33,14 @@ public class BlockNormalizer implements Visitor {
         var definition = definitionOptional.orElsePanic();
         var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
 
-        var withNewModifiers = definition.withStringList("modifiers", modifiers.remove("static"));
-        var withNewDefinition = node.withNode("definition", withNewModifiers);
+        var cleanedOptional = cleanup(node, outerName);
+        if(cleanedOptional.isEmpty()) return new Ok<>(flattening);
+        var cleaned = cleanedOptional.orElsePanic();
 
         if (modifiers.contains("static")) {
-            return new Ok<>(flattening.withStaticMember(withNewDefinition));
+            return new Ok<>(flattening.withStaticMember(cleaned));
         } else {
-            return new Ok<>(flattening.withInstanceMember(withNewDefinition));
+            return new Ok<>(flattening.withInstanceMember(cleaned));
         }
     }
 
@@ -65,6 +69,26 @@ public class BlockNormalizer implements Visitor {
         return node.clear("object")
                 .withString("name", name)
                 .withNode("child", staticBlock);
+    }
+
+    static Option<Node> cleanup(Node node, String outerName) {
+        if (!node.is("function")) return new Some<>(node);
+
+        var definitionOptional = node.findNode("definition");
+        if (definitionOptional.isEmpty()) return new Some<>(node);
+
+        var definition = definitionOptional.orElsePanic();
+        var nameOptional = definition.findString("name");
+        if (nameOptional.isEmpty()) return new Some<>(node);
+        if (nameOptional.orElsePanic().equals(outerName)) {
+            return new None<>();
+        }
+
+        var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+
+        var withNewModifiers = definition.withStringList("modifiers", modifiers.remove("static"));
+        var withNewDefinition = node.withNode("definition", withNewModifiers);
+        return new Some<>(withNewDefinition);
     }
 
     @Override
@@ -101,11 +125,35 @@ public class BlockNormalizer implements Visitor {
         var child = childOptional.orElsePanic();
         if (!child.is("block")) return new Ok<>(Streams.of(node));
 
-        return child.findNodeList("children")
-                .orElse(JavaList.empty())
+        var oldChildren = child.findNodeList("children").orElse(JavaList.empty());
+
+        if (hasFactory(oldChildren, name)) {
+            var children1 = oldChildren.stream()
+                    .map((Node oldChild) -> cleanup(oldChild, name))
+                    .flatMap(Streams::fromOption)
+                    .collect(JavaList.collecting());
+
+            return new Ok<>(Streams.of(createObject(node, name, children1)));
+        }
+
+        return oldChildren
                 .stream()
-                .foldLeftToResult(new Flattening(JavaList.empty(), JavaList.empty()), BlockNormalizer::flattenChild)
+                .foldLeftToResult(new Flattening(JavaList.empty(), JavaList.empty()), (flattening1, node1) -> flattenChild(flattening1, node1, name))
                 .mapValue(flattening -> splitIntoObject(node, flattening, name));
+    }
+
+    private boolean hasFactory(List<Node> children, String outerName) {
+        return children.stream().anyMatch(child -> {
+            if (!child.is("function")) return false;
+
+            var definition = child.findNode("definition");
+            if (definition.isEmpty()) return false;
+
+            var name = definition.orElsePanic().findString("name");
+            if (name.isEmpty()) return false;
+
+            return name.orElsePanic().equals(outerName);
+        });
     }
 
     @Override

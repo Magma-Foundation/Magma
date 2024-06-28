@@ -1,13 +1,13 @@
 package magma.api.option;
 
 import magma.api.Tuple;
-import magma.lang.Instance;
+import magma.lang.Instantiator;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class None<T> implements Option<T> {
-    @Instance
+    @Instantiator
     public static <T> None<T> None() {
         return new None<>();
     }

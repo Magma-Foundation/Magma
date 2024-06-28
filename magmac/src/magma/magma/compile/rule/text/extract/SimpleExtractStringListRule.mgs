@@ -1,6 +1,5 @@
 import magma.compile.Error_;
 import java.util.Optional;
-export default class def SimpleExtractStringListRule() => {
-	 SimpleExtractStringListRule(this : Self, key : String, delimiter : String) => super(key, delimiter)
+object SimpleExtractStringListRule {
 	def qualify(this : Self, child : String) => Optional.empty();
 }

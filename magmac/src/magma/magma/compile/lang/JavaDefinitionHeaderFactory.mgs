@@ -87,12 +87,11 @@ object JavaDefinitionHeaderFactory {
 	}
 }
 export default class def JavaDefinitionHeaderFactory() => {
-	default class def ModifiersRule() => {
+	object ModifiersRule {
 		
 		public static final MODIFIERS : List<String>=
 		
 		List.of("public", "static", "final", "private", "default", "protected", "abstract");
-		 ModifiersRule(this : Self) => super("modifiers", " ")
 		def qualify(this : Self, child : String) => {
 			if
 			(MODIFIERS.contains(child))

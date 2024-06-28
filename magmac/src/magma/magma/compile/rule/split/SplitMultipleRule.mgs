@@ -20,17 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-export default class def SplitMultipleRule() => {
+object SplitMultipleRule {
 	private final propertyKey : String;
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	 SplitMultipleRule(this : Self, splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) => {
-		this=propertyKey;
-		this=childRule;
-		this=splitter;
-		this=delimiter;
-	}
 	public def toNode(this : Self, input : String) => {
 		
 		split : var=

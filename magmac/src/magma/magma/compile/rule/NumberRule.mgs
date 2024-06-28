@@ -23,9 +23,6 @@ object NumberRule {
 		}
 		return true;
 	}
-}
-export default class def NumberRule() => {
-	 NumberRule(this : Self, child : Rule) => super(child)
 	def computeMessage(this : Self) => "Not a number.";
 	def filter(this : Self, input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
 }

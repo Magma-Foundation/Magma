@@ -41,15 +41,10 @@ import java.util.function.Predicate;
 		}
 	}
 	public def head(this : Self) => provider.head();
-	default class def FlatMapHead<R>() => {
+	object FlatMapHead {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;
-		 FlatMapHead(this : Self, initial : Head<R>, outer : HeadedStream<T>, mapper : Function<T, Head<R>>) => {
-			this=outer;
-			this=mapper;
-			current=initial;
-		}
 		public def head(this : Self) => while(true){
 			
 			currentHead : var=

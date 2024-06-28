@@ -9,17 +9,11 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
-export default class def SplitOnceRule() => {
+object SplitOnceRule {
 	protected final leftRule : Rule;
 	protected final slice : String;
 	protected final rightRule : Rule;
 	private final searcher : Searcher;
-	 SplitOnceRule(this : Self, leftRule : Rule, slice : String, rightRule : Rule, searcher : Searcher) => {
-		this=leftRule;
-		this=slice;
-		this=rightRule;
-		this=searcher;
-	}
 	public def toNode(this : Self, input : String) => {
 		
 		tuple : var=
