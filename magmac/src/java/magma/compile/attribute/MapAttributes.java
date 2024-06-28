@@ -1,7 +1,10 @@
 package magma.compile.attribute;
 
 import magma.api.Tuple;
+import magma.api.collect.stream.HeadedStream;
+import magma.java.NativeListHead;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -75,5 +78,10 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     @Override
     public boolean isEmpty() {
         return values.isEmpty();
+    }
+
+    @Override
+    public magma.api.collect.stream.Stream<String> streamKeys() {
+        return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(values.keySet())));
     }
 }

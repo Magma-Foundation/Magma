@@ -52,4 +52,6 @@ public interface Attributes {
     boolean has(String name);
 
     boolean isEmpty();
+
+    magma.api.collect.stream.Stream<String> streamKeys();
 }

@@ -1,5 +1,6 @@
 package magma.compile.rule;
 
+import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
@@ -101,6 +102,11 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public Option<magma.api.collect.List<String>> findStringList(String key) {
         return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute::asStringList).map(JavaList::new));
+    }
+
+    @Override
+    public Stream<String> streamKeys() {
+        return attributes.streamKeys();
     }
 
     public Node with(String key, Attribute value) {
