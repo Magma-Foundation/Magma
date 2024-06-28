@@ -159,4 +159,21 @@ public interface Node {
      * @return the updated Node
      */
     Node withStringList(String key, List<String> values);
+
+    /**
+     * Maps the node associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the node
+     * @param mapper the function to apply to the node
+     * @return the updated Node
+     */
+    Node mapNode(String key, Function<Node, Node> mapper);
+
+    /**
+     * Removes a property.
+     *
+     * @param key The key.
+     * @return Without the property.
+     */
+    Node remove(String key);
 }

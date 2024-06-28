@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 () => {
-	public toNode(input : String) : RuleResult => {
+	public toNode(input : String) => {
 		
 		allIndexes : var=
 		
@@ -73,8 +73,8 @@ import java.util.List;
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	private static wrapError(leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
-	private findAllIndexesReverse(input : String) : List<Integer> => {
+	private static wrapError(leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+	private findAllIndexesReverse(input : String) => {
 		
 		indexes : List<Integer>=
 		
@@ -92,5 +92,5 @@ import java.util.List;
 		Collections.reverse(indexes);
 		return indexes;
 	}
-	public fromNode(node : Node) : Result<String, Error_> => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	public fromNode(node : Node) => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
 }

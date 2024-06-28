@@ -2,6 +2,6 @@ import magma.api.collect.List;
 import magma.api.collect.stream.Stream;
 export default class def Configuration() => {
 	private final builds : List<Build>;
-	Configuration(builds : List<Build>) : public => this=builds;
-	public streamBuilds() : Stream<Build> => builds.stream();
+	Configuration(builds : List<Build>) => this=builds;
+	public streamBuilds() => builds.stream();
 }

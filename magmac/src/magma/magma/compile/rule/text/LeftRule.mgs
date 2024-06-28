@@ -6,7 +6,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 () => {
-	public toNode(input : String) : RuleResult => {
+	public toNode(input : String) => {
 		if
 		(input.startsWith(slice))
 		{
@@ -21,5 +21,5 @@ import magma.compile.rule.result.RuleResult;
 			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));
 		}
 	}
-	public fromNode(node : Node) : Result<String, Error_> => child.fromNode(node).mapValue(() => slice+inner);
+	public fromNode(node : Node) => child.fromNode(node).mapValue(() => slice+inner);
 }

@@ -11,14 +11,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 () => {
-	MapAttributes() : public => this(Collections.emptyMap())
-	public mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
+	MapAttributes() => this(Collections.emptyMap())
+	public mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) => {
 		if
 		(!values.containsKey(key))
 		return this;
 		return factory.fromAttribute(values.get(key)).map(mapper).map(factory.toAttribute).map(() => with(key, inner)).orElse(this);
 	}
-	public with(key : String, value : Attribute) : Attributes => {
+	public with(key : String, value : Attribute) => {
 		
 		copy : var=
 		
@@ -26,8 +26,8 @@ import java.util.stream.Stream;
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
-	public apply(key : String) : Optional<Attribute> => values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
-	public merge(other : Attributes) : Attributes => {
+	public apply(key : String) => values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
+	public merge(other : Attributes) => {
 		
 		entries : var=
 		
@@ -41,9 +41,17 @@ import java.util.stream.Stream;
 		}
 		return current;
 	}
-	public streamEntries() : Stream<Tuple<String, Attribute>> => values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
-	public format(depth : int) : String => values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
-	public has(name : String) : boolean => this.values.containsKey(name);
-	public isEmpty() : boolean => values.isEmpty();
-	public streamKeys() : magma.api.collect.stream.Stream<String> => HeadedStream(NativeListHead(ArrayList(values.keySet())));
+	public streamEntries() => values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
+	public format(depth : int) => values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
+	public has(name : String) => this.values.containsKey(name);
+	public isEmpty() => values.isEmpty();
+	public remove(key : String) => {
+		
+		copy : var=
+		
+		HashMap(values);
+		copy.remove(key);
+		return MapAttributes(copy);
+	}
+	public streamKeys() => HeadedStream(NativeListHead(ArrayList(values.keySet())));
 }

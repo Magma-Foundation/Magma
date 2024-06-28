@@ -13,13 +13,13 @@ import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
 export default class def ExtractRule() => {
 	protected final key : String;
-	ExtractRule(key : String) : public => this=key;
+	ExtractRule(key : String) => this=key;
 	protected abstract fromAttribute : (Node) => Optional<String>;
 	protected abstract toAttribute : (String) => Result<Attribute, Error_>;
-	public toNode(input : String) : RuleResult => toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
-	public fromNode(node : Node) : Result<String, Error_> => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
-	private static getStringErrorOk(value : String) : Result<String, Error_> => Ok(value);
-	private createErr(node : Node) : Err<String, Error_> => {
+	public toNode(input : String) => toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
+	public fromNode(node : Node) => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
+	private static getStringErrorOk(value : String) => Ok(value);
+	private createErr(node : Node) => {
 		
 		format : var=
 		

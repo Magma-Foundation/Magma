@@ -2,9 +2,9 @@ import magma.api.collect.List;
 import magma.java.JavaList;
 export default class def ImmutableState() => {
 	private final frames : List<List<String>>;
-	ImmutableState(frames : List<List<String>>) : public => this=frames;
-	ImmutableState() : public => this(JavaList())
-	public enter() : State => ImmutableState(frames.pushLast(JavaList.empty()));
-	public computeDepth() : int => frames.size();
-	public exit() : State => ImmutableState(frames.popLastAndDiscard().orElse(frames));
+	ImmutableState(frames : List<List<String>>) => this=frames;
+	ImmutableState() => this(JavaList())
+	public enter() => ImmutableState(frames.pushLast(JavaList.empty()));
+	public computeDepth() => frames.size();
+	public exit() => ImmutableState(frames.popLastAndDiscard().orElse(frames));
 }

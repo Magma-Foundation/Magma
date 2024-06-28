@@ -4,11 +4,11 @@ import magma.api.option.Some;
 export default class def RangeHead() => {
 	private final extent : int;
 	private counter : int;
-	RangeHead(initial : int, extent : int) : public => {
+	RangeHead(initial : int, extent : int) => {
 		this=initial;
 		this=extent;
 	}
-	public head() : Option<Integer> => {
+	public head() => {
 		if
 		(counter>=extent)
 		return None.None();

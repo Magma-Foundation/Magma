@@ -7,8 +7,8 @@ export default class def SingleHead() => {
 	private retrieved : boolean=
 	
 	false;
-	SingleHead(value : T) : public => this=value;
-	public head() : Option<T> => {
+	SingleHead(value : T) => this=value;
+	public head() => {
 		if
 		(retrieved)
 		return None.None();

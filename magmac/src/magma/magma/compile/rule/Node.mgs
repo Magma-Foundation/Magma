@@ -156,4 +156,21 @@ export struct Node {
      * @return the updated Node
      */
 	withStringList : (String, List<String>) => Node;
+	
+	/**
+     * Maps the node associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the node
+     * @param mapper the function to apply to the node
+     * @return the updated Node
+     */
+	mapNode : (String, Function<Node, Node>) => Node;
+	
+	/**
+     * Removes a property.
+     *
+     * @param key The key.
+     * @return Without the property.
+     */
+	remove : (String) => Node;
 }

@@ -3,12 +3,12 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import java.util.function.Function;
 () => {
-	public static from<E, R>(value : R) : Result<R, E> => Ok(value);
-	public flatMapValue<R>(mapper : Function<T, Result<R, E>>) : Result<R, E> => mapper.apply(value);
-	public mapValue<R>(mapper : Function<T, R>) : Result<R, E> => Ok(mapper.apply(value));
-	public isOk() : boolean => true;
-	public mapErr<R>(mapper : Function<E, R>) : Result<T, R> => Ok(value);
-	public match<R>(onOk : Function<T, R>, onErr : Function<E, R>) : R => onOk.apply(value);
-	public findValue() : Option<T> => Some(value);
-	public findErr() : Option<E> => None.None();
+	public static from<E, R>(value : R) => Ok(value);
+	public flatMapValue<R>(mapper : Function<T, Result<R, E>>) => mapper.apply(value);
+	public mapValue<R>(mapper : Function<T, R>) => Ok(mapper.apply(value));
+	public isOk() => true;
+	public mapErr<R>(mapper : Function<E, R>) => Ok(value);
+	public match<R>(onOk : Function<T, R>, onErr : Function<E, R>) => onOk.apply(value);
+	public findValue() => Some(value);
+	public findErr() => None.None();
 }

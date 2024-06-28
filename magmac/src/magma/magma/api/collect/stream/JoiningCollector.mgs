@@ -1,5 +1,5 @@
 import java.util.Optional;
 () => {
-	public createInitial() : Optional<String> => Optional.empty();
-	public fold(current : Optional<String>, next : String) : Optional<String> => current.isEmpty()?Optional.of(next):current.map(() => inner+delimiter+next);
+	public createInitial() => Optional.empty();
+	public fold(current : Optional<String>, next : String) => current.isEmpty()?Optional.of(next):current.map(() => inner+delimiter+next);
 }

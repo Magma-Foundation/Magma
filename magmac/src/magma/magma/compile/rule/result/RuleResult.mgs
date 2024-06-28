@@ -9,13 +9,13 @@ import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 export struct RuleResult {
-	private static createNothingPresentError() : Err<Node, Error_> => Err(CompileError("Neither value nor error is present.", ""));
-	private static wrapInOk(inner : Node) : Result<Node, Error_> => Ok(inner);
+	private static createNothingPresentError() => Err(CompileError("Neither value nor error is present.", ""));
+	private static wrapInOk(inner : Node) => Ok(inner);
 	findError : () => Option<Error_>;
 	findAttributes : () => Option<Attributes>;
 	tryCreate : () => Option<Node>;
 	withType : (String) => RuleResult;
 	mapErr : (Function<Error_, Error_>) => RuleResult;
-	default create() : Result<Node, Error_> => tryCreate().map(RuleResult.wrapInOk).orElseGet(this.wrapInErr);
-	private wrapInErr() : Result<Node, Error_> => findError().map(() => Err(err)).orElseGet(RuleResult.createNothingPresentError);
+	default create() => tryCreate().map(RuleResult.wrapInOk).orElseGet(this.wrapInErr);
+	private wrapInErr() => findError().map(() => Err(err)).orElseGet(RuleResult.createNothingPresentError);
 }

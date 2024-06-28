@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 export default class def ExtractStringListRule() => {
 	protected final delimiter : String;
-	ExtractStringListRule(key : String, delimiter : String) : public => {
+	ExtractStringListRule(key : String, delimiter : String) => {
 		super(key);
 		this=delimiter;
 	}
-	protected fromAttribute(attribute : Node) : Optional<String> => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
-	private join(list : magma.api.collect.List<String>) : String => list.stream().collect(JoiningCollector(delimiter)).orElse("");
-	protected toAttribute(content : String) : Result<Attribute, Error_> => {
+	protected fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
+	private join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
+	protected toAttribute(content : String) => {
 		
 		list : var=
 		
@@ -36,7 +36,7 @@ export default class def ExtractStringListRule() => {
 		}
 		return Ok(StringListAttribute(list));
 	}
-	private split(content : String) : List<String> => {
+	private split(content : String) => {
 		
 		result : List<String>=
 		

@@ -11,7 +11,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 
-public class FunctionFlattener implements Visitor {
+public class FunctionOptimizer implements Visitor {
     private static Result<Tuple<Node, State>, Error_> flattenChild(Node child, Node node, State state) {
         if (child.is("block")) return flattenInner(child, node).mapValue(newNode -> new Tuple<>(newNode, state));
         // Child is already flattened, probably in a lambda...
@@ -37,8 +37,9 @@ public class FunctionFlattener implements Visitor {
 
     @Override
     public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        return node.findNode("child")
-                .map(child -> flattenChild(child, node, state))
-                .orElseGet(() -> new Err<>(new CompileError("No child is present.", node.toString())));
+        var withoutType = node.mapNode("definition", definition -> definition.remove("type"));
+        return withoutType.findNode("child")
+                .map(child -> flattenChild(child, withoutType, state))
+                .orElseGet(() -> new Err<>(new CompileError("No child is present.", withoutType.toString())));
     }
 }

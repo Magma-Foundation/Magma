@@ -2,8 +2,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 () => {
-	public findMessage() : Optional<String> => Optional.of(message);
-	public findCauses() : Optional<List<Error_>> => Optional.of(Collections.singletonList(parent));
-	public findContext() : Optional<String> => Optional.of(context);
-	public calculateDepth() : int => 1+parent.calculateDepth();
+	public findMessage() => Optional.of(message);
+	public findCauses() => Optional.of(Collections.singletonList(parent));
+	public findContext() => Optional.of(context);
+	public calculateDepth() => 1+parent.calculateDepth();
 }

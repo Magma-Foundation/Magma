@@ -81,6 +81,13 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     }
 
     @Override
+    public Attributes remove(String key) {
+        var copy = new HashMap<>(values);
+        copy.remove(key);
+        return new MapAttributes(copy);
+    }
+
+    @Override
     public magma.api.collect.stream.Stream<String> streamKeys() {
         return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(values.keySet())));
     }

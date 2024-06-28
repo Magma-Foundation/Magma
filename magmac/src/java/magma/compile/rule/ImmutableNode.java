@@ -5,6 +5,7 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
+import magma.compile.attribute.Factory;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
@@ -82,7 +83,11 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
 
     @Override
     public Node mapStringList(String key, Function<List<String>, List<String>> mapper) {
-        return new ImmutableNode(type, attributes.mapValue(key, StringListAttribute.Factory, list -> JavaList.toNative(mapper.apply(JavaList.fromNative(list)))));
+        return map(key, StringListAttribute.Factory, list -> JavaList.toNative(mapper.apply(JavaList.fromNative(list))));
+    }
+
+    private <T> ImmutableNode map(String key, Factory<T> factory, Function<T, T> mapper) {
+        return new ImmutableNode(type, attributes.mapValue(key, factory, mapper));
     }
 
     @Override
@@ -93,6 +98,16 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public Node withStringList(String key, List<String> values) {
         return with(key, new StringListAttribute(JavaList.toNative(values)));
+    }
+
+    @Override
+    public Node mapNode(String key, Function<Node, Node> mapper) {
+        return map(key, NodeAttribute.Factory, mapper);
+    }
+
+    @Override
+    public Node remove(String key) {
+        return new ImmutableNode(type, attributes.remove(key));
     }
 
     public Node with(String key, Attribute value) {

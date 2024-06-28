@@ -7,7 +7,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import java.util.Optional;
 export default class def ExtractStringRule() => {
-	ExtractStringRule(key : String) : public => super(key)
-	protected fromAttribute(attribute : Node) : Optional<String> => JavaOptionals.toNative(attribute.findString(key));
-	protected toAttribute(content : String) : Result<Attribute, Error_> => Ok(StringAttribute(content));
+	ExtractStringRule(key : String) => super(key)
+	protected fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findString(key));
+	protected toAttribute(content : String) => Ok(StringAttribute(content));
 }

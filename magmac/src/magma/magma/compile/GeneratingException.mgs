@@ -1,14 +1,14 @@
 export default class def GeneratingException() => {
 	public final content : String;
-	GeneratingException(message : String) : public => {
+	GeneratingException(message : String) => {
 		super(message);
 		this="";
 	}
-	GeneratingException(message : String, content : String) : public => {
+	GeneratingException(message : String, content : String) => {
 		super(message);
 		this=content;
 	}
-	GeneratingException(message : String, content : String, cause : Throwable) : public => {
+	GeneratingException(message : String, content : String, cause : Throwable) => {
 		super(message, cause);
 		this=content;
 	}

@@ -54,4 +54,6 @@ public interface Attributes {
     boolean isEmpty();
 
     magma.api.collect.stream.Stream<String> streamKeys();
+
+    Attributes remove(String key);
 }

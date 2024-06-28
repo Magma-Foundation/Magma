@@ -11,11 +11,11 @@ import java.util.stream.IntStream;
 export default class def PathUnit() => {
 	private final root : Path;
 	private final child : Path;
-	PathUnit(root : Path, child : Path) : public => {
+	PathUnit(root : Path, child : Path) => {
 		this=root;
 		this=child;
 	}
-	public toString() : String => {
+	public toString() => {
 		
 		list : var=
 		
@@ -23,7 +23,7 @@ export default class def PathUnit() => {
 		list.add(computeName());
 		return String.join(".", list);
 	}
-	public read() : Result<String, CompileException> => {
+	public read() => {
 		try 
 		{
 			return Ok(Files.readString(child));
@@ -32,14 +32,14 @@ export default class def PathUnit() => {
 			return Err(CompileException(e));
 		}
 	}
-	public computeNamespace() : List<String> => {
+	public computeNamespace() => {
 		
 		relativized : var=
 		
 		root.relativize(child.getParent());
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
-	public computeName() : String => {
+	public computeName() => {
 		
 		fileName : var=
 		

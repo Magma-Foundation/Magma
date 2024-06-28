@@ -8,8 +8,8 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 () => {
-	public toNode(input : String) : RuleResult => input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));
-	public fromNode(node : Node) : Result<String, Error_> => {
+	public toNode(input : String) => input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));
+	public fromNode(node : Node) => {
 		if
 		(node.has(name))
 		{

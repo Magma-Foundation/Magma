@@ -28,7 +28,7 @@ import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.PackageRemover;
 import magma.compile.lang.java.RecordNormalizer;
-import magma.compile.lang.magma.FunctionFlattener;
+import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -124,7 +124,7 @@ public record Application(Configuration config) {
         }
     }
 
-    private static Stream<Visitor> streamVisitors0() {
+    private static Stream<Visitor> streamNormalizers() {
         return Streams.fromNativeList(List.of(
                 new FilteringVisitor("block", new PackageRemover()),
                 new FilteringVisitor("record", new RecordNormalizer()),
@@ -192,9 +192,9 @@ public record Application(Configuration config) {
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
             var rootGenerator = new CompoundGenerator(List.of(
-                    new VisitingGenerator(new CompoundVisitor(streamVisitors0().collect(JavaList.collecting()))),
-                    new VisitingGenerator(new CompoundVisitor(streamVisitors2().collect(JavaList.collecting()))),
-                    new VisitingGenerator(new CompoundVisitor(streamVisitors1().collect(JavaList.collecting())))
+                    new VisitingGenerator(new CompoundVisitor(streamNormalizers().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamOptimizers().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamFormatters().collect(JavaList.collecting())))
             ));
 
             var generated = $Result(rootGenerator
@@ -210,13 +210,13 @@ public record Application(Configuration config) {
         });
     }
 
-    private Stream<Visitor> streamVisitors2() {
+    private Stream<Visitor> streamOptimizers() {
         return Streams.of(
-                new FilteringVisitor("function", new FunctionFlattener())
+                new FilteringVisitor("function", new FunctionOptimizer())
         );
     }
 
-    private Stream<Visitor> streamVisitors1() {
+    private Stream<Visitor> streamFormatters() {
         return Streams.of(
                 new FilteringVisitor("block", new BlockFormatter())
         );

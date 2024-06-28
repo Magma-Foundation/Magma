@@ -3,7 +3,7 @@ import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;
-() => public parse(input : String) : Option<JSONValue> => {
+() => public parse(input : String) => {
 	if
 	(!input.startsWith("[")||!input.endsWith("]"))
 	return None.None();

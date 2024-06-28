@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 export default class def VisitingGenerator() => {
 	private final visitor : Visitor;
-	VisitingGenerator(visitor : Visitor) : public => this=visitor;
-	private generateAttribute(key : String, node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+	VisitingGenerator(visitor : Visitor) => this=visitor;
+	private generateAttribute(key : String, node : Node, state : State) => {
 		
 		nodeList : var=
 		
@@ -29,7 +29,7 @@ export default class def VisitingGenerator() => {
 		}
 		return JavaOptionals.toNative(node.findNode(key)).map(() => generate(value, state).mapValue(() => inner.mapLeft(() => node.withNode(key, child)))).orElseGet(() => Ok(Tuple(node, state)));
 	}
-	private generateThenFold(current : Tuple<List<Node>, State>, node : Node) : Result<Tuple<List<Node>, State>, Error_> => generate(node, current.right()).mapValue(() => {
+	private generateThenFold(current : Tuple<List<Node>, State>, node : Node) => generate(node, current.right()).mapValue(() => {
 		
 		newNode : var=
 		
@@ -45,7 +45,7 @@ export default class def VisitingGenerator() => {
 		list.add(newNode);
 		return Tuple(list, newState);
 	});
-	public generate(node : Node, depth : State) : Result<Tuple<Node, State>, Error_> => visitor.preVisit(node, depth).flatMapValue(() => {
+	public generate(node : Node, depth : State) => visitor.preVisit(node, depth).flatMapValue(() => {
 		
 		preVisitedNode : var=
 		
