@@ -3,6 +3,7 @@ package magma;
 import magma.api.Tuple;
 import magma.api.collect.Map;
 import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
 import magma.api.option.Option;
@@ -13,7 +14,7 @@ import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
-import magma.compile.lang.Generator;
+import magma.compile.lang.CompoundVisitor;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.VisitingGenerator;
@@ -39,7 +40,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Option;
@@ -123,8 +123,8 @@ public record Application(Configuration config) {
         }
     }
 
-    private static Stream<Visitor> streamVisitors() {
-        return Stream.of(
+    private static Stream<Visitor> streamVisitors0() {
+        return Streams.fromNativeList(List.of(
                 new FilteringVisitor("block", new PackageRemover()),
                 new FilteringVisitor("record", new RecordNormalizer()),
                 new FilteringVisitor("interface", new InterfaceNormalizer()),
@@ -133,7 +133,7 @@ public record Application(Configuration config) {
                 new FilteringVisitor("constructor", new ConstructorNormalizer()),
                 new FilteringVisitor("lambda", new LambdaNormalizer()),
                 new FilteringVisitor("method-reference", new MethodReferenceNormalizer())
-        );
+        ));
     }
 
     private static Result<Rule, CompileException> findRootRule(String platform) {
@@ -190,9 +190,13 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var generated = $Result(new CompoundGenerator(streamVisitors()
-                    .<Generator>map(VisitingGenerator::new)
-                    .toList())
+            var javaCleaner = new VisitingGenerator(new CompoundVisitor(streamVisitors0().collect(JavaList.collecting())));
+
+            var rootGenerator = new CompoundGenerator(List.of(
+                    javaCleaner
+            ));
+
+            var generated = $Result(rootGenerator
                     .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
