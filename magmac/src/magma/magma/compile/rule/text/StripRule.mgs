@@ -4,7 +4,7 @@ import magma.compile.Error_;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
-() => {
+export default object StripRule {
 	
 	public static final DEFAULT_LEFT : String=
 	
@@ -13,7 +13,6 @@ import magma.compile.rule.result.RuleResult;
 	public static final DEFAULT_RIGHT : String=
 	
 	"right";
-	StripRule(this : Self, child : Rule) => this(child, DEFAULT_LEFT, DEFAULT_RIGHT)
 	public def toNode(this : Self, input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
 	public def fromNode(this : Self, node : Node) => {
 		
@@ -26,4 +25,5 @@ import magma.compile.rule.result.RuleResult;
 		node.findString(right).orElse("");
 		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
+	implements Rule;
 }

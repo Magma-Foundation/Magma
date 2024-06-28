@@ -238,7 +238,7 @@ export default class def BlockNormalizer() => {
 		return name.orElsePanic().equals(outerName);
 	});
 	public def preVisit(this : Self, node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
-	() => {
+	default class def Flattening(instanceMembers : List<Node>, staticMembers : List<Node>) => {
 		public def withStaticMember(this : Self, staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));
 		public def withInstanceMember(this : Self, instanceMember : Node) => Flattening(instanceMembers.addLast(instanceMember), staticMembers);
 	}

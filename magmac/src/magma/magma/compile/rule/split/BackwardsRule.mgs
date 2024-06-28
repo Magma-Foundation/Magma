@@ -12,7 +12,10 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-() => {
+export default object BackwardsRule {
+	def wrapError(this : Self, leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+}
+export default class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
 	public def toNode(this : Self, input : String) => {
 		
 		allIndexes : var=
@@ -73,7 +76,6 @@ import java.util.List;
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	static def wrapError(this : Self, leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 	def findAllIndexesReverse(this : Self, input : String) => {
 		
 		indexes : List<Integer>=
@@ -93,4 +95,5 @@ import java.util.List;
 		return indexes;
 	}
 	public def fromNode(this : Self, node : Node) => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	implements Rule;
 }

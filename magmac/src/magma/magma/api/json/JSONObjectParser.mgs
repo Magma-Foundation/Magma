@@ -4,7 +4,7 @@ import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;
-() => {
+export default class def JSONObjectParser(valueParser : JSONParser) => {
 	public def parse(this : Self, input : String) => {
 		if
 		(!input.startsWith("{")||!input.endsWith("}"))
@@ -38,4 +38,5 @@ import magma.java.JavaMap;
 		left.substring(1, left.length()-1);
 		return valueParser.parse(right).map(() => Tuple(key, value));
 	}
+	implements JSONParser;
 }

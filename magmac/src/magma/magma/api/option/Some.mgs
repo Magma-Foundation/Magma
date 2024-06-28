@@ -1,7 +1,7 @@
 import magma.api.Tuple;
 import java.util.function.Function;
 import java.util.function.Supplier;
-() => {
+export default class def Some<T>(value : T) => {
 	public def map<R>(this : Self, mapper : Function<T, R>) => Some(mapper.apply(value));
 	public def orElseGet(this : Self, supplier : Supplier<T>) => value;
 	public def orElse(this : Self, other : T) => value;
@@ -11,4 +11,5 @@ import java.util.function.Supplier;
 	public def flatMap<R>(this : Self, mapper : Function<T, Option<R>>) => mapper.apply(value);
 	public def orElsePanic(this : Self) => value;
 	public def and<R>(this : Self, other : Option<R>) => other.map(() => Tuple(value, inner));
+	implements Option<T>;
 }

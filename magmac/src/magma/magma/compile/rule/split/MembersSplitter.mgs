@@ -159,8 +159,7 @@ export default class def MembersSplitter() => {
 		}
 		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();
 	}
-	() => {
-		State(this : Self) => this(Collections.emptyList(), StringBuilder(), 0)
+	default object State {
 		def advance(this : Self) => {
 			
 			copy : var=

@@ -12,8 +12,7 @@ import magma.compile.attribute.StringListAttribute;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.function.Function;
-() => {
-	ImmutableNode(this : Self, type : String) => this(type, MapAttributes())
+export default object ImmutableNode {
 	public def findType(this : Self) => type;
 	public def formatWithDepth(this : Self, depth : int) => "\t".repeat(depth)+format(depth);
 	public def format(this : Self, depth : int) => type+" = "+attributes.format(depth);
@@ -37,4 +36,5 @@ import java.util.function.Function;
 	public def withNodeList(this : Self, key : String, values : magma.api.collect.List<Node>) => with(key, NodeListAttribute(JavaList.toNative(values)));
 	public def mapNodes(this : Self, key : String, mapper : Function<magma.api.collect.List<Node>, magma.api.collect.List<Node>>) => ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
 	public def findNodeList(this : Self, key : String) => JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNodeList)).map(JavaList.fromNative);
+	implements Node;
 }

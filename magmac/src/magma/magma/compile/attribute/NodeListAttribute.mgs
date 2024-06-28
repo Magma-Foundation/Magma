@@ -2,7 +2,7 @@ import magma.compile.rule.Node;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-() => {
+export default class def NodeListAttribute(nodeList : List<Node>) => {
 	
 	public static final Factory : Factory<List<Node>>=
 	
@@ -16,4 +16,5 @@ import java.util.stream.Collectors;
 		return "[]";
 		return nodeList.stream().map(() => child.formatWithDepth(depth+1)).collect(Collectors.joining(",\n", "[\n", "\n" + "\t".repeat(depth) + "]"));
 	}
+	implements Attribute;
 }

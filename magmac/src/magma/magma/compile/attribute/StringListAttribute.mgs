@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-() => {
+export default class def StringListAttribute(values : List<String>) => {
 	
 	public static final Factory : Factory<List<String>>=
 	
@@ -10,4 +10,5 @@ import java.util.stream.Collectors;
 	;
 	public def asStringList(this : Self) => Optional.of(values);
 	public def format(this : Self, depth : int) => values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
+	implements Attribute;
 }

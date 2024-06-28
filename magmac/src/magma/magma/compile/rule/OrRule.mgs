@@ -9,8 +9,10 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-() => {
-	static def toError(this : Self, results : List<Result<String, Error_>>) => Err(MultipleError(results.stream().map(() => JavaOptionals.toNative(stringErrorResult.findErr())).flatMap(Optional.stream).toList()));
+export default object OrRule {
+	def toError(this : Self, results : List<Result<String, Error_>>) => Err(MultipleError(results.stream().map(() => JavaOptionals.toNative(stringErrorResult.findErr())).flatMap(Optional.stream).toList()));
+}
+export default class def OrRule(rules : List<Rule>) => {
 	public def toNode(this : Self, input : String) => {
 		
 		errors : var=
@@ -65,4 +67,5 @@ import java.util.Optional;
 		}
 		return anyOk.orElseGet(() => toError(results));
 	}
+	implements Rule;
 }

@@ -10,8 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-() => {
-	MapAttributes(this : Self) => this(Collections.emptyMap())
+export default object MapAttributes {
 	public def mapValue<T>(this : Self, key : String, factory : Factory<T>, mapper : Function<T, T>) => {
 		if
 		(!values.containsKey(key))
@@ -54,4 +53,5 @@ import java.util.stream.Stream;
 		return MapAttributes(copy);
 	}
 	public def streamKeys(this : Self) => HeadedStream(NativeListHead(ArrayList(values.keySet())));
+	implements Attributes;
 }

@@ -6,10 +6,13 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Generator;
 import magma.compile.rule.Node;
 import java.util.List;
-() => public def generate(this : Self, root : Node, state : State) => {
-	
-	initial : var=
-	
-	Tuple(root, state);
-	return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
+export default class def CompoundGenerator(children : List<Generator>) => {
+	public def generate(this : Self, root : Node, state : State) => {
+		
+		initial : var=
+		
+		Tuple(root, state);
+		return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
+	}
+	implements Generator;
 }

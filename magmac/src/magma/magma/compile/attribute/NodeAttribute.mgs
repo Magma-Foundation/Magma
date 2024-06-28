@@ -1,6 +1,9 @@
 import magma.compile.rule.Node;
 import java.util.Optional;
-() => {
+export default object NodeAttribute {
+	public def from(this : Self, node : Node) => NodeAttribute(node);
+}
+export default class def NodeAttribute(value : Node) => {
 	
 	public static final Factory : Factory<Node>=
 	
@@ -9,5 +12,5 @@ import java.util.Optional;
 	;
 	public def asNode(this : Self) => Optional.of(value);
 	public def format(this : Self, depth : int) => value.format(depth);
-	public static def from(this : Self, node : Node) => NodeAttribute(node);
+	implements Attribute;
 }

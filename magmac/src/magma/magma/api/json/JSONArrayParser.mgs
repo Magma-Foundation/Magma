@@ -3,9 +3,12 @@ import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;
-() => public def parse(this : Self, input : String) => {
-	if
-	(!input.startsWith("[")||!input.endsWith("]"))
-	return None.None();
-	return JSON.split(input.substring(1, input.length()-1)).stream().map(String.strip).map(valueParser.parse).collect(RequiredCollector(JavaList.collecting())).map(JSONArray.new);
+export default class def JSONArrayParser(valueParser : JSONParser) => {
+	public def parse(this : Self, input : String) => {
+		if
+		(!input.startsWith("[")||!input.endsWith("]"))
+		return None.None();
+		return JSON.split(input.substring(1, input.length()-1)).stream().map(String.strip).map(valueParser.parse).collect(RequiredCollector(JavaList.collecting())).map(JSONArray.new);
+	}
+	implements JSONParser;
 }

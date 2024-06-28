@@ -5,7 +5,7 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-() => {
+export default class def RightRule(child : Rule, slice : String) => {
 	public def toNode(this : Self, input : String) => {
 		if
 		(input.endsWith(slice))
@@ -26,4 +26,5 @@ import magma.compile.rule.result.RuleResult;
 		}
 	}
 	public def fromNode(this : Self, node : Node) => child.fromNode(node).mapValue(() => inner+slice);
+	implements Rule;
 }

@@ -4,69 +4,72 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-() => public def search(this : Self, input : String) => {
-	if
-	(!input.contains(slice))
-	return Optional.empty();
-	
-	queue : var=
-	
-	IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-	
-	depth : var=
-	
-	0;
-	while
-	(!queue.isEmpty())
-	{
-		
-		tuple : var=
-		
-		queue.pop();
-		
-		i : var=
-		
-		tuple.left();
-		
-		maybeSlice : var=
-		
-		input.substring(i, Math.min(i+slice.length(), input.length()));
+default class def OperatorSearcher(slice : String) => {
+	public def search(this : Self, input : String) => {
 		if
-		(maybeSlice.equals(slice)&&depth==0)
-		{
-			return Optional.of(i);
-		}
-		else
+		(!input.contains(slice))
+		return Optional.empty();
+		
+		queue : var=
+		
+		IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		
+		depth : var=
+		
+		0;
+		while
+		(!queue.isEmpty())
 		{
 			
-			c : var=
+			tuple : var=
 			
-			maybeSlice.charAt(0);
+			queue.pop();
+			
+			i : var=
+			
+			tuple.left();
+			
+			maybeSlice : var=
+			
+			input.substring(i, Math.min(i+slice.length(), input.length()));
 			if
-			(c=='\'')
+			(maybeSlice.equals(slice)&&depth==0)
+			{
+				return Optional.of(i);
+			}
+			else
 			{
 				
-				pop : var=
+				c : var=
 				
-				queue.pop();
+				maybeSlice.charAt(0);
 				if
-				(pop.right()=='\\')
-				queue.pop();
-				queue.pop();
-				continue
-				;
+				(c=='\'')
+				{
+					
+					pop : var=
+					
+					queue.pop();
+					if
+					(pop.right()=='\\')
+					queue.pop();
+					queue.pop();
+					continue
+					;
+				}
+				if
+				(c=='(')
+				depth++;
+				if
+				(c==')')
+				depth--;
 			}
-			if
-			(c=='(')
-			depth++;
-			if
-			(c==')')
-			depth--;
 		}
-	}
-	
-	/*
+		
+		/*
         TODO: find the operator
          */
-	return Optional.empty();
+		return Optional.empty();
+	}
+	implements Searcher;
 }

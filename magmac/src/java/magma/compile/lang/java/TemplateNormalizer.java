@@ -12,7 +12,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 
-public class ClassNormalizer implements Visitor {
+public class TemplateNormalizer implements Visitor {
     private static List<String> computeNewModifiers(Node node) {
         var oldModifiers = node.findStringList("modifiers").orElse(JavaList.empty());
         var newModifiers = JavaList.<String>empty();
@@ -22,12 +22,12 @@ public class ClassNormalizer implements Visitor {
     private static Result<Tuple<Node, State>, Error_> generateDefinition(String name, Node node, State state) {
         var classModifiers = JavaList.of("default", "class", "def");
         var stringList = computeNewModifiers(node).addAll(classModifiers);
-
+        var params = node.findNodeList("params").orElse(JavaList.empty());
 
         var definition = node.clear("definition")
                 .withString("name", name)
                 .withStringList("modifiers", stringList)
-                .withNodeList("params", JavaList.empty());
+                .withNodeList("params", params);
 
         var withTypeParams = node.findNodeList("type-params")
                 .map(typeParams -> definition.withNodeList("type-params", typeParams))

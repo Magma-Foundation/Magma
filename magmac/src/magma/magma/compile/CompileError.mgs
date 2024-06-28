@@ -1,9 +1,10 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-() => {
+export default class def CompileError(message : String, context : String) => {
 	public def findMessage(this : Self) => Optional.of(message);
 	public def findCauses(this : Self) => Optional.empty();
 	public def findContext(this : Self) => Optional.of(context);
 	public def calculateDepth(this : Self) => 1;
+	implements Error_;
 }
