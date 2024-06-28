@@ -21,6 +21,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.lang.java.ClassNormalizer;
 import magma.compile.lang.java.FilteringVisitor;
 import magma.compile.lang.java.InterfaceNormalizer;
+import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.PackageRemover;
 import magma.compile.lang.java.RecordNormalizer;
 import magma.compile.rule.Node;
@@ -124,7 +125,8 @@ public record Application(Configuration config) {
                 new FilteringVisitor("block", new PackageRemover()),
                 new FilteringVisitor("record", new RecordNormalizer()),
                 new FilteringVisitor("interface", new InterfaceNormalizer()),
-                new FilteringVisitor("class", new ClassNormalizer())
+                new FilteringVisitor("class", new ClassNormalizer()),
+                new FilteringVisitor("method", new MethodNormalizer())
         );
     }
 
