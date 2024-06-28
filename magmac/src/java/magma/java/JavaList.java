@@ -101,17 +101,4 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
         return list.size();
     }
 
-    @Override
-    public Option<magma.api.collect.List<T>> mapLast(Function<T, T> mapper) {
-        if (list.isEmpty()) {
-            return new None<>();
-        }
-
-        var copy = new ArrayList<>(list);
-        var lastIndex = copy.size() - 1;
-        var last = copy.get(lastIndex);
-        var newLast = mapper.apply(last);
-        copy.set(lastIndex, newLast);
-        return new Some<>(new JavaList<>(copy));
-    }
 }

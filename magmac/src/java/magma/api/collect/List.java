@@ -4,8 +4,6 @@ import magma.api.Tuple;
 import magma.api.option.Option;
 import magma.api.collect.stream.Stream;
 
-import java.util.function.Function;
-
 public interface List<T> {
     List<T> add(T next);
 
@@ -26,6 +24,4 @@ public interface List<T> {
     Option<T> last();
 
     int size();
-
-    Option<List<T>> mapLast(Function<T, T> mapper);
 }
