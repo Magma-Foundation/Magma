@@ -1,7 +1,7 @@
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-object RangeHead {
+export default object RangeHead {
 	private final extent : int;
 	private counter : int;
 	public def head(this : Self) => {

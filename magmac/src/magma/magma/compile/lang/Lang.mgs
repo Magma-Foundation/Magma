@@ -24,7 +24,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-object Lang {
+export default object Lang {
 	def createBlock(this : Self, member : Rule) => StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
 	def createMembersRule(this : Self, member : Rule) => SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
 	def createImportRule(this : Self, namespace : TypeRule) => TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));

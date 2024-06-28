@@ -17,7 +17,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-object JavaDefinitionHeaderFactory {
+export default object JavaDefinitionHeaderFactory {
 	def createDefinitionHeaderRule(this : Self) => {
 		
 		type : var=
@@ -87,7 +87,7 @@ object JavaDefinitionHeaderFactory {
 	}
 }
 export default class def JavaDefinitionHeaderFactory() => {
-	object ModifiersRule {
+	default object ModifiersRule {
 		
 		public static final MODIFIERS : List<String>=
 		

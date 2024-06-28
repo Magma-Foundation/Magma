@@ -11,7 +11,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
-object MethodNormalizer {
+export default object MethodNormalizer {
 	def attachSelfReference(this : Self, oldParams : magma.api.collect.List<Node>, node : Node) => {
 		
 		selfType : var=

@@ -14,7 +14,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-object BlockNormalizer {
+export default object BlockNormalizer {
 	def removeFromChildren(this : Self, children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	def flattenChild(this : Self, flattening : Flattening, node : Node, outerName : String) => {
 		if
@@ -56,7 +56,7 @@ object BlockNormalizer {
 			return Ok(flattening.withInstanceMember(cleaned));
 		}
 	}
-	def splitIntoObject(this : Self, node : Node, flattening : Flattening, name : String) => {
+	def splitIntoObject(this : Self, node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
 		
 		staticMembers : var=
 		
@@ -71,14 +71,14 @@ object BlockNormalizer {
 			return Streams.of(createFunction(node, instanceMembers));
 		}
 		else if(instanceMembers.isEmpty()){
-			return Streams.of(createObject(node, name, staticMembers));
+			return Streams.of(createObject(node, modifiers, name, staticMembers));
 		}
 		else
 		{
 			
 			object : var=
 			
-			createObject(node, name, staticMembers);
+			createObject(node, modifiers, name, staticMembers);
 			
 			withChild : var=
 			
@@ -93,12 +93,16 @@ object BlockNormalizer {
 		node.clear("block").withNodeList("children", instanceMembers);
 		return node.withNode("child", instanceBlock);
 	}
-	def createObject(this : Self, node : Node, name : String, staticMembers : List<Node>) => {
+	def createObject(this : Self, node : Node, oldModifiers : List<String>, name : String, staticMembers : List<Node>) => {
 		
 		staticBlock : var=
 		
 		node.clear("block").withNodeList("children", staticMembers);
-		return node.clear("object").withString("name", name).withNode("child", staticBlock);
+		
+		newModifiers : var=
+		
+		oldModifiers.remove("class").remove("def");
+		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
 	def cleanup(this : Self, node : Node, outerName : String) => {
 		if
@@ -170,6 +174,10 @@ export default class def BlockNormalizer() => {
 		
 		definitionOptional.orElsePanic();
 		
+		modifiers : var=
+		
+		definition.findStringList("modifiers").orElse(JavaList.empty());
+		
 		nameOptional : var=
 		
 		definition.findString("name");
@@ -205,9 +213,9 @@ export default class def BlockNormalizer() => {
 			children1 : var=
 			
 			oldChildren.stream().map(() => cleanup(oldChild, name)).flatMap(Streams.fromOption).collect(JavaList.collecting());
-			return Ok(Streams.of(createObject(node, name, children1)));
+			return Ok(Streams.of(createObject(node, modifiers, name, children1)));
 		}
-		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name));
+		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name, modifiers));
 	}
 	def hasFactory(this : Self, children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
 		if

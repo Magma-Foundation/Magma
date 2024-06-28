@@ -10,7 +10,7 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-object ExtractStringListRule {
+export default object ExtractStringListRule {
 	protected final delimiter : String;
 	def fromAttribute(this : Self, attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
 	def join(this : Self, list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");

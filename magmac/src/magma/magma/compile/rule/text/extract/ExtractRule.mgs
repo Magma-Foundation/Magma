@@ -11,7 +11,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
-object ExtractRule {
+export default object ExtractRule {
 	protected final key : String;
 	def fromAttribute : (Self, Node) => Optional<String>;
 	def toAttribute : (Self, String) => Result<Attribute, Error_>;

@@ -6,7 +6,7 @@ import magma.compile.attribute.StringAttribute;
 import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import java.util.Optional;
-object ExtractStringRule {
+export default object ExtractStringRule {
 	def fromAttribute(this : Self, attribute : Node) => JavaOptionals.toNative(attribute.findString(key));
 	def toAttribute(this : Self, content : String) => Ok(StringAttribute(content));
 }

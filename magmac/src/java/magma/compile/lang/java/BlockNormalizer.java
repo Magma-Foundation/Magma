@@ -34,7 +34,7 @@ public class BlockNormalizer implements Visitor {
         var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
 
         var cleanedOptional = cleanup(node, outerName);
-        if(cleanedOptional.isEmpty()) return new Ok<>(flattening);
+        if (cleanedOptional.isEmpty()) return new Ok<>(flattening);
         var cleaned = cleanedOptional.orElsePanic();
 
         if (modifiers.contains("static")) {
@@ -44,16 +44,16 @@ public class BlockNormalizer implements Visitor {
         }
     }
 
-    private static Stream<Node> splitIntoObject(Node node, Flattening flattening, String name) {
+    private static Stream<Node> splitIntoObject(Node node, Flattening flattening, String name, List<String> modifiers) {
         var staticMembers = flattening.staticMembers;
         var instanceMembers = flattening.instanceMembers;
 
         if (staticMembers.isEmpty()) {
             return Streams.of(createFunction(node, instanceMembers));
         } else if (instanceMembers.isEmpty()) {
-            return Streams.of(createObject(node, name, staticMembers));
+            return Streams.of(createObject(node, modifiers, name, staticMembers));
         } else {
-            var object = createObject(node, name, staticMembers);
+            var object = createObject(node, modifiers, name, staticMembers);
             var withChild = createFunction(node, instanceMembers);
             return Streams.of(object, withChild);
         }
@@ -64,9 +64,12 @@ public class BlockNormalizer implements Visitor {
         return node.withNode("child", instanceBlock);
     }
 
-    private static Node createObject(Node node, String name, List<Node> staticMembers) {
+    private static Node createObject(Node node, List<String> oldModifiers, String name, List<Node> staticMembers) {
         var staticBlock = node.clear("block").withNodeList("children", staticMembers);
+        var newModifiers = oldModifiers.remove("class").remove("def");
+
         return node.clear("object")
+                .withStringList("modifiers", newModifiers)
                 .withString("name", name)
                 .withNode("child", staticBlock);
     }
@@ -115,6 +118,9 @@ public class BlockNormalizer implements Visitor {
         if (definitionOptional.isEmpty()) return new Ok<>(Streams.of(node));
 
         var definition = definitionOptional.orElsePanic();
+
+        var modifiers = definition.findStringList("modifiers").orElse(JavaList.empty());
+
         var nameOptional = definition.findString("name");
         if (nameOptional.isEmpty()) return new Ok<>(Streams.of(node));
         var name = nameOptional.orElsePanic();
@@ -133,13 +139,13 @@ public class BlockNormalizer implements Visitor {
                     .flatMap(Streams::fromOption)
                     .collect(JavaList.collecting());
 
-            return new Ok<>(Streams.of(createObject(node, name, children1)));
+            return new Ok<>(Streams.of(createObject(node, modifiers, name, children1)));
         }
 
         return oldChildren
                 .stream()
                 .foldLeftToResult(new Flattening(JavaList.empty(), JavaList.empty()), (flattening1, node1) -> flattenChild(flattening1, node1, name))
-                .mapValue(flattening -> splitIntoObject(node, flattening, name));
+                .mapValue(flattening -> splitIntoObject(node, flattening, name, modifiers));
     }
 
     private boolean hasFactory(List<Node> children, String outerName) {

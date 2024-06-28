@@ -20,7 +20,7 @@ import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-object JavaLang {
+export default object JavaLang {
 	public def createRootRule(this : Self) => Lang.createBlock(createRootMemberRule());
 	def createRootMemberRule(this : Self) => {
 		

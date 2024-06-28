@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.Optional;
-object MultipleError {
+export default object MultipleError {
 	private final errors : List<Error_>;
 	public def findMessage(this : Self) => Optional.empty();
 	public def findCauses(this : Self) => Optional.of(errors);
