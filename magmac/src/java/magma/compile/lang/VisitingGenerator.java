@@ -8,6 +8,7 @@ import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.rule.Node;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
@@ -21,12 +22,12 @@ public class VisitingGenerator implements Generator {
     }
 
     private Result<Tuple<Node, State>, Error_> generateAttribute(String key, Node node, State state) {
-        var nodeList = JavaOptionals.toNative(node.findNodeList(key));
+        var nodeList = JavaOptionals.toNative(node.findNodeList(key).map(JavaList::toNative));
         if (nodeList.isPresent()) {
             var initial = new Tuple<List<Node>, State>(new ArrayList<>(), state);
             return Streams.fromNativeList(nodeList.get())
                     .foldLeftToResult(initial, this::generateThenFold)
-                    .mapValue(tuple -> tuple.mapLeft(list -> node.withNodeList(key, list)));
+                    .mapValue(tuple -> tuple.mapLeft(list -> node.withNodeList(key, JavaList.fromNative(list))));
         }
 
         return JavaOptionals.toNative(node.findNode(key))

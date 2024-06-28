@@ -1,9 +1,9 @@
 package magma.compile.rule;
 
+import magma.api.collect.List;
 import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 
-import java.util.List;
 import java.util.function.Function;
 
 public interface Node {
@@ -33,7 +33,7 @@ public interface Node {
 
     Option<String> findString(String key);
 
-    Option<magma.api.collect.List<String>> findStringList(String key);
+    Option<List<String>> findStringList(String key);
 
     Stream<String> streamKeys();
 }

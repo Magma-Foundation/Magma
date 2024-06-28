@@ -58,8 +58,7 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return with(key, new NodeAttribute(value));
     }
 
-    @Override
-    public Node withNodeList(String key, List<Node> values) {
+    private Node withNodeList0(String key, List<Node> values) {
         return with(key, new NodeListAttribute(values));
     }
 
@@ -68,8 +67,7 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return attributes.has(child);
     }
 
-    @Override
-    public Node mapNodes(String key, Function<List<Node>, List<Node>> mapper) {
+    private Node mapNodes0(String key, Function<List<Node>, List<Node>> mapper) {
         return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, mapper));
     }
 
@@ -110,8 +108,22 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return JavaOptionals.fromNative(findNode0(key));
     }
 
-    @Override
-    public Option<List<Node>> findNodeList(String key) {
+    private Option<List<Node>> findNodeList1(String key) {
         return JavaOptionals.fromNative(findNodeList0(key));
+    }
+
+    @Override
+    public Node withNodeList(String key, magma.api.collect.List<Node> values) {
+        return withNodeList0(key, JavaList.toNative(values));
+    }
+
+    @Override
+    public Node mapNodes(String key, Function<magma.api.collect.List<Node>, magma.api.collect.List<Node>> mapper) {
+        return mapNodes0(key, nodes -> JavaList.toNative(mapper.apply(JavaList.fromNative(nodes))));
+    }
+
+    @Override
+    public Option<magma.api.collect.List<Node>> findNodeList(String key) {
+        return findNodeList1(key).map(JavaList::fromNative);
     }
 }

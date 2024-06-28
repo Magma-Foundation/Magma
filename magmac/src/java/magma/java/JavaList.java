@@ -1,8 +1,8 @@
 package magma.java;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Collector;
+import magma.api.collect.stream.HeadedStream;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
@@ -37,6 +37,17 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
                 return current.add(next);
             }
         };
+    }
+
+    public static <T> magma.api.collect.List<T> fromNative(List<T> list) {
+        return new JavaList<>(list);
+    }
+
+    public static <T> List<T> toNative(magma.api.collect.List<T> values) {
+        return values.stream().foldLeft(new ArrayList<>(), (ts, t) -> {
+            ts.add(t);
+            return ts;
+        });
     }
 
     @Override

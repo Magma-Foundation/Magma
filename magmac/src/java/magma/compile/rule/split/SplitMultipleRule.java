@@ -14,6 +14,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public final class SplitMultipleRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return JavaOptionals.toNative(node.findNodeList(propertyKey))
+        return JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList::toNative))
                 .map(this::joinNodes)
                 .orElseGet(() -> createErr(node));
     }

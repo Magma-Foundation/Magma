@@ -9,6 +9,7 @@ import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class MethodNormalizer implements Visitor {
         if (node.has("child")) {
             return new Ok<>(new Tuple<>(renamed, state));
         } else {
-            var params = JavaOptionals.toNative(node.findNodeList("params")).orElse(Collections.emptyList());
+            var params = JavaOptionals.toNative(node.findNodeList("params").map(JavaList::toNative)).orElse(Collections.emptyList());
             var definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
             if (definitionOptional.isEmpty()) {
                 return new Err<>(new CompileError("No definition present.", node.toString()));
@@ -45,8 +46,8 @@ public class MethodNormalizer implements Visitor {
                 paramTypes.add(type);
             }
 
-            var functionType = node.clear("function-type")
-                    .withNodeList("params", paramTypes)
+            Node node1 = node.clear("function-type");
+            var functionType = node1.withNodeList("params", JavaList.fromNative(paramTypes))
                     .withNode("returns", returns);
 
             var withType = definition.withNode("type", functionType);
