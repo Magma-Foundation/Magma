@@ -49,6 +49,15 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
         });
     }
 
+    public static <T> magma.api.collect.List<T> empty() {
+        return new JavaList<>();
+    }
+
+    @SafeVarargs
+    public static <T> magma.api.collect.List<T> of(T... values) {
+        return new JavaList<>(List.of(values));
+    }
+
     @Override
     public magma.api.collect.List<T> add(T next) {
         var copy = new ArrayList<>(list);

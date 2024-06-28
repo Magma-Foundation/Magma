@@ -4,7 +4,7 @@ import magma.api.option.Option;import java.util.function.Function;/**
  *
  * @param <T> the type of the value contained in a successful result
  * @param <E> the type of the error contained in a failed result
- */public struct Result {/**
+ */export struct Result {/**
      * Retrieves the value if the result is successful, wrapped in an Option.
      *
      * @return an Option containing the value if successful, or an empty Option if there is an error

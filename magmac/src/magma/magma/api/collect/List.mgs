@@ -3,7 +3,7 @@ import magma.api.collect.stream.Stream;import magma.api.option.Option;/**
  * streaming, and checking properties of the list.
  *
  * @param <T> the type of elements in the list
- */public struct List {/**
+ */export struct List {/**
      * Adds an element to the list and returns the updated list.
      *
      * @param next the element to add

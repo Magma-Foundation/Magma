@@ -3,7 +3,7 @@ import magma.api.Tuple;import java.util.Optional;import java.util.function.Funct
  * where keys are strings and values are attributes. It supports
  * adding attributes, applying attributes, merging nodes, and
  * streaming entries.
- */public struct Attributes {mapValue<T> : (String, Factory<T>, Function<T, T>) => Attributes;/**
+ */export struct Attributes {mapValue<T> : (String, Factory<T>, Function<T, T>) => Attributes;/**
      * Adds an attribute to the node.
      *
      * @param key   the key to associate with the attribute

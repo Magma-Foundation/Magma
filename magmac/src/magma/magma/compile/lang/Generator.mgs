@@ -1,7 +1,7 @@
 import magma.api.Tuple;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;/**
  * Interface representing a generator that processes a node and its state
  * to produce a result containing a new node and state, or an error.
- */public struct Generator {/**
+ */export struct Generator {/**
      * Generates a result by processing the given node and state.
      *
      * @param node  the input node to process

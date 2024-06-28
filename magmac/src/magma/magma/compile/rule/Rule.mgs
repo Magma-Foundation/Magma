@@ -2,4 +2,4 @@ import magma.api.result.Result;import magma.compile.Error_;import magma.compile.
  * The Rule interface provides methods for converting between strings
  * and nodes. It includes methods to transform an input string into a node
  * and to transform a node back into a string.
- */public struct Rule {toNode : (String) => RuleResult;fromNode : (Node) => Result<String, Error_>;}
+ */export struct Rule {toNode : (String) => RuleResult;fromNode : (Node) => Result<String, Error_>;}

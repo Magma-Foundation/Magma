@@ -1,1 +1,1 @@
-import magma.api.result.Result;import magma.compile.CompileException;import java.util.List;public struct Unit {read : () => Result<String, CompileException>;computeNamespace : () => List<String>;computeName : () => String;}
+import magma.api.result.Result;import magma.compile.CompileException;import java.util.List;export struct Unit {read : () => Result<String, CompileException>;computeNamespace : () => List<String>;computeName : () => String;}

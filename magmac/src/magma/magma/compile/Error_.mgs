@@ -1,6 +1,6 @@
 import java.util.List;import java.util.Optional;/**
  * Interface representing an error that may occur during compilation, with methods to retrieve error details.
- */public struct Error_ {/**
+ */export struct Error_ {/**
      * Retrieves the error message, if present.
      *
      * @return an Optional containing the error message, or an empty Optional if no message is present

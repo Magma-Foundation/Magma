@@ -54,7 +54,7 @@ public interface Node {
     /**
      * Adds a child node with a specified key.
      *
-     * @param key the key for the child node
+     * @param key   the key for the child node
      * @param value the child node to add
      * @return the updated Node
      */
@@ -63,7 +63,7 @@ public interface Node {
     /**
      * Adds a list of child nodes with a specified key.
      *
-     * @param key the key for the child nodes
+     * @param key    the key for the child nodes
      * @param values the list of child nodes to add
      * @return the updated Node
      */
@@ -80,7 +80,7 @@ public interface Node {
     /**
      * Maps the list of child nodes associated with a specified key using a mapper function.
      *
-     * @param key the key for the child nodes
+     * @param key    the key for the child nodes
      * @param mapper the function to apply to the list of child nodes
      * @return the updated Node
      */
@@ -132,4 +132,13 @@ public interface Node {
      * @return a Stream of the keys of the node's children
      */
     Stream<String> streamKeys();
+
+    /**
+     * Maps the list of strings associated with a specified key using a mapper function.
+     *
+     * @param key    the key for the strings
+     * @param mapper the function to apply to the list of strings
+     * @return the updated Node
+     */
+    Node mapStringList(String key, Function<List<String>, List<String>> mapper);
 }

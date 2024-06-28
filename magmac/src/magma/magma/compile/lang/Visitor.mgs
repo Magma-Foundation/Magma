@@ -1,6 +1,6 @@
 import magma.api.Tuple;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;/**
  * Interface representing a visitor that performs operations on nodes before and after the main visit.
- */public struct Visitor {/**
+ */export struct Visitor {/**
      * Method to be called before the main visit operation on a node.
      * By default, it returns the node and state unchanged wrapped in a successful result.
      *

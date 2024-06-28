@@ -3,7 +3,7 @@ import magma.api.Tuple;import java.util.function.Function;import java.util.funct
  * This interface provides methods to manipulate and retrieve the value, if present, or handle the absence of a value.
  *
  * @param <T> the type of the value that may be present
- */public struct Option {/**
+ */export struct Option {/**
      * Applies a function to the contained value if it is present, returning a new Option with the result.
      *
      * @param <R>    the type of the result

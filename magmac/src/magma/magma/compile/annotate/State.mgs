@@ -1,1 +1,1 @@
-public struct State {}
+export struct State {}
