@@ -1,4 +1,4 @@
 import magma.compile.rule.Rule;
 import magma.compile.rule.Rules;
-export default object LastRule {
+export object LastRule {
 }

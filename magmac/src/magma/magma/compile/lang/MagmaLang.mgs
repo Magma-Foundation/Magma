@@ -14,7 +14,7 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
-export default object MagmaLang {
+export object MagmaLang {
 	public def createRootRule() => {
 		
 		statement : var=

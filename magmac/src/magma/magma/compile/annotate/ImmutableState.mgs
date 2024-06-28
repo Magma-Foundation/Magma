@@ -1,6 +1,6 @@
 import magma.api.collect.List;
 import magma.java.JavaList;
-export default object ImmutableState {
+export object ImmutableState {
 	private final frames : List<List<String>>;
 	public def enter() => ImmutableState(frames.pushLast(JavaList.empty()));
 	public def computeDepth() => frames.size();

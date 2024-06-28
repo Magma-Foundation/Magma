@@ -5,7 +5,7 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-export default class def LeftRule(slice : String, child : Rule) => {
+export class def LeftRule(slice : String, child : Rule) => {
 	public def toNode(input : String) => {
 		if
 		(input.startsWith(slice))

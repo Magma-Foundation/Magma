@@ -1,7 +1,7 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-export default class def CompileParentError(message : String, context : String, parent : Error_) => {
+export class def CompileParentError(message : String, context : String, parent : Error_) => {
 	public def findMessage() => Optional.of(message);
 	public def findCauses() => Optional.of(Collections.singletonList(parent));
 	public def findContext() => Optional.of(context);

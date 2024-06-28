@@ -41,7 +41,7 @@ import static magma.java.JavaResults.$;
 import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
-export default object Application {
+export object Application {
 	def createDirectory(targetParent : Path) => {
 		try 
 		{
@@ -161,7 +161,7 @@ export default object Application {
 		return Err(CompileException("Unknown platform: "+platform));
 	}
 }
-export default class def Application(config : Configuration) => {
+export class def Application(config : Configuration) => {
 	 run() => config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
 	def compile(build : Build) => $Void(() => {
 		

@@ -1,4 +1,4 @@
 import java.util.Optional;
-export default object Rules {
+export object Rules {
 	public def wrapIndex(index : int) => index==-1?Optional.empty():Optional.of(index);
 }

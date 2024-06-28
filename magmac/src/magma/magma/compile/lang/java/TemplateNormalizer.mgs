@@ -9,7 +9,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-export default object TemplateNormalizer {
+export object TemplateNormalizer {
 	def computeNewModifiers(node : Node) => {
 		
 		oldModifiers : var=
@@ -25,7 +25,7 @@ export default object TemplateNormalizer {
 		
 		classModifiers : var=
 		
-		JavaList.of("default", "class", "def");
+		JavaList.of("class", "def");
 		
 		stringList : var=
 		
@@ -64,7 +64,7 @@ export default object TemplateNormalizer {
 		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.addLast(implementsStatement))).orElse(implementsStatement));
 	}
 }
-export default class def TemplateNormalizer() => {
+export class def TemplateNormalizer() => {
 	public def preVisit(node : Node, state : State) => node.findString("name").map(() => generateDefinition(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
 	implements Visitor;
 }

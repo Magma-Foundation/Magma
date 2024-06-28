@@ -10,7 +10,7 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 import magma.java.JavaList;
-export default object BlockFormatter {
+export object BlockFormatter {
 	def indentChildren(children : List<Node>, state : State) => Streams.rangeTo(children.size()).extend(children.get).map(Options.invertRight).flatMap(Streams.fromOption).map(() => attachAfterChild(child, state)).collect(JavaList.collecting());
 	def attachAfterChild(child : Tuple<Integer, Node>, state : State) => {
 		
@@ -45,7 +45,7 @@ export default object BlockFormatter {
 		return node.withString("after-children", endIndent);
 	}
 }
-export default class def BlockFormatter() => {
+export class def BlockFormatter() => {
 	public def preVisit(node : Node, state : State) => Ok(Tuple(node, state.enter()));
 	public def postVisit(node : Node, state : State) => {
 		

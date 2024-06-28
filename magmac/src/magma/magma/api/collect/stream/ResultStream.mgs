@@ -6,10 +6,10 @@ import magma.api.result.Result;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-export default object ResultStream {
+export object ResultStream {
 	def flatMapElement<B, C>(headBResult : Result<Stream<C>, B>) => headBResult.match(() => onOk.map(Ok.new), () => Streams.of(Err(err)));
 }
-export default class def ResultStream<A, B>(stream : Stream<Result<A, B>>) => {
+export class def ResultStream<A, B>(stream : Stream<Result<A, B>>) => {
 	public def map<R>(mapper : Function<Result<A, B>, R>) => stream.map(mapper);
 	public def collect<C>(collector : Collector<Result<A, B>, C>) => stream.collect(collector);
 	public def foldLeft<C>(current : C, folder : BiFunction<C, Result<A, B>, C>) => stream.foldLeft(current, folder);

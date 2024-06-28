@@ -14,7 +14,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-export default object BlockNormalizer {
+export object BlockNormalizer {
 	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
 		if
@@ -146,7 +146,7 @@ export default object BlockNormalizer {
 		return Some(withNewDefinition);
 	}
 }
-export default class def BlockNormalizer() => {
+export class def BlockNormalizer() => {
 	public def postVisit(node : Node, state : State) => {
 		
 		childrenOptional : var=
@@ -238,7 +238,7 @@ export default class def BlockNormalizer() => {
 		return name.orElsePanic().equals(outerName);
 	});
 	public def preVisit(node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
-	default class def Flattening(instanceMembers : List<Node>, staticMembers : List<Node>) => {
+	class def Flattening(instanceMembers : List<Node>, staticMembers : List<Node>) => {
 		public def withStaticMember(staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));
 		public def withInstanceMember(instanceMember : Node) => Flattening(instanceMembers.addLast(instanceMember), staticMembers);
 	}

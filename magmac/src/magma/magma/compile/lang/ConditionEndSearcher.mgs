@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-export default class def ConditionEndSearcher() => {
+export class def ConditionEndSearcher() => {
 	public def search(input : String) => {
 		
 		depth : var=

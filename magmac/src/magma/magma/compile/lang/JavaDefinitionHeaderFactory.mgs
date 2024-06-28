@@ -17,7 +17,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-export default object JavaDefinitionHeaderFactory {
+export object JavaDefinitionHeaderFactory {
 	def createDefinitionHeaderRule() => {
 		
 		type : var=
@@ -86,8 +86,8 @@ export default object JavaDefinitionHeaderFactory {
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
 }
-export default class def JavaDefinitionHeaderFactory() => {
-	default object ModifiersRule {
+export class def JavaDefinitionHeaderFactory() => {
+	 object ModifiersRule {
 		
 		public static final MODIFIERS : List<String>=
 		
@@ -104,7 +104,7 @@ export default class def JavaDefinitionHeaderFactory() => {
 			}
 		}
 	}
-	default class def SimpleSplitter() => {
+	class def SimpleSplitter() => {
 		public def split(input : String) => List.of(input.split("\r\n"));
 		implements Splitter;
 	}

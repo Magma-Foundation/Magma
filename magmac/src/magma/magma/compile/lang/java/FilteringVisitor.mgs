@@ -6,7 +6,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import java.util.function.BiFunction;
-export default class def FilteringVisitor(type : String, child : Visitor) => {
+export class def FilteringVisitor(type : String, child : Visitor) => {
 	public def preVisit(node : Node, state : State) => applyFilter(node, state, child.preVisit);
 	def applyFilter(node : Node, state : State, folder : BiFunction<Node, State, Result<Tuple<Node, State>, Error_>>) => {
 		if

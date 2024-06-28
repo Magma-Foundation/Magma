@@ -1,6 +1,6 @@
 import magma.api.collect.Map;
 import magma.api.option.Option;
-export default class def JSONObject(entries : Map<String, JSONValue>) => {
+export class def JSONObject(entries : Map<String, JSONValue>) => {
 	public def find(key : String) => entries.get(key);
 	implements JSONValue;
 }

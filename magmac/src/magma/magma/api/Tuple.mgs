@@ -6,7 +6,7 @@ import java.util.function.Function;
  * @param <L> the type of the left value
  * @param <R> the type of the right value
  */
-export default class def Tuple<L, R>(left : L, right : R) => {
+export class def Tuple<L, R>(left : L, right : R) => {
 	
 	/**
      * Applies a function to the left value of the tuple, returning a new tuple with the transformed left value.

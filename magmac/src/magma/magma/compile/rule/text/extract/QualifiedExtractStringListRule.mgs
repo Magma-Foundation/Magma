@@ -3,7 +3,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
 import magma.java.JavaOptionals;
 import java.util.Optional;
-export default object QualifiedExtractStringListRule {
+export object QualifiedExtractStringListRule {
 	private final qualifier : Rule;
 	def qualify(child : String) => {
 		

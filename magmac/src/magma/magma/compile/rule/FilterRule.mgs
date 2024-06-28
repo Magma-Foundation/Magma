@@ -3,7 +3,7 @@ import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
-export default object FilterRule {
+export object FilterRule {
 	protected final child : Rule;
 	public def toNode(input : String) => {
 		if

@@ -1,7 +1,7 @@
 import magma.api.Tuple;
 import java.util.function.Function;
 import java.util.function.Supplier;
-export default class def Some<T>(value : T) => {
+export class def Some<T>(value : T) => {
 	public def map<R>(mapper : Function<T, R>) => Some(mapper.apply(value));
 	public def orElseGet(supplier : Supplier<T>) => value;
 	public def orElse(other : T) => value;

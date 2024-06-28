@@ -6,7 +6,7 @@ import magma.compile.Error_;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.java.JavaOptionals;
-export default class def TypeRule(type : String, child : Rule) => {
+export class def TypeRule(type : String, child : Rule) => {
 	
 	public static final FORMAT : String=
 	

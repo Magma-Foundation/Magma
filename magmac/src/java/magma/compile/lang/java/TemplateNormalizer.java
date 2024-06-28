@@ -20,7 +20,7 @@ public class TemplateNormalizer implements Visitor {
     }
 
     private static Result<Tuple<Node, State>, Error_> generateDefinition(String name, Node node, State state) {
-        var classModifiers = JavaList.of("default", "class", "def");
+        var classModifiers = JavaList.of("class", "def");
         var stringList = computeNewModifiers(node).addAll(classModifiers);
         var params = node.findNodeList("params").orElse(JavaList.empty());
 

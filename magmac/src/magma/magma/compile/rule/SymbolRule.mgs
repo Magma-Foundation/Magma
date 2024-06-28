@@ -1,4 +1,4 @@
-export default object SymbolRule {
+export object SymbolRule {
 	def isValidDigit(i : int, c : char) => i!=0&&Character.isDigit(c);
 	def isUnderscore(c : char) => c=='_';
 	def computeMessage() => "Not a symbol.";

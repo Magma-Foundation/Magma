@@ -1,7 +1,7 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-export default class def CompileError(message : String, context : String) => {
+export class def CompileError(message : String, context : String) => {
 	public def findMessage() => Optional.of(message);
 	public def findCauses() => Optional.empty();
 	public def findContext() => Optional.of(context);

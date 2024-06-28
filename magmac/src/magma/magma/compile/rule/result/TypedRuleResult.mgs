@@ -6,7 +6,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
-export default class def TypedRuleResult(name : String, attributes : Attributes) => {
+export class def TypedRuleResult(name : String, attributes : Attributes) => {
 	def findAttributes0() => Optional.of(attributes);
 	def tryCreate0() => Optional.of(ImmutableNode(name, attributes));
 	def findError0() => Optional.empty();

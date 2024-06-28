@@ -2,7 +2,7 @@ import magma.api.Tuple;
 import magma.lang.Instantiator;
 import java.util.function.Function;
 import java.util.function.Supplier;
-export default object None {
+export object None {
 	public def map<R>(mapper : Function<T, R>) => None();
 	public def orElseGet(supplier : Supplier<T>) => supplier.get();
 	public def orElse(other : T) => other;

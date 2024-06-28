@@ -9,10 +9,10 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-export default object OrRule {
+export object OrRule {
 	def toError(results : List<Result<String, Error_>>) => Err(MultipleError(results.stream().map(() => JavaOptionals.toNative(stringErrorResult.findErr())).flatMap(Optional.stream).toList()));
 }
-export default class def OrRule(rules : List<Rule>) => {
+export class def OrRule(rules : List<Rule>) => {
 	public def toNode(input : String) => {
 		
 		errors : var=

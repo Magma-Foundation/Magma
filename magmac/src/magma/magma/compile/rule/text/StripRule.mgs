@@ -4,7 +4,7 @@ import magma.compile.Error_;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
-export default object StripRule {
+export object StripRule {
 	
 	public static final DEFAULT_LEFT : String=
 	

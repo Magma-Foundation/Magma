@@ -7,7 +7,7 @@ import magma.java.JavaOptionals;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-export default class def HeadedStream<T>(provider : Head<T>) => {
+export class def HeadedStream<T>(provider : Head<T>) => {
 	public def foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, T, Result<R, E>>) => this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
 	public def anyMatch(predicate : Predicate<T>) => foldLeft(false, () => aBoolean||predicate.test(t));
 	public def filter(filter : Predicate<T>) => flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
@@ -41,7 +41,7 @@ export default class def HeadedStream<T>(provider : Head<T>) => {
 		}
 	}
 	public def head() => provider.head();
-	default object FlatMapHead {
+	 object FlatMapHead {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;

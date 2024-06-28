@@ -2,10 +2,10 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
 import java.util.function.Function;
-export default object Ok {
+export object Ok {
 	public def from<E, R>(value : R) => Ok(value);
 }
-export default class def Ok<T, E>(value : T) => {
+export class def Ok<T, E>(value : T) => {
 	public def flatMapValue<R>(mapper : Function<T, Result<R, E>>) => mapper.apply(value);
 	public def mapValue<R>(mapper : Function<T, R>) => Ok(mapper.apply(value));
 	public def isOk() => true;

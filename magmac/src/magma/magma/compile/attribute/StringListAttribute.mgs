@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-export default class def StringListAttribute(values : List<String>) => {
+export class def StringListAttribute(values : List<String>) => {
 	
 	public static final Factory : Factory<List<String>>=
 	

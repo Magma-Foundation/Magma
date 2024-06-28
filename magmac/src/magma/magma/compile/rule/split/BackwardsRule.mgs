@@ -12,10 +12,10 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-export default object BackwardsRule {
+export object BackwardsRule {
 	def wrapError(leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 }
-export default class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
+export class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
 	public def toNode(input : String) => {
 		
 		allIndexes : var=

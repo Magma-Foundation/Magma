@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-export default object PathUnit {
+export object PathUnit {
 	private final root : Path;
 	private final child : Path;
 	public def toString() => {

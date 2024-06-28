@@ -5,7 +5,7 @@ import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import java.util.function.Function;
-export default class def UntypedRuleResult(attributes : Attributes) => {
+export class def UntypedRuleResult(attributes : Attributes) => {
 	public def withType(type : String) => TypedRuleResult(type, attributes);
 	public def mapErr(mapper : Function<Error_, Error_>) => this;
 	public def findError() => None.None();

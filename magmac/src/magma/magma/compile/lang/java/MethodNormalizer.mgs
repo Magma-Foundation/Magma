@@ -11,10 +11,10 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
-export default object MethodNormalizer {
+export object MethodNormalizer {
 	def transpose(oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input)?newModifiers.addLast(output):newModifiers;
 }
-export default class def MethodNormalizer() => {
+export class def MethodNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
 		
 		renamed : var=

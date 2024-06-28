@@ -12,7 +12,7 @@ import magma.compile.attribute.StringListAttribute;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.function.Function;
-export default object ImmutableNode {
+export object ImmutableNode {
 	public def findType() => type;
 	public def formatWithDepth(depth : int) => "\t".repeat(depth)+format(depth);
 	public def format(depth : int) => type+" = "+attributes.format(depth);

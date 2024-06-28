@@ -5,7 +5,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
-export default class def ErrorRuleResult(e : Error_) => {
+export class def ErrorRuleResult(e : Error_) => {
 	def findError0() => Optional.of(e);
 	public def mapErr(mapper : Function<Error_, Error_>) => ErrorRuleResult(mapper.apply(e));
 	def findAttributes0() => Optional.empty();

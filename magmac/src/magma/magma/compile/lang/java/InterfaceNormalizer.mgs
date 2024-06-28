@@ -7,10 +7,10 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-export default object InterfaceNormalizer {
+export object InterfaceNormalizer {
 	def normalizeModifiers(oldModifiers : List<String>) => oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
 }
-export default class def InterfaceNormalizer() => {
+export class def InterfaceNormalizer() => {
 	public def preVisit(node : Node, state : State) => {
 		
 		struct : var=

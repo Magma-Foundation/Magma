@@ -1,4 +1,4 @@
-export default object NumberRule {
+export object NumberRule {
 	def allDigits(input : String) => {
 		if
 		(input.isEmpty())

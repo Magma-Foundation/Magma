@@ -10,7 +10,7 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.List;
-export default object VisitingGenerator {
+export object VisitingGenerator {
 	private final visitor : Visitor;
 	def generateAttribute(key : String, node : Node, state : State) => {
 		

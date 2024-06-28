@@ -10,7 +10,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
-export default class def ExtractNodeRule(propertyKey : String, child : Rule) => {
+export class def ExtractNodeRule(propertyKey : String, child : Rule) => {
 	public def toNode(input : String) => {
 		
 		node : var=

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-default class def OperatorSearcher(slice : String) => {
+class def OperatorSearcher(slice : String) => {
 	public def search(input : String) => {
 		if
 		(!input.contains(slice))

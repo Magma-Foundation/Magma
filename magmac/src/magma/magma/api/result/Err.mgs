@@ -2,7 +2,7 @@ import magma.api.option.Option;
 import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
-export default class def Err<T, E>(value : E) => {
+export class def Err<T, E>(value : E) => {
 	def findValue1() => Optional.empty();
 	def findErr0() => Optional.of(value);
 	public def flatMapValue<R>(mapper : Function<T, Result<R, E>>) => Err(value);
