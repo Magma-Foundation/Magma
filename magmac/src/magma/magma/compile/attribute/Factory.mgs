@@ -1,5 +1,1 @@
-import java.util.Optional;
-public struct Factory {
-	fromAttribute : Optional<T>;
-	toAttribute : Attribute;
-}
+import java.util.Optional;public struct Factory {fromAttribute : (Attribute) => Optional<T>;toAttribute : (T) => Attribute;}

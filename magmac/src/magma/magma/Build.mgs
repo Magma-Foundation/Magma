@@ -1,3 +1,1 @@
-import java.nio.file.Path;
-export class def Build(sourceDirectory : BuildSet, targetDirectory : BuildSet, debugDirectory : Path) => {
-}
+import java.nio.file.Path;() => {}

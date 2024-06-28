@@ -1,10 +1,1 @@
-import magma.api.Tuple;
-import magma.api.collect.stream.Stream;
-import magma.api.option.None;
-import magma.api.option.Option;
-public struct JSONValue {
-	(this, key : String);
-	(this);
-	(this);
-	(this);
-}
+import magma.api.collect.stream.Stream;import magma.api.option.None;import magma.api.option.Option;public struct JSONValue {default find : Option<JSONValue> => {return None();}default findValue : Option<String> => {return None();}default stream : Option<Stream<JSONValue>> => {return None();}}

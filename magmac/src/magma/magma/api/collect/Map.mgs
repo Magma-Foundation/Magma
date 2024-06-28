@@ -1,12 +1,1 @@
-import magma.api.Tuple;
-import magma.api.collect.stream.Head;
-import magma.api.collect.stream.Stream;
-import magma.api.option.Option;
-public struct Map {
-	putAll : Map<K, V>;
-	get : Option<V>;
-	streamEntries : Stream<Tuple<K, V>>;
-	put : Map<K, V>;
-	keyStream : Stream<K>;
-	streamValues : Stream<V>;
-}
+import magma.api.Tuple;import magma.api.collect.stream.Head;import magma.api.collect.stream.Stream;import magma.api.option.Option;public struct Map {putAll : (Map<K, V>) => Map<K, V>;get : (K) => Option<V>;streamEntries : () => Stream<Tuple<K, V>>;put : (K, V) => Map<K, V>;keyStream : () => Stream<K>;streamValues : () => Stream<V>;}

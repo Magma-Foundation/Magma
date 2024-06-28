@@ -52,8 +52,7 @@ public class MagmaLang {
                 Lang.createKeywordRule("break"),
                 Lang.createKeywordRule("continue"),
                 Lang.createEmptyStatementRule(),
-                Lang.createBlockCommentRule(),
-                Lang.createCommentRule(),
+                createCommentRule(),
                 Lang.createTryRule(statement),
                 Lang.createCatchRule(definition, statement),
                 createStructRule(definition, statement, value),
@@ -81,6 +80,12 @@ public class MagmaLang {
                 statement)));
     }
 
+    private static OrRule createCommentRule() {
+        return new OrRule(List.of(
+                Lang.createBlockCommentRule(),
+                Lang.createCommentRule()));
+    }
+
     private static TypeRule createConstructionRule(Rule statement) {
         var child1 = new ExtractNodeRule("child", Lang.createBlock(statement));
         var child = new LeftRule("{", new RightRule(child1, "}"));
@@ -92,7 +97,11 @@ public class MagmaLang {
 
         var definition1 = new TypeRule("definition", definition);
 
-        var structMember = new OrRule(List.of(new RightRule(definition1, ";"), createFunctionRule(statement, value)));
+        var structMember = new OrRule(List.of(
+                new RightRule(definition1, ";"),
+                createFunctionRule(statement, value),
+                createCommentRule()
+        ));
         var children = new ExtractNodeRule("child", Lang.createBlock(structMember));
         var name = new ExtractStringRule("name");
 
