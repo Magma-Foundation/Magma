@@ -25,7 +25,7 @@ export default class def SplitMultipleRule() => {
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	SplitMultipleRule(this : Self, splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) => {
+	 SplitMultipleRule(this : Self, splitter : Splitter, delimiter : String, propertyKey : String, childRule : Rule) => {
 		this=propertyKey;
 		this=childRule;
 		this=splitter;

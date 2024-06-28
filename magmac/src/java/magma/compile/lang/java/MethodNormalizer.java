@@ -1,6 +1,7 @@
 package magma.compile.lang.java;
 
 import magma.api.Tuple;
+import magma.api.collect.List;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -44,11 +45,9 @@ public class MethodNormalizer implements Visitor {
         }
 
         var definition = definitionOptional.orElseThrow().mapStringList("modifiers", oldModifiers -> {
-            var newModifiers = oldModifiers.contains("public")
-                    ? JavaList.of("public")
-                    : JavaList.<String>empty();
-
-            return newModifiers.addLast("def");
+            var withPublic = transpose(oldModifiers, JavaList.empty(),"public", "public");
+            var withStatic = transpose(oldModifiers, withPublic, "static", "static");
+            return withStatic.addLast("def");
         });
 
         if (node.has("child")) {
@@ -79,5 +78,11 @@ public class MethodNormalizer implements Visitor {
             var withType = definition.withNode("type", functionType);
             return new Ok<>(new Tuple<>(withType, state));
         }
+    }
+
+    private static List<String> transpose(List<String> oldModifiers, List<String> newModifiers, String input, String output) {
+        return oldModifiers.contains(input)
+                ? newModifiers.addLast(output)
+                : newModifiers;
     }
 }

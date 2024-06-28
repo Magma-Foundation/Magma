@@ -14,7 +14,7 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
-export default class def MagmaLang() => {
+object MagmaLang {
 	public def createRootRule(this : Self) => {
 		
 		statement : var=
@@ -29,8 +29,27 @@ export default class def MagmaLang() => {
 		
 		createDefinitionRule();
 		value.setRule(ContextRule("Not a value.", OrRule(List.of(createFunctionRule(statement, value), Lang.createCharRule(), Lang.createStringRule(), Lang.createInvocationRule(value), Lang.createAccessRule("access", ".", value), Lang.createSymbolRule(), Lang.createTernaryRule(value), Lang.createNumberRule(), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("less-than", "<", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("less-than-or-equals", "<=", value), Lang.createNotRule(value), TypeRule("quantity", StripRule(LeftRule("(", RightRule(ExtractNodeRule("value", value), ")")))), createConstructionRule(statement)))));
-		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createEmptyStatementRule(), createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), createStructRule(definition, statement, value), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, " in "), Lang.createAssignmentRule(value), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";"))), Lang.createStatementRule(value)))));
+		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createEmptyStatementRule(), createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), createStructRule(definition, statement, value), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, " in "), Lang.createAssignmentRule(value), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";"))), Lang.createStatementRule(value), createObjectRule(statement)))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
+	}
+	def createObjectRule(this : Self, statement : LazyRule) => {
+		
+		name : var=
+		
+		ExtractStringRule("name");
+		
+		child : var=
+		
+		ExtractNodeRule("child", Lang.createBlock(statement));
+		
+		afterKeyword : var=
+		
+		FirstRule(name, " {", RightRule(child, "}"));
+		
+		modifiers : var=
+		
+		Lang.createModifiersRule();
+		return TypeRule("object", OrRule(List.of(FirstRule(modifiers, " object ", afterKeyword), LeftRule("object ", afterKeyword))));
 	}
 	def createCommentRule(this : Self) => OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule()));
 	def createConstructionRule(this : Self, statement : Rule) => {

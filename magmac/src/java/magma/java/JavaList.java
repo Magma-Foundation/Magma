@@ -185,4 +185,11 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
         copy.add(0, first);
         return new JavaList<>(copy);
     }
+
+    @Override
+    public magma.api.collect.List<T> remove(T element) {
+        var copy = new ArrayList<>(list);
+        copy.remove(element);
+        return new JavaList<>(copy);
+    }
 }

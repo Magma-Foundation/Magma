@@ -8,7 +8,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-export default class def FunctionOptimizer() => {
+object FunctionOptimizer {
 	def flattenChild(this : Self, child : Node, node : Node, state : State) => {
 		if
 		(child.is("block"))
@@ -48,6 +48,8 @@ export default class def FunctionOptimizer() => {
 			return Err(CompileError("List implementation is malformed.", node.toString()));
 		}
 	}
+}
+export default class def FunctionOptimizer() => {
 	public def preVisit(this : Self, node : Node, state : State) => {
 		
 		withoutType : var=

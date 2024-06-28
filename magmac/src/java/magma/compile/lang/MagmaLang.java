@@ -74,12 +74,26 @@ public class MagmaLang {
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
                 new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";"))),
-                Lang.createStatementRule(value)
+                Lang.createStatementRule(value),
+                createObjectRule(statement)
         ))));
 
         return Lang.createBlock(new OrRule(List.of(
                 Lang.createImportRule(Lang.createNamespaceRule()),
                 statement)));
+    }
+
+    private static TypeRule createObjectRule(LazyRule statement) {
+        var name = new ExtractStringRule("name");
+        var child = new ExtractNodeRule("child", Lang.createBlock(statement));
+        var afterKeyword = new FirstRule(name, " {", new RightRule(child, "}"));
+
+        var modifiers = Lang.createModifiersRule();
+
+        return new TypeRule("object", new OrRule(List.of(
+                new FirstRule(modifiers, " object ", afterKeyword),
+                new LeftRule("object ", afterKeyword)
+        )));
     }
 
     private static OrRule createCommentRule() {

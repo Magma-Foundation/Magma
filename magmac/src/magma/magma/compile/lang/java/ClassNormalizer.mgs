@@ -9,7 +9,7 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
-export default class def ClassNormalizer() => {
+object ClassNormalizer {
 	def computeNewModifiers(this : Self, node : Node) => {
 		
 		oldModifiers : var=
@@ -59,6 +59,8 @@ export default class def ClassNormalizer() => {
 		function.clear("implements").withNode("type", interfaceType);
 		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.addLast(implementsStatement))).orElse(implementsStatement));
 	}
+}
+export default class def ClassNormalizer() => {
 	public def preVisit(this : Self, node : Node, state : State) => node.findString("name").map(() => generateDefinition(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
 	implements Visitor;
 }

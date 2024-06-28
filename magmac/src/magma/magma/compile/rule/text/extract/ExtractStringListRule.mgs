@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 export default class def ExtractStringListRule() => {
 	protected final delimiter : String;
-	ExtractStringListRule(this : Self, key : String, delimiter : String) => {
+	 ExtractStringListRule(this : Self, key : String, delimiter : String) => {
 		super(key);
 		this=delimiter;
 	}

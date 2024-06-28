@@ -5,7 +5,7 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export default class def FilterRule() => {
 	protected final child : Rule;
-	FilterRule(this : Self, child : Rule) => this=child;
+	 FilterRule(this : Self, child : Rule) => this=child;
 	public def toNode(this : Self, input : String) => {
 		if
 		(filter(input))

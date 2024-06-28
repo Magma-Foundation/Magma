@@ -73,7 +73,7 @@ import java.util.List;
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	def wrapError(this : Self, leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+	static def wrapError(this : Self, leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 	def findAllIndexesReverse(this : Self, input : String) => {
 		
 		indexes : List<Integer>=

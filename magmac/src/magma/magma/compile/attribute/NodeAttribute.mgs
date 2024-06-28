@@ -9,5 +9,5 @@ import java.util.Optional;
 	;
 	public def asNode(this : Self) => Optional.of(value);
 	public def format(this : Self, depth : int) => value.format(depth);
-	public def from(this : Self, node : Node) => NodeAttribute(node);
+	public static def from(this : Self, node : Node) => NodeAttribute(node);
 }

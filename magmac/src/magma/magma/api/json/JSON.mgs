@@ -1,48 +1,50 @@
 import magma.api.collect.List;
 import magma.java.JavaList;
 import java.util.ArrayList;
-export default class def JSON() => public def split(this : Self, input : String) => {
-	
-	list : var=
-	
-	ArrayList();
-	
-	buffer : var=
-	
-	StringBuilder();
-	
-	depth : var=
-	
-	0;
-	
-	i : int=
-	
-	0;
-	while
-	(i<input.length())
-	{
+object JSON {
+	public def split(this : Self, input : String) => {
 		
-		c : var=
+		list : var=
 		
-		input.charAt(i);
-		if
-		(c==','&&depth==0)
+		ArrayList();
+		
+		buffer : var=
+		
+		StringBuilder();
+		
+		depth : var=
+		
+		0;
+		
+		i : int=
+		
+		0;
+		while
+		(i<input.length())
 		{
-			list.add(buffer.toString());
-			buffer=StringBuilder();
-		}
-		else
-		{
+			
+			c : var=
+			
+			input.charAt(i);
 			if
-			(c=='{' || c == '[')
-			depth++;
-			if
-			(c=='}' || c == ']')
-			depth--;
-			buffer.append(c);
+			(c==','&&depth==0)
+			{
+				list.add(buffer.toString());
+				buffer=StringBuilder();
+			}
+			else
+			{
+				if
+				(c=='{' || c == '[')
+				depth++;
+				if
+				(c=='}' || c == ']')
+				depth--;
+				buffer.append(c);
+			}
+			i++;
 		}
-		i++;
+		list.add(buffer.toString());
+		return JavaList(list);
 	}
-	list.add(buffer.toString());
-	return JavaList(list);
 }

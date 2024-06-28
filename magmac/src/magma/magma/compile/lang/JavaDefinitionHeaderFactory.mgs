@@ -17,7 +17,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 import java.util.Optional;
-export default class def JavaDefinitionHeaderFactory() => {
+object JavaDefinitionHeaderFactory {
 	def createDefinitionHeaderRule(this : Self) => {
 		
 		type : var=
@@ -85,12 +85,14 @@ export default class def JavaDefinitionHeaderFactory() => {
 		ContextRule("Cannot parse before name.", maybeAnnotations);
 		return TypeRule("definition", StripRule(LastRule(beforeName, " ", name)));
 	}
+}
+export default class def JavaDefinitionHeaderFactory() => {
 	default class def ModifiersRule() => {
 		
 		public static final MODIFIERS : List<String>=
 		
 		List.of("public", "static", "final", "private", "default", "protected", "abstract");
-		ModifiersRule(this : Self) => super("modifiers", " ")
+		 ModifiersRule(this : Self) => super("modifiers", " ")
 		def qualify(this : Self, child : String) => {
 			if
 			(MODIFIERS.contains(child))

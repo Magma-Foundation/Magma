@@ -26,7 +26,7 @@ import magma.compile.lang.java.InterfaceNormalizer;
 import magma.compile.lang.java.LambdaNormalizer;
 import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
-import magma.compile.lang.java.PackageRemover;
+import magma.compile.lang.java.BlockNormalizer;
 import magma.compile.lang.java.RecordNormalizer;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
@@ -126,7 +126,7 @@ public record Application(Configuration config) {
 
     private static Stream<Visitor> streamNormalizers() {
         return Streams.fromNativeList(List.of(
-                new FilteringVisitor("block", new PackageRemover()),
+                new FilteringVisitor("block", new BlockNormalizer()),
                 new FilteringVisitor("record", new RecordNormalizer()),
                 new FilteringVisitor("interface", new InterfaceNormalizer()),
                 new FilteringVisitor("class", new ClassNormalizer()),

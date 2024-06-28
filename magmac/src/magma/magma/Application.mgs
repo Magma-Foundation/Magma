@@ -24,7 +24,7 @@ import magma.compile.lang.java.InterfaceNormalizer;
 import magma.compile.lang.java.LambdaNormalizer;
 import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
-import magma.compile.lang.java.PackageRemover;
+import magma.compile.lang.java.BlockNormalizer;
 import magma.compile.lang.java.RecordNormalizer;
 import magma.compile.lang.magma.FunctionOptimizer;
 import magma.compile.lang.magma.BlockFormatter;
@@ -43,7 +43,7 @@ import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
 () => {
-	def createDirectory(this : Self, targetParent : Path) => {
+	static def createDirectory(this : Self, targetParent : Path) => {
 		try 
 		{
 			Files.createDirectories(targetParent);
@@ -53,7 +53,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Failed to make parent.", e));
 		}
 	}
-	def print(this : Self, error : Error_, depth : int) => {
+	static def print(this : Self, error : Error_, depth : int) => {
 		
 		context : var=
 		
@@ -118,8 +118,8 @@ import static magma.java.JavaResults.$Void;
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	def escape(this : Self, value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-	def formatContext(this : Self, e : Error_, depth : int) => {
+	static def escape(this : Self, value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	static def formatContext(this : Self, e : Error_, depth : int) => {
 		
 		actualContext : var=
 		
@@ -137,7 +137,7 @@ import static magma.java.JavaResults.$Void;
 		actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
-	def writeSafely(this : Self, target : Path, csq : String) => {
+	static def writeSafely(this : Self, target : Path, csq : String) => {
 		try 
 		{
 			Files.writeString(target, csq);
@@ -147,8 +147,8 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	def streamNormalizers(this : Self) => Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
-	def findRootRule(this : Self, platform : String) => {
+	static def streamNormalizers(this : Self) => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
+	static def findRootRule(this : Self, platform : String) => {
 		if
 		(platform.equals("java"))
 		{

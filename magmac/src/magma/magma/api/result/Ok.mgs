@@ -3,7 +3,7 @@ import magma.api.option.Option;
 import magma.api.option.Some;
 import java.util.function.Function;
 () => {
-	public def from<E, R>(this : Self, value : R) => Ok(value);
+	public static def from<E, R>(this : Self, value : R) => Ok(value);
 	public def flatMapValue<R>(this : Self, mapper : Function<T, Result<R, E>>) => mapper.apply(value);
 	public def mapValue<R>(this : Self, mapper : Function<T, R>) => Ok(mapper.apply(value));
 	public def isOk(this : Self) => true;

@@ -7,7 +7,7 @@ import magma.compile.rule.result.RuleResult;
 import java.util.Optional;
 export default class def LazyRule() => {
 	private child : Optional<Rule>;
-	LazyRule(this : Self) => this=Optional.empty();
+	 LazyRule(this : Self) => this=Optional.empty();
 	public def setRule(this : Self, child : Rule) => this=Optional.of(child);
 	public def toNode(this : Self, input : String) => child.map(() => inner.toNode(input)).orElse(ErrorRuleResult(CompileError("Child was not set.", input)));
 	public def fromNode(this : Self, node : Node) => child.map(() => inner.fromNode(node)).orElse(Err(CompileError("No child set.", node.toString())));

@@ -4,7 +4,7 @@ import magma.api.option.Some;
 export default class def RangeHead() => {
 	private final extent : int;
 	private counter : int;
-	RangeHead(this : Self, initial : int, extent : int) => {
+	 RangeHead(this : Self, initial : int, extent : int) => {
 		this=initial;
 		this=extent;
 	}

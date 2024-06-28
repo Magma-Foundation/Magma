@@ -11,14 +11,16 @@ import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import java.util.Optional;
+object ExtractRule {
+	def getStringErrorOk(this : Self, value : String) => Ok(value);
+}
 export default class def ExtractRule() => {
 	protected final key : String;
-	ExtractRule(this : Self, key : String) => this=key;
+	 ExtractRule(this : Self, key : String) => this=key;
 	def fromAttribute : (Self, Node) => Optional<String>;
 	def toAttribute : (Self, String) => Result<Attribute, Error_>;
 	public def toNode(this : Self, input : String) => toAttribute(input).match(() => UntypedRuleResult(MapAttributes().with(key, attribute)), ErrorRuleResult.new);
 	public def fromNode(this : Self, node : Node) => fromAttribute(node).map(ExtractRule.getStringErrorOk).orElseGet(() => createErr(node));
-	def getStringErrorOk(this : Self, value : String) => Ok(value);
 	def createErr(this : Self, node : Node) => {
 		
 		format : var=

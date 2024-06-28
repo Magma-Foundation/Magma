@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 export default class def PathUnit() => {
 	private final root : Path;
 	private final child : Path;
-	PathUnit(this : Self, root : Path, child : Path) => {
+	 PathUnit(this : Self, root : Path, child : Path) => {
 		this=root;
 		this=child;
 	}

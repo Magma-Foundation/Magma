@@ -1,8 +1,6 @@
 import magma.api.Tuple;
-import magma.api.collect.List;
 import magma.api.option.Option;
 import magma.api.result.Result;
-import magma.compile.rule.Node;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,4 +20,5 @@ export struct Stream {
 	flatMap<R> : (Self, Function<T, Head<R>>) => Stream<R>;
 	
 	extend<R> : (Self, Function<T, R>) => Stream<Tuple<T, R>>;
+	def into<R>(this : Self, mapper : Function<Stream<T>, R>) => mapper.apply(this);
 }

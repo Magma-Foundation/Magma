@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 export default class def VisitingGenerator() => {
 	private final visitor : Visitor;
-	VisitingGenerator(this : Self, visitor : Visitor) => this=visitor;
+	 VisitingGenerator(this : Self, visitor : Visitor) => this=visitor;
 	def generateAttribute(this : Self, key : String, node : Node, state : State) => {
 		
 		nodeList : var=

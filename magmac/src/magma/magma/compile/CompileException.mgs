@@ -1,8 +1,8 @@
 import java.io.IOException;
 export default class def CompileException() => {
-	CompileException(this : Self, message : String, cause : Throwable) => super(message, cause)
-	CompileException(this : Self, message : String) => super(message)
-	CompileException(this : Self) => {
+	 CompileException(this : Self, message : String, cause : Throwable) => super(message, cause)
+	 CompileException(this : Self, message : String) => super(message)
+	 CompileException(this : Self) => {
 	}
-	CompileException(this : Self, cause : IOException) => super(cause)
+	 CompileException(this : Self, cause : IOException) => super(cause)
 }

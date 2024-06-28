@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Optional;
 export default class def MultipleError() => {
 	private final errors : List<Error_>;
-	MultipleError(this : Self, errors : List<Error_>) => this=errors;
+	 MultipleError(this : Self, errors : List<Error_>) => this=errors;
 	public def findMessage(this : Self) => Optional.empty();
 	public def findCauses(this : Self) => Optional.of(errors);
 	public def findContext(this : Self) => Optional.empty();

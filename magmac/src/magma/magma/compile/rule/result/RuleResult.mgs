@@ -9,8 +9,8 @@ import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 export struct RuleResult {
-	def createNothingPresentError(this : Self) => Err(CompileError("Neither value nor error is present.", ""));
-	def wrapInOk(this : Self, inner : Node) => Ok(inner);
+	static def createNothingPresentError(this : Self) => Err(CompileError("Neither value nor error is present.", ""));
+	static def wrapInOk(this : Self, inner : Node) => Ok(inner);
 	findError : (Self) => Option<Error_>;
 	findAttributes : (Self) => Option<Attributes>;
 	tryCreate : (Self) => Option<Node>;

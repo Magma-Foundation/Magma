@@ -17,11 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import static magma.java.JavaResults.$Void;
-export default class def Main() => {
-	
-	public static final CONFIG_PATH : Path=
-	
-	Paths.get(".", "config.json");
+object Main {
 	public def main(this : Self, args : String[]) => {
 		
 		result : var=
@@ -126,3 +122,4 @@ export default class def Main() => {
 		return BuildSet(Path.of(location), platform);
 	}
 }
+export default class def Main() => public static final CONFIG_PATH : Path=Paths.get(".", "config.json");

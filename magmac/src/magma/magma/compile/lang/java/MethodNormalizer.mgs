@@ -1,4 +1,5 @@
 import magma.api.Tuple;
+import magma.api.collect.List;
 import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
@@ -10,7 +11,7 @@ import magma.compile.rule.Node;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
-export default class def MethodNormalizer() => {
+object MethodNormalizer {
 	def attachSelfReference(this : Self, oldParams : magma.api.collect.List<Node>, node : Node) => {
 		
 		selfType : var=
@@ -22,6 +23,9 @@ export default class def MethodNormalizer() => {
 		node.clear("definition").withString("name", "this").withNode("type", selfType);
 		return Ok(oldParams.addFirst(selfReference));
 	}
+	def transpose(this : Self, oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input)?newModifiers.addLast(output):newModifiers;
+}
+export default class def MethodNormalizer() => {
 	public def preVisit(this : Self, node : Node, state : State) => {
 		
 		renamed : var=
@@ -62,10 +66,14 @@ export default class def MethodNormalizer() => {
 		
 		definitionOptional.orElseThrow().mapStringList("modifiers", () => {
 			
-			newModifiers : var=
+			withPublic : var=
 			
-			oldModifiers.contains("public")?JavaList.of("public"):JavaList.empty();
-			return newModifiers.addLast("def");
+			transpose(oldModifiers, JavaList.empty(), "public", "public");
+			
+			withStatic : var=
+			
+			transpose(oldModifiers, withPublic, "static", "static");
+			return withStatic.addLast("def");
 		});
 		if
 		(node.has("child"))

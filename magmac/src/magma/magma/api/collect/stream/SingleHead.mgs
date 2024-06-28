@@ -7,7 +7,7 @@ export default class def SingleHead<T>() => {
 	private retrieved : boolean=
 	
 	false;
-	SingleHead(this : Self, value : T) => this=value;
+	 SingleHead(this : Self, value : T) => this=value;
 	public def head(this : Self) => {
 		if
 		(retrieved)

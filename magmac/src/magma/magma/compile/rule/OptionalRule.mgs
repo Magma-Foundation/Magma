@@ -7,7 +7,7 @@ export default class def OptionalRule() => {
 	private final onPresent : Rule;
 	private final onEmpty : Rule;
 	private final orRule : OrRule;
-	OptionalRule(this : Self, key : String, onPresent : Rule, onEmpty : Rule) => {
+	 OptionalRule(this : Self, key : String, onPresent : Rule, onEmpty : Rule) => {
 		this=key;
 		this=onPresent;
 		this=onEmpty;

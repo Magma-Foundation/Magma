@@ -1,7 +1,10 @@
-export default class def SymbolRule() => {
-	SymbolRule(this : Self, child : Rule) => super(child)
+object SymbolRule {
 	def isValidDigit(this : Self, i : int, c : char) => i!=0&&Character.isDigit(c);
 	def isUnderscore(this : Self, c : char) => c=='_';
+	def isDollar(this : Self, c : char) => c=='$';
+}
+export default class def SymbolRule() => {
+	 SymbolRule(this : Self, child : Rule) => super(child)
 	def computeMessage(this : Self) => "Not a symbol.";
 	def filter(this : Self, input : String) => {
 		if
@@ -31,5 +34,4 @@ export default class def SymbolRule() => {
 		}
 		return true;
 	}
-	def isDollar(this : Self, c : char) => c=='$';
 }

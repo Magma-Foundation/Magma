@@ -92,4 +92,5 @@ export struct List {
      */
 	first : (Self) => Option<T>;
 	addFirst : (Self, T) => List<T>;
+	remove : (Self, T) => List<T>;
 }

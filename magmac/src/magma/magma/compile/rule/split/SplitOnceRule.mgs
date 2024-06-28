@@ -14,7 +14,7 @@ export default class def SplitOnceRule() => {
 	protected final slice : String;
 	protected final rightRule : Rule;
 	private final searcher : Searcher;
-	SplitOnceRule(this : Self, leftRule : Rule, slice : String, rightRule : Rule, searcher : Searcher) => {
+	 SplitOnceRule(this : Self, leftRule : Rule, slice : String, rightRule : Rule, searcher : Searcher) => {
 		this=leftRule;
 		this=slice;
 		this=rightRule;

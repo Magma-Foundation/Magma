@@ -95,4 +95,6 @@ public interface List<T> {
     Option<T> first();
 
     List<T> addFirst(T first);
+
+    List<T> remove(T element);
 }
