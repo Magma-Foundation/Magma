@@ -1,4 +1,1 @@
-import magma.api.option.Option;
-public struct JSONParser {
-	parse : Option<JSONValue>;
-}
+import magma.api.option.Option;public struct JSONParser {parse : (String) => Option<JSONValue>;}
