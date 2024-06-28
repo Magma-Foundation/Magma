@@ -1,1 +1,49 @@
-import magma.api.result.Err;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileException;import java.io.IOException;import java.nio.file.Files;import java.nio.file.Path;import java.util.ArrayList;import java.util.List;import java.util.stream.IntStream;() => {private final root : Path;private final child : Path;PathUnit : public => {this=root;this=child;}public toString : String => {list : var=ArrayList(computeNamespace());list.add(computeName());return String.join(".", list);}public read : Result<String, CompileException> => {try {return Ok(Files.readString(child));}catch (e : IOException){return Err(CompileException(e));}}public computeNamespace : List<String> => {relativized : var=root.relativize(child.getParent());return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();}public computeName : String => {fileName : var=child.getFileName().toString();return fileName.substring(0, fileName.indexOf('.'));}}
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+() => {
+	private final root : Path;
+	private final child : Path;
+	PathUnit : public => {
+		this=root;
+		this=child;
+	}
+	public toString : String => {
+		
+		list : var=
+		
+		ArrayList(computeNamespace());
+		list.add(computeName());
+		return String.join(".", list);
+	}
+	public read : Result<String, CompileException> => {
+		try 
+		{
+			return Ok(Files.readString(child));
+		}
+		catch (e : IOException){
+			return Err(CompileException(e));
+		}
+	}
+	public computeNamespace : List<String> => {
+		
+		relativized : var=
+		
+		root.relativize(child.getParent());
+		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
+	}
+	public computeName : String => {
+		
+		fileName : var=
+		
+		child.getFileName().toString();
+		return fileName.substring(0, fileName.indexOf('.'));
+	}
+}

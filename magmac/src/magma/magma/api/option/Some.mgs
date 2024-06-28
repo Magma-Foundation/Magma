@@ -1,1 +1,32 @@
-import magma.api.Tuple;import java.util.function.Function;import java.util.function.Supplier;() => {public map<R> : Option<R> => {return Some(mapper.apply(value));}public orElseGet : T => {return value;}public orElse : T => {return value;}public isPresent : boolean => {return true;}public toTuple : Tuple<Boolean, T> => {return Tuple(true, value);}public isEmpty : boolean => {return false;}public flatMap<R> : Option<R> => {return mapper.apply(value);}public orElsePanic : T => {return value;}public and<R> : Option<Tuple<T, R>> => {return other.map(() => Tuple(value, inner));}}
+import magma.api.Tuple;
+import java.util.function.Function;
+import java.util.function.Supplier;
+() => {
+	public map<R> : Option<R> => {
+		return Some(mapper.apply(value));
+	}
+	public orElseGet : T => {
+		return value;
+	}
+	public orElse : T => {
+		return value;
+	}
+	public isPresent : boolean => {
+		return true;
+	}
+	public toTuple : Tuple<Boolean, T> => {
+		return Tuple(true, value);
+	}
+	public isEmpty : boolean => {
+		return false;
+	}
+	public flatMap<R> : Option<R> => {
+		return mapper.apply(value);
+	}
+	public orElsePanic : T => {
+		return value;
+	}
+	public and<R> : Option<Tuple<T, R>> => {
+		return other.map(() => Tuple(value, inner));
+	}
+}

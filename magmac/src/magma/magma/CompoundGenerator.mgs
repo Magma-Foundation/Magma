@@ -1,1 +1,17 @@
-import magma.api.Tuple;import magma.api.collect.stream.Streams;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.lang.Generator;import magma.compile.rule.Node;import java.util.List;() => {public generate : Result<Tuple<Node, State>, Error_> => {initial : var=Tuple(root, state);return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));}}
+import magma.api.Tuple;
+import magma.api.collect.stream.Streams;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Generator;
+import magma.compile.rule.Node;
+import java.util.List;
+() => {
+	public generate : Result<Tuple<Node, State>, Error_> => {
+		
+		initial : var=
+		
+		Tuple(root, state);
+		return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
+	}
+}

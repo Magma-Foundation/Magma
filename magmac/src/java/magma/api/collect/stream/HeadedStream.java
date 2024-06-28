@@ -1,5 +1,6 @@
 package magma.api.collect.stream;
 
+import magma.api.Tuple;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.result.Ok;
@@ -36,6 +37,11 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
                 .map(mapper)
                 .<Head<R>>map(initial -> new FlatMapHead<>(initial, this, mapper))
                 .orElse(new EmptyHead<>()));
+    }
+
+    @Override
+    public <R> Stream<Tuple<T, R>> extend(Function<T, R> mapper) {
+        return map(value -> new Tuple<>(value, mapper.apply(value)));
     }
 
     @Override

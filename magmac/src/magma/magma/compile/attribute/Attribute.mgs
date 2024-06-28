@@ -1,13 +1,36 @@
-import magma.compile.rule.Node;import java.util.List;import java.util.Optional;/**
+import magma.compile.rule.Node;
+import java.util.List;
+import java.util.Optional;
+
+/**
  * The Attribute interface provides methods to retrieve attribute values
  * as different types. This interface includes default methods to get
  * the attribute value as a string or a list of strings.
- */export struct Attribute {default asNode : Optional<Node> => {return Optional.empty();}default asNodeList : Optional<List<Node>> => {return Optional.empty();}/**
+ */
+export struct Attribute {
+	default asNode : Optional<Node> => {
+		return Optional.empty();
+	}
+	default asNodeList : Optional<List<Node>> => {
+		return Optional.empty();
+	}
+	
+	/**
      * Retrieves the attribute value as a string.
      *
      * @return an Optional containing the string value if present, otherwise empty
-     */default asString : Optional<String> => {return Optional.empty();}/**
+     */
+	default asString : Optional<String> => {
+		return Optional.empty();
+	}
+	
+	/**
      * Retrieves the attribute value as a list of strings.
      *
      * @return an Optional containing the list of string values if present, otherwise empty
-     */default asStringList : Optional<List<String>> => {return Optional.empty();}format : (int) => String;}
+     */
+	default asStringList : Optional<List<String>> => {
+		return Optional.empty();
+	}
+	format : (int) => String;
+}

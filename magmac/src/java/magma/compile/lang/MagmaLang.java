@@ -43,6 +43,7 @@ public class MagmaLang {
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("less-than", "<", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
+                Lang.createOperatorRule("less-than-or-equals", "<=", value),
                 Lang.createNotRule(value),
                 new TypeRule("quantity", new StripRule(new LeftRule("(", new RightRule(new ExtractNodeRule("value", value), ")")))),
                 createConstructionRule(statement)

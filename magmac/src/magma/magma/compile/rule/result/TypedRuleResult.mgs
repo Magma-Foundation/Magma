@@ -1,1 +1,34 @@
-import magma.api.option.Option;import magma.compile.Error_;import magma.compile.attribute.Attributes;import magma.compile.rule.ImmutableNode;import magma.compile.rule.Node;import magma.java.JavaOptionals;import java.util.Optional;import java.util.function.Function;() => {private findAttributes0 : Optional<Attributes> => {return Optional.of(attributes);}private tryCreate0 : Optional<Node> => {return Optional.of(ImmutableNode(name, attributes));}private findError0 : Optional<Error_> => {return Optional.empty();}public withType : RuleResult => {return this;}public mapErr : RuleResult => {return this;}public findError : Option<Error_> => {return JavaOptionals.fromNative(findError0());}public findAttributes : Option<Attributes> => {return JavaOptionals.fromNative(findAttributes0());}public tryCreate : Option<Node> => {return JavaOptionals.fromNative(tryCreate0());}}
+import magma.api.option.Option;
+import magma.compile.Error_;
+import magma.compile.attribute.Attributes;
+import magma.compile.rule.ImmutableNode;
+import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
+import java.util.Optional;
+import java.util.function.Function;
+() => {
+	private findAttributes0 : Optional<Attributes> => {
+		return Optional.of(attributes);
+	}
+	private tryCreate0 : Optional<Node> => {
+		return Optional.of(ImmutableNode(name, attributes));
+	}
+	private findError0 : Optional<Error_> => {
+		return Optional.empty();
+	}
+	public withType : RuleResult => {
+		return this;
+	}
+	public mapErr : RuleResult => {
+		return this;
+	}
+	public findError : Option<Error_> => {
+		return JavaOptionals.fromNative(findError0());
+	}
+	public findAttributes : Option<Attributes> => {
+		return JavaOptionals.fromNative(findAttributes0());
+	}
+	public tryCreate : Option<Node> => {
+		return JavaOptionals.fromNative(tryCreate0());
+	}
+}

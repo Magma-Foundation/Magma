@@ -1,1 +1,25 @@
-import magma.api.result.Err;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.attribute.MapAttributes;import magma.compile.rule.result.ErrorRuleResult;import magma.compile.rule.result.RuleResult;import magma.compile.rule.result.UntypedRuleResult;() => {public toNode : RuleResult => {return input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));}public fromNode : Result<String, Error_> => {if(node.has(name)){return Err(CompileError("Node has property '" + name + "'.", node.toString()));}else{return Ok("");}}}
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.attribute.MapAttributes;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.compile.rule.result.UntypedRuleResult;
+() => {
+	public toNode : RuleResult => {
+		return input.isEmpty()?UntypedRuleResult(MapAttributes()):ErrorRuleResult(CompileError("Input is not empty.", input));
+	}
+	public fromNode : Result<String, Error_> => {
+		if
+		(node.has(name))
+		{
+			return Err(CompileError("Node has property '" + name + "'.", node.toString()));
+		}
+		else
+		{
+			return Ok("");
+		}
+	}
+}

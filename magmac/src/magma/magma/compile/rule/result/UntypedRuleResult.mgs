@@ -1,1 +1,24 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;import magma.compile.Error_;import magma.compile.attribute.Attributes;import magma.compile.rule.Node;import java.util.function.Function;() => {public withType : RuleResult => {return TypedRuleResult(type, attributes);}public mapErr : RuleResult => {return this;}public findError : Option<Error_> => {return None();}public findAttributes : Option<Attributes> => {return Some(attributes);}public tryCreate : Option<Node> => {return None();}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.compile.Error_;
+import magma.compile.attribute.Attributes;
+import magma.compile.rule.Node;
+import java.util.function.Function;
+() => {
+	public withType : RuleResult => {
+		return TypedRuleResult(type, attributes);
+	}
+	public mapErr : RuleResult => {
+		return this;
+	}
+	public findError : Option<Error_> => {
+		return None();
+	}
+	public findAttributes : Option<Attributes> => {
+		return Some(attributes);
+	}
+	public tryCreate : Option<Node> => {
+		return None();
+	}
+}

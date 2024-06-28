@@ -1,1 +1,65 @@
-import magma.api.Tuple;import magma.api.collect.stream.Streams;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.CompileParentError;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;import magma.java.JavaList;import magma.java.JavaOptionals;import java.util.ArrayList;import java.util.List;() => {private final visitor : Visitor;VisitingGenerator : public => {this=visitor;}private generateAttribute : Result<Tuple<Node, State>, Error_> => {nodeList : var=JavaOptionals.toNative(node.findNodeList(key).map(JavaList.toNative));if(nodeList.isPresent()){initial : var=Tuple(ArrayList(), state);return Streams.fromNativeList(nodeList.get()).foldLeftToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(() => node.withNodeList(key, JavaList.fromNative(list))));}return JavaOptionals.toNative(node.findNode(key)).map(() => generate(value, state).mapValue(() => inner.mapLeft(() => node.withNode(key, child)))).orElseGet(() => Ok(Tuple(node, state)));}private generateThenFold : Result<Tuple<List<Node>, State>, Error_> => {return generate(node, current.right()).mapValue(() => {newNode : var=tuple.left();newState : var=tuple.right();list : var=current.left();list.add(newNode);return Tuple(list, newState);});}public generate : Result<Tuple<Node, State>, Error_> => {return visitor.preVisit(node, depth).flatMapValue(() => {preVisitedNode : var=preVisitedTuple.left();preVisitedState : var=preVisitedTuple.right();return preVisitedNode.streamKeys().foldLeftToResult(Tuple(preVisitedNode, preVisitedState), () => generateAttribute(key, tuple.left(), tuple.right())).flatMapValue(() => visitor.postVisit(tuple.left(), tuple.right()));}).mapErr(() => CompileParentError("Failed to parse node.", node.toString(), err));}}
+import magma.api.Tuple;
+import magma.api.collect.stream.Streams;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+import magma.java.JavaOptionals;
+import java.util.ArrayList;
+import java.util.List;
+() => {
+	private final visitor : Visitor;
+	VisitingGenerator : public => {
+		this=visitor;
+	}
+	private generateAttribute : Result<Tuple<Node, State>, Error_> => {
+		
+		nodeList : var=
+		
+		JavaOptionals.toNative(node.findNodeList(key).map(JavaList.toNative));
+		if
+		(nodeList.isPresent())
+		{
+			
+			initial : var=
+			
+			Tuple(ArrayList(), state);
+			return Streams.fromNativeList(nodeList.get()).foldLeftToResult(initial, this.generateThenFold).mapValue(() => tuple.mapLeft(() => node.withNodeList(key, JavaList.fromNative(list))));
+		}
+		return JavaOptionals.toNative(node.findNode(key)).map(() => generate(value, state).mapValue(() => inner.mapLeft(() => node.withNode(key, child)))).orElseGet(() => Ok(Tuple(node, state)));
+	}
+	private generateThenFold : Result<Tuple<List<Node>, State>, Error_> => {
+		return generate(node, current.right()).mapValue(() => {
+			
+			newNode : var=
+			
+			tuple.left();
+			
+			newState : var=
+			
+			tuple.right();
+			
+			list : var=
+			
+			current.left();
+			list.add(newNode);
+			return Tuple(list, newState);
+		});
+	}
+	public generate : Result<Tuple<Node, State>, Error_> => {
+		return visitor.preVisit(node, depth).flatMapValue(() => {
+			
+			preVisitedNode : var=
+			
+			preVisitedTuple.left();
+			
+			preVisitedState : var=
+			
+			preVisitedTuple.right();
+			return preVisitedNode.streamKeys().foldLeftToResult(Tuple(preVisitedNode, preVisitedState), () => generateAttribute(key, tuple.left(), tuple.right())).flatMapValue(() => visitor.postVisit(tuple.left(), tuple.right()));
+		}).mapErr(() => CompileParentError("Failed to parse node.", node.toString(), err));
+	}
+}

@@ -1,1 +1,9 @@
-import magma.api.collect.stream.Collector;() => {public createInitial : List<T> => {return initial;}public fold : List<T> => {return current.add(next);}}
+import magma.api.collect.stream.Collector;
+() => {
+	public createInitial : List<T> => {
+		return initial;
+	}
+	public fold : List<T> => {
+		return current.add(next);
+	}
+}

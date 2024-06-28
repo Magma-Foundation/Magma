@@ -1,1 +1,4 @@
-import magma.api.option.Option;export struct Head {head : () => Option<T>;}
+import magma.api.option.Option;
+export struct Head {
+	head : () => Option<T>;
+}

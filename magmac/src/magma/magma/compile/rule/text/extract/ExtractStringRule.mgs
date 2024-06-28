@@ -1,1 +1,19 @@
-import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.attribute.Attribute;import magma.compile.attribute.StringAttribute;import magma.compile.rule.Node;import magma.java.JavaOptionals;import java.util.Optional;() => {ExtractStringRule : public => {super(key);}protected fromAttribute : Optional<String> => {return JavaOptionals.toNative(attribute.findString(key));}protected toAttribute : Result<Attribute, Error_> => {return Ok(StringAttribute(content));}}
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.attribute.Attribute;
+import magma.compile.attribute.StringAttribute;
+import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
+import java.util.Optional;
+() => {
+	ExtractStringRule : public => {
+		super(key);
+	}
+	protected fromAttribute : Optional<String> => {
+		return JavaOptionals.toNative(attribute.findString(key));
+	}
+	protected toAttribute : Result<Attribute, Error_> => {
+		return Ok(StringAttribute(content));
+	}
+}

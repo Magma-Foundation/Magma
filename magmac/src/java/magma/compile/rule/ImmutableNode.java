@@ -8,6 +8,7 @@ import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
+import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
@@ -82,6 +83,11 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public Node mapStringList(String key, Function<List<String>, List<String>> mapper) {
         return new ImmutableNode(type, attributes.mapValue(key, StringListAttribute.Factory, list -> JavaList.toNative(mapper.apply(JavaList.fromNative(list)))));
+    }
+
+    @Override
+    public Node withString(String key, String value) {
+        return with(key, new StringAttribute(value));
     }
 
     public Node with(String key, Attribute value) {

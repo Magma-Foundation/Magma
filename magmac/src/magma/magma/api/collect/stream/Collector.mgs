@@ -1,1 +1,4 @@
-export struct Collector {createInitial : () => C;fold : (C, T) => C;}
+export struct Collector {
+	createInitial : () => C;
+	fold : (C, T) => C;
+}

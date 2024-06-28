@@ -1,1 +1,12 @@
-import java.util.Optional;() => {public asString : Optional<String> => {return Optional.of(value);}public format : String => {return "\"" + escape() + "\"";}private escape : String => {return value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");}}
+import java.util.Optional;
+() => {
+	public asString : Optional<String> => {
+		return Optional.of(value);
+	}
+	public format : String => {
+		return "\"" + escape() + "\"";
+	}
+	private escape : String => {
+		return value.replace("\r", "\\r").replace("\n", "\\n").replace("\t", "\\t");
+	}
+}

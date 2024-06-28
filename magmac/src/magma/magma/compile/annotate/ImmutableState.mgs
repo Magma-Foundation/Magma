@@ -1,1 +1,20 @@
-import magma.Unit;import magma.api.collect.List;import magma.java.JavaList;import magma.java.Set;() => {private final sources : Set<Unit>;private final frames : List<List<String>>;ImmutableState : public => {this=sources;this=frames;}ImmutableState : public => {this(sources, JavaList());}}
+import magma.api.collect.List;
+import magma.java.JavaList;
+() => {
+	private final frames : List<List<String>>;
+	ImmutableState : public => {
+		this=frames;
+	}
+	ImmutableState : public => {
+		this(JavaList());
+	}
+	public enter : State => {
+		return ImmutableState(frames.pushLast(JavaList.empty()));
+	}
+	public computeDepth : int => {
+		return frames.size();
+	}
+	public exit : State => {
+		return ImmutableState(frames.popLastAndDiscard().orElse(frames));
+	}
+}

@@ -1,1 +1,23 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;() => {private final value : T;private retrieved : boolean=false;SingleHead : public => {this=value;}public head : Option<T> => {if(retrieved)return None();else{retrieved=true;return Some(value);}}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+() => {
+	private final value : T;
+	
+	private retrieved : boolean=
+	
+	false;
+	SingleHead : public => {
+		this=value;
+	}
+	public head : Option<T> => {
+		if
+		(retrieved)
+		return None();
+		else
+		{
+			retrieved=true;
+			return Some(value);
+		}
+	}
+}

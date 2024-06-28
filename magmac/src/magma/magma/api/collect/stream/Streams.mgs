@@ -1,1 +1,25 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;import magma.java.JavaOptionals;import java.util.List;import java.util.Optional;() => {public static fromNativeList<T> : Stream<T> => {return HeadedStream(Head());}public static fromOption<T> : Stream<T> => {return HeadedStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));}public static from : Stream<Integer> => {return HeadedStream(Head());}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
+import magma.java.NativeListHead;
+import java.util.List;
+import java.util.Optional;
+() => {
+	public static fromNativeList<T> : Stream<T> => {
+		return HeadedStream(Head());
+	}
+	public static fromOption<T> : Stream<T> => {
+		return HeadedStream(option.map(SingleHead.new).orElseGet(EmptyHead.new));
+	}
+	public static from : Stream<Integer> => {
+		return HeadedStream(Head());
+	}
+	public static of<T> : Stream<T> => {
+		return HeadedStream(NativeListHead(List.of(values)));
+	}
+	public static rangeTo : Stream<Integer> => {
+		return HeadedStream(RangeHead(0, extent));
+	}
+}

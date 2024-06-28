@@ -141,4 +141,13 @@ public interface Node {
      * @return the updated Node
      */
     Node mapStringList(String key, Function<List<String>, List<String>> mapper);
+
+    /**
+     * Adds a string with a specified string.
+     *
+     * @param key   the key for the string
+     * @param value the string to add
+     * @return the updated Node
+     */
+    Node withString(String key, String value);
 }

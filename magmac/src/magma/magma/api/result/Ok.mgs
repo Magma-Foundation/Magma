@@ -1,1 +1,30 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.option.Some;import java.util.function.Function;() => {public static from<E, R> : Result<R, E> => {return Ok(value);}public flatMapValue<R> : Result<R, E> => {return mapper.apply(value);}public mapValue<R> : Result<R, E> => {return Ok(mapper.apply(value));}public isOk : boolean => {return true;}public mapErr<R> : Result<T, R> => {return Ok(value);}public match<R> : R => {return onOk.apply(value);}public findValue : Option<T> => {return Some(value);}public findErr : Option<E> => {return None();}}
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+import java.util.function.Function;
+() => {
+	public static from<E, R> : Result<R, E> => {
+		return Ok(value);
+	}
+	public flatMapValue<R> : Result<R, E> => {
+		return mapper.apply(value);
+	}
+	public mapValue<R> : Result<R, E> => {
+		return Ok(mapper.apply(value));
+	}
+	public isOk : boolean => {
+		return true;
+	}
+	public mapErr<R> : Result<T, R> => {
+		return Ok(value);
+	}
+	public match<R> : R => {
+		return onOk.apply(value);
+	}
+	public findValue : Option<T> => {
+		return Some(value);
+	}
+	public findErr : Option<E> => {
+		return None();
+	}
+}

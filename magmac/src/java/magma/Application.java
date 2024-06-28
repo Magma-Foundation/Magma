@@ -28,6 +28,7 @@ import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.PackageRemover;
 import magma.compile.lang.java.RecordNormalizer;
+import magma.compile.lang.magma.BlockFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
@@ -190,14 +191,13 @@ public record Application(Configuration config) {
 
             System.out.println("Generating target: " + String.join(".", namespace) + "." + name);
 
-            var javaCleaner = new VisitingGenerator(new CompoundVisitor(streamVisitors0().collect(JavaList.collecting())));
-
             var rootGenerator = new CompoundGenerator(List.of(
-                    javaCleaner
+                    new VisitingGenerator(new CompoundVisitor(streamVisitors0().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamVisitors1().collect(JavaList.collecting())))
             ));
 
             var generated = $Result(rootGenerator
-                    .generate(right, new ImmutableState(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
+                    .generate(right, new ImmutableState())
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
 
@@ -207,6 +207,12 @@ public record Application(Configuration config) {
             $Option(writeSafely(debugTarget, generated.toString()));
             return new Tuple<>(source, generated);
         });
+    }
+
+    private Stream<Visitor> streamVisitors1() {
+        return Streams.of(
+                new FilteringVisitor("block", new BlockFormatter())
+        );
     }
 
     Option<CompileException> writeTargets(Build build, Map<Unit, Node> targetTrees) {

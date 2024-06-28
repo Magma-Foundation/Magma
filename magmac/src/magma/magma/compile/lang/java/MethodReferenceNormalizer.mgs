@@ -1,1 +1,12 @@
-import magma.api.Tuple;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.lang.Visitor;import magma.compile.rule.Node;() => {public preVisit : Result<Tuple<Node, State>, Error_> => {return Ok(Tuple(node.retype("access"), state));}}
+import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+() => {
+	public preVisit : Result<Tuple<Node, State>, Error_> => {
+		return Ok(Tuple(node.retype("access"), state));
+	}
+}

@@ -1,1 +1,45 @@
-() => {SymbolRule : public => {super(child);}private static isValidDigit : boolean => {return i!=0&&Character.isDigit(c);}private static isUnderscore : boolean => {return c=='_';}protected computeMessage : String => {return "Not a symbol.";}protected filter : boolean => {if(input.isEmpty()){return false;}i : int=0;while(i<input.length()){c : var=input.charAt(i);if(Character.isLetter(c)||isUnderscore(c)||isDollar(c)||isValidDigit(i, c)){i++;continue;}return false;}return true;}private static isDollar : boolean => {return c=='$';}}
+() => {
+	SymbolRule : public => {
+		super(child);
+	}
+	private static isValidDigit : boolean => {
+		return i!=0&&Character.isDigit(c);
+	}
+	private static isUnderscore : boolean => {
+		return c=='_';
+	}
+	protected computeMessage : String => {
+		return "Not a symbol.";
+	}
+	protected filter : boolean => {
+		if
+		(input.isEmpty())
+		{
+			return false;
+		}
+		
+		i : int=
+		
+		0;
+		while
+		(i<input.length())
+		{
+			
+			c : var=
+			
+			input.charAt(i);
+			if
+			(Character.isLetter(c)||isUnderscore(c)||isDollar(c)||isValidDigit(i, c))
+			{
+				i++;
+				continue
+				;
+			}
+			return false;
+		}
+		return true;
+	}
+	private static isDollar : boolean => {
+		return c=='$';
+	}
+}

@@ -165,6 +165,7 @@ public class JavaLang {
                 Lang.createOperatorRule("add", "+", value),
                 Lang.createOperatorRule("subtract", "-", value),
                 Lang.createOperatorRule("greater-than-or-equals", ">=", value),
+                Lang.createOperatorRule("less-than-or-equals", "<=", value),
                 Lang.createOperatorRule("greater-than", ">", value),
                 Lang.createOperatorRule("or", "||", value),
                 Lang.createOperatorRule("less-than", "<", value),

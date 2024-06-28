@@ -1,1 +1,22 @@
-import magma.api.Tuple;import magma.api.result.Ok;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.lang.Visitor;import magma.compile.rule.Node;() => {public preVisit : Result<Tuple<Node, State>, Error_> => {if(node.is(type))return child.preVisit(node, state);return Ok(Tuple(node, state));}}
+import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import java.util.function.BiFunction;
+() => {
+	public preVisit : Result<Tuple<Node, State>, Error_> => {
+		return applyFilter(node, state, child.preVisit);
+	}
+	private applyFilter : Result<Tuple<Node, State>, Error_> => {
+		if
+		(!node.is(type))
+		return Ok(Tuple(node, state));
+		return folder.apply(node, state);
+	}
+	public postVisit : Result<Tuple<Node, State>, Error_> => {
+		return applyFilter(node, state, child.postVisit);
+	}
+}

@@ -1,1 +1,33 @@
-import magma.api.result.Result;import magma.compile.CompileParentError;import magma.compile.Error_;import magma.compile.rule.Node;import magma.compile.rule.Rule;import magma.compile.rule.result.RuleResult;() => {public static final DEFAULT_LEFT : String="left";public static final DEFAULT_RIGHT : String="right";StripRule : public => {this(child, DEFAULT_LEFT, DEFAULT_RIGHT);}public toNode : RuleResult => {return child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));}public fromNode : Result<String, Error_> => {leftIndent : var=node.findString("left").orElse("");rightIndent : var=node.findString(right).orElse("");return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));}}
+import magma.api.result.Result;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
+import magma.compile.rule.Node;
+import magma.compile.rule.Rule;
+import magma.compile.rule.result.RuleResult;
+() => {
+	
+	public static final DEFAULT_LEFT : String=
+	
+	"left";
+	
+	public static final DEFAULT_RIGHT : String=
+	
+	"right";
+	StripRule : public => {
+		this(child, DEFAULT_LEFT, DEFAULT_RIGHT);
+	}
+	public toNode : RuleResult => {
+		return child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
+	}
+	public fromNode : Result<String, Error_> => {
+		
+		leftIndent : var=
+		
+		node.findString("left").orElse("");
+		
+		rightIndent : var=
+		
+		node.findString(right).orElse("");
+		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
+	}
+}

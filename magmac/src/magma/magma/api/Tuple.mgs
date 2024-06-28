@@ -1,12 +1,21 @@
-import java.util.function.Function;/**
+import java.util.function.Function;
+
+/**
  * A simple record representing a tuple with a left and right value.
  *
  * @param <L> the type of the left value
  * @param <R> the type of the right value
- */() => {/**
+ */
+() => {
+	
+	/**
      * Applies a function to the left value of the tuple, returning a new tuple with the transformed left value.
      *
      * @param <T> the type of the transformed left value
      * @param mapper the function to apply to the left value
      * @return a new Tuple with the transformed left value and the same right value
-     */public mapLeft<T> : Tuple<T, R> => {return Tuple(mapper.apply(left), right);}}
+     */
+	public mapLeft<T> : Tuple<T, R> => {
+		return Tuple(mapper.apply(left), right);
+	}
+}

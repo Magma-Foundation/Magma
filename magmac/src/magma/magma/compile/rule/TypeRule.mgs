@@ -1,1 +1,54 @@
-import magma.api.result.Err;import magma.api.result.Result;import magma.compile.CompileError;import magma.compile.CompileParentError;import magma.compile.Error_;import magma.compile.rule.result.ErrorRuleResult;import magma.compile.rule.result.RuleResult;import magma.java.JavaOptionals;() => {public static final FORMAT : String="Node was not of type '%s', but rather '%s'.";public toNode : RuleResult => {result : var=child.toNode(input);if(JavaOptionals.toNative(result.findError()).isEmpty())return result.withType(type);format : var="Cannot attach type '%s' because of child failure.";message : var=format.formatted(type);return ErrorRuleResult(CompileParentError(message, input, JavaOptionals.toNative(result.findError()).get()));}public fromNode : Result<String, Error_> => {if(!node.is(type)){message : var=String.format(FORMAT, type, node.findType());return Err(CompileError(message, node.toString()));}return child.fromNode(node).mapErr(() => {format : var="Cannot generate '%s' from node.";message : var=format.formatted(type);return CompileParentError(message, node.toString(), err);});}}
+import magma.api.result.Err;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.CompileParentError;
+import magma.compile.Error_;
+import magma.compile.rule.result.ErrorRuleResult;
+import magma.compile.rule.result.RuleResult;
+import magma.java.JavaOptionals;
+() => {
+	
+	public static final FORMAT : String=
+	
+	"Node was not of type '%s', but rather '%s'.";
+	public toNode : RuleResult => {
+		
+		result : var=
+		
+		child.toNode(input);
+		if
+		(JavaOptionals.toNative(result.findError()).isEmpty())
+		return result.withType(type);
+		
+		format : var=
+		
+		"Cannot attach type '%s' because of child failure.";
+		
+		message : var=
+		
+		format.formatted(type);
+		return ErrorRuleResult(CompileParentError(message, input, JavaOptionals.toNative(result.findError()).get()));
+	}
+	public fromNode : Result<String, Error_> => {
+		if
+		(!node.is(type))
+		{
+			
+			message : var=
+			
+			String.format(FORMAT, type, node.findType());
+			return Err(CompileError(message, node.toString()));
+		}
+		return child.fromNode(node).mapErr(() => {
+			
+			format : var=
+			
+			"Cannot generate '%s' from node.";
+			
+			message : var=
+			
+			format.formatted(type);
+			return CompileParentError(message, node.toString(), err);
+		});
+	}
+}

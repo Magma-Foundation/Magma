@@ -1,3 +1,413 @@
-import magma.api.Tuple;import magma.compile.CompileError;import magma.compile.Error_;import magma.compile.rule.ContextRule;import magma.compile.rule.EmptyRule;import magma.compile.rule.LazyRule;import magma.compile.rule.NumberRule;import magma.compile.rule.OptionalRule;import magma.compile.rule.OrRule;import magma.compile.rule.Rule;import magma.compile.rule.SymbolRule;import magma.compile.rule.TypeRule;import magma.compile.rule.split.FirstRule;import magma.compile.rule.split.LastRule;import magma.compile.rule.split.MembersSplitter;import magma.compile.rule.split.ParamSplitter;import magma.compile.rule.split.Searcher;import magma.compile.rule.split.SplitMultipleRule;import magma.compile.rule.split.SplitOnceRule;import magma.compile.rule.text.LeftRule;import magma.compile.rule.text.RightRule;import magma.compile.rule.text.StripRule;import magma.compile.rule.text.extract.ExtractNodeRule;import magma.compile.rule.text.extract.ExtractStringListRule;import magma.compile.rule.text.extract.ExtractStringRule;import magma.compile.rule.text.extract.SimpleExtractStringListRule;import java.util.LinkedList;import java.util.List;import java.util.Optional;import java.util.stream.Collectors;import java.util.stream.IntStream;() => {static createBlock : Rule => {return StripRule(TypeRule("block", createMembersRule(member)), "before-content", "after-content");}static createMembersRule : SplitMultipleRule => {return SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));}static createImportRule : TypeRule => {return TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));}static createNamespaceRule : TypeRule => {return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));}static createCatchRule : TypeRule => {declaration : var=StripRule(LeftRule("(", RightRule(definition, ")")));value : var=ExtractNodeRule("child", createBlock(statement));afterKeyword : var=FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));return TypeRule("catch", LeftRule("catch ", afterKeyword));}static createTypeRule : LazyRule => {type : var=LazyRule();generic : var=createGenericTypeRule(type);type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("placeholder", StripRule(SymbolRule(ExtractStringRule("value")))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));return type;}private static createGenericTypeRule : TypeRule => {children : var=SplitMultipleRule(ParamSplitter(), ", ", "children", type);parent : var=StripRule(ExtractStringRule("parent"));return TypeRule("generic", StripRule(FirstRule(parent, "<", RightRule(children, ">"))));}private static createFunctionType : TypeRule => {params : var=SplitMultipleRule(ParamSplitter(), ", ", "params", type);wrappedParams : var=LeftRule("(", RightRule(params, ")"));maybeParams : var=OptionalRule("params", wrappedParams, LeftRule("()", EmptyRule("params")));returns : var=ExtractNodeRule("returns", type);return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));}static createTryRule : TypeRule => {return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));}static createModifiersRule : Rule => {return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));}static createModifiersRule : Rule => {return ExtractStringListRule("modifiers", " ");;}static createInvocationRule : TypeRule => {arguments : var=OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));caller : var=ExtractNodeRule("caller", StripRule(value));return TypeRule("invocation", RightRule(SplitOnceRule(caller, "(", arguments, InvocationStartSearcher()), ")"));}static createCommentRule : TypeRule => {return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));}static createConditionRule : TypeRule => {child : var=ExtractNodeRule("condition", value);conditionParent : var=StripRule(LeftRule("(", child), "before-condition", "after-condition");valueWithBlock : var=LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));valueWithoutBlock : var=ExtractNodeRule("value", statement);valueParent : var=StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock)));return TypeRule(type, LeftRule(type, SplitOnceRule(conditionParent, ")", valueParent, ConditionEndSearcher())));}static createReturnRule : Rule => {child : var=ExtractNodeRule("child", StripRule(value));withValue : var=LeftRule(" ", ContextRule("Invalid value.", child));maybeChild : var=OrRule(List.of(withValue, EmptyRule("child")));after : var=OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));return TypeRule("return", LeftRule("return", after));}static createForRule : Rule => {collection : var=StripRule(ExtractNodeRule("collection", value));condition : var=RightRule(LastRule(StripRule(definition), delimiter, collection), ")");content : var=RightRule(ExtractNodeRule("child", createBlock(statement)), "}");child : var=StripRule(LeftRule("(", condition));leftRule : var=ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));after : var=FirstRule(leftRule, "{", content);return TypeRule("for", LeftRule("for", after));}static createElseRule : Rule => {child : var=RightRule(ExtractNodeRule("child", createBlock(statement)), "}");child1 : var=LeftRule("{", child);anElse : var=LeftRule("else", StripRule(child1));anElse1 : var=LeftRule("else ", ExtractNodeRule("child", statement));return TypeRule("else", OrRule(List.of(anElse, anElse1)));}static createAssignmentRule : Rule => {reference : var=SymbolRule(ExtractStringRule("reference"));assignable : var=OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));left : var=ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));right : var=RightRule(ExtractNodeRule("value", StripRule(value)), ";");return TypeRule("assignment", FirstRule(left, "=", right));}static createDeclarationRule : TypeRule => {wrappedDefinition : var=ExtractNodeRule("definition", TypeRule("definition", definition));formattedDefinition : var=StripRule(wrappedDefinition, "", "after-definition");withoutTerminator : var=ExtractNodeRule("value", value);withTerminator : var=StripRule(RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");maybeTerminating : var=StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));}static createParamsRule : Rule => {return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));}static createStringRule : TypeRule => {return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));}static createAccessRule : TypeRule => {parent : var=ExtractNodeRule("parent", StripRule(value));return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));}static createSymbolRule : TypeRule => {return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));}static createTernaryRule : TypeRule => {return TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));}static createOperatorRule : TypeRule => {left : var=StripRule(ExtractNodeRule("leftRule", value));right : var=StripRule(ExtractNodeRule("right", value));return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));}static createNumberRule : TypeRule => {return TypeRule("number", NumberRule(ExtractStringRule("value")));}static createCharRule : TypeRule => {return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));}static createEmptyStatementRule : TypeRule => {return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));}static createThrowRule : Rule => {rule : Rule=ExtractNodeRule("value", value);after : var=RightRule(rule, ";");return TypeRule("throw", LeftRule("throw ", after));}static createNotRule : TypeRule => {return TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));}static createDefinitionRule : TypeRule => {return TypeRule("definition", RightRule(definition, ";"));}static createBlockCommentRule : TypeRule => {return TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));}static createPostDecrementRule : TypeRule => {return TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));}static createPostIncrementRule : TypeRule => {return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));}static createKeywordRule : TypeRule => {return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));}static createTypeParamsRule : SplitMultipleRule => {typeParam : var=LazyRule();symbol : var=TypeRule("symbol-type", StripRule(SymbolRule(ExtractStringRule("value"))));extendsRule : var=TypeRule("extends", StripRule(FirstRule(ExtractStringRule("name"), " extends ", ExtractNodeRule("child", typeParam))));typeParam.setRule(OrRule(List.of(extendsRule, symbol)));return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);}() => {private final slice : String;OperatorSearcher : public => {this=slice;}public search : Optional<Integer> => {if(!input.contains(slice))return Optional.empty();queue : var=IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));depth : var=0;while(!queue.isEmpty()){tuple : var=queue.pop();i : var=tuple.left();maybeSlice : var=input.substring(i, Math.min(i+slice.length(), input.length()));if(maybeSlice.equals(slice)&&depth==0){return Optional.of(i);}else{c : var=maybeSlice.charAt(0);if(c=='\''){pop : var=queue.pop();if(pop.right()=='\\')queue.pop();queue.pop();continue;}if(c=='(')depth++;if(c==')')depth--;}}/*
+import magma.api.Tuple;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.rule.ContextRule;
+import magma.compile.rule.EmptyRule;
+import magma.compile.rule.LazyRule;
+import magma.compile.rule.NumberRule;
+import magma.compile.rule.OptionalRule;
+import magma.compile.rule.OrRule;
+import magma.compile.rule.Rule;
+import magma.compile.rule.SymbolRule;
+import magma.compile.rule.TypeRule;
+import magma.compile.rule.split.FirstRule;
+import magma.compile.rule.split.LastRule;
+import magma.compile.rule.split.MembersSplitter;
+import magma.compile.rule.split.ParamSplitter;
+import magma.compile.rule.split.Searcher;
+import magma.compile.rule.split.SplitMultipleRule;
+import magma.compile.rule.split.SplitOnceRule;
+import magma.compile.rule.text.LeftRule;
+import magma.compile.rule.text.RightRule;
+import magma.compile.rule.text.StripRule;
+import magma.compile.rule.text.extract.ExtractNodeRule;
+import magma.compile.rule.text.extract.ExtractStringListRule;
+import magma.compile.rule.text.extract.ExtractStringRule;
+import magma.compile.rule.text.extract.SimpleExtractStringListRule;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+() => {
+	static createBlock : Rule => {
+		return StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
+	}
+	static createMembersRule : SplitMultipleRule => {
+		return SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
+	}
+	static createImportRule : TypeRule => {
+		return TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
+	}
+	static createNamespaceRule : TypeRule => {
+		return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
+	}
+	static createCatchRule : TypeRule => {
+		
+		declaration : var=
+		
+		StripRule(LeftRule("(", RightRule(definition, ")")));
+		
+		value : var=
+		
+		ExtractNodeRule("child", createBlock(statement));
+		
+		afterKeyword : var=
+		
+		FirstRule(ExtractNodeRule("condition", TypeRule("definition", declaration)), "{", RightRule(value, "}"));
+		return TypeRule("catch", LeftRule("catch ", afterKeyword));
+	}
+	static createTypeRule : LazyRule => {
+		
+		type : var=
+		
+		LazyRule();
+		
+		generic : var=
+		
+		createGenericTypeRule(type);
+		type.setRule(OrRule(List.of(TypeRule("array", RightRule(ExtractNodeRule("child", type), "[]")), generic, TypeRule("placeholder", StripRule(SymbolRule(ExtractStringRule("value")))), TypeRule("access", LastRule(ExtractNodeRule("parent", type), ".", ExtractStringRule("member"))), createFunctionType(type))));
+		return type;
+	}
+	private static createGenericTypeRule : TypeRule => {
+		
+		children : var=
+		
+		SplitMultipleRule(ParamSplitter(), ", ", "children", type);
+		
+		parent : var=
+		
+		StripRule(ExtractStringRule("parent"));
+		return TypeRule("generic", StripRule(FirstRule(parent, "<", RightRule(children, ">"))));
+	}
+	private static createFunctionType : TypeRule => {
+		
+		params : var=
+		
+		SplitMultipleRule(ParamSplitter(), ", ", "params", type);
+		
+		wrappedParams : var=
+		
+		LeftRule("(", RightRule(params, ")"));
+		
+		maybeParams : var=
+		
+		OptionalRule("params", wrappedParams, LeftRule("()", EmptyRule("params")));
+		
+		returns : var=
+		
+		ExtractNodeRule("returns", type);
+		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
+	}
+	static createTryRule : TypeRule => {
+		return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
+	}
+	static createModifiersRule : Rule => {
+		return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
+	}
+	static createModifiersRule : Rule => {
+		return ExtractStringListRule("modifiers", " ");
+		
+		;
+	}
+	static createInvocationRule : TypeRule => {
+		
+		arguments : var=
+		
+		OrRule(List.of(SplitMultipleRule(ParamSplitter(), ", ", "arguments", StripRule(value))));
+		
+		caller : var=
+		
+		ExtractNodeRule("caller", StripRule(value));
+		return TypeRule("invocation", RightRule(SplitOnceRule(caller, "(", arguments, InvocationStartSearcher()), ")"));
+	}
+	static createCommentRule : TypeRule => {
+		return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
+	}
+	static createConditionRule : TypeRule => {
+		
+		child : var=
+		
+		ExtractNodeRule("condition", value);
+		
+		conditionParent : var=
+		
+		StripRule(LeftRule("(", child), "before-condition", "after-condition");
+		
+		valueWithBlock : var=
+		
+		LeftRule("{", RightRule(ExtractNodeRule("value", createBlock(statement)), "}"));
+		
+		valueWithoutBlock : var=
+		
+		ExtractNodeRule("value", statement);
+		
+		valueParent : var=
+		
+		StripRule(OrRule(List.of(valueWithBlock, valueWithoutBlock)));
+		return TypeRule(type, LeftRule(type, SplitOnceRule(conditionParent, ")", valueParent, ConditionEndSearcher())));
+	}
+	static createReturnRule : Rule => {
+		
+		child : var=
+		
+		ExtractNodeRule("child", StripRule(value));
+		
+		withValue : var=
+		
+		LeftRule(" ", ContextRule("Invalid value.", child));
+		
+		maybeChild : var=
+		
+		OrRule(List.of(withValue, EmptyRule("child")));
+		
+		after : var=
+		
+		OrRule(List.of(RightRule(maybeChild, ";"), maybeChild));
+		return TypeRule("return", LeftRule("return", after));
+	}
+	static createForRule : Rule => {
+		
+		collection : var=
+		
+		StripRule(ExtractNodeRule("collection", value));
+		
+		condition : var=
+		
+		RightRule(LastRule(StripRule(definition), delimiter, collection), ")");
+		
+		content : var=
+		
+		RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		
+		child : var=
+		
+		StripRule(LeftRule("(", condition));
+		
+		leftRule : var=
+		
+		ExtractNodeRule("condition-parent", TypeRule("condition-parent", child));
+		
+		after : var=
+		
+		FirstRule(leftRule, "{", content);
+		return TypeRule("for", LeftRule("for", after));
+	}
+	static createElseRule : Rule => {
+		
+		child : var=
+		
+		RightRule(ExtractNodeRule("child", createBlock(statement)), "}");
+		
+		child1 : var=
+		
+		LeftRule("{", child);
+		
+		anElse : var=
+		
+		LeftRule("else", StripRule(child1));
+		
+		anElse1 : var=
+		
+		LeftRule("else ", ExtractNodeRule("child", statement));
+		return TypeRule("else", OrRule(List.of(anElse, anElse1)));
+	}
+	static createAssignmentRule : Rule => {
+		
+		reference : var=
+		
+		SymbolRule(ExtractStringRule("reference"));
+		
+		assignable : var=
+		
+		OrRule(List.of(StripRule(reference), LastRule(reference, ".", ExtractStringRule("member"))));
+		
+		left : var=
+		
+		ExtractNodeRule("assignable", TypeRule("assignable-parent", assignable));
+		
+		right : var=
+		
+		RightRule(ExtractNodeRule("value", StripRule(value)), ";");
+		return TypeRule("assignment", FirstRule(left, "=", right));
+	}
+	static createDeclarationRule : TypeRule => {
+		
+		wrappedDefinition : var=
+		
+		ExtractNodeRule("definition", TypeRule("definition", definition));
+		
+		formattedDefinition : var=
+		
+		StripRule(wrappedDefinition, "", "after-definition");
+		
+		withoutTerminator : var=
+		
+		ExtractNodeRule("value", value);
+		
+		withTerminator : var=
+		
+		StripRule(RightRule(withoutTerminator, ";"), "", "value-terminator-spacing");
+		
+		maybeTerminating : var=
+		
+		StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
+		return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));
+	}
+	static createParamsRule : Rule => {
+		return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
+	}
+	static createStringRule : TypeRule => {
+		return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
+	}
+	static createAccessRule : TypeRule => {
+		
+		parent : var=
+		
+		ExtractNodeRule("parent", StripRule(value));
+		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
+	}
+	static createSymbolRule : TypeRule => {
+		return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
+	}
+	static createTernaryRule : TypeRule => {
+		return TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
+	}
+	static createOperatorRule : TypeRule => {
+		
+		left : var=
+		
+		StripRule(ExtractNodeRule("leftRule", value));
+		
+		right : var=
+		
+		StripRule(ExtractNodeRule("right", value));
+		return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
+	}
+	static createNumberRule : TypeRule => {
+		return TypeRule("number", NumberRule(ExtractStringRule("value")));
+	}
+	static createCharRule : TypeRule => {
+		return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
+	}
+	static createEmptyStatementRule : TypeRule => {
+		return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
+	}
+	static createThrowRule : Rule => {
+		
+		rule : Rule=
+		
+		ExtractNodeRule("value", value);
+		
+		after : var=
+		
+		RightRule(rule, ";");
+		return TypeRule("throw", LeftRule("throw ", after));
+	}
+	static createNotRule : TypeRule => {
+		return TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
+	}
+	static createDefinitionRule : TypeRule => {
+		return TypeRule("definition", RightRule(definition, ";"));
+	}
+	static createBlockCommentRule : TypeRule => {
+		return TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
+	}
+	static createPostDecrementRule : TypeRule => {
+		return TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
+	}
+	static createPostIncrementRule : TypeRule => {
+		return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
+	}
+	static createKeywordRule : TypeRule => {
+		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
+	}
+	static createTypeParamsRule : SplitMultipleRule => {
+		
+		typeParam : var=
+		
+		LazyRule();
+		
+		symbol : var=
+		
+		TypeRule("symbol-type", StripRule(SymbolRule(ExtractStringRule("value"))));
+		
+		extendsRule : var=
+		
+		TypeRule("extends", StripRule(FirstRule(ExtractStringRule("name"), " extends ", ExtractNodeRule("child", typeParam))));
+		typeParam.setRule(OrRule(List.of(extendsRule, symbol)));
+		return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);
+	}
+	() => {
+		private final slice : String;
+		OperatorSearcher : public => {
+			this=slice;
+		}
+		public search : Optional<Integer> => {
+			if
+			(!input.contains(slice))
+			return Optional.empty();
+			
+			queue : var=
+			
+			IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+			
+			depth : var=
+			
+			0;
+			while
+			(!queue.isEmpty())
+			{
+				
+				tuple : var=
+				
+				queue.pop();
+				
+				i : var=
+				
+				tuple.left();
+				
+				maybeSlice : var=
+				
+				input.substring(i, Math.min(i+slice.length(), input.length()));
+				if
+				(maybeSlice.equals(slice)&&depth==0)
+				{
+					return Optional.of(i);
+				}
+				else
+				{
+					
+					c : var=
+					
+					maybeSlice.charAt(0);
+					if
+					(c=='\'')
+					{
+						
+						pop : var=
+						
+						queue.pop();
+						if
+						(pop.right()=='\\')
+						queue.pop();
+						queue.pop();
+						continue
+						;
+					}
+					if
+					(c=='(')
+					depth++;
+					if
+					(c==')')
+					depth--;
+				}
+			}
+			
+			/*
         TODO: find the operator
-         */return Optional.empty();}}}
+         */
+			return Optional.empty();
+		}
+	}
+}

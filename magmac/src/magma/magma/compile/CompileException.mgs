@@ -1,1 +1,14 @@
-import java.io.IOException;() => {CompileException : public => {super(message, cause);}CompileException : public => {super(message);}CompileException : public => {}CompileException : public => {super(cause);}}
+import java.io.IOException;
+() => {
+	CompileException : public => {
+		super(message, cause);
+	}
+	CompileException : public => {
+		super(message);
+	}
+	CompileException : public => {
+	}
+	CompileException : public => {
+		super(cause);
+	}
+}

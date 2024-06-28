@@ -3,7 +3,9 @@ package magma.api.collect.stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
+import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
+import magma.java.NativeListHead;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,4 +50,12 @@ public class Streams {
         });
     }
 
+    @SafeVarargs
+    public static <T> Stream<T> of(T... values) {
+        return new HeadedStream<>(new NativeListHead<>(List.of(values)));
+    }
+
+    public static Stream<Integer> rangeTo(int extent) {
+        return new HeadedStream<>(new RangeHead(0, extent));
+    }
 }

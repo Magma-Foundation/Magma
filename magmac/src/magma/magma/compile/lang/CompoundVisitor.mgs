@@ -1,1 +1,18 @@
-import magma.api.Tuple;import magma.api.collect.List;import magma.api.result.Result;import magma.compile.Error_;import magma.compile.annotate.State;import magma.compile.rule.Node;import java.util.function.BiFunction;() => {public preVisit : Result<Tuple<Node, State>, Error_> => {return foldAll(node, state, () => visitor.preVisit(tuple.left(), tuple.right()));}public postVisit : Result<Tuple<Node, State>, Error_> => {return foldAll(node, state, () => visitor.postVisit(tuple.left(), tuple.right()));}private foldAll : Result<Tuple<Node, State>, Error_> => {return visitors.stream().foldLeftToResult(Tuple(node, state), folder);}}
+import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.rule.Node;
+import java.util.function.BiFunction;
+() => {
+	public preVisit : Result<Tuple<Node, State>, Error_> => {
+		return foldAll(node, state, () => visitor.preVisit(tuple.left(), tuple.right()));
+	}
+	public postVisit : Result<Tuple<Node, State>, Error_> => {
+		return foldAll(node, state, () => visitor.postVisit(tuple.left(), tuple.right()));
+	}
+	private foldAll : Result<Tuple<Node, State>, Error_> => {
+		return visitors.stream().foldLeftToResult(Tuple(node, state), folder);
+	}
+}

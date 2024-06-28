@@ -54,4 +54,27 @@ public interface List<T> {
      * @return the size of the list
      */
     int size();
+
+    /**
+     * Removes and discards the last element of the list, returning the updated list if possible.
+     *
+     * @return an Option containing the updated list with the last element removed,
+     * or an empty Option if the list is empty
+     */
+    Option<List<T>> popLastAndDiscard();
+
+    /**
+     * Adds an element to the end of the list and returns the updated list.
+     *
+     * @param element the element to add
+     * @return the updated list with the added element
+     */
+    List<T> pushLast(T element);
+
+    /**
+     * Retrieves the element or None if the index is invalid.
+     * @param index The index.
+     * @return The element.
+     */
+    Option<T> get(int index);
 }

@@ -1,1 +1,25 @@
-import magma.api.option.Option;import magma.api.option.Some;import magma.api.result.Ok;import magma.api.result.Result;import java.util.Optional;() => {public static joining : Collector<String, Optional<String>> => {return joining("");}public static joining : Collector<String, Optional<String>> => {return Collector();;}public static exceptionally<T, C, E> : Collector<Result<T, E>, Result<C, E>> => {return Collector();;}public static required<T, C> : Collector<Option<T>, Option<C>> => {return Collector();;}}
+import magma.api.option.Option;
+import magma.api.option.Some;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import java.util.Optional;
+() => {
+	public static joining : Collector<String, Optional<String>> => {
+		return joining("");
+	}
+	public static joining : Collector<String, Optional<String>> => {
+		return Collector();
+		
+		;
+	}
+	public static exceptionally<T, C, E> : Collector<Result<T, E>, Result<C, E>> => {
+		return Collector();
+		
+		;
+	}
+	public static required<T, C> : Collector<Option<T>, Option<C>> => {
+		return Collector();
+		
+		;
+	}
+}

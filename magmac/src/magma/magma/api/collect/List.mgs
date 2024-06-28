@@ -1,32 +1,78 @@
-import magma.api.collect.stream.Stream;import magma.api.option.Option;/**
+import magma.api.collect.stream.Stream;
+import magma.api.option.Option;
+
+/**
  * Interface representing a list collection with methods for adding elements,
  * streaming, and checking properties of the list.
  *
  * @param <T> the type of elements in the list
- */export struct List {/**
+ */
+export struct List {
+	
+	/**
      * Adds an element to the list and returns the updated list.
      *
      * @param next the element to add
      * @return the updated list with the added element
-     */add : (T) => List<T>;/**
+     */
+	add : (T) => List<T>;
+	
+	/**
      * Returns a stream of the elements in the list.
      *
      * @return a Stream of the list's elements
-     */stream : () => Stream<T>;/**
+     */
+	stream : () => Stream<T>;
+	
+	/**
      * Checks if the list contains the specified element.
      *
      * @param element the element to check for
      * @return true if the list contains the element, false otherwise
-     */contains : (T) => boolean;/**
+     */
+	contains : (T) => boolean;
+	
+	/**
      * Checks if the list is empty.
      *
      * @return true if the list is empty, false otherwise
-     */isEmpty : () => boolean;/**
+     */
+	isEmpty : () => boolean;
+	
+	/**
      * Retrieves the last element in the list, if present.
      *
      * @return an Option containing the last element, or an empty Option if the list is empty
-     */last : () => Option<T>;/**
+     */
+	last : () => Option<T>;
+	
+	/**
      * Returns the number of elements in the list.
      *
      * @return the size of the list
-     */size : () => int;}
+     */
+	size : () => int;
+	
+	/**
+     * Removes and discards the last element of the list, returning the updated list if possible.
+     *
+     * @return an Option containing the updated list with the last element removed,
+     * or an empty Option if the list is empty
+     */
+	popLastAndDiscard : () => Option<List<T>>;
+	
+	/**
+     * Adds an element to the end of the list and returns the updated list.
+     *
+     * @param element the element to add
+     * @return the updated list with the added element
+     */
+	pushLast : (T) => List<T>;
+	
+	/**
+     * Retrieves the element or None if the index is invalid.
+     * @param index The index.
+     * @return The element.
+     */
+	get : (int) => Option<T>;
+}

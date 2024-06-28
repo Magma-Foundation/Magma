@@ -35,7 +35,7 @@ import java.util.stream.IntStream;
 
 public class Lang {
     static Rule createBlock(Rule member) {
-        return new StripRule(new TypeRule("block", createMembersRule(member)), "before-content", "after-content");
+        return new StripRule(new TypeRule("block", createMembersRule(member)), "before-children", "after-children");
     }
 
     static SplitMultipleRule createMembersRule(Rule member) {

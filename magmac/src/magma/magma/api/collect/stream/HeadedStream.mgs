@@ -1,1 +1,98 @@
-import magma.api.option.None;import magma.api.option.Option;import magma.api.result.Ok;import magma.api.result.Result;import magma.java.JavaOptionals;import java.util.function.BiFunction;import java.util.function.Function;import java.util.function.Predicate;() => {public foldLeftToResult<R, E> : Result<R, E> => {return this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));}public anyMatch : boolean => {return foldLeft(false, () => aBoolean||predicate.test(t));}public filter : Stream<T> => {return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead()));}public flatMap<R> : Stream<R> => {return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead()));}public map<R> : Stream<R> => {return HeadedStream(() => this.provider.head().map(mapper));}public collect<C> : C => {current : var=collector.createInitial();return foldLeft(current, collector.fold);}public foldLeft<C> : C => {while(true){finalCurrent : C=current;tuple : var=JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);if(tuple.left()){current=tuple.right();}else{return current;}}}public head : Option<T> => {return provider.head();}() => {private final outer : Head<T>;private final mapper : Function<T, Head<R>>;private current : Head<R>;FlatMapHead : public => {this=outer;this=mapper;current=initial;}public head : Option<R> => {while(true){currentHead : var=current.head();if(currentHead.isPresent())return currentHead;tuple : var=outer.head().map(mapper).toTuple(current);if(tuple.left()){current=tuple.right();}else{return None();}}}}}
+import magma.api.Tuple;
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.java.JavaOptionals;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+() => {
+	public foldLeftToResult<R, E> : Result<R, E> => {
+		return this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
+	}
+	public anyMatch : boolean => {
+		return foldLeft(false, () => aBoolean||predicate.test(t));
+	}
+	public filter : Stream<T> => {
+		return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead()));
+	}
+	public flatMap<R> : Stream<R> => {
+		return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead()));
+	}
+	public extend<R> : Stream<Tuple<T, R>> => {
+		return map(() => Tuple(value, mapper.apply(value)));
+	}
+	public map<R> : Stream<R> => {
+		return HeadedStream(() => this.provider.head().map(mapper));
+	}
+	public collect<C> : C => {
+		
+		current : var=
+		
+		collector.createInitial();
+		return foldLeft(current, collector.fold);
+	}
+	public foldLeft<C> : C => {
+		while
+		(true)
+		{
+			
+			finalCurrent : C=
+			
+			current;
+			
+			tuple : var=
+			
+			JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+			if
+			(tuple.left())
+			{
+				current=tuple.right();
+			}
+			else
+			{
+				return current;
+			}
+		}
+	}
+	public head : Option<T> => {
+		return provider.head();
+	}
+	() => {
+		private final outer : Head<T>;
+		private final mapper : Function<T, Head<R>>;
+		private current : Head<R>;
+		FlatMapHead : public => {
+			this=outer;
+			this=mapper;
+			current=initial;
+		}
+		public head : Option<R> => {
+			while
+			(true)
+			{
+				
+				currentHead : var=
+				
+				current.head();
+				if
+				(currentHead.isPresent())
+				return currentHead;
+				
+				tuple : var=
+				
+				outer.head().map(mapper).toTuple(current);
+				if
+				(tuple.left())
+				{
+					current=tuple.right();
+				}
+				else
+				{
+					return None();
+				}
+			}
+		}
+	}
+}
