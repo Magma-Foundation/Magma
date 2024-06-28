@@ -202,7 +202,7 @@ public class JavaLang {
 
         var caller = new ExtractNodeRule("caller", value);
         var withGenerics = new OrRule(List.of(
-                new FirstRule(caller, "<", new ExtractStringRule("temp")),
+                new FirstRule(caller, "<", new RightRule(new ExtractStringRule("generics"), ">")),
                 caller
         ));
 

@@ -265,7 +265,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(writeError(build, err, source));
 		})).match(() => inner, Some.new);
 	}
-	parseSources(this : Self, build : Build, sources : List<Path>) => JavaList(ExceptionalCollector(JavaMap.collecting()));
+	parseSources(this : Self, build : Build, sources : List<Path>) => JavaList(sources).stream().map(() => PathUnit(build.sourceDirectory().location(), source)).map(() => parseSource(build, unit)).flatMap(Streams.fromOption).collect(ExceptionalCollector(JavaMap.collecting()));
 	parseSource(this : Self, build : Build, source : Unit) => {
 		
 		namespace : var=

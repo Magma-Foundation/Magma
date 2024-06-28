@@ -1,0 +1,21 @@
+import magma.api.Tuple;
+import magma.api.option.Option;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+() => {
+	static def flatMapElement<B, C>(this : Self, headBResult : Result<Stream<C>, B>) => headBResult.match(() => onOk.map(Ok.new), () => Streams.of(Err(err)));
+	public def map<R>(this : Self, mapper : Function<Result<A, B>, R>) => stream.map(mapper);
+	public def collect<C>(this : Self, collector : Collector<Result<A, B>, C>) => stream.collect(collector);
+	public def foldLeft<C>(this : Self, current : C, folder : BiFunction<C, Result<A, B>, C>) => stream.foldLeft(current, folder);
+	public def head(this : Self) => stream.head();
+	public def foldLeftToResult<R, E>(this : Self, initial : R, mapper : BiFunction<R, Result<A, B>, Result<R, E>>) => stream.foldLeftToResult(initial, mapper);
+	public def anyMatch(this : Self, predicate : Predicate<Result<A, B>>) => stream.anyMatch(predicate);
+	public def filter(this : Self, filter : Predicate<Result<A, B>>) => stream.filter(filter);
+	public def flatMap<R>(this : Self, mapper : Function<Result<A, B>, Head<R>>) => stream.flatMap(mapper);
+	public def extend<R>(this : Self, mapper : Function<Result<A, B>, R>) => stream.extend(mapper);
+	public def flatMapValue<C>(this : Self, mapper : Function<A, Stream<C>>) => map(() => inner.mapValue(mapper)).flatMap(ResultStream.flatMapElement);
+}

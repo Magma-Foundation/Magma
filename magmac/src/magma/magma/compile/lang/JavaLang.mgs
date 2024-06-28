@@ -232,7 +232,7 @@ object JavaLang {
 		
 		withGenerics : var=
 		
-		OrRule(List.of(FirstRule(caller, "<", ExtractStringRule("temp")), caller));
+		OrRule(List.of(FirstRule(caller, "<", RightRule(ExtractStringRule("generics"), ">")), caller));
 		
 		before : var=
 		
