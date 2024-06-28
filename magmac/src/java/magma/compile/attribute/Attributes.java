@@ -47,11 +47,7 @@ public interface Attributes {
      */
     Stream<Tuple<String, Attribute>> streamEntries();
 
-    Attributes mapValues(Function<Attribute, Attribute> mapper);
-
     String format(int depth);
-
-    Attributes remove(String key);
 
     boolean has(String name);
 

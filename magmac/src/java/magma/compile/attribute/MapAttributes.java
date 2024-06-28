@@ -59,29 +59,12 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     }
 
     @Override
-    public Attributes mapValues(Function<Attribute, Attribute> mapper) {
-        var copy = new HashMap<String, Attribute>();
-        for (Map.Entry<String, Attribute> stringAttributeEntry : values.entrySet()) {
-            copy.put(stringAttributeEntry.getKey(), mapper.apply(stringAttributeEntry.getValue()));
-        }
-
-        return new MapAttributes(copy);
-    }
-
-    @Override
     public String format(int depth) {
         return values.entrySet()
                 .stream()
                 .map(entry -> "\n" + "\t".repeat(depth + 1) + entry.getKey() + " : " + entry.getValue().format(depth + 1))
                 .sorted(Comparator.comparingInt(String::length))
                 .collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
-    }
-
-    @Override
-    public Attributes remove(String key) {
-        var copy = new HashMap<>(values);
-        copy.remove(key);
-        return new MapAttributes(copy);
     }
 
     @Override
