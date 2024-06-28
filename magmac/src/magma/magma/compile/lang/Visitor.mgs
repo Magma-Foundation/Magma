@@ -18,7 +18,7 @@ export struct Visitor {
      * @param state the current state during the visit
      * @return a Result containing a Tuple of the node and state, or an error
      */
-	default preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => return Ok(Tuple(node, state));
+	default preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => Ok(Tuple(node, state));
 	
 	/**
      * Method to be called after the main visit operation on a node.
@@ -28,5 +28,5 @@ export struct Visitor {
      * @param state the current state during the visit
      * @return a Result containing a Tuple of the node and state, or an error
      */
-	default postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => return Ok(Tuple(node, state));
+	default postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => Ok(Tuple(node, state));
 }

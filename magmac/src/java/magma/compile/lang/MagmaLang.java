@@ -73,7 +73,8 @@ public class MagmaLang {
                 Lang.createThrowRule(value),
                 Lang.createPostIncrementRule(value),
                 Lang.createPostDecrementRule(value),
-                new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";")))
+                new TypeRule("implements", new LeftRule("implements ", new RightRule(new ExtractNodeRule("type", Lang.createTypeRule()), ";"))),
+                Lang.createStatementRule(value)
         ))));
 
         return Lang.createBlock(new OrRule(List.of(

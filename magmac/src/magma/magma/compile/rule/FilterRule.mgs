@@ -14,5 +14,5 @@ export default class def FilterRule() => {
 	}
 	protected abstract computeMessage : () => String;
 	protected abstract filter : (String) => boolean;
-	public fromNode(node : Node) : Result<String, Error_> => return child.fromNode(node);
+	public fromNode(node : Node) : Result<String, Error_> => child.fromNode(node);
 }

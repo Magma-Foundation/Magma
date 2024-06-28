@@ -3,6 +3,6 @@ import magma.compile.CompileParentError;
 import magma.compile.Error_;
 import magma.compile.rule.result.RuleResult;
 () => {
-	public toNode(input : String) : RuleResult => return child.toNode(input).mapErr(() => CompileParentError(message, input, err));
-	public fromNode(node : Node) : Result<String, Error_> => return child.fromNode(node);
+	public toNode(input : String) : RuleResult => child.toNode(input).mapErr(() => CompileParentError(message, input, err));
+	public fromNode(node : Node) : Result<String, Error_> => child.fromNode(node);
 }

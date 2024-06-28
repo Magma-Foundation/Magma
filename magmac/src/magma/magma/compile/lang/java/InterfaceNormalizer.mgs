@@ -15,5 +15,5 @@ export default class def InterfaceNormalizer() => {
 		node.retype("struct").mapStringList("modifiers", InterfaceNormalizer.normalizeModifiers);
 		return Ok(Tuple(struct, state));
 	}
-	private static normalizeModifiers(oldModifiers : List<String>) : List<String> => return oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
+	private static normalizeModifiers(oldModifiers : List<String>) : List<String> => oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
 }

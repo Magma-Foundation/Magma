@@ -24,6 +24,6 @@ export default class def NumberRule() => {
 		}
 		return true;
 	}
-	protected computeMessage() : String => return "Not a number.";
-	protected filter(input : String) : boolean => return input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	protected computeMessage() : String => "Not a number.";
+	protected filter(input : String) : boolean => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
 }

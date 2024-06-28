@@ -73,7 +73,7 @@ import java.util.List;
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	private static wrapError(leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => return CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+	private static wrapError(leftSlice : String, rightSlice : String, error : Error_) : CompileParentError => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 	private findAllIndexesReverse(input : String) : List<Integer> => {
 		
 		indexes : List<Integer>=
@@ -92,5 +92,5 @@ import java.util.List;
 		Collections.reverse(indexes);
 		return indexes;
 	}
-	public fromNode(node : Node) : Result<String, Error_> => return leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	public fromNode(node : Node) : Result<String, Error_> => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
 }

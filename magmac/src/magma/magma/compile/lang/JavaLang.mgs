@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 export default class def JavaLang() => {
-	public static createRootRule() : Rule => return Lang.createBlock(createRootMemberRule());
+	public static createRootRule() : Rule => Lang.createBlock(createRootMemberRule());
 	private static createRootMemberRule() : OrRule => {
 		
 		namespace : var=
@@ -243,5 +243,5 @@ export default class def JavaLang() => {
 		OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}
-	default class def SplitThrows() => public split(input : String) : List<String> => return Arrays.asList(input.split(","));
+	default class def SplitThrows() => public split(input : String) : List<String> => Arrays.asList(input.split(","));
 }

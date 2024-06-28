@@ -4,7 +4,7 @@ export default class def ImmutableState() => {
 	private final frames : List<List<String>>;
 	ImmutableState(frames : List<List<String>>) : public => this=frames;
 	ImmutableState() : public => this(JavaList())
-	public enter() : State => return ImmutableState(frames.pushLast(JavaList.empty()));
-	public computeDepth() : int => return frames.size();
-	public exit() : State => return ImmutableState(frames.popLastAndDiscard().orElse(frames));
+	public enter() : State => ImmutableState(frames.pushLast(JavaList.empty()));
+	public computeDepth() : int => frames.size();
+	public exit() : State => ImmutableState(frames.popLastAndDiscard().orElse(frames));
 }

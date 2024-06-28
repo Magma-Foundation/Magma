@@ -5,4 +5,4 @@ import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
-export default class def LambdaNormalizer() => public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => return Ok(Tuple(node.retype("function"), state));
+export default class def LambdaNormalizer() => public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => Ok(Tuple(node.retype("function"), state));

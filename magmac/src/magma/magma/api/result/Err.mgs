@@ -3,13 +3,13 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
 () => {
-	private findValue1() : Optional<T> => return Optional.empty();
-	private findErr0() : Optional<E> => return Optional.of(value);
-	public flatMapValue<R>(mapper : Function<T, Result<R, E>>) : Result<R, E> => return Err(value);
-	public mapValue<R>(mapper : Function<T, R>) : Result<R, E> => return Err(value);
-	public isOk() : boolean => return false;
-	public mapErr<R>(mapper : Function<E, R>) : Result<T, R> => return Err(mapper.apply(value));
-	public match<R>(onOk : Function<T, R>, onErr : Function<E, R>) : R => return onErr.apply(value);
-	public findValue() : Option<T> => return JavaOptionals.fromNative(findValue1());
-	public findErr() : Option<E> => return JavaOptionals.fromNative(findErr0());
+	private findValue1() : Optional<T> => Optional.empty();
+	private findErr0() : Optional<E> => Optional.of(value);
+	public flatMapValue<R>(mapper : Function<T, Result<R, E>>) : Result<R, E> => Err(value);
+	public mapValue<R>(mapper : Function<T, R>) : Result<R, E> => Err(value);
+	public isOk() : boolean => false;
+	public mapErr<R>(mapper : Function<E, R>) : Result<T, R> => Err(mapper.apply(value));
+	public match<R>(onOk : Function<T, R>, onErr : Function<E, R>) : R => onErr.apply(value);
+	public findValue() : Option<T> => JavaOptionals.fromNative(findValue1());
+	public findErr() : Option<E> => JavaOptionals.fromNative(findErr0());
 }

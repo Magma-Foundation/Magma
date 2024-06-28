@@ -103,5 +103,5 @@ export default class def JavaDefinitionHeaderFactory() => {
 			}
 		}
 	}
-	default class def SimpleSplitter() => public split(input : String) : List<String> => return List.of(input.split("\n"));
+	default class def SimpleSplitter() => public split(input : String) : List<String> => List.of(input.split("\n"));
 }

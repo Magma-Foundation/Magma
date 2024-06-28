@@ -25,9 +25,11 @@ public class FunctionFlattener implements Visitor {
             return new Ok<>(node);
         }
 
-        var first = children.first();
-        if (first.isPresent()) {
-            return new Ok<>(node.withNode("child", first.orElsePanic()));
+        var firstOptional = children.first();
+        if (firstOptional.isPresent()) {
+            var first = firstOptional.orElsePanic();
+            var value = first.is("return") ? first.retype("statement") : first;
+            return new Ok<>(node.withNode("child", value));
         } else {
             return new Err<>(new CompileError("List implementation is malformed.", node.toString()));
         }

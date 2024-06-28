@@ -1,4 +1,3 @@
-import magma.api.Tuple;
 import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.rule.ContextRule;
@@ -14,7 +13,6 @@ import magma.compile.rule.split.FirstRule;
 import magma.compile.rule.split.LastRule;
 import magma.compile.rule.split.MembersSplitter;
 import magma.compile.rule.split.ParamSplitter;
-import magma.compile.rule.split.Searcher;
 import magma.compile.rule.split.SplitMultipleRule;
 import magma.compile.rule.split.SplitOnceRule;
 import magma.compile.rule.text.LeftRule;
@@ -24,16 +22,13 @@ import magma.compile.rule.text.extract.ExtractNodeRule;
 import magma.compile.rule.text.extract.ExtractStringListRule;
 import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 export default class def Lang() => {
-	static createBlock(member : Rule) : Rule => return StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
-	static createMembersRule(member : Rule) : SplitMultipleRule => return SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
-	static createImportRule(namespace : TypeRule) : TypeRule => return TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
-	static createNamespaceRule() : TypeRule => return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
+	static createBlock(member : Rule) : Rule => StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
+	static createMembersRule(member : Rule) : SplitMultipleRule => SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
+	static createImportRule(namespace : TypeRule) : TypeRule => TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
+	static createNamespaceRule() : TypeRule => TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
 	static createCatchRule(definition : Rule, statement : Rule) : TypeRule => {
 		
 		declaration : var=
@@ -91,8 +86,8 @@ export default class def Lang() => {
 		ExtractNodeRule("returns", type);
 		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
 	}
-	static createTryRule(statement : Rule) : TypeRule => return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
-	static createModifiersRule() : Rule => return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
+	static createTryRule(statement : Rule) : TypeRule => TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
+	static createModifiersRule() : Rule => createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
 	static createModifiersRule(final modifiers : List<String>) : Rule => {
 		return ExtractStringListRule("modifiers", " ");
 		
@@ -109,7 +104,7 @@ export default class def Lang() => {
 		ExtractNodeRule("caller", StripRule(value));
 		return TypeRule("invocation", RightRule(SplitOnceRule(caller, "(", arguments, InvocationStartSearcher()), ")"));
 	}
-	static createCommentRule() : TypeRule => return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
+	static createCommentRule() : TypeRule => TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
 	static createConditionRule(type : String, value : Rule, statement : Rule) : TypeRule => {
 		
 		child : var=
@@ -240,8 +235,8 @@ export default class def Lang() => {
 		StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
 		return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));
 	}
-	static createParamsRule(definition : Rule) : Rule => return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
-	static createStringRule() : TypeRule => return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
+	static createParamsRule(definition : Rule) : Rule => SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
+	static createStringRule() : TypeRule => TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
 	static createAccessRule(type : String, separator : String, value : Rule) : TypeRule => {
 		
 		parent : var=
@@ -249,8 +244,8 @@ export default class def Lang() => {
 		ExtractNodeRule("parent", StripRule(value));
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
-	static createSymbolRule() : TypeRule => return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
-	static createTernaryRule(value : LazyRule) : TypeRule => return TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
+	static createSymbolRule() : TypeRule => TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
+	static createTernaryRule(value : LazyRule) : TypeRule => TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
 	static createOperatorRule(name : String, slice : String, value : Rule) : TypeRule => {
 		
 		left : var=
@@ -262,9 +257,9 @@ export default class def Lang() => {
 		StripRule(ExtractNodeRule("right", value));
 		return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
 	}
-	static createNumberRule() : TypeRule => return TypeRule("number", NumberRule(ExtractStringRule("value")));
-	static createCharRule() : TypeRule => return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
-	static createEmptyStatementRule() : TypeRule => return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
+	static createNumberRule() : TypeRule => TypeRule("number", NumberRule(ExtractStringRule("value")));
+	static createCharRule() : TypeRule => TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
+	static createEmptyStatementRule() : TypeRule => TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
 	static createThrowRule(value : Rule) : Rule => {
 		
 		rule : Rule=
@@ -276,12 +271,12 @@ export default class def Lang() => {
 		RightRule(rule, ";");
 		return TypeRule("throw", LeftRule("throw ", after));
 	}
-	static createNotRule(value : LazyRule) : TypeRule => return TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
-	static createDefinitionRule(definition : Rule) : TypeRule => return TypeRule("definition", RightRule(definition, ";"));
-	static createBlockCommentRule() : TypeRule => return TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
-	static createPostDecrementRule(value : LazyRule) : TypeRule => return TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
-	static createPostIncrementRule(value : LazyRule) : TypeRule => return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
-	static createKeywordRule(keyword : String) : TypeRule => return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
+	static createNotRule(value : LazyRule) : TypeRule => TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
+	static createDefinitionRule(definition : Rule) : TypeRule => TypeRule("definition", RightRule(definition, ";"));
+	static createBlockCommentRule() : TypeRule => TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
+	static createPostDecrementRule(value : LazyRule) : TypeRule => TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
+	static createPostIncrementRule(value : LazyRule) : TypeRule => TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
+	static createKeywordRule(keyword : String) : TypeRule => TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	static createTypeParamsRule() : SplitMultipleRule => {
 		
 		typeParam : var=
@@ -298,74 +293,11 @@ export default class def Lang() => {
 		typeParam.setRule(OrRule(List.of(extendsRule, symbol)));
 		return SplitMultipleRule(ParamSplitter(), ", ", "type-params", typeParam);
 	}
-	default class def OperatorSearcher() => {
-		private final slice : String;
-		OperatorSearcher(slice : String) : public => this=slice;
-		public search(input : String) : Optional<Integer> => {
-			if
-			(!input.contains(slice))
-			return Optional.empty();
-			
-			queue : var=
-			
-			IntStream.range(0, input.length()).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-			
-			depth : var=
-			
-			0;
-			while
-			(!queue.isEmpty())
-			{
-				
-				tuple : var=
-				
-				queue.pop();
-				
-				i : var=
-				
-				tuple.left();
-				
-				maybeSlice : var=
-				
-				input.substring(i, Math.min(i+slice.length(), input.length()));
-				if
-				(maybeSlice.equals(slice)&&depth==0)
-				{
-					return Optional.of(i);
-				}
-				else
-				{
-					
-					c : var=
-					
-					maybeSlice.charAt(0);
-					if
-					(c=='\'')
-					{
-						
-						pop : var=
-						
-						queue.pop();
-						if
-						(pop.right()=='\\')
-						queue.pop();
-						queue.pop();
-						continue
-						;
-					}
-					if
-					(c=='(')
-					depth++;
-					if
-					(c==')')
-					depth--;
-				}
-			}
-			
-			/*
-        TODO: find the operator
-         */
-			return Optional.empty();
-		}
+	public static createStatementRule(value : LazyRule) : Rule => {
+		
+		child : var=
+		
+		ExtractNodeRule("child", StripRule(value));
+		return TypeRule("statement", RightRule(child, ";"));
 	}
 }

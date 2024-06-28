@@ -34,7 +34,7 @@ export default class def Main() => {
 			result.orElsePanic().printStackTrace();
 		}
 	}
-	private static run() : Option<CompileException> => return $Void(() => {
+	private static run() : Option<CompileException> => $Void(() => {
 		
 		configuration : var=
 		

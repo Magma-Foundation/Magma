@@ -25,5 +25,5 @@ import magma.compile.rule.result.RuleResult;
 			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
 		}
 	}
-	public fromNode(node : Node) : Result<String, Error_> => return child.fromNode(node).mapValue(() => inner+slice);
+	public fromNode(node : Node) : Result<String, Error_> => child.fromNode(node).mapValue(() => inner+slice);
 }
