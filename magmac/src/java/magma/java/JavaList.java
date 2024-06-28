@@ -66,13 +66,6 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     }
 
     @Override
-    public magma.api.collect.List<T> push(T element) {
-        var copy = new ArrayList<>(list);
-        copy.add(element);
-        return new JavaList<>(copy);
-    }
-
-    @Override
     public Stream<T> stream() {
         return new HeadedStream<>(new NativeListHead<>(list));
     }
