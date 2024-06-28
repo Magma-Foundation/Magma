@@ -5,7 +5,7 @@ import magma.api.option.Some;
 	
 	private value : Option<JSONParser>=
 	
-	None();
+	None.None();
 	public setValue : void => {
 		this=Some(value);
 	}

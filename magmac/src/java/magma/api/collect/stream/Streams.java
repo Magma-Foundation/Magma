@@ -32,7 +32,7 @@ public class Streams {
     public static <T> Stream<T> fromOption(Option<T> option) {
         return new HeadedStream<>(option
                 .<Head<T>>map(SingleHead::new)
-                .orElseGet(EmptyHead::new));
+                .orElseGet(EmptyHead::EmptyHead));
     }
 
     public static Stream<Integer> from(int extent) {

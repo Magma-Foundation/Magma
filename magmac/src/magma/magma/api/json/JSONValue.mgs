@@ -3,12 +3,12 @@ import magma.api.option.None;
 import magma.api.option.Option;
 export struct JSONValue {
 	default find : Option<JSONValue> => {
-		return None();
+		return None.None();
 	}
 	default findValue : Option<String> => {
-		return None();
+		return None.None();
 	}
 	default stream : Option<Stream<JSONValue>> => {
-		return None();
+		return None.None();
 	}
 }

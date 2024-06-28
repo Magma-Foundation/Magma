@@ -25,6 +25,6 @@ import java.util.function.Function;
 		return Some(value);
 	}
 	public findErr : Option<E> => {
-		return None();
+		return None.None();
 	}
 }

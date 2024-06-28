@@ -13,12 +13,12 @@ import java.util.function.Function;
 		return this;
 	}
 	public findError : Option<Error_> => {
-		return None();
+		return None.None();
 	}
 	public findAttributes : Option<Attributes> => {
 		return Some(attributes);
 	}
 	public tryCreate : Option<Node> => {
-		return None();
+		return None.None();
 	}
 }

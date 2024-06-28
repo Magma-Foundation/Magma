@@ -13,7 +13,7 @@ import magma.api.option.Some;
 	public head : Option<T> => {
 		if
 		(retrieved)
-		return None();
+		return None.None();
 		else
 		{
 			retrieved=true;

@@ -7,7 +7,7 @@ import magma.java.JavaList;
 	public parse : Option<JSONValue> => {
 		if
 		(!input.startsWith("[")||!input.endsWith("]"))
-		return None();
+		return None.None();
 		return JSON.split(input.substring(1, input.length()-1)).stream().map(String.strip).map(valueParser.parse).collect(RequiredCollector(JavaList.collecting())).map(JSONArray.new);
 	}
 }

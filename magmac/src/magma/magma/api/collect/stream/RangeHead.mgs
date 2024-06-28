@@ -11,7 +11,7 @@ import magma.api.option.Some;
 	public head : Option<Integer> => {
 		if
 		(counter>=extent)
-		return None();
+		return None.None();
 		
 		value : var=
 		

@@ -46,7 +46,7 @@ import static magma.java.JavaResults.$Void;
 		try 
 		{
 			Files.createDirectories(targetParent);
-			return None();
+			return None.None();
 		}
 		catch (e : IOException){
 			return Some(CompileException("Failed to make parent.", e));
@@ -142,7 +142,7 @@ import static magma.java.JavaResults.$Void;
 		try 
 		{
 			Files.writeString(target, csq);
-			return None();
+			return None.None();
 		}
 		catch (e : IOException){
 			return Some(CompileException("Cannot write.", e));
@@ -298,9 +298,9 @@ import static magma.java.JavaResults.$Void;
 			namespace.subList(0, 2);
 			// Essentially, we want to skip this package.
 			if
-			(slice.equals(List.of("magma", "java")))
+			(slice.equals(List.of("magma", "java"))||slice.equals(List.of("magma", "lang")))
 			{
-				return None();
+				return None.None();
 			}
 		}
 		System.out.println("Parsing source: "+source);

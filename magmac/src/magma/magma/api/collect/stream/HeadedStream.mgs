@@ -15,10 +15,10 @@ import java.util.function.Predicate;
 		return foldLeft(false, () => aBoolean||predicate.test(t));
 	}
 	public filter : Stream<T> => {
-		return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead()));
+		return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
 	}
 	public flatMap<R> : Stream<R> => {
-		return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead()));
+		return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
 	}
 	public extend<R> : Stream<Tuple<T, R>> => {
 		return map(() => Tuple(value, mapper.apply(value)));
@@ -90,7 +90,7 @@ import java.util.function.Predicate;
 				}
 				else
 				{
-					return None();
+					return None.None();
 				}
 			}
 		}

@@ -264,7 +264,7 @@ public record Application(Configuration config) {
             var slice = namespace.subList(0, 2);
 
             // Essentially, we want to skip this package.
-            if (slice.equals(List.of("magma", "java"))) {
+            if (slice.equals(List.of("magma", "java")) || slice.equals(List.of("magma", "lang"))) {
                 return None.None();
             }
         }
