@@ -1,10 +1,6 @@
 import magma.api.option.Option;
 import magma.api.option.Some;
 () => {
-	public createInitial() : Option<C> => {
-		return Some(collector.createInitial());
-	}
-	public fold(current : Option<C>, next : Option<T>) : Option<C> => {
-		return current.and(next).map(() => collector.fold(inner.left(), inner.right()));
-	}
+	public createInitial() : Option<C> => return Some(collector.createInitial());
+	public fold(current : Option<C>, next : Option<T>) : Option<C> => return current.and(next).map(() => collector.fold(inner.left(), inner.right()));
 }

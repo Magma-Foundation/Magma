@@ -84,4 +84,11 @@ export struct List {
      * @return The new list, with this list's items first, and the other list's items second.
      */
 	addAll : (List<T>) => List<T>;
+	
+	/**
+     * Returns the first item in this list, or None if this list is empty.
+     *
+     * @return The option.
+     */
+	first : () => Option<T>;
 }

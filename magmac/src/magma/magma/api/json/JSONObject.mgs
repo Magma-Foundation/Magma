@@ -1,7 +1,3 @@
 import magma.api.collect.Map;
 import magma.api.option.Option;
-() => {
-	public find(key : String) : Option<JSONValue> => {
-		return entries.get(key);
-	}
-}
+() => public find(key : String) : Option<JSONValue> => return entries.get(key);

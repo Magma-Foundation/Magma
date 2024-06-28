@@ -12,67 +12,25 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.function.Function;
 () => {
-	ImmutableNode(type : String) : public => {
-		this(type, MapAttributes());
-	}
-	public findType() : String => {
-		return type;
-	}
-	public formatWithDepth(depth : int) : String => {
-		return "\t".repeat(depth)+format(depth);
-	}
-	public format(depth : int) : String => {
-		return type+" = "+attributes.format(depth);
-	}
-	public toString() : String => {
-		return formatWithDepth(0);
-	}
-	public is(type : String) : boolean => {
-		return this.type.equals(type);
-	}
-	public retype(type : String) : Node => {
-		return ImmutableNode(type, attributes);
-	}
-	public withNode(key : String, value : Node) : Node => {
-		return with(key, NodeAttribute(value));
-	}
-	public has(child : String) : boolean => {
-		return attributes.has(child);
-	}
-	public clear(type : String) : Node => {
-		return ImmutableNode(type);
-	}
-	public findString(key : String) : Option<String> => {
-		return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asString));
-	}
-	public findStringList(key : String) : Option<List<String>> => {
-		return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asStringList).map(JavaList.new));
-	}
-	public streamKeys() : Stream<String> => {
-		return attributes.streamKeys();
-	}
-	public mapStringList(key : String, mapper : Function<List<String>, List<String>>) : Node => {
-		return ImmutableNode(type, attributes.mapValue(key, StringListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(list)))));
-	}
-	public withString(key : String, value : String) : Node => {
-		return with(key, StringAttribute(value));
-	}
-	public withStringList(key : String, values : List<String>) : Node => {
-		return with(key, StringListAttribute(JavaList.toNative(values)));
-	}
-	public with(key : String, value : Attribute) : Node => {
-		return ImmutableNode(type, attributes.with(key, value));
-	}
-	public findNode(key : String) : Option<Node> => {
-		return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNode));
-	}
-	public withNodeList(key : String, values : magma.api.collect.List<Node>) : Node => {
-		return with(key, NodeListAttribute(JavaList.toNative(values)));
-	}
-	public mapNodes(key : String, mapper : Function<magma.api.collect.List<Node>, magma.api.collect.List<Node>>) : Node => {
-		return ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
-	}
-	public findNodeList(key : String) : Option<magma.api.collect.List<Node>> => {
-		return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNodeList)).map(JavaList.fromNative);
-	}
+	ImmutableNode(type : String) : public => this(type, MapAttributes())
+	public findType() : String => return type;
+	public formatWithDepth(depth : int) : String => return "\t".repeat(depth)+format(depth);
+	public format(depth : int) : String => return type+" = "+attributes.format(depth);
+	public toString() : String => return formatWithDepth(0);
+	public is(type : String) : boolean => return this.type.equals(type);
+	public retype(type : String) : Node => return ImmutableNode(type, attributes);
+	public withNode(key : String, value : Node) : Node => return with(key, NodeAttribute(value));
+	public has(child : String) : boolean => return attributes.has(child);
+	public clear(type : String) : Node => return ImmutableNode(type);
+	public findString(key : String) : Option<String> => return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asString));
+	public findStringList(key : String) : Option<List<String>> => return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asStringList).map(JavaList.new));
+	public streamKeys() : Stream<String> => return attributes.streamKeys();
+	public mapStringList(key : String, mapper : Function<List<String>, List<String>>) : Node => return ImmutableNode(type, attributes.mapValue(key, StringListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(list)))));
+	public withString(key : String, value : String) : Node => return with(key, StringAttribute(value));
+	public withStringList(key : String, values : List<String>) : Node => return with(key, StringListAttribute(JavaList.toNative(values)));
+	public with(key : String, value : Attribute) : Node => return ImmutableNode(type, attributes.with(key, value));
+	public findNode(key : String) : Option<Node> => return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNode));
+	public withNodeList(key : String, values : magma.api.collect.List<Node>) : Node => return with(key, NodeListAttribute(JavaList.toNative(values)));
+	public mapNodes(key : String, mapper : Function<magma.api.collect.List<Node>, magma.api.collect.List<Node>>) : Node => return ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
+	public findNodeList(key : String) : Option<magma.api.collect.List<Node>> => return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNodeList)).map(JavaList.fromNative);
 }

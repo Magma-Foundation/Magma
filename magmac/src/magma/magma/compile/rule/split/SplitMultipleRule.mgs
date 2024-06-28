@@ -68,9 +68,7 @@ export default class def SplitMultipleRule() => {
 		JoiningCollector(delimiter);
 		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(ExceptionalCollector(collector)).mapValue(() => inner.orElse(""));
 	}
-	public fromNode(node : Node) : Result<String, Error_> => {
-		return JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));
-	}
+	public fromNode(node : Node) : Result<String, Error_> => return JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));
 	private createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=

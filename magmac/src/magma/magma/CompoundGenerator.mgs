@@ -6,12 +6,10 @@ import magma.compile.annotate.State;
 import magma.compile.lang.Generator;
 import magma.compile.rule.Node;
 import java.util.List;
-() => {
-	public generate(root : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
-		
-		initial : var=
-		
-		Tuple(root, state);
-		return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
-	}
+() => public generate(root : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
+	
+	initial : var=
+	
+	Tuple(root, state);
+	return Streams.fromNativeList(children()).foldLeftToResult(initial, () => generator.generate(tuple.left(), tuple.right()));
 }

@@ -32,9 +32,7 @@ export default class def MagmaLang() => {
 		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createEmptyStatementRule(), createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), createStructRule(definition, statement, value), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, " in "), Lang.createAssignmentRule(value), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";")))))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
-	private static createCommentRule() : OrRule => {
-		return OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule()));
-	}
+	private static createCommentRule() : OrRule => return OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule()));
 	private static createConstructionRule(statement : Rule) : TypeRule => {
 		
 		child1 : var=

@@ -30,18 +30,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export default class def Lang() => {
-	static createBlock(member : Rule) : Rule => {
-		return StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
-	}
-	static createMembersRule(member : Rule) : SplitMultipleRule => {
-		return SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
-	}
-	static createImportRule(namespace : TypeRule) : TypeRule => {
-		return TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
-	}
-	static createNamespaceRule() : TypeRule => {
-		return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
-	}
+	static createBlock(member : Rule) : Rule => return StripRule(TypeRule("block", createMembersRule(member)), "before-children", "after-children");
+	static createMembersRule(member : Rule) : SplitMultipleRule => return SplitMultipleRule(MembersSplitter(), "", "children", StripRule(member));
+	static createImportRule(namespace : TypeRule) : TypeRule => return TypeRule("import", LeftRule("import ", RightRule(ExtractNodeRule("external", namespace), ";")));
+	static createNamespaceRule() : TypeRule => return TypeRule("namespace", SimpleExtractStringListRule("namespace", "."));
 	static createCatchRule(definition : Rule, statement : Rule) : TypeRule => {
 		
 		declaration : var=
@@ -99,12 +91,8 @@ export default class def Lang() => {
 		ExtractNodeRule("returns", type);
 		return TypeRule("function-type", FirstRule(maybeParams, " => ", returns));
 	}
-	static createTryRule(statement : Rule) : TypeRule => {
-		return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
-	}
-	static createModifiersRule() : Rule => {
-		return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
-	}
+	static createTryRule(statement : Rule) : TypeRule => return TypeRule("try", LeftRule("try ", StripRule(LeftRule("{", RightRule(ExtractNodeRule("child", createBlock(statement)), "}")))));
+	static createModifiersRule() : Rule => return createModifiersRule(List.of("public", "abstract", "static", "private", "final"));
 	static createModifiersRule(final modifiers : List<String>) : Rule => {
 		return ExtractStringListRule("modifiers", " ");
 		
@@ -121,9 +109,7 @@ export default class def Lang() => {
 		ExtractNodeRule("caller", StripRule(value));
 		return TypeRule("invocation", RightRule(SplitOnceRule(caller, "(", arguments, InvocationStartSearcher()), ")"));
 	}
-	static createCommentRule() : TypeRule => {
-		return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
-	}
+	static createCommentRule() : TypeRule => return TypeRule("comment", LeftRule("//", ExtractStringRule("value")));
 	static createConditionRule(type : String, value : Rule, statement : Rule) : TypeRule => {
 		
 		child : var=
@@ -254,12 +240,8 @@ export default class def Lang() => {
 		StripRule(OrRule(List.of(withTerminator, withoutTerminator)), "after-value-separator", "");
 		return TypeRule("declaration", FirstRule(formattedDefinition, "=", maybeTerminating));
 	}
-	static createParamsRule(definition : Rule) : Rule => {
-		return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
-	}
-	static createStringRule() : TypeRule => {
-		return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
-	}
+	static createParamsRule(definition : Rule) : Rule => return SplitMultipleRule(ParamSplitter(), ", ", "params", StripRule(TypeRule("definition", definition)));
+	static createStringRule() : TypeRule => return TypeRule("string", LeftRule("\"", RightRule(ExtractStringRule("value"), "\"")));
 	static createAccessRule(type : String, separator : String, value : Rule) : TypeRule => {
 		
 		parent : var=
@@ -267,12 +249,8 @@ export default class def Lang() => {
 		ExtractNodeRule("parent", StripRule(value));
 		return TypeRule(type, LastRule(parent, separator, StripRule(SymbolRule(ExtractStringRule("child")))));
 	}
-	static createSymbolRule() : TypeRule => {
-		return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
-	}
-	static createTernaryRule(value : LazyRule) : TypeRule => {
-		return TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
-	}
+	static createSymbolRule() : TypeRule => return TypeRule("symbol", SymbolRule(ExtractStringRule("value")));
+	static createTernaryRule(value : LazyRule) : TypeRule => return TypeRule("ternary", FirstRule(StripRule(ExtractNodeRule("condition", value)), "?", FirstRule(StripRule(ExtractNodeRule("true", value)), ":", StripRule(ExtractNodeRule("false", value)))));
 	static createOperatorRule(name : String, slice : String, value : Rule) : TypeRule => {
 		
 		left : var=
@@ -284,15 +262,9 @@ export default class def Lang() => {
 		StripRule(ExtractNodeRule("right", value));
 		return TypeRule(name, SplitOnceRule(left, slice, right, OperatorSearcher(slice)));
 	}
-	static createNumberRule() : TypeRule => {
-		return TypeRule("number", NumberRule(ExtractStringRule("value")));
-	}
-	static createCharRule() : TypeRule => {
-		return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
-	}
-	static createEmptyStatementRule() : TypeRule => {
-		return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
-	}
+	static createNumberRule() : TypeRule => return TypeRule("number", NumberRule(ExtractStringRule("value")));
+	static createCharRule() : TypeRule => return TypeRule("char", LeftRule("'", RightRule(ExtractStringRule("value"), "'")));
+	static createEmptyStatementRule() : TypeRule => return TypeRule("empty", RightRule(StripRule(EmptyRule("value")), ";"));
 	static createThrowRule(value : Rule) : Rule => {
 		
 		rule : Rule=
@@ -304,24 +276,12 @@ export default class def Lang() => {
 		RightRule(rule, ";");
 		return TypeRule("throw", LeftRule("throw ", after));
 	}
-	static createNotRule(value : LazyRule) : TypeRule => {
-		return TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
-	}
-	static createDefinitionRule(definition : Rule) : TypeRule => {
-		return TypeRule("definition", RightRule(definition, ";"));
-	}
-	static createBlockCommentRule() : TypeRule => {
-		return TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
-	}
-	static createPostDecrementRule(value : LazyRule) : TypeRule => {
-		return TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
-	}
-	static createPostIncrementRule(value : LazyRule) : TypeRule => {
-		return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
-	}
-	static createKeywordRule(keyword : String) : TypeRule => {
-		return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
-	}
+	static createNotRule(value : LazyRule) : TypeRule => return TypeRule("not", LeftRule("!", ExtractNodeRule("child", value)));
+	static createDefinitionRule(definition : Rule) : TypeRule => return TypeRule("definition", RightRule(definition, ";"));
+	static createBlockCommentRule() : TypeRule => return TypeRule("block-comment", StripRule(LeftRule("/*", RightRule(ExtractStringRule("value"), "*/"))));
+	static createPostDecrementRule(value : LazyRule) : TypeRule => return TypeRule("post-decrement", RightRule(ExtractNodeRule("value", value), "--;"));
+	static createPostIncrementRule(value : LazyRule) : TypeRule => return TypeRule("post-increment", RightRule(ExtractNodeRule("value", value), "++;"));
+	static createKeywordRule(keyword : String) : TypeRule => return TypeRule(keyword, LeftRule(keyword, RightRule(StripRule(EmptyRule("value")), ";")));
 	static createTypeParamsRule() : SplitMultipleRule => {
 		
 		typeParam : var=
@@ -340,9 +300,7 @@ export default class def Lang() => {
 	}
 	default class def OperatorSearcher() => {
 		private final slice : String;
-		OperatorSearcher(slice : String) : public => {
-			this=slice;
-		}
+		OperatorSearcher(slice : String) : public => this=slice;
 		public search(input : String) : Optional<Integer> => {
 			if
 			(!input.contains(slice))

@@ -11,9 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 () => {
-	MapAttributes() : public => {
-		this(Collections.emptyMap());
-	}
+	MapAttributes() : public => this(Collections.emptyMap())
 	public mapValue<T>(key : String, factory : Factory<T>, mapper : Function<T, T>) : Attributes => {
 		if
 		(!values.containsKey(key))
@@ -28,9 +26,7 @@ import java.util.stream.Stream;
 		copy.put(key, value);
 		return MapAttributes(copy);
 	}
-	public apply(key : String) : Optional<Attribute> => {
-		return values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
-	}
+	public apply(key : String) : Optional<Attribute> => return values.containsKey(key)?Optional.of(values.get(key)):Optional.empty();
 	public merge(other : Attributes) : Attributes => {
 		
 		entries : var=
@@ -45,19 +41,9 @@ import java.util.stream.Stream;
 		}
 		return current;
 	}
-	public streamEntries() : Stream<Tuple<String, Attribute>> => {
-		return values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
-	}
-	public format(depth : int) : String => {
-		return values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
-	}
-	public has(name : String) : boolean => {
-		return this.values.containsKey(name);
-	}
-	public isEmpty() : boolean => {
-		return values.isEmpty();
-	}
-	public streamKeys() : magma.api.collect.stream.Stream<String> => {
-		return HeadedStream(NativeListHead(ArrayList(values.keySet())));
-	}
+	public streamEntries() : Stream<Tuple<String, Attribute>> => return values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
+	public format(depth : int) : String => return values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
+	public has(name : String) : boolean => return this.values.containsKey(name);
+	public isEmpty() : boolean => return values.isEmpty();
+	public streamKeys() : magma.api.collect.stream.Stream<String> => return HeadedStream(NativeListHead(ArrayList(values.keySet())));
 }

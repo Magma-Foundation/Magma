@@ -34,15 +34,13 @@ export default class def Main() => {
 			result.orElsePanic().printStackTrace();
 		}
 	}
-	private static run() : Option<CompileException> => {
-		return $Void(() => {
-			
-			configuration : var=
-			
-			JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
-			JavaResults.$Option(Application(configuration).run());
-		});
-	}
+	private static run() : Option<CompileException> => return $Void(() => {
+		
+		configuration : var=
+		
+		JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
+		JavaResults.$Option(Application(configuration).run());
+	});
 	private static buildConfiguration() : Result<Configuration, IOException> => {
 		try 
 		{

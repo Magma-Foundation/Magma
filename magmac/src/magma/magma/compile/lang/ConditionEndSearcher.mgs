@@ -4,62 +4,60 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-export default class def ConditionEndSearcher() => {
-	public search(input : String) : Optional<Integer> => {
+export default class def ConditionEndSearcher() => public search(input : String) : Optional<Integer> => {
+	
+	depth : var=
+	
+	0;
+	
+	queue : var=
+	
+	IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
+	while
+	(!queue.isEmpty())
+	{
 		
-		depth : var=
+		tuple : var=
 		
-		0;
+		queue.pop();
 		
-		queue : var=
+		i : var=
 		
-		IntStream.range(0, input.length()).mapToObj(() => Tuple(index, input.charAt(index))).collect(Collectors.toCollection(LinkedList.new));
-		while
-		(!queue.isEmpty())
+		tuple.left();
+		
+		c : var=
+		
+		tuple.right();
+		if
+		(c=='\'')
 		{
 			
-			tuple : var=
+			popped : var=
 			
 			queue.pop();
-			
-			i : var=
-			
-			tuple.left();
-			
-			c : var=
-			
-			tuple.right();
 			if
-			(c=='\'')
+			(popped.right()=='\\')
 			{
-				
-				popped : var=
-				
 				queue.pop();
-				if
-				(popped.right()=='\\')
-				{
-					queue.pop();
-				}
-				queue.pop();
-				continue
-				;
 			}
-			if
-			(c==')'&&depth==1)
-			{
-				return Optional.of(i);
-			}
-			else
-			{
-				if
-				(c=='(')
-				depth++;
-				if
-				(c==')')
-				depth--;
-			}
+			queue.pop();
+			continue
+			;
 		}
-		return Optional.empty();
+		if
+		(c==')'&&depth==1)
+		{
+			return Optional.of(i);
+		}
+		else
+		{
+			if
+			(c=='(')
+			depth++;
+			if
+			(c==')')
+			depth--;
+		}
 	}
+	return Optional.empty();
 }

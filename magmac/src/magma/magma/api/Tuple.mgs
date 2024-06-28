@@ -15,7 +15,5 @@ import java.util.function.Function;
      * @param mapper the function to apply to the left value
      * @return a new Tuple with the transformed left value and the same right value
      */
-	public mapLeft<T>(mapper : Function<L, T>) : Tuple<T, R> => {
-		return Tuple(mapper.apply(left), right);
-	}
+	public mapLeft<T>(mapper : Function<L, T>) : Tuple<T, R> => return Tuple(mapper.apply(left), right);
 }

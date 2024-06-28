@@ -16,12 +16,8 @@ export default class def ExtractStringListRule() => {
 		super(key);
 		this=delimiter;
 	}
-	protected fromAttribute(attribute : Node) : Optional<String> => {
-		return JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
-	}
-	private join(list : magma.api.collect.List<String>) : String => {
-		return list.stream().collect(JoiningCollector(delimiter)).orElse("");
-	}
+	protected fromAttribute(attribute : Node) : Optional<String> => return JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
+	private join(list : magma.api.collect.List<String>) : String => return list.stream().collect(JoiningCollector(delimiter)).orElse("");
 	protected toAttribute(content : String) : Result<Attribute, Error_> => {
 		
 		list : var=

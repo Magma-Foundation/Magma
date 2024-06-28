@@ -6,28 +6,12 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
 () => {
-	private findError0() : Optional<Error_> => {
-		return Optional.of(e);
-	}
-	public mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
-		return ErrorRuleResult(mapper.apply(e));
-	}
-	private findAttributes0() : Optional<Attributes> => {
-		return Optional.empty();
-	}
-	private tryCreate0() : Optional<Node> => {
-		return Optional.empty();
-	}
-	public withType(type : String) : RuleResult => {
-		return this;
-	}
-	public findError() : Option<Error_> => {
-		return JavaOptionals.fromNative(findError0());
-	}
-	public findAttributes() : Option<Attributes> => {
-		return JavaOptionals.fromNative(findAttributes0());
-	}
-	public tryCreate() : Option<Node> => {
-		return JavaOptionals.fromNative(tryCreate0());
-	}
+	private findError0() : Optional<Error_> => return Optional.of(e);
+	public mapErr(mapper : Function<Error_, Error_>) : RuleResult => return ErrorRuleResult(mapper.apply(e));
+	private findAttributes0() : Optional<Attributes> => return Optional.empty();
+	private tryCreate0() : Optional<Node> => return Optional.empty();
+	public withType(type : String) : RuleResult => return this;
+	public findError() : Option<Error_> => return JavaOptionals.fromNative(findError0());
+	public findAttributes() : Option<Attributes> => return JavaOptionals.fromNative(findAttributes0());
+	public tryCreate() : Option<Node> => return JavaOptionals.fromNative(tryCreate0());
 }

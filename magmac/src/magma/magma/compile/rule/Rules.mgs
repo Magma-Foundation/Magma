@@ -1,6 +1,2 @@
 import java.util.Optional;
-export default class def Rules() => {
-	public static wrapIndex(index : int) : Optional<Integer> => {
-		return index==-1?Optional.empty():Optional.of(index);
-	}
-}
+export default class def Rules() => public static wrapIndex(index : int) : Optional<Integer> => return index==-1?Optional.empty():Optional.of(index);

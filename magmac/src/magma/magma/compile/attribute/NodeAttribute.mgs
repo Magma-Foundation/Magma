@@ -7,13 +7,7 @@ import java.util.Optional;
 	Factory();
 	
 	;
-	public asNode() : Optional<Node> => {
-		return Optional.of(value);
-	}
-	public format(depth : int) : String => {
-		return value.format(depth);
-	}
-	public static from(node : Node) : Attribute => {
-		return NodeAttribute(node);
-	}
+	public asNode() : Optional<Node> => return Optional.of(value);
+	public format(depth : int) : String => return value.format(depth);
+	public static from(node : Node) : Attribute => return NodeAttribute(node);
 }

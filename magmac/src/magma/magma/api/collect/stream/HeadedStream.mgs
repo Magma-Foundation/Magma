@@ -8,24 +8,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 () => {
-	public foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => {
-		return this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
-	}
-	public anyMatch(predicate : Predicate<T>) : boolean => {
-		return foldLeft(false, () => aBoolean||predicate.test(t));
-	}
-	public filter(filter : Predicate<T>) : Stream<T> => {
-		return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
-	}
-	public flatMap<R>(mapper : Function<T, Head<R>>) : Stream<R> => {
-		return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
-	}
-	public extend<R>(mapper : Function<T, R>) : Stream<Tuple<T, R>> => {
-		return map(() => Tuple(value, mapper.apply(value)));
-	}
-	public map<R>(mapper : Function<T, R>) : Stream<R> => {
-		return HeadedStream(() => this.provider.head().map(mapper));
-	}
+	public foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => return this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
+	public anyMatch(predicate : Predicate<T>) : boolean => return foldLeft(false, () => aBoolean||predicate.test(t));
+	public filter(filter : Predicate<T>) : Stream<T> => return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
+	public flatMap<R>(mapper : Function<T, Head<R>>) : Stream<R> => return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
+	public extend<R>(mapper : Function<T, R>) : Stream<Tuple<T, R>> => return map(() => Tuple(value, mapper.apply(value)));
+	public map<R>(mapper : Function<T, R>) : Stream<R> => return HeadedStream(() => this.provider.head().map(mapper));
 	public collect<C>(collector : Collector<T, C>) : C => {
 		
 		current : var=
@@ -33,32 +21,26 @@ import java.util.function.Predicate;
 		collector.createInitial();
 		return foldLeft(current, collector.fold);
 	}
-	public foldLeft<C>(current : C, folder : BiFunction<C, T, C>) : C => {
-		while
-		(true)
+	public foldLeft<C>(current : C, folder : BiFunction<C, T, C>) : C => while(true){
+		
+		finalCurrent : C=
+		
+		current;
+		
+		tuple : var=
+		
+		JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+		if
+		(tuple.left())
 		{
-			
-			finalCurrent : C=
-			
-			current;
-			
-			tuple : var=
-			
-			JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
-			if
-			(tuple.left())
-			{
-				current=tuple.right();
-			}
-			else
-			{
-				return current;
-			}
+			current=tuple.right();
+		}
+		else
+		{
+			return current;
 		}
 	}
-	public head() : Option<T> => {
-		return provider.head();
-	}
+	public head() : Option<T> => return provider.head();
 	default class def FlatMapHead() => {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
@@ -68,30 +50,26 @@ import java.util.function.Predicate;
 			this=mapper;
 			current=initial;
 		}
-		public head() : Option<R> => {
-			while
-			(true)
+		public head() : Option<R> => while(true){
+			
+			currentHead : var=
+			
+			current.head();
+			if
+			(currentHead.isPresent())
+			return currentHead;
+			
+			tuple : var=
+			
+			outer.head().map(mapper).toTuple(current);
+			if
+			(tuple.left())
 			{
-				
-				currentHead : var=
-				
-				current.head();
-				if
-				(currentHead.isPresent())
-				return currentHead;
-				
-				tuple : var=
-				
-				outer.head().map(mapper).toTuple(current);
-				if
-				(tuple.left())
-				{
-					current=tuple.right();
-				}
-				else
-				{
-					return None.None();
-				}
+				current=tuple.right();
+			}
+			else
+			{
+				return None.None();
 			}
 		}
 	}

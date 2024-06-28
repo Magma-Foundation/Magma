@@ -86,4 +86,11 @@ public interface List<T> {
      * @return The new list, with this list's items first, and the other list's items second.
      */
     List<T> addAll(List<T> other);
+
+    /**
+     * Returns the first item in this list, or None if this list is empty.
+     *
+     * @return The option.
+     */
+    Option<T> first();
 }

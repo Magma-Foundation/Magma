@@ -90,9 +90,7 @@ export default class def JavaDefinitionHeaderFactory() => {
 		public static final MODIFIERS : List<String>=
 		
 		List.of("public", "static", "final", "private", "default", "protected", "abstract");
-		ModifiersRule() : public => {
-			super("modifiers", " ");
-		}
+		ModifiersRule() : public => super("modifiers", " ")
 		protected qualify(child : String) : Optional<Error_> => {
 			if
 			(MODIFIERS.contains(child))
@@ -105,9 +103,5 @@ export default class def JavaDefinitionHeaderFactory() => {
 			}
 		}
 	}
-	default class def SimpleSplitter() => {
-		public split(input : String) : List<String> => {
-			return List.of(input.split("\n"));
-		}
-	}
+	default class def SimpleSplitter() => public split(input : String) : List<String> => return List.of(input.split("\n"));
 }

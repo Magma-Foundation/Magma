@@ -28,6 +28,7 @@ import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.PackageRemover;
 import magma.compile.lang.java.RecordNormalizer;
+import magma.compile.lang.magma.FunctionFlattener;
 import magma.compile.lang.magma.BlockFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -192,6 +193,7 @@ public record Application(Configuration config) {
 
             var rootGenerator = new CompoundGenerator(List.of(
                     new VisitingGenerator(new CompoundVisitor(streamVisitors0().collect(JavaList.collecting()))),
+                    new VisitingGenerator(new CompoundVisitor(streamVisitors2().collect(JavaList.collecting()))),
                     new VisitingGenerator(new CompoundVisitor(streamVisitors1().collect(JavaList.collecting())))
             ));
 
@@ -206,6 +208,12 @@ public record Application(Configuration config) {
             $Option(writeSafely(debugTarget, generated.toString()));
             return new Tuple<>(source, generated);
         });
+    }
+
+    private Stream<Visitor> streamVisitors2() {
+        return Streams.of(
+                new FilteringVisitor("function", new FunctionFlattener())
+        );
     }
 
     private Stream<Visitor> streamVisitors1() {

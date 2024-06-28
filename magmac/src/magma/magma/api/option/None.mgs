@@ -3,34 +3,14 @@ import magma.lang.Instance;
 import java.util.function.Function;
 import java.util.function.Supplier;
 export default class def None() => {
-	public static None<T>() : None<T> => {
-		return None();
-	}
-	public map<R>(mapper : Function<T, R>) : Option<R> => {
-		return None();
-	}
-	public orElseGet(supplier : Supplier<T>) : T => {
-		return supplier.get();
-	}
-	public orElse(other : T) : T => {
-		return other;
-	}
-	public isPresent() : boolean => {
-		return false;
-	}
-	public toTuple(other : T) : Tuple<Boolean, T> => {
-		return Tuple(false, other);
-	}
-	public isEmpty() : boolean => {
-		return true;
-	}
-	public flatMap<R>(mapper : Function<T, Option<R>>) : Option<R> => {
-		return None();
-	}
-	public orElsePanic() : T => {
-		throw RuntimeException("Option was empty!");
-	}
-	public and<R>(other : Option<R>) : Option<Tuple<T, R>> => {
-		return None();
-	}
+	public static None<T>() : None<T> => return None();
+	public map<R>(mapper : Function<T, R>) : Option<R> => return None();
+	public orElseGet(supplier : Supplier<T>) : T => return supplier.get();
+	public orElse(other : T) : T => return other;
+	public isPresent() : boolean => return false;
+	public toTuple(other : T) : Tuple<Boolean, T> => return Tuple(false, other);
+	public isEmpty() : boolean => return true;
+	public flatMap<R>(mapper : Function<T, Option<R>>) : Option<R> => return None();
+	public orElsePanic() : T => throw RuntimeException("Option was empty!");
+	public and<R>(other : Option<R>) : Option<Tuple<T, R>> => return None();
 }

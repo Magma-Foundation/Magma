@@ -26,6 +26,7 @@ import magma.compile.lang.java.MethodNormalizer;
 import magma.compile.lang.java.MethodReferenceNormalizer;
 import magma.compile.lang.java.PackageRemover;
 import magma.compile.lang.java.RecordNormalizer;
+import magma.compile.lang.magma.FunctionFlattener;
 import magma.compile.lang.magma.BlockFormatter;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
@@ -117,9 +118,7 @@ import static magma.java.JavaResults.$Void;
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	private static escape(value : String) : String => {
-		return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-	}
+	private static escape(value : String) : String => return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
 	private static formatContext(e : Error_, depth : int) : String => {
 		
 		actualContext : var=
@@ -148,9 +147,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	private static streamVisitors0() : Stream<Visitor> => {
-		return Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
-	}
+	private static streamVisitors0() : Stream<Visitor> => return Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
 	private static findRootRule(platform : String) : Result<Rule, CompileException> => {
 		if
 		(platform.equals("java"))
@@ -164,80 +161,67 @@ import static magma.java.JavaResults.$Void;
 		}
 		return Err(CompileException("Unknown platform: "+platform));
 	}
-	run() : Option<CompileException> => {
-		return config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
-	}
-	private compile(build : Build) : Option<CompileException> => {
-		return $Void(() => {
-			
-			sources : var=
-			
-			$Result(findSources(build.sourceDirectory()).mapErr(CompileException.new));
-			
-			sourceTrees : var=
-			
-			$Result(parseSources(build, sources));
-			
-			targetTrees : var=
-			
-			$Result(generateTargets(build, sourceTrees));
-			$Option(writeTargets(build, targetTrees));
-		});
-	}
-	findSources(buildSet : BuildSet) : Result<List<Path>, IOException> => {
-		return $(() => {
-			//noinspection resource
-			return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
-		});
-	}
-	generateTargets(build : Build, sourceTrees : Map<Unit, Node>) : Result<Map<Unit, Node>, CompileException> => {
-		return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
-	}
-	generateTarget(build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) : Result<Tuple<Unit, Node>, CompileException> => {
-		return $(() => {
-			
-			source : var=
-			
-			entry.left();
-			
-			right : var=
-			
-			entry.right();
-			
-			namespace : var=
-			
-			source.computeNamespace();
-			
-			name : var=
-			
-			source.computeName();
-			System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
-			
-			rootGenerator : var=
-			
-			CompoundGenerator(List.of(VisitingGenerator(CompoundVisitor(streamVisitors0().collect(JavaList.collecting()))), VisitingGenerator(CompoundVisitor(streamVisitors1().collect(JavaList.collecting())))));
-			
-			generated : var=
-			
-			$Result(rootGenerator.generate(right, ImmutableState()).mapValue(Tuple.left).mapErr(() => writeError(build, error, source)));
-			
-			debug : var=
-			
-			$Result(createDebugDirectory(build, namespace));
-			
-			debugTarget : var=
-			
-			debug.resolve(name+".output.ast");
-			$Option(writeSafely(debugTarget, generated.toString()));
-			return Tuple(source, generated);
-		});
-	}
-	private streamVisitors1() : Stream<Visitor> => {
-		return Streams.of(FilteringVisitor("block", BlockFormatter()));
-	}
-	writeTargets(build : Build, targetTrees : Map<Unit, Node>) : Option<CompileException> => {
-		return targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
-	}
+	run() : Option<CompileException> => return config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
+	private compile(build : Build) : Option<CompileException> => return $Void(() => {
+		
+		sources : var=
+		
+		$Result(findSources(build.sourceDirectory()).mapErr(CompileException.new));
+		
+		sourceTrees : var=
+		
+		$Result(parseSources(build, sources));
+		
+		targetTrees : var=
+		
+		$Result(generateTargets(build, sourceTrees));
+		$Option(writeTargets(build, targetTrees));
+	});
+	findSources(buildSet : BuildSet) : Result<List<Path>, IOException> => return $(() => {
+		//noinspection resource
+		return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
+	});
+	generateTargets(build : Build, sourceTrees : Map<Unit, Node>) : Result<Map<Unit, Node>, CompileException> => return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
+	generateTarget(build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) : Result<Tuple<Unit, Node>, CompileException> => return $(() => {
+		
+		source : var=
+		
+		entry.left();
+		
+		right : var=
+		
+		entry.right();
+		
+		namespace : var=
+		
+		source.computeNamespace();
+		
+		name : var=
+		
+		source.computeName();
+		System.out.println("Generating target: "+String.join(".", namespace)+"."+name);
+		
+		rootGenerator : var=
+		
+		CompoundGenerator(List.of(VisitingGenerator(CompoundVisitor(streamVisitors0().collect(JavaList.collecting()))), VisitingGenerator(CompoundVisitor(streamVisitors2().collect(JavaList.collecting()))), VisitingGenerator(CompoundVisitor(streamVisitors1().collect(JavaList.collecting())))));
+		
+		generated : var=
+		
+		$Result(rootGenerator.generate(right, ImmutableState()).mapValue(Tuple.left).mapErr(() => writeError(build, error, source)));
+		
+		debug : var=
+		
+		$Result(createDebugDirectory(build, namespace));
+		
+		debugTarget : var=
+		
+		debug.resolve(name+".output.ast");
+		$Option(writeSafely(debugTarget, generated.toString()));
+		return Tuple(source, generated);
+	});
+	private streamVisitors2() : Stream<Visitor> => return Streams.of(FilteringVisitor("function", FunctionFlattener()));
+	private streamVisitors1() : Stream<Visitor> => return Streams.of(FilteringVisitor("block", BlockFormatter()));
+	writeTargets(build : Build, targetTrees : Map<Unit, Node>) : Option<CompileException> => return targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
 	writeTarget(build : Build, source : Unit, root : Node) : Option<CompileException> => {
 		
 		namespace : var=
@@ -281,9 +265,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(writeError(build, err, source));
 		})).match(() => inner, Some.new);
 	}
-	parseSources(build : Build, sources : List<Path>) : Result<Map<Unit, Node>, CompileException> => {
-		return JavaList(ExceptionalCollector(JavaMap.collecting()));
-	}
+	parseSources(build : Build, sources : List<Path>) : Result<Map<Unit, Node>, CompileException> => return JavaList(ExceptionalCollector(JavaMap.collecting()));
 	parseSource(build : Build, source : Unit) : Option<Result<Tuple<Unit, Node>, CompileException>> => {
 		
 		namespace : var=
@@ -306,18 +288,14 @@ import static magma.java.JavaResults.$Void;
 		System.out.println("Parsing source: "+source);
 		return Some(source.read().mapValue(() => parseWithInput(build, source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
 	}
-	private parseWithInput(build : Build, source : Unit, input : String) : Result<Node, CompileException> => {
-		return $(() => {
-			
-			s : var=
-			
-			$Result(findRootRule(build.sourceDirectory().platform()));
-			return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
-		});
-	}
-	parse(build : Build, unit : Unit, root : Node) : Result<Node, CompileException> => {
-		return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
-	}
+	private parseWithInput(build : Build, source : Unit, input : String) : Result<Node, CompileException> => return $(() => {
+		
+		s : var=
+		
+		$Result(findRootRule(build.sourceDirectory().platform()));
+		return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
+	});
+	parse(build : Build, unit : Unit, root : Node) : Result<Node, CompileException> => return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
 	writeError(build : Build, err : Error_, location : Unit) : CompileException => {
 		
 		result : var=

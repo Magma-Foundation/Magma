@@ -6,13 +6,7 @@ import magma.compile.annotate.State;
 import magma.compile.rule.Node;
 import java.util.function.BiFunction;
 () => {
-	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
-		return foldAll(node, state, () => visitor.preVisit(tuple.left(), tuple.right()));
-	}
-	public postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
-		return foldAll(node, state, () => visitor.postVisit(tuple.left(), tuple.right()));
-	}
-	private foldAll(node : Node, state : State, folder : BiFunction<Tuple<Node, State>, Visitor, Result<Tuple<Node, State>, Error_>>) : Result<Tuple<Node, State>, Error_> => {
-		return visitors.stream().foldLeftToResult(Tuple(node, state), folder);
-	}
+	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => return foldAll(node, state, () => visitor.preVisit(tuple.left(), tuple.right()));
+	public postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => return foldAll(node, state, () => visitor.postVisit(tuple.left(), tuple.right()));
+	private foldAll(node : Node, state : State, folder : BiFunction<Tuple<Node, State>, Visitor, Result<Tuple<Node, State>, Error_>>) : Result<Tuple<Node, State>, Error_> => return visitors.stream().foldLeftToResult(Tuple(node, state), folder);
 }

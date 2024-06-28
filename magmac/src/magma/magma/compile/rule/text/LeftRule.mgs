@@ -21,7 +21,5 @@ import magma.compile.rule.result.RuleResult;
 			return ErrorRuleResult(CompileError(String.format("Input does not start with '%s'.", slice), input));
 		}
 	}
-	public fromNode(node : Node) : Result<String, Error_> => {
-		return child.fromNode(node).mapValue(() => slice+inner);
-	}
+	public fromNode(node : Node) : Result<String, Error_> => return child.fromNode(node).mapValue(() => slice+inner);
 }

@@ -172,4 +172,10 @@ public record JavaList<T>(List<T> list) implements magma.api.collect.List<T> {
     public magma.api.collect.List<T> addAll(magma.api.collect.List<T> other) {
         return other.stream().<magma.api.collect.List<T>>foldLeft(this, magma.api.collect.List::add);
     }
+
+    @Override
+    public Option<T> first() {
+        if(list.isEmpty()) return new None<>();
+        return new Some<>(list.get(0));
+    }
 }

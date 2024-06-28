@@ -1,16 +1,8 @@
 export default class def SymbolRule() => {
-	SymbolRule(child : Rule) : public => {
-		super(child);
-	}
-	private static isValidDigit(i : int, c : char) : boolean => {
-		return i!=0&&Character.isDigit(c);
-	}
-	private static isUnderscore(c : char) : boolean => {
-		return c=='_';
-	}
-	protected computeMessage() : String => {
-		return "Not a symbol.";
-	}
+	SymbolRule(child : Rule) : public => super(child)
+	private static isValidDigit(i : int, c : char) : boolean => return i!=0&&Character.isDigit(c);
+	private static isUnderscore(c : char) : boolean => return c=='_';
+	protected computeMessage() : String => return "Not a symbol.";
 	protected filter(input : String) : boolean => {
 		if
 		(input.isEmpty())
@@ -39,7 +31,5 @@ export default class def SymbolRule() => {
 		}
 		return true;
 	}
-	private static isDollar(c : char) : boolean => {
-		return c=='$';
-	}
+	private static isDollar(c : char) : boolean => return c=='$';
 }
