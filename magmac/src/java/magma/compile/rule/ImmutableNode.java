@@ -59,11 +59,6 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     }
 
     @Override
-    public Node withAttributes(Attributes attributes) {
-        return new ImmutableNode(type, attributes);
-    }
-
-    @Override
     public Node withNode(String key, Node value) {
         return with(key, new NodeAttribute(value));
     }
@@ -106,11 +101,6 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public Option<magma.api.collect.List<String>> findStringList(String key) {
         return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute::asStringList).map(JavaList::new));
-    }
-
-    @Override
-    public Attributes findAttributes() {
-        return null;
     }
 
     public Node with(String key, Attribute value) {

@@ -1,7 +1,7 @@
 package magma.compile.rule;
 
+import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
-import magma.compile.attribute.Attributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +19,6 @@ public interface Node {
     boolean is(String type);
 
     Node retype(String type);
-
-    Node withAttributes(Attributes attributes);
 
     Node withNode(String key, Node value);
 
@@ -40,5 +38,5 @@ public interface Node {
 
     Option<magma.api.collect.List<String>> findStringList(String key);
 
-    Attributes findAttributes();
+    Stream<String> streamKeys();
 }
