@@ -1,16 +1,55 @@
 package magma.compile.lang.java;
 
 import magma.api.Tuple;
+import magma.api.result.Err;
 import magma.api.result.Ok;
 import magma.api.result.Result;
+import magma.compile.CompileError;
 import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class MethodNormalizer implements Visitor {
     @Override
     public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        return new Ok<>(new Tuple<>(node.retype("function"), state));
+        var renamed = node.retype("function");
+        if (node.has("child")) {
+            return new Ok<>(new Tuple<>(renamed, state));
+        } else {
+            var params = node.findNodeList("params").orElse(Collections.emptyList());
+            var definitionOptional = node.findNode("definition");
+            if (definitionOptional.isEmpty()) {
+                return new Err<>(new CompileError("No definition present.", node.toString()));
+            }
+
+            var definition = definitionOptional.orElseThrow();
+            var returnsOptional = definition.findNode("type");
+            if (returnsOptional.isEmpty()) {
+                return new Err<>(new CompileError("No return type present.", node.toString()));
+            }
+
+            var returns = returnsOptional.orElseThrow();
+            var paramTypes = new ArrayList<Node>();
+            for (Node param : params) {
+                var paramTypeOptional = param.findNode("type");
+                if (paramTypeOptional.isEmpty()) {
+                    return new Err<>(new CompileError("No parameter type present.", node.toString()));
+                }
+
+                var type = paramTypeOptional.orElseThrow();
+                paramTypes.add(type);
+            }
+
+            var functionType = node.clear("function-type")
+                    .withNodeList("params", paramTypes)
+                    .withNode("returns", returns);
+
+            var withType = definition.withNode("type", functionType);
+            return new Ok<>(new Tuple<>(withType, state));
+        }
     }
 }
