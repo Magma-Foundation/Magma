@@ -3,6 +3,7 @@ package magma.compile.rule.result;
 import magma.api.option.Option;
 import magma.compile.Error_;
 import magma.compile.attribute.Attributes;
+import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import magma.java.JavaOptionals;
 
@@ -16,7 +17,7 @@ public record TypedRuleResult(String name, Attributes attributes) implements Rul
     }
 
     private Optional<Node> tryCreate0() {
-        return Optional.of(new Node(name, attributes));
+        return Optional.of(new ImmutableNode(name, attributes));
     }
 
     private Optional<Error_> findError0() {

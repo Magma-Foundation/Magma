@@ -6,6 +6,7 @@ import magma.api.result.Result;
 import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringListAttribute;
+import magma.compile.rule.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public abstract class ExtractStringListRule extends ExtractRule {
     }
 
     @Override
-    protected Optional<String> fromAttribute(Attribute attribute) {
+    protected Optional<String> fromAttribute(Node attribute) {
         return attribute.asStringList().map(list -> String.join(delimiter, list));
     }
 

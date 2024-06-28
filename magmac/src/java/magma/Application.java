@@ -13,7 +13,7 @@ import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileException;
 import magma.compile.Error_;
-import magma.compile.annotate.State;
+import magma.compile.annotate.ImmutableState;
 import magma.compile.lang.CompoundVisitor;
 import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
@@ -197,7 +197,7 @@ public record Application(Configuration config) {
             ));
 
             var generated = $Result(rootGenerator
-                    .generate(right, new State(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
+                    .generate(right, new ImmutableState(sourceTrees.keyStream().collect(JavaSet.collecting()), new JavaList<>()))
                     .mapValue(Tuple::left)
                     .mapErr(error -> writeError(build, error, source)));
 

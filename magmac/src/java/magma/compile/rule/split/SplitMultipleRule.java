@@ -1,13 +1,12 @@
 package magma.compile.rule.split;
 
 import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.Streams;
 import magma.api.result.Err;
 import magma.api.result.Result;
-import magma.api.collect.stream.Streams;
 import magma.compile.CompileError;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
-import magma.compile.attribute.Attribute;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.rule.Node;
@@ -63,9 +62,7 @@ public final class SplitMultipleRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return node.attributes()
-                .apply(propertyKey)
-                .flatMap(Attribute::asNodeList)
+        return node.findNodeList(propertyKey)
                 .map(this::joinNodes)
                 .orElseGet(() -> createErr(node));
     }

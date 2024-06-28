@@ -6,6 +6,7 @@ import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringAttribute;
 import magma.compile.attribute.StringListAttribute;
+import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import magma.compile.rule.result.RuleResult;
 import magma.java.JavaOptionals;
@@ -80,15 +81,15 @@ class JavaDefinitionHeaderFactoryTest {
 
     @Test
     void oneAnnotation() {
-        assertParse("@Test\nvar test;", "annotations", new NodeListAttribute(List.of(new Node("annotation")
+        assertParse("@Test\nvar test;", "annotations", new NodeListAttribute(List.of(new ImmutableNode("annotation")
                 .withString("value", "Test"))));
     }
 
     @Test
     void twoAnnotations() {
         assertParse("@First\n@Second\nvar test;", "annotations", new NodeListAttribute(List.of(
-                new Node("annotation").withString("value", "First"),
-                new Node("annotation").withString("value", "Second")
+                new ImmutableNode("annotation").withString("value", "First"),
+                new ImmutableNode("annotation").withString("value", "Second")
         )));
     }
 

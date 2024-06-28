@@ -22,7 +22,7 @@ public abstract class ExtractRule implements Rule {
         this.key = key;
     }
 
-    protected abstract Optional<String> fromAttribute(Attribute attribute);
+    protected abstract Optional<String> fromAttribute(Node attribute);
 
     protected abstract Result<Attribute, Error_> toAttribute(String content);
 
@@ -35,9 +35,7 @@ public abstract class ExtractRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return node.attributes()
-                .apply(key)
-                .flatMap(this::fromAttribute)
+        return fromAttribute(node)
                 .map(ExtractRule::getStringErrorOk)
                 .orElseGet(() -> createErr(node));
     }

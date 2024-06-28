@@ -3,7 +3,6 @@ package magma.compile.rule.text;
 import magma.api.result.Result;
 import magma.compile.CompileParentError;
 import magma.compile.Error_;
-import magma.compile.attribute.Attribute;
 import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.compile.rule.result.RuleResult;
@@ -23,15 +22,8 @@ public record StripRule(Rule child, String left, String right) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        var leftIndent = node.attributes()
-                .apply(left)
-                .flatMap(Attribute::asString)
-                .orElse("");
-
-        var rightIndent = node.attributes()
-                .apply(right)
-                .flatMap(Attribute::asString)
-                .orElse("");
+        var leftIndent = node.findString("left").orElse("");
+        var rightIndent = node.findString(right).orElse("");
 
         return child.fromNode(node)
                 .mapValue(inner -> leftIndent + inner + rightIndent)
