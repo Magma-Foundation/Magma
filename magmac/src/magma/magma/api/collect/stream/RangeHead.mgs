@@ -1,0 +1,22 @@
+import magma.api.option.None;
+import magma.api.option.Option;
+import magma.api.option.Some;
+() => {
+	private final extent : int;
+	private counter : int;
+	RangeHead : public => {
+		this=initial;
+		this=extent;
+	}
+	public head : Option<Integer> => {
+		if
+		(counter>=extent)
+		return None();
+		
+		value : var=
+		
+		counter;
+		counter++;
+		return Some(value);
+	}
+}

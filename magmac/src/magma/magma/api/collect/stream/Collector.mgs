@@ -1,4 +1,24 @@
+/**
+ * Interface representing a collector that accumulates elements into a collection.
+ *
+ * @param <T> the type of elements to be collected
+ * @param <C> the type of the collection
+ */
 export struct Collector {
+	
+	/**
+     * Creates the initial empty collection.
+     *
+     * @return the initial empty collection
+     */
 	createInitial : () => C;
+	
+	/**
+     * Adds an element to the current collection and returns the updated collection.
+     *
+     * @param current the current collection
+     * @param next    the element to add
+     * @return the updated collection with the added element
+     */
 	fold : (C, T) => C;
 }

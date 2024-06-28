@@ -1,0 +1,6 @@
+import magma.api.Tuple;
+() => {
+	public static invertRight<A, B> : Option<Tuple<A, B>> => {
+		return tuple.right().map(() => Tuple(tuple.left(), inner));
+	}
+}
