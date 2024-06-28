@@ -15,7 +15,7 @@ import magma.compile.rule.text.extract.ExtractStringRule;
 import magma.compile.rule.text.extract.SimpleExtractStringListRule;
 import java.util.List;
 export default object MagmaLang {
-	public def createRootRule(this : Self) => {
+	public def createRootRule() => {
 		
 		statement : var=
 		
@@ -32,7 +32,7 @@ export default object MagmaLang {
 		statement.setRule(ContextRule("Not a statement.", OrRule(List.of(Lang.createKeywordRule("break"), Lang.createKeywordRule("continue"), Lang.createEmptyStatementRule(), createCommentRule(), Lang.createTryRule(statement), Lang.createCatchRule(definition, statement), createStructRule(definition, statement, value), Lang.createConditionRule("if", value, statement), Lang.createConditionRule("while", value, statement), Lang.createElseRule(statement), Lang.createReturnRule(value), Lang.createForRule(definition, value, statement, " in "), Lang.createAssignmentRule(value), createFunctionRule(statement, value), Lang.createDefinitionRule(definition), Lang.createDeclarationRule(definition, value), TypeRule("invocation", RightRule(Lang.createInvocationRule(value), ";")), Lang.createThrowRule(value), Lang.createPostIncrementRule(value), Lang.createPostDecrementRule(value), TypeRule("implements", LeftRule("implements ", RightRule(ExtractNodeRule("type", Lang.createTypeRule()), ";"))), Lang.createStatementRule(value), createObjectRule(statement)))));
 		return Lang.createBlock(OrRule(List.of(Lang.createImportRule(Lang.createNamespaceRule()), statement)));
 	}
-	def createObjectRule(this : Self, statement : LazyRule) => {
+	def createObjectRule(statement : LazyRule) => {
 		
 		name : var=
 		
@@ -51,8 +51,8 @@ export default object MagmaLang {
 		Lang.createModifiersRule();
 		return TypeRule("object", OrRule(List.of(FirstRule(modifiers, " object ", afterKeyword), LeftRule("object ", afterKeyword))));
 	}
-	def createCommentRule(this : Self) => OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule()));
-	def createConstructionRule(this : Self, statement : Rule) => {
+	def createCommentRule() => OrRule(List.of(Lang.createBlockCommentRule(), Lang.createCommentRule()));
+	def createConstructionRule(statement : Rule) => {
 		
 		child1 : var=
 		
@@ -63,7 +63,7 @@ export default object MagmaLang {
 		LeftRule("{", RightRule(child1, "}"));
 		return TypeRule("construction", StripRule(child));
 	}
-	def createStructRule(this : Self, definition : Rule, statement : Rule, value : Rule) => {
+	def createStructRule(definition : Rule, statement : Rule, value : Rule) => {
 		
 		modifiers : var=
 		
@@ -90,7 +90,7 @@ export default object MagmaLang {
 		FirstRule(name, " {", RightRule(children, "}"));
 		return TypeRule("struct", OptionalRule("modifiers", FirstRule(modifiers, " struct ", child), LeftRule("struct ", child)));
 	}
-	def createDefinitionRule(this : Self) => {
+	def createDefinitionRule() => {
 		
 		modifiers : var=
 		
@@ -142,7 +142,7 @@ export default object MagmaLang {
 		definition.setRule(maybeType);
 		return definition;
 	}
-	def createFunctionRule(this : Self, statement : Rule, value : Rule) => {
+	def createFunctionRule(statement : Rule, value : Rule) => {
 		
 		block : var=
 		

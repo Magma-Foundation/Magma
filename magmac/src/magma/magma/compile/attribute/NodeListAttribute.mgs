@@ -9,8 +9,8 @@ export default class def NodeListAttribute(nodeList : List<Node>) => {
 	Factory();
 	
 	;
-	public def asNodeList(this : Self) => Optional.of(nodeList);
-	public def format(this : Self, depth : int) => {
+	public def asNodeList() => Optional.of(nodeList);
+	public def format(depth : int) => {
 		if
 		(nodeList.isEmpty())
 		return "[]";

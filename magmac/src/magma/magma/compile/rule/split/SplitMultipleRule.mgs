@@ -25,7 +25,7 @@ export default object SplitMultipleRule {
 	private final childRule : Rule;
 	private final splitter : Splitter;
 	private final delimiter : String;
-	public def toNode(this : Self, input : String) => {
+	public def toNode(input : String) => {
 		
 		split : var=
 		
@@ -55,15 +55,15 @@ export default object SplitMultipleRule {
 		}
 		return UntypedRuleResult(MapAttributes(Map.of(propertyKey, NodeListAttribute(members))));
 	}
-	def joinNodes(this : Self, list : List<Node>) => {
+	def joinNodes(list : List<Node>) => {
 		
 		collector : Collector<String, Optional<String>>=
 		
 		JoiningCollector(delimiter);
 		return Streams.fromNativeList(list).map(() => childRule.fromNode(node)).collect(ExceptionalCollector(collector)).mapValue(() => inner.orElse(""));
 	}
-	public def fromNode(this : Self, node : Node) => JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));
-	def createErr(this : Self, node : Node) => {
+	public def fromNode(node : Node) => JavaOptionals.toNative(node.findNodeList(propertyKey).map(JavaList.toNative)).map(this.joinNodes).orElseGet(() => createErr(node));
+	def createErr(node : Node) => {
 		
 		format : var=
 		

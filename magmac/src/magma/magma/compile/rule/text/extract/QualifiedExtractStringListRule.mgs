@@ -5,7 +5,7 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 export default object QualifiedExtractStringListRule {
 	private final qualifier : Rule;
-	def qualify(this : Self, child : String) => {
+	def qualify(child : String) => {
 		
 		ruleResult : RuleResult=
 		

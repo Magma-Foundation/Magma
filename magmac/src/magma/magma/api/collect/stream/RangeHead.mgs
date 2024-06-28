@@ -4,7 +4,7 @@ import magma.api.option.Some;
 export default object RangeHead {
 	private final extent : int;
 	private counter : int;
-	public def head(this : Self) => {
+	public def head() => {
 		if
 		(counter>=extent)
 		return None.None();

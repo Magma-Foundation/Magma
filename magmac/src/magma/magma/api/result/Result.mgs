@@ -15,14 +15,14 @@ export struct Result {
      *
      * @return an Option containing the value if successful, or an empty Option if there is an error
      */
-	findValue : (Self) => Option<T>;
+	findValue : () => Option<T>;
 	
 	/**
      * Retrieves the error if the result is a failure, wrapped in an Option.
      *
      * @return an Option containing the error if failed, or an empty Option if there is a value
      */
-	findErr : (Self) => Option<E>;
+	findErr : () => Option<E>;
 	
 	/**
      * Applies a function to the contained value if the result is successful, which returns another Result,
@@ -33,7 +33,7 @@ export struct Result {
      * @return the Result returned by applying the function, or the original error if the result is a failure
      */
 	
-	flatMapValue<R> : (Self, Function<T, Result<R, E>>) => Result<R, E>;
+	flatMapValue<R> : (Function<T, Result<R, E>>) => Result<R, E>;
 	
 	/**
      * Applies a function to the contained value if the result is successful, returning a new Result with the transformed value.
@@ -43,14 +43,14 @@ export struct Result {
      * @return a new Result containing the transformed value, or the original error if the result is a failure
      */
 	
-	mapValue<R> : (Self, Function<T, R>) => Result<R, E>;
+	mapValue<R> : (Function<T, R>) => Result<R, E>;
 	
 	/**
      * Checks if the result is successful (contains a value).
      *
      * @return true if the result is successful, false if it contains an error
      */
-	isOk : (Self) => boolean;
+	isOk : () => boolean;
 	
 	/**
      * Applies a function to the contained error if the result is a failure, returning a new Result with the transformed error.
@@ -60,7 +60,7 @@ export struct Result {
      * @return a new Result containing the transformed error, or the original value if the result is successful
      */
 	
-	mapErr<R> : (Self, Function<E, R>) => Result<T, R>;
+	mapErr<R> : (Function<E, R>) => Result<T, R>;
 	
 	/**
      * Matches the result, applying one of two functions depending on whether it is successful or failed,
@@ -72,5 +72,5 @@ export struct Result {
      * @return the result of applying the appropriate function
      */
 	
-	match<R> : (Self, Function<T, R>, Function<E, R>) => R;
+	match<R> : (Function<T, R>, Function<E, R>) => R;
 }

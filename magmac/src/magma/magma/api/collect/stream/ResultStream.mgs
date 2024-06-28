@@ -7,18 +7,18 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 export default object ResultStream {
-	def flatMapElement<B, C>(this : Self, headBResult : Result<Stream<C>, B>) => headBResult.match(() => onOk.map(Ok.new), () => Streams.of(Err(err)));
+	def flatMapElement<B, C>(headBResult : Result<Stream<C>, B>) => headBResult.match(() => onOk.map(Ok.new), () => Streams.of(Err(err)));
 }
 export default class def ResultStream<A, B>(stream : Stream<Result<A, B>>) => {
-	public def map<R>(this : Self, mapper : Function<Result<A, B>, R>) => stream.map(mapper);
-	public def collect<C>(this : Self, collector : Collector<Result<A, B>, C>) => stream.collect(collector);
-	public def foldLeft<C>(this : Self, current : C, folder : BiFunction<C, Result<A, B>, C>) => stream.foldLeft(current, folder);
-	public def head(this : Self) => stream.head();
-	public def foldLeftToResult<R, E>(this : Self, initial : R, mapper : BiFunction<R, Result<A, B>, Result<R, E>>) => stream.foldLeftToResult(initial, mapper);
-	public def anyMatch(this : Self, predicate : Predicate<Result<A, B>>) => stream.anyMatch(predicate);
-	public def filter(this : Self, filter : Predicate<Result<A, B>>) => stream.filter(filter);
-	public def flatMap<R>(this : Self, mapper : Function<Result<A, B>, Head<R>>) => stream.flatMap(mapper);
-	public def extend<R>(this : Self, mapper : Function<Result<A, B>, R>) => stream.extend(mapper);
-	public def flatMapValue<C>(this : Self, mapper : Function<A, Stream<C>>) => map(() => inner.mapValue(mapper)).flatMap(ResultStream.flatMapElement);
+	public def map<R>(mapper : Function<Result<A, B>, R>) => stream.map(mapper);
+	public def collect<C>(collector : Collector<Result<A, B>, C>) => stream.collect(collector);
+	public def foldLeft<C>(current : C, folder : BiFunction<C, Result<A, B>, C>) => stream.foldLeft(current, folder);
+	public def head() => stream.head();
+	public def foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, Result<A, B>, Result<R, E>>) => stream.foldLeftToResult(initial, mapper);
+	public def anyMatch(predicate : Predicate<Result<A, B>>) => stream.anyMatch(predicate);
+	public def filter(filter : Predicate<Result<A, B>>) => stream.filter(filter);
+	public def flatMap<R>(mapper : Function<Result<A, B>, Head<R>>) => stream.flatMap(mapper);
+	public def extend<R>(mapper : Function<Result<A, B>, R>) => stream.extend(mapper);
+	public def flatMapValue<C>(mapper : Function<A, Stream<C>>) => map(() => inner.mapValue(mapper)).flatMap(ResultStream.flatMapElement);
 	implements Stream<Result<A, B>>;
 }

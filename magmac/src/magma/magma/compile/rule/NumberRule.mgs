@@ -1,5 +1,5 @@
 export default object NumberRule {
-	def allDigits(this : Self, input : String) => {
+	def allDigits(input : String) => {
 		if
 		(input.isEmpty())
 		return false;
@@ -23,6 +23,6 @@ export default object NumberRule {
 		}
 		return true;
 	}
-	def computeMessage(this : Self) => "Not a number.";
-	def filter(this : Self, input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
+	def computeMessage() => "Not a number.";
+	def filter(input : String) => input.startsWith("-")?allDigits(input.substring(1)):allDigits(input);
 }

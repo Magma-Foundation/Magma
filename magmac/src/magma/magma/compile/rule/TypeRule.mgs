@@ -11,7 +11,7 @@ export default class def TypeRule(type : String, child : Rule) => {
 	public static final FORMAT : String=
 	
 	"Node was not of type '%s', but rather '%s'.";
-	public def toNode(this : Self, input : String) => {
+	public def toNode(input : String) => {
 		
 		result : var=
 		
@@ -29,7 +29,7 @@ export default class def TypeRule(type : String, child : Rule) => {
 		format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, JavaOptionals.toNative(result.findError()).get()));
 	}
-	public def fromNode(this : Self, node : Node) => {
+	public def fromNode(node : Node) => {
 		if
 		(!node.is(type))
 		{

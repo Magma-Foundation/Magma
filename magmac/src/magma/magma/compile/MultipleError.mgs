@@ -2,9 +2,9 @@ import java.util.List;
 import java.util.Optional;
 export default object MultipleError {
 	private final errors : List<Error_>;
-	public def findMessage(this : Self) => Optional.empty();
-	public def findCauses(this : Self) => Optional.of(errors);
-	public def findContext(this : Self) => Optional.empty();
-	public def calculateDepth(this : Self) => 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
+	public def findMessage() => Optional.empty();
+	public def findCauses() => Optional.of(errors);
+	public def findContext() => Optional.empty();
+	public def calculateDepth() => 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
 	implements Error_;
 }

@@ -42,7 +42,7 @@ import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
 export default object Application {
-	def createDirectory(this : Self, targetParent : Path) => {
+	def createDirectory(targetParent : Path) => {
 		try 
 		{
 			Files.createDirectories(targetParent);
@@ -52,7 +52,7 @@ export default object Application {
 			return Some(CompileException("Failed to make parent.", e));
 		}
 	}
-	def print(this : Self, error : Error_, depth : int) => {
+	def print(error : Error_, depth : int) => {
 		
 		context : var=
 		
@@ -117,8 +117,8 @@ export default object Application {
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	def escape(this : Self, value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-	def formatContext(this : Self, e : Error_, depth : int) => {
+	def escape(value : String) => value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+	def formatContext(e : Error_, depth : int) => {
 		
 		actualContext : var=
 		
@@ -136,7 +136,7 @@ export default object Application {
 		actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
-	def writeSafely(this : Self, target : Path, csq : String) => {
+	def writeSafely(target : Path, csq : String) => {
 		try 
 		{
 			Files.writeString(target, csq);
@@ -146,8 +146,8 @@ export default object Application {
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	def streamNormalizers(this : Self) => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", TemplateNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", TemplateNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
-	def findRootRule(this : Self, platform : String) => {
+	def streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", TemplateNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", TemplateNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
+	def findRootRule(platform : String) => {
 		if
 		(platform.equals("java"))
 		{
@@ -162,8 +162,8 @@ export default object Application {
 	}
 }
 export default class def Application(config : Configuration) => {
-	 run(this : Self) => config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
-	def compile(this : Self, build : Build) => $Void(() => {
+	 run() => config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
+	def compile(build : Build) => $Void(() => {
 		
 		sources : var=
 		
@@ -178,12 +178,12 @@ export default class def Application(config : Configuration) => {
 		$Result(generateTargets(build, sourceTrees));
 		$Option(writeTargets(build, targetTrees));
 	});
-	 findSources(this : Self, buildSet : BuildSet) => $(() => {
+	 findSources(buildSet : BuildSet) => $(() => {
 		//noinspection resource
 		return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
 	});
-	 generateTargets(this : Self, build : Build, sourceTrees : Map<Unit, Node>) => sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
-	 generateTarget(this : Self, build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) => $(() => {
+	 generateTargets(build : Build, sourceTrees : Map<Unit, Node>) => sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
+	 generateTarget(build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) => $(() => {
 		
 		source : var=
 		
@@ -220,10 +220,10 @@ export default class def Application(config : Configuration) => {
 		$Option(writeSafely(debugTarget, generated.toString()));
 		return Tuple(source, generated);
 	});
-	def streamOptimizers(this : Self) => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
-	def streamFormatters(this : Self) => Streams.of(FilteringVisitor("block", BlockFormatter()));
-	 writeTargets(this : Self, build : Build, targetTrees : Map<Unit, Node>) => targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
-	 writeTarget(this : Self, build : Build, source : Unit, root : Node) => {
+	def streamOptimizers() => Streams.of(FilteringVisitor("function", FunctionOptimizer()));
+	def streamFormatters() => Streams.of(FilteringVisitor("block", BlockFormatter()));
+	 writeTargets(build : Build, targetTrees : Map<Unit, Node>) => targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
+	 writeTarget(build : Build, source : Unit, root : Node) => {
 		
 		namespace : var=
 		
@@ -266,8 +266,8 @@ export default class def Application(config : Configuration) => {
 			return Some(writeError(build, err, source));
 		})).match(() => inner, Some.new);
 	}
-	 parseSources(this : Self, build : Build, sources : List<Path>) => JavaList(sources).stream().map(() => PathUnit(build.sourceDirectory().location(), source)).map(() => parseSource(build, unit)).flatMap(Streams.fromOption).collect(ExceptionalCollector(JavaMap.collecting()));
-	 parseSource(this : Self, build : Build, source : Unit) => {
+	 parseSources(build : Build, sources : List<Path>) => JavaList(sources).stream().map(() => PathUnit(build.sourceDirectory().location(), source)).map(() => parseSource(build, unit)).flatMap(Streams.fromOption).collect(ExceptionalCollector(JavaMap.collecting()));
+	 parseSource(build : Build, source : Unit) => {
 		
 		namespace : var=
 		
@@ -289,15 +289,15 @@ export default class def Application(config : Configuration) => {
 		System.out.println("Parsing source: "+source);
 		return Some(source.read().mapValue(() => parseWithInput(build, source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
 	}
-	def parseWithInput(this : Self, build : Build, source : Unit, input : String) => $(() => {
+	def parseWithInput(build : Build, source : Unit, input : String) => $(() => {
 		
 		s : var=
 		
 		$Result(findRootRule(build.sourceDirectory().platform()));
 		return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
 	});
-	 parse(this : Self, build : Build, unit : Unit, root : Node) => createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
-	 writeError(this : Self, build : Build, err : Error_, location : Unit) => {
+	 parse(build : Build, unit : Unit, root : Node) => createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
+	 writeError(build : Build, err : Error_, location : Unit) => {
 		
 		result : var=
 		
@@ -314,7 +314,7 @@ export default class def Application(config : Configuration) => {
 			$Option(writeSafely(errorPath, result));
 		}).orElseGet(() => CompileException(location.toString()));
 	}
-	 createDebugDirectory(this : Self, build : Build, namespace : List<String>) => {
+	 createDebugDirectory(build : Build, namespace : List<String>) => {
 		
 		relativizedDebug : var=
 		

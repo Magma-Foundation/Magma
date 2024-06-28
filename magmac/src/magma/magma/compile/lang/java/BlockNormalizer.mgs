@@ -15,8 +15,8 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 export default object BlockNormalizer {
-	def removeFromChildren(this : Self, children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
-	def flattenChild(this : Self, flattening : Flattening, node : Node, outerName : String) => {
+	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
+	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
 		if
 		(!node.is("function"))
 		return Ok(flattening.withInstanceMember(node));
@@ -56,7 +56,7 @@ export default object BlockNormalizer {
 			return Ok(flattening.withInstanceMember(cleaned));
 		}
 	}
-	def splitIntoObject(this : Self, node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
+	def splitIntoObject(node : Node, flattening : Flattening, name : String, modifiers : List<String>) => {
 		
 		staticMembers : var=
 		
@@ -86,14 +86,14 @@ export default object BlockNormalizer {
 			return Streams.of(object, withChild);
 		}
 	}
-	def createFunction(this : Self, node : Node, instanceMembers : List<Node>) => {
+	def createFunction(node : Node, instanceMembers : List<Node>) => {
 		
 		instanceBlock : var=
 		
 		node.clear("block").withNodeList("children", instanceMembers);
 		return node.withNode("child", instanceBlock);
 	}
-	def createObject(this : Self, node : Node, oldModifiers : List<String>, name : String, staticMembers : List<Node>) => {
+	def createObject(node : Node, oldModifiers : List<String>, name : String, staticMembers : List<Node>) => {
 		
 		staticBlock : var=
 		
@@ -104,7 +104,7 @@ export default object BlockNormalizer {
 		oldModifiers.remove("class").remove("def");
 		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
-	def cleanup(this : Self, node : Node, outerName : String) => {
+	def cleanup(node : Node, outerName : String) => {
 		if
 		(!node.is("function"))
 		return Some(node);
@@ -147,7 +147,7 @@ export default object BlockNormalizer {
 	}
 }
 export default class def BlockNormalizer() => {
-	public def postVisit(this : Self, node : Node, state : State) => {
+	public def postVisit(node : Node, state : State) => {
 		
 		childrenOptional : var=
 		
@@ -157,8 +157,8 @@ export default class def BlockNormalizer() => {
 		return Ok(Tuple(node, state));
 		return flattenChildren(childrenOptional.orElsePanic()).mapValue(() => Tuple(node.withNodeList("children", children), state));
 	}
-	def flattenChildren(this : Self, nodeList : List<Node>) => nodeList.stream().map(this.flattenChild).into(ResultStream.new).flatMapValue(() => value).collect(ExceptionalCollector(JavaList.collecting()));
-	def flattenChild(this : Self, node : Node) => {
+	def flattenChildren(nodeList : List<Node>) => nodeList.stream().map(this.flattenChild).into(ResultStream.new).flatMapValue(() => value).collect(ExceptionalCollector(JavaList.collecting()));
+	def flattenChild(node : Node) => {
 		if
 		(!node.is("function"))
 		return Ok(Streams.of(node));
@@ -217,7 +217,7 @@ export default class def BlockNormalizer() => {
 		}
 		return oldChildren.stream().foldLeftToResult(Flattening(JavaList.empty(), JavaList.empty()), () => flattenChild(flattening1, node1, name)).mapValue(() => splitIntoObject(node, flattening, name, modifiers));
 	}
-	def hasFactory(this : Self, children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
+	def hasFactory(children : List<Node>, outerName : String) => children.stream().anyMatch(() => {
 		if
 		(!child.is("function"))
 		return false;
@@ -237,10 +237,10 @@ export default class def BlockNormalizer() => {
 		return false;
 		return name.orElsePanic().equals(outerName);
 	});
-	public def preVisit(this : Self, node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
+	public def preVisit(node : Node, state : State) => Ok(Tuple(node.mapNodes("children", BlockNormalizer.removeFromChildren), state));
 	default class def Flattening(instanceMembers : List<Node>, staticMembers : List<Node>) => {
-		public def withStaticMember(this : Self, staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));
-		public def withInstanceMember(this : Self, instanceMember : Node) => Flattening(instanceMembers.addLast(instanceMember), staticMembers);
+		public def withStaticMember(staticMember : Node) => Flattening(instanceMembers, staticMembers.addLast(staticMember));
+		public def withInstanceMember(instanceMember : Node) => Flattening(instanceMembers.addLast(instanceMember), staticMembers);
 	}
 	implements Visitor;
 }

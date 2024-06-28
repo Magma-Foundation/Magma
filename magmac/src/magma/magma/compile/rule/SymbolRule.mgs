@@ -1,8 +1,8 @@
 export default object SymbolRule {
-	def isValidDigit(this : Self, i : int, c : char) => i!=0&&Character.isDigit(c);
-	def isUnderscore(this : Self, c : char) => c=='_';
-	def computeMessage(this : Self) => "Not a symbol.";
-	def filter(this : Self, input : String) => {
+	def isValidDigit(i : int, c : char) => i!=0&&Character.isDigit(c);
+	def isUnderscore(c : char) => c=='_';
+	def computeMessage() => "Not a symbol.";
+	def filter(input : String) => {
 		if
 		(input.isEmpty())
 		{
@@ -30,5 +30,5 @@ export default object SymbolRule {
 		}
 		return true;
 	}
-	def isDollar(this : Self, c : char) => c=='$';
+	def isDollar(c : char) => c=='$';
 }

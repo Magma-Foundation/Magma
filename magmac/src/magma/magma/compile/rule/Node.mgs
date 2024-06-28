@@ -14,7 +14,7 @@ export struct Node {
      *
      * @return the type of the node as a String
      */
-	findType : (Self) => String;
+	findType : () => String;
 	
 	/**
      * Formats the node with a specified depth, often for printing or debugging.
@@ -22,7 +22,7 @@ export struct Node {
      * @param depth the depth for formatting
      * @return a formatted String representation of the node
      */
-	formatWithDepth : (Self, int) => String;
+	formatWithDepth : (int) => String;
 	
 	/**
      * Formats the node with a specified depth.
@@ -30,7 +30,7 @@ export struct Node {
      * @param depth the depth for formatting
      * @return a formatted String representation of the node
      */
-	format : (Self, int) => String;
+	format : (int) => String;
 	
 	/**
      * Checks if the node is of the specified type.
@@ -38,7 +38,7 @@ export struct Node {
      * @param type the type to check against
      * @return true if the node is of the specified type, false otherwise
      */
-	is : (Self, String) => boolean;
+	is : (String) => boolean;
 	
 	/**
      * Retypes the node to a new type.
@@ -46,7 +46,7 @@ export struct Node {
      * @param type the new type
      * @return a new Node with the specified type
      */
-	retype : (Self, String) => Node;
+	retype : (String) => Node;
 	
 	/**
      * Adds a child node with a specified key.
@@ -55,7 +55,7 @@ export struct Node {
      * @param value the child node to add
      * @return the updated Node
      */
-	withNode : (Self, String, Node) => Node;
+	withNode : (String, Node) => Node;
 	
 	/**
      * Adds a list of child nodes with a specified key.
@@ -64,7 +64,7 @@ export struct Node {
      * @param values the list of child nodes to add
      * @return the updated Node
      */
-	withNodeList : (Self, String, List<Node>) => Node;
+	withNodeList : (String, List<Node>) => Node;
 	
 	/**
      * Checks if the node has a child with the specified key.
@@ -72,7 +72,7 @@ export struct Node {
      * @param child the key of the child to check for
      * @return true if the node has the specified child, false otherwise
      */
-	has : (Self, String) => boolean;
+	has : (String) => boolean;
 	
 	/**
      * Maps the list of child nodes associated with a specified key using a mapper function.
@@ -81,7 +81,7 @@ export struct Node {
      * @param mapper the function to apply to the list of child nodes
      * @return the updated Node
      */
-	mapNodes : (Self, String, Function<List<Node>, List<Node>>) => Node;
+	mapNodes : (String, Function<List<Node>, List<Node>>) => Node;
 	
 	/**
      * Finds a child node with a specified key.
@@ -89,7 +89,7 @@ export struct Node {
      * @param key the key of the child node to find
      * @return an Option containing the child node if present, or an empty Option if not present
      */
-	findNode : (Self, String) => Option<Node>;
+	findNode : (String) => Option<Node>;
 	
 	/**
      * Clears the node of all children of a specified type.
@@ -97,7 +97,7 @@ export struct Node {
      * @param type the type of children to clear
      * @return the updated Node
      */
-	clear : (Self, String) => Node;
+	clear : (String) => Node;
 	
 	/**
      * Finds a list of child nodes with a specified key.
@@ -105,7 +105,7 @@ export struct Node {
      * @param key the key of the child nodes to find
      * @return an Option containing the list of child nodes if present, or an empty Option if not present
      */
-	findNodeList : (Self, String) => Option<List<Node>>;
+	findNodeList : (String) => Option<List<Node>>;
 	
 	/**
      * Finds a string value associated with a specified key.
@@ -113,7 +113,7 @@ export struct Node {
      * @param key the key of the string value to find
      * @return an Option containing the string value if present, or an empty Option if not present
      */
-	findString : (Self, String) => Option<String>;
+	findString : (String) => Option<String>;
 	
 	/**
      * Finds a list of string values associated with a specified key.
@@ -121,14 +121,14 @@ export struct Node {
      * @param key the key of the string values to find
      * @return an Option containing the list of string values if present, or an empty Option if not present
      */
-	findStringList : (Self, String) => Option<List<String>>;
+	findStringList : (String) => Option<List<String>>;
 	
 	/**
      * Returns a stream of the keys of the node's children.
      *
      * @return a Stream of the keys of the node's children
      */
-	streamKeys : (Self) => Stream<String>;
+	streamKeys : () => Stream<String>;
 	
 	/**
      * Maps the list of strings associated with a specified key using a mapper function.
@@ -137,7 +137,7 @@ export struct Node {
      * @param mapper the function to apply to the list of strings
      * @return the updated Node
      */
-	mapStringList : (Self, String, Function<List<String>, List<String>>) => Node;
+	mapStringList : (String, Function<List<String>, List<String>>) => Node;
 	
 	/**
      * Adds a string with a specified key.
@@ -146,7 +146,7 @@ export struct Node {
      * @param value the string to add
      * @return the updated Node
      */
-	withString : (Self, String, String) => Node;
+	withString : (String, String) => Node;
 	
 	/**
      * Adds a string list with a specified key.
@@ -155,7 +155,7 @@ export struct Node {
      * @param values the string list to add
      * @return the updated Node
      */
-	withStringList : (Self, String, List<String>) => Node;
+	withStringList : (String, List<String>) => Node;
 	
 	/**
      * Maps the node associated with a specified key using a mapper function.
@@ -164,7 +164,7 @@ export struct Node {
      * @param mapper the function to apply to the node
      * @return the updated Node
      */
-	mapNode : (Self, String, Function<Node, Node>) => Node;
+	mapNode : (String, Function<Node, Node>) => Node;
 	
 	/**
      * Removes a property.
@@ -172,5 +172,5 @@ export struct Node {
      * @param key The key.
      * @return Without the property.
      */
-	remove : (Self, String) => Node;
+	remove : (String) => Node;
 }

@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 export default object BackwardsRule {
-	def wrapError(this : Self, leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
+	def wrapError(leftSlice : String, rightSlice : String, error : Error_) => CompileParentError("Invalid combination.", "[\"" + leftSlice + "\", \"" + rightSlice + "\"]", error);
 }
 export default class def BackwardsRule(leftRule : Rule, slice : String, rightRule : Rule) => {
-	public def toNode(this : Self, input : String) => {
+	public def toNode(input : String) => {
 		
 		allIndexes : var=
 		
@@ -76,7 +76,7 @@ export default class def BackwardsRule(leftRule : Rule, slice : String, rightRul
 			return ErrorRuleResult(MultipleError(errors));
 		}
 	}
-	def findAllIndexesReverse(this : Self, input : String) => {
+	def findAllIndexesReverse(input : String) => {
 		
 		indexes : List<Integer>=
 		
@@ -94,6 +94,6 @@ export default class def BackwardsRule(leftRule : Rule, slice : String, rightRul
 		Collections.reverse(indexes);
 		return indexes;
 	}
-	public def fromNode(this : Self, node : Node) => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
+	public def fromNode(node : Node) => leftRule.fromNode(node).flatMapValue(() => rightRule.fromNode(node).mapValue(() => leftResult+slice+rightResult));
 	implements Rule;
 }

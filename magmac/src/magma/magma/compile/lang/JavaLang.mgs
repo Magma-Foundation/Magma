@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 export default object JavaLang {
-	public def createRootRule(this : Self) => Lang.createBlock(createRootMemberRule());
-	def createRootMemberRule(this : Self) => {
+	public def createRootRule() => Lang.createBlock(createRootMemberRule());
+	def createRootMemberRule() => {
 		
 		namespace : var=
 		
@@ -56,7 +56,7 @@ export default object JavaLang {
 		contents.setRule(OrRule(List.of(createContentRule("class", member, Lang.createTypeRule(), definition), createContentRule("record", member, Lang.createTypeRule(), definition), createContentRule("interface", member, Lang.createTypeRule(), definition))));
 		return OrRule(List.of(TypeRule("package", LeftRule("package ", RightRule(ExtractNodeRule("internal", namespace), ";"))), importRule, contents, Lang.createBlockCommentRule()));
 	}
-	def initContentMember(this : Self, contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) => {
+	def initContentMember(contentMember : LazyRule, contents : Rule, definition : Rule, statement : Rule, value : Rule) => {
 		
 		content : var=
 		
@@ -99,7 +99,7 @@ export default object JavaLang {
 		TypeRule("method", FirstRule(definitionNode, "(", maybeValue));
 		contentMember.setRule(OrRule(List.of(Lang.createEmptyStatementRule(), Lang.createBlockCommentRule(), methodRule, Lang.createDeclarationRule(definition, value), Lang.createDefinitionRule(definition), contents)));
 	}
-	def initStatements(this : Self, definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) => {
+	def initStatements(definition : Rule, statement : LazyRule, classMember : LazyRule, value : LazyRule) => {
 		
 		rules : var=
 		
@@ -111,7 +111,7 @@ export default object JavaLang {
 		copy.add(TypeRule("constructor", RightRule(createConstructorRule(value, classMember), ";")));
 		statement.setRule(OrRule(copy));
 	}
-	def createContentRule(this : Self, keyword : String, classMember : LazyRule, type : LazyRule, definition : Rule) => {
+	def createContentRule(keyword : String, classMember : LazyRule, type : LazyRule, definition : Rule) => {
 		
 		modifiers : var=
 		
@@ -170,7 +170,7 @@ export default object JavaLang {
 		FirstRule(maybeImplements, "{", RightRule(block, "}"));
 		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
 	}
-	def createValueRule(this : Self, classMember : LazyRule, statement : Rule) => {
+	def createValueRule(classMember : LazyRule, statement : Rule) => {
 		
 		value : var=
 		
@@ -182,7 +182,7 @@ export default object JavaLang {
 		value.setRule(OrRule(List.of(Lang.createStringRule(), Lang.createCharRule(), Lang.createSymbolRule(), Lang.createNumberRule(), createLambdaRule(value, statement), createConstructorRule(value, classMember), Lang.createTernaryRule(value), Lang.createInvocationRule(value), createAccessRule(parent, Lang.createTypeRule()), Lang.createAccessRule("method-reference", "::", value), Lang.createOperatorRule("and", "&&", value), Lang.createOperatorRule("equals", "==", value), Lang.createOperatorRule("not-equals", "!=", value), Lang.createOperatorRule("add", "+", value), Lang.createOperatorRule("subtract", "-", value), Lang.createOperatorRule("greater-than-or-equals", ">=", value), Lang.createOperatorRule("less-than-or-equals", "<=", value), Lang.createOperatorRule("greater-than", ">", value), Lang.createOperatorRule("or", "||", value), Lang.createOperatorRule("less-than", "<", value), Lang.createNotRule(value))));
 		return value;
 	}
-	def createAccessRule(this : Self, parent : Rule, type : Rule) => {
+	def createAccessRule(parent : Rule, type : Rule) => {
 		
 		withoutTypeArguments : var=
 		
@@ -197,7 +197,7 @@ export default object JavaLang {
 		StripRule(OrRule(List.of(withTypeArguments, withoutTypeArguments)));
 		return TypeRule("access", LastRule(parent, ".", child));
 	}
-	def createLambdaRule(this : Self, value : Rule, statement : Rule) => {
+	def createLambdaRule(value : Rule, statement : Rule) => {
 		
 		asMultiple : var=
 		
@@ -220,7 +220,7 @@ export default object JavaLang {
 		StripRule(ExtractNodeRule("child", maybeValue));
 		return TypeRule("lambda", FirstRule(left, "->", right));
 	}
-	def createConstructorRule(this : Self, value : Rule, classMember : Rule) => {
+	def createConstructorRule(value : Rule, classMember : Rule) => {
 		
 		arguments : var=
 		
@@ -245,6 +245,6 @@ export default object JavaLang {
 	}
 }
 export default class def JavaLang() => default class def SplitThrows() => {
-	public def split(this : Self, input : String) => Arrays.asList(input.split(","));
+	public def split(input : String) => Arrays.asList(input.split(","));
 	implements Splitter;
 }

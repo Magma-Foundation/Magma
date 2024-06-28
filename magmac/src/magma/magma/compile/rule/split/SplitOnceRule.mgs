@@ -14,7 +14,7 @@ export default object SplitOnceRule {
 	protected final slice : String;
 	protected final rightRule : Rule;
 	private final searcher : Searcher;
-	public def toNode(this : Self, input : String) => {
+	public def toNode(input : String) => {
 		
 		tuple : var=
 		
@@ -65,7 +65,7 @@ export default object SplitOnceRule {
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
-	public def fromNode(this : Self, node : Node) => {
+	public def fromNode(node : Node) => {
 		
 		leftResult : var=
 		
@@ -76,7 +76,7 @@ export default object SplitOnceRule {
 		rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
 	}
-	def createError(this : Self, node : Node, err : Error_) => {
+	def createError(node : Node, err : Error_) => {
 		
 		format : var=
 		

@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Optional;
 export default object ExtractStringListRule {
 	protected final delimiter : String;
-	def fromAttribute(this : Self, attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
-	def join(this : Self, list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
-	def toAttribute(this : Self, content : String) => {
+	def fromAttribute(attribute : Node) => JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
+	def join(list : magma.api.collect.List<String>) => list.stream().collect(JoiningCollector(delimiter)).orElse("");
+	def toAttribute(content : String) => {
 		
 		list : var=
 		
@@ -32,7 +32,7 @@ export default object ExtractStringListRule {
 		}
 		return Ok(StringListAttribute(list));
 	}
-	def split(this : Self, content : String) => {
+	def split(content : String) => {
 		
 		result : List<String>=
 		
@@ -57,5 +57,5 @@ export default object ExtractStringListRule {
 		result.add(content.substring(start));
 		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();
 	}
-	def qualify : (Self, String) => Optional<Error_>;
+	def qualify : (String) => Optional<Error_>;
 }

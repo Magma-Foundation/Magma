@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 export default object PathUnit {
 	private final root : Path;
 	private final child : Path;
-	public def toString(this : Self) => {
+	public def toString() => {
 		
 		list : var=
 		
@@ -19,7 +19,7 @@ export default object PathUnit {
 		list.add(computeName());
 		return String.join(".", list);
 	}
-	public def read(this : Self) => {
+	public def read() => {
 		try 
 		{
 			return Ok(Files.readString(child));
@@ -28,14 +28,14 @@ export default object PathUnit {
 			return Err(CompileException(e));
 		}
 	}
-	public def computeNamespace(this : Self) => {
+	public def computeNamespace() => {
 		
 		relativized : var=
 		
 		root.relativize(child.getParent());
 		return IntStream.range(0, relativized.getNameCount()).mapToObj(() => relativized.getName(index).toString()).toList();
 	}
-	public def computeName(this : Self) => {
+	public def computeName() => {
 		
 		fileName : var=
 		

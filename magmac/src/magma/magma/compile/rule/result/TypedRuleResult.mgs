@@ -7,13 +7,13 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
 export default class def TypedRuleResult(name : String, attributes : Attributes) => {
-	def findAttributes0(this : Self) => Optional.of(attributes);
-	def tryCreate0(this : Self) => Optional.of(ImmutableNode(name, attributes));
-	def findError0(this : Self) => Optional.empty();
-	public def withType(this : Self, type : String) => this;
-	public def mapErr(this : Self, mapper : Function<Error_, Error_>) => this;
-	public def findError(this : Self) => JavaOptionals.fromNative(findError0());
-	public def findAttributes(this : Self) => JavaOptionals.fromNative(findAttributes0());
-	public def tryCreate(this : Self) => JavaOptionals.fromNative(tryCreate0());
+	def findAttributes0() => Optional.of(attributes);
+	def tryCreate0() => Optional.of(ImmutableNode(name, attributes));
+	def findError0() => Optional.empty();
+	public def withType(type : String) => this;
+	public def mapErr(mapper : Function<Error_, Error_>) => this;
+	public def findError() => JavaOptionals.fromNative(findError0());
+	public def findAttributes() => JavaOptionals.fromNative(findAttributes0());
+	public def tryCreate() => JavaOptionals.fromNative(tryCreate0());
 	implements RuleResult;
 }

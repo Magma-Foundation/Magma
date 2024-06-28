@@ -13,8 +13,8 @@ export default object StripRule {
 	public static final DEFAULT_RIGHT : String=
 	
 	"right";
-	public def toNode(this : Self, input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
-	public def fromNode(this : Self, node : Node) => {
+	public def toNode(input : String) => child.toNode(input.strip()).mapErr(() => CompileParentError("Cannot strip input.", input, error));
+	public def fromNode(node : Node) => {
 		
 		leftIndent : var=
 		

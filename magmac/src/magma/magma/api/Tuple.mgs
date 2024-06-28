@@ -15,5 +15,5 @@ export default class def Tuple<L, R>(left : L, right : R) => {
      * @param mapper the function to apply to the left value
      * @return a new Tuple with the transformed left value and the same right value
      */
-	public def mapLeft<T>(this : Self, mapper : Function<L, T>) => Tuple(mapper.apply(left), right);
+	public def mapLeft<T>(mapper : Function<L, T>) => Tuple(mapper.apply(left), right);
 }

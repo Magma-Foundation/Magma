@@ -16,28 +16,11 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 
 public class MethodNormalizer implements Visitor {
-    private static Result<magma.api.collect.List<Node>, Error_> attachSelfReference(magma.api.collect.List<Node> oldParams, Node node) {
-        var selfType = node.clear("reference").withString("value", "Self");
-
-        var selfReference = node.clear("definition")
-                .withString("name", "this")
-                .withNode("type", selfType);
-
-        return new Ok<>(oldParams.addFirst(selfReference));
-    }
-
     @Override
     public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
         var renamed = node.retype("function");
-        var oldParams = node.findNodeList("params")
+        var params = node.findNodeList("params")
                 .orElse(JavaList.empty());
-
-        var newParamsResult = attachSelfReference(oldParams, node);
-        var err = newParamsResult.findErr();
-        if (err.isPresent()) {
-            return new Err<>(err.orElsePanic());
-        }
-        var newParams = newParamsResult.findValue().orElsePanic();
 
         var definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
         if (definitionOptional.isEmpty()) {
@@ -51,7 +34,7 @@ public class MethodNormalizer implements Visitor {
         });
 
         if (node.has("child")) {
-            var withParams = definition.withNodeList("params", newParams);
+            var withParams = definition.withNodeList("params", params);
             return new Ok<>(new Tuple<>(renamed.withNode("definition", withParams), state));
         } else {
             var returnsOptional = JavaOptionals.toNative(definition.findNode("type"));
@@ -61,7 +44,7 @@ public class MethodNormalizer implements Visitor {
 
             var returns = returnsOptional.orElseThrow();
             var paramTypes = new ArrayList<Node>();
-            for (Node param : JavaList.toNative(newParams)) {
+            for (Node param : JavaList.toNative(params)) {
                 var paramTypeOptional = JavaOptionals.toNative(param.findNode("type"));
                 if (paramTypeOptional.isEmpty()) {
                     return new Err<>(new CompileError("No parameter type present.", node.toString()));

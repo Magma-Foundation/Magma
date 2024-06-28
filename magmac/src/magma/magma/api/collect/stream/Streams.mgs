@@ -6,9 +6,9 @@ import magma.java.NativeListHead;
 import java.util.List;
 import java.util.Optional;
 export default object Streams {
-	public def fromNativeList<T>(this : Self, list : List<T>) => HeadedStream(Head());
-	public def fromOption<T>(this : Self, option : Option<T>) => HeadedStream(option.map(SingleHead.new).orElseGet(EmptyHead.EmptyHead));
-	public def from(this : Self, extent : int) => HeadedStream(Head());
-	public def of<T>(this : Self, values : T...) => HeadedStream(NativeListHead(List.of(values)));
-	public def rangeTo(this : Self, extent : int) => HeadedStream(RangeHead(0, extent));
+	public def fromNativeList<T>(list : List<T>) => HeadedStream(Head());
+	public def fromOption<T>(option : Option<T>) => HeadedStream(option.map(SingleHead.new).orElseGet(EmptyHead.EmptyHead));
+	public def from(extent : int) => HeadedStream(Head());
+	public def of<T>(values : T...) => HeadedStream(NativeListHead(List.of(values)));
+	public def rangeTo(extent : int) => HeadedStream(RangeHead(0, extent));
 }

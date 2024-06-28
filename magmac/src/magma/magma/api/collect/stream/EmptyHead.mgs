@@ -2,6 +2,6 @@ import magma.api.option.Option;
 import magma.lang.Instantiator;
 import static magma.api.option.None.None;
 export default object EmptyHead {
-	public def head(this : Self) => None();
+	public def head() => None();
 	implements Head<T>;
 }

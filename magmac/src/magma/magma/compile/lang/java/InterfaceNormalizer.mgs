@@ -8,10 +8,10 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 export default object InterfaceNormalizer {
-	def normalizeModifiers(this : Self, oldModifiers : List<String>) => oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
+	def normalizeModifiers(oldModifiers : List<String>) => oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
 }
 export default class def InterfaceNormalizer() => {
-	public def preVisit(this : Self, node : Node, state : State) => {
+	public def preVisit(node : Node, state : State) => {
 		
 		struct : var=
 		

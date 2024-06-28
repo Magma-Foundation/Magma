@@ -1,0 +1,70 @@
+import magma.api.Tuple;
+import magma.api.collect.List;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export default object TemplateNormalizer {
+	def computeNewModifiers(node : Node) => {
+		
+		oldModifiers : var=
+		
+		node.findStringList("modifiers").orElse(JavaList.empty());
+		
+		newModifiers : var=
+		
+		JavaList.empty();
+		return oldModifiers.contains("public")?newModifiers.addLast("export"):newModifiers;
+	}
+	def generateDefinition(name : String, node : Node, state : State) => {
+		
+		classModifiers : var=
+		
+		JavaList.of("default", "class", "def");
+		
+		stringList : var=
+		
+		computeNewModifiers(node).addAll(classModifiers);
+		
+		params : var=
+		
+		node.findNodeList("params").orElse(JavaList.empty());
+		
+		definition : var=
+		
+		node.clear("definition").withString("name", name).withStringList("modifiers", stringList).withNodeList("params", params);
+		
+		withTypeParams : var=
+		
+		node.findNodeList("type-params").map(() => definition.withNodeList("type-params", typeParams)).orElse(definition);
+		
+		function : var=
+		
+		node.retype("function").withNode("definition", withTypeParams);
+		
+		withImplements : var=
+		
+		function.findNode("interface").map(() => moveImplements(function, interfaceType)).orElse(function);
+		
+		tuple : var=
+		
+		Tuple(withImplements, state);
+		return Ok(tuple);
+	}
+	def moveImplements(function : Node, interfaceType : Node) => {
+		
+		implementsStatement : var=
+		
+		function.clear("implements").withNode("type", interfaceType);
+		return function.withNode("child", function.findNode("child").map(() => child.mapNodes("children", () => children.addLast(implementsStatement))).orElse(implementsStatement));
+	}
+}
+export default class def TemplateNormalizer() => {
+	public def preVisit(node : Node, state : State) => node.findString("name").map(() => generateDefinition(name, node, state)).orElseGet(() => Err(CompileError("No name present.", node.toString())));
+	implements Visitor;
+}

@@ -9,14 +9,14 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 export default object FunctionOptimizer {
-	def flattenChild(this : Self, child : Node, node : Node, state : State) => {
+	def flattenChild(child : Node, node : Node, state : State) => {
 		if
 		(child.is("block"))
 		return flattenInner(child, node).mapValue(() => Tuple(newNode, state));
 		// Child is already flattened, probably in a lambda...
 		return Ok(Tuple(node, state));
 	}
-	def flattenInner(this : Self, child : Node, node : Node) => {
+	def flattenInner(child : Node, node : Node) => {
 		
 		children : var=
 		
@@ -50,7 +50,7 @@ export default object FunctionOptimizer {
 	}
 }
 export default class def FunctionOptimizer() => {
-	public def preVisit(this : Self, node : Node, state : State) => {
+	public def preVisit(node : Node, state : State) => {
 		
 		withoutType : var=
 		

@@ -8,7 +8,7 @@ export default class def StringListAttribute(values : List<String>) => {
 	Factory();
 	
 	;
-	public def asStringList(this : Self) => Optional.of(values);
-	public def format(this : Self, depth : int) => values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
+	public def asStringList() => Optional.of(values);
+	public def format(depth : int) => values.stream().map(() => "\"" + value + "\"").collect(Collectors.joining(", ", "[", "]"));
 	implements Attribute;
 }

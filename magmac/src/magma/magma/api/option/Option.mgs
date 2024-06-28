@@ -18,7 +18,7 @@ export struct Option {
      * @return a new Option containing the result of applying the function, or an empty Option if the value is not present
      */
 	
-	map<R> : (Self, Function<T, R>) => Option<R>;
+	map<R> : (Function<T, R>) => Option<R>;
 	
 	/**
      * Returns the contained value if present, otherwise returns the result produced by the provided Supplier.
@@ -26,7 +26,7 @@ export struct Option {
      * @param supplier the Supplier to provide a value if the contained value is not present
      * @return the contained value or the value provided by the Supplier
      */
-	orElseGet : (Self, Supplier<T>) => T;
+	orElseGet : (Supplier<T>) => T;
 	
 	/**
      * Returns the contained value if present, otherwise returns the provided default value.
@@ -34,14 +34,14 @@ export struct Option {
      * @param other the default value to return if the contained value is not present
      * @return the contained value or the provided default value
      */
-	orElse : (Self, T) => T;
+	orElse : (T) => T;
 	
 	/**
      * Checks if a value is present in this Option.
      *
      * @return true if a value is present, false otherwise
      */
-	isPresent : (Self) => boolean;
+	isPresent : () => boolean;
 	
 	/**
      * Converts the Option to a Tuple containing a boolean indicating presence and the contained value or a provided default.
@@ -49,14 +49,14 @@ export struct Option {
      * @param other the default value to use if the contained value is not present
      * @return a Tuple containing a boolean and the contained or default value
      */
-	toTuple : (Self, T) => Tuple<Boolean, T>;
+	toTuple : (T) => Tuple<Boolean, T>;
 	
 	/**
      * Checks if the Option is empty (i.e., no value is present).
      *
      * @return true if no value is present, false otherwise
      */
-	isEmpty : (Self) => boolean;
+	isEmpty : () => boolean;
 	
 	/**
      * Applies a function to the contained value if present, which returns another Option, and returns that Option.
@@ -66,7 +66,7 @@ export struct Option {
      * @return the Option returned by applying the function, or an empty Option if the value is not present
      */
 	
-	flatMap<R> : (Self, Function<T, Option<R>>) => Option<R>;
+	flatMap<R> : (Function<T, Option<R>>) => Option<R>;
 	
 	/**
      * Returns the contained value if present, otherwise throws an exception.
@@ -74,7 +74,7 @@ export struct Option {
      * @return the contained value
      * @throws RuntimeException if no value is present
      */
-	orElsePanic : (Self) => T;
+	orElsePanic : () => T;
 	
 	/**
      * Combines this Option with another Option, returning a new Option containing a Tuple of the two values if both are present.
@@ -84,5 +84,5 @@ export struct Option {
      * @return a new Option containing a Tuple of the two values if both are present, or an empty Option if either is not present
      */
 	
-	and<R> : (Self, Option<R>) => Option<Tuple<T, R>>;
+	and<R> : (Option<R>) => Option<Tuple<T, R>>;
 }

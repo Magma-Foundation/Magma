@@ -1,6 +1,6 @@
 import magma.api.option.Option;
 import magma.api.option.Some;
 export default class def JSONString(value : String) => {
-	public def findValue(this : Self) => Some(value);
+	public def findValue() => Some(value);
 	implements JSONValue;
 }

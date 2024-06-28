@@ -6,7 +6,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 export default class def RightRule(child : Rule, slice : String) => {
-	public def toNode(this : Self, input : String) => {
+	public def toNode(input : String) => {
 		if
 		(input.endsWith(slice))
 		{
@@ -25,6 +25,6 @@ export default class def RightRule(child : Rule, slice : String) => {
 			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
 		}
 	}
-	public def fromNode(this : Self, node : Node) => child.fromNode(node).mapValue(() => inner+slice);
+	public def fromNode(node : Node) => child.fromNode(node).mapValue(() => inner+slice);
 	implements Rule;
 }

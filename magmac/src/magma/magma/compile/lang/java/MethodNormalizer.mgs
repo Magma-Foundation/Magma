@@ -12,46 +12,18 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 export default object MethodNormalizer {
-	def attachSelfReference(this : Self, oldParams : magma.api.collect.List<Node>, node : Node) => {
-		
-		selfType : var=
-		
-		node.clear("reference").withString("value", "Self");
-		
-		selfReference : var=
-		
-		node.clear("definition").withString("name", "this").withNode("type", selfType);
-		return Ok(oldParams.addFirst(selfReference));
-	}
-	def transpose(this : Self, oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input)?newModifiers.addLast(output):newModifiers;
+	def transpose(oldModifiers : List<String>, newModifiers : List<String>, input : String, output : String) => oldModifiers.contains(input)?newModifiers.addLast(output):newModifiers;
 }
 export default class def MethodNormalizer() => {
-	public def preVisit(this : Self, node : Node, state : State) => {
+	public def preVisit(node : Node, state : State) => {
 		
 		renamed : var=
 		
 		node.retype("function");
 		
-		oldParams : var=
+		params : var=
 		
 		node.findNodeList("params").orElse(JavaList.empty());
-		
-		newParamsResult : var=
-		
-		attachSelfReference(oldParams, node);
-		
-		err : var=
-		
-		newParamsResult.findErr();
-		if
-		(err.isPresent())
-		{
-			return Err(err.orElsePanic());
-		}
-		
-		newParams : var=
-		
-		newParamsResult.findValue().orElsePanic();
 		
 		definitionOptional : var=
 		
@@ -81,7 +53,7 @@ export default class def MethodNormalizer() => {
 			
 			withParams : var=
 			
-			definition.withNodeList("params", newParams);
+			definition.withNodeList("params", params);
 			return Ok(Tuple(renamed.withNode("definition", withParams), state));
 		}
 		else
@@ -103,7 +75,7 @@ export default class def MethodNormalizer() => {
 			paramTypes : var=
 			
 			ArrayList();
-			for(param : Node in JavaList.toNative(newParams)){
+			for(param : Node in JavaList.toNative(params)){
 				
 				paramTypeOptional : var=
 				

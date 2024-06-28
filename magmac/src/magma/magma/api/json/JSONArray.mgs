@@ -3,6 +3,6 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 import magma.api.option.Some;
 export default class def JSONArray(items : List<JSONValue>) => {
-	public def stream(this : Self) => Some(items.stream());
+	public def stream() => Some(items.stream());
 	implements JSONValue;
 }

@@ -7,8 +7,8 @@ export default object OptionalRule {
 	private final onPresent : Rule;
 	private final onEmpty : Rule;
 	private final orRule : OrRule;
-	public def toNode(this : Self, input : String) => orRule.toNode(input);
-	public def fromNode(this : Self, node : Node) => {
+	public def toNode(input : String) => orRule.toNode(input);
+	public def fromNode(node : Node) => {
 		if
 		(node.has(key))
 		{

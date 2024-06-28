@@ -2,7 +2,7 @@ import magma.api.collect.List;
 import magma.java.JavaList;
 import java.util.ArrayList;
 export default object JSON {
-	public def split(this : Self, input : String) => {
+	public def split(input : String) => {
 		
 		list : var=
 		

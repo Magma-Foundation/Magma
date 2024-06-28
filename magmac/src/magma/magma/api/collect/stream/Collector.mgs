@@ -11,7 +11,7 @@ export struct Collector {
      *
      * @return the initial empty collection
      */
-	createInitial : (Self) => C;
+	createInitial : () => C;
 	
 	/**
      * Adds an element to the current collection and returns the updated collection.
@@ -20,5 +20,5 @@ export struct Collector {
      * @param next    the element to add
      * @return the updated collection with the added element
      */
-	fold : (Self, C, T) => C;
+	fold : (C, T) => C;
 }

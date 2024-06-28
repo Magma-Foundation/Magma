@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import static magma.java.JavaResults.$Void;
 export default object Main {
-	public def main(this : Self, args : String[]) => {
+	public def main(args : String[]) => {
 		
 		result : var=
 		
@@ -30,14 +30,14 @@ export default object Main {
 			result.orElsePanic().printStackTrace();
 		}
 	}
-	def run(this : Self) => $Void(() => {
+	def run() => $Void(() => {
 		
 		configuration : var=
 		
 		JavaResults.$Result(buildConfiguration().mapErr(CompileException.new));
 		JavaResults.$Option(Application(configuration).run());
 	});
-	def buildConfiguration(this : Self) => {
+	def buildConfiguration() => {
 		try 
 		{
 			
@@ -106,7 +106,7 @@ export default object Main {
 			return Err(e);
 		}
 	}
-	def buildSet(this : Self, build : JSONValue, key : String) => {
+	def buildSet(build : JSONValue, key : String) => {
 		
 		root : var=
 		
