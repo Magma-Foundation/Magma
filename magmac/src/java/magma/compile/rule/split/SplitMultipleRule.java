@@ -62,7 +62,7 @@ public final class SplitMultipleRule implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        return node.findNodeList(propertyKey)
+        return JavaOptionals.toNative(node.findNodeList(propertyKey))
                 .map(this::joinNodes)
                 .orElseGet(() -> createErr(node));
     }

@@ -4,7 +4,6 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface Node {
@@ -26,11 +25,11 @@ public interface Node {
 
     Node mapNodes(String key, Function<List<Node>, List<Node>> mapper);
 
-    Optional<Node> findNode(String key);
+    Option<Node> findNode(String key);
 
     Node clear(String type);
 
-    Optional<List<Node>> findNodeList(String key);
+    Option<List<Node>> findNodeList(String key);
 
     Option<String> findString(String key);
 

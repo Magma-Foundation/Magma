@@ -73,8 +73,7 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return mapAttributes(attributes -> attributes.mapValue(key, NodeListAttribute.Factory, mapper));
     }
 
-    @Override
-    public Optional<Node> findNode(String key) {
+    private Optional<Node> findNode0(String key) {
         return attributes.apply(key).flatMap(Attribute::asNode);
     }
 
@@ -83,8 +82,7 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return new ImmutableNode(type);
     }
 
-    @Override
-    public Optional<List<Node>> findNodeList(String key) {
+    private Optional<List<Node>> findNodeList0(String key) {
         return attributes.apply(key).flatMap(Attribute::asNodeList);
     }
 
@@ -105,5 +103,15 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
 
     public Node with(String key, Attribute value) {
         return mapAttributes(attributes -> attributes.with(key, value));
+    }
+
+    @Override
+    public Option<Node> findNode(String key) {
+        return JavaOptionals.fromNative(findNode0(key));
+    }
+
+    @Override
+    public Option<List<Node>> findNodeList(String key) {
+        return JavaOptionals.fromNative(findNodeList0(key));
     }
 }

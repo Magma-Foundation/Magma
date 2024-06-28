@@ -28,7 +28,7 @@ public record ExtractNodeRule(String propertyKey, Rule child) implements Rule {
 
     @Override
     public Result<String, Error_> fromNode(Node node) {
-        var asNode = node.findNode(propertyKey);
+        var asNode = JavaOptionals.toNative(node.findNode(propertyKey));
         if (asNode.isEmpty()) return createErr(node);
 
         return child.fromNode(asNode.get());

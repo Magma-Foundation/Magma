@@ -9,6 +9,7 @@ import magma.compile.Error_;
 import magma.compile.annotate.State;
 import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,14 +21,14 @@ public class MethodNormalizer implements Visitor {
         if (node.has("child")) {
             return new Ok<>(new Tuple<>(renamed, state));
         } else {
-            var params = node.findNodeList("params").orElse(Collections.emptyList());
-            var definitionOptional = node.findNode("definition");
+            var params = JavaOptionals.toNative(node.findNodeList("params")).orElse(Collections.emptyList());
+            var definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
             if (definitionOptional.isEmpty()) {
                 return new Err<>(new CompileError("No definition present.", node.toString()));
             }
 
             var definition = definitionOptional.orElseThrow();
-            var returnsOptional = definition.findNode("type");
+            var returnsOptional = JavaOptionals.toNative(definition.findNode("type"));
             if (returnsOptional.isEmpty()) {
                 return new Err<>(new CompileError("No return type present.", node.toString()));
             }
@@ -35,7 +36,7 @@ public class MethodNormalizer implements Visitor {
             var returns = returnsOptional.orElseThrow();
             var paramTypes = new ArrayList<Node>();
             for (Node param : params) {
-                var paramTypeOptional = param.findNode("type");
+                var paramTypeOptional = JavaOptionals.toNative(param.findNode("type"));
                 if (paramTypeOptional.isEmpty()) {
                     return new Err<>(new CompileError("No parameter type present.", node.toString()));
                 }
