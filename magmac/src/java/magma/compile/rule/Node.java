@@ -10,8 +10,6 @@ import java.util.function.Function;
 public interface Node {
     String findType();
 
-    Node withString(String key, String value);
-
     String formatWithDepth(int depth);
 
     String format(int depth);

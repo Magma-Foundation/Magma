@@ -7,7 +7,6 @@ import magma.compile.attribute.Attributes;
 import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
-import magma.compile.attribute.StringAttribute;
 import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
@@ -23,11 +22,6 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public String findType() {
         return type;
-    }
-
-    @Override
-    public Node withString(String key, String value) {
-        return with(key, new StringAttribute(value));
     }
 
     @Override
