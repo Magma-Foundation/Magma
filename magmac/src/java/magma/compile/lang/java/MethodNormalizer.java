@@ -19,15 +19,16 @@ public class MethodNormalizer implements Visitor {
     @Override
     public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
         var renamed = node.retype("function");
-        if (node.has("child")) {
-            return new Ok<>(new Tuple<>(renamed, state));
-        } else {
-            var params = JavaOptionals.toNative(node.findNodeList("params").map(JavaList::toNative)).orElse(Collections.emptyList());
-            var definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
-            if (definitionOptional.isEmpty()) {
-                return new Err<>(new CompileError("No definition present.", node.toString()));
-            }
+        var params = node.findNodeList("params").map(JavaList::toNative).orElse(Collections.emptyList());
+        var definitionOptional = JavaOptionals.toNative(node.findNode("definition"));
+        if (definitionOptional.isEmpty()) {
+            return new Err<>(new CompileError("No definition present.", node.toString()));
+        }
 
+        if (node.has("child")) {
+            var withParams = definitionOptional.get().withNodeList("params", JavaList.fromNative(params));
+            return new Ok<>(new Tuple<>(renamed.withNode("definition", withParams), state));
+        } else {
             var definition = definitionOptional.orElseThrow();
             var returnsOptional = JavaOptionals.toNative(definition.findNode("type"));
             if (returnsOptional.isEmpty()) {

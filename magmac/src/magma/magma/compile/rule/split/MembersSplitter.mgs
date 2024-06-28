@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export default class def MembersSplitter() => {
-	public split : List<String> => {
+	public split(input : String) : List<String> => {
 		
 		current : var=
 		
@@ -160,10 +160,10 @@ export default class def MembersSplitter() => {
 		return current.advance().tokens.stream().filter(() => !token.isBlank()).toList();
 	}
 	() => {
-		State : public => {
+		State() : public => {
 			this(Collections.emptyList(), StringBuilder(), 0);
 		}
-		private advance : State => {
+		private advance() : State => {
 			
 			copy : var=
 			
@@ -171,19 +171,19 @@ export default class def MembersSplitter() => {
 			copy.add(this.buffer.toString());
 			return State(copy, StringBuilder(), depth);
 		}
-		private append : State => {
+		private append(c : char) : State => {
 			return State(tokens, this.buffer.append(c), depth);
 		}
-		public isLevel : boolean => {
+		public isLevel() : boolean => {
 			return this.depth==0;
 		}
-		public enter : State => {
+		public enter() : State => {
 			return State(tokens, buffer, depth+1);
 		}
-		public exit : State => {
+		public exit() : State => {
 			return State(tokens, buffer, depth-1);
 		}
-		public isShallow : boolean => {
+		public isShallow() : boolean => {
 			return depth==1;
 		}
 	}

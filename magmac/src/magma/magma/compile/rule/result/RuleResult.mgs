@@ -9,10 +9,10 @@ import magma.compile.rule.ImmutableNode;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 export struct RuleResult {
-	private static createNothingPresentError : Err<Node, Error_> => {
+	private static createNothingPresentError() : Err<Node, Error_> => {
 		return Err(CompileError("Neither value nor error is present.", ""));
 	}
-	private static wrapInOk : Result<Node, Error_> => {
+	private static wrapInOk(inner : Node) : Result<Node, Error_> => {
 		return Ok(inner);
 	}
 	findError : () => Option<Error_>;
@@ -20,10 +20,10 @@ export struct RuleResult {
 	tryCreate : () => Option<Node>;
 	withType : (String) => RuleResult;
 	mapErr : (Function<Error_, Error_>) => RuleResult;
-	default create : Result<Node, Error_> => {
+	default create() : Result<Node, Error_> => {
 		return tryCreate().map(RuleResult.wrapInOk).orElseGet(this.wrapInErr);
 	}
-	private wrapInErr : Result<Node, Error_> => {
+	private wrapInErr() : Result<Node, Error_> => {
 		return findError().map(() => Err(err)).orElseGet(RuleResult.createNothingPresentError);
 	}
 }

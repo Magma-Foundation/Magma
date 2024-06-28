@@ -42,7 +42,7 @@ import static magma.java.JavaResults.$Option;
 import static magma.java.JavaResults.$Result;
 import static magma.java.JavaResults.$Void;
 () => {
-	static createDirectory : Option<CompileException> => {
+	static createDirectory(targetParent : Path) : Option<CompileException> => {
 		try 
 		{
 			Files.createDirectories(targetParent);
@@ -52,7 +52,7 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Failed to make parent.", e));
 		}
 	}
-	static print : String => {
+	static print(error : Error_, depth : int) : String => {
 		
 		context : var=
 		
@@ -117,10 +117,10 @@ import static magma.java.JavaResults.$Void;
 		}
 		return "\n" + "\t".repeat(depth) + "<collection" + messageAttribute + contextAttribute + ">" + builder + "</collection>";
 	}
-	private static escape : String => {
+	private static escape(value : String) : String => {
 		return value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&apos;").replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
 	}
-	private static formatContext : String => {
+	private static formatContext(e : Error_, depth : int) : String => {
 		
 		actualContext : var=
 		
@@ -138,7 +138,7 @@ import static magma.java.JavaResults.$Void;
 		actualContext.replace("\n", "\n" + " ".repeat(depth==0?0:depth-1));
 		return "\n" + spacing + "---\n" + spacing + formatted + "\n" + spacing + "---";
 	}
-	static writeSafely : Option<CompileException> => {
+	static writeSafely(target : Path, csq : String) : Option<CompileException> => {
 		try 
 		{
 			Files.writeString(target, csq);
@@ -148,10 +148,10 @@ import static magma.java.JavaResults.$Void;
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	private static streamVisitors0 : Stream<Visitor> => {
+	private static streamVisitors0() : Stream<Visitor> => {
 		return Streams.fromNativeList(List.of(FilteringVisitor("block", PackageRemover()), FilteringVisitor("record", RecordNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", ClassNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
 	}
-	private static findRootRule : Result<Rule, CompileException> => {
+	private static findRootRule(platform : String) : Result<Rule, CompileException> => {
 		if
 		(platform.equals("java"))
 		{
@@ -164,10 +164,10 @@ import static magma.java.JavaResults.$Void;
 		}
 		return Err(CompileException("Unknown platform: "+platform));
 	}
-	run : Option<CompileException> => {
+	run() : Option<CompileException> => {
 		return config.streamBuilds().map(this.compile).flatMap(Streams.fromOption).head();
 	}
-	private compile : Option<CompileException> => {
+	private compile(build : Build) : Option<CompileException> => {
 		return $Void(() => {
 			
 			sources : var=
@@ -184,16 +184,16 @@ import static magma.java.JavaResults.$Void;
 			$Option(writeTargets(build, targetTrees));
 		});
 	}
-	findSources : Result<List<Path>, IOException> => {
+	findSources(buildSet : BuildSet) : Result<List<Path>, IOException> => {
 		return $(() => {
 			//noinspection resource
 			return Files.walk(buildSet.location()).filter(() => value.toString().endsWith("."+buildSet.platform())).filter(Files.isRegularFile).toList();
 		});
 	}
-	generateTargets : Result<Map<Unit, Node>, CompileException> => {
+	generateTargets(build : Build, sourceTrees : Map<Unit, Node>) : Result<Map<Unit, Node>, CompileException> => {
 		return sourceTrees.streamEntries().map(() => generateTarget(build, sourceTrees, entry)).collect(ExceptionalCollector(JavaMap.collecting()));
 	}
-	generateTarget : Result<Tuple<Unit, Node>, CompileException> => {
+	generateTarget(build : Build, sourceTrees : Map<Unit, Node>, entry : Tuple<Unit, Node>) : Result<Tuple<Unit, Node>, CompileException> => {
 		return $(() => {
 			
 			source : var=
@@ -232,13 +232,13 @@ import static magma.java.JavaResults.$Void;
 			return Tuple(source, generated);
 		});
 	}
-	private streamVisitors1 : Stream<Visitor> => {
+	private streamVisitors1() : Stream<Visitor> => {
 		return Streams.of(FilteringVisitor("block", BlockFormatter()));
 	}
-	writeTargets : Option<CompileException> => {
+	writeTargets(build : Build, targetTrees : Map<Unit, Node>) : Option<CompileException> => {
 		return targetTrees.streamEntries().map(() => writeTarget(build, entry.left(), entry.right())).flatMap(Streams.fromOption).head();
 	}
-	writeTarget : Option<CompileException> => {
+	writeTarget(build : Build, source : Unit, root : Node) : Option<CompileException> => {
 		
 		namespace : var=
 		
@@ -281,10 +281,10 @@ import static magma.java.JavaResults.$Void;
 			return Some(writeError(build, err, source));
 		})).match(() => inner, Some.new);
 	}
-	parseSources : Result<Map<Unit, Node>, CompileException> => {
+	parseSources(build : Build, sources : List<Path>) : Result<Map<Unit, Node>, CompileException> => {
 		return JavaList(ExceptionalCollector(JavaMap.collecting()));
 	}
-	parseSource : Option<Result<Tuple<Unit, Node>, CompileException>> => {
+	parseSource(build : Build, source : Unit) : Option<Result<Tuple<Unit, Node>, CompileException>> => {
 		
 		namespace : var=
 		
@@ -306,7 +306,7 @@ import static magma.java.JavaResults.$Void;
 		System.out.println("Parsing source: "+source);
 		return Some(source.read().mapValue(() => parseWithInput(build, source, input)).match(() => result, Err.new).mapValue(() => Tuple(source, value)));
 	}
-	private parseWithInput : Result<Node, CompileException> => {
+	private parseWithInput(build : Build, source : Unit, input : String) : Result<Node, CompileException> => {
 		return $(() => {
 			
 			s : var=
@@ -315,10 +315,10 @@ import static magma.java.JavaResults.$Void;
 			return $Result(s.toNode(input).create().match(() => parse(build, source, root), () => Err(writeError(build, err, source))));
 		});
 	}
-	parse : Result<Node, CompileException> => {
+	parse(build : Build, unit : Unit, root : Node) : Result<Node, CompileException> => {
 		return createDebugDirectory(build, unit.computeNamespace()).flatMapValue(() => writeSafely(relativizedDebug.resolve(unit.computeName()+".input.ast"), root.toString()).map(Err.new).orElseGet(() => Ok(root)));
 	}
-	writeError : CompileException => {
+	writeError(build : Build, err : Error_, location : Unit) : CompileException => {
 		
 		result : var=
 		
@@ -335,7 +335,7 @@ import static magma.java.JavaResults.$Void;
 			$Option(writeSafely(errorPath, result));
 		}).orElseGet(() => CompileException(location.toString()));
 	}
-	createDebugDirectory : Result<Path, CompileException> => {
+	createDebugDirectory(build : Build, namespace : List<String>) : Result<Path, CompileException> => {
 		
 		relativizedDebug : var=
 		

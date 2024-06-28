@@ -5,13 +5,13 @@ import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;
 () => {
-	public parse : Option<JSONValue> => {
+	public parse(input : String) : Option<JSONValue> => {
 		if
 		(!input.startsWith("{")||!input.endsWith("}"))
 		return None.None();
 		return JSON.split(input.substring(1, input.length()-1)).stream().map(this.parseEntry).collect(RequiredCollector(JavaMap.collecting())).map(JSONObject.new);
 	}
-	private parseEntry : Option<Tuple<String, JSONValue>> => {
+	private parseEntry(inner : String) : Option<Tuple<String, JSONValue>> => {
 		
 		separator : var=
 		

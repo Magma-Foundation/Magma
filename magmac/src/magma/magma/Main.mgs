@@ -22,7 +22,7 @@ export default class def Main() => {
 	public static final CONFIG_PATH : Path=
 	
 	Paths.get(".", "config.json");
-	public static main : void => {
+	public static main(args : String[]) : void => {
 		
 		result : var=
 		
@@ -34,7 +34,7 @@ export default class def Main() => {
 			result.orElsePanic().printStackTrace();
 		}
 	}
-	private static run : Option<CompileException> => {
+	private static run() : Option<CompileException> => {
 		return $Void(() => {
 			
 			configuration : var=
@@ -43,7 +43,7 @@ export default class def Main() => {
 			JavaResults.$Option(Application(configuration).run());
 		});
 	}
-	private static buildConfiguration : Result<Configuration, IOException> => {
+	private static buildConfiguration() : Result<Configuration, IOException> => {
 		try 
 		{
 			
@@ -112,7 +112,7 @@ export default class def Main() => {
 			return Err(e);
 		}
 	}
-	private static buildSet : BuildSet => {
+	private static buildSet(build : JSONValue, key : String) : BuildSet => {
 		
 		root : var=
 		

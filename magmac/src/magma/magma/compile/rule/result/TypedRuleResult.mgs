@@ -7,28 +7,28 @@ import magma.java.JavaOptionals;
 import java.util.Optional;
 import java.util.function.Function;
 () => {
-	private findAttributes0 : Optional<Attributes> => {
+	private findAttributes0() : Optional<Attributes> => {
 		return Optional.of(attributes);
 	}
-	private tryCreate0 : Optional<Node> => {
+	private tryCreate0() : Optional<Node> => {
 		return Optional.of(ImmutableNode(name, attributes));
 	}
-	private findError0 : Optional<Error_> => {
+	private findError0() : Optional<Error_> => {
 		return Optional.empty();
 	}
-	public withType : RuleResult => {
+	public withType(type : String) : RuleResult => {
 		return this;
 	}
-	public mapErr : RuleResult => {
+	public mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
 		return this;
 	}
-	public findError : Option<Error_> => {
+	public findError() : Option<Error_> => {
 		return JavaOptionals.fromNative(findError0());
 	}
-	public findAttributes : Option<Attributes> => {
+	public findAttributes() : Option<Attributes> => {
 		return JavaOptionals.fromNative(findAttributes0());
 	}
-	public tryCreate : Option<Node> => {
+	public tryCreate() : Option<Node> => {
 		return JavaOptionals.fromNative(tryCreate0());
 	}
 }

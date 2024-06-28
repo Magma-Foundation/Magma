@@ -2,16 +2,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 () => {
-	public findMessage : Optional<String> => {
+	public findMessage() : Optional<String> => {
 		return Optional.of(message);
 	}
-	public findCauses : Optional<List<Error_>> => {
+	public findCauses() : Optional<List<Error_>> => {
 		return Optional.empty();
 	}
-	public findContext : Optional<String> => {
+	public findContext() : Optional<String> => {
 		return Optional.of(context);
 	}
-	public calculateDepth : int => {
+	public calculateDepth() : int => {
 		return 1;
 	}
 }

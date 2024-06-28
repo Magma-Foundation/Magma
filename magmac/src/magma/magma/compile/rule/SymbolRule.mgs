@@ -1,17 +1,17 @@
 export default class def SymbolRule() => {
-	SymbolRule : public => {
+	SymbolRule(child : Rule) : public => {
 		super(child);
 	}
-	private static isValidDigit : boolean => {
+	private static isValidDigit(i : int, c : char) : boolean => {
 		return i!=0&&Character.isDigit(c);
 	}
-	private static isUnderscore : boolean => {
+	private static isUnderscore(c : char) : boolean => {
 		return c=='_';
 	}
-	protected computeMessage : String => {
+	protected computeMessage() : String => {
 		return "Not a symbol.";
 	}
-	protected filter : boolean => {
+	protected filter(input : String) : boolean => {
 		if
 		(input.isEmpty())
 		{
@@ -39,7 +39,7 @@ export default class def SymbolRule() => {
 		}
 		return true;
 	}
-	private static isDollar : boolean => {
+	private static isDollar(c : char) : boolean => {
 		return c=='$';
 	}
 }

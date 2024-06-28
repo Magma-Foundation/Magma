@@ -11,7 +11,7 @@ import magma.java.JavaOptionals;
 	public static final FORMAT : String=
 	
 	"Node was not of type '%s', but rather '%s'.";
-	public toNode : RuleResult => {
+	public toNode(input : String) : RuleResult => {
 		
 		result : var=
 		
@@ -29,7 +29,7 @@ import magma.java.JavaOptionals;
 		format.formatted(type);
 		return ErrorRuleResult(CompileParentError(message, input, JavaOptionals.toNative(result.findError()).get()));
 	}
-	public fromNode : Result<String, Error_> => {
+	public fromNode(node : Node) : Result<String, Error_> => {
 		if
 		(!node.is(type))
 		{

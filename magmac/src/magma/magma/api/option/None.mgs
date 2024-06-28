@@ -3,34 +3,34 @@ import magma.lang.Instance;
 import java.util.function.Function;
 import java.util.function.Supplier;
 export default class def None() => {
-	public static None<T> : None<T> => {
+	public static None<T>() : None<T> => {
 		return None();
 	}
-	public map<R> : Option<R> => {
+	public map<R>(mapper : Function<T, R>) : Option<R> => {
 		return None();
 	}
-	public orElseGet : T => {
+	public orElseGet(supplier : Supplier<T>) : T => {
 		return supplier.get();
 	}
-	public orElse : T => {
+	public orElse(other : T) : T => {
 		return other;
 	}
-	public isPresent : boolean => {
+	public isPresent() : boolean => {
 		return false;
 	}
-	public toTuple : Tuple<Boolean, T> => {
+	public toTuple(other : T) : Tuple<Boolean, T> => {
 		return Tuple(false, other);
 	}
-	public isEmpty : boolean => {
+	public isEmpty() : boolean => {
 		return true;
 	}
-	public flatMap<R> : Option<R> => {
+	public flatMap<R>(mapper : Function<T, Option<R>>) : Option<R> => {
 		return None();
 	}
-	public orElsePanic : T => {
+	public orElsePanic() : T => {
 		throw RuntimeException("Option was empty!");
 	}
-	public and<R> : Option<Tuple<T, R>> => {
+	public and<R>(other : Option<R>) : Option<Tuple<T, R>> => {
 		return None();
 	}
 }

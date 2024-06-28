@@ -6,19 +6,19 @@ import magma.compile.attribute.Attributes;
 import magma.compile.rule.Node;
 import java.util.function.Function;
 () => {
-	public withType : RuleResult => {
+	public withType(type : String) : RuleResult => {
 		return TypedRuleResult(type, attributes);
 	}
-	public mapErr : RuleResult => {
+	public mapErr(mapper : Function<Error_, Error_>) : RuleResult => {
 		return this;
 	}
-	public findError : Option<Error_> => {
+	public findError() : Option<Error_> => {
 		return None.None();
 	}
-	public findAttributes : Option<Attributes> => {
+	public findAttributes() : Option<Attributes> => {
 		return Some(attributes);
 	}
-	public tryCreate : Option<Node> => {
+	public tryCreate() : Option<Node> => {
 		return None.None();
 	}
 }

@@ -6,7 +6,7 @@ import magma.compile.rule.Rule;
 import magma.compile.rule.result.ErrorRuleResult;
 import magma.compile.rule.result.RuleResult;
 () => {
-	public toNode : RuleResult => {
+	public toNode(input : String) : RuleResult => {
 		if
 		(input.endsWith(slice))
 		{
@@ -25,7 +25,7 @@ import magma.compile.rule.result.RuleResult;
 			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
 		}
 	}
-	public fromNode : Result<String, Error_> => {
+	public fromNode(node : Node) : Result<String, Error_> => {
 		return child.fromNode(node).mapValue(() => inner+slice);
 	}
 }

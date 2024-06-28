@@ -8,10 +8,10 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import magma.java.JavaList;
 export default class def PackageRemover() => {
-	private static removeFromChildren : List<Node> => {
+	private static removeFromChildren(children : List<Node>) : List<Node> => {
 		return children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	}
-	public preVisit : Result<Tuple<Node, State>, Error_> => {
+	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		return Ok(Tuple(node.mapNodes("children", PackageRemover.removeFromChildren), state));
 	}
 }

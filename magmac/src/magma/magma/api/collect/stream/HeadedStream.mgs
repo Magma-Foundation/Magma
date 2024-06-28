@@ -8,32 +8,32 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 () => {
-	public foldLeftToResult<R, E> : Result<R, E> => {
+	public foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, T, Result<R, E>>) : Result<R, E> => {
 		return this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
 	}
-	public anyMatch : boolean => {
+	public anyMatch(predicate : Predicate<T>) : boolean => {
 		return foldLeft(false, () => aBoolean||predicate.test(t));
 	}
-	public filter : Stream<T> => {
+	public filter(filter : Predicate<T>) : Stream<T> => {
 		return flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
 	}
-	public flatMap<R> : Stream<R> => {
+	public flatMap<R>(mapper : Function<T, Head<R>>) : Stream<R> => {
 		return HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
 	}
-	public extend<R> : Stream<Tuple<T, R>> => {
+	public extend<R>(mapper : Function<T, R>) : Stream<Tuple<T, R>> => {
 		return map(() => Tuple(value, mapper.apply(value)));
 	}
-	public map<R> : Stream<R> => {
+	public map<R>(mapper : Function<T, R>) : Stream<R> => {
 		return HeadedStream(() => this.provider.head().map(mapper));
 	}
-	public collect<C> : C => {
+	public collect<C>(collector : Collector<T, C>) : C => {
 		
 		current : var=
 		
 		collector.createInitial();
 		return foldLeft(current, collector.fold);
 	}
-	public foldLeft<C> : C => {
+	public foldLeft<C>(current : C, folder : BiFunction<C, T, C>) : C => {
 		while
 		(true)
 		{
@@ -56,19 +56,19 @@ import java.util.function.Predicate;
 			}
 		}
 	}
-	public head : Option<T> => {
+	public head() : Option<T> => {
 		return provider.head();
 	}
 	default class def FlatMapHead() => {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;
-		FlatMapHead : public => {
+		FlatMapHead(initial : Head<R>, outer : HeadedStream<T>, mapper : Function<T, Head<R>>) : public => {
 			this=outer;
 			this=mapper;
 			current=initial;
 		}
-		public head : Option<R> => {
+		public head() : Option<R> => {
 			while
 			(true)
 			{

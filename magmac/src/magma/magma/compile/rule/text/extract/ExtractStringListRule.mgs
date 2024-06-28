@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 export default class def ExtractStringListRule() => {
 	protected final delimiter : String;
-	ExtractStringListRule : public => {
+	ExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key);
 		this=delimiter;
 	}
-	protected fromAttribute : Optional<String> => {
+	protected fromAttribute(attribute : Node) : Optional<String> => {
 		return JavaOptionals.toNative(attribute.findStringList(key).map(this.join));
 	}
-	private join : String => {
+	private join(list : magma.api.collect.List<String>) : String => {
 		return list.stream().collect(JoiningCollector(delimiter)).orElse("");
 	}
-	protected toAttribute : Result<Attribute, Error_> => {
+	protected toAttribute(content : String) : Result<Attribute, Error_> => {
 		
 		list : var=
 		
@@ -40,7 +40,7 @@ export default class def ExtractStringListRule() => {
 		}
 		return Ok(StringListAttribute(list));
 	}
-	private split : List<String> => {
+	private split(content : String) : List<String> => {
 		
 		result : List<String>=
 		

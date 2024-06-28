@@ -7,16 +7,16 @@ import magma.compile.lang.Visitor;
 import magma.compile.rule.Node;
 import java.util.function.BiFunction;
 () => {
-	public preVisit : Result<Tuple<Node, State>, Error_> => {
+	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		return applyFilter(node, state, child.preVisit);
 	}
-	private applyFilter : Result<Tuple<Node, State>, Error_> => {
+	private applyFilter(node : Node, state : State, folder : BiFunction<Node, State, Result<Tuple<Node, State>, Error_>>) : Result<Tuple<Node, State>, Error_> => {
 		if
 		(!node.is(type))
 		return Ok(Tuple(node, state));
 		return folder.apply(node, state);
 	}
-	public postVisit : Result<Tuple<Node, State>, Error_> => {
+	public postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		return applyFilter(node, state, child.postVisit);
 	}
 }

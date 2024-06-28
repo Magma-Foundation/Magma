@@ -1,7 +1,7 @@
 import magma.api.option.Option;
 import magma.api.option.Some;
 () => {
-	public findValue : Option<String> => {
+	public findValue() : Option<String> => {
 		return Some(value);
 	}
 }

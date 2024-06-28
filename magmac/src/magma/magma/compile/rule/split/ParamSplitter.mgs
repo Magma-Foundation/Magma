@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 export default class def ParamSplitter() => {
-	public split : List<String> => {
+	public split(input : String) : List<String> => {
 		
 		segments : var=
 		

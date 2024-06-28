@@ -2,13 +2,13 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.None;
 import magma.api.option.Option;
 export struct JSONValue {
-	default find : Option<JSONValue> => {
+	default find(key : String) : Option<JSONValue> => {
 		return None.None();
 	}
-	default findValue : Option<String> => {
+	default findValue() : Option<String> => {
 		return None.None();
 	}
-	default stream : Option<Stream<JSONValue>> => {
+	default stream() : Option<Stream<JSONValue>> => {
 		return None.None();
 	}
 }

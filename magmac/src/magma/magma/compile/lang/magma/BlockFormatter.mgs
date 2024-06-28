@@ -11,10 +11,10 @@ import magma.compile.rule.Node;
 import magma.compile.rule.text.StripRule;
 import magma.java.JavaList;
 export default class def BlockFormatter() => {
-	private static indentChildren : List<Node> => {
+	private static indentChildren(children : List<Node>, state : State) : List<Node> => {
 		return Streams.rangeTo(children.size()).extend(children.get).map(Options.invertRight).flatMap(Streams.fromOption).map(() => attachAfterChild(child, state)).collect(JavaList.collecting());
 	}
-	private static attachAfterChild : Node => {
+	private static attachAfterChild(child : Tuple<Integer, Node>, state : State) : Node => {
 		
 		depth : var=
 		
@@ -32,7 +32,7 @@ export default class def BlockFormatter() => {
 		return child.right();
 		return child.right().withString(StripRule.DEFAULT_LEFT, childIndent);
 	}
-	private static attachAfterChildren : Node => {
+	private static attachAfterChildren(node : Node, depth : int) : Node => {
 		if
 		(depth<=1)
 		return node;
@@ -46,10 +46,10 @@ export default class def BlockFormatter() => {
 		"\n" + "\t".repeat(count);
 		return node.withString("after-children", endIndent);
 	}
-	public preVisit : Result<Tuple<Node, State>, Error_> => {
+	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		return Ok(Tuple(node, state.enter()));
 	}
-	public postVisit : Result<Tuple<Node, State>, Error_> => {
+	public postVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		
 		withChildren : var=
 		

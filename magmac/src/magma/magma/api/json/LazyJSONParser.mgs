@@ -6,10 +6,10 @@ export default class def LazyJSONParser() => {
 	private value : Option<JSONParser>=
 	
 	None.None();
-	public setValue : void => {
+	public setValue(value : JSONParser) : void => {
 		this=Some(value);
 	}
-	public parse : Option<JSONValue> => {
+	public parse(input : String) : Option<JSONValue> => {
 		return value.flatMap(() => inner.parse(input));
 	}
 }

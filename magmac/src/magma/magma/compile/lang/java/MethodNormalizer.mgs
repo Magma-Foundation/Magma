@@ -12,31 +12,35 @@ import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
 export default class def MethodNormalizer() => {
-	public preVisit : Result<Tuple<Node, State>, Error_> => {
+	public preVisit(node : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		
 		renamed : var=
 		
 		node.retype("function");
+		
+		params : var=
+		
+		node.findNodeList("params").map(JavaList.toNative).orElse(Collections.emptyList());
+		
+		definitionOptional : var=
+		
+		JavaOptionals.toNative(node.findNode("definition"));
+		if
+		(definitionOptional.isEmpty())
+		{
+			return Err(CompileError("No definition present.", node.toString()));
+		}
 		if
 		(node.has("child"))
 		{
-			return Ok(Tuple(renamed, state));
+			
+			withParams : var=
+			
+			definitionOptional.get().withNodeList("params", JavaList.fromNative(params));
+			return Ok(Tuple(renamed.withNode("definition", withParams), state));
 		}
 		else
 		{
-			
-			params : var=
-			
-			JavaOptionals.toNative(node.findNodeList("params").map(JavaList.toNative)).orElse(Collections.emptyList());
-			
-			definitionOptional : var=
-			
-			JavaOptionals.toNative(node.findNode("definition"));
-			if
-			(definitionOptional.isEmpty())
-			{
-				return Err(CompileError("No definition present.", node.toString()));
-			}
 			
 			definition : var=
 			

@@ -1,10 +1,10 @@
 import magma.compile.Error_;
 import java.util.Optional;
 export default class def SimpleExtractStringListRule() => {
-	SimpleExtractStringListRule : public => {
+	SimpleExtractStringListRule(key : String, delimiter : String) : public => {
 		super(key, delimiter);
 	}
-	protected qualify : Optional<Error_> => {
+	protected qualify(child : String) : Optional<Error_> => {
 		return Optional.empty();
 	}
 }

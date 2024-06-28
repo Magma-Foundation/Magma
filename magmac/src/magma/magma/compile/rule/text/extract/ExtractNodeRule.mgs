@@ -11,7 +11,7 @@ import magma.compile.rule.result.RuleResult;
 import magma.compile.rule.result.UntypedRuleResult;
 import magma.java.JavaOptionals;
 () => {
-	public toNode : RuleResult => {
+	public toNode(input : String) : RuleResult => {
 		
 		node : var=
 		
@@ -21,7 +21,7 @@ import magma.java.JavaOptionals;
 		return node;
 		return JavaOptionals.toNative(node.tryCreate()).map(NodeAttribute.new).map(() => MapAttributes().with(propertyKey, attribute)).map(UntypedRuleResult.new).orElse(ErrorRuleResult(CompileError("No name present: ", input)));
 	}
-	public fromNode : Result<String, Error_> => {
+	public fromNode(node : Node) : Result<String, Error_> => {
 		
 		asNode : var=
 		
@@ -31,7 +31,7 @@ import magma.java.JavaOptionals;
 		return createErr(node);
 		return child.fromNode(asNode.get());
 	}
-	private createErr : Err<String, Error_> => {
+	private createErr(node : Node) : Err<String, Error_> => {
 		
 		format : var=
 		

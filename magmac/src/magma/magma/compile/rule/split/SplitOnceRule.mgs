@@ -14,13 +14,13 @@ export default class def SplitOnceRule() => {
 	protected final slice : String;
 	protected final rightRule : Rule;
 	private final searcher : Searcher;
-	SplitOnceRule : public => {
+	SplitOnceRule(leftRule : Rule, slice : String, rightRule : Rule, searcher : Searcher) : public => {
 		this=leftRule;
 		this=slice;
 		this=rightRule;
 		this=searcher;
 	}
-	public toNode : RuleResult => {
+	public toNode(input : String) : RuleResult => {
 		
 		tuple : var=
 		
@@ -71,7 +71,7 @@ export default class def SplitOnceRule() => {
 			return ErrorRuleResult(CompileError(message, input));
 		});
 	}
-	public fromNode : Result<String, Error_> => {
+	public fromNode(node : Node) : Result<String, Error_> => {
 		
 		leftResult : var=
 		
@@ -82,7 +82,7 @@ export default class def SplitOnceRule() => {
 		rightRule.fromNode(node);
 		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
 	}
-	private createError : CompileParentError => {
+	private createError(node : Node, err : Error_) : CompileParentError => {
 		
 		format : var=
 		

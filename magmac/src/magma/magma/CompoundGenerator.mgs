@@ -7,7 +7,7 @@ import magma.compile.lang.Generator;
 import magma.compile.rule.Node;
 import java.util.List;
 () => {
-	public generate : Result<Tuple<Node, State>, Error_> => {
+	public generate(root : Node, state : State) : Result<Tuple<Node, State>, Error_> => {
 		
 		initial : var=
 		

@@ -3,7 +3,7 @@ import magma.api.collect.stream.Stream;
 import magma.api.option.Option;
 import magma.api.option.Some;
 () => {
-	public stream : Option<Stream<JSONValue>> => {
+	public stream() : Option<Stream<JSONValue>> => {
 		return Some(items.stream());
 	}
 }
