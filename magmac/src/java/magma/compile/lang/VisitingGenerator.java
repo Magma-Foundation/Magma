@@ -55,7 +55,7 @@ public class VisitingGenerator implements Generator {
     public Result<Tuple<Node, State>, Error_> generate(Node node, State depth) {
         return visitor.preVisit(node, depth).flatMapValue(preVisitedTuple -> {
             var preVisited = preVisitedTuple.left();
-            var preVisitedAttributes = preVisited.attributes().streamEntries().toList();
+            var preVisitedAttributes = preVisited.findAttributes().streamEntries().toList();
             var preVisitedState = preVisitedTuple.right();
 
             return Streams.fromNativeList(preVisitedAttributes)

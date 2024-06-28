@@ -36,6 +36,6 @@ public interface RuleResult {
     }
 
     private Result<Node, Error_> wrapInErr() {
-        return findError().map(err -> new Err<ImmutableNode, Error_>(err)).orElseGet(RuleResult::createNothingPresentError);
+        return findError().map(err -> new Err<Node, Error_>(err)).orElseGet(RuleResult::createNothingPresentError);
     }
 }

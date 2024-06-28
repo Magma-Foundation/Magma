@@ -1,7 +1,6 @@
 package magma.compile.rule;
 
 import magma.api.option.Option;
-import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
 
 import java.util.List;
@@ -13,17 +12,11 @@ public interface Node {
 
     Node withString(String key, String value);
 
-    default Node with(String key, Attribute value) {
-        return mapAttributes(attributes -> attributes.with(key, value));
-    }
-
     String formatWithDepth(int depth);
 
     String format(int depth);
 
     boolean is(String type);
-
-    Node mapAttributes(Function<Attributes, Attributes> mapper);
 
     Node retype(String type);
 
@@ -44,4 +37,8 @@ public interface Node {
     Optional<List<Node>> findNodeList(String key);
 
     Option<String> findString(String key);
+
+    Option<magma.api.collect.List<String>> findStringList(String key);
+
+    Attributes findAttributes();
 }

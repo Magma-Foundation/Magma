@@ -7,6 +7,7 @@ import magma.compile.attribute.MapAttributes;
 import magma.compile.attribute.NodeAttribute;
 import magma.compile.attribute.NodeListAttribute;
 import magma.compile.attribute.StringAttribute;
+import magma.java.JavaList;
 import magma.java.JavaOptionals;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     }
 
     @Override
-    public String findType(){
+    public String findType() {
         return type;
     }
 
@@ -48,7 +49,6 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
         return this.type.equals(type);
     }
 
-    @Override
     public Node mapAttributes(Function<Attributes, Attributes> mapper) {
         return new ImmutableNode(type, mapper.apply(attributes));
     }
@@ -101,5 +101,19 @@ public record ImmutableNode(String type, Attributes attributes) implements Node 
     @Override
     public Option<String> findString(String key) {
         return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute::asString));
+    }
+
+    @Override
+    public Option<magma.api.collect.List<String>> findStringList(String key) {
+        return JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute::asStringList).map(JavaList::new));
+    }
+
+    @Override
+    public Attributes findAttributes() {
+        return null;
+    }
+
+    public Node with(String key, Attribute value) {
+        return mapAttributes(attributes -> attributes.with(key, value));
     }
 }

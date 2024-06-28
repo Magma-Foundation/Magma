@@ -6,6 +6,7 @@ import magma.compile.Error_;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.StringAttribute;
 import magma.compile.rule.Node;
+import magma.java.JavaOptionals;
 
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ public final class ExtractStringRule extends ExtractRule {
 
     @Override
     protected Optional<String> fromAttribute(Node attribute) {
-        return attribute.asString();
+        return JavaOptionals.toNative(attribute.findString(key));
     }
 
     @Override
