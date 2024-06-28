@@ -55,4 +55,5 @@ export default class def FunctionOptimizer() => {
 		node.mapNode("definition", () => definition.remove("type"));
 		return withoutType.findNode("child").map(() => flattenChild(child, withoutType, state)).orElseGet(() => Err(CompileError("No child is present.", withoutType.toString())));
 	}
+	implements Visitor;
 }

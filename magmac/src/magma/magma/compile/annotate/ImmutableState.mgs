@@ -7,4 +7,5 @@ export default class def ImmutableState() => {
 	public def enter() => ImmutableState(frames.pushLast(JavaList.empty()));
 	public def computeDepth() => frames.size();
 	public def exit() => ImmutableState(frames.popLastAndDiscard().orElse(frames));
+	implements State;
 }

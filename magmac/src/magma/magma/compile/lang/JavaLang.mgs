@@ -243,5 +243,8 @@ export default class def JavaLang() => {
 		OrRule(List.of(FirstRule(StripRule(before), "{", RightRule(Lang.createBlock(classMember), "}")), before));
 		return TypeRule("constructor", StripRule(LeftRule("new ", child)));
 	}
-	default class def SplitThrows() => public def split(input : String) => Arrays.asList(input.split(","));
+	default class def SplitThrows() => {
+		public def split(input : String) => Arrays.asList(input.split(","));
+		implements Splitter;
+	}
 }

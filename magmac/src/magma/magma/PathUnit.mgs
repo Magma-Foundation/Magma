@@ -46,4 +46,5 @@ export default class def PathUnit() => {
 		child.getFileName().toString();
 		return fileName.substring(0, fileName.indexOf('.'));
 	}
+	implements Unit;
 }

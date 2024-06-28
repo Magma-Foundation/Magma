@@ -56,4 +56,5 @@ export default class def VisitingGenerator() => {
 		preVisitedTuple.right();
 		return preVisitedNode.streamKeys().foldLeftToResult(Tuple(preVisitedNode, preVisitedState), () => generateAttribute(key, tuple.left(), tuple.right())).flatMapValue(() => visitor.postVisit(tuple.left(), tuple.right()));
 	}).mapErr(() => CompileParentError("Failed to parse node.", node.toString(), err));
+	implements Generator;
 }

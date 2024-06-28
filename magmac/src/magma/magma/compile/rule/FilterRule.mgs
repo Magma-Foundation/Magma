@@ -15,4 +15,5 @@ export default class def FilterRule() => {
 	def computeMessage : () => String;
 	def filter : (String) => boolean;
 	public def fromNode(node : Node) => child.fromNode(node);
+	implements Rule;
 }

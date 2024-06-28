@@ -30,4 +30,5 @@ export default class def ExtractRule() => {
 		format.formatted(key);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

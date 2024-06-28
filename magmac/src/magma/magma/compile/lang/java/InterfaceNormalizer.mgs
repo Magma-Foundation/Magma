@@ -16,4 +16,5 @@ export default class def InterfaceNormalizer() => {
 		return Ok(Tuple(struct, state));
 	}
 	def normalizeModifiers(oldModifiers : List<String>) => oldModifiers.contains("public")?JavaList.of("export"):JavaList.empty();
+	implements Visitor;
 }

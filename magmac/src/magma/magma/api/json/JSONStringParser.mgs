@@ -1,4 +1,7 @@
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.api.option.Some;
-export default class def JSONStringParser() => public def parse(input : String) => input.startsWith("\"")&&input.endsWith("\"")?Some(JSONString(input.substring(1, input.length()-1))):None.None();
+export default class def JSONStringParser() => {
+	public def parse(input : String) => input.startsWith("\"")&&input.endsWith("\"")?Some(JSONString(input.substring(1, input.length()-1))):None.None();
+	implements JSONParser;
+}

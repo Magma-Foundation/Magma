@@ -11,90 +11,93 @@ import magma.java.JavaList;
 import magma.java.JavaOptionals;
 import java.util.ArrayList;
 import java.util.Collections;
-export default class def MethodNormalizer() => public def preVisit(node : Node, state : State) => {
-	
-	renamed : var=
-	
-	node.retype("function");
-	
-	params : var=
-	
-	node.findNodeList("params").map(JavaList.toNative).orElse(Collections.emptyList());
-	
-	definitionOptional : var=
-	
-	JavaOptionals.toNative(node.findNode("definition"));
-	if
-	(definitionOptional.isEmpty())
-	{
-		return Err(CompileError("No definition present.", node.toString()));
-	}
-	
-	definition : var=
-	
-	definitionOptional.orElseThrow().mapStringList("modifiers", () => {
+export default class def MethodNormalizer() => {
+	public def preVisit(node : Node, state : State) => {
 		
-		newModifiers : var=
+		renamed : var=
 		
-		oldModifiers.contains("public")?JavaList.of("public"):JavaList.empty();
-		return newModifiers.add("def");
-	});
-	if
-	(node.has("child"))
-	{
+		node.retype("function");
 		
-		withParams : var=
+		params : var=
 		
-		definition.withNodeList("params", JavaList.fromNative(params));
-		return Ok(Tuple(renamed.withNode("definition", withParams), state));
-	}
-	else
-	{
+		node.findNodeList("params").map(JavaList.toNative).orElse(Collections.emptyList());
 		
-		returnsOptional : var=
+		definitionOptional : var=
 		
-		JavaOptionals.toNative(definition.findNode("type"));
+		JavaOptionals.toNative(node.findNode("definition"));
 		if
-		(returnsOptional.isEmpty())
+		(definitionOptional.isEmpty())
 		{
-			return Err(CompileError("No return type present.", node.toString()));
+			return Err(CompileError("No definition present.", node.toString()));
 		}
 		
-		returns : var=
+		definition : var=
 		
-		returnsOptional.orElseThrow();
-		
-		paramTypes : var=
-		
-		ArrayList();
-		for(param : Node in params){
+		definitionOptional.orElseThrow().mapStringList("modifiers", () => {
 			
-			paramTypeOptional : var=
+			newModifiers : var=
 			
-			JavaOptionals.toNative(param.findNode("type"));
+			oldModifiers.contains("public")?JavaList.of("public"):JavaList.empty();
+			return newModifiers.add("def");
+		});
+		if
+		(node.has("child"))
+		{
+			
+			withParams : var=
+			
+			definition.withNodeList("params", JavaList.fromNative(params));
+			return Ok(Tuple(renamed.withNode("definition", withParams), state));
+		}
+		else
+		{
+			
+			returnsOptional : var=
+			
+			JavaOptionals.toNative(definition.findNode("type"));
 			if
-			(paramTypeOptional.isEmpty())
+			(returnsOptional.isEmpty())
 			{
-				return Err(CompileError("No parameter type present.", node.toString()));
+				return Err(CompileError("No return type present.", node.toString()));
 			}
 			
-			type : var=
+			returns : var=
 			
-			paramTypeOptional.orElseThrow();
-			paramTypes.add(type);
+			returnsOptional.orElseThrow();
+			
+			paramTypes : var=
+			
+			ArrayList();
+			for(param : Node in params){
+				
+				paramTypeOptional : var=
+				
+				JavaOptionals.toNative(param.findNode("type"));
+				if
+				(paramTypeOptional.isEmpty())
+				{
+					return Err(CompileError("No parameter type present.", node.toString()));
+				}
+				
+				type : var=
+				
+				paramTypeOptional.orElseThrow();
+				paramTypes.add(type);
+			}
+			
+			node1 : Node=
+			
+			node.clear("function-type");
+			
+			functionType : var=
+			
+			node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
+			
+			withType : var=
+			
+			definition.withNode("type", functionType);
+			return Ok(Tuple(withType, state));
 		}
-		
-		node1 : Node=
-		
-		node.clear("function-type");
-		
-		functionType : var=
-		
-		node1.withNodeList("params", JavaList.fromNative(paramTypes)).withNode("returns", returns);
-		
-		withType : var=
-		
-		definition.withNode("type", functionType);
-		return Ok(Tuple(withType, state));
 	}
+	implements Visitor;
 }

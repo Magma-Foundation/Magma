@@ -4,71 +4,74 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-default class def InvocationStartSearcher() => public def search(input : String) => {
-	
-	depth : var=
-	
-	0;
-	
-	queue : var=
-	
-	IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
-	while
-	(!queue.isEmpty())
-	{
+default class def InvocationStartSearcher() => {
+	public def search(input : String) => {
 		
-		pop : var=
+		depth : var=
 		
-		queue.pop();
+		0;
 		
-		i : var=
+		queue : var=
 		
-		pop.left();
-		
-		c : var=
-		
-		pop.right();
-		if
-		(c=='\"')
+		IntStream.range(0, input.length()).map(() => input.length()-i-1).mapToObj(() => Tuple(i, input.charAt(i))).collect(Collectors.toCollection(LinkedList.new));
+		while
+		(!queue.isEmpty())
 		{
-			while
-			(!queue.isEmpty())
+			
+			pop : var=
+			
+			queue.pop();
+			
+			i : var=
+			
+			pop.left();
+			
+			c : var=
+			
+			pop.right();
+			if
+			(c=='\"')
 			{
-				
-				next : var=
-				
-				queue.pop().right();
-				if
-				(next=='\"')
+				while
+				(!queue.isEmpty())
 				{
+					
+					next : var=
+					
+					queue.pop().right();
 					if
-					(!queue.isEmpty())
+					(next=='\"')
 					{
-						
-						after : var=
-						
-						queue.peek().right();
 						if
-						(after=='\\')
+						(!queue.isEmpty())
 						{
-							continue
-							;
+							
+							after : var=
+							
+							queue.peek().right();
+							if
+							(after=='\\')
+							{
+								continue
+								;
+							}
 						}
 					}
-				}
-				if
-				(next=='\"')
-				{
-					break
-					;
+					if
+					(next=='\"')
+					{
+						break
+						;
+					}
 				}
 			}
+			if
+			(c=='('&&depth==0)
+			return Optional.of(i);
+			else if(c==')')depth++;
+			else if(c=='(')depth--;
 		}
-		if
-		(c=='('&&depth==0)
-		return Optional.of(i);
-		else if(c==')')depth++;
-		else if(c=='(')depth--;
+		return Optional.empty();
 	}
-	return Optional.empty();
+	implements Searcher;
 }

@@ -80,4 +80,5 @@ export default class def SplitMultipleRule() => {
 		format.formatted(propertyKey);
 		return Err(CompileError(message, node.toString()));
 	}
+	implements Rule;
 }

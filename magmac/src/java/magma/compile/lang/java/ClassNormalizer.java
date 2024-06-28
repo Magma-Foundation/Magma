@@ -19,14 +19,7 @@ public class ClassNormalizer implements Visitor {
         return oldModifiers.contains("public") ? newModifiers.add("export") : newModifiers;
     }
 
-    @Override
-    public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
-        return node.findString("name")
-                .map(name -> getTupleObjectOk(name, node, state))
-                .orElseGet(() -> new Err<>(new CompileError("No name present.", node.toString())));
-    }
-
-    private static Result<Tuple<Node, State>, Error_> getTupleObjectOk(String name, Node node, State state) {
+    private static Result<Tuple<Node, State>, Error_> generateDefinition(String name, Node node, State state) {
         var classModifiers = JavaList.of("default", "class", "def");
         var stringList = computeNewModifiers(node).addAll(classModifiers);
 
@@ -36,7 +29,26 @@ public class ClassNormalizer implements Visitor {
                 .withNodeList("params", JavaList.empty());
 
         var function = node.retype("function").withNode("definition", definition);
-        var tuple = new Tuple<>(function, state);
+        var withImplements = function.findNode("interface")
+                .map(interfaceType -> moveImplements(function, interfaceType))
+                .orElse(function);
+
+        var tuple = new Tuple<>(withImplements, state);
         return new Ok<>(tuple);
+    }
+
+    private static Node moveImplements(Node function, Node interfaceType) {
+        var implementsStatement = function.clear("implements").withNode("type", interfaceType);
+
+        return function.withNode("child", function.findNode("child")
+                .map(child -> child.mapNodes("children", children -> children.add(implementsStatement)))
+                .orElse(implementsStatement));
+    }
+
+    @Override
+    public Result<Tuple<Node, State>, Error_> preVisit(Node node, State state) {
+        return node.findString("name")
+                .map(name -> generateDefinition(name, node, state))
+                .orElseGet(() -> new Err<>(new CompileError("No name present.", node.toString())));
     }
 }

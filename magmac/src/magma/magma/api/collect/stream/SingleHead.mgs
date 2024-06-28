@@ -18,4 +18,5 @@ export default class def SingleHead() => {
 			return Some(value);
 		}
 	}
+	implements Head<T>;
 }

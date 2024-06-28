@@ -72,5 +72,6 @@ import java.util.function.Predicate;
 				return None.None();
 			}
 		}
+		implements Head<R>;
 	}
 }

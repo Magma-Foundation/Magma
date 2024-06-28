@@ -25,4 +25,5 @@ export default class def OptionalRule() => {
 			return onEmpty.fromNode(node);
 		}
 	}
+	implements Rule;
 }

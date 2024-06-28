@@ -4,4 +4,5 @@ import static magma.api.option.None.None;
 export default class def EmptyHead() => {
 	public def EmptyHead<T>() => EmptyHead();
 	public def head() => None();
+	implements Head<T>;
 }

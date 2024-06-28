@@ -13,4 +13,5 @@ export default class def None() => {
 	public def flatMap<R>(mapper : Function<T, Option<R>>) => None();
 	public def orElsePanic() => throw RuntimeException("Option was empty!");
 	public def and<R>(other : Option<R>) => None();
+	implements Option<T>;
 }

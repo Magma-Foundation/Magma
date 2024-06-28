@@ -19,4 +19,5 @@ export default class def RangeHead() => {
 		counter++;
 		return Some(value);
 	}
+	implements Head<Integer>;
 }

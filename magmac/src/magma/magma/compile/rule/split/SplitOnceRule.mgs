@@ -93,4 +93,5 @@ export default class def SplitOnceRule() => {
 		format.formatted(slice);
 		return CompileParentError(message, node.toString(), err);
 	}
+	implements Rule;
 }

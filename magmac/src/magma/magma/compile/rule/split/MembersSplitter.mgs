@@ -175,4 +175,5 @@ export default class def MembersSplitter() => {
 		public def exit() => State(tokens, buffer, depth-1);
 		public def isShallow() => depth==1;
 	}
+	implements Splitter;
 }

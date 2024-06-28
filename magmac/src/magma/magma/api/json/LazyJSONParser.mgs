@@ -8,4 +8,5 @@ export default class def LazyJSONParser() => {
 	None.None();
 	public def setValue(value : JSONParser) => this=Some(value);
 	public def parse(input : String) => value.flatMap(() => inner.parse(input));
+	implements JSONParser;
 }
