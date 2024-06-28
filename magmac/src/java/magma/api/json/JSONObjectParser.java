@@ -1,7 +1,8 @@
 package magma.api.json;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.Map;
+import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaMap;
@@ -13,7 +14,7 @@ public record JSONObjectParser(JSONParser valueParser) implements JSONParser {
         return JSON.split(input.substring(1, input.length() - 1))
                 .stream()
                 .map(this::parseEntry)
-                .collect(Collectors.required(JavaMap.collecting()))
+                .collect(new RequiredCollector<Map<String, JSONValue>, Tuple<String, JSONValue>>(JavaMap.collecting()))
                 .map(JSONObject::new);
     }
 

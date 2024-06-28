@@ -2,7 +2,7 @@ package magma;
 
 import magma.api.Tuple;
 import magma.api.collect.Map;
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.stream.ExceptionalCollector;
 import magma.api.collect.stream.Stream;
 import magma.api.collect.stream.Streams;
 import magma.api.option.None;
@@ -33,7 +33,6 @@ import magma.compile.rule.Node;
 import magma.compile.rule.Rule;
 import magma.java.JavaList;
 import magma.java.JavaMap;
-import magma.java.JavaSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -178,7 +177,7 @@ public record Application(Configuration config) {
     Result<Map<Unit, Node>, CompileException> generateTargets(Build build, Map<Unit, Node> sourceTrees) {
         return sourceTrees.streamEntries()
                 .map(entry -> generateTarget(build, sourceTrees, entry))
-                .collect(Collectors.exceptionally(JavaMap.collecting()));
+                .collect(new ExceptionalCollector<Map<Unit, Node>, CompileException, Tuple<Unit, Node>>(JavaMap.collecting()));
     }
 
     Result<Tuple<Unit, Node>, CompileException> generateTarget(Build build, Map<Unit, Node> sourceTrees, Tuple<Unit, Node> entry) {
@@ -256,7 +255,7 @@ public record Application(Configuration config) {
                 .map(source -> new PathUnit(build.sourceDirectory().location(), source))
                 .map((unit) -> parseSource(build, unit))
                 .flatMap(Streams::fromOption)
-                .collect(Collectors.exceptionally(JavaMap.collecting()));
+                .collect(new ExceptionalCollector<Map<Unit, Node>, CompileException, Tuple<Unit, Node>>(JavaMap.collecting()));
     }
 
     Option<Result<Tuple<Unit, Node>, CompileException>> parseSource(Build build, Unit source) {

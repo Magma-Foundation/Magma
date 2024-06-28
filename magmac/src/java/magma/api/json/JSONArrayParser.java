@@ -1,6 +1,7 @@
 package magma.api.json;
 
-import magma.api.collect.stream.Collectors;
+import magma.api.collect.List;
+import magma.api.collect.stream.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;
@@ -13,7 +14,7 @@ public record JSONArrayParser(JSONParser valueParser) implements JSONParser {
                 .stream()
                 .map(String::strip)
                 .map(valueParser::parse)
-                .collect(Collectors.required(JavaList.collecting()))
+                .collect(new RequiredCollector<List<JSONValue>, JSONValue>(JavaList.collecting()))
                 .map(JSONArray::new);
     }
 }
