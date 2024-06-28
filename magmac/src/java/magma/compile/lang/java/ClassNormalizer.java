@@ -23,12 +23,17 @@ public class ClassNormalizer implements Visitor {
         var classModifiers = JavaList.of("default", "class", "def");
         var stringList = computeNewModifiers(node).addAll(classModifiers);
 
+
         var definition = node.clear("definition")
                 .withString("name", name)
                 .withStringList("modifiers", stringList)
                 .withNodeList("params", JavaList.empty());
 
-        var function = node.retype("function").withNode("definition", definition);
+        var withTypeParams = node.findNodeList("type-params")
+                .map(typeParams -> definition.withNodeList("type-params", typeParams))
+                .orElse(definition);
+
+        var function = node.retype("function").withNode("definition", withTypeParams);
         var withImplements = function.findNode("interface")
                 .map(interfaceType -> moveImplements(function, interfaceType))
                 .orElse(function);

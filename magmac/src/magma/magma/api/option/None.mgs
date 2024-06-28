@@ -2,7 +2,7 @@ import magma.api.Tuple;
 import magma.lang.Instance;
 import java.util.function.Function;
 import java.util.function.Supplier;
-export default class def None() => {
+export default class def None<T>() => {
 	public def None<T>(this : Self) => None();
 	public def map<R>(this : Self, mapper : Function<T, R>) => None();
 	public def orElseGet(this : Self, supplier : Supplier<T>) => supplier.get();

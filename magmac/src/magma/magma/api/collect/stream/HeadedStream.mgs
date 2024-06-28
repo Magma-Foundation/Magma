@@ -41,7 +41,7 @@ import java.util.function.Predicate;
 		}
 	}
 	public def head(this : Self) => provider.head();
-	default class def FlatMapHead() => {
+	default class def FlatMapHead<R>() => {
 		private final outer : Head<T>;
 		private final mapper : Function<T, Head<R>>;
 		private current : Head<R>;

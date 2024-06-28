@@ -35,9 +35,13 @@ export default class def ClassNormalizer() => {
 		
 		node.clear("definition").withString("name", name).withStringList("modifiers", stringList).withNodeList("params", JavaList.empty());
 		
+		withTypeParams : var=
+		
+		node.findNodeList("type-params").map(() => definition.withNodeList("type-params", typeParams)).orElse(definition);
+		
 		function : var=
 		
-		node.retype("function").withNode("definition", definition);
+		node.retype("function").withNode("definition", withTypeParams);
 		
 		withImplements : var=
 		
