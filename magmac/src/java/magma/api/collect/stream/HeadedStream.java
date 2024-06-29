@@ -4,7 +4,6 @@ import magma.api.Tuple;
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.java.JavaOptionals;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -57,8 +56,8 @@ public record HeadedStream<T>(Head<T> provider) implements Stream<T> {
     @Override
     public <C> C foldLeft(C current, BiFunction<C, T, C> folder) {
         while (true) {
-            C finalCurrent = current;
-            var tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(head -> folder.apply(finalCurrent, head)), current);
+            var finalCurrent = current;
+            var tuple = head().map(head -> folder.apply(finalCurrent, head)).toTuple(current);
             if (tuple.left()) {
                 current = tuple.right();
             } else {
