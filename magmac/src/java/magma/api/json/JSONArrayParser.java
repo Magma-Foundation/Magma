@@ -1,7 +1,7 @@
 package magma.api.json;
 
-import magma.api.collect.List;
-import magma.api.collect.stream.RequiredCollector;
+import magma.api.contain.List;
+import magma.api.contain.collect.RequiredCollector;
 import magma.api.option.None;
 import magma.api.option.Option;
 import magma.java.JavaList;

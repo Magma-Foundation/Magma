@@ -1,6 +1,6 @@
-package magma.api.collect;
+package magma.api.contain;
 
-import magma.api.collect.stream.Collector;
+import magma.api.contain.collect.Collector;
 
 public record ListCollector<T>(List<T> initial) implements Collector<T, List<T>> {
     @Override

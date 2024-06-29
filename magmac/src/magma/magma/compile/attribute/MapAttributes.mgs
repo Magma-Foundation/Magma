@@ -1,5 +1,5 @@
 import magma.api.Tuple;
-import magma.api.collect.stream.HeadedStream;
+import magma.api.contain.stream.HeadedStream;
 import magma.java.NativeListHead;
 import java.util.ArrayList;
 import java.util.Collections;

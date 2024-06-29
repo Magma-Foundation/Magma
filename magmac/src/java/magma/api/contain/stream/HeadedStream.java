@@ -1,6 +1,7 @@
-package magma.api.collect.stream;
+package magma.api.contain.stream;
 
 import magma.api.Tuple;
+import magma.api.contain.collect.Collector;
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;

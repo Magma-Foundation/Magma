@@ -1,7 +1,7 @@
 package magma.compile.attribute;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.HeadedStream;
+import magma.api.contain.stream.HeadedStream;
 import magma.java.NativeListHead;
 
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ public record MapAttributes(Map<String, Attribute> values) implements Attributes
     }
 
     @Override
-    public magma.api.collect.stream.Stream<String> streamKeys() {
+    public magma.api.contain.stream.Stream<String> streamKeys() {
         return new HeadedStream<>(new NativeListHead<>(new ArrayList<>(values.keySet())));
     }
 }

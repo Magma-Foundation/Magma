@@ -1,6 +1,5 @@
 import magma.api.Tuple;
-import magma.api.collect.stream.Head;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 export struct Map {
 	putAll : (Map<K, V>) => Map<K, V>;

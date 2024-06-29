@@ -1,6 +1,6 @@
 package magma.api.json;
 
-import magma.api.collect.Map;
+import magma.api.contain.Map;
 import magma.api.option.Option;
 
 public record JSONObject(Map<String, JSONValue> entries) implements JSONValue {

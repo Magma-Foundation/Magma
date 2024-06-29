@@ -1,5 +1,5 @@
-import magma.api.collect.List;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.List;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 import magma.compile.attribute.Attribute;
 import magma.compile.attribute.Attributes;
@@ -33,8 +33,8 @@ export object ImmutableNode {
 	public def remove(key : String) => ImmutableNode(type, attributes.remove(key));
 	public def with(key : String, value : Attribute) => ImmutableNode(type, attributes.with(key, value));
 	public def findNode(key : String) => JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNode));
-	public def withNodeList(key : String, values : magma.api.collect.List<Node>) => with(key, NodeListAttribute(JavaList.toNative(values)));
-	public def mapNodes(key : String, mapper : (magma.api.collect.List<Node>) => magma.api.collect.List<Node>) => ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
+	public def withNodeList(key : String, values : magma.api.contain.List<Node>) => with(key, NodeListAttribute(JavaList.toNative(values)));
+	public def mapNodes(key : String, mapper : (magma.api.contain.List<Node>) => magma.api.contain.List<Node>) => ImmutableNode(type, attributes.mapValue(key, NodeListAttribute.Factory, () => JavaList.toNative(mapper.apply(JavaList.fromNative(nodes)))));
 	public def findNodeList(key : String) => JavaOptionals.fromNative(attributes.apply(key).flatMap(Attribute.asNodeList)).map(JavaList.fromNative);
 	implements Node;
 }

@@ -1,7 +1,7 @@
 package magma;
 
-import magma.api.collect.List;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.List;
+import magma.api.contain.stream.Stream;
 
 public final class Configuration {
     private final List<Build> builds;

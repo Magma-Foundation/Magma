@@ -1,4 +1,4 @@
-package magma.api.collect.stream;
+package magma.api.contain.collect;
 
 /**
  * Interface representing a collector that accumulates elements into a collection.

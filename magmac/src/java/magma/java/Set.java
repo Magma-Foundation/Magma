@@ -1,6 +1,6 @@
 package magma.java;
 
-import magma.api.collect.stream.Stream;
+import magma.api.contain.stream.Stream;
 
 public interface Set<T> {
     Set<T> add(T next);

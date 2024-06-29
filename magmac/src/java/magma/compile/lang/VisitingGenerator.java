@@ -1,7 +1,7 @@
 package magma.compile.lang;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.stream.Streams;
 import magma.api.result.Ok;
 import magma.api.result.Result;
 import magma.compile.CompileParentError;

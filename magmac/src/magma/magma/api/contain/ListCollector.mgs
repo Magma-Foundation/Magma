@@ -1,4 +1,4 @@
-import magma.api.collect.stream.Collector;
+import magma.api.contain.collect.Collector;
 export class def ListCollector<T>(initial : List<T>) => {
 	public def createInitial() => initial;
 	public def fold(current : List<T>, next : T) => current.addLast(next);

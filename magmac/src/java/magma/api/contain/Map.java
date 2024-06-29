@@ -1,8 +1,7 @@
-package magma.api.collect;
+package magma.api.contain;
 
 import magma.api.Tuple;
-import magma.api.collect.stream.Head;
-import magma.api.collect.stream.Stream;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 
 public interface Map<K, V> {

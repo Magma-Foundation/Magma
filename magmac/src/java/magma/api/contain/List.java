@@ -1,6 +1,6 @@
-package magma.api.collect;
+package magma.api.contain;
 
-import magma.api.collect.stream.Stream;
+import magma.api.contain.stream.Stream;
 import magma.api.option.Option;
 
 /**

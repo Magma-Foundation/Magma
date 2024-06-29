@@ -1,7 +1,7 @@
 package magma.api.json;
 
-import magma.api.collect.List;
-import magma.api.collect.stream.Streams;
+import magma.api.contain.List;
+import magma.api.contain.stream.Streams;
 import magma.api.option.Option;
 
 public record CompoundJSONParser(List<JSONParser> parsers) implements JSONParser {
