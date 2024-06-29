@@ -9,8 +9,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 export class def HeadedStream<T>(provider : Head<T>) => {
 	public def foldLeftToResult<R, E>(initial : R, mapper : (R, T) => Result<R, E>) => this.foldLeft(Ok.from(initial), () => reResult.flatMapValue(() => mapper.apply(inner, t)));
-	public def anyMatch(predicate : Predicate<T>) => foldLeft(false, () => aBoolean||predicate.test(t));
-	public def filter(filter : Predicate<T>) => flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
+	public def anyMatch(predicate : (T) => Bool) => foldLeft(false, () => aBoolean||predicate.test(t));
+	public def filter(filter : (T) => Bool) => flatMap(() => HeadedStream(filter.test(value)?SingleHead(value):EmptyHead.EmptyHead()));
 	public def flatMap<R>(mapper : Function<T, Head<R>>) => HeadedStream(head().map(mapper).map(() => FlatMapHead(initial, this, mapper)).orElse(EmptyHead.EmptyHead()));
 	public def extend<R>(mapper : Function<T, R>) => map(() => Tuple(value, mapper.apply(value)));
 	public def map<R>(mapper : Function<T, R>) => HeadedStream(() => this.provider.head().map(mapper));

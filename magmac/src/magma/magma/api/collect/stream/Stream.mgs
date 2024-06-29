@@ -14,8 +14,8 @@ export struct Stream {
 	head : () => Option<T>;
 	
 	foldLeftToResult<R, E> : (R, (R, T) => Result<R, E>) => Result<R, E>;
-	anyMatch : (Predicate<T>) => boolean;
-	filter : (Predicate<T>) => Stream<T>;
+	anyMatch : ((T) => Bool) => boolean;
+	filter : ((T) => Bool) => Stream<T>;
 	
 	flatMap<R> : (Function<T, Head<R>>) => Stream<R>;
 	

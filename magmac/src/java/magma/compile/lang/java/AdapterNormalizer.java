@@ -46,6 +46,16 @@ public class AdapterNormalizer implements Visitor {
                     .withNode("returns", returns);
 
             return new Ok<>(new Tuple<>(newType, state));
+        } else if (parent.equals("Predicate")) {
+            var type = children.get(0);
+            if (type.isEmpty()) return new Err<>(new CompileError("Predicate requires a type.", node.toString()));
+
+            var reference = node.clear("reference").withString("value", "Bool");
+            var newType = node.clear("function-type")
+                    .withNodeList("params", JavaList.of(type.orElsePanic()))
+                    .withNode("returns", reference);
+
+            return new Ok<>(new Tuple<>(newType, state));
         } else return new Ok<>(new Tuple<>(node, state));
     }
 }

@@ -75,6 +75,24 @@ export class def AdapterNormalizer() => {
 			node.clear("function-type").withNodeList("params", JavaList.of(first, second)).withNode("returns", returns);
 			return Ok(Tuple(newType, state));
 		}
+		else if(parent.equals("Predicate")){
+			
+			type : var=
+			
+			children.get(0);
+			if
+			(type.isEmpty())
+			return Err(CompileError("Predicate requires a type.", node.toString()));
+			
+			reference : var=
+			
+			node.clear("reference").withString("value", "Bool");
+			
+			newType : var=
+			
+			node.clear("function-type").withNodeList("params", JavaList.of(type.orElsePanic())).withNode("returns", reference);
+			return Ok(Tuple(newType, state));
+		}
 		else return Ok(Tuple(node, state));
 	}
 	implements Visitor;
