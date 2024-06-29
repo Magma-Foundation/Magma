@@ -19,6 +19,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.VisitingGenerator;
 import magma.compile.lang.Visitor;
+import magma.compile.lang.java.AdapterNormalizer;
 import magma.compile.lang.java.TemplateNormalizer;
 import magma.compile.lang.java.ConstructorNormalizer;
 import magma.compile.lang.java.FilteringVisitor;
@@ -132,7 +133,8 @@ public record Application(Configuration config) {
                 new FilteringVisitor("method", new MethodNormalizer()),
                 new FilteringVisitor("constructor", new ConstructorNormalizer()),
                 new FilteringVisitor("lambda", new LambdaNormalizer()),
-                new FilteringVisitor("method-reference", new MethodReferenceNormalizer())
+                new FilteringVisitor("method-reference", new MethodReferenceNormalizer()),
+                new FilteringVisitor("generic", new AdapterNormalizer())
         ));
     }
 

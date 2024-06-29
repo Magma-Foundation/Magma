@@ -1,0 +1,81 @@
+import magma.api.Tuple;
+import magma.api.result.Err;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.CompileError;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+import magma.java.JavaList;
+export class def AdapterNormalizer() => {
+	public def preVisit(node : Node, state : State) => {
+		
+		parentOption : var=
+		
+		node.findString("parent");
+		if
+		(parentOption.isEmpty())
+		{
+			return Ok(Tuple(node, state));
+		}
+		
+		childrenOption : var=
+		
+		node.findNodeList("children");
+		if
+		(childrenOption.isEmpty())
+		return Ok(Tuple(node, state));
+		
+		parent : var=
+		
+		parentOption.orElsePanic();
+		
+		children : var=
+		
+		childrenOption.orElsePanic();
+		if
+		(parent.equals("BiFunction"))
+		{
+			
+			firstOption : var=
+			
+			children.get(0);
+			
+			secondOption : var=
+			
+			children.get(1);
+			if
+			(firstOption.isEmpty()||secondOption.isEmpty())
+			{
+				return Err(CompileError("Parameters required.", node.toString()));
+			}
+			
+			first : var=
+			
+			firstOption.orElsePanic();
+			
+			second : var=
+			
+			secondOption.orElsePanic();
+			
+			returnsOption : var=
+			
+			children.get(2);
+			if
+			(returnsOption.isEmpty())
+			return Err(CompileError("No return type.", node.toString()));
+			
+			returns : var=
+			
+			returnsOption.orElsePanic();
+			
+			newType : var=
+			
+			node.clear("function-type").withNodeList("params", JavaList.of(first, second)).withNode("returns", returns);
+			return Ok(Tuple(newType, state));
+		}
+		else return Ok(Tuple(node, state));
+	}
+	implements Visitor;
+}

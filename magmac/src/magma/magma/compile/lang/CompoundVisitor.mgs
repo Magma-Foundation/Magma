@@ -8,6 +8,6 @@ import java.util.function.BiFunction;
 export class def CompoundVisitor(visitors : List<Visitor>) => {
 	public def preVisit(node : Node, state : State) => foldAll(node, state, () => visitor.preVisit(tuple.left(), tuple.right()));
 	public def postVisit(node : Node, state : State) => foldAll(node, state, () => visitor.postVisit(tuple.left(), tuple.right()));
-	def foldAll(node : Node, state : State, folder : BiFunction<Tuple<Node, State>, Visitor, Result<Tuple<Node, State>, Error_>>) => visitors.stream().foldLeftToResult(Tuple(node, state), folder);
+	def foldAll(node : Node, state : State, folder : (Tuple<Node, State>, Visitor) => Result<Tuple<Node, State>, Error_>) => visitors.stream().foldLeftToResult(Tuple(node, state), folder);
 	implements Visitor;
 }

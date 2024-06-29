@@ -12,9 +12,9 @@ export object ResultStream {
 export class def ResultStream<A, B>(stream : Stream<Result<A, B>>) => {
 	public def map<R>(mapper : Function<Result<A, B>, R>) => stream.map(mapper);
 	public def collect<C>(collector : Collector<Result<A, B>, C>) => stream.collect(collector);
-	public def foldLeft<C>(current : C, folder : BiFunction<C, Result<A, B>, C>) => stream.foldLeft(current, folder);
+	public def foldLeft<C>(current : C, folder : (C, Result<A, B>) => C) => stream.foldLeft(current, folder);
 	public def head() => stream.head();
-	public def foldLeftToResult<R, E>(initial : R, mapper : BiFunction<R, Result<A, B>, Result<R, E>>) => stream.foldLeftToResult(initial, mapper);
+	public def foldLeftToResult<R, E>(initial : R, mapper : (R, Result<A, B>) => Result<R, E>) => stream.foldLeftToResult(initial, mapper);
 	public def anyMatch(predicate : Predicate<Result<A, B>>) => stream.anyMatch(predicate);
 	public def filter(filter : Predicate<Result<A, B>>) => stream.filter(filter);
 	public def flatMap<R>(mapper : Function<Result<A, B>, Head<R>>) => stream.flatMap(mapper);

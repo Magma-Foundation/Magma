@@ -17,6 +17,7 @@ import magma.compile.lang.JavaLang;
 import magma.compile.lang.MagmaLang;
 import magma.compile.lang.VisitingGenerator;
 import magma.compile.lang.Visitor;
+import magma.compile.lang.java.AdapterNormalizer;
 import magma.compile.lang.java.TemplateNormalizer;
 import magma.compile.lang.java.ConstructorNormalizer;
 import magma.compile.lang.java.FilteringVisitor;
@@ -146,7 +147,7 @@ export object Application {
 			return Some(CompileException("Cannot write.", e));
 		}
 	}
-	def streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", TemplateNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", TemplateNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer())));
+	def streamNormalizers() => Streams.fromNativeList(List.of(FilteringVisitor("block", BlockNormalizer()), FilteringVisitor("record", TemplateNormalizer()), FilteringVisitor("interface", InterfaceNormalizer()), FilteringVisitor("class", TemplateNormalizer()), FilteringVisitor("method", MethodNormalizer()), FilteringVisitor("constructor", ConstructorNormalizer()), FilteringVisitor("lambda", LambdaNormalizer()), FilteringVisitor("method-reference", MethodReferenceNormalizer()), FilteringVisitor("generic", AdapterNormalizer())));
 	def findRootRule(platform : String) => {
 		if
 		(platform.equals("java"))
