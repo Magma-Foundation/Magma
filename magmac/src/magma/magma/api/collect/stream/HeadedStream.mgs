@@ -2,7 +2,6 @@ import magma.api.Tuple;
 import magma.api.option.Option;
 import magma.api.result.Ok;
 import magma.api.result.Result;
-import magma.java.JavaOptionals;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,8 +17,8 @@ export class def HeadedStream<T>(provider : Head<T>) => {
 		return foldLeft(current, collector.fold);
 	}
 	public def foldLeft<C>(current : C, folder : (C, T) => C) => while(true){
-		let mut finalCurrent : C = current;
-		let mut tuple = JavaOptionals.toTuple(JavaOptionals.toNative(head()).map(() => folder.apply(finalCurrent, head)), current);
+		let mut finalCurrent = current;
+		let mut tuple = head().map(() => folder.apply(finalCurrent, head)).toTuple(current);
 		if(tuple.left())
 		{
 			current = tuple.right();
