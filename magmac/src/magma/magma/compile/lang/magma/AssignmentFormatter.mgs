@@ -1,0 +1,11 @@
+import magma.api.Tuple;
+import magma.api.result.Ok;
+import magma.api.result.Result;
+import magma.compile.Error_;
+import magma.compile.annotate.State;
+import magma.compile.lang.Visitor;
+import magma.compile.rule.Node;
+export class def AssignmentFormatter() => {
+	public def postVisit(node : Node, state : State) => Ok(Tuple(node.withString("after-assignable", " ").withString("after-value-separator", " "), state));
+	implements Visitor;
+}
