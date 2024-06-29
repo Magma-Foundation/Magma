@@ -5,6 +5,6 @@ export object MultipleError {
 	public def findMessage() => Optional.empty();
 	public def findCauses() => Optional.of(errors);
 	public def findContext() => Optional.empty();
-	public def calculateDepth() => 1+errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
+	public def calculateDepth() => 1 + errors.stream().mapToInt(Error_.calculateDepth).max().orElse(0);
 	implements Error_;
 }

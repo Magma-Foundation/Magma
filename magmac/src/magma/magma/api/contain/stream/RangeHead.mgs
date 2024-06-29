@@ -5,7 +5,7 @@ export object RangeHead {
 	private final extent : int;
 	private counter : int;
 	public def head() => {
-		if(counter>=extent)
+		if(counter >= extent)
 		return None.None();
 		let mut value = counter;
 		counter++;

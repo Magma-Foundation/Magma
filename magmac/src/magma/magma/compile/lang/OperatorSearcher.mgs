@@ -14,26 +14,26 @@ class def OperatorSearcher(slice : String) => {
 		{
 			let mut tuple = queue.pop();
 			let mut i = tuple.left();
-			let mut maybeSlice = input.substring(i, Math.min(i+slice.length(), input.length()));
-			if(maybeSlice.equals(slice)&&depth==0)
+			let mut maybeSlice = input.substring(i, Math.min(i + slice.length(), input.length()));
+			if(maybeSlice.equals(slice) && depth == 0)
 			{
 				return Optional.of(i);
 			}
 			else
 			{
 				let mut c = maybeSlice.charAt(0);
-				if(c=='\'')
+				if(c == '\'')
 				{
 					let mut pop = queue.pop();
-					if(pop.right()=='\\')
+					if(pop.right() == '\\')
 					queue.pop();
 					queue.pop();
 					continue
 					;
 				}
-				if(c=='(')
+				if(c == '(')
 				depth++;
-				if(c==')')
+				if(c == ')')
 				depth--;
 			}
 		}

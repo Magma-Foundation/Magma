@@ -17,7 +17,7 @@ export object SplitOnceRule {
 	public def toNode(input : String) => {
 		let mut tuple = searcher.search(input).map(() => {
 			let mut left1 = input.substring(0, keywordIndex);
-			let mut right1 = input.substring(keywordIndex+slice.length());
+			let mut right1 = input.substring(keywordIndex + slice.length());
 			return Tuple(left1, right1);
 		});
 		return tuple.map(() => {
@@ -39,7 +39,7 @@ export object SplitOnceRule {
 	public def fromNode(node : Node) => {
 		let mut leftResult = leftRule.fromNode(node);
 		let mut rightValue = rightRule.fromNode(node);
-		return leftResult.flatMapValue(() => rightValue.mapValue(() => left+slice+right)).mapErr(() => createError(node, err));
+		return leftResult.flatMapValue(() => rightValue.mapValue(() => left + slice + right)).mapErr(() => createError(node, err));
 	}
 	def createError(node : Node, err : Error_) => {
 		let mut format = "Cannot merge node using slice '%s'.";

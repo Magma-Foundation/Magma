@@ -14,8 +14,8 @@ import magma.java.JavaOptionals;
 import java.util.function.Function;
 export object ImmutableNode {
 	public def findType() => type;
-	public def formatWithDepth(depth : int) => "\t".repeat(depth)+format(depth);
-	public def format(depth : int) => type+" = "+attributes.format(depth);
+	public def formatWithDepth(depth : int) => "\t".repeat(depth) + format(depth);
+	public def format(depth : int) => type + " = " + attributes.format(depth);
 	public def toString() => formatWithDepth(0);
 	public def is(type : String) => this.type.equals(type);
 	public def retype(type : String) => ImmutableNode(type, attributes);

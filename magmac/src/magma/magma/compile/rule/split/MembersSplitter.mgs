@@ -12,10 +12,10 @@ export class def MembersSplitter() => {
 		{
 			let mut c = queue.pop();
 			let mut state = current.append(c);
-			if(c=='/'&&state.isLevel()&&!queue.isEmpty())
+			if(c == '/' && state.isLevel() && !queue.isEmpty())
 			{
 				let mut after = queue.peek();
-				if(after=='/')
+				if(after == '/')
 				{
 					// We are in a single-line comment.
 					let mut withAfter = state.append(queue.pop());
@@ -23,7 +23,7 @@ export class def MembersSplitter() => {
 					{
 						let mut next = queue.pop();
 						withAfter = withAfter.append(next);
-						if(next=='\n')
+						if(next == '\n')
 						{
 							break
 							;
@@ -33,14 +33,14 @@ export class def MembersSplitter() => {
 					continue
 					;
 				}
-				else if(after=='*'){
+				else if(after == '*'){
 					// We are in a block comment.
 					let mut withAfter = state.append(queue.pop());
 					while(!queue.isEmpty())
 					{
 						let mut next = queue.pop();
 						withAfter = withAfter.append(next);
-						if(next=='*'&&!queue.isEmpty()&&queue.peek()=='/')
+						if(next == '*' && !queue.isEmpty() && queue.peek() == '/')
 						{
 							withAfter = withAfter.append(queue.pop());
 							break
@@ -52,29 +52,29 @@ export class def MembersSplitter() => {
 					;
 				}
 			}
-			if(c=='\'')
+			if(c == '\'')
 			{
 				let mut next = queue.pop();
 				let mut withNext = current.append(next);
-				let mut escaped = next=='\\' ? current.append(queue.pop()) : withNext;
+				let mut escaped = next == '\\' ? current.append(queue.pop()) : withNext;
 				current = escaped.append(queue.pop());
 				continue
 				;
 			}
-			if(c=='\"')
+			if(c == '\"')
 			{
 				let mut withString = current;
 				while(!queue.isEmpty())
 				{
 					let mut next = queue.pop();
 					withString = withString.append(next);
-					if(next=='\\')
+					if(next == '\\')
 					{
 						withString.append(queue.pop());
 						continue
 						;
 					}
-					if(next=='\"')
+					if(next == '\"')
 					{
 						break
 						;
@@ -84,17 +84,17 @@ export class def MembersSplitter() => {
 				continue
 				;
 			}
-			if(c==';'&&state.isLevel())
+			if(c == ';' && state.isLevel())
 			{
 				current = state.advance();
 			}
-			else if(c=='}'&&state.isShallow()){
+			else if(c == '}' && state.isShallow()){
 				current = state.exit().advance();
 			}
-			else if(c=='{' || c == '('){
+			else if(c == '{' || c == '('){
 				current = state.enter();
 			}
-			else if(c=='}' || c == ')'){
+			else if(c == '}' || c == ')'){
 				current = state.exit();
 			}
 			else
@@ -111,10 +111,10 @@ export class def MembersSplitter() => {
 			return State(copy, StringBuilder(), depth);
 		}
 		def append(c : char) => State(tokens, this.buffer.append(c), depth);
-		public def isLevel() => this.depth==0;
-		public def enter() => State(tokens, buffer, depth+1);
-		public def exit() => State(tokens, buffer, depth-1);
-		public def isShallow() => depth==1;
+		public def isLevel() => this.depth == 0;
+		public def enter() => State(tokens, buffer, depth + 1);
+		public def exit() => State(tokens, buffer, depth - 1);
+		public def isShallow() => depth == 1;
 	}
 	implements Splitter;
 }

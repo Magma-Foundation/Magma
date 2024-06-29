@@ -17,7 +17,7 @@ import magma.java.JavaList;
 export object BlockNormalizer {
 	def removeFromChildren(children : List<Node>) => children.stream().filter(() => !child.is("package")).collect(JavaList.collecting());
 	def flattenChild(flattening : Flattening, node : Node, outerName : String) => {
-		if(node.is("function")||node.is("declaration"))
+		if(node.is("function") || node.is("declaration"))
 		{
 			let mut definitionOptional = node.findNode("definition");
 			if(definitionOptional.isEmpty())
@@ -69,7 +69,7 @@ export object BlockNormalizer {
 		return node.clear("object").withStringList("modifiers", newModifiers).withString("name", name).withNode("child", staticBlock);
 	}
 	def cleanup(node : Node, outerName : String) => {
-		if(!node.is("function")&&!node.is("declaration"))
+		if(!node.is("function") && !node.is("declaration"))
 		return Some(node);
 		let mut definitionOptional = node.findNode("definition");
 		if(definitionOptional.isEmpty())

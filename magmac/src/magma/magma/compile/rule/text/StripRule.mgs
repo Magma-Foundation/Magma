@@ -11,7 +11,7 @@ export object StripRule {
 	public def fromNode(node : Node) => {
 		let mut leftIndent = node.findString(left).orElse("");
 		let mut rightIndent = node.findString(right).orElse("");
-		return child.fromNode(node).mapValue(() => leftIndent+inner+rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
+		return child.fromNode(node).mapValue(() => leftIndent + inner + rightIndent).mapErr(() => CompileParentError("Cannot apply indentation: ", node.toString(), err));
 	}
 	implements Rule;
 }

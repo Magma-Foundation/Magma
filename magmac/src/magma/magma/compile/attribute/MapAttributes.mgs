@@ -31,7 +31,7 @@ export object MapAttributes {
 		return current;
 	}
 	public def streamEntries() => values.entrySet().stream().map(() => Tuple(entry.getKey(), entry.getValue()));
-	public def format(depth : int) => values.entrySet().stream().map(() => "\n"+"\t".repeat(depth+1)+entry.getKey()+" : "+entry.getValue().format(depth+1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
+	public def format(depth : int) => values.entrySet().stream().map(() => "\n" + "\t".repeat(depth + 1) + entry.getKey() + " : " + entry.getValue().format(depth + 1)).sorted(Comparator.comparingInt(String.length)).collect(Collectors.joining(",", "{", "\n" + "\t".repeat(depth) + "}"));
 	public def has(name : String) => this.values.containsKey(name);
 	public def isEmpty() => values.isEmpty();
 	public def remove(key : String) => {

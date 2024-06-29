@@ -50,7 +50,7 @@ export object Main {
 			let mut parsedOption = valueParser.parse(configurationString);
 			if(parsedOption.isEmpty())
 			{
-				return Err(IOException("Failed to parse configuration: "+configurationString));
+				return Err(IOException("Failed to parse configuration: " + configurationString));
 			}
 			let mut parsed = parsedOption.orElsePanic();
 			System.out.println("Parsed configuration.");

@@ -13,10 +13,10 @@ export class def ConditionEndSearcher() => {
 			let mut tuple = queue.pop();
 			let mut i = tuple.left();
 			let mut c = tuple.right();
-			if(c=='\'')
+			if(c == '\'')
 			{
 				let mut popped = queue.pop();
-				if(popped.right()=='\\')
+				if(popped.right() == '\\')
 				{
 					queue.pop();
 				}
@@ -24,15 +24,15 @@ export class def ConditionEndSearcher() => {
 				continue
 				;
 			}
-			if(c==')'&&depth==1)
+			if(c == ')' && depth == 1)
 			{
 				return Optional.of(i);
 			}
 			else
 			{
-				if(c=='(')
+				if(c == '(')
 				depth++;
-				if(c==')')
+				if(c == ')')
 				depth--;
 			}
 		}

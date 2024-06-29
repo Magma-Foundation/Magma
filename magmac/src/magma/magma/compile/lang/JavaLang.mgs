@@ -69,7 +69,7 @@ export object JavaLang {
 		let mut withImplements = FirstRule(maybeExtends, " implements ", ExtractNodeRule("interface", type));
 		let mut maybeImplements = OptionalRule("implements", withImplements, maybeExtends);
 		let mut withoutModifiers = FirstRule(maybeImplements, "{", RightRule(block, "}"));
-		return TypeRule(keyword, FirstRule(modifiers, keyword+" ", withoutModifiers));
+		return TypeRule(keyword, FirstRule(modifiers, keyword + " ", withoutModifiers));
 	}
 	def createValueRule(classMember : LazyRule, statement : Rule) => {
 		let mut value = LazyRule();

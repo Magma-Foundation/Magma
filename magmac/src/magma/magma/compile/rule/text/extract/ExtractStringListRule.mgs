@@ -31,10 +31,10 @@ export object ExtractStringListRule {
 		while(true)
 		{
 			let mut end = content.indexOf(delimiter, start);
-			if(end==-1)
+			if(end == -1)
 			break;
 			result.add(content.substring(start, end));
-			start = end+delimiter.length();
+			start = end + delimiter.length();
 		}
 		result.add(content.substring(start));
 		return result.stream().map(String.strip).filter(() => !value.isEmpty()).toList();

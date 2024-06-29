@@ -9,7 +9,7 @@ export class def RightRule(child : Rule, slice : String) => {
 	public def toNode(input : String) => {
 		if(input.endsWith(slice))
 		{
-			let mut contentEnd = input.length()-slice.length();
+			let mut contentEnd = input.length() - slice.length();
 			let mut content = input.substring(0, contentEnd);
 			return child.toNode(content);
 		}
@@ -18,6 +18,6 @@ export class def RightRule(child : Rule, slice : String) => {
 			return ErrorRuleResult(CompileError("Input does not end with '%s'.".formatted(slice), input));
 		}
 	}
-	public def fromNode(node : Node) => child.fromNode(node).mapValue(() => inner+slice);
+	public def fromNode(node : Node) => child.fromNode(node).mapValue(() => inner + slice);
 	implements Rule;
 }

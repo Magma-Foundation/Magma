@@ -205,9 +205,9 @@ public class Lang {
     }
 
     static TypeRule createOperatorRule(String name, String slice, Rule value) {
-        var left = new StripRule(new ExtractNodeRule("leftRule", value));
-        var right = new StripRule(new ExtractNodeRule("right", value));
-        return new TypeRule(name, new SplitOnceRule(left, slice, right, new OperatorSearcher(slice)));
+        var left = new StripRule(new ExtractNodeRule("left", value), "", "after-left");
+        var right = new StripRule(new ExtractNodeRule("right", value), "after-operator", "");
+        return new TypeRule(name + "-operator", new SplitOnceRule(left, slice, right, new OperatorSearcher(slice)));
     }
 
     static TypeRule createNumberRule() {
